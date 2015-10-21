@@ -1,0 +1,22 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'com.palantir.baseline'
+apply plugin: 'org.inferred.processors'
+
+apply from: "${rootDir}/gradle/libs.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile libs.guava
+    compile libs.jackson.databind
+
+    testCompile libs.hamcrest
+    testCompile libs.junit
+
+    processor libs.immutables
+}
+
+tasks.check.dependsOn(javadoc)
+
+

@@ -1,0 +1,26 @@
+# Gradle
+*.class
+*.jar
+.gradle
+build/
+
+# Eclipse
+.classpath
+.checkstyle
+.factorypath
+.project
+.settings
+bin/
+
+# Idea
+*.iml
+*.ipr
+*.iws
+.idea/
+out/
+
+# Codegen
+.generated
+
+# Mac
+.DS_Store
