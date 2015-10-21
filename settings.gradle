@@ -1,4 +1,5 @@
 rootProject.name = 'http-remoting'
 
+include 'remote-clients'
 include 'trust-stores'
 
