@@ -16,6 +16,7 @@
 
 package com.palantir.remoting.http;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.remoting.http.errors.SerializableErrorErrorDecoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
@@ -30,7 +31,7 @@ public final class FeignClients {
     private FeignClients() {}
 
     /**
-     * Provides a {@link FeignClientFactory} with an {@link com.fasterxml.jackson.databind.ObjectMapper} configured with
+     * Provides a {@link FeignClientFactory} with an {@link ObjectMapper} configured with
      * {@link com.fasterxml.jackson.datatype.guava.GuavaModule} and
      * {@link com.fasterxml.jackson.datatype.jdk7.Jdk7Module}.
      */
@@ -44,13 +45,25 @@ public final class FeignClients {
     }
 
     /**
-     * Provides a {@link FeignClientFactory} with an unmodified {@link com.fasterxml.jackson.databind.ObjectMapper}.
+     * Provides a {@link FeignClientFactory} with an unmodified {@link ObjectMapper}.
      */
     public static FeignClientFactory vanilla() {
         return FeignClientFactory.of(
                 new JAXRSContract(),
                 new JacksonEncoder(ObjectMappers.vanilla()),
                 new JacksonDecoder(ObjectMappers.vanilla()),
+                new SerializableErrorErrorDecoder(),
+                FeignClientFactory.okHttpClient());
+    }
+
+    /**
+     * Provides a {@link FeignClientFactory} with the specified {@link ObjectMapper}.
+     */
+    public static FeignClientFactory withMapper(ObjectMapper mapper) {
+        return FeignClientFactory.of(
+                new JAXRSContract(),
+                new JacksonEncoder(mapper),
+                new JacksonDecoder(mapper),
                 new SerializableErrorErrorDecoder(),
                 FeignClientFactory.okHttpClient());
     }
