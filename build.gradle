@@ -8,7 +8,7 @@ plugins {
 }
 
 allprojects {
-    group 'com.palantir.http.remoting'
+    group 'com.palantir.remoting.http'
     version gitVersion()
 }
 

@@ -7,6 +7,8 @@ apply plugin: 'org.inferred.processors'
 apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
+group 'com.palantir.trust'
+
 dependencies {
     compile libs.guava
     compile libs.jackson.databind
