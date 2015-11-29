@@ -1,11 +1,7 @@
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'com.palantir.baseline'
-apply plugin: 'org.inferred.processors'
-
 apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
+
+group 'com.palantir.remoting.http'
 
 dependencies {
     compile libs.feign.jackson
@@ -21,7 +17,7 @@ dependencies {
     testCompile libs.hamcrest
     testCompile libs.junit
     testCompile libs.mockwebserver
-    
+
     processor libs.immutables
 }
 
