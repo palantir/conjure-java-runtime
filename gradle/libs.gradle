@@ -1,4 +1,8 @@
 project.ext.libs = [
+    'dropwizard': [
+        'testing': 'io.dropwizard:dropwizard-testing:0.8.2',
+        'core': 'io.dropwizard:dropwizard-core:0.8.2'
+    ],
     'feign': [
         'jackson': 'com.netflix.feign:feign-jackson:8.11.0',
         'jaxrs': 'com.netflix.feign:feign-jaxrs:8.11.0',
