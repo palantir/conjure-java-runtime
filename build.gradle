@@ -39,4 +39,3 @@ subprojects {
 
     sourceCompatibility = 1.7
 }
-
