@@ -1,11 +1,11 @@
 /*
- * Copyright 2015 Palantir Technologies
+ * Copyright 2015 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * <http://www.apache.org/licenses/LICENSE-2.0>
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +31,12 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A feign {@link ErrorDecoder} that attempts to interpret the {@link Response}'s body as a JSON representation of a
+ * {@link SerializableError} and re-throws the encoded exception including exception type, message, and stacktrace.
+ * Throws a {@link RuntimeException} if the body cannot be interpreted as a {@link SerializableError}, or if the
+ * exception fails to get re-thrown.
+ */
 public final class SerializableErrorErrorDecoder implements ErrorDecoder {
     private static final Logger log = LoggerFactory.getLogger(SerializableErrorErrorDecoder.class);
 

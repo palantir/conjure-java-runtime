@@ -1,18 +1,14 @@
 apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
-group 'com.palantir.trust'
+group 'com.palantir.remoting.error'
 
 dependencies {
-    compile libs.guava
+    compile libs.feign.jackson
     compile libs.jackson.databind
-
-    testCompile libs.hamcrest
-    testCompile libs.junit
+    compile libs.jsr305
 
     processor libs.immutables
 }
 
 tasks.check.dependsOn(javadoc)
-
-
