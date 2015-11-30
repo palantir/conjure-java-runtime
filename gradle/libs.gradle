@@ -19,6 +19,7 @@ project.ext.libs = [
     'jsr305': 'com.google.code.findbugs:jsr305:3.0.0',
     'junit': 'junit:junit:4.12',
     'mockwebserver': 'com.squareup.okhttp:mockwebserver:2.5.0',
-    'slf4j': 'org.slf4j:slf4j-api:1.7.12'
+    'slf4j': 'org.slf4j:slf4j-api:1.7.12',
+    'wsRsApi': 'javax.ws.rs:javax.ws.rs-api:2.0.1'
 ]
 
