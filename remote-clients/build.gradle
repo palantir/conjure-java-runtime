@@ -4,6 +4,8 @@ apply from: "${rootDir}/gradle/publish.gradle"
 group 'com.palantir.remoting.http'
 
 dependencies {
+    compile project(':error-handling')
+
     compile libs.feign.jackson
     compile libs.feign.jaxrs
     compile libs.feign.okhttp
