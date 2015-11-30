@@ -40,6 +40,11 @@ public abstract class SerializableError {
     @Nullable
     public abstract List<StackTraceElement> getStackTrace();
 
+    public static SerializableError of(String message, Class<? extends Exception> exceptionClass) {
+        return ImmutableSerializableError.builder().message(message).exceptionClass(exceptionClass)
+                .build();
+    }
+
     public static SerializableError of(
             String message, Class<? extends Exception> exceptionClass, List<StackTraceElement> stackTrace) {
         return ImmutableSerializableError.builder()
