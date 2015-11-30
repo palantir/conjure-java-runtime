@@ -31,6 +31,12 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A feign {@link ErrorDecoder} that attempts to interpret the {@link Response}'s body as a JSON representation of a
+ * {@link SerializableError} and re-throws the encoded exception including exception type, message, and stacktrace.
+ * Throws a {@link RuntimeException} if the body cannot be interpreted as a {@link SerializableError}, or if the
+ * exception fails to get re-thrown.
+ */
 public final class SerializableErrorErrorDecoder implements ErrorDecoder {
     private static final Logger log = LoggerFactory.getLogger(SerializableErrorErrorDecoder.class);
 

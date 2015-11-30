@@ -22,6 +22,11 @@ import java.util.List;
 import javax.annotation.Nullable;
 import org.immutables.value.Value;
 
+/**
+ * A JSON-serializable representation of a generic Java exception, represented by its exception message, exception
+ * class, and stacktrace. Intended to transport exceptions through non-Java channels such as HTTP responses in order to
+ * be de-serialized and potentially rethrown on the other end.
+ */
 @JsonDeserialize(as = ImmutableSerializableError.class)
 @JsonSerialize(as = ImmutableSerializableError.class)
 @Value.Immutable
