@@ -1,0 +1,17 @@
+apply from: "${rootDir}/gradle/libs.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile project(':error-handling')
+    compile libs.jackson.databind
+    compile libs.jsr305
+    compile libs.dropwizard.core
+
+    testCompile libs.dropwizard.testing
+    testCompile libs.hamcrest
+    testCompile libs.junit
+
+    processor libs.immutables
+}
+
+tasks.check.dependsOn(javadoc)

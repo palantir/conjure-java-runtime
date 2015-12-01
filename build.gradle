@@ -1,24 +1,42 @@
-plugins {
-    id 'com.palantir.git-version' version '0.2.0'
+buildscript {
+    repositories {
+        jcenter()
+    }
 
-    id 'idea'
-    id 'com.palantir.baseline-idea' version '0.1.1'
-    id 'org.inferred.processors' version '1.1'
-    id 'com.jfrog.bintray' version '1.2'
-}
-
-allprojects {
-    group 'com.palantir.http.remoting'
-    version gitVersion()
-}
-
-subprojects {
-    plugins.withType(JavaPlugin) {
-        repositories {
-            jcenter()
-        }
-
-        sourceCompatibility = 1.7
+    dependencies {
+        classpath "com.palantir:gradle-baseline-java:${baselineVersion}"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:${bintrayPlugin}"
     }
 }
 
+plugins {
+    id 'com.palantir.git-version' version '0.2.0'
+    id 'org.inferred.processors' version '1.1'
+}
+
+apply plugin: 'com.palantir.baseline-config' // provides baselineUpdateConfig task
+apply plugin: 'com.palantir.baseline-idea'
+
+repositories {
+    jcenter() // needed for baselineUpdateConfig task
+}
+
+allprojects {
+    version gitVersion()
+    group 'com.palantir.remoting'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'com.palantir.baseline-checkstyle'
+    apply plugin: 'com.palantir.baseline-eclipse'
+    apply plugin: 'com.palantir.baseline-findbugs'
+    apply plugin: 'com.palantir.baseline-idea'
+    apply plugin: 'org.inferred.processors'
+
+    repositories {
+        jcenter()
+    }
+
+    sourceCompatibility = 1.7
+}
