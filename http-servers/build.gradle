@@ -9,6 +9,10 @@ dependencies {
     compile libs.jsr305
     compile libs.dropwizard.core
 
+    testCompile libs.dropwizard.testing
+    testCompile libs.hamcrest
+    testCompile libs.junit
+
     processor libs.immutables
 }
 
