@@ -59,6 +59,21 @@ public final class FeignClientFactory {
     }
 
     /**
+     * Returns a new instance using the specified contract/encoder/decoder/client when constructing clients, using a
+     * {@link NeverRetryingBackoffStrategy} to attempt connecting via each of the alternative target URLs at most once
+     * per proxy call.
+     */
+    public static FeignClientFactory of(
+            Contract contract,
+            Encoder encoder,
+            Decoder decoder,
+            ErrorDecoder errorDecoder,
+            Function<Optional<SSLSocketFactory>, Client> clientSupplier) {
+        return new FeignClientFactory(
+                contract, encoder, decoder, errorDecoder, clientSupplier, NeverRetryingBackoffStrategy.INSTANCE);
+    }
+
+    /**
      * Returns a new instance using the specified contract/encoder/decoder/client when constructing clients.
      */
     public static FeignClientFactory of(
@@ -73,8 +88,8 @@ public final class FeignClientFactory {
     }
 
     /**
-     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and
-     * feign {@link feign.Client.Default} HTTP client.
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and feign {@link
+     * feign.Client.Default} HTTP client.
      */
     public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, String uri, Class<T> type) {
         return Feign.builder()
@@ -87,9 +102,9 @@ public final class FeignClientFactory {
     }
 
     /**
-     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and feign
-     * {@link feign.Client.Default} HTTP client. A {@link FailoverFeignTarget} is used to cycle through the given uris
-     * on failure.
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and feign {@link
+     * feign.Client.Default} HTTP client. A {@link FailoverFeignTarget} is used to cycle through the given uris on
+     * failure.
      */
     public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type) {
         FailoverFeignTarget<T> target = new FailoverFeignTarget<>(uris, type, backoffStrategy);
@@ -120,21 +135,21 @@ public final class FeignClientFactory {
 
     private static final Function<Optional<SSLSocketFactory>, Client> OKHTTP_CLIENT_SUPPLIER =
             new Function<Optional<SSLSocketFactory>, Client>() {
-            @Override
-            public Client apply(Optional<SSLSocketFactory> sslSocketFactory) {
-                com.squareup.okhttp.OkHttpClient client = new com.squareup.okhttp.OkHttpClient();
-                client.setSslSocketFactory(sslSocketFactory.orNull());
-                return new OkHttpClient(client);
-            }
-        };
+                @Override
+                public Client apply(Optional<SSLSocketFactory> sslSocketFactory) {
+                    com.squareup.okhttp.OkHttpClient client = new com.squareup.okhttp.OkHttpClient();
+                    client.setSslSocketFactory(sslSocketFactory.orNull());
+                    return new OkHttpClient(client);
+                }
+            };
 
     private static final Function<Optional<SSLSocketFactory>, Client> DEFAULT_CLIENT_SUPPLIER =
             new Function<Optional<SSLSocketFactory>, Client>() {
-            @Override
-            public Client apply(Optional<SSLSocketFactory> sslSocketFactory) {
-                return new Client.Default(sslSocketFactory.orNull(), null);
-            }
-        };
+                @Override
+                public Client apply(Optional<SSLSocketFactory> sslSocketFactory) {
+                    return new Client.Default(sslSocketFactory.orNull(), null);
+                }
+            };
 
     /**
      * Supplies a feign {@link Client} wrapping a {@link com.squareup.okhttp.OkHttpClient} client with optionally

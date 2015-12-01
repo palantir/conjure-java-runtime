@@ -19,14 +19,8 @@ package com.palantir.remoting.http;
 /**
  * A {@link BackoffStrategy} that attempts the operation exactly once, i.e., returns false always.
  */
-public final class NeverRetryingBackoffStrategy implements BackoffStrategy {
-    private static final NeverRetryingBackoffStrategy INSTANCE = new NeverRetryingBackoffStrategy();
-
-    private NeverRetryingBackoffStrategy() {}
-
-    public static NeverRetryingBackoffStrategy getInstance() {
-        return INSTANCE;
-    }
+public enum NeverRetryingBackoffStrategy implements BackoffStrategy {
+    INSTANCE;
 
     @Override
     public boolean backoff(int numFailedAttempts) {

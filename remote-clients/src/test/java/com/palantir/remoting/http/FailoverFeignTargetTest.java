@@ -96,7 +96,7 @@ public final class FailoverFeignTargetTest {
                 new JAXRSContract(),
                 new JacksonEncoder(ObjectMappers.guavaJdk7()),
                 new JacksonDecoder(ObjectMappers.guavaJdk7()),
-                new SerializableErrorErrorDecoder(),
+                SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
                 backoffStrategy)
                 .createProxy(Optional.<SSLSocketFactory>absent(),
