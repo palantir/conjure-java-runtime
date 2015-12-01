@@ -26,121 +26,96 @@ import feign.RetryableException;
 import feign.Retryer;
 import feign.Target;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Collections;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A combined Feign {@link Target} and {@link Retryer} designed to provide failover across a list of service targets
+ * instead of iterative retries against a single, fixed target. Upon detecting a failure in a service call, the retry
+ * strategy will cycle through a provided collection of service URIs with a provided backoff strategy to prevent server
+ * call amplification due to individual server failures. Implementation detail: failover state is shared via
+ * thread-local variables, using the fact that Feign calls {@link #clone} to initialize the retryer before the first
+ * connection attempt.
+ */
 @SuppressWarnings("checkstyle:noclone")
 public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
+
+    private class ThreadLocalInteger extends ThreadLocal<Integer> {
+        @Override
+        protected Integer initialValue() {
+            return 0;
+        }
+
+        public int increment() {
+            set(get() + 1);
+            return get();
+        }
+    }
+
     private static final Logger log = LoggerFactory.getLogger(FailoverFeignTarget.class);
-    private static final double GOLDEN_RATIO = (Math.sqrt(5) + 1.0) / 2.0;
 
     private final ImmutableList<String> servers;
     private final Class<T> type;
-    private final AtomicInteger failoverCount = new AtomicInteger();
-    private final int failuresBeforeSwitching = 3;
-    private final int numServersToTryBeforeFailing = 14;
-    private final int fastFailoverTimeoutMillis = 10000;
-    private final int maxBackoffMillis = 3000;
+    private final BackoffStrategy backoffStrategy;
 
-    private final AtomicLong failuresSinceLastSwitch = new AtomicLong();
-    private final AtomicLong numSwitches = new AtomicLong();
-    private final AtomicLong startTimeOfFastFailover = new AtomicLong();
+    /** An index into {@link #servers} indicating the server to be used for the next request. */
+    private ThreadLocalInteger currentServer = new ThreadLocalInteger();
+    /** Counts the number of failed servers since the last successful connection attempt. */
+    private ThreadLocalInteger failedServers = new ThreadLocalInteger();
+    /** Counts the number of failed connection attempts for the {@link #currentServer current server}. */
+    private ThreadLocalInteger failedAttemptsForCurrentServer = new ThreadLocalInteger();
 
-    private final ThreadLocal<Integer> mostRecentServerIndex = new ThreadLocal<Integer>();
+    /**
+     * Constructs a new instance for the given server list; retries against the same server are governed by the given
+     * {@link BackoffStrategy}, i.e., the next server is tried as soon as {@link BackoffStrategy#backoff} returns {@code
+     * false}. Each server is tried at most once in between successive {@link #clone} calls.
+     */
+    public FailoverFeignTarget(Collection<String> servers, Class<T> type, BackoffStrategy backoffStrategy) {
+        List<String> shuffledServers = new ArrayList<>(servers);
+        Collections.shuffle(shuffledServers);
 
-    public FailoverFeignTarget(Collection<String> servers, Class<T> type) {
-        this.servers = ImmutableList.copyOf(servers);
+        this.servers = ImmutableList.copyOf(shuffledServers);
         this.type = type;
-    }
-
-    public void sucessfulCall() {
-        numSwitches.set(0);
-        failuresSinceLastSwitch.set(0);
-        startTimeOfFastFailover.set(0);
+        this.backoffStrategy = backoffStrategy;
     }
 
     @Override
     public void continueOrPropagate(RetryableException exception) {
-
-        boolean isFastFailoverException;
-        if (exception.retryAfter() == null) {
-            // This is the case where we have failed due to networking or other IOException error.
-            isFastFailoverException = false;
+        failedAttemptsForCurrentServer.increment();
+        if (backoffStrategy.backoff(failedAttemptsForCurrentServer.get())) {
+            // Use same server again.
+            log.info("{}: {}. Attempt #{} failed for server {}. Retrying the same server.",
+                    exception.getCause(), exception.getMessage(), failedAttemptsForCurrentServer,
+                    servers.get(currentServer.get()));
         } else {
-            // This is the case where the server has returned a 503.
-            // This is done when we want to do fast failover because we aren't the leader or we are shutting down.
-            isFastFailoverException = true;
-        }
-        synchronized (this) {
-            // Only fail over if this failure was to the current server.
-            // This means that no one on another thread has failed us over already.
-            if (mostRecentServerIndex.get() != null && mostRecentServerIndex.get() == failoverCount.get()) {
-                long failures = failuresSinceLastSwitch.incrementAndGet();
-                if (isFastFailoverException || failures >= failuresBeforeSwitching) {
-                    if (isFastFailoverException) {
-                        // We did talk to a node successfully. It was shutting down but nodes are available
-                        // so we shoudln't keep making the backoff higher.
-                        numSwitches.set(0);
-                        startTimeOfFastFailover.compareAndSet(0, System.currentTimeMillis());
-                    } else {
-                        numSwitches.incrementAndGet();
-                        startTimeOfFastFailover.set(0);
-                    }
-                    failuresSinceLastSwitch.set(0);
-                    failoverCount.incrementAndGet();
-                }
+            // Use next server or fail if all servers have failed.
+            failedServers.increment();
+
+            if (failedServers.get() >= servers.size()) {
+                // Attempted to call all servers - propagate exception.
+                // Note: Not resetting state here since Feign calls clone() before re-using this retryer.
+                throw exception;
+            } else {
+                // Call next server in list.
+                log.info("{}: {}. Server #{} ({}) failed {} times - trying next server", exception.getCause(),
+                        exception.getMessage(), failedServers, servers.get(currentServer.get()),
+                        failedAttemptsForCurrentServer);
+
+                currentServer.set((currentServer.get() + 1) % servers.size());
+                failedAttemptsForCurrentServer.set(0);
             }
-        }
-
-        checkAndHandleFailure(exception);
-        if (!isFastFailoverException) {
-            pauseForBackOff();
-        }
-        return;
-    }
-
-    private void checkAndHandleFailure(RetryableException exception) {
-        final long fastFailoverStartTime = startTimeOfFastFailover.get();
-        final long currentTime = System.currentTimeMillis();
-        boolean failedDueToFastFailover =
-                fastFailoverStartTime != 0 && (currentTime - fastFailoverStartTime) > fastFailoverTimeoutMillis;
-        boolean failedDueToNumSwitches = numSwitches.get() >= numServersToTryBeforeFailing;
-
-        if (failedDueToFastFailover) {
-            log.warn("This connection has been instructed to fast failover for "
-                    + TimeUnit.MILLISECONDS.toSeconds(fastFailoverTimeoutMillis)
-                    + " seconds without establishing a successful connection."
-                    + " The remote hosts have been in a fast failover state for too long.");
-        } else if (failedDueToNumSwitches) {
-            log.warn("This connection has tried " + numServersToTryBeforeFailing
-                    + " hosts each " + failuresBeforeSwitching + " times and has failed out.", exception);
-        }
-
-        if (failedDueToFastFailover || failedDueToNumSwitches) {
-            throw exception;
-        }
-    }
-
-    private void pauseForBackOff() {
-        double pow =
-                Math.pow(GOLDEN_RATIO, (numSwitches.get() * failuresBeforeSwitching) + failuresSinceLastSwitch.get());
-        long timeout = Math.min(maxBackoffMillis, Math.round(pow));
-
-        try {
-            log.info("Pausing {}ms before retrying", timeout);
-            Thread.sleep(timeout);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
     }
 
     @Override
     public Retryer clone() {
-        mostRecentServerIndex.remove();
+        // Not resetting currentServer so that the next connection is made through the current server.
+        failedServers.set(0);
+        failedAttemptsForCurrentServer.set(0);
         return this;
     }
 
@@ -151,14 +126,12 @@ public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
 
     @Override
     public String name() {
-        return "server list: " + servers;
+        return FailoverFeignTarget.class.getSimpleName() + " instance with servers: " + servers;
     }
 
     @Override
     public String url() {
-        int indexToHit = failoverCount.get();
-        mostRecentServerIndex.set(indexToHit);
-        return servers.get(indexToHit % servers.size());
+        return servers.get(currentServer.get());
     }
 
     @Override
@@ -175,7 +148,9 @@ public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
             public Response execute(Request request, Options options) throws IOException {
                 Response response = client.execute(request, options);
                 if (response.status() >= 200 && response.status() < 300) {
-                    sucessfulCall();
+                    // Call successful: set our attempts back to 0.
+                    failedServers.set(0);
+                    failedAttemptsForCurrentServer.set(0);
                 }
                 return response;
             }

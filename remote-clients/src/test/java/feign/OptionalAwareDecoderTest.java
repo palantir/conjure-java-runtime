@@ -22,13 +22,7 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting.http.FeignClientFactory;
-import com.palantir.remoting.http.ObjectMappers;
-import com.palantir.remoting.http.errors.SerializableErrorErrorDecoder;
-import feign.codec.ErrorDecoder;
-import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
-import feign.jaxrs.JAXRSContract;
+import com.palantir.remoting.http.FeignClients;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import javax.net.ssl.SSLSocketFactory;
@@ -42,14 +36,6 @@ import org.junit.rules.ExpectedException;
 
 public final class OptionalAwareDecoderTest {
 
-    private static final ErrorDecoder errorDecoder = new SerializableErrorErrorDecoder();
-    private static final FeignClientFactory feignClientFactory = FeignClientFactory.of(
-            new JAXRSContract(),
-            new JacksonEncoder(ObjectMappers.guavaJdk7()),
-            new OptionalAwareDecoder(new JacksonDecoder(ObjectMappers.guavaJdk7()), errorDecoder),
-            errorDecoder,
-            FeignClientFactory.okHttpClient());
-
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestServer.class,
             "src/test/resources/test-server.yml");
@@ -62,7 +48,7 @@ public final class OptionalAwareDecoderTest {
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = feignClientFactory.createProxy(Optional.<SSLSocketFactory>absent(), endpointUri,
+        service = FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(), endpointUri,
                 TestServer.TestService.class);
     }
 

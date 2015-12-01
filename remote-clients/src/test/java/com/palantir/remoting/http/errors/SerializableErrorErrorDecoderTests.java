@@ -33,7 +33,7 @@ import org.junit.Test;
 
 public final class SerializableErrorErrorDecoderTests {
 
-    private static final SerializableErrorErrorDecoder decoder = new SerializableErrorErrorDecoder();
+    private static final SerializableErrorErrorDecoder decoder = SerializableErrorErrorDecoder.INSTANCE;
 
     @Test
     public void testJsonException() throws JsonProcessingException {

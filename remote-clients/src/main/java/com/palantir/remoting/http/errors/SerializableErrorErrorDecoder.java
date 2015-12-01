@@ -37,9 +37,10 @@ import org.slf4j.LoggerFactory;
  * Throws a {@link RuntimeException} if the body cannot be interpreted as a {@link SerializableError}, or if the
  * exception fails to get re-thrown.
  */
-public final class SerializableErrorErrorDecoder implements ErrorDecoder {
-    private static final Logger log = LoggerFactory.getLogger(SerializableErrorErrorDecoder.class);
+public enum SerializableErrorErrorDecoder implements ErrorDecoder {
+    INSTANCE;
 
+    private static final Logger log = LoggerFactory.getLogger(SerializableErrorErrorDecoder.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Override

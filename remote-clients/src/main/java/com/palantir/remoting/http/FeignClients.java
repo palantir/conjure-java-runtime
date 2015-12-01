@@ -17,30 +17,33 @@
 package com.palantir.remoting.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Optional;
 import com.palantir.remoting.http.errors.SerializableErrorErrorDecoder;
+import feign.OptionalAwareDecoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JAXRSContract;
 
 /**
  * Static factory methods for producing common configurations of {@link FeignClientFactory}, which in turn may be used
- * to create HTTP proxies for HTTP remoting clients.
+ * to create HTTP proxies for HTTP remoting clients. The returned instances serialize server-side exceptions as JSON and
+ * decode any 204 response as an {@link Optional#absent} in case the proxied interface is of type {@link Optional}.
  */
 public final class FeignClients {
 
     private FeignClients() {}
 
     /**
-     * Provides a {@link FeignClientFactory} with an {@link ObjectMapper} configured with
-     * {@link com.fasterxml.jackson.datatype.guava.GuavaModule} and
-     * {@link com.fasterxml.jackson.datatype.jdk7.Jdk7Module}.
+     * Provides a {@link FeignClientFactory} with an {@link ObjectMapper} configured with {@link
+     * com.fasterxml.jackson.datatype.guava.GuavaModule} and {@link com.fasterxml.jackson.datatype.jdk7.Jdk7Module}.
      */
     public static FeignClientFactory standard() {
         return FeignClientFactory.of(
                 new JAXRSContract(),
                 new JacksonEncoder(ObjectMappers.guavaJdk7()),
-                new JacksonDecoder(ObjectMappers.guavaJdk7()),
-                new SerializableErrorErrorDecoder(),
+                new OptionalAwareDecoder(new JacksonDecoder(ObjectMappers.guavaJdk7()),
+                        SerializableErrorErrorDecoder.INSTANCE),
+                SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient());
     }
 
@@ -51,8 +54,9 @@ public final class FeignClients {
         return FeignClientFactory.of(
                 new JAXRSContract(),
                 new JacksonEncoder(ObjectMappers.vanilla()),
-                new JacksonDecoder(ObjectMappers.vanilla()),
-                new SerializableErrorErrorDecoder(),
+                new OptionalAwareDecoder(new JacksonDecoder(ObjectMappers.vanilla()),
+                        SerializableErrorErrorDecoder.INSTANCE),
+                SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient());
     }
 
@@ -63,8 +67,8 @@ public final class FeignClients {
         return FeignClientFactory.of(
                 new JAXRSContract(),
                 new JacksonEncoder(mapper),
-                new JacksonDecoder(mapper),
-                new SerializableErrorErrorDecoder(),
+                new OptionalAwareDecoder(new JacksonDecoder(mapper), SerializableErrorErrorDecoder.INSTANCE),
+                SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient());
     }
 
