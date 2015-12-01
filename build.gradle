@@ -23,6 +23,7 @@ repositories {
 
 allprojects {
     version gitVersion()
+    group 'com.palantir.remoting'
 }
 
 subprojects {
