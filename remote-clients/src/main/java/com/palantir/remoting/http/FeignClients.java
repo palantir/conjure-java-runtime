@@ -39,9 +39,11 @@ public final class FeignClients {
         return FeignClientFactory.of(
                 new JAXRSContract(),
                 new JacksonEncoder(ObjectMappers.guavaJdk7()),
+                // TODO(rfink): Use OptionalAwareDecoder by default in all these factories.
                 new JacksonDecoder(ObjectMappers.guavaJdk7()),
                 new SerializableErrorErrorDecoder(),
-                FeignClientFactory.okHttpClient());
+                FeignClientFactory.okHttpClient(),
+                NeverRetryingBackoffStrategy.getInstance());
     }
 
     /**
@@ -53,7 +55,8 @@ public final class FeignClients {
                 new JacksonEncoder(ObjectMappers.vanilla()),
                 new JacksonDecoder(ObjectMappers.vanilla()),
                 new SerializableErrorErrorDecoder(),
-                FeignClientFactory.okHttpClient());
+                FeignClientFactory.okHttpClient(),
+                NeverRetryingBackoffStrategy.getInstance());
     }
 
     /**
@@ -65,7 +68,8 @@ public final class FeignClients {
                 new JacksonEncoder(mapper),
                 new JacksonDecoder(mapper),
                 new SerializableErrorErrorDecoder(),
-                FeignClientFactory.okHttpClient());
+                FeignClientFactory.okHttpClient(),
+                NeverRetryingBackoffStrategy.getInstance());
     }
 
 }

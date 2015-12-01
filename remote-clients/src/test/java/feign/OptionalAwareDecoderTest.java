@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThat;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting.http.FeignClientFactory;
+import com.palantir.remoting.http.NeverRetryingBackoffStrategy;
 import com.palantir.remoting.http.ObjectMappers;
 import com.palantir.remoting.http.errors.SerializableErrorErrorDecoder;
 import feign.codec.ErrorDecoder;
@@ -48,7 +49,8 @@ public final class OptionalAwareDecoderTest {
             new JacksonEncoder(ObjectMappers.guavaJdk7()),
             new OptionalAwareDecoder(new JacksonDecoder(ObjectMappers.guavaJdk7()), errorDecoder),
             errorDecoder,
-            FeignClientFactory.okHttpClient());
+            FeignClientFactory.okHttpClient(),
+            NeverRetryingBackoffStrategy.getInstance());
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestServer.class,

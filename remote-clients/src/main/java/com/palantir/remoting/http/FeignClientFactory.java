@@ -41,18 +41,21 @@ public final class FeignClientFactory {
     private final Decoder decoder;
     private final ErrorDecoder errorDecoder;
     private final Function<Optional<SSLSocketFactory>, Client> clientSupplier;
+    private final BackoffStrategy backoffStrategy;
 
     private FeignClientFactory(
             Contract contract,
             Encoder encoder,
             Decoder decoder,
             ErrorDecoder errorDecoder,
-            Function<Optional<SSLSocketFactory>, Client> clientSupplier) {
+            Function<Optional<SSLSocketFactory>, Client> clientSupplier,
+            BackoffStrategy backoffStrategy) {
         this.contract = contract;
         this.encoder = encoder;
         this.decoder = decoder;
         this.errorDecoder = errorDecoder;
         this.clientSupplier = clientSupplier;
+        this.backoffStrategy = backoffStrategy;
     }
 
     /**
@@ -63,8 +66,10 @@ public final class FeignClientFactory {
             Encoder encoder,
             Decoder decoder,
             ErrorDecoder errorDecoder,
-            Function<Optional<SSLSocketFactory>, Client> clientSupplier) {
-        return new FeignClientFactory(contract, encoder, decoder, errorDecoder, clientSupplier);
+            Function<Optional<SSLSocketFactory>, Client> clientSupplier,
+            BackoffStrategy backoffStrategy) {
+        return new FeignClientFactory(
+                contract, encoder, decoder, errorDecoder, clientSupplier, backoffStrategy);
     }
 
     /**
@@ -87,7 +92,7 @@ public final class FeignClientFactory {
      * on failure.
      */
     public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type) {
-        FailoverFeignTarget<T> target = new FailoverFeignTarget<>(uris, type);
+        FailoverFeignTarget<T> target = new FailoverFeignTarget<>(uris, type, backoffStrategy);
         Client client = clientSupplier.apply(sslSocketFactory);
         client = target.wrapClient(client);
         return Feign.builder()
