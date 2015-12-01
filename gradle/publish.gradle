@@ -21,7 +21,7 @@ bintray {
     user = System.getenv('BINTRAY_USER')
     key = System.getenv('BINTRAY_KEY')
     pkg {
-        repo = 'releases-internal'
+        repo = 'releases'
         name = 'http-remoting'
         userOrg = 'palantir'
         licenses = ['Apache-2.0']
