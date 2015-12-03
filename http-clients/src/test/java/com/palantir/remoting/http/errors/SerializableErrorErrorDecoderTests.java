@@ -16,7 +16,6 @@
 
 package com.palantir.remoting.http.errors;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -27,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import feign.Response;
 import java.util.Arrays;
 import java.util.Collection;
+import javax.annotation.CheckForNull;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public final class SerializableErrorErrorDecoderTests {
         Response response = getResponse(MediaType.TEXT_PLAIN, "errorbody");
         Exception decode = decoder.decode("ignored", response);
         assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is("errorbody"));
+        assertThat(decode.getMessage(), is("Error 400. Reason: reason. Body:\nerrorbody"));
     }
 
     @Test
@@ -58,7 +58,7 @@ public final class SerializableErrorErrorDecoderTests {
         Response response = getResponse(MediaType.TEXT_HTML, "errorbody");
         Exception decode = decoder.decode("ignored", response);
         assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is("errorbody"));
+        assertThat(decode.getMessage(), is("Error 400. Reason: reason. Body:\nerrorbody"));
     }
 
     @Test
@@ -66,7 +66,7 @@ public final class SerializableErrorErrorDecoderTests {
         Response response = getResponse(MediaType.MULTIPART_FORM_DATA, "errorbody");
         Exception decode = decoder.decode("ignored", response);
         assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is("Server returned 400 reason. Failed to parse error body"));
+        assertThat(decode.getMessage(), is("Error 400. Reason: reason. Body content type: [multipart/form-data]"));
     }
 
     @Test
@@ -74,10 +74,11 @@ public final class SerializableErrorErrorDecoderTests {
         Response response = getResponse(MediaType.APPLICATION_JSON, "notjsonifiable!");
         Exception decode = decoder.decode("ignored", response);
         assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), containsString(
-                "Server returned 400 reason. Failed to parse error body: "
-                        + "Unrecognized token 'notjsonifiable': was expecting 'null', "
-                        + "'true', 'false' or NaN\n at [Source: "));
+        assertThat(decode.getMessage(), is(
+                "Error 400. Reason: reason. Failed to parse error body: "
+                        + "Unrecognized token 'notjsonifiable': was expecting 'null', 'true', 'false' or NaN\n "
+                        + "at [Source: notjsonifiable!; line: 1, column: 15]. Body:\n"
+                        + "notjsonifiable!"));
     }
 
     @Test
@@ -88,9 +89,9 @@ public final class SerializableErrorErrorDecoderTests {
         assertThat(decode.getMessage(), is("400 reason"));
     }
 
-    private static Response getResponse(String contentType, String body) {
-        return Response.create(400, "reason", ImmutableMap.<String, Collection<String>>of(
-                HttpHeaders.CONTENT_TYPE, Arrays.asList(contentType)), body, feign.Util.UTF_8);
+    private static Response getResponse(String contentType, @CheckForNull String body) {
+        return Response.create(400, "reason", ImmutableMap.<String, Collection<String>>of(HttpHeaders.CONTENT_TYPE,
+                Arrays.asList(contentType)), body, feign.Util.UTF_8);
     }
 
 }
