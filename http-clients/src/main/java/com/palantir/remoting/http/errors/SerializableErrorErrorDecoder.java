@@ -23,7 +23,6 @@ import feign.Response;
 import feign.Response.Body;
 import feign.codec.ErrorDecoder;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.List;
@@ -41,6 +40,7 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
     INSTANCE;
 
     private static final Logger log = LoggerFactory.getLogger(SerializableErrorErrorDecoder.class);
+
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     @Override
@@ -48,10 +48,11 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
         Collection<String> contentType = response.headers().get(HttpHeaders.CONTENT_TYPE);
         Body body = response.body();
         if (body != null) {
-            String exceptionInErrorParsing = null;
             if (contentType.contains(MediaType.APPLICATION_JSON)) {
-                try (InputStream in = body.asInputStream()) {
-                    SerializableError error = MAPPER.readValue(in, SerializableError.class);
+                String bodyAsString = readBodyAsString(body);
+
+                try {
+                    SerializableError error = MAPPER.readValue(bodyAsString, SerializableError.class);
                     Class<? extends Exception> exceptionClass = error.getExceptionClass();
                     Exception exception = exceptionClass.getConstructor(String.class).newInstance(error.getMessage());
                     List<StackTraceElement> stackTrace = error.getStackTrace();
@@ -61,25 +62,38 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
                     return exception;
                 } catch (Exception e) {
                     log.error("Failed to parse error body as GenericError.", e);
-                    exceptionInErrorParsing = e.getMessage();
+                    String message =
+                            String.format("Error %s. Reason: %s. Failed to parse error body: %s. Body:%n%s",
+                                    response.status(),
+                                    response.reason(), e.getMessage(), bodyAsString);
+                    return new RuntimeException(message);
                 }
             } else if (contentType.contains(MediaType.TEXT_HTML) || contentType.contains(MediaType.TEXT_PLAIN)
                     || contentType.contains(MediaType.TEXT_XML)) {
-                try (Reader bodyReader = body.asReader()) {
-                    String responseString = CharStreams.toString(bodyReader);
-                    return new RuntimeException(responseString);
-                } catch (IOException e) {
-                    log.error("Failed to parse error body as string.", e);
-                    exceptionInErrorParsing = e.getMessage();
-                }
+                String bodyAsString = readBodyAsString(body);
+                String message =
+                        String.format("Error %s. Reason: %s. Body:%n%s", response.status(), response.reason(),
+                                bodyAsString);
+                return new RuntimeException(message);
             }
 
-            String extra = exceptionInErrorParsing == null ? "" : ": " + exceptionInErrorParsing;
-            String message = String.format("Server returned %s %s. Failed to parse error body%s", response.status(),
-                    response.reason(), extra);
+            String message = String.format("Error %s. Reason: %s. Body content type: %s", response.status(),
+                    response.reason(), contentType);
             return new RuntimeException(message);
         } else {
             return new RuntimeException(String.format("%s %s", response.status(), response.reason()));
+        }
+    }
+
+    /*
+     * Reads the response body fully into a string so that if there are exceptions parsing the body we can at least show
+     * the string representation of it.
+     */
+    private static String readBodyAsString(Body body) {
+        try (Reader reader = body.asReader()) {
+            return CharStreams.toString(reader);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
