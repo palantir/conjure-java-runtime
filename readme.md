@@ -1,6 +1,6 @@
 HTTP Remoting Utilities
 =======================
-This repository holds a small collection of useful utilties for use with HTTP Remoting setups,
+This repository holds a small collection of useful utilities for use with HTTP Remoting setups,
 in particular those that use Feign as a client and Jersey as a server.
 
 http-clients
@@ -12,7 +12,7 @@ equivalent endpoints.
 
 trust-stores
 ------------
-Provides utiltiies for interacting with Java trust stores and acquiring `SSLSocketFactory`
+Provides utilities for interacting with Java trust stores and acquiring `SSLSocketFactory`
 instances using those trust stores, as well as a configuration class for use in server
 configuration files.
 
