@@ -3,6 +3,14 @@ HTTP Remoting Utilities
 This repository holds a small collection of useful utilities for use with HTTP Remoting setups,
 in particular those that use Feign as a client and Jersey as a server.
 
+While allowing for further customizations, this library makes the following opinionated choices
+regarding the interplay of Java and HTTP interfaces:
+- Server-side Java exceptions are serialized as JSON objects. Client-side error deserializers
+  rethrow the original exception if possible, or a RuntimeException else.
+- `Optional<>` service interfaces give rise to a 204 HTTP response code to encode `Optional#absent`.
+  Client-side, 204 response codes are translated back to `Optional#absent`.
+- `String` service interfaces are supported for HTTP media type TEXT_PLAIN.
+
 http-clients
 --------------
 Provides Feign decoders for translating HTTP error codes to appropriate JAX-RS Java exceptions,

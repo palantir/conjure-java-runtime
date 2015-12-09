@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.palantir.remoting.http.errors.SerializableErrorErrorDecoder;
 import feign.OptionalAwareDecoder;
+import feign.TextDelegateDecoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JAXRSContract;
@@ -41,8 +42,7 @@ public final class FeignClients {
         return FeignClientFactory.of(
                 new JAXRSContract(),
                 new JacksonEncoder(ObjectMappers.guavaJdk7()),
-                new OptionalAwareDecoder(new JacksonDecoder(ObjectMappers.guavaJdk7()),
-                        SerializableErrorErrorDecoder.INSTANCE),
+                new OptionalAwareDecoder(new TextDelegateDecoder(new JacksonDecoder(ObjectMappers.guavaJdk7()))),
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient());
     }
@@ -54,8 +54,7 @@ public final class FeignClients {
         return FeignClientFactory.of(
                 new JAXRSContract(),
                 new JacksonEncoder(ObjectMappers.vanilla()),
-                new OptionalAwareDecoder(new JacksonDecoder(ObjectMappers.vanilla()),
-                        SerializableErrorErrorDecoder.INSTANCE),
+                new OptionalAwareDecoder(new TextDelegateDecoder(new JacksonDecoder(ObjectMappers.vanilla()))),
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient());
     }
@@ -67,9 +66,8 @@ public final class FeignClients {
         return FeignClientFactory.of(
                 new JAXRSContract(),
                 new JacksonEncoder(mapper),
-                new OptionalAwareDecoder(new JacksonDecoder(mapper), SerializableErrorErrorDecoder.INSTANCE),
+                new OptionalAwareDecoder(new TextDelegateDecoder(new JacksonDecoder(mapper))),
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient());
     }
-
 }
