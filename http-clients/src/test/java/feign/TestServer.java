@@ -100,6 +100,16 @@ public class TestServer extends Application<Configuration> {
                 return Optional.of(ImmutableMap.of(value, value));
             }
         }
+
+        @Override
+        public String getString(@Nullable String value) {
+            return value;
+        }
+
+        @Override
+        public Optional<String> getOptionalString(@Nullable String value) {
+            return Optional.fromNullable(value);
+        }
     }
 
     @Path("/")
@@ -148,5 +158,17 @@ public class TestServer extends Application<Configuration> {
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         Optional<ImmutableMap<String, String>> getOptionalThrowsForbidden(@QueryParam("value") @Nullable String value);
+
+        @GET
+        @Path("/string")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        String getString(@QueryParam("value") @Nullable String value);
+
+        @GET
+        @Path("/optionalString")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        Optional<String> getOptionalString(@QueryParam("value") @Nullable String value);
     }
 }

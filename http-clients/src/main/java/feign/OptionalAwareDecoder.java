@@ -17,37 +17,29 @@
 package feign;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import feign.codec.Decoder;
-import feign.codec.ErrorDecoder;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
 /**
  * Decorates a Feign {@link Decoder} such that it returns {@link Optional#absent} when observing an HTTP 204 error code
- * for a method with {@link Type} {@link Optional}. Propagates the exception returned by the given {@link ErrorDecoder}
- * in case the response is 204 for a non-Optional method.
+ * for a method with {@link Type} {@link Optional}.
  */
 public final class OptionalAwareDecoder implements Decoder {
 
     private final Decoder delegate;
-    private final ErrorDecoder errorDecoder;
 
-    public OptionalAwareDecoder(Decoder delegate, ErrorDecoder errorDecoder) {
+    public OptionalAwareDecoder(Decoder delegate) {
         this.delegate = delegate;
-        this.errorDecoder = errorDecoder;
     }
 
     @Override
     public Object decode(Response response, Type type) throws IOException, FeignException {
-        if (response.status() == 204) {
-            if (Types.getRawType(type).equals(Optional.class)) {
-                return Optional.absent();
-            } else {
-                throw Throwables.propagate(errorDecoder.decode(null, response));
-            }
+        if (response.status() == 204 && Types.getRawType(type).equals(Optional.class)) {
+            return Optional.absent();
         } else {
             return delegate.decode(response, type);
         }
     }
 }
+

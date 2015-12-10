@@ -17,6 +17,7 @@
 package com.palantir.remoting.http.errors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharStreams;
 import com.google.common.net.HttpHeaders;
 import feign.Response;
@@ -46,6 +47,10 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
     @Override
     public Exception decode(String methodKey, Response response) {
         Collection<String> contentType = response.headers().get(HttpHeaders.CONTENT_TYPE);
+        if (contentType == null) {
+            contentType = ImmutableSet.of();
+        }
+
         Body body = response.body();
         if (body != null) {
             if (contentType.contains(MediaType.APPLICATION_JSON)) {
