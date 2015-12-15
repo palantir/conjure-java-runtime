@@ -41,9 +41,7 @@ Usage
 Gradle:
 
     repositories {
-      maven {
-        url "https://dl.bintray.com/palantir/releases"
-      }
+      jcenter()
     } 
     dependencies {
       compile "com.palantir.remoting:http-clients:0.1.2"
