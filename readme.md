@@ -34,6 +34,23 @@ http-servers
 Provides Dropwizard/Jersey exception mappers for translating common JAX-RS exceptions to
 appropriate HTTP error codes.
 
+Usage
+=====
+
+
+Gradle:
+
+    repositories {
+      jcenter()
+    } 
+    dependencies {
+      compile "com.palantir.remoting:http-clients:0.1.2"
+      compile "com.palantir.remoting:http-servers:0.1.2"
+      compile "com.palantir.remoting:trust-stores:0.1.2"
+      compile "com.palantir.remoting:error-handling:0.1.2"
+    }
+
+
 License
 -------
 This repository is made available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
