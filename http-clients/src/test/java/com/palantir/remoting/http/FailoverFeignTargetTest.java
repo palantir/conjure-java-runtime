@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import com.palantir.remoting.http.errors.SerializableErrorErrorDecoder;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
+import feign.Request;
 import feign.RetryableException;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
@@ -98,7 +99,8 @@ public final class FailoverFeignTargetTest {
                 new JacksonDecoder(ObjectMappers.guavaJdk7()),
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
-                backoffStrategy)
+                backoffStrategy,
+                new Request.Options())
                 .createProxy(Optional.<SSLSocketFactory>absent(),
                         ImmutableSet.of("http://localhost:" + server1.getPort(),
                                 "http://localhost:" + server2.getPort()),

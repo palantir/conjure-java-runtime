@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import feign.Client;
 import feign.Contract;
 import feign.Feign;
+import feign.Request;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
@@ -42,6 +43,7 @@ public final class FeignClientFactory {
     private final ErrorDecoder errorDecoder;
     private final Function<Optional<SSLSocketFactory>, Client> clientSupplier;
     private final BackoffStrategy backoffStrategy;
+    private final Request.Options options;
 
     private FeignClientFactory(
             Contract contract,
@@ -49,13 +51,15 @@ public final class FeignClientFactory {
             Decoder decoder,
             ErrorDecoder errorDecoder,
             Function<Optional<SSLSocketFactory>, Client> clientSupplier,
-            BackoffStrategy backoffStrategy) {
+            BackoffStrategy backoffStrategy,
+            Request.Options options) {
         this.contract = contract;
         this.encoder = encoder;
         this.decoder = decoder;
         this.errorDecoder = errorDecoder;
         this.clientSupplier = clientSupplier;
         this.backoffStrategy = backoffStrategy;
+        this.options = options;
     }
 
     /**
@@ -69,8 +73,8 @@ public final class FeignClientFactory {
             Decoder decoder,
             ErrorDecoder errorDecoder,
             Function<Optional<SSLSocketFactory>, Client> clientSupplier) {
-        return new FeignClientFactory(
-                contract, encoder, decoder, errorDecoder, clientSupplier, NeverRetryingBackoffStrategy.INSTANCE);
+        return new FeignClientFactory(contract, encoder, decoder, errorDecoder, clientSupplier,
+                NeverRetryingBackoffStrategy.INSTANCE, new Request.Options());
     }
 
     /**
@@ -82,9 +86,10 @@ public final class FeignClientFactory {
             Decoder decoder,
             ErrorDecoder errorDecoder,
             Function<Optional<SSLSocketFactory>, Client> clientSupplier,
-            BackoffStrategy backoffStrategy) {
+            BackoffStrategy backoffStrategy,
+            Request.Options options) {
         return new FeignClientFactory(
-                contract, encoder, decoder, errorDecoder, clientSupplier, backoffStrategy);
+                contract, encoder, decoder, errorDecoder, clientSupplier, backoffStrategy, options);
     }
 
     /**
@@ -98,6 +103,7 @@ public final class FeignClientFactory {
                 .decoder(decoder)
                 .errorDecoder(errorDecoder)
                 .client(clientSupplier.apply(sslSocketFactory))
+                .options(options)
                 .target(type, uri);
     }
 
@@ -117,6 +123,7 @@ public final class FeignClientFactory {
                 .errorDecoder(errorDecoder)
                 .client(client)
                 .retryer(target)
+                .options(options)
                 .target(target);
     }
 
