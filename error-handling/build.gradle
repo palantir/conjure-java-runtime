@@ -2,7 +2,6 @@ apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
-    compile libs.feign.jackson
     compile libs.jackson.databind
     compile libs.jsr305
 
