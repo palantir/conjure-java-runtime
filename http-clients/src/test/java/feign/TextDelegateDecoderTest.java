@@ -33,7 +33,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.http.FeignClients;
-import feign.codec.DecodeException;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -48,7 +47,6 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 
 public final class TextDelegateDecoderTest {
     private static final String DELEGATE_RESPONSE = "delegate response";
@@ -125,13 +123,8 @@ public final class TextDelegateDecoderTest {
     public void testInterplayOfOptionalAwareDecoderAndTextDelegateDecoder() {
         assertNull(service.getString(null));
 
-        try {
-            service.getOptionalString("string");
-            fail();
-        } catch (DecodeException e) {
-            assertThat(e.getMessage(), containsString(
-                    "com.google.common.base.Optional<java.lang.String> is not a type supported by this decoder."));
-        }
+        Optional<String> result = service.getOptionalString("string");
+        assertEquals(Optional.of("string"), result);
 
         try {
             service.getOptionalString(null);
