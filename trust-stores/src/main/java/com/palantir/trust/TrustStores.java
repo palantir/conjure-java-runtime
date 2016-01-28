@@ -20,6 +20,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
@@ -65,7 +66,9 @@ public final class TrustStores {
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
                     TrustManagerFactory.getDefaultAlgorithm());
             KeyStore keyStore = KeyStore.getInstance(trustStoreType.or("JKS"));
-            keyStore.load(Files.newInputStream(trustStorePath), trustStorePassword.transform(TO_CHAR_ARRAY).orNull());
+            try (InputStream stream = Files.newInputStream(trustStorePath)) {
+                keyStore.load(stream, trustStorePassword.transform(TO_CHAR_ARRAY).orNull());
+            }
 
             trustManagerFactory.init(keyStore);
 
