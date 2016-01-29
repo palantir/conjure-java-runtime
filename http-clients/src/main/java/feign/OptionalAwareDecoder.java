@@ -16,9 +16,12 @@
 
 package feign;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Optional;
 import feign.codec.Decoder;
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
@@ -35,11 +38,21 @@ public final class OptionalAwareDecoder implements Decoder {
 
     @Override
     public Object decode(Response response, Type type) throws IOException, FeignException {
-        if (response.status() == 204 && Types.getRawType(type).equals(Optional.class)) {
-            return Optional.absent();
+        if (Types.getRawType(type).equals(Optional.class)) {
+            if (response.status() == 204) {
+                return Optional.absent();
+            } else {
+                Object decoded = checkNotNull(delegate.decode(response, getInnerType(type)),
+                        "Unexpected null content for response status %d", response.status());
+                return Optional.of(decoded);
+            }
         } else {
             return delegate.decode(response, type);
         }
     }
-}
 
+    private static Type getInnerType(Type type) {
+        ParameterizedType paramType = (ParameterizedType) type;
+        return paramType.getActualTypeArguments()[0];
+    }
+}
