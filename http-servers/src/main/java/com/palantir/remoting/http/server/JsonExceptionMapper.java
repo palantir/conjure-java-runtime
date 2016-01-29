@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.remoting.http.errors.SerializableError;
 import java.util.Arrays;
+import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -51,15 +52,16 @@ public abstract class JsonExceptionMapper<T extends Exception> implements Except
         String message = exception.getMessage();
         ResponseBuilder builder = Response.status(status);
         try {
-            log.error(message, exception);
-
             final SerializableError error;
             if (includeStackTrace) {
+                log.error(message, exception);
                 StackTraceElement[] stackTrace = exception.getStackTrace();
                 error = SerializableError.of(message, exception.getClass(),
                         Arrays.asList(stackTrace));
             } else {
-                error = SerializableError.of(message, exception.getClass());
+                String errorId = UUID.randomUUID().toString();
+                log.error("Error {}: {}", errorId, message, exception);
+                error = SerializableError.of(errorId, RuntimeException.class);
             }
             builder.type(MediaType.APPLICATION_JSON);
             String json = MAPPER.writeValueAsString(error);
