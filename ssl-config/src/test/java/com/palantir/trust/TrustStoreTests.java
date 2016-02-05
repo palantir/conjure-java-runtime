@@ -26,9 +26,9 @@ import org.junit.Test;
 
 public final class TrustStoreTests {
 
-    private static final String TRUST_STORE_PASSWORD = "testtest";
-    private static final Path TRUST_STORE_PATH = Paths.get("src", "test", "resources", "testTrustStore.jks");
-    private static final String TRUST_STORE_TYPE = "JKS";
+    static final String TRUST_STORE_PASSWORD = "testCA";
+    static final Path TRUST_STORE_PATH = Paths.get("src", "test", "resources", "testCA", "testCATrustStore.jks");
+    static final String TRUST_STORE_TYPE = "JKS";
 
     @Test
     public void testCreateSslSocketFactory_canCreateWithAllParams() {
