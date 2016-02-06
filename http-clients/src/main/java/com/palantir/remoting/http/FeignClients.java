@@ -40,7 +40,7 @@ public final class FeignClients {
      */
     public static FeignClientFactory standard() {
         return FeignClientFactory.of(
-                new JAXRSContract(),
+                new GuavaOptionalAwareContract(new JAXRSContract()),
                 new JacksonEncoder(ObjectMappers.guavaJdk7()),
                 new OptionalAwareDecoder(new TextDelegateDecoder(new JacksonDecoder(ObjectMappers.guavaJdk7()))),
                 SerializableErrorErrorDecoder.INSTANCE,
@@ -52,7 +52,7 @@ public final class FeignClients {
      */
     public static FeignClientFactory vanilla() {
         return FeignClientFactory.of(
-                new JAXRSContract(),
+                new GuavaOptionalAwareContract(new JAXRSContract()),
                 new JacksonEncoder(ObjectMappers.vanilla()),
                 new OptionalAwareDecoder(new TextDelegateDecoder(new JacksonDecoder(ObjectMappers.vanilla()))),
                 SerializableErrorErrorDecoder.INSTANCE,
@@ -64,7 +64,7 @@ public final class FeignClients {
      */
     public static FeignClientFactory withMapper(ObjectMapper mapper) {
         return FeignClientFactory.of(
-                new JAXRSContract(),
+                new GuavaOptionalAwareContract(new JAXRSContract()),
                 new JacksonEncoder(mapper),
                 new OptionalAwareDecoder(new TextDelegateDecoder(new JacksonDecoder(mapper))),
                 SerializableErrorErrorDecoder.INSTANCE,
