@@ -23,9 +23,10 @@ import static org.junit.Assert.assertThat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import feign.Response;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -89,9 +90,25 @@ public final class SerializableErrorErrorDecoderTests {
         assertThat(decode.getMessage(), is("400 reason"));
     }
 
+    @Test
+    public void testClientExceptionWrapsServerException() throws JsonProcessingException {
+        Object error = SerializableError.of("msg", IllegalArgumentException.class,
+                Lists.newArrayList(new RuntimeException().getStackTrace()));
+        String json = new ObjectMapper().writeValueAsString(error);
+        Response response = getResponse(MediaType.APPLICATION_JSON, json);
+        Exception decode = decoder.decode("ignored", response);
+
+        assertThat(decode, is(instanceOf(IllegalArgumentException.class)));
+        assertThat(decode.getMessage(), is("msg"));
+        assertThat(decode.getStackTrace()[0].getMethodName(), is("decode"));
+        assertThat(decode.getCause(), is(instanceOf(IllegalArgumentException.class)));
+        assertThat(decode.getCause().getMessage(), is("msg"));
+        assertThat(decode.getCause().getStackTrace()[0].getMethodName(), is("testClientExceptionWrapsServerException"));
+    }
+
     private static Response getResponse(String contentType, @CheckForNull String body) {
         return Response.create(400, "reason", ImmutableMap.<String, Collection<String>>of(HttpHeaders.CONTENT_TYPE,
-                Arrays.asList(contentType)), body, feign.Util.UTF_8);
+                Collections.singletonList(contentType)), body, feign.Util.UTF_8);
     }
 
 }

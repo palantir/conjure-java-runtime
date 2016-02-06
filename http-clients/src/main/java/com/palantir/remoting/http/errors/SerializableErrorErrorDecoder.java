@@ -59,12 +59,27 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
                 try {
                     SerializableError error = MAPPER.readValue(bodyAsString, SerializableError.class);
                     Class<? extends Exception> exceptionClass = error.getExceptionClass();
-                    Exception exception = exceptionClass.getConstructor(String.class).newInstance(error.getMessage());
+
+                    // Construct remote exception
+                    Exception remoteException =
+                            exceptionClass.getConstructor(String.class).newInstance(error.getMessage());
                     List<StackTraceElement> stackTrace = error.getStackTrace();
                     if (stackTrace != null) {
-                        exception.setStackTrace(stackTrace.toArray(new StackTraceElement[stackTrace.size()]));
+                        remoteException.setStackTrace(stackTrace.toArray(new StackTraceElement[stackTrace.size()]));
                     }
-                    return exception;
+
+                    // Construct local exception that wraps the remote exception
+                    Exception localException;
+                    try {
+                        localException = exceptionClass.getConstructor(String.class, Throwable.class)
+                                .newInstance(error.getMessage(), remoteException);
+                    } catch (NoSuchMethodException e) {
+                        localException = exceptionClass.getConstructor(String.class).newInstance(error.getMessage());
+                    }
+                    localException.fillInStackTrace();
+
+                    return localException;
+
                 } catch (Exception e) {
                     log.error("Failed to parse error body as GenericError.", e);
                     String message =
