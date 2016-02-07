@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.trust;
+package com.palantir.ssl;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -26,11 +26,11 @@ import java.nio.file.Paths;
 import org.immutables.value.Value;
 import org.immutables.value.Value.Style.ImplementationVisibility;
 
-@JsonDeserialize(as = ImmutableTrustStoreConfiguration.class)
-@JsonSerialize(as = ImmutableTrustStoreConfiguration.class)
+@JsonDeserialize(as = ImmutableSslConfiguration.class)
+@JsonSerialize(as = ImmutableSslConfiguration.class)
 @Value.Immutable
 @Value.Style(visibility = ImplementationVisibility.PACKAGE)
-public abstract class TrustStoreConfiguration {
+public abstract class SslConfiguration {
 
     public abstract Path trustStorePath();
 
@@ -38,15 +38,25 @@ public abstract class TrustStoreConfiguration {
 
     public abstract Optional<String> trustStorePassword();
 
+    public abstract Optional<Path> keyStorePath();
+
+    public abstract Optional<String> keyStoreType();
+
+    public abstract Optional<String> keyStorePassword();
+
     @Value.Check
     protected final void check() {
         checkArgument(!trustStorePath().equals(Paths.get("")), "trustStorePath cannot be empty");
+        checkArgument(!(keyStorePath().isPresent() && keyStorePath().get().equals(Paths.get(""))),
+                "keyStorePath cannot be empty");
+        checkArgument(!(keyStorePath().isPresent() && !keyStorePassword().isPresent()),
+                "keyStorePassword cannot be absent if keyStorePath is present");
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends ImmutableTrustStoreConfiguration.Builder {}
+    public static class Builder extends ImmutableSslConfiguration.Builder {}
 
 }

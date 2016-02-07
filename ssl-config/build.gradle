@@ -7,10 +7,9 @@ dependencies {
 
     testCompile libs.hamcrest
     testCompile libs.junit
+    testCompile libs.dropwizard.core
 
     processor libs.immutables
 }
 
 tasks.check.dependsOn(javadoc)
-
-

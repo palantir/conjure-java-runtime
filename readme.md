@@ -18,8 +18,8 @@ and utilities for creating Feign clients in commonly used configurations. Additi
 offers a basic round-robin failover client configuration for basic failover between multiple
 equivalent endpoints.
 
-trust-stores
-------------
+ssl-config
+----------
 Provides utilities for interacting with Java trust stores and acquiring `SSLSocketFactory`
 instances using those trust stores, as well as a configuration class for use in server
 configuration files.
@@ -46,7 +46,7 @@ Gradle:
     dependencies {
       compile "com.palantir.remoting:http-clients:0.1.2"
       compile "com.palantir.remoting:http-servers:0.1.2"
-      compile "com.palantir.remoting:trust-stores:0.1.2"
+      compile "com.palantir.remoting:ssl-config:0.1.2"
       compile "com.palantir.remoting:error-handling:0.1.2"
     }
 

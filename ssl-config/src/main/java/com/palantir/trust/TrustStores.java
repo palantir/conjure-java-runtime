@@ -16,22 +16,17 @@
 
 package com.palantir.trust;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
+import com.palantir.ssl.SslSocketFactories;
 import java.nio.file.Path;
-import java.security.GeneralSecurityException;
-import java.security.KeyStore;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Utility functions for working with Java trust stores, and in particular for creating {@link SSLSocketFactory}s.
+ *
+ * @deprecated use {@link SslSocketFactories} instead.
  */
+@Deprecated
 public final class TrustStores {
 
     private TrustStores() {}
@@ -44,10 +39,7 @@ public final class TrustStores {
      * @return an {@link SSLSocketFactory} according to the input configuration
      */
     public static SSLSocketFactory createSslSocketFactory(TrustStoreConfiguration config) {
-        return createSslSocketFactory(
-                config.trustStorePath(),
-                config.trustStoreType(),
-                config.trustStorePassword());
+        return createSslSocketFactory(config.trustStorePath(), config.trustStoreType(), config.trustStorePassword());
     }
 
     /**
@@ -62,29 +54,6 @@ public final class TrustStores {
             Path trustStorePath,
             Optional<String> trustStoreType,
             Optional<String> trustStorePassword) {
-        try {
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
-                    TrustManagerFactory.getDefaultAlgorithm());
-            KeyStore keyStore = KeyStore.getInstance(trustStoreType.or("JKS"));
-            try (InputStream stream = Files.newInputStream(trustStorePath)) {
-                keyStore.load(stream, trustStorePassword.transform(TO_CHAR_ARRAY).orNull());
-            }
-
-            trustManagerFactory.init(keyStore);
-
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
-            return sslContext.getSocketFactory();
-        } catch (GeneralSecurityException | IOException e) {
-            throw Throwables.propagate(e);
-        }
+        return SslSocketFactories.createSslSocketFactory(trustStorePath, trustStoreType, trustStorePassword);
     }
-
-    private static final Function<String, char[]> TO_CHAR_ARRAY = new Function<String, char[]>() {
-        @Override
-        public char[] apply(String input) {
-            return input.toCharArray();
-        }
-    };
-
 }
