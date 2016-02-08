@@ -76,7 +76,7 @@ public final class SerializableErrorErrorDecoderTests {
         Exception decode = decoder.decode("ignored", response);
         assertThat(decode, is(instanceOf(RuntimeException.class)));
         assertThat(decode.getMessage(), is(
-                "Error 400. Reason: reason. Failed to parse error body: "
+                "Error 400. Reason: reason. Failed to parse error body and instantiate exception: "
                         + "Unrecognized token 'notjsonifiable': was expecting 'null', 'true', 'false' or NaN\n "
                         + "at [Source: notjsonifiable!; line: 1, column: 15]. Body:\n"
                         + "notjsonifiable!"));

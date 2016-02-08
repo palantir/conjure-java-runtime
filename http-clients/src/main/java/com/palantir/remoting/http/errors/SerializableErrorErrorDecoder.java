@@ -25,6 +25,7 @@ import feign.Response.Body;
 import feign.codec.ErrorDecoder;
 import java.io.IOException;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
@@ -56,38 +57,32 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
             if (contentType.contains(MediaType.APPLICATION_JSON)) {
                 String bodyAsString = readBodyAsString(body);
 
+                SerializableError error;
                 try {
-                    SerializableError error = MAPPER.readValue(bodyAsString, SerializableError.class);
-                    Class<? extends Exception> exceptionClass = error.getExceptionClass();
-
-                    // Construct remote exception
-                    Exception remoteException =
-                            exceptionClass.getConstructor(String.class).newInstance(error.getMessage());
-                    List<StackTraceElement> stackTrace = error.getStackTrace();
-                    if (stackTrace != null) {
-                        remoteException.setStackTrace(stackTrace.toArray(new StackTraceElement[stackTrace.size()]));
-                    }
-
-                    // Construct local exception that wraps the remote exception
-                    Exception localException;
-                    try {
-                        localException = exceptionClass.getConstructor(String.class, Throwable.class)
-                                .newInstance(error.getMessage(), remoteException);
-                    } catch (NoSuchMethodException e) {
-                        localException = exceptionClass.getConstructor(String.class).newInstance(error.getMessage());
-                    }
-                    localException.fillInStackTrace();
-
-                    return localException;
-
+                    error = MAPPER.readValue(bodyAsString, SerializableError.class);
                 } catch (Exception e) {
-                    log.error("Failed to parse error body as GenericError.", e);
-                    String message =
-                            String.format("Error %s. Reason: %s. Failed to parse error body: %s. Body:%n%s",
-                                    response.status(),
-                                    response.reason(), e.getMessage(), bodyAsString);
+                    log.error("Failed to parse error body as SerializableError.", e);
+                    String message = String.format(
+                            "Error %s. Reason: %s. Failed to parse error body and instantiate exception: %s. Body:%n%s",
+                            response.status(), response.reason(), e.getMessage(), bodyAsString);
                     return new RuntimeException(message);
                 }
+
+                // Construct remote exception and fill with remote stacktrace
+                Exception remoteException = constructException(error.getExceptionClass(), error.getMessage());
+                List<StackTraceElement> stackTrace = error.getStackTrace();
+                if (stackTrace != null) {
+                    remoteException.setStackTrace(stackTrace.toArray(new StackTraceElement[stackTrace.size()]));
+                }
+
+                // Construct local exception that wraps the remote exception and fill with stack trace of local
+                // call (yet without the reflection overhead).
+                Exception localException =
+                        constructException(error.getExceptionClass(), error.getMessage(), remoteException);
+                localException.fillInStackTrace();
+
+                return localException;
+
             } else if (contentType.contains(MediaType.TEXT_HTML) || contentType.contains(MediaType.TEXT_PLAIN)
                     || contentType.contains(MediaType.TEXT_XML)) {
                 String bodyAsString = readBodyAsString(body);
@@ -102,6 +97,35 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
             return new RuntimeException(message);
         } else {
             return new RuntimeException(String.format("%s %s", response.status(), response.reason()));
+        }
+    }
+
+    private static Exception constructException(Class<? extends Exception> exceptionClass, String message) {
+        try {
+            return exceptionClass.getConstructor(String.class).newInstance(message);
+        } catch (Exception e1) {
+            return new RuntimeException(String.format(
+                    "Failed to construction exception of type %s, constructing RuntimeException instead: %s%n%s",
+                    exceptionClass.toString(), e1.toString(), message));
+        }
+    }
+
+    private static Exception constructException(
+            Class<? extends Exception> exceptionClass, String message, Throwable wrappedException) {
+        // Note: If another constructor is added, then we should refactor the construction logic in order to avoid
+        // nested try/catch
+        try {
+            return exceptionClass.getConstructor(String.class, Throwable.class).newInstance(message, wrappedException);
+        } catch (NoSuchMethodException | InstantiationException
+                | IllegalAccessException | InvocationTargetException e) {
+            try {
+                return exceptionClass.getConstructor(String.class).newInstance(message);
+            } catch (Exception e1) {
+                return new RuntimeException(String.format(
+                        "Failed to wrap exception as %s, wrapping exception as RuntimeException instead: %s%n%s",
+                        exceptionClass.toString(), e1.toString(), message),
+                        wrappedException);
+            }
         }
     }
 
