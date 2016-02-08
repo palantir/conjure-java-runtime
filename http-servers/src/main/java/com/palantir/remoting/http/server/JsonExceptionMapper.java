@@ -61,7 +61,7 @@ public abstract class JsonExceptionMapper<T extends Exception> implements Except
             } else {
                 String errorId = UUID.randomUUID().toString();
                 log.error("Error {}: {}", errorId, message, exception);
-                error = SerializableError.of(errorId, RuntimeException.class);
+                error = SerializableError.of(errorId, exception.getClass());
             }
             builder.type(MediaType.APPLICATION_JSON);
             String json = MAPPER.writeValueAsString(error);
