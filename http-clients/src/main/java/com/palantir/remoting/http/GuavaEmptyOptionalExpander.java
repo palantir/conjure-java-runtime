@@ -22,15 +22,16 @@ import feign.Param.Expander;
 import java.util.Objects;
 
 /**
- * Expands Optional by using null for Optional.absent and the toString() of the value otherwise.
+ * Expands Optional by using the empty string for {@link Optional#absent()} and the {@link Object#toString()} of
+ * the value otherwise.
  */
-public final class GuavaOptionalExpander implements Expander {
+public final class GuavaEmptyOptionalExpander implements Expander {
 
     @Override
     public String expand(Object value) {
         Preconditions.checkArgument(value instanceof Optional, "Value must be an Optional. Was: %s", value.getClass());
         Optional<?> optional = (Optional<?>) value;
-        return optional.isPresent() ? Objects.toString(optional.get()) : null;
+        return optional.isPresent() ? Objects.toString(optional.get()) : "";
     }
 
 }
