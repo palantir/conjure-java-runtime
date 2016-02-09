@@ -28,10 +28,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 
 /**
- * Decorates a Contract and uses {@link GuavaNullOptionalExpander} for any PathParam or QueryParam parameters
- * and {@link GuavaEmptyOptionalExpander} for any {@link HeaderParam} parameters.
+ * Decorates a {@link Contract} and uses {@link GuavaNullOptionalExpander} for any {@link QueryParam} parameters,
+ * {@link GuavaEmptyOptionalExpander} for any {@link HeaderParam} parameters, and throws a {@link RuntimeException}
+ * at first encounter of an {@link Optional} typed {@link PathParam}.
+ * <p>
+ * {@link PathParam}s require a value, and so we explicitly disallow use with {@link Optional}.
  */
 public final class GuavaOptionalAwareContract implements Contract {
 
@@ -61,10 +66,16 @@ public final class GuavaOptionalAwareContract implements Contract {
                 for (int i = 0; i < parameterTypes.length; i++) {
                     Class<?> cls = parameterTypes[i];
                     if (cls.equals(Optional.class)) {
-                        if (FluentIterable.of(annotations[i]).transform(EXTRACT_CLASS).contains(HeaderParam.class)) {
+                        FluentIterable<Class<?>> paramAnnotations =
+                                FluentIterable.of(annotations[i]).transform(EXTRACT_CLASS);
+                        if (paramAnnotations.contains(HeaderParam.class)) {
                             md.indexToExpanderClass().put(i, GuavaEmptyOptionalExpander.class);
-                        } else {
+                        } else if (paramAnnotations.contains(QueryParam.class)) {
                             md.indexToExpanderClass().put(i, GuavaNullOptionalExpander.class);
+                        } else if (paramAnnotations.contains(PathParam.class)) {
+                            throw new RuntimeException(String.format(
+                                    "Cannot use Guava Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
+                                    targetType.getName(), method.getName(), i));
                         }
                     }
                 }

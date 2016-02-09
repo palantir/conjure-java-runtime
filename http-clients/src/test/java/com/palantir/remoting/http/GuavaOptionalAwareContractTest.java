@@ -18,6 +18,7 @@ package com.palantir.remoting.http;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
@@ -50,10 +51,17 @@ public final class GuavaOptionalAwareContractTest {
     }
 
     @Path("/")
-    public interface FakeoInterface {
+    public interface CannotDecorateInterface {
         @GET
         @Path("{opt}/foo/{req}")
         String path(@PathParam("opt") Optional<String> opt, @PathParam("req") String req);
+    }
+
+    @Path("/")
+    public interface FakeoInterface {
+        @GET
+        @Path("foo/{req}")
+        String path(@PathParam("req") String req);
 
         @GET
         @Path("foo")
@@ -65,28 +73,23 @@ public final class GuavaOptionalAwareContractTest {
     }
 
     @Test
-    public void testAbsentPath() throws Exception {
-        proxy.path(Optional.<String>absent(), "str2");
-        RecordedRequest takeRequest = server.takeRequest();
-        // note that this differs from feign's default behavior of leaving the template
-        // in the path. The default would be "/{opt}/foo"
-        // This is because feign expands null values to their parameter name if they
-        // have no Expander and the value is null
-        assertThat(takeRequest.getPath(), is("/null/foo/str2"));
+    public void testCannotDecorateInterfaceWithOptionalPathParam() {
+        try {
+            FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(),
+                    ImmutableSet.of("https://localhost:" + server.getPort()), CannotDecorateInterface.class);
+            fail();
+        } catch (RuntimeException e) {
+            assertThat(e.getMessage(), is("Cannot use Guava Optionals with PathParams."
+                    + " (Class: com.palantir.remoting.http.GuavaOptionalAwareContractTest$CannotDecorateInterface,"
+                    + " Method: path, Param: arg0)"));
+        }
     }
 
     @Test
-    public void testEmptyStringPath() throws Exception {
-        proxy.path(Optional.<String>of(""), "str2");
+    public void testRegularPathParam() throws Exception {
+        proxy.path("str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getPath(), is("//foo/str2"));
-    }
-
-    @Test
-    public void testStringPath() throws Exception {
-        proxy.path(Optional.<String>of("str"), "str2");
-        RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getPath(), is("/str/foo/str2"));
+        assertThat(takeRequest.getPath(), is("/foo/str2"));
     }
 
     @Test
