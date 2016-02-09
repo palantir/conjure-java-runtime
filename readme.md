@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/palantir/http-remoting.svg?branch=develop)](https://travis-ci.org/palantir/http-remoting)
+[![Download](https://api.bintray.com/packages/palantir/releases/http-remoting/images/download.svg) ](https://bintray.com/palantir/releases/http-remoting/_latestVersion)
+
 HTTP Remoting Utilities
 =======================
 This repository holds a small collection of useful utilities for use with HTTP Remoting setups,
