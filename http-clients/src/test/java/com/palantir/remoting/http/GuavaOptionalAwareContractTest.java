@@ -114,7 +114,7 @@ public final class GuavaOptionalAwareContractTest {
     public void testAbsentHeader() throws Exception {
         proxy.header(Optional.<String>absent(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt"), is("{opt}"));
+        assertThat(takeRequest.getHeader("opt"), is(""));
         assertThat(takeRequest.getHeader("req"), is("str2"));
     }
 
