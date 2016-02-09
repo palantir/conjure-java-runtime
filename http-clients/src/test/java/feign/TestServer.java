@@ -4,6 +4,7 @@
 
 package feign;
 
+import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting.http.server.ForbiddenExceptionMapper;
@@ -13,12 +14,16 @@ import com.palantir.remoting.http.server.OptionalAsNoContentMessageBodyWriter;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -107,6 +112,20 @@ public class TestServer extends Application<Configuration> {
         }
 
         @Override
+        public InputStream writeInputStream(String bytes) {
+            return new ByteArrayInputStream(bytes.getBytes(Charsets.UTF_8));
+        }
+
+        @Override
+        public String readInputStream(InputStream data) {
+            try {
+                return new String(Util.toByteArray(data), Charsets.UTF_8);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
         public Optional<String> getOptionalString(@Nullable String value) {
             return Optional.fromNullable(value);
         }
@@ -164,6 +183,18 @@ public class TestServer extends Application<Configuration> {
         @Consumes(MediaType.TEXT_PLAIN)
         @Produces(MediaType.TEXT_PLAIN)
         String getString(@QueryParam("value") @Nullable String value);
+
+        @GET
+        @Path("/writeInputStream")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        InputStream writeInputStream(@QueryParam("value") @Nullable String bytes);
+
+        @POST
+        @Path("/readInputStream")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        String readInputStream(InputStream data);
 
         @GET
         @Path("/optionalString")
