@@ -117,29 +117,6 @@ public final class SslSocketFactoriesConnectionTests {
     }
 
     @Test
-    public void testSslNoClientAuthenticationFailsWithMultipleKeyStoreUnspecified() {
-        TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        // bad configuration: specified key store has multiple key entries and first
-        // one that is returned is not the correct key
-        KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.of(
-                TestConstants.MULTIPLE_KEY_STORE_JKS_PATH,
-                TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD);
-        SslConfiguration serverConfig = SslConfiguration.of(serverTrustStoreConfig, serverKeyStoreConfig);
-
-        TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(
-                TestConstants.SERVER_KEY_STORE_JKS_PATH);
-        SslConfiguration clientConfig = SslConfiguration.of(clientTrustStoreConfig);
-
-        try {
-            runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
-            fail();
-        } catch (RuntimeException ex) {
-            assertThat(ex.getCause(), is(instanceOf(SSLHandshakeException.class)));
-            assertThat(ex.getMessage(), containsString("PKIX path building failed"));
-        }
-    }
-
-    @Test
     public void testSslNoClientAuthenticationFailsWithMultipleKeyStoreSpecified() {
         TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
 
