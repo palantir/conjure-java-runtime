@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.trust;
+package com.palantir.remoting.ssl;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -26,27 +26,41 @@ import java.nio.file.Paths;
 import org.immutables.value.Value;
 import org.immutables.value.Value.Style.ImplementationVisibility;
 
-@JsonDeserialize(as = ImmutableTrustStoreConfiguration.class)
-@JsonSerialize(as = ImmutableTrustStoreConfiguration.class)
+@JsonDeserialize(as = ImmutableKeyStoreConfiguration.class)
+@JsonSerialize(as = ImmutableKeyStoreConfiguration.class)
 @Value.Immutable
 @Value.Style(visibility = ImplementationVisibility.PACKAGE)
-public abstract class TrustStoreConfiguration {
+public abstract class KeyStoreConfiguration {
 
-    public abstract Path trustStorePath();
+    @Value.Parameter
+    public abstract Path path();
 
-    public abstract Optional<String> trustStoreType();
+    @Value.Parameter
+    public abstract String password();
 
-    public abstract Optional<String> trustStorePassword();
+    @SuppressWarnings("checkstyle:designforextension")
+    @Value.Default
+    public String type() {
+        return "JKS";
+    }
+
+    // alias of the key. If absent, first key returned by key store will be used.
+    public abstract Optional<String> alias();
 
     @Value.Check
     protected final void check() {
-        checkArgument(!trustStorePath().equals(Paths.get("")), "trustStorePath cannot be empty");
+        checkArgument(!path().equals(Paths.get("")), "path cannot be empty");
+        checkArgument(!password().equals(""), "password cannot be empty");
+    }
+
+    public static KeyStoreConfiguration of(Path path, String password) {
+        return ImmutableKeyStoreConfiguration.of(path, password);
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static class Builder extends ImmutableTrustStoreConfiguration.Builder {}
+    public static class Builder extends ImmutableKeyStoreConfiguration.Builder {}
 
 }
