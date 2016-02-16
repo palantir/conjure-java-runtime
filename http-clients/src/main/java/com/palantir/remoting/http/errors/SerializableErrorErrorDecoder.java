@@ -61,10 +61,10 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
                 try {
                     error = MAPPER.readValue(bodyAsString, SerializableError.class);
                 } catch (Exception e) {
-                    log.error("Failed to parse error body as SerializableError.", e);
                     String message = String.format(
                             "Error %s. Reason: %s. Failed to parse error body and instantiate exception: %s. Body:%n%s",
                             response.status(), response.reason(), e.getMessage(), bodyAsString);
+                    log.error(message, e);
                     return new RuntimeException(message);
                 }
 
@@ -89,6 +89,7 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
                 String message =
                         String.format("Error %s. Reason: %s. Body:%n%s", response.status(), response.reason(),
                                 bodyAsString);
+                log.error(message);
                 return new RuntimeException(message);
             }
 
