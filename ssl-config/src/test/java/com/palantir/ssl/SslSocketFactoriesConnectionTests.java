@@ -64,7 +64,7 @@ public final class SslSocketFactoriesConnectionTests {
     public void testSslNoClientAuthenticationPkcs12() {
         TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
         KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.builder()
-                .path(TestConstants.SERVER_KEY_STORE_P12_PATH)
+                .uri(TestConstants.SERVER_KEY_STORE_P12_PATH)
                 .type(TestConstants.SERVER_KEY_STORE_P12_TYPE)
                 .password(TestConstants.SERVER_KEY_STORE_P12_PASSWORD)
                 .build();
@@ -122,7 +122,7 @@ public final class SslSocketFactoriesConnectionTests {
 
         // specify that server key alias should be used
         KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.builder()
-                .path(TestConstants.MULTIPLE_KEY_STORE_JKS_PATH)
+                .uri(TestConstants.MULTIPLE_KEY_STORE_JKS_PATH)
                 .password(TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD)
                 .alias(TestConstants.MULTIPLE_KEY_STORE_SERVER_ALIAS)
                 .build();
@@ -157,7 +157,7 @@ public final class SslSocketFactoriesConnectionTests {
         TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
 
         KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.builder()
-                .path(TestConstants.SERVER_KEY_STORE_P12_PATH)
+                .uri(TestConstants.SERVER_KEY_STORE_P12_PATH)
                 .type(TestConstants.SERVER_KEY_STORE_P12_TYPE)
                 .password(TestConstants.SERVER_KEY_STORE_P12_PASSWORD)
                 .build();
@@ -166,7 +166,7 @@ public final class SslSocketFactoriesConnectionTests {
 
         TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
         KeyStoreConfiguration clientKeyStoreConfig = KeyStoreConfiguration.builder()
-                .path(TestConstants.CLIENT_KEY_STORE_P12_PATH)
+                .uri(TestConstants.CLIENT_KEY_STORE_P12_PATH)
                 .type(TestConstants.CLIENT_KEY_STORE_P12_TYPE)
                 .password(TestConstants.CLIENT_KEY_STORE_P12_PASSWORD)
                 .build();
@@ -185,7 +185,7 @@ public final class SslSocketFactoriesConnectionTests {
 
         TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
         KeyStoreConfiguration clientKeyStoreConfig = KeyStoreConfiguration.builder()
-                .path(TestConstants.CLIENT_KEY_STORE_P12_PATH)
+                .uri(TestConstants.CLIENT_KEY_STORE_P12_PATH)
                 .type(TestConstants.CLIENT_KEY_STORE_P12_TYPE)
                 .password(TestConstants.CLIENT_KEY_STORE_P12_PASSWORD)
                 .build();
