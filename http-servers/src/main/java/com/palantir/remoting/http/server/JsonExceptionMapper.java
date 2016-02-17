@@ -25,7 +25,7 @@ import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,16 +40,15 @@ public abstract class JsonExceptionMapper<T extends Exception> implements Except
     private static final ObjectMapper MAPPER = getObjectMapper();
 
     private final boolean includeStackTrace;
-    private final Status status;
 
-    public JsonExceptionMapper(boolean includeStackTrace, Status status) {
+    public JsonExceptionMapper(boolean includeStackTrace) {
         this.includeStackTrace = includeStackTrace;
-        this.status = status;
     }
 
     @Override
     public final Response toResponse(T exception) {
         String message = exception.getMessage();
+        StatusType status = this.getStatus(exception);
         ResponseBuilder builder = Response.status(status);
         try {
             final SerializableError error;
@@ -75,6 +74,8 @@ public abstract class JsonExceptionMapper<T extends Exception> implements Except
         }
         return builder.build();
     }
+
+    protected abstract StatusType getStatus(T exception);
 
     private static ObjectMapper getObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
