@@ -7,10 +7,9 @@ package feign;
 import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting.http.server.ForbiddenExceptionMapper;
 import com.palantir.remoting.http.server.NoContentExceptionMapper;
-import com.palantir.remoting.http.server.NotFoundExceptionMapper;
 import com.palantir.remoting.http.server.OptionalAsNoContentMessageBodyWriter;
+import com.palantir.remoting.http.server.WebApplicationExceptionMapper;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -38,8 +37,7 @@ public class TestServer extends Application<Configuration> {
 
         // Not registering all mappers so that we can test behaviour for exceptions without registered mapper.
         env.jersey().register(new NoContentExceptionMapper());
-        env.jersey().register(new ForbiddenExceptionMapper(true));
-        env.jersey().register(new NotFoundExceptionMapper(true));
+        env.jersey().register(new WebApplicationExceptionMapper(true));
     }
 
     static class TestResource implements TestService {

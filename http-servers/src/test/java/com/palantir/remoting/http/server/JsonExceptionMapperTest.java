@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.StatusType;
 import org.junit.Test;
 
 public final class JsonExceptionMapperTest {
@@ -36,7 +37,12 @@ public final class JsonExceptionMapperTest {
 
     private static class TestJsonExceptionMapper extends JsonExceptionMapper<FooException> {
         TestJsonExceptionMapper(boolean includeStackTrace) {
-            super(includeStackTrace, STATUS);
+            super(includeStackTrace);
+        }
+
+        @Override
+        protected StatusType getStatus(FooException exception) {
+            return STATUS;
         }
     }
 

@@ -17,13 +17,18 @@
 package com.palantir.remoting.http.server;
 
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
 public final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalArgumentException> {
 
     public IllegalArgumentExceptionMapper(boolean includeStackTrace) {
-        super(includeStackTrace, Status.BAD_REQUEST);
+        super(includeStackTrace);
     }
 
+    @Override
+    protected StatusType getStatus(IllegalArgumentException exception) {
+        return Status.BAD_REQUEST;
+    }
 }
