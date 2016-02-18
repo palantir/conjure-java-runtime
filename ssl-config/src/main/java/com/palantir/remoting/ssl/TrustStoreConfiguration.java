@@ -16,12 +16,10 @@
 
 package com.palantir.remoting.ssl;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import com.google.common.base.Preconditions;
+import java.net.URI;
 import org.immutables.value.Value;
 import org.immutables.value.Value.Style.ImplementationVisibility;
 
@@ -32,7 +30,7 @@ import org.immutables.value.Value.Style.ImplementationVisibility;
 public abstract class TrustStoreConfiguration {
 
     @Value.Parameter
-    public abstract Path path();
+    public abstract URI uri();
 
     @SuppressWarnings("checkstyle:designforextension")
     @Value.Default
@@ -42,11 +40,11 @@ public abstract class TrustStoreConfiguration {
 
     @Value.Check
     protected final void check() {
-        checkArgument(!path().equals(Paths.get("")), "path cannot be empty");
+        Preconditions.checkArgument(!uri().equals(URI.create("")), "uri cannot be empty");
     }
 
-    public static TrustStoreConfiguration of(Path path) {
-        return ImmutableTrustStoreConfiguration.of(path);
+    public static TrustStoreConfiguration of(URI uri) {
+        return ImmutableTrustStoreConfiguration.of(uri);
     }
 
     public static Builder builder() {

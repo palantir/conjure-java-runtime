@@ -16,13 +16,11 @@
 
 package com.palantir.remoting.ssl;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import com.google.common.base.Preconditions;
+import java.net.URI;
 import org.immutables.value.Value;
 import org.immutables.value.Value.Style.ImplementationVisibility;
 
@@ -33,7 +31,7 @@ import org.immutables.value.Value.Style.ImplementationVisibility;
 public abstract class KeyStoreConfiguration {
 
     @Value.Parameter
-    public abstract Path path();
+    public abstract URI uri();
 
     @Value.Parameter
     public abstract String password();
@@ -49,12 +47,12 @@ public abstract class KeyStoreConfiguration {
 
     @Value.Check
     protected final void check() {
-        checkArgument(!path().equals(Paths.get("")), "path cannot be empty");
-        checkArgument(!password().equals(""), "password cannot be empty");
+        Preconditions.checkArgument(!uri().equals(URI.create("")), "uri cannot be empty");
+        Preconditions.checkArgument(!password().equals(""), "password cannot be empty");
     }
 
-    public static KeyStoreConfiguration of(Path path, String password) {
-        return ImmutableKeyStoreConfiguration.of(path, password);
+    public static KeyStoreConfiguration of(URI uri, String password) {
+        return ImmutableKeyStoreConfiguration.of(uri, password);
     }
 
     public static Builder builder() {
