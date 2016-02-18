@@ -72,4 +72,10 @@ public final class JsonExceptionMapperTest {
                 containsString("com.palantir.remoting.http.server.JsonExceptionMapperTest$FooException"));
         assertThat(response.getEntity().toString(), not(containsString("\"methodName\" : \"createException\"")));
     }
+
+    @Test
+    public void test_noMessage() {
+        Response response = new RuntimeExceptionMapper(true).toResponse(new NullPointerException());
+        assertThat(response.getEntity().toString(), containsString("test_noMessage"));
+    }
 }

@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.remoting.http.errors.SerializableError;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -47,30 +48,33 @@ public abstract class JsonExceptionMapper<T extends Exception> implements Except
 
     @Override
     public final Response toResponse(T exception) {
-        String message = exception.getMessage();
+        String exceptionMessage = Objects.toString(exception.getMessage());
+        String logMessage = exceptionMessage;
         StatusType status = this.getStatus(exception);
         ResponseBuilder builder = Response.status(status);
         try {
             final SerializableError error;
             if (includeStackTrace) {
-                log.error(message, exception);
                 StackTraceElement[] stackTrace = exception.getStackTrace();
-                error = SerializableError.of(message, exception.getClass(),
+                error = SerializableError.of(exceptionMessage, exception.getClass(),
                         Arrays.asList(stackTrace));
             } else {
                 String errorId = UUID.randomUUID().toString();
-                log.error("Error {}: {}", errorId, message, exception);
+                logMessage = String.format("Error %s: %s", errorId, exceptionMessage);
                 error = SerializableError.of(errorId, exception.getClass());
             }
             builder.type(MediaType.APPLICATION_JSON);
             String json = MAPPER.writeValueAsString(error);
             builder.entity(json);
         } catch (RuntimeException | JsonProcessingException e) {
-            log.warn("Unable to write out exception as json: {}", e.getMessage(), e);
+            log.warn("Unable to translate exception to json: {}", e.getMessage(), e);
             // simply write out the exception message
             builder = Response.status(status);
             builder.type(MediaType.TEXT_PLAIN);
-            builder.entity(message);
+            builder.entity(exceptionMessage);
+        } finally {
+            // always log error server-side
+            log.error(logMessage, exception);
         }
         return builder.build();
     }
