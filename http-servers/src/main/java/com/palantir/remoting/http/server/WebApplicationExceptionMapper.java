@@ -16,15 +16,19 @@
 
 package com.palantir.remoting.http.server;
 
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public final class ForbiddenExceptionMapper extends JsonExceptionMapper<ForbiddenException> {
+public final class WebApplicationExceptionMapper extends JsonExceptionMapper<WebApplicationException> {
 
-    public ForbiddenExceptionMapper(boolean includeStackTrace) {
-        super(includeStackTrace, Status.FORBIDDEN);
+    public WebApplicationExceptionMapper(boolean includeStackTrace) {
+        super(includeStackTrace);
     }
 
+    @Override
+    protected StatusType getStatus(WebApplicationException exception) {
+        return exception.getResponse().getStatusInfo();
+    }
 }

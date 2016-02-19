@@ -28,7 +28,7 @@ public final class SslSocketFactoriesTests {
     public void testCreateSslSocketFactory_canCreateWithAllTrustStoreParams() {
         TrustStoreConfiguration trustStoreConfig = TrustStoreConfiguration
                 .builder()
-                .path(TestConstants.CA_TRUST_STORE_PATH)
+                .uri(TestConstants.CA_TRUST_STORE_PATH)
                 .type(TestConstants.CA_TRUST_STORE_TYPE)
                 .build();
 
@@ -44,7 +44,7 @@ public final class SslSocketFactoriesTests {
     public void testCreateSslSocketFactory_canCreateWithAllTrustStoreParamsPkcs12Format() {
         TrustStoreConfiguration trustStoreConfig = TrustStoreConfiguration
                 .builder()
-                .path(TestConstants.SERVER_KEY_STORE_P12_PATH)
+                .uri(TestConstants.SERVER_KEY_STORE_P12_PATH)
                 .type(TestConstants.SERVER_KEY_STORE_P12_TYPE)
                 .build();
 
@@ -60,7 +60,7 @@ public final class SslSocketFactoriesTests {
     public void testCreateSslSocketFactory_canCreateWithOnlyTrustStorePath() {
         TrustStoreConfiguration trustStoreConfig = TrustStoreConfiguration
                 .builder()
-                .path(TestConstants.CA_TRUST_STORE_PATH)
+                .uri(TestConstants.CA_TRUST_STORE_PATH)
                 .build();
 
         SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(
@@ -75,12 +75,12 @@ public final class SslSocketFactoriesTests {
     public void testCreateSslSocketFactory_canCreateWithAllKeyStoreParams() {
         TrustStoreConfiguration trustStoreConfig = TrustStoreConfiguration
                 .builder()
-                .path(TestConstants.CA_TRUST_STORE_PATH)
+                .uri(TestConstants.CA_TRUST_STORE_PATH)
                 .build();
 
         KeyStoreConfiguration keyStoreConfig = KeyStoreConfiguration
                 .builder()
-                .path(TestConstants.SERVER_KEY_STORE_JKS_PATH)
+                .uri(TestConstants.SERVER_KEY_STORE_JKS_PATH)
                 .password(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
                 .type(TestConstants.SERVER_KEY_STORE_JKS_TYPE)
                 .build();
@@ -98,12 +98,12 @@ public final class SslSocketFactoriesTests {
     public void testCreateSslSocketFactory_canCreateWithoutKeyStoreTypeJks() {
         TrustStoreConfiguration trustStoreConfig = TrustStoreConfiguration
                 .builder()
-                .path(TestConstants.CA_TRUST_STORE_PATH)
+                .uri(TestConstants.CA_TRUST_STORE_PATH)
                 .build();
 
         KeyStoreConfiguration keyStoreConfig = KeyStoreConfiguration
                 .builder()
-                .path(TestConstants.SERVER_KEY_STORE_JKS_PATH)
+                .uri(TestConstants.SERVER_KEY_STORE_JKS_PATH)
                 .password(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
                 .build();
 
@@ -121,14 +121,14 @@ public final class SslSocketFactoriesTests {
         try {
             TrustStoreConfiguration trustStoreConfig = TrustStoreConfiguration
                     .builder()
-                    .path(TestConstants.CA_TRUST_STORE_PATH)
+                    .uri(TestConstants.CA_TRUST_STORE_PATH)
                     .build();
 
             // bad configuration: key store is JKS format, but configuration specifies
             // that it is in PKCS12 format
             KeyStoreConfiguration keyStoreConfig = KeyStoreConfiguration
                     .builder()
-                    .path(TestConstants.SERVER_KEY_STORE_JKS_PATH)
+                    .uri(TestConstants.SERVER_KEY_STORE_JKS_PATH)
                     .password(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
                     .type(TestConstants.SERVER_KEY_STORE_P12_TYPE)
                     .build();
@@ -150,13 +150,13 @@ public final class SslSocketFactoriesTests {
         try {
             TrustStoreConfiguration trustStoreConfig = TrustStoreConfiguration
                     .builder()
-                    .path(TestConstants.CA_TRUST_STORE_PATH)
+                    .uri(TestConstants.CA_TRUST_STORE_PATH)
                     .build();
 
             // bad configuration: keyStorePassword is incorrect
             KeyStoreConfiguration keyStoreConfig = KeyStoreConfiguration
                     .builder()
-                    .path(TestConstants.SERVER_KEY_STORE_JKS_PATH)
+                    .uri(TestConstants.SERVER_KEY_STORE_JKS_PATH)
                     .password("a")
                     .build();
 
@@ -178,13 +178,13 @@ public final class SslSocketFactoriesTests {
         try {
             TrustStoreConfiguration trustStoreConfig = TrustStoreConfiguration
                     .builder()
-                    .path(TestConstants.CA_TRUST_STORE_PATH)
+                    .uri(TestConstants.CA_TRUST_STORE_PATH)
                     .build();
 
             // bad configuration: keyStorePassword is incorrect
             KeyStoreConfiguration keyStoreConfig = KeyStoreConfiguration
                     .builder()
-                    .path(TestConstants.SERVER_KEY_STORE_P12_PATH)
+                    .uri(TestConstants.SERVER_KEY_STORE_P12_PATH)
                     .password("a")
                     .build();
 
@@ -206,13 +206,13 @@ public final class SslSocketFactoriesTests {
         try {
             TrustStoreConfiguration trustStoreConfig = TrustStoreConfiguration
                     .builder()
-                    .path(TestConstants.CA_TRUST_STORE_PATH)
+                    .uri(TestConstants.CA_TRUST_STORE_PATH)
                     .build();
 
             // bad configuration: specified key alias does not exist in key store
             KeyStoreConfiguration keyStoreConfig = KeyStoreConfiguration
                     .builder()
-                    .path(TestConstants.MULTIPLE_KEY_STORE_JKS_PATH)
+                    .uri(TestConstants.MULTIPLE_KEY_STORE_JKS_PATH)
                     .password(TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD)
                     .alias("nonexistent")
                     .build();

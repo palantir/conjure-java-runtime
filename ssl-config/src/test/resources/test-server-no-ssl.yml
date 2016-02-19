@@ -1,0 +1,8 @@
+server:
+  adminConnectors:
+    - type: http
+      port: 0
+
+path: path/to/file
+uri: hdfs://host:1234/file
+bogusScheme: bogus://host:1234/file

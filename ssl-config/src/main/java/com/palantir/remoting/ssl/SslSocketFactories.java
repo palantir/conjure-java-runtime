@@ -7,7 +7,6 @@ package com.palantir.remoting.ssl;
 import com.google.common.base.Throwables;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
@@ -65,7 +64,7 @@ public final class SslSocketFactories {
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
                     TrustManagerFactory.getDefaultAlgorithm());
             KeyStore keyStore = KeyStore.getInstance(trustStoreConfig.type());
-            try (InputStream stream = Files.newInputStream(trustStoreConfig.path())) {
+            try (InputStream stream = trustStoreConfig.uri().toURL().openStream()) {
                 keyStore.load(stream, null);
             }
             trustManagerFactory.init(keyStore);
@@ -81,7 +80,7 @@ public final class SslSocketFactories {
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(
                     KeyManagerFactory.getDefaultAlgorithm());
             KeyStore keyStore = KeyStore.getInstance(keyStoreConfig.type());
-            try (InputStream stream = Files.newInputStream(keyStoreConfig.path())) {
+            try (InputStream stream = keyStoreConfig.uri().toURL().openStream()) {
                 keyStore.load(stream, keyStoreConfig.password().toCharArray());
             }
 

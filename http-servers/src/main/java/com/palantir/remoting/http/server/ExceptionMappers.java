@@ -29,10 +29,9 @@ public final class ExceptionMappers {
 
     public static void visitExceptionMappers(boolean includeStackTrace,
             Consumer<ExceptionMapper<? extends Throwable>> consumer) {
-        consumer.accept(new ForbiddenExceptionMapper(includeStackTrace));
         consumer.accept(new IllegalArgumentExceptionMapper(includeStackTrace));
         consumer.accept(new NoContentExceptionMapper());
-        consumer.accept(new NotFoundExceptionMapper(includeStackTrace));
         consumer.accept(new RuntimeExceptionMapper(includeStackTrace));
+        consumer.accept(new WebApplicationExceptionMapper(includeStackTrace));
     }
 }
