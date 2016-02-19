@@ -4,6 +4,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 dependencies {
     compile project(':error-handling')
 
+    compile libs.dropwizard.jackson
     compile libs.feign.jackson
     compile(libs.feign.jaxrs){
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
