@@ -53,6 +53,21 @@ public final class FeignClients {
     }
 
     /**
+     * Provides a {@link FeignClientFactory} compatible with jackson 2.4.
+     */
+    public static FeignClientFactory standardJackson24() {
+        return FeignClientFactory.of(
+                new GuavaOptionalAwareContract(new JAXRSContract()),
+                new InputStreamDelegateEncoder(new Jackson24Encoder(ObjectMappers.guavaJdk7())),
+                new OptionalAwareDecoder(
+                        new InputStreamDelegateDecoder(
+                                new TextDelegateDecoder(
+                                        new JacksonDecoder(ObjectMappers.guavaJdk7())))),
+                SerializableErrorErrorDecoder.INSTANCE,
+                FeignClientFactory.okHttpClient());
+    }
+
+    /**
      * Provides a {@link FeignClientFactory} with an unmodified {@link ObjectMapper}.
      */
     public static FeignClientFactory vanilla() {
