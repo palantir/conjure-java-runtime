@@ -28,6 +28,10 @@ import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
+import javax.annotation.CheckForNull;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +73,8 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
                 }
 
                 // Construct remote exception and fill with remote stacktrace
-                Exception remoteException = constructException(error.getExceptionClass(), error.getMessage());
+                Exception remoteException = constructException(error.getExceptionClass(), error.getMessage(),
+                        response.status(), null);
                 List<StackTraceElement> stackTrace = error.getStackTrace();
                 if (stackTrace != null) {
                     remoteException.setStackTrace(stackTrace.toArray(new StackTraceElement[stackTrace.size()]));
@@ -78,7 +83,8 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
                 // Construct local exception that wraps the remote exception and fill with stack trace of local
                 // call (yet without the reflection overhead).
                 Exception localException =
-                        constructException(error.getExceptionClass(), error.getMessage(), remoteException);
+                        constructException(error.getExceptionClass(), error.getMessage(), response.status(),
+                                remoteException);
                 localException.fillInStackTrace();
 
                 return localException;
@@ -101,18 +107,17 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
         }
     }
 
-    private static Exception constructException(Class<? extends Exception> exceptionClass, String message) {
-        try {
-            return exceptionClass.getConstructor(String.class).newInstance(message);
-        } catch (Exception e1) {
-            return new RuntimeException(String.format(
-                    "Failed to construction exception of type %s, constructing RuntimeException instead: %s%n%s",
-                    exceptionClass.toString(), e1.toString(), message));
+    // wrappedException may be null to indicate an unknown cause
+    private static Exception constructException(Class<? extends Exception> exceptionClass, String message, int status,
+            @CheckForNull Throwable wrappedException) {
+        if (exceptionClass.equals(ClientErrorException.class)) {
+            return new ClientErrorException(message, status, wrappedException);
+        } else if (exceptionClass.equals(ServerErrorException.class)) {
+            return new ServerErrorException(message, status, wrappedException);
+        } else if (exceptionClass.equals(WebApplicationException.class)) {
+            return new WebApplicationException(message, wrappedException, status);
         }
-    }
 
-    private static Exception constructException(
-            Class<? extends Exception> exceptionClass, String message, Throwable wrappedException) {
         // Note: If another constructor is added, then we should refactor the construction logic in order to avoid
         // nested try/catch
         try {
@@ -123,7 +128,7 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
                 return exceptionClass.getConstructor(String.class).newInstance(message);
             } catch (Exception e1) {
                 return new RuntimeException(String.format(
-                        "Failed to wrap exception as %s, wrapping exception as RuntimeException instead: %s%n%s",
+                        "Failed to construct exception as %s, constructing RuntimeException instead: %s%n%s",
                         exceptionClass.toString(), e1.toString(), message),
                         wrappedException);
             }
