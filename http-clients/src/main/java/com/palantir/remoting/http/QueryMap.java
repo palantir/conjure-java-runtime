@@ -4,14 +4,10 @@
 
 package com.palantir.remoting.http;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Multimap;
 import org.immutables.value.Value;
 import org.immutables.value.Value.Style.ImplementationVisibility;
 
-@JsonDeserialize(as = ImmutableQueryMap.class)
-@JsonSerialize(as = ImmutableQueryMap.class)
 @Value.Immutable
 @Value.Style(visibility = ImplementationVisibility.PACKAGE)
 public abstract class QueryMap {
