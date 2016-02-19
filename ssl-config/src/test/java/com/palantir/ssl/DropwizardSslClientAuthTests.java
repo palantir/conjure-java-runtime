@@ -10,10 +10,8 @@ import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
 import com.palantir.remoting.http.FeignClients;
-import com.palantir.remoting.ssl.KeyStoreConfiguration;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.remoting.ssl.SslSocketFactories;
-import com.palantir.remoting.ssl.TrustStoreConfiguration;
 import feign.RetryableException;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -48,7 +46,7 @@ public final class DropwizardSslClientAuthTests {
 
     @Test
     public void testConnectionFailsWithoutClientCerts() {
-        SslConfiguration sslConfig = SslConfiguration.of(TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH));
+        SslConfiguration sslConfig = SslConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
         TestEchoService service = createTestService(sslConfig);
 
         try {
@@ -62,10 +60,9 @@ public final class DropwizardSslClientAuthTests {
     @Test
     public void testConnectionWorksWithClientCerts() {
         SslConfiguration sslConfig = SslConfiguration.of(
-                TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH),
-                KeyStoreConfiguration.of(
-                        TestConstants.CLIENT_KEY_STORE_JKS_PATH,
-                        TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD));
+                TestConstants.CA_TRUST_STORE_PATH,
+                TestConstants.CLIENT_KEY_STORE_JKS_PATH,
+                TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
         TestEchoService service = createTestService(sslConfig);
 
         assertThat(service.echo("foo"), is("foo"));

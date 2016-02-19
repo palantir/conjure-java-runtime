@@ -4,9 +4,12 @@
 
 package com.palantir.remoting.ssl;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
@@ -43,11 +46,17 @@ public final class SslSocketFactories {
      * @return an {@link SSLContext} according to the input configuration
      */
     public static SSLContext createSslContext(SslConfiguration config) {
-        TrustManager[] trustManagers = createTrustManagerFactory(config.trust()).getTrustManagers();
+        TrustManager[] trustManagers = createTrustManagerFactory(
+                config.trustStorePath(),
+                config.trustStoreType()).getTrustManagers();
 
         KeyManager[] keyManagers = null;
-        if (config.key().isPresent()) {
-            keyManagers = createKeyManagerFactory(config.key().get()).getKeyManagers();
+        if (config.keyStorePath().isPresent()) {
+            keyManagers = createKeyManagerFactory(
+                    config.keyStorePath().get(),
+                    config.keyStorePassword().get(),
+                    config.keyStoreType(),
+                    config.keyStoreKeyAlias()).getKeyManagers();
         }
 
         try {
@@ -59,12 +68,12 @@ public final class SslSocketFactories {
         }
     }
 
-    private static TrustManagerFactory createTrustManagerFactory(TrustStoreConfiguration trustStoreConfig) {
+    private static TrustManagerFactory createTrustManagerFactory(Path trustStorePath, String trustStoreType) {
         try {
             TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(
                     TrustManagerFactory.getDefaultAlgorithm());
-            KeyStore keyStore = KeyStore.getInstance(trustStoreConfig.type());
-            try (InputStream stream = trustStoreConfig.uri().toURL().openStream()) {
+            KeyStore keyStore = KeyStore.getInstance(trustStoreType);
+            try (InputStream stream = Files.newInputStream(trustStorePath)) {
                 keyStore.load(stream, null);
             }
             trustManagerFactory.init(keyStore);
@@ -75,23 +84,27 @@ public final class SslSocketFactories {
         }
     }
 
-    private static KeyManagerFactory createKeyManagerFactory(KeyStoreConfiguration keyStoreConfig) {
+    private static KeyManagerFactory createKeyManagerFactory(
+            Path keyStorePath,
+            String keyStorePassword,
+            String keyStoreType,
+            Optional<String> keyStoreKeyAlias) {
         try {
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(
                     KeyManagerFactory.getDefaultAlgorithm());
-            KeyStore keyStore = KeyStore.getInstance(keyStoreConfig.type());
-            try (InputStream stream = keyStoreConfig.uri().toURL().openStream()) {
-                keyStore.load(stream, keyStoreConfig.password().toCharArray());
+            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+            try (InputStream stream = Files.newInputStream(keyStorePath)) {
+                keyStore.load(stream, keyStorePassword.toCharArray());
             }
 
-            if (keyStoreConfig.alias().isPresent()) {
+            if (keyStoreKeyAlias.isPresent()) {
                 // default KeyManagerFactory does not support referencing key by alias, so
                 // if a key with a specific alias is desired, construct a new key store that
                 // contains only the key and certificate with that alias
-                keyStore = newKeyStoreWithEntry(keyStore, keyStoreConfig.password(), keyStoreConfig.alias().get());
+                keyStore = newKeyStoreWithEntry(keyStore, keyStorePassword, keyStoreKeyAlias.get());
             }
 
-            keyManagerFactory.init(keyStore, keyStoreConfig.password().toCharArray());
+            keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
 
             return keyManagerFactory;
         } catch (GeneralSecurityException | IOException e) {

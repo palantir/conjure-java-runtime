@@ -19,6 +19,8 @@ package com.palantir.remoting.ssl;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import java.nio.file.Path;
 import org.immutables.value.Value;
 import org.immutables.value.Value.Style.ImplementationVisibility;
 
@@ -28,18 +30,51 @@ import org.immutables.value.Value.Style.ImplementationVisibility;
 @Value.Style(visibility = ImplementationVisibility.PACKAGE)
 public abstract class SslConfiguration {
 
-    @Value.Parameter
-    public abstract TrustStoreConfiguration trust();
+    private static final String DEFAULT_STORE_TYPE = "JKS";
 
-    @Value.Parameter
-    public abstract Optional<KeyStoreConfiguration> key();
+    public abstract Path trustStorePath();
 
-    public static SslConfiguration of(TrustStoreConfiguration trust) {
-        return ImmutableSslConfiguration.of(trust, Optional.<KeyStoreConfiguration>absent());
+    @SuppressWarnings("checkstyle:designforextension")
+    @Value.Default
+    public String trustStoreType() {
+        return DEFAULT_STORE_TYPE;
     }
 
-    public static SslConfiguration of(TrustStoreConfiguration trust, KeyStoreConfiguration key) {
-        return ImmutableSslConfiguration.of(trust, Optional.of(key));
+    public abstract Optional<Path> keyStorePath();
+
+    public abstract Optional<String> keyStorePassword();
+
+    @SuppressWarnings("checkstyle:designforextension")
+    @Value.Default
+    public String keyStoreType() {
+        return DEFAULT_STORE_TYPE;
+    }
+
+    // alias of the key that should be used in the key store.
+    // If absent, first entry returned by key store is used.
+    public abstract Optional<String> keyStoreKeyAlias();
+
+    @Value.Check
+    protected final void check() {
+        Preconditions.checkArgument(
+                keyStorePath().isPresent() == keyStorePassword().isPresent(),
+                "keyStorePath and keyStorePassword must both be present or both be absent");
+
+        Preconditions.checkArgument(
+                !keyStoreKeyAlias().isPresent() || keyStorePath().isPresent(),
+                "keyStorePath must be present if keyStoreKeyAlias is present");
+    }
+
+    public static SslConfiguration of(Path trustStorePath) {
+        return SslConfiguration.builder().trustStorePath(trustStorePath).build();
+    }
+
+    public static SslConfiguration of(Path trustStorePath, Path keyStorePath, String keyStorePassword) {
+        return SslConfiguration.builder()
+                .trustStorePath(trustStorePath)
+                .keyStorePath(keyStorePath)
+                .keyStorePassword(keyStorePassword)
+                .build();
     }
 
     public static Builder builder() {

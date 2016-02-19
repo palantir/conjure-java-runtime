@@ -23,23 +23,22 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.palantir.remoting.ssl.KeyStoreConfiguration;
-import com.palantir.remoting.ssl.TrustStoreConfiguration;
+import com.palantir.remoting.http.ObjectMappers;
+import com.palantir.remoting.ssl.SslConfiguration;
 import java.io.IOException;
-import java.net.URI;
 import org.junit.Test;
 
 public final class SerializationTests {
 
     @Test
     public void testJsonSerDe() throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
-        KeyStoreConfiguration keystore = KeyStoreConfiguration.of(URI.create("/path"), "password");
-        TrustStoreConfiguration truststore = TrustStoreConfiguration.of(URI.create("/path"));
+        ObjectMapper mapper = ObjectMappers.guavaJdk7();
+        SslConfiguration sslConfig = SslConfiguration.of(
+                TestConstants.CA_TRUST_STORE_PATH,
+                TestConstants.SERVER_KEY_STORE_JKS_PATH,
+                TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
 
-        assertThat(mapper.readValue(mapper.writeValueAsBytes(keystore), KeyStoreConfiguration.class), is(keystore));
-        assertThat(mapper.readValue(mapper.writeValueAsBytes(truststore), TrustStoreConfiguration.class),
-                is(truststore));
+        assertThat(mapper.readValue(mapper.writeValueAsBytes(sslConfig), SslConfiguration.class), is(sslConfig));
     }
+
 }
