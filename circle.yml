@@ -1,0 +1,22 @@
+machine:
+  java:
+    version: oraclejdk7
+  environment:
+    TERM: dumb
+
+general:
+  artifacts:
+    - error-handling/build/libs
+    - http-clients/build/libs
+    - http-servers/build/libs
+    - ssl-config/build/libs
+
+test:
+  override:
+    - ./gradlew build
+
+deployment:
+  release:
+    tag: /[0-9]+(\.[0-9]+)+/
+    commands:
+      - ./gradlew -i bintrayUpload
