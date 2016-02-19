@@ -19,14 +19,16 @@ package com.palantir.remoting.http;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk7.Jdk7Module;
+import io.dropwizard.jackson.DiscoverableSubtypeResolver;
 
 public final class ObjectMappers {
 
     private static final ObjectMapper VANILLA_MAPPER = new ObjectMapper();
 
-    private static final ObjectMapper GUAVA_JDK7_MAPPER = new ObjectMapper()
+    private static final ObjectMapper DISCOVERABLE_GUAVA_JDK7_MAPPER = new ObjectMapper()
             .registerModule(new GuavaModule())
-            .registerModule(new Jdk7Module());
+            .registerModule(new Jdk7Module())
+            .setSubtypeResolver(new DiscoverableSubtypeResolver());
 
     private ObjectMappers() {}
 
@@ -34,8 +36,8 @@ public final class ObjectMappers {
         return VANILLA_MAPPER;
     }
 
-    public static ObjectMapper guavaJdk7() {
-        return GUAVA_JDK7_MAPPER;
+    public static ObjectMapper discoverableGuavaJdk7() {
+        return DISCOVERABLE_GUAVA_JDK7_MAPPER;
     }
 
 }

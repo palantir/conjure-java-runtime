@@ -95,8 +95,8 @@ public final class FailoverFeignTargetTest {
 
         FakeoInterface proxy = FeignClientFactory.of(
                 new JAXRSContract(),
-                new JacksonEncoder(ObjectMappers.guavaJdk7()),
-                new JacksonDecoder(ObjectMappers.guavaJdk7()),
+                new JacksonEncoder(ObjectMappers.discoverableGuavaJdk7()),
+                new JacksonDecoder(ObjectMappers.discoverableGuavaJdk7()),
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
                 backoffStrategy,

@@ -43,11 +43,11 @@ public final class FeignClients {
     public static FeignClientFactory standard() {
         return FeignClientFactory.of(
                 new GuavaOptionalAwareContract(new JAXRSContract()),
-                new InputStreamDelegateEncoder(new JacksonEncoder(ObjectMappers.guavaJdk7())),
+                new InputStreamDelegateEncoder(new JacksonEncoder(ObjectMappers.discoverableGuavaJdk7())),
                 new OptionalAwareDecoder(
                         new InputStreamDelegateDecoder(
                                 new TextDelegateDecoder(
-                                        new JacksonDecoder(ObjectMappers.guavaJdk7())))),
+                                        new JacksonDecoder(ObjectMappers.discoverableGuavaJdk7())))),
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient());
     }
@@ -58,11 +58,11 @@ public final class FeignClients {
     public static FeignClientFactory standardJackson24() {
         return FeignClientFactory.of(
                 new GuavaOptionalAwareContract(new JAXRSContract()),
-                new InputStreamDelegateEncoder(new Jackson24Encoder(ObjectMappers.guavaJdk7())),
+                new InputStreamDelegateEncoder(new Jackson24Encoder(ObjectMappers.discoverableGuavaJdk7())),
                 new OptionalAwareDecoder(
                         new InputStreamDelegateDecoder(
                                 new TextDelegateDecoder(
-                                        new JacksonDecoder(ObjectMappers.guavaJdk7())))),
+                                        new JacksonDecoder(ObjectMappers.discoverableGuavaJdk7())))),
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient());
     }
