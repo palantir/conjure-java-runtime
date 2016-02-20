@@ -10,10 +10,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import com.palantir.remoting.ssl.KeyStoreConfiguration;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.remoting.ssl.SslSocketFactories;
-import com.palantir.remoting.ssl.TrustStoreConfiguration;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -48,47 +46,40 @@ public final class SslSocketFactoriesConnectionTests {
 
     @Test
     public void testSslNoClientAuthenticationJks() {
-        TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.of(
+        SslConfiguration serverConfig = SslConfiguration.of(
+                TestConstants.CA_TRUST_STORE_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
-        SslConfiguration serverConfig = SslConfiguration.of(serverTrustStoreConfig, serverKeyStoreConfig);
 
-        TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        SslConfiguration clientConfig = SslConfiguration.of(clientTrustStoreConfig);
+        SslConfiguration clientConfig = SslConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
 
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
     }
 
     @Test
     public void testSslNoClientAuthenticationPkcs12() {
-        TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.builder()
-                .uri(TestConstants.SERVER_KEY_STORE_P12_PATH)
-                .type(TestConstants.SERVER_KEY_STORE_P12_TYPE)
-                .password(TestConstants.SERVER_KEY_STORE_P12_PASSWORD)
+        SslConfiguration serverConfig = SslConfiguration.builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.SERVER_KEY_STORE_P12_PATH)
+                .keyStoreType(TestConstants.SERVER_KEY_STORE_P12_TYPE)
+                .keyStorePassword(TestConstants.SERVER_KEY_STORE_P12_PASSWORD)
                 .build();
-        SslConfiguration serverConfig = SslConfiguration.of(serverTrustStoreConfig, serverKeyStoreConfig);
 
-        TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        SslConfiguration clientConfig = SslConfiguration.of(clientTrustStoreConfig);
+        SslConfiguration clientConfig = SslConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
 
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
     }
 
     @Test
     public void testSslNoClientAuthenticationFailsWithoutProperClientTrustStore() {
-        TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.of(
+        SslConfiguration serverConfig = SslConfiguration.of(
+                TestConstants.CA_TRUST_STORE_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
-        SslConfiguration serverConfig = SslConfiguration.of(serverTrustStoreConfig, serverKeyStoreConfig);
 
         // bad configuration: client trust store does not contain any certificates
         // that can verify the server certificate
-        TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(
-                TestConstants.CLIENT_KEY_STORE_JKS_PATH);
-        SslConfiguration clientConfig = SslConfiguration.of(clientTrustStoreConfig);
+        SslConfiguration clientConfig = SslConfiguration.of(TestConstants.CLIENT_KEY_STORE_JKS_PATH);
 
         try {
             runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
@@ -103,109 +94,92 @@ public final class SslSocketFactoriesConnectionTests {
     public void testSslWithNoClientAuthenticationWorksWithoutProperServerTrustStore() {
         // if no client authentication is present, doesn't matter that server trust store
         // cannot verify any certificates
-        TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(
-                TestConstants.SERVER_KEY_STORE_JKS_PATH);
-        KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.of(
+        SslConfiguration serverConfig = SslConfiguration.of(
+                TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
-        SslConfiguration serverConfig = SslConfiguration.of(serverTrustStoreConfig, serverKeyStoreConfig);
 
-        TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        SslConfiguration clientConfig = SslConfiguration.of(clientTrustStoreConfig);
+        SslConfiguration clientConfig = SslConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
 
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
     }
 
     @Test
     public void testSslNoClientAuthenticationFailsWithMultipleKeyStoreSpecified() {
-        TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-
         // specify that server key alias should be used
-        KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.builder()
-                .uri(TestConstants.MULTIPLE_KEY_STORE_JKS_PATH)
-                .password(TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD)
-                .alias(TestConstants.MULTIPLE_KEY_STORE_SERVER_ALIAS)
+        SslConfiguration serverConfig = SslConfiguration.builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.MULTIPLE_KEY_STORE_JKS_PATH)
+                .keyStorePassword(TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD)
+                .keyStoreKeyAlias(TestConstants.MULTIPLE_KEY_STORE_SERVER_ALIAS)
                 .build();
 
-        SslConfiguration serverConfig = SslConfiguration.of(serverTrustStoreConfig, serverKeyStoreConfig);
-        TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(
-                TestConstants.SERVER_KEY_STORE_JKS_PATH);
-        SslConfiguration clientConfig = SslConfiguration.of(clientTrustStoreConfig);
+        SslConfiguration clientConfig = SslConfiguration.of(TestConstants.SERVER_KEY_STORE_JKS_PATH);
 
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
     }
 
     @Test
     public void testSslWithClientAuthenticationJks() {
-        TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.of(
+        SslConfiguration serverConfig = SslConfiguration.of(
+                TestConstants.CA_TRUST_STORE_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
-        SslConfiguration serverConfig = SslConfiguration.of(serverTrustStoreConfig, serverKeyStoreConfig);
 
-        TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        KeyStoreConfiguration clientKeyStoreConfig = KeyStoreConfiguration.of(
+        SslConfiguration clientConfig = SslConfiguration.of(
+                TestConstants.CA_TRUST_STORE_PATH,
                 TestConstants.CLIENT_KEY_STORE_JKS_PATH,
                 TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
-        SslConfiguration clientConfig = SslConfiguration.of(clientTrustStoreConfig, clientKeyStoreConfig);
 
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
     }
 
     @Test
     public void testSslWithClientAuthenticationPkcs12() {
-        TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-
-        KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.builder()
-                .uri(TestConstants.SERVER_KEY_STORE_P12_PATH)
-                .type(TestConstants.SERVER_KEY_STORE_P12_TYPE)
-                .password(TestConstants.SERVER_KEY_STORE_P12_PASSWORD)
+        SslConfiguration serverConfig = SslConfiguration.builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.SERVER_KEY_STORE_P12_PATH)
+                .keyStoreType(TestConstants.SERVER_KEY_STORE_P12_TYPE)
+                .keyStorePassword(TestConstants.SERVER_KEY_STORE_P12_PASSWORD)
                 .build();
 
-        SslConfiguration serverConfig = SslConfiguration.of(serverTrustStoreConfig, serverKeyStoreConfig);
-
-        TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        KeyStoreConfiguration clientKeyStoreConfig = KeyStoreConfiguration.builder()
-                .uri(TestConstants.CLIENT_KEY_STORE_P12_PATH)
-                .type(TestConstants.CLIENT_KEY_STORE_P12_TYPE)
-                .password(TestConstants.CLIENT_KEY_STORE_P12_PASSWORD)
+        SslConfiguration clientConfig = SslConfiguration.builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.CLIENT_KEY_STORE_P12_PATH)
+                .keyStoreType(TestConstants.CLIENT_KEY_STORE_P12_TYPE)
+                .keyStorePassword(TestConstants.CLIENT_KEY_STORE_P12_PASSWORD)
                 .build();
-        SslConfiguration clientConfig = SslConfiguration.of(clientTrustStoreConfig, clientKeyStoreConfig);
 
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
     }
 
     @Test
     public void testSslWithClientAuthenticationMixed() {
-        TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.of(
+        SslConfiguration serverConfig = SslConfiguration.of(
+                TestConstants.CA_TRUST_STORE_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
-        SslConfiguration serverConfig = SslConfiguration.of(serverTrustStoreConfig, serverKeyStoreConfig);
 
-        TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        KeyStoreConfiguration clientKeyStoreConfig = KeyStoreConfiguration.builder()
-                .uri(TestConstants.CLIENT_KEY_STORE_P12_PATH)
-                .type(TestConstants.CLIENT_KEY_STORE_P12_TYPE)
-                .password(TestConstants.CLIENT_KEY_STORE_P12_PASSWORD)
+        SslConfiguration clientConfig = SslConfiguration.builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.CLIENT_KEY_STORE_P12_PATH)
+                .keyStoreType(TestConstants.CLIENT_KEY_STORE_P12_TYPE)
+                .keyStorePassword(TestConstants.CLIENT_KEY_STORE_P12_PASSWORD)
                 .build();
-        SslConfiguration clientConfig = SslConfiguration.of(clientTrustStoreConfig, clientKeyStoreConfig);
 
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
     }
 
     @Test
     public void testSslWithClientAuthenticationFailsWithoutClientKeyStore() {
-        TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.of(
+        SslConfiguration serverConfig = SslConfiguration.of(
+                TestConstants.CA_TRUST_STORE_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
-        SslConfiguration serverConfig = SslConfiguration.of(serverTrustStoreConfig, serverKeyStoreConfig);
 
-        TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
         // bad configuration: client does not specify a key store for a connection
         // that requires client authentication
-        SslConfiguration clientConfig = SslConfiguration.of(clientTrustStoreConfig);
+        SslConfiguration clientConfig = SslConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
 
         try {
             runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
@@ -220,18 +194,15 @@ public final class SslSocketFactoriesConnectionTests {
     public void testSslWithClientAuthenticationFailsWithoutProperServerTrustStore() {
         // bad configuration: server trust store does not contain any certificates
         // that can verify the client certificate
-        TrustStoreConfiguration serverTrustStoreConfig = TrustStoreConfiguration.of(
-                TestConstants.SERVER_KEY_STORE_JKS_PATH);
-        KeyStoreConfiguration serverKeyStoreConfig = KeyStoreConfiguration.of(
+        SslConfiguration serverConfig = SslConfiguration.of(
+                TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
-        SslConfiguration serverConfig = SslConfiguration.of(serverTrustStoreConfig, serverKeyStoreConfig);
 
-        TrustStoreConfiguration clientTrustStoreConfig = TrustStoreConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
-        KeyStoreConfiguration clientKeyStoreConfig = KeyStoreConfiguration.of(
+        SslConfiguration clientConfig = SslConfiguration.of(
+                TestConstants.CA_TRUST_STORE_PATH,
                 TestConstants.CLIENT_KEY_STORE_JKS_PATH,
                 TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
-        SslConfiguration clientConfig = SslConfiguration.of(clientTrustStoreConfig, clientKeyStoreConfig);
 
         try {
             runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
