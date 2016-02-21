@@ -22,7 +22,14 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.remoting.http.FeignClientFactory;
 import com.palantir.remoting.http.FeignClients;
+import com.palantir.remoting.http.GuavaOptionalAwareContract;
+import com.palantir.remoting.http.ObjectMappers;
+import com.palantir.remoting.http.errors.SerializableErrorErrorDecoder;
+import feign.jackson.JacksonDecoder;
+import feign.jackson.JacksonEncoder;
+import feign.jaxrs.JAXRSContract;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import javax.net.ssl.SSLSocketFactory;
@@ -50,12 +57,34 @@ public final class OptionalAwareDecoderTest {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(), endpointUri,
                 TestServer.TestService.class);
+//        service = myClient().createProxy(Optional.<SSLSocketFactory>absent(), endpointUri,
+//                TestServer.TestService.class);
     }
+
+    public static FeignClientFactory myClient() {
+        return FeignClientFactory.of(
+                new GuavaOptionalAwareContract(new JAXRSContract()),
+                new InputStreamDelegateEncoder(new JacksonEncoder(ObjectMappers.guavaJdk7())),
+                new JacksonDecoder(),
+                SerializableErrorErrorDecoder.INSTANCE,
+                FeignClientFactory.okHttpClient());
+    }
+
 
     @Test
     public void testOptional() {
         assertThat(service.getOptional("something"), is(Optional.of(ImmutableMap.of("something", "something"))));
         assertThat(service.getOptional(null), is(Optional.<ImmutableMap<String, String>>absent()));
+    }
+
+    @Test
+    public void testStringJson() {
+        assertThat(service.getStringJson(), is("foo"));
+    }
+
+    @Test
+    public void testOptionalStringJson() {
+        assertThat(service.getOptionalStringJson(), is(Optional.of("foo")));
     }
 
     @Test
