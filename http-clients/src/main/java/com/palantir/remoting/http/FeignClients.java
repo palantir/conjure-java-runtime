@@ -63,6 +63,7 @@ public final class FeignClients {
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
                 NeverRetryingBackoffStrategy.INSTANCE,
+                NeverRetryingBackoffStrategy.INSTANCE,
                 timeoutOptions);
     }
 
@@ -86,6 +87,7 @@ public final class FeignClients {
                                         new JacksonDecoder(ObjectMappers.guavaJdk7())))),
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
+                NeverRetryingBackoffStrategy.INSTANCE,
                 NeverRetryingBackoffStrategy.INSTANCE,
                 timeoutOptions);
     }
@@ -111,6 +113,7 @@ public final class FeignClients {
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
                 NeverRetryingBackoffStrategy.INSTANCE,
+                NeverRetryingBackoffStrategy.INSTANCE,
                 timeoutOptions);
     }
 
@@ -135,7 +138,23 @@ public final class FeignClients {
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
                 NeverRetryingBackoffStrategy.INSTANCE,
+                NeverRetryingBackoffStrategy.INSTANCE,
                 timeoutOptions);
     }
 
+    public static FeignClientFactory withBackoffStrategies(BackoffStrategy backoffStrategy,
+            BackoffStrategy leaderElectionBackoffStrategy) {
+        return FeignClientFactory.of(
+                new QueryMapAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())),
+                new InputStreamDelegateEncoder(new JacksonEncoder(ObjectMappers.guavaJdk7())),
+                new OptionalAwareDecoder(
+                        new InputStreamDelegateDecoder(
+                                new TextDelegateDecoder(
+                                        new JacksonDecoder(ObjectMappers.guavaJdk7())))),
+                SerializableErrorErrorDecoder.INSTANCE,
+                FeignClientFactory.okHttpClient(),
+                backoffStrategy,
+                leaderElectionBackoffStrategy,
+                DEFAULT_TIMEOUT_OPTIONS);
+    }
 }

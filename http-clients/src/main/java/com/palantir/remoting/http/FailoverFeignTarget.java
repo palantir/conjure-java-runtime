@@ -16,7 +16,8 @@
 
 package com.palantir.remoting.http;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import feign.Client;
 import feign.Request;
 import feign.Request.Options;
@@ -40,83 +41,96 @@ import org.slf4j.LoggerFactory;
  * call amplification due to individual server failures. Implementation detail: failover state is shared via
  * thread-local variables, using the fact that Feign calls {@link #clone} to initialize the retryer before the first
  * connection attempt.
+ *
+ * This class also supports a cluster of servers with a designated leader. Upon receiving a {@link NotLeaderException}
+ * when trying a request it will immediately switch to another server. If all servers have failed or are in follower
+ * mode, it is assumed that the cluster is attempting to elect a new leader (as long as there is at least one follower).
+ * In this case more attempts to find the leader can be made, as governed by the provided
+ * {@link #leaderElectionBackoffStrategy}.
  */
 @SuppressWarnings("checkstyle:noclone")
 public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
-
-    private class ThreadLocalInteger extends ThreadLocal<Integer> {
-        @Override
-        protected Integer initialValue() {
-            return 0;
-        }
-
-        public int increment() {
-            set(get() + 1);
-            return get();
-        }
-    }
-
     private static final Logger log = LoggerFactory.getLogger(FailoverFeignTarget.class);
 
-    private final ImmutableList<String> servers;
+    private final String name;
     private final Class<T> type;
     private final BackoffStrategy backoffStrategy;
+    private final BackoffStrategy leaderElectionBackoffStrategy;
 
-    /** An index into {@link #servers} indicating the server to be used for the next request. */
-    private ThreadLocalInteger currentServer = new ThreadLocalInteger();
-    /** Counts the number of failed servers since the last successful connection attempt. */
-    private ThreadLocalInteger failedServers = new ThreadLocalInteger();
-    /** Counts the number of failed connection attempts for the {@link #currentServer current server}. */
-    private ThreadLocalInteger failedAttemptsForCurrentServer = new ThreadLocalInteger();
+    /** Keeps track of the state of all servers in the cluster, in the scope of a single request. */
+    private ThreadLocal<ClusterState> clusterState;
 
     /**
      * Constructs a new instance for the given server list; retries against the same server are governed by the given
      * {@link BackoffStrategy}, i.e., the next server is tried as soon as {@link BackoffStrategy#backoff} returns {@code
      * false}. Each server is tried at most once in between successive {@link #clone} calls.
      */
-    public FailoverFeignTarget(Collection<String> servers, Class<T> type, BackoffStrategy backoffStrategy) {
-        List<String> shuffledServers = new ArrayList<>(servers);
+    public FailoverFeignTarget(Collection<String> servers, Class<T> type, BackoffStrategy backoffStrategy,
+            BackoffStrategy leaderElectionBackoffStrategy) {
+        final List<String> shuffledServers = new ArrayList<>(servers);
         Collections.shuffle(shuffledServers);
 
-        this.servers = ImmutableList.copyOf(shuffledServers);
+        this.name = FailoverFeignTarget.class.getSimpleName() + " instance with servers: " + shuffledServers;
         this.type = type;
         this.backoffStrategy = backoffStrategy;
+        this.leaderElectionBackoffStrategy = leaderElectionBackoffStrategy;
+        this.clusterState = new ThreadLocal<ClusterState>() {
+            @Override
+            protected ClusterState initialValue() {
+                return new ClusterState(ImmutableSet.copyOf(shuffledServers));
+            }
+        };
     }
 
     @Override
     public void continueOrPropagate(RetryableException exception) {
-        failedAttemptsForCurrentServer.increment();
-        if (backoffStrategy.backoff(failedAttemptsForCurrentServer.get())) {
+        ClusterState state = clusterState.get();
+        String currentServer = state.currentServer();
+
+        if (exception instanceof NotLeaderException) {
+            log.info("Marking {} as follower.", currentServer);
+            state.markCurrentServerAsFollower();
+        } else if (backoffStrategy.backoff(state.incrementFailuresForCurrentServer())) {
+            log.warn("{}: {}. Attempt #{} failed for server {}. Retrying the same server.",
+                    exception.getCause(), exception.getMessage(), state.getFailuresForCurrentServer(), currentServer);
             // Use same server again.
-            log.info("{}: {}. Attempt #{} failed for server {}. Retrying the same server.",
-                    exception.getCause(), exception.getMessage(), failedAttemptsForCurrentServer.get(),
-                    servers.get(currentServer.get()));
+            return;
         } else {
-            // Use next server or fail if all servers have failed.
-            failedServers.increment();
-
-            if (failedServers.get() >= servers.size()) {
-                // Attempted to call all servers - propagate exception.
-                // Note: Not resetting state here since Feign calls clone() before re-using this retryer.
-                throw exception;
-            } else {
-                // Call next server in list.
-                log.info("{}: {}. Server #{} ({}) failed {} times - trying next server", exception.getCause(),
-                        exception.getMessage(), failedServers.get(), servers.get(currentServer.get()),
-                        failedAttemptsForCurrentServer.get());
-
-                currentServer.set((currentServer.get() + 1) % servers.size());
-                failedAttemptsForCurrentServer.set(0);
-            }
+            log.error("{}: {}. Server {} failed {} times, marking it as down.", exception.getCause(),
+                    exception.getMessage(), currentServer, state.getFailuresForCurrentServer());
+            state.markCurrentServerAsDown();
         }
+        // Get next server or fail if all servers have failed.
+        if (!findNewServer()) {
+            // Attempted to call all servers - propagate exception.
+            // Note: Not resetting state here since Feign calls clone() before re-using this retryer.
+            throw exception;
+        }
+        log.info("Retrying using server: {}.", state.currentServer());
+    }
+
+    private boolean findNewServer() {
+        ClusterState state = clusterState.get();
+        Optional<String> newServer = state.trySwitchServer();
+
+        if (newServer.isPresent()) {
+            return true;
+        } else if (state.hasFollowerNodes()) {
+            int failedLeaderSearchAttempts = state.incrementLeaderSearchFailures();
+            if (leaderElectionBackoffStrategy.backoff(failedLeaderSearchAttempts)) {
+                log.warn("No leader found after trying all servers. Retrying.");
+                state.resetFollowerState();
+                return state.trySwitchServer().isPresent();
+            }
+            log.error("No leader node found after {} attempts.", failedLeaderSearchAttempts);
+        }
+        return false;
     }
 
     @SuppressWarnings("checkstyle:superclone")
     @Override
     public Retryer clone() {
-        // Not resetting currentServer so that the next connection is made through the current server.
-        failedServers.set(0);
-        failedAttemptsForCurrentServer.set(0);
+        clusterState.get().resetState();
         return this;
     }
 
@@ -127,12 +141,12 @@ public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
 
     @Override
     public String name() {
-        return FailoverFeignTarget.class.getSimpleName() + " instance with servers: " + servers;
+        return name;
     }
 
     @Override
     public String url() {
-        return servers.get(currentServer.get());
+        return clusterState.get().currentServer();
     }
 
     @Override
@@ -149,9 +163,7 @@ public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
             public Response execute(Request request, Options options) throws IOException {
                 Response response = client.execute(request, options);
                 if (response.status() >= 200 && response.status() < 300) {
-                    // Call successful: set our attempts back to 0.
-                    failedServers.set(0);
-                    failedAttemptsForCurrentServer.set(0);
+                    clusterState.get().resetState();
                 }
                 return response;
             }
