@@ -136,7 +136,10 @@ public final class FailoverFeignTargetTest {
         server2.enqueue(new MockResponse().setBody("\"foo\""));
         assertThat(proxy.blah(), is("foo"));
 
-        server1.enqueue(getMockFollowerResponse());
+        if (server1.getRequestCount() == 1) {
+            // we tried to hitting the server already so we need to re-enqueue a response
+            server1.enqueue(getMockFollowerResponse());
+        }
         server1.enqueue(getMockFollowerResponse());
         server1.enqueue(new MockResponse().setBody("\"foo2\""));
         server2.shutdown();
