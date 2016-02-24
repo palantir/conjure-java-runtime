@@ -19,6 +19,7 @@ package com.palantir.remoting.http;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import feign.Contract;
 import feign.Feign;
 import feign.MethodMetadata;
@@ -67,7 +68,7 @@ public final class GuavaOptionalAwareContract implements Contract {
                     Class<?> cls = parameterTypes[i];
                     if (cls.equals(Optional.class)) {
                         FluentIterable<Class<?>> paramAnnotations =
-                                FluentIterable.of(annotations[i]).transform(EXTRACT_CLASS);
+                                FluentIterable.from(Lists.newArrayList(annotations[i])).transform(EXTRACT_CLASS);
                         if (paramAnnotations.contains(HeaderParam.class)) {
                             md.indexToExpanderClass().put(i, GuavaEmptyOptionalExpander.class);
                         } else if (paramAnnotations.contains(QueryParam.class)) {
