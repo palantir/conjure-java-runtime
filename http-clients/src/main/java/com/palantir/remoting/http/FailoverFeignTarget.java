@@ -89,7 +89,7 @@ public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
         if (backoffStrategy.backoff(failedAttemptsForCurrentServer.get())) {
             // Use same server again.
             log.info("{}: {}. Attempt #{} failed for server {}. Retrying the same server.",
-                    exception.getCause(), exception.getMessage(), failedAttemptsForCurrentServer,
+                    exception.getCause(), exception.getMessage(), failedAttemptsForCurrentServer.get(),
                     servers.get(currentServer.get()));
         } else {
             // Use next server or fail if all servers have failed.
@@ -102,8 +102,8 @@ public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
             } else {
                 // Call next server in list.
                 log.info("{}: {}. Server #{} ({}) failed {} times - trying next server", exception.getCause(),
-                        exception.getMessage(), failedServers, servers.get(currentServer.get()),
-                        failedAttemptsForCurrentServer);
+                        exception.getMessage(), failedServers.get(), servers.get(currentServer.get()),
+                        failedAttemptsForCurrentServer.get());
 
                 currentServer.set((currentServer.get() + 1) % servers.size());
                 failedAttemptsForCurrentServer.set(0);
