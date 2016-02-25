@@ -127,6 +127,16 @@ public class TestServer extends Application<Configuration> {
         public Optional<String> getOptionalString(@Nullable String value) {
             return Optional.fromNullable(value);
         }
+
+        @Override
+        public String getStringJson() {
+            return "foo";
+        }
+
+        @Override
+        public Optional<String> getOptionalStringJson() {
+            return Optional.of("foo");
+        }
     }
 
     @Path("/")
@@ -199,5 +209,15 @@ public class TestServer extends Application<Configuration> {
         @Consumes(MediaType.TEXT_PLAIN)
         @Produces(MediaType.TEXT_PLAIN)
         Optional<String> getOptionalString(@QueryParam("value") @Nullable String value);
+
+        @GET
+        @Path("/stringJson")
+        @Produces(MediaType.APPLICATION_JSON)
+        String getStringJson();
+
+        @GET
+        @Path("/optionalStringJson")
+        @Produces(MediaType.APPLICATION_JSON)
+        Optional<String> getOptionalStringJson();
     }
 }
