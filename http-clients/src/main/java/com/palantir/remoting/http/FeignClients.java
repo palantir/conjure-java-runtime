@@ -22,6 +22,8 @@ import com.palantir.remoting.http.errors.SerializableErrorErrorDecoder;
 import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
 import feign.OptionalAwareDecoder;
+import feign.Request;
+import feign.Request.Options;
 import feign.TextDelegateDecoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
@@ -34,6 +36,8 @@ import feign.jaxrs.JAXRSContract;
  */
 public final class FeignClients {
 
+    private static final Options DEFAULT_TIMEOUT_OPTIONS = new Request.Options();
+
     private FeignClients() {}
 
     /**
@@ -41,6 +45,14 @@ public final class FeignClients {
      * com.fasterxml.jackson.datatype.guava.GuavaModule} and {@link com.fasterxml.jackson.datatype.jdk7.Jdk7Module}.
      */
     public static FeignClientFactory standard() {
+        return standard(DEFAULT_TIMEOUT_OPTIONS);
+    }
+
+    /**
+     * Provides a {@link FeignClientFactory} with an {@link ObjectMapper} configured with {@link
+     * com.fasterxml.jackson.datatype.guava.GuavaModule} and {@link com.fasterxml.jackson.datatype.jdk7.Jdk7Module}.
+     */
+    public static FeignClientFactory standard(Request.Options timeoutOptions) {
         return FeignClientFactory.of(
                 new GuavaOptionalAwareContract(new JAXRSContract()),
                 new InputStreamDelegateEncoder(new JacksonEncoder(ObjectMappers.guavaJdk7())),
@@ -49,13 +61,22 @@ public final class FeignClients {
                                 new TextDelegateDecoder(
                                         new JacksonDecoder(ObjectMappers.guavaJdk7())))),
                 SerializableErrorErrorDecoder.INSTANCE,
-                FeignClientFactory.okHttpClient());
+                FeignClientFactory.okHttpClient(),
+                NeverRetryingBackoffStrategy.INSTANCE,
+                timeoutOptions);
     }
 
     /**
      * Provides a {@link FeignClientFactory} compatible with jackson 2.4.
      */
     public static FeignClientFactory standardJackson24() {
+        return standard(DEFAULT_TIMEOUT_OPTIONS);
+    }
+
+    /**
+     * Provides a {@link FeignClientFactory} compatible with jackson 2.4.
+     */
+    public static FeignClientFactory standardJackson24(Request.Options timeoutOptions) {
         return FeignClientFactory.of(
                 new GuavaOptionalAwareContract(new JAXRSContract()),
                 new InputStreamDelegateEncoder(new Jackson24Encoder(ObjectMappers.guavaJdk7())),
@@ -64,13 +85,22 @@ public final class FeignClients {
                                 new TextDelegateDecoder(
                                         new JacksonDecoder(ObjectMappers.guavaJdk7())))),
                 SerializableErrorErrorDecoder.INSTANCE,
-                FeignClientFactory.okHttpClient());
+                FeignClientFactory.okHttpClient(),
+                NeverRetryingBackoffStrategy.INSTANCE,
+                timeoutOptions);
     }
 
     /**
      * Provides a {@link FeignClientFactory} with an unmodified {@link ObjectMapper}.
      */
     public static FeignClientFactory vanilla() {
+        return vanilla(DEFAULT_TIMEOUT_OPTIONS);
+    }
+
+    /**
+     * Provides a {@link FeignClientFactory} with an unmodified {@link ObjectMapper}.
+     */
+    public static FeignClientFactory vanilla(Request.Options timeoutOptions) {
         return FeignClientFactory.of(
                 new GuavaOptionalAwareContract(new JAXRSContract()),
                 new InputStreamDelegateEncoder(new JacksonEncoder(ObjectMappers.vanilla())),
@@ -79,7 +109,9 @@ public final class FeignClients {
                                 new TextDelegateDecoder(
                                         new JacksonDecoder(ObjectMappers.vanilla())))),
                 SerializableErrorErrorDecoder.INSTANCE,
-                FeignClientFactory.okHttpClient());
+                FeignClientFactory.okHttpClient(),
+                NeverRetryingBackoffStrategy.INSTANCE,
+                timeoutOptions);
     }
 
     /**
