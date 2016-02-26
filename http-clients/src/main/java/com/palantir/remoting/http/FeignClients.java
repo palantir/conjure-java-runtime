@@ -54,7 +54,7 @@ public final class FeignClients {
      */
     public static FeignClientFactory standard(Request.Options timeoutOptions) {
         return FeignClientFactory.of(
-                new GuavaOptionalAwareContract(new JAXRSContract()),
+                new QueryMapAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())),
                 new InputStreamDelegateEncoder(new JacksonEncoder(ObjectMappers.guavaJdk7())),
                 new OptionalAwareDecoder(
                         new InputStreamDelegateDecoder(
@@ -78,7 +78,7 @@ public final class FeignClients {
      */
     public static FeignClientFactory standardJackson24(Request.Options timeoutOptions) {
         return FeignClientFactory.of(
-                new GuavaOptionalAwareContract(new JAXRSContract()),
+                new QueryMapAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())),
                 new InputStreamDelegateEncoder(new Jackson24Encoder(ObjectMappers.guavaJdk7())),
                 new OptionalAwareDecoder(
                         new InputStreamDelegateDecoder(
@@ -102,7 +102,7 @@ public final class FeignClients {
      */
     public static FeignClientFactory vanilla(Request.Options timeoutOptions) {
         return FeignClientFactory.of(
-                new GuavaOptionalAwareContract(new JAXRSContract()),
+                new QueryMapAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())),
                 new InputStreamDelegateEncoder(new JacksonEncoder(ObjectMappers.vanilla())),
                 new OptionalAwareDecoder(
                         new InputStreamDelegateDecoder(
@@ -119,7 +119,7 @@ public final class FeignClients {
      */
     public static FeignClientFactory withMapper(ObjectMapper mapper) {
         return FeignClientFactory.of(
-                new GuavaOptionalAwareContract(new JAXRSContract()),
+                new QueryMapAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())),
                 new InputStreamDelegateEncoder(new JacksonEncoder(mapper)),
                 new OptionalAwareDecoder(
                         new InputStreamDelegateDecoder(
@@ -128,4 +128,5 @@ public final class FeignClients {
                 SerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient());
     }
+
 }
