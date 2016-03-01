@@ -70,7 +70,7 @@ public final class FeignClients {
      * Provides a {@link FeignClientFactory} compatible with jackson 2.4.
      */
     public static FeignClientFactory standardJackson24() {
-        return standard(DEFAULT_TIMEOUT_OPTIONS);
+        return standardJackson24(DEFAULT_TIMEOUT_OPTIONS);
     }
 
     /**
