@@ -22,11 +22,13 @@ import com.google.common.collect.Lists;
 import feign.Client;
 import feign.Contract;
 import feign.Feign;
+import feign.Logger.Level;
 import feign.Request;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
 import feign.okhttp.OkHttpClient;
+import feign.slf4j.Slf4jLogger;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -104,6 +106,8 @@ public final class FeignClientFactory {
                 .errorDecoder(errorDecoder)
                 .client(clientSupplier.apply(sslSocketFactory))
                 .options(options)
+                .logger(new Slf4jLogger(FeignClients.class))
+                .logLevel(Level.BASIC)
                 .target(type, uri);
     }
 
@@ -124,6 +128,8 @@ public final class FeignClientFactory {
                 .client(client)
                 .retryer(target)
                 .options(options)
+                .logger(new Slf4jLogger(FeignClients.class))
+                .logLevel(Level.BASIC)
                 .target(target);
     }
 

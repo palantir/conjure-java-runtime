@@ -10,6 +10,7 @@ dependencies {
         exclude group: 'javax.ws.rs', module: 'jsr311-api'
     }
     compile libs.feign.okhttp
+    compile libs.feign.slf4j
     compile libs.guava
     compile libs.jackson.databind
     compile libs.jackson.guava
