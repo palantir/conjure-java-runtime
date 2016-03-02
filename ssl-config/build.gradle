@@ -5,7 +5,7 @@ dependencies {
     compile libs.guava
     compile libs.jackson.databind
 
-    testCompile project(':http-clients')
+    testCompile project(':feign-clients')
     testCompile libs.dropwizard.core
     testCompile libs.dropwizard.testing
     testCompile libs.hamcrest
