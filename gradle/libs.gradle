@@ -4,10 +4,10 @@ project.ext.libs = [
         'core': 'io.dropwizard:dropwizard-core:0.8.2'
     ],
     'feign': [
-        'jackson': 'com.netflix.feign:feign-jackson:8.11.0',
-        'jaxrs': 'com.netflix.feign:feign-jaxrs:8.11.0',
-        'okhttp': 'com.netflix.feign:feign-okhttp:8.11.0',
-        'slf4j': 'com.netflix.feign:feign-slf4j:8.11.0'
+        'jackson': 'com.netflix.feign:feign-jackson:8.14.4',
+        'jaxrs': 'com.netflix.feign:feign-jaxrs:8.14.4',
+        'okhttp': 'com.netflix.feign:feign-okhttp:8.14.4',
+        'slf4j': 'com.netflix.feign:feign-slf4j:8.14.4'
     ],
     'guava': 'com.google.guava:guava:18.0',
     'hamcrest': 'org.hamcrest:hamcrest-all:1.3',
