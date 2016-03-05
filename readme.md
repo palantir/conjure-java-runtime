@@ -21,6 +21,10 @@ and utilities for creating Feign clients in commonly used configurations. Additi
 offers a basic round-robin failover client configuration for basic failover between multiple
 equivalent endpoints.
 
+retrofit-clients
+----------------
+Similar to `http-clients`, but generates proxies using the [Retrofit](http://square.github.io/retrofit/) library.
+
 ssl-config
 ----------
 Provides utilities for interacting with Java trust stores and key stores and acquiring
