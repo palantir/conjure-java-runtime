@@ -74,7 +74,7 @@ public final class FailoverFeignTargetTest {
             proxy.blah();
             fail();
         } catch (RetryableException e) {
-            assertThat(e.getMessage(), startsWith("Connection refused"));
+            assertThat(e.getMessage(), startsWith("Failed to connect"));
         }
 
         // Subsequent call (with the same proxy instance) succeeds since Feign clones the retryer.
@@ -109,7 +109,7 @@ public final class FailoverFeignTargetTest {
             proxy.blah();
             fail();
         } catch (RetryableException e) {
-            assertThat(e.getMessage(), startsWith("Connection refused"));
+            assertThat(e.getMessage(), startsWith("Failed to connect"));
         }
 
         InOrder inOrder = inOrder(backoffStrategy);
