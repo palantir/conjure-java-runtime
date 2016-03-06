@@ -19,10 +19,12 @@ package feign;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting.http.FeignClients;
+import feign.codec.DecodeException;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import javax.net.ssl.SSLSocketFactory;
@@ -56,6 +58,18 @@ public final class OptionalAwareDecoderTest {
     public void testOptional() {
         assertThat(service.getOptional("something"), is(Optional.of(ImmutableMap.of("something", "something"))));
         assertThat(service.getOptional(null), is(Optional.<ImmutableMap<String, String>>absent()));
+    }
+
+    @Test
+    public void testNestedOptional() {
+        try {
+            service.getNestedOptional("something");
+            fail();
+        } catch (DecodeException ex) {
+            // OptionalAwareDecoder only handles top-level Optional objects so Optional.absent()
+            // value in map is decoded as null by the delegate decoder
+            assertThat(ex.getMessage(), containsString("null value in entry: something=null"));
+        }
     }
 
     @Test

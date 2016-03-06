@@ -51,6 +51,11 @@ public class TestServer extends Application<Configuration> {
         }
 
         @Override
+        public ImmutableMap<String, Optional<String>> getNestedOptional(String value) {
+            return ImmutableMap.of(value, Optional.<String>absent());
+        }
+
+        @Override
         public ImmutableMap<String, String> getNonOptional(@Nullable String value) {
             if (Strings.isNullOrEmpty(value)) {
                 return ImmutableMap.of();
@@ -138,6 +143,13 @@ public class TestServer extends Application<Configuration> {
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         Optional<ImmutableMap<String, String>> getOptional(@QueryParam("value") @Nullable String value);
+
+        // not valid: OptionalAwareDecoder only handles top-level Optional objects
+        @GET
+        @Path("/nestedOptional")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        ImmutableMap<String, Optional<String>> getNestedOptional(@QueryParam("value") @Nullable String value);
 
         @GET
         @Path("/nonOptional")

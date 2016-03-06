@@ -26,7 +26,10 @@ import java.lang.reflect.Type;
 
 /**
  * Decorates a Feign {@link Decoder} such that it returns {@link Optional#absent} when observing an HTTP 204 error code
- * for a method with {@link Type} {@link Optional}.
+ * for a method with {@link Type} {@link Optional}. This decoder only handles the case where the response object itself
+ * is an {@link Optional}, and does not handle any occurrences of {@link Optional} objects that do not wrap the
+ * top-level response. For example, if a method returns Map&lt;String, Optional&gt;, the inner Optional&lt;String&gt;
+ * will not receive any special handling from this decoder (it will fall through to the delegated decoder).
  */
 public final class OptionalAwareDecoder implements Decoder {
 
