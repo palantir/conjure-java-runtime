@@ -21,13 +21,9 @@ import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import feign.Contract;
-import feign.Feign;
 import feign.MethodMetadata;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -39,50 +35,32 @@ import javax.ws.rs.QueryParam;
  * <p>
  * {@link PathParam}s require a value, and so we explicitly disallow use with {@link Optional}.
  */
-public final class GuavaOptionalAwareContract implements Contract {
-
-    private final Contract delegate;
+public final class GuavaOptionalAwareContract extends AbstractDelegatingContract {
 
     public GuavaOptionalAwareContract(Contract delegate) {
-        this.delegate = delegate;
+        super(delegate);
     }
 
     @Override
-    public List<MethodMetadata> parseAndValidatateMetadata(Class<?> targetType) {
-        List<MethodMetadata> mdList = delegate.parseAndValidatateMetadata(targetType);
-        Map<String, MethodMetadata> methodMetadataByConfigKey = new LinkedHashMap<String, MethodMetadata>();
-        for (MethodMetadata md : mdList) {
-            methodMetadataByConfigKey.put(md.configKey(), md);
-        }
-
-        for (Method method : targetType.getMethods()) {
-            if (method.getDeclaringClass() == Object.class) {
-                continue;
-            }
-            String configKey = Feign.configKey(targetType, method);
-            MethodMetadata md = methodMetadataByConfigKey.get(configKey);
-            if (md != null) {
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                Annotation[][] annotations = method.getParameterAnnotations();
-                for (int i = 0; i < parameterTypes.length; i++) {
-                    Class<?> cls = parameterTypes[i];
-                    if (cls.equals(Optional.class)) {
-                        FluentIterable<Class<?>> paramAnnotations =
-                                FluentIterable.from(Lists.newArrayList(annotations[i])).transform(EXTRACT_CLASS);
-                        if (paramAnnotations.contains(HeaderParam.class)) {
-                            md.indexToExpanderClass().put(i, GuavaEmptyOptionalExpander.class);
-                        } else if (paramAnnotations.contains(QueryParam.class)) {
-                            md.indexToExpanderClass().put(i, GuavaNullOptionalExpander.class);
-                        } else if (paramAnnotations.contains(PathParam.class)) {
-                            throw new RuntimeException(String.format(
-                                    "Cannot use Guava Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
-                                    targetType.getName(), method.getName(), i));
-                        }
-                    }
+    protected void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        Annotation[][] annotations = method.getParameterAnnotations();
+        for (int i = 0; i < parameterTypes.length; i++) {
+            Class<?> cls = parameterTypes[i];
+            if (cls.equals(Optional.class)) {
+                FluentIterable<Class<?>> paramAnnotations =
+                        FluentIterable.from(Lists.newArrayList(annotations[i])).transform(EXTRACT_CLASS);
+                if (paramAnnotations.contains(HeaderParam.class)) {
+                    metadata.indexToExpanderClass().put(i, GuavaEmptyOptionalExpander.class);
+                } else if (paramAnnotations.contains(QueryParam.class)) {
+                    metadata.indexToExpanderClass().put(i, GuavaNullOptionalExpander.class);
+                } else if (paramAnnotations.contains(PathParam.class)) {
+                    throw new RuntimeException(String.format(
+                            "Cannot use Guava Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
+                            targetType.getName(), method.getName(), i));
                 }
             }
         }
-        return mdList;
     }
 
     private static final Function<Annotation, Class<?>> EXTRACT_CLASS = new Function<Annotation, Class<?>>() {
