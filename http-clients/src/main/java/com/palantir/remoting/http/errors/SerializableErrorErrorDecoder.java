@@ -29,8 +29,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.CheckForNull;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
@@ -73,7 +71,7 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
                 }
 
                 // Construct remote exception and fill with remote stacktrace
-                Exception remoteException = constructException(error.getExceptionClass(), error.getMessage(),
+                Exception remoteException = constructException(error.getExceptionClassName(), error.getMessage(),
                         response.status(), null);
                 List<StackTraceElement> stackTrace = error.getStackTrace();
                 if (stackTrace != null) {
@@ -83,7 +81,7 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
                 // Construct local exception that wraps the remote exception and fill with stack trace of local
                 // call (yet without the reflection overhead).
                 Exception localException =
-                        constructException(error.getExceptionClass(), error.getMessage(), response.status(),
+                        constructException(error.getExceptionClassName(), error.getMessage(), response.status(),
                                 remoteException);
                 localException.fillInStackTrace();
 
@@ -108,20 +106,44 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
     }
 
     // wrappedException may be null to indicate an unknown cause
-    private static Exception constructException(Class<? extends Exception> exceptionClass, String message, int status,
+    @SuppressWarnings("unchecked")
+    private static Exception constructException(String exceptionClassName, String message, int status,
             @CheckForNull Throwable wrappedException) {
-        if (exceptionClass.equals(ClientErrorException.class)) {
-            return new ClientErrorException(message, status, wrappedException);
-        } else if (exceptionClass.equals(ServerErrorException.class)) {
-            return new ServerErrorException(message, status, wrappedException);
-        } else if (exceptionClass.equals(WebApplicationException.class)) {
-            return new WebApplicationException(message, wrappedException, status);
+        Class<? extends Exception> exceptionClass;
+        try {
+            exceptionClass = (Class<? extends Exception>) Class.forName(exceptionClassName);
+        } catch (ClassNotFoundException e) {
+            // use the most expressive constructor that exists in Jersey 1.x
+            return new WebApplicationException(wrappedException, status);
+        }
+
+        if (exceptionClassName.equals("javax.ws.rs.WebApplicationException")) {
+            try {
+                return exceptionClass.getConstructor(String.class, Throwable.class, int.class)
+                        .newInstance(message, wrappedException, status);
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                // use the most expressive constructor that exists in Jersey 1.x
+                return new WebApplicationException(wrappedException, status);
+            }
+        }
+
+        if (exceptionClassName.startsWith("javax.ws.rs") && exceptionClassName.endsWith("Exception")) {
+            try {
+                return exceptionClass.getConstructor(String.class, int.class, Throwable.class)
+                        .newInstance(message, status, wrappedException);
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                // use the most expressive constructor that exists in Jersey 1.x
+                return new WebApplicationException(wrappedException, status);
+            }
         }
 
         // Note: If another constructor is added, then we should refactor the construction logic in order to avoid
         // nested try/catch
         try {
-            return exceptionClass.getConstructor(String.class, Throwable.class).newInstance(message, wrappedException);
+            return exceptionClass.getConstructor(String.class, Throwable.class)
+                    .newInstance(message, wrappedException);
         } catch (NoSuchMethodException | InstantiationException
                 | IllegalAccessException | InvocationTargetException e) {
             try {
