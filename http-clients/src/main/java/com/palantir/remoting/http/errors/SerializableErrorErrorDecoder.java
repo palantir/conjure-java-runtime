@@ -117,45 +117,43 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
             return new WebApplicationException(wrappedException, status);
         }
 
-        switch (exceptionClassName) {
-            case "javax.ws.rs.ClientErrorException":
-            case "javax.ws.rs.ServerErrorException":
-                try {
-                    return exceptionClass.getConstructor(String.class, int.class, Throwable.class)
-                            .newInstance(message, status, wrappedException);
-                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                    // use the most expressive constructor that exists in Jersey 1.x
-                    return new WebApplicationException(wrappedException, status);
-                }
+        if (exceptionClassName.equals("javax.ws.rs.WebApplicationException")) {
+            try {
+                return exceptionClass.getConstructor(String.class, Throwable.class, int.class)
+                        .newInstance(message, wrappedException, status);
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                // use the most expressive constructor that exists in Jersey 1.x
+                return new WebApplicationException(wrappedException, status);
+            }
+        }
 
-            case "javax.ws.rs.WebApplicationException":
-                try {
-                    return exceptionClass.getConstructor(String.class, Throwable.class, int.class)
-                            .newInstance(message, wrappedException, status);
-                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                    // use the most expressive constructor that exists in Jersey 1.x
-                    return new WebApplicationException(wrappedException, status);
-                }
+        if (exceptionClassName.startsWith("javax.ws.rs") && exceptionClassName.endsWith("Exception")) {
+            try {
+                return exceptionClass.getConstructor(String.class, int.class, Throwable.class)
+                        .newInstance(message, status, wrappedException);
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                    | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                // use the most expressive constructor that exists in Jersey 1.x
+                return new WebApplicationException(wrappedException, status);
+            }
+        }
 
-            default:
-                // Note: If another constructor is added, then we should refactor the construction logic in order to
-                // avoid nested try/catch
-                try {
-                    return exceptionClass.getConstructor(String.class, Throwable.class)
-                            .newInstance(message, wrappedException);
-                } catch (NoSuchMethodException | InstantiationException
-                        | IllegalAccessException | InvocationTargetException e) {
-                    try {
-                        return exceptionClass.getConstructor(String.class).newInstance(message);
-                    } catch (Exception e1) {
-                        return new RuntimeException(String.format(
-                                "Failed to construct exception as %s, constructing RuntimeException instead: %s%n%s",
-                                exceptionClass.toString(), e1.toString(), message),
-                                wrappedException);
-                    }
-                }
+        // Note: If another constructor is added, then we should refactor the construction logic in order to avoid
+        // nested try/catch
+        try {
+            return exceptionClass.getConstructor(String.class, Throwable.class)
+                    .newInstance(message, wrappedException);
+        } catch (NoSuchMethodException | InstantiationException
+                | IllegalAccessException | InvocationTargetException e) {
+            try {
+                return exceptionClass.getConstructor(String.class).newInstance(message);
+            } catch (Exception e1) {
+                return new RuntimeException(String.format(
+                        "Failed to construct exception as %s, constructing RuntimeException instead: %s%n%s",
+                        exceptionClass.toString(), e1.toString(), message),
+                        wrappedException);
+            }
         }
     }
 
