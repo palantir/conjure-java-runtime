@@ -16,6 +16,8 @@
 
 package com.palantir.remoting.http.errors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.List;
@@ -35,13 +37,28 @@ public abstract class SerializableError {
 
     public abstract String getMessage();
 
-    public abstract Class<? extends Exception> getExceptionClass();
+    @JsonProperty("exceptionClass")
+    public abstract String getExceptionClassName();
+
+    /**
+     * @deprecated Use {@link #getExceptionClassName()} instead.
+     */
+    @Deprecated
+    @JsonIgnore
+    @SuppressWarnings("unchecked")
+    public final Class<? extends Exception> getExceptionClass() {
+        try {
+            return (Class<? extends Exception>) Class.forName(getExceptionClassName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Nullable
     public abstract List<StackTraceElement> getStackTrace();
 
     public static SerializableError of(String message, Class<? extends Exception> exceptionClass) {
-        return ImmutableSerializableError.builder().message(message).exceptionClass(exceptionClass)
+        return ImmutableSerializableError.builder().message(message).exceptionClassName(exceptionClass.getName())
                 .build();
     }
 
@@ -49,7 +66,7 @@ public abstract class SerializableError {
             String message, Class<? extends Exception> exceptionClass, List<StackTraceElement> stackTrace) {
         return ImmutableSerializableError.builder()
                 .message(message)
-                .exceptionClass(exceptionClass)
+                .exceptionClassName(exceptionClass.getName())
                 .stackTrace(stackTrace)
                 .build();
     }
