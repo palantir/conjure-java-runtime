@@ -120,10 +120,19 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
         switch (exceptionClassName) {
             case "javax.ws.rs.ClientErrorException":
             case "javax.ws.rs.ServerErrorException":
-            case "javax.ws.rs.WebApplicationException":
                 try {
                     return exceptionClass.getConstructor(String.class, int.class, Throwable.class)
                             .newInstance(message, status, wrappedException);
+                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                        | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                    // use the most expressive constructor that exists in Jersey 1.x
+                    return new WebApplicationException(wrappedException, status);
+                }
+
+            case "javax.ws.rs.WebApplicationException":
+                try {
+                    return exceptionClass.getConstructor(String.class, Throwable.class, int.class)
+                            .newInstance(message, wrappedException, status);
                 } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                         | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                     // use the most expressive constructor that exists in Jersey 1.x
