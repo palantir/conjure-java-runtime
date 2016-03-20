@@ -74,13 +74,10 @@ public final class TestPatchServer extends Application<Configuration> {
     public interface TestService {
         @GET
         @Path("/service")
-        @Produces(MediaType.APPLICATION_JSON)
         Map<String, String> getService();
 
         @PATCH
         @Path("/service")
-        @Consumes(MediaType.APPLICATION_JSON)
-        @Produces(MediaType.APPLICATION_JSON)
         Map<String, String> patchService(JsonPatch patch);
     }
 }
