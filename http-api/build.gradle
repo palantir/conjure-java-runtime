@@ -1,0 +1,19 @@
+apply from: "${rootDir}/gradle/libs.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile libs.jackson.databind
+    compile libs.jsr305
+    compile libs.wsRsApi
+
+    testCompile project(':http-clients')
+    testCompile project(':http-servers')
+
+    testCompile libs.dropwizard.testing
+    testCompile libs.hamcrest
+    testCompile libs.jsonpatch
+    testCompile libs.junit
+    testCompile libs.mockwebserver
+}
+
+tasks.check.dependsOn(javadoc)

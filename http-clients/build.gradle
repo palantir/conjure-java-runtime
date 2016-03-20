@@ -23,7 +23,6 @@ dependencies {
 
     testCompile libs.dropwizard.testing
     testCompile libs.hamcrest
-    testCompile libs.jsonpatch
     testCompile libs.junit
     testCompile libs.mockwebserver
 

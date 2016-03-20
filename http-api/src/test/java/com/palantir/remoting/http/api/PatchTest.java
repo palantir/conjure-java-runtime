@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package javax.ws.rs;
+package com.palantir.remoting.http.api;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting.http.FeignClients;
-import com.palantir.remoting.http.ObjectMappers;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.IOException;
@@ -54,7 +54,7 @@ public final class PatchTest {
                 service.getService(),
                 is((Map<String, String>) ImmutableMap.of("name", "originalName")));
 
-        JsonNode jsonNode = ObjectMappers.guavaJdk7().readTree(
+        JsonNode jsonNode = new ObjectMapper().readTree(
                 "[ { \"op\": \"replace\", \"path\": \"/name\", \"value\": \"patchedName\" } ]");
         JsonPatch jsonPatch = JsonPatch.fromJson(jsonNode);
 

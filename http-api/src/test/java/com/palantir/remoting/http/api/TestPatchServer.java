@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package javax.ws.rs;
+package com.palantir.remoting.http.api;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
-import com.palantir.remoting.http.ObjectMappers;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import java.io.IOException;
 import java.util.Map;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 public final class TestPatchServer extends Application<Configuration> {
@@ -36,7 +39,7 @@ public final class TestPatchServer extends Application<Configuration> {
     }
 
     static final class TestResource implements TestService {
-        private static final ObjectMapper MAPPER = ObjectMappers.vanilla();
+        private static final ObjectMapper MAPPER = new ObjectMapper();
 
         @Override
         public Map<String, String> getService() {
