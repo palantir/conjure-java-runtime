@@ -14,4 +14,10 @@ dependencies {
     processor libs.immutables
 }
 
+task generateCerts(type:Exec) {
+  workingDir './src/test/resources'
+  commandLine './certSetup.sh', '-f'
+}
+
 tasks.check.dependsOn(javadoc)
+tasks.test.dependsOn(generateCerts)

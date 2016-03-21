@@ -243,7 +243,7 @@ default_md        = sha1'
   # create temporary directory for CRL operations.
   # Variable is intentionally global so that 'trap'
   # call can read the value on exit.
-  crlTempDir=`mktemp -d -t crlTempDir`
+  crlTempDir=`mktemp -d -t crlTempDir.XXXXXX`
   # clean up temporary directory on script termination
   trap 'rm -rf "$crlTempDir"' EXIT
 
