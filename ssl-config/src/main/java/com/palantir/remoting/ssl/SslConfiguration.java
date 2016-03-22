@@ -30,13 +30,18 @@ import org.immutables.value.Value.Style.ImplementationVisibility;
 @Value.Style(visibility = ImplementationVisibility.PACKAGE)
 public abstract class SslConfiguration {
 
-    private static final String DEFAULT_STORE_TYPE = "JKS";
+    public enum StoreType {
+        JKS,
+        PKCS12
+    }
+
+    private static final StoreType DEFAULT_STORE_TYPE = StoreType.JKS;
 
     public abstract Path trustStorePath();
 
     @SuppressWarnings("checkstyle:designforextension")
     @Value.Default
-    public String trustStoreType() {
+    public StoreType trustStoreType() {
         return DEFAULT_STORE_TYPE;
     }
 
@@ -46,7 +51,7 @@ public abstract class SslConfiguration {
 
     @SuppressWarnings("checkstyle:designforextension")
     @Value.Default
-    public String keyStoreType() {
+    public StoreType keyStoreType() {
         return DEFAULT_STORE_TYPE;
     }
 

@@ -48,14 +48,14 @@ public final class SslSocketFactories {
     public static SSLContext createSslContext(SslConfiguration config) {
         TrustManager[] trustManagers = createTrustManagerFactory(
                 config.trustStorePath(),
-                config.trustStoreType()).getTrustManagers();
+                config.trustStoreType().name()).getTrustManagers();
 
         KeyManager[] keyManagers = null;
         if (config.keyStorePath().isPresent()) {
             keyManagers = createKeyManagerFactory(
                     config.keyStorePath().get(),
                     config.keyStorePassword().get(),
-                    config.keyStoreType(),
+                    config.keyStoreType().name(),
                     config.keyStoreKeyAlias()).getKeyManagers();
         }
 
