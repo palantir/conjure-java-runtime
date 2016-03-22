@@ -32,6 +32,7 @@ public abstract class SslConfiguration {
 
     public enum StoreType {
         JKS,
+        PEM,
         PKCS12
     }
 

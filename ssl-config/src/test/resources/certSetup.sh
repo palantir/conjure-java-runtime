@@ -20,17 +20,18 @@ CA="testCA"
 CA_CN="Test CA"
 
 # file name constants
-TRUST_STORE_SUFFIX="TrustStore"
 KEY_STORE_SUFFIX="KeyStore"
+TRUST_STORE_SUFFIX="TrustStore"
 
 # file extensions
+CONFIG_EXT="cnf"
+CSR_EXT="csr"
+DER_EXT="der"
+JKS_EXT="jks"
+P12_EXT="p12"
+PEM_EXT="pem"
 PRIVATE_KEY_EXT="key"
 SIGNED_CERT_EXT="crt"
-CSR_EXT="csr"
-P12_EXT="p12"
-JKS_EXT="jks"
-PEM_EXT="pem"
-CONFIG_EXT="cnf"
 
 # passes arguments to 'echo' if $VERBOSE is true.
 # Otherwise, is a no-op.
@@ -85,6 +86,15 @@ create_ca() {
     -key "$CA"."$PRIVATE_KEY_EXT" -sha256 -days 1024 \
     -out "$CA"."$SIGNED_CERT_EXT" \
     -subj "/C=US/ST=CA/L=Palo Alto/O=Test Org/OU=Test OU/CN=$CA_CN" \
+    &>/dev/null
+  check_return_value "openssl req -x509"
+  log "done"
+
+  # create a DER version of the CA certificate
+  log -n "Creating DER certificate for CA..."
+  openssl x509 -outform der \
+    -in "$CA"."$SIGNED_CERT_EXT" \
+    -out "$CA"."$DER_EXT" \
     &>/dev/null
   check_return_value "openssl req -x509"
   log "done"
