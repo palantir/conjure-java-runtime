@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.ssl;
+package com.palantir.remoting.ssl;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
