@@ -1,0 +1,13 @@
+apply from: "${rootDir}/gradle/libs.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile project(':ssl-config')
+    // declare dependency directly to ensure it isn't inadvertently used
+    compile 'org.bouncycastle:bcpkix-jdk15on:1.54'
+
+    testCompile libs.hamcrest
+    testCompile libs.junit
+}
+
+tasks.check.dependsOn(javadoc)

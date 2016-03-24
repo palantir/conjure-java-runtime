@@ -100,6 +100,9 @@ create_key_pair_dir() {
   # create key pair
   create_key_pair "$key_name" "$common_name" "../$ca_name/$ca_name.$CER_EXT" "../$ca_name/$ca_name.$KEY_EXT" "$common_name"
 
+  # create combined file (key + certificate as single PEM)
+  cat "$key_name.$KEY_EXT" "$key_name.$CER_EXT" > "$key_name.$PEM_EXT"
+
   # create PKCS12 store
   create_p12_key_store_from_pem "$key_name" "$p12_pass" "$key_name.$CER_EXT" "$key_name.$KEY_EXT"
 

@@ -112,6 +112,73 @@ public final class SslSocketFactoriesTests {
     }
 
     @Test
+    public void testCreateSslSocketFactory_canCreateTrustStorePuppetFromDirectory() throws IOException {
+        File puppetFolder = tempFolder.newFolder();
+
+        File certsFolder = puppetFolder.toPath().resolve("certs").toFile();
+        assertThat(certsFolder.mkdir(), is(true));
+
+        Files.copy(TestConstants.CA_PEM_CERT_PATH.toFile(), certsFolder.toPath().resolve("ca.pem").toFile());
+        Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), certsFolder.toPath().resolve("server.pem").toFile());
+        Files.copy(TestConstants.CLIENT_CERT_PEM_PATH.toFile(), certsFolder.toPath().resolve("client.pem").toFile());
+
+        SslConfiguration sslConfig = SslConfiguration
+                .builder()
+                .trustStorePath(puppetFolder.toPath())
+                .trustStoreType(SslConfiguration.StoreType.PUPPET)
+                .build();
+
+        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
+
+        assertThat(factory, notNullValue());
+    }
+
+    @Test
+    public void testCreateSslSocketFactory_canCreateKeyStorePuppetFromDirectory() throws IOException {
+        TestConstants.assumePkcs1ReaderExists();
+
+        File puppetFolder = tempFolder.newFolder();
+
+        File keysFolder = puppetFolder.toPath().resolve("private_keys").toFile();
+        assertThat(keysFolder.mkdir(), is(true));
+
+        File certsFolder = puppetFolder.toPath().resolve("certs").toFile();
+        assertThat(certsFolder.mkdir(), is(true));
+
+        Files.copy(TestConstants.SERVER_KEY_PEM_PATH.toFile(), keysFolder.toPath().resolve("server.pem").toFile());
+        Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), certsFolder.toPath().resolve("server.pem").toFile());
+
+        SslConfiguration sslConfig = SslConfiguration
+                .builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(puppetFolder.toPath())
+                .keyStorePassword("")
+                .keyStoreType(SslConfiguration.StoreType.PUPPET)
+                .build();
+
+        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
+
+        assertThat(factory, notNullValue());
+    }
+
+    @Test
+    public void testCreateSslSocketFactory_canCreateKeyStorePemType() {
+        TestConstants.assumePkcs1ReaderExists();
+
+        SslConfiguration sslConfig = SslConfiguration
+                .builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH)
+                .keyStorePassword("")
+                .keyStoreType(SslConfiguration.StoreType.PEM)
+                .build();
+
+        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
+
+        assertThat(factory, notNullValue());
+    }
+
+    @Test
     public void testCreateSslSocketFactory_canCreateWithOnlyTrustStorePath() {
         SslConfiguration sslConfig = SslConfiguration
                 .builder()
@@ -285,26 +352,6 @@ public final class SslSocketFactoriesTests {
             fail();
         } catch (IllegalArgumentException ex) {
             assertThat(ex.getMessage(), containsString("keyStorePath must be present if keyStoreKeyAlias is present"));
-        }
-    }
-
-    @Test
-    public void testCreateSslSocketFactory_pemKeyStoreTypeNotSupported() {
-        try {
-            SslConfiguration sslConfig = SslConfiguration
-                    .builder()
-                    .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
-                    .keyStorePath(TestConstants.SERVER_KEY_PEM_PATH)
-                    .keyStorePassword(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
-                    // bad configuration: key store cannot be PEM format
-                    .keyStoreType(SslConfiguration.StoreType.PEM)
-                    .build();
-
-            SslSocketFactories.createSslSocketFactory(sslConfig);
-
-            fail();
-        } catch (IllegalStateException ex) {
-            assertThat(ex.getMessage(), containsString("PEM is not supported as a key store type"));
         }
     }
 
