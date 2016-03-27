@@ -45,7 +45,7 @@ public final class KeyStoresTests {
 
         assertThat(trustStore.size(), is(1));
         assertThat(trustStore.getCertificate(TestConstants.CA_DER_CERT_PATH.getFileName().toString()).toString(),
-                containsString("CN=Test CA"));
+                containsString("CN=testCA"));
     }
 
     @Test
@@ -57,7 +57,7 @@ public final class KeyStoresTests {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
 
         assertThat(trustStore.size(), is(3));
-        assertThat(trustStore.getCertificate("ca.der").toString(), containsString("CN=Test CA"));
+        assertThat(trustStore.getCertificate("ca.der").toString(), containsString("CN=testCA"));
         assertThat(trustStore.getCertificate("server.crt").toString(), containsString("CN=localhost"));
         assertThat(trustStore.getCertificate("client.cer").toString(), containsString("CN=localhost"));
     }

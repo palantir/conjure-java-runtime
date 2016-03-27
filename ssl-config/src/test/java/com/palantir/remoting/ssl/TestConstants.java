@@ -24,9 +24,9 @@ import java.nio.file.Paths;
  */
 final class TestConstants {
 
-    static final Path CA_TRUST_STORE_PATH = Paths.get("src", "test", "resources", "testCA", "testCATrustStore.jks");
+    static final Path CA_TRUST_STORE_PATH = Paths.get("src", "test", "resources", "testCA", "testCA.jks");
     static final Path CA_DER_CERT_PATH = Paths.get("src", "test", "resources", "testCA", "testCA.der");
-    static final Path CA_PEM_CERT_PATH = Paths.get("src", "test", "resources", "testCA", "testCA.crt");
+    static final Path CA_PEM_CERT_PATH = Paths.get("src", "test", "resources", "testCA", "testCA.cer");
     static final SslConfiguration.StoreType CA_TRUST_STORE_TYPE = SslConfiguration.StoreType.JKS;
 
     static final Path CA_CRL_PATH = Paths.get("src", "test", "resources", "crl.pem");
@@ -36,14 +36,14 @@ final class TestConstants {
             "test",
             "resources",
             "testServer",
-            "testServer.crt");
+            "testServer.cer");
 
     static final Path SERVER_KEY_STORE_JKS_PATH = Paths.get(
             "src",
             "test",
             "resources",
             "testServer",
-            "testServerKeyStore.jks");
+            "testServer.jks");
     static final SslConfiguration.StoreType SERVER_KEY_STORE_JKS_TYPE = SslConfiguration.StoreType.JKS;
     static final String SERVER_KEY_STORE_JKS_PASSWORD = "serverStore";
     static final Path SERVER_KEY_PEM_PATH = Paths.get(
@@ -58,7 +58,7 @@ final class TestConstants {
             "test",
             "resources",
             "testServer",
-            "testServerKeyStore.p12");
+            "testServer.p12");
     static final SslConfiguration.StoreType SERVER_KEY_STORE_P12_TYPE = SslConfiguration.StoreType.PKCS12;
     static final String SERVER_KEY_STORE_P12_PASSWORD = "testServer";
 
@@ -67,14 +67,14 @@ final class TestConstants {
             "test",
             "resources",
             "testClient",
-            "testClient.crt");
+            "testClient.cer");
 
     static final Path CLIENT_KEY_STORE_JKS_PATH = Paths.get(
             "src",
             "test",
             "resources",
             "testClient",
-            "testClientKeyStore.jks");
+            "testClient.jks");
     static final String CLIENT_KEY_STORE_JKS_PASSWORD = "clientStore";
 
     static final Path CLIENT_KEY_STORE_P12_PATH = Paths.get(
@@ -82,7 +82,7 @@ final class TestConstants {
             "test",
             "resources",
             "testClient",
-            "testClientKeyStore.p12");
+            "testClient.p12");
     static final SslConfiguration.StoreType CLIENT_KEY_STORE_P12_TYPE = SslConfiguration.StoreType.PKCS12;
     static final String CLIENT_KEY_STORE_P12_PASSWORD = "testClient";
 

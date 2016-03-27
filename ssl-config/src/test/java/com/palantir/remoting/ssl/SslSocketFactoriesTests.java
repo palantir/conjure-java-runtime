@@ -329,7 +329,7 @@ public final class SslSocketFactoriesTests {
     public void testCreateSslSocketFactory_supportsRelativePath() {
         SslConfiguration sslConfig = SslConfiguration
                 .builder()
-                .trustStorePath(new File("src/test/resources/testCA/testCATrustStore.jks").toPath())
+                .trustStorePath(new File("src/test/resources/testCA/testCA.jks").toPath())
                 .build();
 
         SslSocketFactories.createSslSocketFactory(sslConfig);
