@@ -18,7 +18,13 @@ package com.palantir.remoting.http;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.palantir.config.service.ServiceConfiguration;
+import com.palantir.config.service.ServiceDiscoveryConfiguration;
+import com.palantir.remoting.ssl.SslConfiguration;
+import com.palantir.remoting.ssl.SslSocketFactories;
 import feign.Client;
 import feign.Contract;
 import feign.Feign;
@@ -131,6 +137,29 @@ public final class FeignClientFactory {
                 .logger(new Slf4jLogger(FeignClients.class))
                 .logLevel(Level.BASIC)
                 .target(target);
+    }
+
+    /**
+     * Constructs a dynamic proxy for the specified type using the {@link ServiceConfiguration} obtained from the
+     * supplied {@link ServiceDiscoveryConfiguration} for the specified service name.
+     */
+    public <T> T createProxies(
+            ServiceDiscoveryConfiguration discoveryConfig, String serviceName, Class<T> serviceClass) {
+
+        ServiceConfiguration serviceConfig = Preconditions.checkNotNull(
+                discoveryConfig.getServices().get(serviceName),
+                "Unable to find the configuration for " + serviceName + ".");
+
+        Optional<SSLSocketFactory> socketFactory = Optional.absent();
+        Optional<SslConfiguration> sslConfig = discoveryConfig.getSslConfiguration(serviceName);
+
+        if (sslConfig.isPresent()) {
+            socketFactory = Optional.of(SslSocketFactories.createSslSocketFactory(sslConfig.get()));
+        }
+
+        Set<String> uris = Sets.newHashSet(serviceConfig.uris());
+
+        return createProxy(socketFactory, uris, serviceClass);
     }
 
     /**

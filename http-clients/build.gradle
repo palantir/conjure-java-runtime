@@ -3,6 +3,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(':error-handling')
+    compile project(':service-config')
 
     compile libs.feign.jackson
     compile(libs.feign.jaxrs){

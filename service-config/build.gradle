@@ -1,0 +1,17 @@
+apply from: "$rootDir/gradle/libs.gradle"
+apply from: "$rootDir/gradle/publish.gradle"
+
+dependencies {
+    compile project(':ssl-config')
+    compile libs.tokens
+
+    processor libs.immutables
+
+    testCompile libs.dropwizard.testing
+    testCompile (libs.feign.jaxrs) {
+        // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
+        exclude group: 'javax.ws.rs', module: 'jsr311-api'
+    }
+    testCompile libs.feign.okhttp
+    testCompile libs.junit
+}
