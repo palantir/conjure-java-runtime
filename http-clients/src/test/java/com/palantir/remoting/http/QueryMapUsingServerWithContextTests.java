@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting.http.QueryMapTestServer.TestService;
 import io.dropwizard.Configuration;
@@ -15,7 +16,6 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.util.List;
 import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
-import jersey.repackaged.com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;

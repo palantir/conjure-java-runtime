@@ -1,9 +1,5 @@
 <!-- See http://findbugs.sourceforge.net/manual/filter.html for syntax -->
 <FindBugsFilter>
-    <!-- ignore generated code -->
-    <Match>
-        <Class name="~.*\.*Immutable.*" />
-    </Match>
 
     <!-- @NonnullByDefault doesn't play nicely with overriding @Nullable parameters/outputs -->
     <Match>
