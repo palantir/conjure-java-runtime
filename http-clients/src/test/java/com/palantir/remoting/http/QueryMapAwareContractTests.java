@@ -12,6 +12,7 @@ import static org.junit.Assert.fail;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import feign.Contract;
@@ -26,7 +27,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
-import jersey.repackaged.com.google.common.collect.Iterables;
 import org.junit.Rule;
 import org.junit.Test;
 
