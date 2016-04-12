@@ -11,6 +11,10 @@ general:
     - http-servers/build/libs
     - ssl-config/build/libs
 
+dependencies:
+  override:
+    - ./gradlew resolveDependencies
+
 test:
   override:
     - ./gradlew build

@@ -39,4 +39,15 @@ subprojects {
     }
 
     sourceCompatibility = 1.7
+
+    task resolveDependencies {
+        description = 'Forces the resolution of all dependencies in all configurations'
+        group = 'build'
+
+        doLast {
+            configurations.all { c ->
+                c.resolve()
+            }
+        }
+    }
 }
