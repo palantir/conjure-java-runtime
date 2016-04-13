@@ -21,3 +21,23 @@ task generateCerts(type:Exec) {
 
 tasks.check.dependsOn(javadoc)
 tasks.test.dependsOn(generateCerts)
+
+task testBouncyCastle(type: Test) {
+    configureTestTask(it, 'bouncy-castle')
+}
+
+task testSun(type: Test) {
+    configureTestTask(it, 'sun')
+}
+
+private void configureTestTask(Test test, String name) {
+    test.classpath = test.classpath + project(":pkcs1-reader-${name}").sourceSets.main.getOutput() +
+            project(":pkcs1-reader-${name}").sourceSets.main.runtimeClasspath
+
+    test.reports.junitXml.destination("${project.test.reports.junitXml.getDestination().absolutePath}-${name}")
+    test.reports.html.destination("${project.test.reports.html.getDestination().absolutePath}-${name}")
+
+    project.plugins.withType(JacocoPlugin) {
+        ((JacocoTaskExtension) test.jacoco).destinationFile = project.file("${project.getBuildDir()}/jacoco/${name}.exec")
+    }
+}

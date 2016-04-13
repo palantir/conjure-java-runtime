@@ -26,6 +26,7 @@ import static org.junit.Assert.fail;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
@@ -45,7 +46,7 @@ public final class KeyStoresTests {
 
         assertThat(trustStore.size(), is(1));
         assertThat(trustStore.getCertificate(TestConstants.CA_DER_CERT_PATH.getFileName().toString()).toString(),
-                containsString("CN=Test CA"));
+                containsString("CN=testCA"));
     }
 
     @Test
@@ -57,9 +58,9 @@ public final class KeyStoresTests {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
 
         assertThat(trustStore.size(), is(3));
-        assertThat(trustStore.getCertificate("ca.der").toString(), containsString("CN=Test CA"));
+        assertThat(trustStore.getCertificate("ca.der").toString(), containsString("CN=testCA"));
         assertThat(trustStore.getCertificate("server.crt").toString(), containsString("CN=localhost"));
-        assertThat(trustStore.getCertificate("client.cer").toString(), containsString("CN=localhost"));
+        assertThat(trustStore.getCertificate("client.cer").toString(), containsString("CN=client"));
     }
 
     @Test
@@ -82,8 +83,8 @@ public final class KeyStoresTests {
     @Test
     public void testCreateTrustStoreFromDirectoryFailsWithNonCertFiles() throws IOException, GeneralSecurityException {
         File certFolder = tempFolder.newFolder();
-        File tempCertFile = certFolder.toPath().resolve("crl.pem").toFile();
-        Files.copy(TestConstants.CA_CRL_PATH.toFile(), tempCertFile);
+        File tempCertFile = certFolder.toPath().resolve("crl.pkcs1").toFile();
+        Files.copy(TestConstants.COMBINED_CRL_PATH.toFile(), tempCertFile);
 
         try {
             KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
@@ -111,6 +112,137 @@ public final class KeyStoresTests {
             assertThat(e.getMessage(), containsString(
                     String.format("Could not read file at \"%s\" as an X.509 certificate",
                             tempDirFile.getAbsolutePath().toString())));
+        }
+    }
+
+    @Test
+    public void testCreateKeyStoreFromPemFile() throws GeneralSecurityException, IOException {
+        TestConstants.assumePkcs1ReaderExists();
+
+        String password = "changeit";
+        KeyStore keyStore = KeyStores.createKeyStoreFromCombinedPems(TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH,
+                password);
+
+        assertThat(keyStore.size(), is(1));
+        assertThat(keyStore.getCertificate(
+                TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH.getFileName().toString()).toString(),
+                containsString("CN=testCA"));
+        assertThat(keyStore.getKey(TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH.getFileName().toString(),
+                password.toCharArray()).getFormat(),
+                is("PKCS#8"));
+    }
+
+    @Test
+    public void testCreateKeyStoreFromKeyDirectory() throws GeneralSecurityException, IOException {
+        TestConstants.assumePkcs1ReaderExists();
+
+        String password = "changeit";
+
+        File keyFolder = tempFolder.newFolder();
+        Files.copy(TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH.toFile(),
+                keyFolder.toPath().resolve("server.pkcs1").toFile());
+        Files.copy(TestConstants.CLIENT_KEY_CERT_COMBINED_PEM_PATH.toFile(),
+                keyFolder.toPath().resolve("client.pkcs1").toFile());
+        KeyStore keyStore = KeyStores.createKeyStoreFromCombinedPems(keyFolder.toPath(), password);
+
+        assertThat(keyStore.size(), is(2));
+        assertThat(keyStore.getCertificate("server.pkcs1").toString(), containsString("CN=localhost"));
+        assertThat(keyStore.getKey("server.pkcs1", password.toCharArray()).getFormat(), is("PKCS#8"));
+        assertThat(keyStore.getCertificate("client.pkcs1").toString(), containsString("CN=client"));
+        assertThat(keyStore.getKey("client.pkcs1", password.toCharArray()).getFormat(), is("PKCS#8"));
+    }
+
+    @Test
+    public void testCreateKeyStoreFromEmptyDirectory() throws GeneralSecurityException, IOException {
+        File keyFolder = tempFolder.newFolder();
+        KeyStore trustStore = KeyStores.createKeyStoreFromCombinedPems(keyFolder.toPath(), "changeit");
+
+        assertThat(trustStore.size(), is(0));
+    }
+
+    @Test
+    public void testCreateKeyStoreFromDirectoryFailsWithNonKeyFiles() throws IOException, GeneralSecurityException {
+        File keyFolder = tempFolder.newFolder();
+        File tempCertFile = keyFolder.toPath().resolve("server.cer").toFile();
+        Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), tempCertFile);
+
+        try {
+            KeyStores.createKeyStoreFromCombinedPems(keyFolder.toPath(), "changeit");
+            fail();
+        } catch (RuntimeException e) {
+            assertThat(e.getCause(), is(instanceOf(GeneralSecurityException.class)));
+            assertThat(e.getMessage(), containsString(
+                    String.format("Failed to read private key from file at \"%s\"",
+                            tempCertFile.getAbsolutePath().toString())));
+        }
+    }
+
+    @Test
+    public void testCreateKeyStoreFromPemDirectories() throws GeneralSecurityException, IOException {
+        TestConstants.assumePkcs1ReaderExists();
+
+        String password = "changeit";
+        File keyFolder = tempFolder.newFolder();
+        File certFolder = tempFolder.newFolder();
+        Files.copy(TestConstants.SERVER_KEY_PEM_PATH.toFile(), keyFolder.toPath().resolve("server.key").toFile());
+        Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), certFolder.toPath().resolve("server.cer").toFile());
+
+        KeyStore keyStore = KeyStores.createKeyStoreFromPemDirectories(
+                keyFolder.toPath(),
+                ".key",
+                certFolder.toPath(),
+                ".cer",
+                password);
+
+        assertThat(keyStore.size(), is(1));
+        assertThat(keyStore.getCertificate("server").toString(), containsString("CN=localhost"));
+        assertThat(keyStore.getKey("server", password.toCharArray()).getFormat(), is("PKCS#8"));
+    }
+
+    @Test
+    public void testCreateKeyStoreFromPemDirectoriesFailsIfCertMissing() throws IOException {
+        TestConstants.assumePkcs1ReaderExists();
+
+        String password = "changeit";
+        File keyFolder = tempFolder.newFolder();
+        File certFolder = tempFolder.newFolder();
+        Files.copy(TestConstants.SERVER_KEY_PEM_PATH.toFile(), keyFolder.toPath().resolve("server.key").toFile());
+
+        try {
+            KeyStores.createKeyStoreFromPemDirectories(
+                    keyFolder.toPath(),
+                    ".key",
+                    certFolder.toPath(),
+                    ".cer",
+                    password);
+        } catch (RuntimeException e) {
+            assertThat(e.getCause(), is(instanceOf(NoSuchFileException.class)));
+            assertThat(e.getMessage(), containsString(
+                    String.format("Failed to read certificates from file at \"%s\"",
+                            certFolder.toPath().resolve("server.cer").toString())));
+        }
+    }
+
+    @Test
+    public void testCreateKeyStoreFromPemDirectoriesFailsIfArgIsNotDirectory() throws IOException {
+        String password = "changeit";
+        File folder = tempFolder.newFolder();
+        File file = tempFolder.newFile();
+
+        try {
+            KeyStores.createKeyStoreFromPemDirectories(file.toPath(), ".key", folder.toPath(), ".cer", password);
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), containsString(
+                    String.format("keyDirPath is not a directory: \"%s\"",
+                            file.toPath().toString())));
+        }
+
+        try {
+            KeyStores.createKeyStoreFromPemDirectories(folder.toPath(), ".key", file.toPath(), ".cer", password);
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), containsString(
+                    String.format("certDirPath is not a directory: \"%s\"",
+                            file.toPath().toString())));
         }
     }
 

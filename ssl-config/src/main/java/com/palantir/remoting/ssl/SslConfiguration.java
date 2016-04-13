@@ -33,7 +33,8 @@ public abstract class SslConfiguration {
     public enum StoreType {
         JKS,
         PEM,
-        PKCS12
+        PKCS12,
+        PUPPET
     }
 
     private static final StoreType DEFAULT_STORE_TYPE = StoreType.JKS;

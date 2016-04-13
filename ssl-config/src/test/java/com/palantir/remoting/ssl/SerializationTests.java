@@ -50,9 +50,9 @@ public final class SerializationTests {
 
     private static final String JSON_STRING =
             "{"
-            + "\"trustStorePath\":\"src/test/resources/testCA/testCATrustStore.jks\","
+            + "\"trustStorePath\":\"src/test/resources/testCA/testCA.jks\","
             + "\"trustStoreType\":\"JKS\","
-            + "\"keyStorePath\":\"src/test/resources/testServer/testServerKeyStore.jks\","
+            + "\"keyStorePath\":\"src/test/resources/testServer/testServer.jks\","
             + "\"keyStorePassword\":\"serverStore\","
             + "\"keyStoreType\":\"JKS\","
             + "\"keyStoreKeyAlias\":null"

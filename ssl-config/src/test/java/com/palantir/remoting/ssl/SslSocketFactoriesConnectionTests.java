@@ -160,6 +160,25 @@ public final class SslSocketFactoriesConnectionTests {
     }
 
     @Test
+    public void testSslWithClientAuthenticationIntermediateCa() {
+        TestConstants.assumePkcs1ReaderExists();
+
+        SslConfiguration serverConfig = SslConfiguration.of(
+                TestConstants.CA_TRUST_STORE_PATH,
+                TestConstants.SERVER_KEY_STORE_JKS_PATH,
+                TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
+
+        SslConfiguration clientConfig = SslConfiguration.builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.CHILD_KEY_CERT_CHAIN_PEM_PATH)
+                .keyStorePassword("")
+                .keyStoreType(SslConfiguration.StoreType.PEM)
+                .build();
+
+        runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
+    }
+
+    @Test
     public void testSslWithClientAuthenticationPkcs12() {
         SslConfiguration serverConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)

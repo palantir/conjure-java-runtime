@@ -50,7 +50,7 @@ public final class DropwizardSslClientAuthTests {
             ConfigOverride.config("server.applicationConnectors[0].trustStorePath",
                     TestConstants.CA_TRUST_STORE_PATH.toString()),
             ConfigOverride.config("server.applicationConnectors[0].crlPath",
-                    TestConstants.CA_CRL_PATH.toString()),
+                    TestConstants.COMBINED_CRL_PATH.toString()),
             ConfigOverride.config("server.applicationConnectors[0].needClientAuth",
                     "true"));
 
@@ -73,6 +73,21 @@ public final class DropwizardSslClientAuthTests {
                 TestConstants.CA_TRUST_STORE_PATH,
                 TestConstants.CLIENT_KEY_STORE_JKS_PATH,
                 TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
+        TestEchoService service = createTestService(sslConfig);
+
+        assertThat(service.echo("foo"), is("foo"));
+    }
+
+    @Test
+    public void testConnectionWorksWithClientCertsWithIntermediateCa() {
+        TestConstants.assumePkcs1ReaderExists();
+
+        SslConfiguration sslConfig = SslConfiguration.builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.CHILD_KEY_CERT_CHAIN_PEM_PATH)
+                .keyStorePassword("")
+                .keyStoreType(SslConfiguration.StoreType.PEM)
+                .build();
         TestEchoService service = createTestService(sslConfig);
 
         assertThat(service.echo("foo"), is("foo"));

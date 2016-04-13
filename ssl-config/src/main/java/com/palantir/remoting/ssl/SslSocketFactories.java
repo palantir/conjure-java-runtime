@@ -76,6 +76,14 @@ public final class SslSocketFactories {
             case PEM:
                 keyStore = KeyStores.createTrustStoreFromCertificates(trustStorePath);
                 break;
+            case PUPPET:
+                Path puppetCertsDir = trustStorePath.resolve("certs");
+                if (!puppetCertsDir.toFile().isDirectory()) {
+                    throw new IllegalStateException(
+                            String.format("Puppet certs directory did not exist at path \"%s\"", puppetCertsDir));
+                }
+                keyStore = KeyStores.createTrustStoreFromCertificates(puppetCertsDir);
+                break;
             default:
                 throw new IllegalStateException("Unrecognized trust store type: " + trustStoreType);
         }
@@ -104,7 +112,18 @@ public final class SslSocketFactories {
                 keyStore = KeyStores.loadKeyStore(keyStoreType.name(), keyStorePath, Optional.of(keyStorePassword));
                 break;
             case PEM:
-                throw new IllegalStateException("PEM is not supported as a key store type");
+                keyStore = KeyStores.createKeyStoreFromCombinedPems(keyStorePath, keyStorePassword);
+                break;
+            case PUPPET:
+                Path puppetKeysDir = keyStorePath.resolve("private_keys");
+                Path puppetCertsDir = keyStorePath.resolve("certs");
+                keyStore = KeyStores.createKeyStoreFromPemDirectories(
+                        puppetKeysDir,
+                        ".pem",
+                        puppetCertsDir,
+                        ".pem",
+                        keyStorePassword);
+                break;
             default:
                 throw new IllegalStateException("Unrecognized key store type: " + keyStoreType);
         }

@@ -17,7 +17,7 @@ dependencies:
 
 test:
   override:
-    - ./gradlew build
+    - ./gradlew build testBouncyCastle testSun
 
 deployment:
   release:

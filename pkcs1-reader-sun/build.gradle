@@ -1,0 +1,11 @@
+apply from: "${rootDir}/gradle/libs.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile project(':ssl-config')
+
+    testCompile libs.hamcrest
+    testCompile libs.junit
+}
+
+tasks.check.dependsOn(javadoc)
