@@ -23,7 +23,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting.http.FeignClients;
@@ -33,6 +32,7 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import javax.net.ssl.SSLSocketFactory;
 import org.junit.Before;
@@ -63,11 +63,11 @@ public final class InputStreamDelegateDecoderTest {
         String data = "data";
 
         Response response =
-                Response.create(200, "OK", ImmutableMap.<String, Collection<String>>of(), data, Charsets.UTF_8);
+                Response.create(200, "OK", ImmutableMap.<String, Collection<String>>of(), data, StandardCharsets.UTF_8);
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 
-        assertThat(new String(Util.toByteArray(decoded), Charsets.UTF_8), is(data));
+        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8), is(data));
     }
 
     @Test
@@ -76,7 +76,8 @@ public final class InputStreamDelegateDecoderTest {
 
         when(delegate.decode((Response) any(), (Type) any())).thenReturn(returned);
         Response response =
-                Response.create(200, "OK", ImmutableMap.<String, Collection<String>>of(), returned, Charsets.UTF_8);
+                Response.create(200, "OK", ImmutableMap.<String, Collection<String>>of(), returned,
+                        StandardCharsets.UTF_8);
         String decodedObject = (String) inputStreamDelegateDecoder.decode(response, String.class);
         assertEquals(returned, decodedObject);
     }
@@ -88,6 +89,6 @@ public final class InputStreamDelegateDecoderTest {
     }
 
     private static byte[] bytes(String text) {
-        return text.getBytes(Charsets.UTF_8);
+        return text.getBytes(StandardCharsets.UTF_8);
     }
 }

@@ -111,6 +111,7 @@ public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
         }
     }
 
+    @SuppressWarnings("checkstyle:superclone")
     @Override
     public Retryer clone() {
         // Not resetting currentServer so that the next connection is made through the current server.
