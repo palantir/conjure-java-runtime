@@ -27,7 +27,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -37,6 +36,7 @@ import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
@@ -77,7 +77,7 @@ public final class TextDelegateDecoderTest {
     @Test
     public void testUsesStringDecoderWithTextPlain() throws Exception {
         headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN));
-        Response response = Response.create(200, "OK", headers, "text response", Charsets.UTF_8);
+        Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertEquals(decodedObject, "text response");

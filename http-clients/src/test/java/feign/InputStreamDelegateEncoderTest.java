@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 import com.palantir.remoting.http.FeignClients;
 import feign.codec.Encoder;
@@ -28,6 +27,7 @@ import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import javax.net.ssl.SSLSocketFactory;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -85,6 +85,6 @@ public final class InputStreamDelegateEncoderTest {
     }
 
     private static byte[] bytes(String text) {
-        return text.getBytes(Charsets.UTF_8);
+        return text.getBytes(StandardCharsets.UTF_8);
     }
 }
