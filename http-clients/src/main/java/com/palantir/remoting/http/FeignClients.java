@@ -118,6 +118,13 @@ public final class FeignClients {
      * Provides a {@link FeignClientFactory} with the specified {@link ObjectMapper}.
      */
     public static FeignClientFactory withMapper(ObjectMapper mapper) {
+        return withMapper(mapper, DEFAULT_TIMEOUT_OPTIONS);
+    }
+
+    /**
+     * Provides a {@link FeignClientFactory} with the specified {@link ObjectMapper}.
+     */
+    public static FeignClientFactory withMapper(ObjectMapper mapper, Request.Options timeoutOptions) {
         return FeignClientFactory.of(
                 new QueryMapAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())),
                 new InputStreamDelegateEncoder(new JacksonEncoder(mapper)),
@@ -126,7 +133,9 @@ public final class FeignClients {
                                 new TextDelegateDecoder(
                                         new JacksonDecoder(mapper)))),
                 SerializableErrorErrorDecoder.INSTANCE,
-                FeignClientFactory.okHttpClient());
+                FeignClientFactory.okHttpClient(),
+                NeverRetryingBackoffStrategy.INSTANCE,
+                timeoutOptions);
     }
 
 }
