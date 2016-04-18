@@ -1,0 +1,6 @@
+services:
+  service1:
+    uris: []
+    apiToken: service2ApiToken
+    security:
+      trustStorePath: src/test/resources/trustStore.jks

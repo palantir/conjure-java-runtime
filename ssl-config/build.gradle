@@ -5,9 +5,13 @@ dependencies {
     compile libs.guava
     compile libs.jackson.databind
 
-    testCompile project(':http-clients')
     testCompile libs.dropwizard.core
     testCompile libs.dropwizard.testing
+    testCompile (libs.feign.jaxrs) {
+        // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
+        exclude group: 'javax.ws.rs', module: 'jsr311-api'
+    }
+    testCompile libs.feign.okhttp
     testCompile libs.hamcrest
     testCompile libs.junit
 

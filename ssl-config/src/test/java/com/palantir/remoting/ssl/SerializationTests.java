@@ -20,32 +20,36 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.palantir.remoting.http.ObjectMappers;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk7.Jdk7Module;
 import java.io.IOException;
 import org.junit.Test;
 
 public final class SerializationTests {
 
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .registerModule(new GuavaModule())
+            .registerModule(new Jdk7Module());
+
     @Test
     public void testJsonSerDe() throws IOException {
-        ObjectMapper mapper = ObjectMappers.guavaJdk7();
+
         SslConfiguration sslConfig = SslConfiguration.of(
                 TestConstants.CA_TRUST_STORE_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
 
-        assertThat(mapper.readValue(mapper.writeValueAsBytes(sslConfig), SslConfiguration.class), is(sslConfig));
+        assertThat(MAPPER.readValue(MAPPER.writeValueAsBytes(sslConfig), SslConfiguration.class), is(sslConfig));
     }
 
     @Test
     public void testJsonDeserialize() throws IOException {
-        ObjectMapper mapper = ObjectMappers.guavaJdk7();
         SslConfiguration sslConfig = SslConfiguration.of(
                 TestConstants.CA_TRUST_STORE_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
 
-        assertThat(mapper.readValue(JSON_STRING, SslConfiguration.class), is(sslConfig));
+        assertThat(MAPPER.readValue(JSON_STRING, SslConfiguration.class), is(sslConfig));
     }
 
     private static final String JSON_STRING =

@@ -20,9 +20,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.common.base.Optional;
-import com.palantir.remoting.http.FeignClients;
+import com.squareup.okhttp.OkHttpClient;
+import feign.Feign;
 import feign.RetryableException;
+import feign.jaxrs.JAXRSContract;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -97,10 +98,12 @@ public final class DropwizardSslClientAuthTests {
         SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
 
         String endpointUri = "https://localhost:" + APP.getLocalPort();
-        return FeignClients.standard().createProxy(
-                Optional.of(factory),
-                endpointUri,
-                TestEchoService.class);
+        OkHttpClient okHttpClient = new OkHttpClient();
+        okHttpClient.setSslSocketFactory(factory);
+        return Feign.builder()
+                .client(new feign.okhttp.OkHttpClient(okHttpClient))
+                .contract(new JAXRSContract())
+                .target(TestEchoService.class, endpointUri);
     }
 
     public static final class TestEchoServer extends Application<Configuration> {
