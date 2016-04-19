@@ -16,6 +16,7 @@
 
 package com.palantir.config.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Optional;
@@ -24,6 +25,7 @@ import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Lazy;
@@ -35,7 +37,7 @@ import org.immutables.value.Value.Style;
  */
 @Immutable
 @JsonDeserialize(as = ImmutableServiceDiscoveryConfiguration.class)
-@Style(get = "*", visibility = Style.ImplementationVisibility.PACKAGE)
+@Style(visibility = Style.ImplementationVisibility.PACKAGE)
 public abstract class ServiceDiscoveryConfiguration {
 
     /**
@@ -43,14 +45,14 @@ public abstract class ServiceDiscoveryConfiguration {
      * {@link ServiceConfiguration}.
      */
     @JsonProperty("apiToken")
-    public abstract Optional<BearerToken> getDefaultApiToken();
+    public abstract Optional<BearerToken> defaultApiToken();
 
     /**
      * Fallback SSL Configuration to be used if the service specific SSL configuration is not defined in the
      * {@link ServiceConfiguration}.
      */
     @JsonProperty("security")
-    public abstract Optional<SslConfiguration> getDefaultSecurity();
+    public abstract Optional<SslConfiguration> defaultSecurity();
 
     @JsonProperty("services")
     abstract Map<String, ServiceConfiguration> originalServices();
@@ -60,15 +62,18 @@ public abstract class ServiceDiscoveryConfiguration {
      */
     @Lazy
     @SuppressWarnings("checkstyle:designforextension")
+    @JsonIgnore
     public Map<String, ServiceConfiguration> getServices() {
         Map<String, ServiceConfiguration> intializedServices = new HashMap<String, ServiceConfiguration>();
 
         for (Map.Entry<String, ServiceConfiguration> entry : originalServices().entrySet()) {
-            ServiceConfiguration serviceConfig = entry.getValue();
-            Optional<BearerToken> apiToken = serviceConfig.apiToken().or(getDefaultApiToken());
-            Optional<SslConfiguration> security = serviceConfig.security().or(getDefaultSecurity());
-            intializedServices.put(entry.getKey(),
-                    ImmutableServiceConfiguration.of(apiToken, security, serviceConfig.uris()));
+            ServiceConfiguration originalConfig = entry.getValue();
+            ServiceConfiguration configWithDefaults = ImmutableServiceConfiguration.builder()
+                    .apiToken(originalConfig.apiToken().or(defaultApiToken()))
+                    .security(originalConfig.security().or(defaultSecurity()))
+                    .uris(originalConfig.uris()).build();
+
+            intializedServices.put(entry.getKey(), configWithDefaults);
         }
 
         return Collections.unmodifiableMap(intializedServices);
@@ -79,9 +84,8 @@ public abstract class ServiceDiscoveryConfiguration {
      * {@link ServiceConfiguration}. If the API token is not defined in the {@link ServiceConfiguration}, the default
      * API token will be returned.
      *
-     * @param serviceName
-     *        the name of the service to be used to retrieve the respective {@link ServiceConfiguration}
-     * @return the API token for a service based on the input service name
+     * @param serviceName the name of the service
+     * @return the API token for the specified service
      */
     public final Optional<BearerToken> getApiToken(String serviceName) {
         ServiceConfiguration serviceConfig =
@@ -96,15 +100,47 @@ public abstract class ServiceDiscoveryConfiguration {
      * {@link ServiceConfiguration}. If the {@link SslConfiguration} is not defined in the {@link ServiceConfiguration},
      * the default {@link SslConfiguration} will be returned.
      *
-     * @param serviceName
-     *        the name of the service to be used to retrieve the respective {@link ServiceConfiguration}
-     * @return the {@link ServiceConfiguration} for a service based on the input service name
+     * @param serviceName the name of the service
+     * @return the {@link SslConfiguration} for the specified service
      */
-    public final Optional<SslConfiguration> getSslConfiguration(String serviceName) {
+    public final Optional<SslConfiguration> getSecurity(String serviceName) {
         ServiceConfiguration serviceConfig =
                 Preconditions.checkNotNull(
                         getServices().get(serviceName), "Unable to find the configuration for " + serviceName + ".");
 
         return serviceConfig.security();
+    }
+
+    /**
+     * Uses the service name as the key to retrieve the service URIs for the respective {@link ServiceConfiguration}.
+     *
+     * @param serviceName the name of the service
+     * @return the URIs for the specified service
+     */
+    public final List<String> getUris(String serviceName) {
+        ServiceConfiguration serviceConfig =
+                Preconditions.checkNotNull(
+                        getServices().get(serviceName), "Unable to find the configuration for " + serviceName + ".");
+
+        return serviceConfig.uris();
+    }
+
+    // hides implementation details
+    public static Builder builder() {
+        return ImmutableServiceDiscoveryConfiguration.builder();
+    }
+
+    // hides implementation details
+    public interface Builder {
+
+        Builder defaultApiToken(BearerToken defaultApiToken);
+
+        Builder defaultSecurity(SslConfiguration defaultSecurity);
+
+        Builder originalServices(Map<String, ? extends ServiceConfiguration> services);
+
+        Builder from(ServiceDiscoveryConfiguration otherConfig);
+
+        ServiceDiscoveryConfiguration build();
     }
 }

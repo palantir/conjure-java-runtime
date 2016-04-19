@@ -143,7 +143,7 @@ public final class FeignClientFactory {
      * Constructs a dynamic proxy for the specified type using the {@link ServiceConfiguration} obtained from the
      * supplied {@link ServiceDiscoveryConfiguration} for the specified service name.
      */
-    public <T> T createProxies(
+    public <T> T createProxy(
             ServiceDiscoveryConfiguration discoveryConfig, String serviceName, Class<T> serviceClass) {
 
         ServiceConfiguration serviceConfig = Preconditions.checkNotNull(
@@ -151,7 +151,7 @@ public final class FeignClientFactory {
                 "Unable to find the configuration for " + serviceName + ".");
 
         Optional<SSLSocketFactory> socketFactory = Optional.absent();
-        Optional<SslConfiguration> sslConfig = discoveryConfig.getSslConfiguration(serviceName);
+        Optional<SslConfiguration> sslConfig = discoveryConfig.getSecurity(serviceName);
 
         if (sslConfig.isPresent()) {
             socketFactory = Optional.of(SslSocketFactories.createSslSocketFactory(sslConfig.get()));
