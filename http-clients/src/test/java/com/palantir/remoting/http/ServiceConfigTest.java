@@ -43,9 +43,9 @@ public final class ServiceConfigTest {
                 rule.getConfiguration().getServiceDiscoveryConfiguration();
 
         HelloService helloClient =
-                FeignClients.standard().createProxies(discoveryConfiguration, "hello", HelloService.class);
+                FeignClients.standard().createProxy(discoveryConfiguration, "hello", HelloService.class);
         GoodbyeService goodbyeClient =
-                FeignClients.standard().createProxies(discoveryConfiguration, "goodbye", GoodbyeService.class);
+                FeignClients.standard().createProxy(discoveryConfiguration, "goodbye", GoodbyeService.class);
 
         ServiceConfiguration authConfig = rule.getConfiguration().getAuthConfiguration();
         Optional<SSLSocketFactory> socketFactory =

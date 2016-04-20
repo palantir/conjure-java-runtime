@@ -26,7 +26,7 @@ import org.immutables.value.Value.Style;
 
 @Immutable
 @JsonDeserialize(as = ImmutableServiceConfiguration.class)
-@Style(allParameters = true, visibility = Style.ImplementationVisibility.PACKAGE)
+@Style(visibility = Style.ImplementationVisibility.PACKAGE)
 public abstract class ServiceConfiguration {
 
     /**
@@ -43,4 +43,23 @@ public abstract class ServiceConfiguration {
      * A list of service URIs.
      */
     public abstract List<String> uris();
+
+    // hides implementation details
+    public static Builder builder() {
+        return ImmutableServiceConfiguration.builder();
+    }
+
+    // hides implementation details
+    public interface Builder {
+
+        Builder apiToken(BearerToken apiToken);
+
+        Builder security(SslConfiguration security);
+
+        Builder uris(Iterable<String> uris);
+
+        Builder from(ServiceConfiguration otherConfig);
+
+        ServiceConfiguration build();
+    }
 }
