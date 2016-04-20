@@ -44,13 +44,13 @@ import javax.net.ssl.SSLSocketFactory;
  * Factory for initializing Feign-based HTTP-invoking dynamic proxies around service interfaces.
  */
 public final class FeignClientFactory {
-
     private final Contract contract;
     private final Encoder encoder;
     private final Decoder decoder;
     private final ErrorDecoder errorDecoder;
     private final Function<Optional<SSLSocketFactory>, Client> clientSupplier;
     private final BackoffStrategy backoffStrategy;
+    private final BackoffStrategy leaderElectionBackoffStrategy;
     private final Request.Options options;
 
     private FeignClientFactory(
@@ -60,6 +60,7 @@ public final class FeignClientFactory {
             ErrorDecoder errorDecoder,
             Function<Optional<SSLSocketFactory>, Client> clientSupplier,
             BackoffStrategy backoffStrategy,
+            BackoffStrategy leaderElectionBackoffStrategy,
             Request.Options options) {
         this.contract = contract;
         this.encoder = encoder;
@@ -67,6 +68,7 @@ public final class FeignClientFactory {
         this.errorDecoder = errorDecoder;
         this.clientSupplier = clientSupplier;
         this.backoffStrategy = backoffStrategy;
+        this.leaderElectionBackoffStrategy = leaderElectionBackoffStrategy;
         this.options = options;
     }
 
@@ -82,7 +84,7 @@ public final class FeignClientFactory {
             ErrorDecoder errorDecoder,
             Function<Optional<SSLSocketFactory>, Client> clientSupplier) {
         return new FeignClientFactory(contract, encoder, decoder, errorDecoder, clientSupplier,
-                NeverRetryingBackoffStrategy.INSTANCE, new Request.Options());
+                NeverRetryingBackoffStrategy.INSTANCE, NeverRetryingBackoffStrategy.INSTANCE, new Request.Options());
     }
 
     /**
@@ -95,9 +97,11 @@ public final class FeignClientFactory {
             ErrorDecoder errorDecoder,
             Function<Optional<SSLSocketFactory>, Client> clientSupplier,
             BackoffStrategy backoffStrategy,
+            BackoffStrategy leaderElectionBackoffStrategy,
             Request.Options options) {
         return new FeignClientFactory(
-                contract, encoder, decoder, errorDecoder, clientSupplier, backoffStrategy, options);
+                contract, encoder, decoder, errorDecoder, clientSupplier, backoffStrategy,
+                leaderElectionBackoffStrategy, options);
     }
 
     /**
@@ -123,7 +127,8 @@ public final class FeignClientFactory {
      * failure.
      */
     public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type) {
-        FailoverFeignTarget<T> target = new FailoverFeignTarget<>(uris, type, backoffStrategy);
+        FailoverFeignTarget<T> target = new FailoverFeignTarget<>(uris, type, backoffStrategy,
+                leaderElectionBackoffStrategy);
         Client client = clientSupplier.apply(sslSocketFactory);
         client = target.wrapClient(client);
         return Feign.builder()
