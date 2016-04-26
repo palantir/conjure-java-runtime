@@ -4,6 +4,7 @@ apply from: "$rootDir/gradle/publish.gradle"
 dependencies {
     compile project(':ssl-config')
     compile libs.tokens
+    compile libs.dropwizard.utils
 
     processor libs.immutables
 

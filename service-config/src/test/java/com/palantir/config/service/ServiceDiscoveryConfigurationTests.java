@@ -30,6 +30,7 @@ import com.google.common.io.Resources;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
 import io.dropwizard.jackson.Jackson;
+import io.dropwizard.util.Duration;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -51,6 +52,8 @@ public final class ServiceDiscoveryConfigurationTests {
         // testing fallback properties
         assertFalse(discoveryConfig.defaultSecurity().isPresent());
         assertFalse(discoveryConfig.defaultApiToken().isPresent());
+        assertFalse(discoveryConfig.defaultConnectTimeout().isPresent());
+        assertFalse(discoveryConfig.defaultReadTimeout().isPresent());
 
         // testing service api token property
         // 1) with token
@@ -58,6 +61,9 @@ public final class ServiceDiscoveryConfigurationTests {
         assertEquals(BearerToken.valueOf("service1ApiToken"), discoveryConfig.getApiToken("service1").get());
         assertEquals(BearerToken.valueOf("service2ApiToken"), discoveryConfig.getApiToken("service2").get());
         assertEquals(ImmutableList.of("https://some.internal.url:8443/thirdservice/api"), discoveryConfig.getUris("service3"));
+        assertEquals(Duration.minutes(1), discoveryConfig.getReadTimeout("service2").get());
+        assertEquals(Duration.minutes(5), discoveryConfig.getConnectTimeout("service3").get());
+        assertEquals(Duration.seconds(30), discoveryConfig.getReadTimeout("service3").get());
         assertFalse(discoveryConfig.getApiToken("service3").isPresent());
 
         // testing getter for services that don't exist
@@ -78,6 +84,10 @@ public final class ServiceDiscoveryConfigurationTests {
         // testing fallback properties
         assertTrue(discoveryConfig.defaultSecurity().isPresent());
         assertEquals(BearerToken.valueOf("defaultApiToken"), discoveryConfig.defaultApiToken().get());
+        assertTrue(discoveryConfig.defaultConnectTimeout().isPresent());
+        assertEquals(Duration.seconds(45), discoveryConfig.defaultConnectTimeout().get());
+        assertTrue(discoveryConfig.defaultConnectTimeout().isPresent());
+        assertEquals(Duration.minutes(15), discoveryConfig.defaultReadTimeout().get());
 
         // testing service api token property
         // 1) with token
@@ -92,21 +102,29 @@ public final class ServiceDiscoveryConfigurationTests {
     public void testBuilder() {
         BearerToken defaultApiToken = BearerToken.valueOf("someToken");
         SslConfiguration security = SslConfiguration.of(mock(Path.class));
+        Duration defaultReadTimeout = Duration.seconds(30);
+        Duration connectTimeout = Duration.hours(1);
 
         ServiceConfiguration service = ServiceConfiguration.builder()
                 .security(security)
                 .uris(ImmutableList.of("https://localhost:8443"))
+                .connectTimeout(connectTimeout)
                 .build();
         ServiceDiscoveryConfiguration services = ServiceDiscoveryConfiguration.builder()
                 .defaultApiToken(defaultApiToken)
                 .originalServices(ImmutableMap.of("service1", service))
+                .defaultReadTimeout(defaultReadTimeout)
                 .build();
 
         assertEquals(defaultApiToken, services.defaultApiToken().get());
+        assertEquals(defaultReadTimeout, services.defaultReadTimeout().get());
         assertEquals(defaultApiToken, services.getApiToken("service1").get());
         assertEquals(defaultApiToken, services.getServices().get("service1").apiToken().get());
+        assertEquals(defaultReadTimeout, services.getReadTimeout("service1").get());
+        assertEquals(defaultReadTimeout, services.getServices().get("service1").readTimeout().get());
         assertFalse(services.defaultSecurity().isPresent());
         assertEquals(security, services.getSecurity("service1").get());
         assertEquals(security, services.getServices().get("service1").security().get());
+        assertEquals(connectTimeout, services.getServices().get("service1").connectTimeout().get());
     }
 }

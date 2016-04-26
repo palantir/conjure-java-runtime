@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Optional;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
+import io.dropwizard.util.Duration;
 import java.util.List;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Style;
@@ -40,26 +41,23 @@ public abstract class ServiceConfiguration {
     public abstract Optional<SslConfiguration> security();
 
     /**
+     * Connect timeout for requests.
+     */
+    public abstract Optional<Duration> connectTimeout();
+
+    /**
+     * Read timeout for requests.
+     */
+    public abstract Optional<Duration> readTimeout();
+
+    /**
      * A list of service URIs.
      */
     public abstract List<String> uris();
 
-    // hides implementation details
     public static Builder builder() {
-        return ImmutableServiceConfiguration.builder();
+        return new Builder();
     }
 
-    // hides implementation details
-    public interface Builder {
-
-        Builder apiToken(BearerToken apiToken);
-
-        Builder security(SslConfiguration security);
-
-        Builder uris(Iterable<String> uris);
-
-        Builder from(ServiceConfiguration otherConfig);
-
-        ServiceConfiguration build();
-    }
+    public static final class Builder extends ImmutableServiceConfiguration.Builder {}
 }
