@@ -44,22 +44,10 @@ public abstract class ServiceConfiguration {
      */
     public abstract List<String> uris();
 
-    // hides implementation details
     public static Builder builder() {
-        return ImmutableServiceConfiguration.builder();
+        return new Builder();
     }
 
-    // hides implementation details
-    public interface Builder {
-
-        Builder apiToken(BearerToken apiToken);
-
-        Builder security(SslConfiguration security);
-
-        Builder uris(Iterable<String> uris);
-
-        Builder from(ServiceConfiguration otherConfig);
-
-        ServiceConfiguration build();
+    public static final class Builder extends ImmutableServiceConfiguration.Builder {
     }
 }
