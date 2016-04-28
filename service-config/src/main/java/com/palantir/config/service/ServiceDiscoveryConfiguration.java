@@ -23,6 +23,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
+import io.dropwizard.util.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -58,6 +59,18 @@ public abstract class ServiceDiscoveryConfiguration {
     abstract Map<String, ServiceConfiguration> originalServices();
 
     /**
+     * Default global connect timeout .
+     */
+    @JsonProperty("connectTimeout")
+    public abstract Optional<Duration> defaultConnectTimeout();
+
+    /**
+     * Default global read timeout .
+     */
+    @JsonProperty("readTimeout")
+    public abstract Optional<Duration> defaultReadTimeout();
+
+    /**
      * A map of {@code serviceName}s as the keys and their respective {@link ServiceConfiguration}s as the values.
      */
     @Lazy
@@ -71,6 +84,8 @@ public abstract class ServiceDiscoveryConfiguration {
             ServiceConfiguration configWithDefaults = ImmutableServiceConfiguration.builder()
                     .apiToken(originalConfig.apiToken().or(defaultApiToken()))
                     .security(originalConfig.security().or(defaultSecurity()))
+                    .connectTimeout(originalConfig.connectTimeout().or(defaultConnectTimeout()))
+                    .readTimeout(originalConfig.readTimeout().or(defaultReadTimeout()))
                     .uris(originalConfig.uris()).build();
 
             intializedServices.put(entry.getKey(), configWithDefaults);
@@ -88,11 +103,7 @@ public abstract class ServiceDiscoveryConfiguration {
      * @return the API token for the specified service
      */
     public final Optional<BearerToken> getApiToken(String serviceName) {
-        ServiceConfiguration serviceConfig =
-                Preconditions.checkNotNull(
-                        getServices().get(serviceName), "Unable to find the configuration for " + serviceName + ".");
-
-        return serviceConfig.apiToken();
+        return getServiceConfig(serviceName).apiToken();
     }
 
     /**
@@ -104,11 +115,7 @@ public abstract class ServiceDiscoveryConfiguration {
      * @return the {@link SslConfiguration} for the specified service
      */
     public final Optional<SslConfiguration> getSecurity(String serviceName) {
-        ServiceConfiguration serviceConfig =
-                Preconditions.checkNotNull(
-                        getServices().get(serviceName), "Unable to find the configuration for " + serviceName + ".");
-
-        return serviceConfig.security();
+        return getServiceConfig(serviceName).security();
     }
 
     /**
@@ -118,29 +125,25 @@ public abstract class ServiceDiscoveryConfiguration {
      * @return the URIs for the specified service
      */
     public final List<String> getUris(String serviceName) {
-        ServiceConfiguration serviceConfig =
-                Preconditions.checkNotNull(
-                        getServices().get(serviceName), "Unable to find the configuration for " + serviceName + ".");
-
-        return serviceConfig.uris();
+        return getServiceConfig(serviceName).uris();
     }
 
-    // hides implementation details
+    public final Optional<Duration> getConnectTimeout(String serviceName) {
+        return getServiceConfig(serviceName).connectTimeout();
+    }
+
+    public final Optional<Duration> getReadTimeout(String serviceName) {
+        return getServiceConfig(serviceName).readTimeout();
+    }
+
+    private ServiceConfiguration getServiceConfig(String serviceName) {
+        return Preconditions.checkNotNull(getServices().get(serviceName),
+                "Unable to find the configuration for " + serviceName + ".");
+    }
+
     public static Builder builder() {
-        return ImmutableServiceDiscoveryConfiguration.builder();
+        return new Builder();
     }
 
-    // hides implementation details
-    public interface Builder {
-
-        Builder defaultApiToken(BearerToken defaultApiToken);
-
-        Builder defaultSecurity(SslConfiguration defaultSecurity);
-
-        Builder originalServices(Map<String, ? extends ServiceConfiguration> services);
-
-        Builder from(ServiceDiscoveryConfiguration otherConfig);
-
-        ServiceDiscoveryConfiguration build();
-    }
+    public static final class Builder extends ImmutableServiceDiscoveryConfiguration.Builder {}
 }

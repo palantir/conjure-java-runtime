@@ -35,6 +35,7 @@ import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
+import io.dropwizard.util.Duration;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +45,9 @@ import javax.net.ssl.SSLSocketFactory;
  * Factory for initializing Feign-based HTTP-invoking dynamic proxies around service interfaces.
  */
 public final class FeignClientFactory {
+
+    private static final Duration CONNECT_TIMEOUT = Duration.minutes(10);
+    private static final Duration READ_TIMEOUT = Duration.minutes(10);
 
     private final Contract contract;
     private final Encoder encoder;
@@ -104,14 +108,15 @@ public final class FeignClientFactory {
      * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and feign {@link
      * feign.Client.Default} HTTP client.
      */
-    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, String uri, Class<T> type) {
+    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, String uri, Class<T> type,
+            Request.Options requestOptions) {
         return Feign.builder()
                 .contract(contract)
                 .encoder(encoder)
                 .decoder(decoder)
                 .errorDecoder(errorDecoder)
                 .client(clientSupplier.apply(sslSocketFactory))
-                .options(options)
+                .options(requestOptions)
                 .logger(new Slf4jLogger(FeignClients.class))
                 .logLevel(Level.BASIC)
                 .target(type, uri);
@@ -119,10 +124,20 @@ public final class FeignClientFactory {
 
     /**
      * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and feign {@link
+     * feign.Client.Default} HTTP client.
+     */
+    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, String uri, Class<T> type) {
+        return createProxy(sslSocketFactory, uri, type, options);
+    }
+
+
+    /**
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and feign {@link
      * feign.Client.Default} HTTP client. A {@link FailoverFeignTarget} is used to cycle through the given uris on
      * failure.
      */
-    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type) {
+    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type,
+            Request.Options requestOptions) {
         FailoverFeignTarget<T> target = new FailoverFeignTarget<>(uris, type, backoffStrategy);
         Client client = clientSupplier.apply(sslSocketFactory);
         client = target.wrapClient(client);
@@ -133,10 +148,19 @@ public final class FeignClientFactory {
                 .errorDecoder(errorDecoder)
                 .client(client)
                 .retryer(target)
-                .options(options)
+                .options(requestOptions)
                 .logger(new Slf4jLogger(FeignClients.class))
                 .logLevel(Level.BASIC)
                 .target(target);
+    }
+
+    /**
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and feign {@link
+     * feign.Client.Default} HTTP client. A {@link FailoverFeignTarget} is used to cycle through the given uris on
+     * failure.
+     */
+    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type) {
+        return createProxy(sslSocketFactory, uris, type, options);
     }
 
     /**
@@ -158,8 +182,10 @@ public final class FeignClientFactory {
         }
 
         Set<String> uris = Sets.newHashSet(serviceConfig.uris());
-
-        return createProxy(socketFactory, uris, serviceClass);
+        Request.Options requestOptions = new Request.Options((int) serviceConfig.connectTimeout()
+                .or(CONNECT_TIMEOUT).toMilliseconds(), (int) serviceConfig.readTimeout()
+                .or(READ_TIMEOUT).toMilliseconds());
+        return createProxy(socketFactory, uris, serviceClass, requestOptions);
     }
 
     /**

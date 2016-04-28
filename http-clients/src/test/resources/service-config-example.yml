@@ -18,6 +18,9 @@ serviceDiscovery:
   # optional API token
   apiToken: defaultApiDToken
 
+  connectTimeout: 5 minutes
+  readTimeout: 30 seconds
+
   services:
     hello:
       # list of service API endpoints (mandatory)

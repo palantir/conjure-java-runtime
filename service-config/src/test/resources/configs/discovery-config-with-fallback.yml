@@ -8,6 +8,9 @@ security:
 
 apiToken: defaultApiToken
 
+connectTimeout: 45 seconds
+readTimeout: 15 minutes
+
 services:
   service1:
     apiToken: service1ApiToken
@@ -27,8 +30,10 @@ services:
     apiToken: service2ApiToken
     security:
       trustStorePath: src/test/resources/trustStore.jks
+    readTimeout: 1 minute
 
   service3:
     uris:
       - https://some.internal.url:8443/thirdservice/api
-
+    connectTimeout: 5 minutes
+    readTimeout: 30 seconds
