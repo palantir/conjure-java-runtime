@@ -3,6 +3,8 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(':error-handling')
+    compile project(':tracing')
+
     compile libs.jackson.databind
     compile libs.jsr305
     compile libs.dropwizard.core

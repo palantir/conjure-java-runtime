@@ -48,6 +48,7 @@ public final class FeignClientFactory {
 
     private static final Duration CONNECT_TIMEOUT = Duration.minutes(10);
     private static final Duration READ_TIMEOUT = Duration.minutes(10);
+    private static final TraceRequestInterceptor TRACE_INTERCEPTOR = new TraceRequestInterceptor();
 
     private final Contract contract;
     private final Encoder encoder;
@@ -114,6 +115,7 @@ public final class FeignClientFactory {
                 .contract(contract)
                 .encoder(encoder)
                 .decoder(decoder)
+                .requestInterceptor(TRACE_INTERCEPTOR)
                 .errorDecoder(errorDecoder)
                 .client(clientSupplier.apply(sslSocketFactory))
                 .options(requestOptions)
@@ -145,6 +147,7 @@ public final class FeignClientFactory {
                 .contract(contract)
                 .encoder(encoder)
                 .decoder(decoder)
+                .requestInterceptor(TRACE_INTERCEPTOR)
                 .errorDecoder(errorDecoder)
                 .client(client)
                 .retryer(target)

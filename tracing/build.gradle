@@ -1,0 +1,11 @@
+apply from: "${rootDir}/gradle/libs.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile libs.guava
+    compile libs.jackson.databind
+
+    processor libs.immutables
+}
+
+tasks.check.dependsOn(javadoc)
