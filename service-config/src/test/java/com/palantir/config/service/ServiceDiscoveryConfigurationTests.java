@@ -99,6 +99,17 @@ public final class ServiceDiscoveryConfigurationTests {
     }
 
     @Test
+    public void testIsServiceEnabled() throws IOException {
+        URL resource = Resources.getResource("configs/discovery-config-with-empty-uri.yml");
+        ServiceDiscoveryConfiguration discoveryConfig =
+                mapper.readValue(resource.openStream(), ServiceDiscoveryConfiguration.class);
+
+        assertFalse(discoveryConfig.isServiceEnabled("service1"));
+        assertTrue(discoveryConfig.isServiceEnabled("service2"));
+        assertFalse(discoveryConfig.isServiceEnabled("service-that-does-not-exist"));
+    }
+
+    @Test
     public void testBuilder() {
         BearerToken defaultApiToken = BearerToken.valueOf("someToken");
         SslConfiguration security = SslConfiguration.of(mock(Path.class));

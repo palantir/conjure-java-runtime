@@ -136,6 +136,20 @@ public abstract class ServiceDiscoveryConfiguration {
         return getServiceConfig(serviceName).readTimeout();
     }
 
+    /**
+     * Checks if a service is enabled.
+     * <p>
+     * A service is enabled iff the configuration for it exists and its list of URIs is non-empty.
+     *
+     * @param serviceName the name of the service
+     * @return whether or not the service is enabled
+     */
+    public final boolean isServiceEnabled(String serviceName) {
+        ServiceConfiguration serviceConfig = getServices().get(serviceName);
+
+        return serviceConfig != null && !serviceConfig.uris().isEmpty();
+    }
+
     private ServiceConfiguration getServiceConfig(String serviceName) {
         return Preconditions.checkNotNull(getServices().get(serviceName),
                 "Unable to find the configuration for " + serviceName + ".");
