@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Lazy;
-import org.immutables.value.Value.Style;
 
 /**
  * Configuration class that contains a map of {@code serviceName}s and their respective {@link ServiceConfiguration}s
@@ -38,7 +37,7 @@ import org.immutables.value.Value.Style;
  */
 @Immutable
 @JsonDeserialize(as = ImmutableServiceDiscoveryConfiguration.class)
-@Style(visibility = Style.ImplementationVisibility.PACKAGE)
+@PackageVisibilityImmutableStyle
 public abstract class ServiceDiscoveryConfiguration {
 
     /**
