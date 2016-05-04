@@ -27,7 +27,7 @@ import feign.Request.Options;
 import feign.TextDelegateDecoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
-import feign.jaxrs.JAXRSContract;
+import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
 
 /**
  * Static factory methods for producing common configurations of {@link FeignClientFactory}, which in turn may be used
@@ -54,7 +54,7 @@ public final class FeignClients {
      */
     public static FeignClientFactory standard(Request.Options timeoutOptions) {
         return FeignClientFactory.of(
-                new QueryMapAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())),
+                new GuavaOptionalAwareContract(new JaxRsWithHeaderAndQueryMapContract()),
                 new InputStreamDelegateEncoder(new JacksonEncoder(ObjectMappers.guavaJdk7())),
                 new OptionalAwareDecoder(
                         new InputStreamDelegateDecoder(
@@ -78,7 +78,7 @@ public final class FeignClients {
      */
     public static FeignClientFactory standardJackson24(Request.Options timeoutOptions) {
         return FeignClientFactory.of(
-                new QueryMapAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())),
+                new GuavaOptionalAwareContract(new JaxRsWithHeaderAndQueryMapContract()),
                 new InputStreamDelegateEncoder(new Jackson24Encoder(ObjectMappers.guavaJdk7())),
                 new OptionalAwareDecoder(
                         new InputStreamDelegateDecoder(
@@ -102,7 +102,7 @@ public final class FeignClients {
      */
     public static FeignClientFactory vanilla(Request.Options timeoutOptions) {
         return FeignClientFactory.of(
-                new QueryMapAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())),
+                new GuavaOptionalAwareContract(new JaxRsWithHeaderAndQueryMapContract()),
                 new InputStreamDelegateEncoder(new JacksonEncoder(ObjectMappers.vanilla())),
                 new OptionalAwareDecoder(
                         new InputStreamDelegateDecoder(
@@ -126,7 +126,7 @@ public final class FeignClients {
      */
     public static FeignClientFactory withMapper(ObjectMapper mapper, Request.Options timeoutOptions) {
         return FeignClientFactory.of(
-                new QueryMapAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())),
+                new GuavaOptionalAwareContract(new JaxRsWithHeaderAndQueryMapContract()),
                 new InputStreamDelegateEncoder(new JacksonEncoder(mapper)),
                 new OptionalAwareDecoder(
                         new InputStreamDelegateDecoder(
