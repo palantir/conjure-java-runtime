@@ -18,7 +18,7 @@ package com.palantir.remoting.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
-import com.palantir.remoting.http.errors.SerializableErrorErrorDecoder;
+import com.palantir.remoting.http.errors.FeignSerializableErrorErrorDecoder;
 import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
 import feign.OptionalAwareDecoder;
@@ -60,7 +60,7 @@ public final class FeignClients {
                         new InputStreamDelegateDecoder(
                                 new TextDelegateDecoder(
                                         new JacksonDecoder(ObjectMappers.guavaJdk7())))),
-                SerializableErrorErrorDecoder.INSTANCE,
+                FeignSerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
                 NeverRetryingBackoffStrategy.INSTANCE,
                 timeoutOptions);
@@ -84,7 +84,7 @@ public final class FeignClients {
                         new InputStreamDelegateDecoder(
                                 new TextDelegateDecoder(
                                         new JacksonDecoder(ObjectMappers.guavaJdk7())))),
-                SerializableErrorErrorDecoder.INSTANCE,
+                FeignSerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
                 NeverRetryingBackoffStrategy.INSTANCE,
                 timeoutOptions);
@@ -108,7 +108,7 @@ public final class FeignClients {
                         new InputStreamDelegateDecoder(
                                 new TextDelegateDecoder(
                                         new JacksonDecoder(ObjectMappers.vanilla())))),
-                SerializableErrorErrorDecoder.INSTANCE,
+                FeignSerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
                 NeverRetryingBackoffStrategy.INSTANCE,
                 timeoutOptions);
@@ -132,7 +132,7 @@ public final class FeignClients {
                         new InputStreamDelegateDecoder(
                                 new TextDelegateDecoder(
                                         new JacksonDecoder(mapper)))),
-                SerializableErrorErrorDecoder.INSTANCE,
+                FeignSerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
                 NeverRetryingBackoffStrategy.INSTANCE,
                 timeoutOptions);

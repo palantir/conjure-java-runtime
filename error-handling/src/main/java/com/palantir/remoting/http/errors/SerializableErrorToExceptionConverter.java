@@ -17,62 +17,58 @@
 package com.palantir.remoting.http.errors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.io.CharStreams;
-import com.google.common.net.HttpHeaders;
-import feign.Response;
-import feign.Response.Body;
-import feign.codec.ErrorDecoder;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A feign {@link ErrorDecoder} that attempts to interpret the {@link Response}'s body as a JSON representation of a
- * {@link SerializableError} and re-throws the encoded exception including exception type, message, and stacktrace.
- * Throws a {@link RuntimeException} if the body cannot be interpreted as a {@link SerializableError}, or if the
- * exception fails to get re-thrown.
+ * Attempts to convert a HTTP {@link Response} body as a JSON representation of a {@link SerializableError} and
+ * re-create the original (or close-to) exception including exception type, message, and stacktrace. Creates
+ * {@link RuntimeException} if the body cannot be interpreted as a {@link SerializableError}, or if the exception
+ * otherwise fails to get re-created.
  */
-public enum SerializableErrorErrorDecoder implements ErrorDecoder {
-    INSTANCE;
+public final class SerializableErrorToExceptionConverter {
 
-    private static final Logger log = LoggerFactory.getLogger(SerializableErrorErrorDecoder.class);
+    private SerializableErrorToExceptionConverter() {
+        // util
+    }
+
+    private static final Logger log = LoggerFactory.getLogger(SerializableErrorToExceptionConverter.class);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    @Override
-    public Exception decode(String methodKey, Response response) {
-        Collection<String> contentType = response.headers().get(HttpHeaders.CONTENT_TYPE);
-        if (contentType == null) {
-            contentType = ImmutableSet.of();
-        }
-
-        Body body = response.body();
+    public static Exception getException(Collection<String> contentTypes, int status, String reason,
+            @CheckForNull InputStream body) {
         if (body != null) {
-            if (contentType.contains(MediaType.APPLICATION_JSON)) {
-                String bodyAsString = readBodyAsString(body);
+            String bodyAsString = readBodyAsString(body);
 
+            if (contentTypes.contains(MediaType.APPLICATION_JSON)) {
                 SerializableError error;
                 try {
                     error = MAPPER.readValue(bodyAsString, SerializableError.class);
                 } catch (Exception e) {
                     String message = String.format(
                             "Error %s. Reason: %s. Failed to parse error body and instantiate exception: %s. Body:%n%s",
-                            response.status(), response.reason(), e.getMessage(), bodyAsString);
+                            status, reason, e.getMessage(), bodyAsString);
                     log.error(message, e);
                     return new RuntimeException(message);
                 }
 
                 // Construct remote exception and fill with remote stacktrace
                 Exception remoteException = constructException(error.getExceptionClassName(), error.getMessage(),
-                        response.status(), null);
+                        status, null);
                 List<StackTraceElement> stackTrace = error.getStackTrace();
                 if (stackTrace != null) {
                     remoteException.setStackTrace(stackTrace.toArray(new StackTraceElement[stackTrace.size()]));
@@ -81,27 +77,26 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
                 // Construct local exception that wraps the remote exception and fill with stack trace of local
                 // call (yet without the reflection overhead).
                 Exception localException =
-                        constructException(error.getExceptionClassName(), error.getMessage(), response.status(),
+                        constructException(error.getExceptionClassName(), error.getMessage(), status,
                                 remoteException);
                 localException.fillInStackTrace();
 
                 return localException;
 
-            } else if (contentType.contains(MediaType.TEXT_HTML) || contentType.contains(MediaType.TEXT_PLAIN)
-                    || contentType.contains(MediaType.TEXT_XML)) {
-                String bodyAsString = readBodyAsString(body);
+            } else if (contentTypes.contains(MediaType.TEXT_HTML) || contentTypes.contains(MediaType.TEXT_PLAIN)
+                    || contentTypes.contains(MediaType.TEXT_XML)) {
                 String message =
-                        String.format("Error %s. Reason: %s. Body:%n%s", response.status(), response.reason(),
+                        String.format("Error %s. Reason: %s. Body:%n%s", status, reason,
                                 bodyAsString);
                 log.error(message);
                 return new RuntimeException(message);
             }
 
-            String message = String.format("Error %s. Reason: %s. Body content type: %s", response.status(),
-                    response.reason(), contentType);
+            String message = String.format("Error %s. Reason: %s. Body content type: %s. Body as String: %s", status,
+                    reason, contentTypes, bodyAsString);
             return new RuntimeException(message);
         } else {
-            return new RuntimeException(String.format("%s %s", response.status(), response.reason()));
+            return new RuntimeException(String.format("%s %s", status, reason));
         }
     }
 
@@ -163,8 +158,8 @@ public enum SerializableErrorErrorDecoder implements ErrorDecoder {
      * Reads the response body fully into a string so that if there are exceptions parsing the body we can at least show
      * the string representation of it.
      */
-    private static String readBodyAsString(Body body) {
-        try (Reader reader = body.asReader()) {
+    private static String readBodyAsString(InputStream body) {
+        try (Reader reader = new InputStreamReader(body, StandardCharsets.UTF_8)) {
             return CharStreams.toString(reader);
         } catch (IOException e) {
             throw new RuntimeException(e);

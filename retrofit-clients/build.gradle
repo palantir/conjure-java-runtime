@@ -2,6 +2,7 @@ apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
+    compile project(':error-handling')
     // ssl-config is not used in this project, but we depend on it here in order to provide
     // it transitively to users of retrofit-clients as a convenience.
     compile project(':ssl-config')
