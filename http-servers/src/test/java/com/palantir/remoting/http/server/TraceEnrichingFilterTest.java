@@ -17,15 +17,15 @@
 package com.palantir.remoting.http.server;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.tracing.TraceState;
 import com.palantir.tracing.Traces;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
-import java.util.UUID;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -42,7 +42,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public final class TraceInheritingFilterTest {
+public final class TraceEnrichingFilterTest {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TracingTestServer.class,
@@ -60,53 +60,69 @@ public final class TraceInheritingFilterTest {
 
     @Test
     public void testTraceState_withHeaderUsesTraceId() {
-        Response response = target.path("/trace").request().header(Traces.TRACE_HEADER, "abc").get();
+        Response response = target.path("/trace").request()
+                .header(Traces.Headers.TRACE_ID, "traceId")
+                .header(Traces.Headers.PARENT_SPAN_ID, "parentSpanId")
+                .header(Traces.Headers.SPAN_ID, "spanId")
+                .get();
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(TraceState.class),
-                is((TraceState) TraceState.builder().traceId("abc").operation("GET /trace").build()));
+        assertThat(response.readEntity(String.class), is("GET /trace"));
+        assertThat(response.getHeaderString(Traces.Headers.TRACE_ID), is("traceId"));
+        assertThat(response.getHeaderString(Traces.Headers.PARENT_SPAN_ID), is("parentSpanId"));
+        assertThat(response.getHeaderString(Traces.Headers.SPAN_ID), is("spanId"));
     }
 
     @Test
     public void testTraceState_respectsMethod() {
-        Response response = target.path("/trace").request().header(Traces.TRACE_HEADER, "abc").post(Entity.json(""));
+        Response response = target.path("/trace").request()
+                .header(Traces.Headers.TRACE_ID, "traceId")
+                .header(Traces.Headers.PARENT_SPAN_ID, "parentSpanId")
+                .header(Traces.Headers.SPAN_ID, "spanId")
+                .post(Entity.json(""));
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(TraceState.class),
-                is((TraceState) TraceState.builder().traceId("abc").operation("POST /trace").build()));
+        assertThat(response.readEntity(String.class), is("POST /trace"));
+        assertThat(response.getHeaderString(Traces.Headers.TRACE_ID), is("traceId"));
+        assertThat(response.getHeaderString(Traces.Headers.PARENT_SPAN_ID), is("parentSpanId"));
+        assertThat(response.getHeaderString(Traces.Headers.SPAN_ID), is("spanId"));
     }
 
     @Test
-    public void testTraceState_withoutHeaderGeneratesValidUuid() {
+    public void testTraceState_withoutRequestHeadersGeneratesValidTraceResponseHeaders() {
         Response response = target.path("/trace").request().get();
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        TraceState state = response.readEntity(TraceState.class);
-        assertThat(UUID.fromString(state.getTraceId()).toString(), is(state.getTraceId()));
+        assertThat(response.readEntity(String.class), is("GET /trace"));
+        assertThat(response.getHeaderString(Traces.Headers.TRACE_ID), not(nullValue()));
+        assertThat(response.getHeaderString(Traces.Headers.PARENT_SPAN_ID), is(nullValue()));
+        assertThat(response.getHeaderString(Traces.Headers.SPAN_ID), not(nullValue()));
     }
 
     @Test
-    public void testTraceState_withEmptyHeaderGeneratesValidUuid() {
-        Response response = target.path("/trace").request().header(Traces.TRACE_HEADER, "").get();
+    public void testTraceState_withEmptyTraceIdGeneratesValidTraceResponseHeaders() {
+        Response response = target.path("/trace").request().header(Traces.Headers.TRACE_ID, "").get();
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        TraceState state = response.readEntity(TraceState.class);
-        assertThat(UUID.fromString(state.getTraceId()).toString(), is(state.getTraceId()));
+        assertThat(response.readEntity(String.class), is("GET /trace"));
+        assertThat(response.getHeaderString(Traces.Headers.TRACE_ID), not(nullValue()));
+        assertThat(response.getHeaderString(Traces.Headers.PARENT_SPAN_ID), is(nullValue()));
+        assertThat(response.getHeaderString(Traces.Headers.SPAN_ID), not(nullValue()));
     }
 
     public static class TracingTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(new TraceInheritingFilter());
+            env.jersey().register(new TraceEnrichingFilter());
             env.jersey().register(new TracingTestResource());
         }
     }
 
     public static final class TracingTestResource implements TracingTestService {
         @Override
-        public TraceState getTrace() {
-            return Traces.getTrace();
+        public String getTraceOperation() {
+            return Traces.getTrace().get().getOperation();
         }
 
         @Override
-        public TraceState postTrace() {
-            return Traces.getTrace();
+        public String postTraceOperation() {
+            return Traces.getTrace().get().getOperation();
         }
     }
 
@@ -116,11 +132,11 @@ public final class TraceInheritingFilterTest {
     public interface TracingTestService {
         @GET
         @Path("/trace")
-        TraceState getTrace();
+        String getTraceOperation();
 
         @POST
         @Path("/trace")
-        TraceState postTrace();
+        String postTraceOperation();
     }
 
 }

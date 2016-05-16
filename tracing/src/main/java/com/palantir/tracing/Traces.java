@@ -16,44 +16,59 @@
 
 package com.palantir.tracing;
 
-import com.google.common.base.Strings;
+import com.google.common.base.Optional;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public final class Traces {
 
-    public static final String TRACE_HEADER = "trace-id";
+    public interface Headers {
+        String TRACE_ID = "X-B3-TraceId";
+        String PARENT_SPAN_ID = "X-B3-ParentSpanId";
+        String SPAN_ID = "X-B3-SpanId";
+        String SPAN_NAME = "X-Span-Name";
+    }
 
-    private static final ThreadLocal<TraceState> STATE = new ThreadLocal<TraceState>() {
+    // stack of trace states
+    private static final ThreadLocal<Deque<TraceState>> STATE = new ThreadLocal<Deque<TraceState>>() {
         @Override
-        protected TraceState initialValue() {
-            return TraceState.builder().operation("").build();
+        protected Deque<TraceState> initialValue() {
+            return new ArrayDeque<>();
         }
     };
 
-    public static TraceState getTrace() {
-        return STATE.get();
+    public static Optional<TraceState> getTrace() {
+        Deque<TraceState> stack = STATE.get();
+        return (!stack.isEmpty()) ? Optional.of(stack.peek()) : Optional.<TraceState>absent();
+    }
+
+    public static void setTrace(TraceState state) {
+        STATE.get().push(state);
     }
 
     /**
-     * Create a new call trace using the provided operation descriptor and trace identifier.
-     * If the provided traceId is null, a random traceId will be generated.
+     * Derives a new call trace from the currently known call trace labeled with the
+     * provided operation.
      */
-    public static void createTrace(String operation, String traceId) {
-        TraceState newState;
-        if (!Strings.isNullOrEmpty(traceId)) {
-            newState = TraceState.builder().operation(operation).traceId(traceId).build();
-        } else {
-            newState = TraceState.builder().operation(operation).build();
+    public static TraceState deriveTrace(String operation) {
+        Optional<TraceState> prevState = getTrace();
+
+        TraceState.Builder newStateBuilder = TraceState.builder()
+                .operation(operation);
+
+        if (prevState.isPresent()) {
+            newStateBuilder.traceId(prevState.get().getTraceId())
+                .parentSpanId(prevState.get().getSpanId()); // span -> parent
         }
 
-        STATE.set(newState);
+        TraceState newState = newStateBuilder.build();
+        STATE.get().push(newState);
+        return newState;
     }
 
-    /**
-     * Create a new call trace with the provided operation descriptor and a randomly generated globally unique
-     * trace identifier.
-     */
-    public static void createTrace(String operation) {
-        createTrace(operation, null);
+    public static Optional<TraceState> complete() {
+        Deque<TraceState> stack = STATE.get();
+        return (!stack.isEmpty()) ? Optional.of(stack.pop()) : Optional.<TraceState>absent();
     }
 
     private Traces() {}

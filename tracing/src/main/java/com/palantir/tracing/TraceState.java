@@ -18,6 +18,7 @@ package com.palantir.tracing;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Optional;
 import java.nio.ByteBuffer;
 import java.util.Random;
 import java.util.UUID;
@@ -48,11 +49,25 @@ public abstract class TraceState {
         return randomId();
     }
 
+    /**
+     * Return the identifier of the parent span for the current span, if one exists.
+     */
+    public abstract Optional<String> getParentSpanId();
+
+    /**
+     * Return a globally unique identifier representing a single span within the call trace.
+     */
+    @SuppressWarnings("checkstyle:designforextension")
+    @Value.Default
+    public String getSpanId() {
+        return randomId();
+    }
+
     public static final Builder builder() {
         return new Builder();
     }
 
-    private static String randomId() {
+    public static String randomId() {
         // non-secure random generated UUID because speed is important here and security is not
         byte[] randomBytes = new byte[16];
         RANDOM.nextBytes(randomBytes);

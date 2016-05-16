@@ -17,9 +17,11 @@
 package com.palantir.remoting.retrofit;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.base.Optional;
+import com.palantir.tracing.TraceState;
 import com.palantir.tracing.Traces;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
@@ -56,18 +58,19 @@ public final class TracingRequestInterceptorTest {
         service.get();
         RecordedRequest request = server.takeRequest();
 
-        String traceId = request.getHeader(Traces.TRACE_HEADER);
+        String traceId = request.getHeader(Traces.Headers.TRACE_ID);
         assertThat(UUID.fromString(traceId).toString(), is(traceId));
     }
 
     @Test
     public void testTraceRequestInterceptor_sendsExplicitTraceId() throws InterruptedException {
-        Traces.createTrace("op", "my trace");
+        TraceState state = Traces.deriveTrace("operation");
         service.get();
         RecordedRequest request = server.takeRequest();
 
-        String traceId = request.getHeader(Traces.TRACE_HEADER);
-        assertThat(traceId, is("my trace"));
+        assertThat(request.getHeader(Traces.Headers.TRACE_ID), is(state.getTraceId()));
+        assertThat(request.getHeader(Traces.Headers.PARENT_SPAN_ID), is(state.getSpanId()));
+        assertThat(request.getHeader(Traces.Headers.SPAN_ID), not(state.getSpanId()));
     }
 
     public interface TestRequestInterceptorService {

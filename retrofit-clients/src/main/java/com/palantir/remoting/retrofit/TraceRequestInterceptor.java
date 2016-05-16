@@ -24,10 +24,12 @@ public final class TraceRequestInterceptor implements RequestInterceptor {
 
     @Override
     public void intercept(RequestFacade request) {
-        TraceState traceState = Traces.getTrace();
-        if (traceState != null) {
-            request.addHeader(Traces.TRACE_HEADER, traceState.getTraceId());
+        TraceState callState = Traces.deriveTrace("");
+        request.addHeader(Traces.Headers.TRACE_ID, callState.getTraceId());
+        if (callState.getParentSpanId().isPresent()) {
+            request.addHeader(Traces.Headers.PARENT_SPAN_ID, callState.getParentSpanId().get());
         }
+        request.addHeader(Traces.Headers.SPAN_ID, callState.getSpanId());
     }
 
 }
