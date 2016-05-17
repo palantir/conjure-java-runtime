@@ -12,6 +12,9 @@ dependencies {
     compile libs.okhttp
     compile libs.slf4j
 
+    testCompile project(':http-servers')
+
+    testCompile libs.dropwizard.testing
     testCompile libs.hamcrest
     testCompile libs.junit
     testCompile libs.mockito

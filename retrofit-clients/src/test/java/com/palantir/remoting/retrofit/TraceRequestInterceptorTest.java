@@ -26,14 +26,13 @@ import com.palantir.tracing.Traces;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import java.util.UUID;
 import javax.net.ssl.SSLSocketFactory;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import retrofit.http.GET;
 
-public final class TracingRequestInterceptorTest {
+public final class TraceRequestInterceptorTest {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -50,32 +49,22 @@ public final class TracingRequestInterceptorTest {
                 TestRequestInterceptorService.class,
                 OkHttpClientOptions.builder().build());
 
-        server.enqueue(new MockResponse().setBody("\"ok\""));
+        server.enqueue(new MockResponse().setBody("{}"));
     }
 
     @Test
     public void testTraceRequestInterceptor_sendsAValidTraceId() throws InterruptedException {
+        TraceState parentTrace = Traces.deriveTrace("");
         service.get();
+
         RecordedRequest request = server.takeRequest();
-
-        String traceId = request.getHeader(Traces.Headers.TRACE_ID);
-        assertThat(UUID.fromString(traceId).toString(), is(traceId));
-    }
-
-    @Test
-    public void testTraceRequestInterceptor_sendsExplicitTraceId() throws InterruptedException {
-        TraceState state = Traces.deriveTrace("operation");
-        service.get();
-        RecordedRequest request = server.takeRequest();
-
-        assertThat(request.getHeader(Traces.Headers.TRACE_ID), is(state.getTraceId()));
-        assertThat(request.getHeader(Traces.Headers.PARENT_SPAN_ID), is(state.getSpanId()));
-        assertThat(request.getHeader(Traces.Headers.SPAN_ID), not(state.getSpanId()));
+        assertThat(request.getHeader(Traces.Headers.TRACE_ID), is(parentTrace.getTraceId()));
+        assertThat(request.getHeader(Traces.Headers.SPAN_ID), is(not(parentTrace.getSpanId())));
     }
 
     public interface TestRequestInterceptorService {
         @GET("/")
-        String get();
+        Object get();
     }
 
 }
