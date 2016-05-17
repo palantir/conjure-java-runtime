@@ -18,6 +18,7 @@ package com.palantir.remoting.http.server;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.palantir.tracing.Span;
 import com.palantir.tracing.TraceState;
 import com.palantir.tracing.Traces;
 import java.io.IOException;
@@ -64,13 +65,13 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-        Optional<TraceState> maybeTrace = Traces.complete();
-        if (maybeTrace.isPresent()) {
-            TraceState trace = maybeTrace.get();
-            headers.putSingle(Traces.Headers.TRACE_ID, trace.getTraceId());
-            headers.putSingle(Traces.Headers.SPAN_ID, trace.getSpanId());
-            if (trace.getParentSpanId().isPresent()) {
-                headers.putSingle(Traces.Headers.PARENT_SPAN_ID, trace.getParentSpanId().get());
+        Optional<Span> maybeSpan = Traces.complete();
+        if (maybeSpan.isPresent()) {
+            Span span = maybeSpan.get();
+            headers.putSingle(Traces.Headers.TRACE_ID, span.getTraceId());
+            headers.putSingle(Traces.Headers.SPAN_ID, span.getSpanId());
+            if (span.getParentSpanId().isPresent()) {
+                headers.putSingle(Traces.Headers.PARENT_SPAN_ID, span.getParentSpanId().get());
             }
         }
     }

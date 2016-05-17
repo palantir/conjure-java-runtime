@@ -36,12 +36,28 @@ public abstract class TraceState {
     private static final Random RANDOM = new Random();
 
     /**
-     * Return a description of the operation for this event.
+     * Returns a description of the operation for this event.
      */
     public abstract String getOperation();
 
     /**
-     * Return a globally unique identifier representing this call trace.
+     * Returns the start time in milliseconds of the span represented by this state.
+     * <p>
+     * Users of this class should not set this value manually in the builder, it is configured
+     * automatically when using the {@link #builder()} static.
+     */
+    public abstract long getStartTimeMs();
+
+    /**
+     * Returns the starting clock position in nanoseconds for use in computing span duration.
+     * <p>
+     * Users of this class should not set this value manually in the builder, it is configured
+     * automatically when using the {@link #builder()} static.
+     */
+    public abstract long getStartClockNs();
+
+    /**
+     * Returns a globally unique identifier representing this call trace.
      */
     @SuppressWarnings("checkstyle:designforextension")
     @Value.Default
@@ -50,12 +66,12 @@ public abstract class TraceState {
     }
 
     /**
-     * Return the identifier of the parent span for the current span, if one exists.
+     * Returns the identifier of the parent span for the current span, if one exists.
      */
     public abstract Optional<String> getParentSpanId();
 
     /**
-     * Return a globally unique identifier representing a single span within the call trace.
+     * Returns a globally unique identifier representing a single span within the call trace.
      */
     @SuppressWarnings("checkstyle:designforextension")
     @Value.Default
@@ -63,8 +79,15 @@ public abstract class TraceState {
         return randomId();
     }
 
+    /**
+     * Returns a builder for {@link TraceState} pre-initialized to use the current time.
+     * <p>
+     * Users should not set the {@code startTimeMs} value manually.
+     */
     public static final Builder builder() {
-        return new Builder();
+        return new Builder()
+                .startTimeMs(System.currentTimeMillis())
+                .startClockNs(System.nanoTime());
     }
 
     public static String randomId() {

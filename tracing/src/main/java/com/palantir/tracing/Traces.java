@@ -17,8 +17,10 @@
 package com.palantir.tracing;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Set;
 
 public final class Traces {
 
@@ -36,6 +38,8 @@ public final class Traces {
             return new ArrayDeque<>();
         }
     };
+
+    private static final Set<Subscriber> SUBSCRIBERS = Sets.newConcurrentHashSet();
 
     public static Optional<TraceState> getTrace() {
         Deque<TraceState> stack = STATE.get();
@@ -66,9 +70,44 @@ public final class Traces {
         return newState;
     }
 
-    public static Optional<TraceState> complete() {
+    public static Optional<Span> complete() {
         Deque<TraceState> stack = STATE.get();
-        return (!stack.isEmpty()) ? Optional.of(stack.pop()) : Optional.<TraceState>absent();
+        if (stack.isEmpty()) {
+            return Optional.absent();
+        } else {
+            TraceState state = stack.pop();
+            Span span = Span.builder()
+                    .traceId(state.getTraceId())
+                    .spanId(state.getSpanId())
+                    .parentSpanId(state.getParentSpanId())
+                    .operation(state.getOperation())
+                    .startTimeMs(state.getStartTimeMs())
+                    .durationNs(System.nanoTime() - state.getStartClockNs())
+                    .build();
+
+            // notify subscribers
+            for (Subscriber subscriber : SUBSCRIBERS) {
+                subscriber.consume(span);
+            }
+
+            return Optional.of(span);
+        }
+    }
+
+    public static void subscribe(Subscriber subscriber) {
+        SUBSCRIBERS.add(subscriber);
+    }
+
+    public static void unsubscribe(Subscriber subscriber) {
+        SUBSCRIBERS.remove(subscriber);
+    }
+
+    /**
+     * Represents the event receiver for trace completion events. Implementations are invoked
+     * synchronously on the primary execution thread, and as a result should execute quickly.
+     */
+    public interface Subscriber {
+        void consume(Span span);
     }
 
     private Traces() {}
