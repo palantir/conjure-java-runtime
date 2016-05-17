@@ -17,7 +17,6 @@
 package com.palantir.remoting.http;
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.base.Optional;
@@ -26,7 +25,6 @@ import com.palantir.tracing.Traces;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
-import java.util.UUID;
 import javax.net.ssl.SSLSocketFactory;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -50,33 +48,24 @@ public final class TraceRequestInterceptorTest {
                 endpointUri,
                 TestRequestInterceptorService.class);
 
-        server.enqueue(new MockResponse().setBody("\"ok\""));
+        server.enqueue(new MockResponse().setBody("{}"));
     }
 
     @Test
     public void testTraceRequestInterceptor_sendsAValidTraceId() throws InterruptedException {
         service.get();
+        TraceState expectedTrace = Traces.getTrace().get();
+
         RecordedRequest request = server.takeRequest();
-
-        String traceId = request.getHeader(Traces.Headers.TRACE_ID);
-        assertThat(UUID.fromString(traceId).toString(), is(traceId));
-    }
-
-    @Test
-    public void testTraceRequestInterceptor_sendsExplicitTraceId() throws InterruptedException {
-        TraceState state = Traces.deriveTrace("operation");
-        service.get();
-        RecordedRequest request = server.takeRequest();
-
-        assertThat(request.getHeader(Traces.Headers.TRACE_ID), is(state.getTraceId()));
-        assertThat(request.getHeader(Traces.Headers.PARENT_SPAN_ID), is(state.getSpanId()));
-        assertThat(request.getHeader(Traces.Headers.SPAN_ID), not(state.getSpanId()));
+        assertThat(request.getHeader(Traces.Headers.TRACE_ID), is(expectedTrace.getTraceId()));
+        assertThat(request.getHeader(Traces.Headers.SPAN_ID), is(expectedTrace.getSpanId()));
+        assertThat(request.getHeader(Traces.Headers.PARENT_SPAN_ID), is(expectedTrace.getParentSpanId().orNull()));
     }
 
     @Path("/")
     public interface TestRequestInterceptorService {
         @GET
-        String get();
+        Object get();
     }
 
 }

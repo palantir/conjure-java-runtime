@@ -30,6 +30,7 @@ import feign.Contract;
 import feign.Feign;
 import feign.Logger.Level;
 import feign.Request;
+import feign.TraceResponseDecoder;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
@@ -68,7 +69,7 @@ public final class FeignClientFactory {
             Request.Options options) {
         this.contract = contract;
         this.encoder = encoder;
-        this.decoder = decoder;
+        this.decoder = new TraceResponseDecoder(decoder);
         this.errorDecoder = errorDecoder;
         this.clientSupplier = clientSupplier;
         this.backoffStrategy = backoffStrategy;
