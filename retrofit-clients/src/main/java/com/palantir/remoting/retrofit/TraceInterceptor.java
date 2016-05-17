@@ -18,7 +18,7 @@ public final class TraceInterceptor implements Interceptor {
         Request request = chain.request();
 
         // instrument request
-        TraceState callState = Traces.deriveTrace("");
+        TraceState callState = Traces.deriveTrace(request.method() + " " + request.urlString());
         Request.Builder instrumentedRequest = new Request.Builder()
                 .headers(request.headers())
                 .url(request.url())
