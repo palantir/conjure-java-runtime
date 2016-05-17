@@ -20,8 +20,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
 import java.nio.ByteBuffer;
-import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 import org.immutables.value.Value;
 
 /**
@@ -32,8 +32,6 @@ import org.immutables.value.Value;
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
 public abstract class TraceState {
-
-    private static final Random RANDOM = new Random();
 
     /**
      * Returns a description of the operation for this event.
@@ -93,7 +91,7 @@ public abstract class TraceState {
     public static String randomId() {
         // non-secure random generated UUID because speed is important here and security is not
         byte[] randomBytes = new byte[16];
-        RANDOM.nextBytes(randomBytes);
+        ThreadLocalRandom.current().nextBytes(randomBytes);
 
         randomBytes[6]  &= 0x0f;  /* clear version        */
         randomBytes[6]  |= 0x40;  /* set to version 4     */
