@@ -4,15 +4,21 @@
 
 package com.palantir.remoting.http;
 
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.palantir.tracing.Span;
 import com.palantir.tracing.TraceState;
 import com.palantir.tracing.Traces;
+import com.palantir.tracing.Traces.Subscriber;
 import feign.FeignException;
 import feign.Response;
 import feign.TraceResponseDecoder;
@@ -21,53 +27,64 @@ import feign.codec.Decoder;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.List;
+import org.hamcrest.CustomMatcher;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 public final class TraceResponseDecoderTest {
 
-    @Test
-    public void testDecode_completesMatchingSpan() throws DecodeException, FeignException, IOException {
-        TraceState state = TraceState.builder()
+    private CapturingSubscriber subscriber;
+    private TraceState state;
+
+    @Before
+    public void before() {
+        subscriber = new CapturingSubscriber();
+        Traces.subscribe(subscriber);
+
+        state = TraceState.builder()
                 .traceId("traceId")
                 .spanId("spanId")
                 .operation("any")
                 .build();
         Traces.setTrace(state);
+    }
 
+    @After
+    public void after() {
+        Traces.unsubscribe(subscriber);
+    }
+
+    @Test
+    public void testDecode_completesMatchingSpan() throws DecodeException, FeignException, IOException {
         testDecodeInternal("traceId", "spanId");
+
+        assertThat(subscriber.getObservedSpans(), hasItem(trace("traceId", "spanId")));
+        assertThat(subscriber.getObservedSpans(), hasSize(1));
 
         assertThat(Traces.getTrace(), is(Optional.<TraceState>absent()));
     }
 
     @Test
     public void testDecode_doesNotPopNonMatchingSpan() throws DecodeException, FeignException, IOException {
-        TraceState state = TraceState.builder()
-                .traceId("traceId")
-                .spanId("spanId")
-                .operation("any")
-                .build();
-        Traces.setTrace(state);
-
         testDecodeInternal("traceId", "otherSpanId");
+
+        assertThat(subscriber.getObservedSpans(), hasSize(0));
 
         assertThat(Traces.getTrace(), is(Optional.of(state)));
     }
 
     @Test
     public void testDecode_doesNotPopNonMatchingTrace() throws DecodeException, FeignException, IOException {
-        TraceState state = TraceState.builder()
-                .traceId("traceId")
-                .spanId("spanId")
-                .operation("any")
-                .build();
-        Traces.setTrace(state);
-
         testDecodeInternal("otherTraceId", "spanId");
+
+        assertThat(subscriber.getObservedSpans(), hasSize(0));
 
         assertThat(Traces.getTrace(), is(Optional.of(state)));
     }
 
-    private void testDecodeInternal(String traceId, String spanId) throws IOException {
+    private synchronized void testDecodeInternal(String traceId, String spanId) throws IOException {
         Decoder decoder = new TraceResponseDecoder(mock(Decoder.class));
         Response response = Response.create(200,
                 "",
@@ -77,6 +94,43 @@ public final class TraceResponseDecoderTest {
                 new byte[0]);
 
         decoder.decode(response, mock(Type.class));
+    }
+
+    private static class CapturingSubscriber implements Subscriber {
+        private final List<Span> observedSpans = Lists.newArrayList();
+
+        @Override
+        public void consume(Span span) {
+            observedSpans.add(span);
+        }
+
+        public List<Span> getObservedSpans() {
+            return ImmutableList.copyOf(observedSpans);
+        }
+    }
+
+    private static class TraceMatcher extends CustomMatcher<Span> {
+        private final String traceId;
+        private final String spanId;
+
+        TraceMatcher(String traceId, String spanId) {
+            super("Tests whether a Span is a traceId and spanId match to a TraceState");
+            this.traceId = traceId;
+            this.spanId = spanId;
+        }
+
+        @Override
+        public boolean matches(Object item) {
+            if (item instanceof Span) {
+                Span input = (Span) item;
+                return input.getTraceId().equals(traceId) && input.getSpanId().equals(spanId);
+            }
+            return false;
+        }
+    }
+
+    public static TraceMatcher trace(String traceId, String spanId) {
+        return new TraceMatcher(traceId, spanId);
     }
 
 }

@@ -47,6 +47,7 @@ public final class Traces {
     }
 
     public static void setTrace(TraceState state) {
+        STATE.get().clear();
         STATE.get().push(state);
     }
 
