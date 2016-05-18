@@ -16,17 +16,29 @@
 
 package com.palantir.remoting.http;
 
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.fasterxml.jackson.datatype.jdk7.Jdk7Module;
 
 public final class ObjectMappers {
 
     private static final ObjectMapper VANILLA_MAPPER = new ObjectMapper();
 
-    private static final ObjectMapper GUAVA_JDK7_MAPPER = new ObjectMapper()
-            .registerModule(new GuavaModule())
-            .registerModule(new Jdk7Module());
+    private static final ObjectMapper GUAVA_JDK7_MAPPER;
+
+    // TODO: Replace this code with shading to support different versions of Jackson
+    static {
+        GUAVA_JDK7_MAPPER = new ObjectMapper()
+                .registerModule(new GuavaModule());
+        try {
+            // Newer versions of Jackson no longer ship this module.
+            Class<?> jdk7Module = Class.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module");
+            Module module = (Module) jdk7Module.newInstance();
+            GUAVA_JDK7_MAPPER.registerModule(module);
+        } catch (ReflectiveOperationException e) {
+            // We're using a recent version of Jackson
+        }
+    }
 
     private ObjectMappers() {}
 
