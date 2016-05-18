@@ -23,24 +23,21 @@ import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import feign.Response;
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import org.junit.Test;
 
 public final class SerializableErrorErrorDecoderTests {
 
-    private static final SerializableErrorErrorDecoder decoder = SerializableErrorErrorDecoder.INSTANCE;
     private static final String message = "hello";
 
     @Test
@@ -59,32 +56,29 @@ public final class SerializableErrorErrorDecoderTests {
 
     @Test
     public void testTextPlainException() {
-        Response response = getResponse(MediaType.TEXT_PLAIN, "errorbody");
-        Exception decode = decoder.decode("ignored", response);
+        Exception decode = decode(MediaType.TEXT_PLAIN, "errorbody");
         assertThat(decode, is(instanceOf(RuntimeException.class)));
         assertThat(decode.getMessage(), is("Error 400. Reason: reason. Body:\nerrorbody"));
     }
 
     @Test
     public void testTextHtmlException() {
-        Response response = getResponse(MediaType.TEXT_HTML, "errorbody");
-        Exception decode = decoder.decode("ignored", response);
+        Exception decode = decode(MediaType.TEXT_HTML, "errorbody");
         assertThat(decode, is(instanceOf(RuntimeException.class)));
         assertThat(decode.getMessage(), is("Error 400. Reason: reason. Body:\nerrorbody"));
     }
 
     @Test
     public void testNonTextException() {
-        Response response = getResponse(MediaType.MULTIPART_FORM_DATA, "errorbody");
-        Exception decode = decoder.decode("ignored", response);
+        Exception decode = decode(MediaType.MULTIPART_FORM_DATA, "errorbody");
         assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is("Error 400. Reason: reason. Body content type: [multipart/form-data]"));
+        assertThat(decode.getMessage(),
+                is("Error 400. Reason: reason. Body content type: [multipart/form-data]. Body as String: errorbody"));
     }
 
     @Test
     public void testExceptionInErrorParsing() {
-        Response response = getResponse(MediaType.APPLICATION_JSON, "notjsonifiable!");
-        Exception decode = decoder.decode("ignored", response);
+        Exception decode = decode(MediaType.APPLICATION_JSON, "notjsonifiable!");
         assertThat(decode, is(instanceOf(RuntimeException.class)));
         assertThat(decode.getMessage(), is(
                 "Error 400. Reason: reason. Failed to parse error body and instantiate exception: "
@@ -95,8 +89,7 @@ public final class SerializableErrorErrorDecoderTests {
 
     @Test
     public void testNullBody() {
-        Response response = getResponse(MediaType.APPLICATION_JSON, null);
-        Exception decode = decoder.decode("ignored", response);
+        Exception decode = decode(MediaType.APPLICATION_JSON, null);
         assertThat(decode, is(instanceOf(RuntimeException.class)));
         assertThat(decode.getMessage(), is("400 reason"));
     }
@@ -106,12 +99,11 @@ public final class SerializableErrorErrorDecoderTests {
         Object error = SerializableError.of("msg", IllegalArgumentException.class,
                 Lists.newArrayList(new RuntimeException().getStackTrace()));
         String json = new ObjectMapper().writeValueAsString(error);
-        Response response = getResponse(MediaType.APPLICATION_JSON, json);
-        Exception decode = decoder.decode("ignored", response);
+        Exception decode = decode(MediaType.APPLICATION_JSON, json);
 
         assertThat(decode, is(instanceOf(IllegalArgumentException.class)));
         assertThat(decode.getMessage(), is("msg"));
-        assertThat(decode.getStackTrace()[0].getMethodName(), is("decode"));
+        assertThat(decode.getStackTrace()[0].getMethodName(), is("getException"));
         assertThat(decode.getCause(), is(instanceOf(IllegalArgumentException.class)));
         assertThat(decode.getCause().getMessage(), is("msg"));
         assertThat(decode.getCause().getStackTrace()[0].getMethodName(), is("testClientExceptionWrapsServerException"));
@@ -129,17 +121,17 @@ public final class SerializableErrorErrorDecoderTests {
         int status = (exception instanceof WebApplicationException)
                 ? ((WebApplicationException) exception).getResponse().getStatus()
                 : 400;
-        Response response = getResponse(MediaType.APPLICATION_JSON, json, status);
-        return decoder.decode("ignored", response);
+        return decode(MediaType.APPLICATION_JSON, json, status);
     }
 
-    private static Response getResponse(String contentType, @CheckForNull String body) {
-        return getResponse(contentType, body, 400);
+    private static Exception decode(String contentType, @CheckForNull String body) {
+        return SerializableErrorToExceptionConverter.getException(Collections.singletonList(contentType), 400, "reason",
+                body == null ? null : new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
     }
 
-    private static Response getResponse(String contentType, @CheckForNull String body, int status) {
-        return Response.create(status, "reason", ImmutableMap.<String, Collection<String>>of(HttpHeaders.CONTENT_TYPE,
-                Collections.singletonList(contentType)), body, feign.Util.UTF_8);
+    private static Exception decode(String contentType, @CheckForNull String body, int status) {
+        return SerializableErrorToExceptionConverter.getException(Collections.singletonList(contentType), status,
+                "reason", body == null ? null : new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
     }
 
     private static void testEncodingAndDecodingWebException(Class<? extends WebApplicationException> exceptionClass,

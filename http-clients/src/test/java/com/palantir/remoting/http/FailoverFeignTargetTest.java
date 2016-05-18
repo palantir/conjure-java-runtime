@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.palantir.remoting.http.errors.SerializableErrorErrorDecoder;
+import com.palantir.remoting.http.errors.FeignSerializableErrorErrorDecoder;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import feign.Request;
@@ -97,7 +97,7 @@ public final class FailoverFeignTargetTest {
                 new JAXRSContract(),
                 new JacksonEncoder(ObjectMappers.guavaJdk7()),
                 new JacksonDecoder(ObjectMappers.guavaJdk7()),
-                SerializableErrorErrorDecoder.INSTANCE,
+                FeignSerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
                 backoffStrategy,
                 new Request.Options())

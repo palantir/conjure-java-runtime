@@ -17,6 +17,7 @@
 package com.palantir.remoting.retrofit;
 
 import com.google.common.base.Optional;
+import com.palantir.remoting.retrofit.errors.RetrofitSerializableErrorErrorHandler;
 import com.squareup.okhttp.OkHttpClient;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
@@ -61,6 +62,7 @@ public final class RetrofitClientFactory {
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(uri)
                 .setClient(client)
+                .setErrorHandler(RetrofitSerializableErrorErrorHandler.INSTANCE)
                 .build();
         return restAdapter.create(type);
     }

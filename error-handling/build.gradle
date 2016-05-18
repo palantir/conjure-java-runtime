@@ -2,8 +2,15 @@ apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
+    compile libs.guava
     compile libs.jackson.databind
     compile libs.jsr305
+    compile libs.slf4j
+    compile libs.wsRsApi
+
+    testCompile libs.dropwizard.testing
+    testCompile libs.hamcrest
+    testCompile libs.junit
 
     processor libs.immutables
 }
