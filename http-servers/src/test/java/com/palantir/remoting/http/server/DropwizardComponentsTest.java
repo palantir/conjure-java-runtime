@@ -16,11 +16,9 @@
 
 package com.palantir.remoting.http.server;
 
-
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting.http.server.ExceptionMappers.Consumer;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -38,13 +36,12 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public final class ExceptionMappersTest {
+public final class DropwizardComponentsTest {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(ExceptionMappersTestServer.class,
@@ -94,13 +91,8 @@ public final class ExceptionMappersTest {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new ExceptionTestResource());
-
-            ExceptionMappers.visitExceptionMappers(false, new Consumer<ExceptionMapper<? extends Throwable>>() {
-                @Override
-                public void accept(ExceptionMapper<? extends Throwable> mapper) {
-                    env.jersey().register(mapper);
-                }
-            });
+            DropwizardComponents.registerComponents(env, config, ExceptionMappersTestServer.class.getSimpleName(),
+                    false);
         }
     }
 
