@@ -21,7 +21,9 @@ import com.palantir.tracing.Traces;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
-public final class TraceRequestInterceptor implements RequestInterceptor {
+public enum TraceRequestInterceptor implements RequestInterceptor {
+
+    INSTANCE;
 
     @Override
     public void apply(RequestTemplate template) {
