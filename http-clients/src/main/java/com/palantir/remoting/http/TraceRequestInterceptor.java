@@ -25,7 +25,7 @@ public final class TraceRequestInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        TraceState callState = Traces.deriveTrace(template.method() + " " + template.url());
+        TraceState callState = Traces.startSpan(template.method() + " " + template.url());
         template.header(Traces.Headers.TRACE_ID, callState.getTraceId());
         if (callState.getParentSpanId().isPresent()) {
             template.header(Traces.Headers.PARENT_SPAN_ID, callState.getParentSpanId().get());

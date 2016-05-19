@@ -43,7 +43,7 @@ public final class Traces {
 
     public static Optional<TraceState> getTrace() {
         Deque<TraceState> stack = STATE.get();
-        return (!stack.isEmpty()) ? Optional.of(stack.peek()) : Optional.<TraceState>absent();
+        return stack.isEmpty() ? Optional.<TraceState>absent() : Optional.of(stack.peek());
     }
 
     public static void setTrace(TraceState state) {
@@ -55,7 +55,7 @@ public final class Traces {
      * Derives a new call trace from the currently known call trace labeled with the
      * provided operation.
      */
-    public static TraceState deriveTrace(String operation) {
+    public static TraceState startSpan(String operation) {
         Optional<TraceState> prevState = getTrace();
 
         TraceState.Builder newStateBuilder = TraceState.builder()
@@ -71,7 +71,7 @@ public final class Traces {
         return newState;
     }
 
-    public static Optional<Span> complete() {
+    public static Optional<Span> completeSpan() {
         Deque<TraceState> stack = STATE.get();
         if (stack.isEmpty()) {
             return Optional.absent();

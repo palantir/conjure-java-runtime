@@ -32,7 +32,7 @@ public final class TraceResponseDecoder implements Decoder {
             if (trace.get().getTraceId().equals(traceId)
                     && trace.get().getSpanId().equals(spanId)) {
                 // this trace is for the traceId and spanId on top of the tracing stack, complete it
-                Traces.complete();
+                Traces.completeSpan();
             }
         }
         return delegate.decode(response, type);

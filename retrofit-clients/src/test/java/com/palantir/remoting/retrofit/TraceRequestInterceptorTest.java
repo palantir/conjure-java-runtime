@@ -54,7 +54,7 @@ public final class TraceRequestInterceptorTest {
 
     @Test
     public void testTraceRequestInterceptor_sendsAValidTraceId() throws InterruptedException {
-        TraceState parentTrace = Traces.deriveTrace("");
+        TraceState parentTrace = Traces.startSpan("");
         service.get();
 
         RecordedRequest request = server.takeRequest();

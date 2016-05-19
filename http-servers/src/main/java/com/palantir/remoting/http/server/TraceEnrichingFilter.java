@@ -45,7 +45,7 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
 
         if (Strings.isNullOrEmpty(traceId)) {
             // no trace for this request, just derive a new one
-            Traces.deriveTrace(operation);
+            Traces.startSpan(operation);
         } else {
             // defend against badly formed requests
             if (spanId == null) {
@@ -65,7 +65,7 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-        Optional<Span> maybeSpan = Traces.complete();
+        Optional<Span> maybeSpan = Traces.completeSpan();
         if (maybeSpan.isPresent()) {
             Span span = maybeSpan.get();
             headers.putSingle(Traces.Headers.TRACE_ID, span.getTraceId());

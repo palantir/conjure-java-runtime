@@ -11,14 +11,16 @@ import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import java.io.IOException;
 
-public final class TraceInterceptor implements Interceptor {
+public enum TraceInterceptor implements Interceptor {
+
+    INSTANCE;
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
 
         // instrument request
-        TraceState callState = Traces.deriveTrace(request.method() + " " + request.urlString());
+        TraceState callState = Traces.startSpan(request.method() + " " + request.urlString());
         Request.Builder instrumentedRequest = new Request.Builder()
                 .headers(request.headers())
                 .url(request.url())
@@ -33,8 +35,7 @@ public final class TraceInterceptor implements Interceptor {
         try {
             response = chain.proceed(instrumentedRequest.build());
         } finally {
-            // complete response
-            Traces.complete();
+            Traces.completeSpan();
         }
 
         return response;
