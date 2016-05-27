@@ -110,7 +110,7 @@ public final class FeignClients {
     private static FeignClientFactory withEncoderAndDecoder(Encoder encoder, Decoder decoder,
             Request.Options timeoutOptions) {
         return FeignClientFactory.of(
-                new GuavaOptionalAwareContract(new JaxRsWithHeaderAndQueryMapContract()),
+                new SlashEncodingContract(new GuavaOptionalAwareContract(new JaxRsWithHeaderAndQueryMapContract())),
                 new InputStreamDelegateEncoder(new TextDelegateEncoder(encoder)),
                 new OptionalAwareDecoder(new InputStreamDelegateDecoder(new TextDelegateDecoder(decoder))),
                 FeignSerializableErrorErrorDecoder.INSTANCE,
