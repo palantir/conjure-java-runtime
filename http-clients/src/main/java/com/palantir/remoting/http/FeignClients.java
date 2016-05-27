@@ -107,7 +107,7 @@ public final class FeignClients {
     /**
      * Provides a {@link FeignClientFactory} with the specified {@link Encoder} and {@link Decoder}.
      */
-    public static FeignClientFactory withEncoderAndDecoder(Encoder encoder, Decoder decoder,
+    private static FeignClientFactory withEncoderAndDecoder(Encoder encoder, Decoder decoder,
             Request.Options timeoutOptions) {
         return FeignClientFactory.of(
                 new GuavaOptionalAwareContract(new JaxRsWithHeaderAndQueryMapContract()),
