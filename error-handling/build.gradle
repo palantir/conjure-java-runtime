@@ -9,8 +9,8 @@ dependencies {
     compile libs.wsRsApi
 
     testCompile libs.dropwizard.testing
-    testCompile libs.hamcrest
     testCompile libs.junit
+    testCompile libs.truth
 
     processor libs.immutables
 }

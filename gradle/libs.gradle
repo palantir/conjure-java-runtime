@@ -26,5 +26,6 @@ project.ext.libs = [
     'retrofit': 'com.squareup.retrofit:retrofit:1.9.0',
     'slf4j': 'org.slf4j:slf4j-api:1.7.12',
     'tokens': 'com.palantir.tokens:auth-tokens:0.2.3',
+    'truth': 'com.google.truth:truth:0.28',
     'wsRsApi': 'javax.ws.rs:javax.ws.rs-api:2.0.1'
 ]
