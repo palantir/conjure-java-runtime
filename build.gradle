@@ -10,6 +10,7 @@ buildscript {
 }
 
 plugins {
+    id 'com.palantir.configuration-resolver' version '0.1.0'
     id 'com.palantir.git-version' version '0.2.0'
     id 'org.inferred.processors' version '1.1.5'
 }
@@ -39,17 +40,6 @@ subprojects {
     }
 
     sourceCompatibility = 1.7
-
-    task resolveDependencies {
-        description = 'Forces the resolution of all dependencies in all configurations'
-        group = 'build'
-
-        doLast {
-            configurations.all { c ->
-                c.resolve()
-            }
-        }
-    }
 
     if (System.env.CIRCLE_TEST_REPORTS) {
         test.reports.junitXml.destination = new File(System.env.CIRCLE_TEST_REPORTS, it.getName())
