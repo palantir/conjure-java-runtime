@@ -18,7 +18,7 @@ package com.palantir.remoting.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
-import com.palantir.remoting.http.errors.FeignSerializableErrorErrorDecoder;
+import com.palantir.remoting.http.errors.ErrorDecoderImpl;
 import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
 import feign.OptionalAwareDecoder;
@@ -113,7 +113,7 @@ public final class FeignClients {
                 new SlashEncodingContract(new GuavaOptionalAwareContract(new JaxRsWithHeaderAndQueryMapContract())),
                 new InputStreamDelegateEncoder(new TextDelegateEncoder(encoder)),
                 new OptionalAwareDecoder(new InputStreamDelegateDecoder(new TextDelegateDecoder(decoder))),
-                FeignSerializableErrorErrorDecoder.INSTANCE,
+                ErrorDecoderImpl.SERIALIZABLE_ERROR,
                 FeignClientFactory.okHttpClient(),
                 NeverRetryingBackoffStrategy.INSTANCE,
                 timeoutOptions);

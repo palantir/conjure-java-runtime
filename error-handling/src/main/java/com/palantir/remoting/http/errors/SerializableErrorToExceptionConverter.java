@@ -17,18 +17,12 @@
 package com.palantir.remoting.http.errors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.CharStreams;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * {@link RuntimeException} if the body cannot be interpreted as a {@link SerializableError}, or if the exception
  * otherwise fails to get re-created.
  */
-public final class SerializableErrorToExceptionConverter {
+public final class SerializableErrorToExceptionConverter extends ExceptionConverter {
 
     private SerializableErrorToExceptionConverter() {
         // util
@@ -51,17 +45,16 @@ public final class SerializableErrorToExceptionConverter {
 
     public static Exception getException(Collection<String> contentTypes, int status, String reason,
             @CheckForNull InputStream body) {
-        if (body != null) {
-            String bodyAsString = readBodyAsString(body);
-
-            if (contentTypes.contains(MediaType.APPLICATION_JSON)) {
+        return getExceptionHelper(contentTypes, status, reason, body, log, new JsonExceptionCreator() {
+            @Override
+            public Exception getException(String bodyAsJsonString, int status, String reason) {
                 SerializableError error;
                 try {
-                    error = MAPPER.readValue(bodyAsString, SerializableError.class);
+                    error = MAPPER.readValue(bodyAsJsonString, SerializableError.class);
                 } catch (Exception e) {
                     String message = String.format(
                             "Error %s. Reason: %s. Failed to parse error body and instantiate exception: %s. Body:%n%s",
-                            status, reason, e.getMessage(), bodyAsString);
+                            status, reason, e.getMessage(), bodyAsJsonString);
                     log.error(message, e);
                     return new RuntimeException(message);
                 }
@@ -82,22 +75,8 @@ public final class SerializableErrorToExceptionConverter {
                 localException.fillInStackTrace();
 
                 return localException;
-
-            } else if (contentTypes.contains(MediaType.TEXT_HTML) || contentTypes.contains(MediaType.TEXT_PLAIN)
-                    || contentTypes.contains(MediaType.TEXT_XML)) {
-                String message =
-                        String.format("Error %s. Reason: %s. Body:%n%s", status, reason,
-                                bodyAsString);
-                log.error(message);
-                return new RuntimeException(message);
             }
-
-            String message = String.format("Error %s. Reason: %s. Body content type: %s. Body as String: %s", status,
-                    reason, contentTypes, bodyAsString);
-            return new RuntimeException(message);
-        } else {
-            return new RuntimeException(String.format("%s %s", status, reason));
-        }
+        });
     }
 
     // wrappedException may be null to indicate an unknown cause
@@ -154,15 +133,4 @@ public final class SerializableErrorToExceptionConverter {
         }
     }
 
-    /*
-     * Reads the response body fully into a string so that if there are exceptions parsing the body we can at least show
-     * the string representation of it.
-     */
-    private static String readBodyAsString(InputStream body) {
-        try (Reader reader = new InputStreamReader(body, StandardCharsets.UTF_8)) {
-            return CharStreams.toString(reader);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

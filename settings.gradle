@@ -1,5 +1,6 @@
 include 'error-handling'
 include 'http-clients'
+include 'http-clients-integration'
 include 'http-servers'
 include 'pkcs1-reader-bouncy-castle'
 include 'pkcs1-reader-sun'

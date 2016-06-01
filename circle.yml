@@ -1,6 +1,10 @@
 machine:
+  pre:
+    - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
   java:
     version: oraclejdk7
+  services:
+    - docker
   environment:
     TERM: dumb
 
@@ -12,12 +16,19 @@ general:
     - ssl-config/build/libs
 
 dependencies:
+  pre:
+    - sudo pip install docker-compose
   override:
     - ./gradlew resolveConfigurations
 
 test:
   override:
-    - ./gradlew build testBouncyCastle testSun
+    - ./gradlew -i --stacktrace build testBouncyCastle testSun
+    - docker build -t exception-server http-clients-integration/src/integrationTests/resources/exceptionserver/
+    - docker-compose -f http-clients-integration/src/integrationTests/resources/exceptionserver/docker-compose.yml up -d
+    - ./gradlew -i --stacktrace integrationTests
+  post:
+    - ./gradlew -i --stacktrace copyCiArtifactsToCircle
 
 deployment:
   release:

@@ -16,10 +16,7 @@
 
 package com.palantir.remoting.http.errors;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static com.google.common.truth.Truth.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,48 +47,48 @@ public final class SerializableErrorErrorDecoderTests {
     @Test
     public void testSpecificException() {
         Exception exception = encodeAndDecode(new IllegalArgumentException("msg"));
-        assertThat(exception, is(instanceOf(IllegalArgumentException.class)));
-        assertThat(exception.getMessage(), is("msg"));
+        assertThat(exception).isInstanceOf(IllegalArgumentException.class);
+        assertThat(exception).hasMessage("msg");
     }
 
     @Test
     public void testTextPlainException() {
         Exception decode = decode(MediaType.TEXT_PLAIN, "errorbody");
-        assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is("Error 400. Reason: reason. Body:\nerrorbody"));
+        assertThat(decode).isInstanceOf(RuntimeException.class);
+        assertThat(decode).hasMessage("Error 400. Reason: reason. Body:\nerrorbody");
     }
 
     @Test
     public void testTextHtmlException() {
         Exception decode = decode(MediaType.TEXT_HTML, "errorbody");
-        assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is("Error 400. Reason: reason. Body:\nerrorbody"));
+        assertThat(decode).isInstanceOf(RuntimeException.class);
+        assertThat(decode).hasMessage("Error 400. Reason: reason. Body:\nerrorbody");
     }
 
     @Test
     public void testNonTextException() {
         Exception decode = decode(MediaType.MULTIPART_FORM_DATA, "errorbody");
-        assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(),
-                is("Error 400. Reason: reason. Body content type: [multipart/form-data]. Body as String: errorbody"));
+        assertThat(decode).isInstanceOf(RuntimeException.class);
+        assertThat(decode).hasMessage(
+                "Error 400. Reason: reason. Body content type: [multipart/form-data]. Body as String: errorbody");
     }
 
     @Test
     public void testExceptionInErrorParsing() {
         Exception decode = decode(MediaType.APPLICATION_JSON, "notjsonifiable!");
-        assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is(
+        assertThat(decode).isInstanceOf(RuntimeException.class);
+        assertThat(decode).hasMessage(
                 "Error 400. Reason: reason. Failed to parse error body and instantiate exception: "
                         + "Unrecognized token 'notjsonifiable': was expecting 'null', 'true', 'false' or NaN\n "
                         + "at [Source: notjsonifiable!; line: 1, column: 15]. Body:\n"
-                        + "notjsonifiable!"));
+                        + "notjsonifiable!");
     }
 
     @Test
     public void testNullBody() {
         Exception decode = decode(MediaType.APPLICATION_JSON, null);
-        assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is("400 reason"));
+        assertThat(decode).isInstanceOf(RuntimeException.class);
+        assertThat(decode).hasMessage("400 reason");
     }
 
     @Test
@@ -101,12 +98,13 @@ public final class SerializableErrorErrorDecoderTests {
         String json = new ObjectMapper().writeValueAsString(error);
         Exception decode = decode(MediaType.APPLICATION_JSON, json);
 
-        assertThat(decode, is(instanceOf(IllegalArgumentException.class)));
-        assertThat(decode.getMessage(), is("msg"));
-        assertThat(decode.getStackTrace()[0].getMethodName(), is("getException"));
-        assertThat(decode.getCause(), is(instanceOf(IllegalArgumentException.class)));
-        assertThat(decode.getCause().getMessage(), is("msg"));
-        assertThat(decode.getCause().getStackTrace()[0].getMethodName(), is("testClientExceptionWrapsServerException"));
+        assertThat(decode).isInstanceOf(IllegalArgumentException.class);
+        assertThat(decode).hasMessage("msg");
+        assertThat(decode.getStackTrace()[0].getMethodName()).isEqualTo("getException");
+        assertThat(decode.getCause()).isInstanceOf(IllegalArgumentException.class);
+        assertThat(decode.getCause()).hasMessage("msg");
+        assertThat(decode.getCause().getStackTrace()[0].getMethodName()).isEqualTo(
+                "testClientExceptionWrapsServerException");
     }
 
     private static Exception encodeAndDecode(Exception exception) {
@@ -145,15 +143,13 @@ public final class SerializableErrorErrorDecoderTests {
         }
 
         Exception exception = encodeAndDecode(exceptionToProcess);
-        assertThat(exception.getCause(), is(instanceOf(exceptionClass)));
-        assertEquals(status, ((WebApplicationException) exception.getCause()).getResponse()
-                .getStatusInfo());
-        assertEquals(message, exception.getCause().getMessage());
+        assertThat(exception.getCause()).isInstanceOf(exceptionClass);
+        assertThat(status).isEqualTo(((WebApplicationException) exception.getCause()).getResponse().getStatusInfo());
+        assertThat(message).isEqualTo(exception.getCause().getMessage());
 
-        assertThat(exception, is(instanceOf(exceptionClass)));
-        assertEquals(status, ((WebApplicationException) exception).getResponse()
-                .getStatusInfo());
-        assertEquals(message, exception.getMessage());
+        assertThat(exception).isInstanceOf(exceptionClass);
+        assertThat(status).isEqualTo(((WebApplicationException) exception).getResponse().getStatusInfo());
+        assertThat(message).isEqualTo(exception.getMessage());
     }
 
 }

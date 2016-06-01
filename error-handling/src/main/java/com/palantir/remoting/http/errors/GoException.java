@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,8 @@
 
 package com.palantir.remoting.http.errors;
 
-import feign.Response;
-
-/**
- * @deprecated use ErrorDecoders.SERIALIZABLE_ERROR
- */
-@Deprecated
-public enum FeignSerializableErrorErrorDecoder implements feign.codec.ErrorDecoder {
-    INSTANCE;
-
-    @Override
-    public Exception decode(String methodKey, Response response) {
-        return ErrorDecoderImpl.SERIALIZABLE_ERROR.decode(methodKey, response);
+public final class GoException extends RuntimeException {
+    public GoException(String message) {
+        super(message);
     }
 }
