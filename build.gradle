@@ -13,6 +13,7 @@ plugins {
     id 'com.palantir.configuration-resolver' version '0.1.0'
     id 'com.palantir.git-version' version '0.2.0'
     id 'org.inferred.processors' version '1.1.5'
+    id 'org.unbroken-dome.test-sets' version '1.0.2'
 }
 
 apply plugin: 'com.palantir.baseline-config' // provides baselineUpdateConfig task
@@ -44,4 +45,22 @@ subprojects {
     if (System.env.CIRCLE_TEST_REPORTS) {
         test.reports.junitXml.destination = new File(System.env.CIRCLE_TEST_REPORTS, it.getName())
     }
+
+    if (System.env.CIRCLE_ARTIFACTS) {
+        task copyCiArtifactsToCircle {
+            outputs.upToDateWhen { false }
+            doLast {
+                [
+                        file("${buildDir}/reports"), // jacoco, checkstyle, findbugs
+                        file("${buildDir}/docs/javadoc/")
+                ].each { src ->
+                    copy {
+                        from src
+                        into "${System.env.CIRCLE_ARTIFACTS}/${project.name}/${src.name}"
+                    }
+                }
+            }
+        }
+    }
+
 }

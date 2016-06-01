@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  exception-server:
+      container_name: exception-server.palantir.dev
+      image: exception-server
+      ports:
+          - "3000:3000"

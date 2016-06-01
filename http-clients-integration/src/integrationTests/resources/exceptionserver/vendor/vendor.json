@@ -1,0 +1,25 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "6r2EbOhCRemi6LohEQPS2HGK7ao=",
+			"path": "github.com/palantir/stacktrace",
+			"revision": "5a74c62b11cfd8b2cb9374c785dd965d9a2b4e53",
+			"revisionTime": "2016-04-10T20:59:47Z"
+		},
+		{
+			"checksumSHA1": "YMAHXE8lCDGzmdCDaf/kL3lDD6E=",
+			"path": "github.com/palantir/stacktrace/cleanpath",
+			"revision": "5a74c62b11cfd8b2cb9374c785dd965d9a2b4e53",
+			"revisionTime": "2016-04-10T20:59:47Z"
+		},
+		{
+			"checksumSHA1": "F+ewx48dI9Fl7Q043FUxL7B6Rb0=",
+			"path": "github.com/urfave/negroni",
+			"revision": "fb7b7c045dfb05dc81a5c3688c568550b5bd6e36",
+			"revisionTime": "2016-05-26T04:39:53Z"
+		}
+	],
+	"rootPath": "github.com/palantir/exceptionserver"
+}
