@@ -23,7 +23,6 @@ task generateCerts(type:Exec) {
   commandLine './certSetup.sh', '-f'
 }
 
-tasks.check.dependsOn(javadoc)
 tasks.test.dependsOn(generateCerts)
 
 task testBouncyCastle(type: Test) {

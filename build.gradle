@@ -41,6 +41,8 @@ subprojects {
 
     sourceCompatibility = 1.7
 
+    tasks.check.dependsOn(javadoc)
+
     if (System.env.CIRCLE_TEST_REPORTS) {
         test.reports.junitXml.destination = new File(System.env.CIRCLE_TEST_REPORTS, it.getName())
     }
