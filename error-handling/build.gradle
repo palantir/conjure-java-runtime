@@ -14,5 +14,3 @@ dependencies {
 
     processor libs.immutables
 }
-
-tasks.check.dependsOn(javadoc)

@@ -9,5 +9,3 @@ dependencies {
     testCompile libs.hamcrest
     testCompile libs.junit
 }
-
-tasks.check.dependsOn(javadoc)

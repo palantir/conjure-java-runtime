@@ -12,7 +12,7 @@ buildscript {
 plugins {
     id 'com.palantir.configuration-resolver' version '0.1.0'
     id 'com.palantir.git-version' version '0.2.0'
-    id 'org.inferred.processors' version '1.1.5'
+    id 'org.inferred.processors' version '1.2.2'
 }
 
 apply plugin: 'com.palantir.baseline-config' // provides baselineUpdateConfig task
@@ -40,6 +40,8 @@ subprojects {
     }
 
     sourceCompatibility = 1.7
+
+    tasks.check.dependsOn(javadoc)
 
     if (System.env.CIRCLE_TEST_REPORTS) {
         test.reports.junitXml.destination = new File(System.env.CIRCLE_TEST_REPORTS, it.getName())
