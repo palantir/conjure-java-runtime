@@ -23,11 +23,10 @@ import com.palantir.tokens.auth.BearerToken;
 import io.dropwizard.util.Duration;
 import java.util.List;
 import org.immutables.value.Value.Immutable;
-import org.immutables.value.Value.Style;
 
 @Immutable
 @JsonDeserialize(as = ImmutableServiceConfiguration.class)
-@Style(visibility = Style.ImplementationVisibility.PACKAGE)
+@PackageVisibilityImmutableStyle
 public abstract class ServiceConfiguration {
 
     /**
