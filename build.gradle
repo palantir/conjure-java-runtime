@@ -41,6 +41,12 @@ subprojects {
 
     sourceCompatibility = 1.7
 
+    tasks.withType(Javadoc) {
+        // suppress Javadoc doclint warnings in Java 8+
+        if (!System.getProperty("java.version").startsWith("1.7")) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
+    }
     tasks.check.dependsOn(javadoc)
 
     if (System.env.CIRCLE_TEST_REPORTS) {
