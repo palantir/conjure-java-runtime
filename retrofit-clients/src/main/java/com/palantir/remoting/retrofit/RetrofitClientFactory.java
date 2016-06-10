@@ -33,7 +33,7 @@ import retrofit.client.OkClient;
  *     All proxies take a User Agent and this will be embedded as the User Agent header for all requests.
  *     For services, recommended user agents are of the form: ServiceName (Version), e.g. MyServer (1.2.3)
  *     For services that run multiple instances, recommended user agents are of the form:
- *       ServiceName/instanceId (Version), e.g. MyServer/12 (1.2.3)
+ *       ServiceName/InstanceId (Version), e.g. MyServer/12 (1.2.3)
  */
 public final class RetrofitClientFactory {
 
