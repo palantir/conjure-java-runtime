@@ -34,7 +34,8 @@ public final class RetrofitClientFactory {
 
     private RetrofitClientFactory() {}
 
-    private static Client newHttpClient(Optional<SSLSocketFactory> sslSocketFactory, OkHttpClientOptions options) {
+    private static Client newHttpClient(Optional<SSLSocketFactory> sslSocketFactory, OkHttpClientOptions options,
+            String userAgent) {
         OkHttpClient okClient = new OkHttpClient();
 
         // timeouts
@@ -48,7 +49,10 @@ public final class RetrofitClientFactory {
         RetryInterceptor retryInterceptor = options.getMaxNumberRetries().isPresent()
                 ? new RetryInterceptor(options.getMaxNumberRetries().get())
                 : new RetryInterceptor();
+
+        UserAgentInterceptor userAgentInterceptor = UserAgentInterceptor.of(userAgent);
         okClient.interceptors().add(retryInterceptor);
+        okClient.interceptors().add(userAgentInterceptor);
 
         // ssl
         okClient.setSslSocketFactory(sslSocketFactory.orNull());
@@ -57,8 +61,8 @@ public final class RetrofitClientFactory {
     }
 
     public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
-            OkHttpClientOptions options) {
-        Client client = newHttpClient(sslSocketFactoryOptional, options);
+            OkHttpClientOptions options, String userAgent) {
+        Client client = newHttpClient(sslSocketFactoryOptional, options, userAgent);
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(uri)
                 .setClient(client)

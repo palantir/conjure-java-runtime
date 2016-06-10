@@ -29,11 +29,15 @@ import javax.ws.rs.Path;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public final class UserAgentTest {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     private TestService service;
 
@@ -57,6 +61,13 @@ public final class UserAgentTest {
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader("User-Agent"), is(USER_AGENT));
+    }
+
+    @Test
+    public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
+        expectedException.expect(IllegalArgumentException.class);
+
+        FeignClients.standard("(");
     }
 
     @Path("/")

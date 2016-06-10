@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.http;
+package com.palantir.remoting.retrofit;
 
-import feign.RequestInterceptor;
-import feign.RequestTemplate;
+import com.squareup.okhttp.Interceptor;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+import java.io.IOException;
 import java.util.regex.Pattern;
 
-public final class UserAgentInterceptor implements RequestInterceptor {
+public final class UserAgentInterceptor implements Interceptor {
 
     private static final Pattern VALID_USER_AGENT = Pattern.compile("[A-Za-z0-9/\\.,_\\s]+");
     private final String userAgent;
@@ -37,9 +39,11 @@ public final class UserAgentInterceptor implements RequestInterceptor {
     }
 
     @Override
-    public void apply(RequestTemplate template) {
-        if (!template.headers().containsKey("User-Agent")) {
-            template.header("User-Agent", userAgent);
-        }
+    public Response intercept(Chain chain) throws IOException {
+        Request originalRequest = chain.request();
+        Request requestWithUserAgent = originalRequest.newBuilder()
+                .header("User-Agent", userAgent)
+                .build();
+        return chain.proceed(requestWithUserAgent);
     }
 }
