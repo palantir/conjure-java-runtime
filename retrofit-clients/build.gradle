@@ -13,6 +13,7 @@ dependencies {
     testCompile libs.hamcrest
     testCompile libs.junit
     testCompile libs.mockito
+    testCompile libs.mockwebserver
 
     processor libs.immutables
 }

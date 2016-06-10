@@ -16,6 +16,8 @@
 
 package com.palantir.remoting.retrofit;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -24,13 +26,13 @@ import java.util.regex.Pattern;
 
 public final class UserAgentInterceptor implements Interceptor {
 
+    // keep in sync with corresponding pattern in UserAgentInterceptor.java in http-clients project
     private static final Pattern VALID_USER_AGENT = Pattern.compile("[A-Za-z0-9/\\.,_\\s]+");
     private final String userAgent;
 
-    public UserAgentInterceptor(String userAgent) {
-        if (!VALID_USER_AGENT.matcher(userAgent).matches()) {
-            throw new IllegalArgumentException("User Agent " + userAgent + " is not valid.");
-        }
+    private UserAgentInterceptor(String userAgent) {
+        checkArgument(VALID_USER_AGENT.matcher(userAgent).matches(),
+                "User Agent must match pattern '%s': %s", VALID_USER_AGENT, userAgent);
         this.userAgent = userAgent;
     }
 

@@ -28,6 +28,9 @@ import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Protocol;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+import com.squareup.okhttp.mockwebserver.MockResponse;
+import com.squareup.okhttp.mockwebserver.MockWebServer;
+import com.squareup.okhttp.mockwebserver.RecordedRequest;
 import java.io.IOException;
 import javax.net.ssl.SSLSocketFactory;
 import org.junit.Before;
@@ -36,6 +39,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
+import retrofit.http.GET;
 
 public final class UserAgentTest {
 
@@ -44,6 +48,10 @@ public final class UserAgentTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
+    @Rule
+    public final MockWebServer server = new MockWebServer();
+
+    private TestService service;
     private UserAgentInterceptor userAgentInterceptor;
     private Interceptor.Chain chain;
     private Request request;
@@ -51,13 +59,25 @@ public final class UserAgentTest {
 
     @Before
     public void before() {
-        userAgentInterceptor = new UserAgentInterceptor(USER_AGENT);
+        userAgentInterceptor = UserAgentInterceptor.of(USER_AGENT);
         chain = mock(Interceptor.Chain.class);
         request = new Request.Builder().url("http://url").build();
 
         responseSuccess = responseWithCode(request, 200);
 
         when(chain.request()).thenReturn(request);
+
+        String endpointUri = "http://localhost:" + server.getPort();
+
+        service = RetrofitClientFactory.createProxy(
+                Optional.<SSLSocketFactory>absent(),
+                endpointUri,
+                TestService.class,
+                OkHttpClientOptions.builder().build(),
+                USER_AGENT
+                );
+
+        server.enqueue(new MockResponse().setBody("{}"));
     }
 
 
@@ -75,10 +95,19 @@ public final class UserAgentTest {
         verifyNoMoreInteractions(chain);
     }
 
+    @Test
+    public void  testUserAgent_defaultHeaderIsSent() throws InterruptedException {
+        service.get();
+
+        RecordedRequest capturedRequest = server.takeRequest();
+        assertThat(capturedRequest.getHeader("User-Agent"), is(USER_AGENT));
+    }
+
 
     @Test
     public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
         expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9/\\.,_\\s]+': ("));
 
         OkHttpClientOptions okHttpClientOptions = OkHttpClientOptions.builder().build();
 
@@ -92,6 +121,11 @@ public final class UserAgentTest {
                 .protocol(Protocol.HTTP_1_1)
                 .code(code)
                 .build();
+    }
+
+    public interface TestService {
+        @GET("/")
+        Response get();
     }
 
 }

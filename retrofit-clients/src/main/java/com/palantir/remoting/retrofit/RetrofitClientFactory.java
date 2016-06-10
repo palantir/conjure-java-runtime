@@ -29,6 +29,11 @@ import retrofit.client.OkClient;
  * Utilities to help create Retrofit proxies. Feign clients should be preferred except in cases where proxies must
  * support file upload and download. Read and write timeouts are customizable in order to allow arbitrary sized file
  * uploads/downloads.
+ * <p>
+ *     All proxies take a User Agent and this will be embedded as the User Agent header for all requests.
+ *     For services, recommended user agents are of the form: ServiceName (Version), e.g. MyServer (1.2.3)
+ *     For services that run multiple instances, recommended user agents are of the form:
+ *       ServiceName/instanceId (Version), e.g. MyServer/12 (1.2.3)
  */
 public final class RetrofitClientFactory {
 
@@ -50,9 +55,8 @@ public final class RetrofitClientFactory {
                 ? new RetryInterceptor(options.getMaxNumberRetries().get())
                 : new RetryInterceptor();
 
-        UserAgentInterceptor userAgentInterceptor = UserAgentInterceptor.of(userAgent);
         okClient.interceptors().add(retryInterceptor);
-        okClient.interceptors().add(userAgentInterceptor);
+        okClient.interceptors().add(UserAgentInterceptor.of(userAgent));
 
         // ssl
         okClient.setSslSocketFactory(sslSocketFactory.orNull());

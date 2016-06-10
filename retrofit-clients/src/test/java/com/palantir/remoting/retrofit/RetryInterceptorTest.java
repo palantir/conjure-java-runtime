@@ -54,7 +54,7 @@ public final class RetryInterceptorTest {
     }
 
     @Test
-    public void testUserAgentSet() throws IOException {
+    public void testNoRetries() throws IOException {
         when(chain.proceed(request)).thenReturn(responseSuccess);
         Response response = retryInterceptor.intercept(chain);
 
