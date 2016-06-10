@@ -29,12 +29,19 @@ import retrofit.client.OkClient;
  * Utilities to help create Retrofit proxies. Feign clients should be preferred except in cases where proxies must
  * support file upload and download. Read and write timeouts are customizable in order to allow arbitrary sized file
  * uploads/downloads.
+ * <p>
+ * All factories take a User Agent and this will be embedded as the User Agent header for all requests.
+ * For services, recommended user agents are of the form: {@code ServiceName (Version)}, e.g. MyServer (1.2.3)
+ * For services that run multiple instances, recommended user agents are of the form:
+ * {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3)
  */
+
 public final class RetrofitClientFactory {
 
     private RetrofitClientFactory() {}
 
-    private static Client newHttpClient(Optional<SSLSocketFactory> sslSocketFactory, OkHttpClientOptions options) {
+    private static Client newHttpClient(Optional<SSLSocketFactory> sslSocketFactory, OkHttpClientOptions options,
+            String userAgent) {
         OkHttpClient okClient = new OkHttpClient();
 
         // timeouts
@@ -48,7 +55,9 @@ public final class RetrofitClientFactory {
         RetryInterceptor retryInterceptor = options.getMaxNumberRetries().isPresent()
                 ? new RetryInterceptor(options.getMaxNumberRetries().get())
                 : new RetryInterceptor();
+
         okClient.interceptors().add(retryInterceptor);
+        okClient.interceptors().add(UserAgentInterceptor.of(userAgent));
 
         // ssl
         okClient.setSslSocketFactory(sslSocketFactory.orNull());
@@ -57,8 +66,8 @@ public final class RetrofitClientFactory {
     }
 
     public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
-            OkHttpClientOptions options) {
-        Client client = newHttpClient(sslSocketFactoryOptional, options);
+            OkHttpClientOptions options, String userAgent) {
+        Client client = newHttpClient(sslSocketFactoryOptional, options, userAgent);
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(uri)
                 .setClient(client)

@@ -39,7 +39,7 @@ public final class QueryMapUsingServerWithoutContextTests {
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
 
-        service = FeignClients.standard().createProxy(
+        service = FeignClients.standard("test suite user agent").createProxy(
                 Optional.<SSLSocketFactory>absent(),
                 endpointUri,
                 QueryMapTestServer.TestClientService.class);

@@ -24,47 +24,57 @@ import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 import com.squareup.okhttp.mockwebserver.RecordedRequest;
 import javax.net.ssl.SSLSocketFactory;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
-public final class TextEncoderTest {
+public final class UserAgentTest {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    private TextEncoderService service;
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    private TestService service;
+
+    private static final String USER_AGENT = "TestSuite/1 (0.0.0)";
 
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + server.getPort();
 
-        service = FeignClients.standard("test suite user agent").createProxy(
+        service = FeignClients.standard(USER_AGENT).createProxy(
                 Optional.<SSLSocketFactory>absent(),
                 endpointUri,
-                TextEncoderService.class);
+                TestService.class);
 
         server.enqueue(new MockResponse().setBody("{}"));
     }
 
     @Test
-    public void testTextEncoder_doesNotEscapeAsJson() throws InterruptedException {
-        String testString = "{\"key\": \"value\"}";
-        service.post(testString);
+    public void testUserAgent_default() throws InterruptedException {
+        service.get();
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getBody().readUtf8(), is(testString));
+        assertThat(request.getHeader("User-Agent"), is(USER_AGENT));
+    }
+
+    @Test
+    public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()/\\.,_\\s]+': !@"));
+
+        FeignClients.standard("!@");
     }
 
     @Path("/")
-    public interface TextEncoderService {
-        @POST
-        @Consumes(MediaType.TEXT_PLAIN)
-        Object post(String test);
+    public interface TestService {
+        @GET
+        void get();
     }
 
 }

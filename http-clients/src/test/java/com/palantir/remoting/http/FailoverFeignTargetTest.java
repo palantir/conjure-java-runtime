@@ -55,16 +55,22 @@ public final class FailoverFeignTargetTest {
         server1.shutdown();
         server2.enqueue(new MockResponse().setBody("\"foo\""));
 
-        FakeoInterface proxy = FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(),
-                ImmutableSet.of("http://localhost:" + server1.getPort(), "http://localhost:" + server2.getPort()),
-                FakeoInterface.class);
+        FakeoInterface proxy = FeignClients.standard("test suite user agent")
+                .createProxy(Optional.<SSLSocketFactory>absent(),
+                        ImmutableSet.of(
+                                "http://localhost:" + server1.getPort(),
+                                "http://localhost:" + server2.getPort()),
+                        FakeoInterface.class);
         assertThat(proxy.blah(), is("foo"));
     }
 
     @Test
     public void testConsecutiveCalls() throws Exception {
-        FakeoInterface proxy = FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(),
-                ImmutableSet.of("http://localhost:" + server1.getPort(), "http://localhost:" + server2.getPort()),
+        FakeoInterface proxy = FeignClients.standard("test suite user agent")
+                .createProxy(Optional.<SSLSocketFactory>absent(),
+                ImmutableSet.of(
+                        "http://localhost:" + server1.getPort(),
+                        "http://localhost:" + server2.getPort()),
                 FakeoInterface.class);
 
         // Call fails when servers are down.
@@ -100,7 +106,8 @@ public final class FailoverFeignTargetTest {
                 FeignSerializableErrorErrorDecoder.INSTANCE,
                 FeignClientFactory.okHttpClient(),
                 backoffStrategy,
-                new Request.Options())
+                new Request.Options(),
+                "test suite user agent")
                 .createProxy(Optional.<SSLSocketFactory>absent(),
                         ImmutableSet.of("http://localhost:" + server1.getPort(),
                                 "http://localhost:" + server2.getPort()),

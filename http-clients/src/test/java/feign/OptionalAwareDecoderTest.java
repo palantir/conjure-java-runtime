@@ -48,8 +48,9 @@ public final class OptionalAwareDecoderTest {
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(), endpointUri,
-                TestServer.TestService.class);
+        service = FeignClients.standard("test suite user agent")
+                .createProxy(Optional.<SSLSocketFactory>absent(), endpointUri,
+                        TestServer.TestService.class);
     }
 
     @Test

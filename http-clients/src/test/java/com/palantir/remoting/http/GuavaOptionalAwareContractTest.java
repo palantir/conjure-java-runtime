@@ -44,7 +44,7 @@ public final class GuavaOptionalAwareContractTest {
 
     @Before
     public void before() {
-        proxy = FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(),
+        proxy = FeignClients.standard("test suite user agent").createProxy(Optional.<SSLSocketFactory>absent(),
                 ImmutableSet.of("http://localhost:" + server.getPort()),
                 FakeoInterface.class);
         server.enqueue(new MockResponse().setBody("\"foo\""));
@@ -75,7 +75,7 @@ public final class GuavaOptionalAwareContractTest {
     @Test
     public void testCannotDecorateInterfaceWithOptionalPathParam() {
         try {
-            FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(),
+            FeignClients.standard("test suite user agent").createProxy(Optional.<SSLSocketFactory>absent(),
                     ImmutableSet.of("https://localhost:" + server.getPort()), CannotDecorateInterface.class);
             fail();
         } catch (RuntimeException e) {

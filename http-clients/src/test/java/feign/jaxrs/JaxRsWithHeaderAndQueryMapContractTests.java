@@ -83,9 +83,10 @@ public final class JaxRsWithHeaderAndQueryMapContractTests {
 
     @Test
     public void testJaxRsInterfaceWithHeaderMap() throws Exception {
-        HeaderMapTestInterface proxy = FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(),
-                ImmutableSet.of("http://localhost:" + server.getPort()),
-                HeaderMapTestInterface.class);
+        HeaderMapTestInterface proxy = FeignClients.standard("test suite user agent")
+                .createProxy(Optional.<SSLSocketFactory>absent(),
+                        ImmutableSet.of("http://localhost:" + server.getPort()),
+                        HeaderMapTestInterface.class);
         server.enqueue(new MockResponse());
 
         proxy.header("alice", ImmutableMap.of("fooKey", "fooValue"));
@@ -129,9 +130,10 @@ public final class JaxRsWithHeaderAndQueryMapContractTests {
 
     @Test
     public void testJaxRsInterfaceWithQueryMap() throws Exception {
-        QueryMapTestInterface proxy = FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(),
-                ImmutableSet.of("http://localhost:" + server.getPort()),
-                QueryMapTestInterface.class);
+        QueryMapTestInterface proxy = FeignClients.standard("test suite user agent")
+                .createProxy(Optional.<SSLSocketFactory>absent(),
+                        ImmutableSet.of("http://localhost:" + server.getPort()),
+                        QueryMapTestInterface.class);
         server.enqueue(new MockResponse());
 
         proxy.query("alice", ImmutableMap.of("fooKey", "fooValue"));

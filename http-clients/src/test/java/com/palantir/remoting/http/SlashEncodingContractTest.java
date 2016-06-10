@@ -57,10 +57,10 @@ public final class SlashEncodingContractTest {
 
     @Before
     public void before() {
-        jerseyProxy = FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(),
+        jerseyProxy = FeignClients.standard("test suite user agent").createProxy(Optional.<SSLSocketFactory>absent(),
                 ImmutableSet.of("http://localhost:" + APP.getLocalPort()),
                 FakeoInterface.class);
-        inMemoryProxy = FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(),
+        inMemoryProxy = FeignClients.standard("test suite user agent").createProxy(Optional.<SSLSocketFactory>absent(),
                 ImmutableSet.of("http://localhost:" + server.getPort()),
                 FakeoInterface.class);
         server.enqueue(new MockResponse().setBody("\"foo\""));
