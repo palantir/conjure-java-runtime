@@ -43,15 +43,18 @@ public final class ServiceConfigTest {
                 rule.getConfiguration().getServiceDiscoveryConfiguration();
 
         HelloService helloClient =
-                FeignClients.standard().createProxy(discoveryConfiguration, "hello", HelloService.class);
+                FeignClients.standard("test suite user agent").createProxy(
+                        discoveryConfiguration, "hello", HelloService.class);
         GoodbyeService goodbyeClient =
-                FeignClients.standard().createProxy(discoveryConfiguration, "goodbye", GoodbyeService.class);
+                FeignClients.standard("test suite user agent").createProxy(
+                        discoveryConfiguration, "goodbye", GoodbyeService.class);
 
         ServiceConfiguration authConfig = rule.getConfiguration().getAuthConfiguration();
         Optional<SSLSocketFactory> socketFactory =
                 Optional.of(SslSocketFactories.createSslSocketFactory(authConfig.security().get()));
         AuthService authClient =
-                FeignClients.standard().createProxy(socketFactory, new HashSet<>(authConfig.uris()), AuthService.class);
+                FeignClients.standard("test suite user agent").createProxy(socketFactory,
+                        new HashSet<>(authConfig.uris()), AuthService.class);
 
         assertEquals("Hello world!", helloClient.sayHello());
         assertEquals("Goodbye world!", goodbyeClient.sayGoodBye());

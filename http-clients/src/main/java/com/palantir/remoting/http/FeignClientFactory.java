@@ -56,6 +56,7 @@ public final class FeignClientFactory {
     private final Function<Optional<SSLSocketFactory>, Client> clientSupplier;
     private final BackoffStrategy backoffStrategy;
     private final Request.Options options;
+    private final UserAgentInterceptor userAgentInterceptor;
 
     private FeignClientFactory(
             Contract contract,
@@ -64,7 +65,8 @@ public final class FeignClientFactory {
             ErrorDecoder errorDecoder,
             Function<Optional<SSLSocketFactory>, Client> clientSupplier,
             BackoffStrategy backoffStrategy,
-            Request.Options options) {
+            Request.Options options,
+            String userAgent) {
         this.contract = contract;
         this.encoder = encoder;
         this.decoder = decoder;
@@ -72,6 +74,7 @@ public final class FeignClientFactory {
         this.clientSupplier = clientSupplier;
         this.backoffStrategy = backoffStrategy;
         this.options = options;
+        this.userAgentInterceptor = UserAgentInterceptor.of(userAgent);
     }
 
     /**
@@ -84,9 +87,10 @@ public final class FeignClientFactory {
             Encoder encoder,
             Decoder decoder,
             ErrorDecoder errorDecoder,
-            Function<Optional<SSLSocketFactory>, Client> clientSupplier) {
+            Function<Optional<SSLSocketFactory>, Client> clientSupplier,
+            String userAgent) {
         return new FeignClientFactory(contract, encoder, decoder, errorDecoder, clientSupplier,
-                NeverRetryingBackoffStrategy.INSTANCE, new Request.Options());
+                NeverRetryingBackoffStrategy.INSTANCE, new Request.Options(), userAgent);
     }
 
     /**
@@ -99,9 +103,10 @@ public final class FeignClientFactory {
             ErrorDecoder errorDecoder,
             Function<Optional<SSLSocketFactory>, Client> clientSupplier,
             BackoffStrategy backoffStrategy,
-            Request.Options options) {
+            Request.Options options,
+            String userAgent) {
         return new FeignClientFactory(
-                contract, encoder, decoder, errorDecoder, clientSupplier, backoffStrategy, options);
+                contract, encoder, decoder, errorDecoder, clientSupplier, backoffStrategy, options, userAgent);
     }
 
     /**
@@ -119,6 +124,7 @@ public final class FeignClientFactory {
                 .options(requestOptions)
                 .logger(new Slf4jLogger(FeignClients.class))
                 .logLevel(Level.BASIC)
+                .requestInterceptor(userAgentInterceptor)
                 .target(type, uri);
     }
 
@@ -151,6 +157,7 @@ public final class FeignClientFactory {
                 .options(requestOptions)
                 .logger(new Slf4jLogger(FeignClients.class))
                 .logLevel(Level.BASIC)
+                .requestInterceptor(userAgentInterceptor)
                 .target(target);
     }
 

@@ -54,8 +54,8 @@ public final class InputStreamDelegateDecoderTest {
         inputStreamDelegateDecoder = new InputStreamDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = FeignClients.standard().createProxy(Optional.<SSLSocketFactory>absent(), endpointUri,
-                TestServer.TestService.class);
+        service = FeignClients.standard("test suite user agent").createProxy(Optional.<SSLSocketFactory>absent(),
+                endpointUri, TestServer.TestService.class);
     }
 
     @Test
