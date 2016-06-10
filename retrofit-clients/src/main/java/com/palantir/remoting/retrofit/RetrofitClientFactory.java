@@ -30,11 +30,12 @@ import retrofit.client.OkClient;
  * support file upload and download. Read and write timeouts are customizable in order to allow arbitrary sized file
  * uploads/downloads.
  * <p>
- *     All proxies take a User Agent and this will be embedded as the User Agent header for all requests.
- *     For services, recommended user agents are of the form: ServiceName (Version), e.g. MyServer (1.2.3)
- *     For services that run multiple instances, recommended user agents are of the form:
- *       ServiceName/InstanceId (Version), e.g. MyServer/12 (1.2.3)
+ * All factories take a User Agent and this will be embedded as the User Agent header for all requests.
+ * For services, recommended user agents are of the form: {@code ServiceName (Version)}, e.g. MyServer (1.2.3)
+ * For services that run multiple instances, recommended user agents are of the form:
+ * {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3)
  */
+
 public final class RetrofitClientFactory {
 
     private RetrofitClientFactory() {}

@@ -37,10 +37,10 @@ import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
  * to create HTTP proxies for HTTP remoting clients. The returned instances serialize server-side exceptions as JSON and
  * decode any 204 response as an {@link Optional#absent} in case the proxied interface is of type {@link Optional}.
  * <p>
- *     All factories take a User Agent and this will be embedded as the User Agent header for all requests.
- *     For services, recommended user agents are of the form: ServiceName (Version), e.g. MyServer (1.2.3)
- *     For services that run multiple instances, recommended user agents are of the form:
- *       ServiceName/InstanceId (Version), e.g. MyServer/12 (1.2.3)
+ * All factories take a User Agent and this will be embedded as the User Agent header for all requests.
+ * For services, recommended user agents are of the form: {@code ServiceName (Version)}, e.g. MyServer (1.2.3)
+ * For services that run multiple instances, recommended user agents are of the form:
+ * {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3)
  */
 public final class FeignClients {
 

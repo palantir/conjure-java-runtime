@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 public final class UserAgentInterceptor implements RequestInterceptor {
 
     // keep in sync with corresponding pattern in UserAgentInterceptor.java in retrofit-clients project
-    private static final Pattern VALID_USER_AGENT = Pattern.compile("[A-Za-z0-9/\\.,_\\s]+");
+    private static final Pattern VALID_USER_AGENT = Pattern.compile("[A-Za-z0-9()/\\.,_\\s]+");
     private final String userAgent;
 
     private UserAgentInterceptor(String userAgent) {
