@@ -107,7 +107,7 @@ public final class UserAgentTest {
     @Test
     public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
         expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()/\\.,_\\s]+': !@"));
+        expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()-/\\.,_\\s]+': !@"));
 
         OkHttpClientOptions okHttpClientOptions = OkHttpClientOptions.builder().build();
 
