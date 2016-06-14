@@ -49,11 +49,31 @@ public final class FeignClients {
     private FeignClients() {}
 
     /**
+     * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
+     * Provides a {@link FeignClientFactory} with an {@link ObjectMapper} configured with {@link
+     * com.fasterxml.jackson.datatype.guava.GuavaModule} and {@link com.fasterxml.jackson.datatype.jdk7.Jdk7Module}.
+     */
+    @Deprecated
+    public static FeignClientFactory standard() {
+        return standard(DEFAULT_TIMEOUT_OPTIONS);
+    }
+
+    /**
      * Provides a {@link FeignClientFactory} with an {@link ObjectMapper} configured with {@link
      * com.fasterxml.jackson.datatype.guava.GuavaModule} and {@link com.fasterxml.jackson.datatype.jdk7.Jdk7Module}.
      */
     public static FeignClientFactory standard(String userAgent) {
         return standard(DEFAULT_TIMEOUT_OPTIONS, userAgent);
+    }
+
+    /**
+     * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
+     * Provides a {@link FeignClientFactory} with an {@link ObjectMapper} configured with {@link
+     * com.fasterxml.jackson.datatype.guava.GuavaModule} and {@link com.fasterxml.jackson.datatype.jdk7.Jdk7Module}.
+     */
+    @Deprecated
+    public static FeignClientFactory standard(Request.Options timeoutOptions) {
+        return withMapper(ObjectMappers.guavaJdk7(), timeoutOptions);
     }
 
     /**
@@ -65,10 +85,31 @@ public final class FeignClients {
     }
 
     /**
+     * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
+     * Provides a {@link FeignClientFactory} compatible with jackson 2.4.
+     */
+    @Deprecated
+    public static FeignClientFactory standardJackson24() {
+        return standardJackson24(DEFAULT_TIMEOUT_OPTIONS);
+    }
+
+    /**
      * Provides a {@link FeignClientFactory} compatible with jackson 2.4.
      */
     public static FeignClientFactory standardJackson24(String userAgent) {
         return standardJackson24(DEFAULT_TIMEOUT_OPTIONS, userAgent);
+    }
+
+    /**
+     * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
+     * Provides a {@link FeignClientFactory} compatible with jackson 2.4.
+     */
+    @Deprecated
+    public static FeignClientFactory standardJackson24(Request.Options timeoutOptions) {
+        return withEncoderAndDecoder(
+                new Jackson24Encoder(ObjectMappers.guavaJdk7()),
+                new JacksonDecoder(ObjectMappers.guavaJdk7()),
+                timeoutOptions);
     }
 
     /**
@@ -83,10 +124,28 @@ public final class FeignClients {
     }
 
     /**
+     * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
+     * Provides a {@link FeignClientFactory} with an unmodified {@link ObjectMapper}.
+     */
+    @Deprecated
+    public static FeignClientFactory vanilla() {
+        return vanilla(DEFAULT_TIMEOUT_OPTIONS);
+    }
+
+    /**
      * Provides a {@link FeignClientFactory} with an unmodified {@link ObjectMapper}.
      */
     public static FeignClientFactory vanilla(String userAgent) {
         return vanilla(DEFAULT_TIMEOUT_OPTIONS, userAgent);
+    }
+
+    /**
+     * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
+     * Provides a {@link FeignClientFactory} with an unmodified {@link ObjectMapper}.
+     */
+    @Deprecated
+    public static FeignClientFactory vanilla(Request.Options timeoutOptions) {
+        return withMapper(ObjectMappers.vanilla(), timeoutOptions);
     }
 
     /**
@@ -97,6 +156,15 @@ public final class FeignClients {
     }
 
     /**
+     * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
+     * Provides a {@link FeignClientFactory} with the specified {@link ObjectMapper}.
+     */
+    @Deprecated
+    public static FeignClientFactory withMapper(ObjectMapper mapper) {
+        return withMapper(mapper, DEFAULT_TIMEOUT_OPTIONS);
+    }
+
+    /**
      * Provides a {@link FeignClientFactory} with the specified {@link ObjectMapper}.
      */
     public static FeignClientFactory withMapper(ObjectMapper mapper, String userAgent) {
@@ -104,10 +172,29 @@ public final class FeignClients {
     }
 
     /**
+     * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
+     * Provides a {@link FeignClientFactory} with the specified {@link ObjectMapper}.
+     */
+    @Deprecated
+    public static FeignClientFactory withMapper(ObjectMapper mapper, Request.Options timeoutOptions) {
+        return withEncoderAndDecoder(new JacksonEncoder(mapper), new JacksonDecoder(mapper), timeoutOptions);
+    }
+
+    /**
      * Provides a {@link FeignClientFactory} with the specified {@link ObjectMapper}.
      */
     public static FeignClientFactory withMapper(ObjectMapper mapper, Request.Options timeoutOptions, String userAgent) {
         return withEncoderAndDecoder(new JacksonEncoder(mapper), new JacksonDecoder(mapper), timeoutOptions, userAgent);
+    }
+
+    /**
+     * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
+     * Provides a {@link FeignClientFactory} with the specified {@link Encoder} and {@link Decoder}.
+     */
+    @Deprecated
+    private static FeignClientFactory withEncoderAndDecoder(Encoder encoder, Decoder decoder,
+            Request.Options timeoutOptions) {
+        return withEncoderAndDecoder(encoder, decoder, timeoutOptions, "UnspecifiedUserAgent");
     }
 
     /**

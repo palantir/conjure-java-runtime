@@ -51,7 +51,7 @@ public final class UserAgentTest {
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    private TestService service;
+    private String endpointUri;
     private UserAgentInterceptor userAgentInterceptor;
     private Interceptor.Chain chain;
     private Request request;
@@ -67,15 +67,7 @@ public final class UserAgentTest {
 
         when(chain.request()).thenReturn(request);
 
-        String endpointUri = "http://localhost:" + server.getPort();
-
-        service = RetrofitClientFactory.createProxy(
-                Optional.<SSLSocketFactory>absent(),
-                endpointUri,
-                TestService.class,
-                OkHttpClientOptions.builder().build(),
-                USER_AGENT
-                );
+        endpointUri = "http://localhost:" + server.getPort();
 
         server.enqueue(new MockResponse().setBody("{}"));
     }
@@ -97,10 +89,17 @@ public final class UserAgentTest {
 
     @Test
     public void  testUserAgent_defaultHeaderIsSent() throws InterruptedException {
+        TestService service = RetrofitClientFactory.createProxy(
+                Optional.<SSLSocketFactory>absent(),
+                endpointUri,
+                TestService.class,
+                OkHttpClientOptions.builder().build()
+        );
+
         service.get();
 
         RecordedRequest capturedRequest = server.takeRequest();
-        assertThat(capturedRequest.getHeader("User-Agent"), is(USER_AGENT));
+        assertThat(capturedRequest.getHeader("User-Agent"), is("UnspecifiedUserAgent"));
     }
 
 
