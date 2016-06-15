@@ -74,7 +74,7 @@ public final class UserAgentTest {
 
 
     @Test
-    public void  testUserAgent_default() throws IOException {
+    public void testUserAgent_default() throws IOException {
         when(chain.proceed(Matchers.any(Request.class))).thenReturn(responseSuccess);
         Response response = userAgentInterceptor.intercept(chain);
 
@@ -88,7 +88,23 @@ public final class UserAgentTest {
     }
 
     @Test
-    public void  testUserAgent_defaultHeaderIsSent() throws InterruptedException {
+    public void testUserAgent_defaultHeaderIsSent() throws InterruptedException {
+        TestService service = RetrofitClientFactory.createProxy(
+                Optional.<SSLSocketFactory>absent(),
+                endpointUri,
+                TestService.class,
+                OkHttpClientOptions.builder().build(),
+                USER_AGENT
+        );
+
+        service.get();
+
+        RecordedRequest capturedRequest = server.takeRequest();
+        assertThat(capturedRequest.getHeader("User-Agent"), is(USER_AGENT));
+    }
+
+    @Test
+    public void testUserAgent_deprecatedDefaultIsUnspecified() throws InterruptedException {
         TestService service = RetrofitClientFactory.createProxy(
                 Optional.<SSLSocketFactory>absent(),
                 endpointUri,
@@ -101,7 +117,6 @@ public final class UserAgentTest {
         RecordedRequest capturedRequest = server.takeRequest();
         assertThat(capturedRequest.getHeader("User-Agent"), is("UnspecifiedUserAgent"));
     }
-
 
     @Test
     public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
