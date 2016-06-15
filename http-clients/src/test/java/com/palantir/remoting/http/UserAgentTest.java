@@ -39,28 +39,41 @@ public final class UserAgentTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private TestService service;
+    private String endpointUri;
 
     private static final String USER_AGENT = "TestSuite/1 (0.0.0)";
 
     @Before
     public void before() {
-        String endpointUri = "http://localhost:" + server.getPort();
-
-        service = FeignClients.standard(USER_AGENT).createProxy(
-                Optional.<SSLSocketFactory>absent(),
-                endpointUri,
-                TestService.class);
+        endpointUri = "http://localhost:" + server.getPort();
 
         server.enqueue(new MockResponse().setBody("{}"));
     }
 
     @Test
     public void testUserAgent_default() throws InterruptedException {
+        TestService service = FeignClients.standard(USER_AGENT).createProxy(
+                Optional.<SSLSocketFactory>absent(),
+                endpointUri,
+                TestService.class);
+
         service.get();
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader("User-Agent"), is(USER_AGENT));
+    }
+
+    @Test
+    public void testUserAgent_deprecatedDefaultIsUnspecified() throws InterruptedException {
+        TestService service = FeignClients.standard().createProxy(
+                Optional.<SSLSocketFactory>absent(),
+                endpointUri,
+                TestService.class);
+
+        service.get();
+
+        RecordedRequest request = server.takeRequest();
+        assertThat(request.getHeader("User-Agent"), is("UnspecifiedUserAgent"));
     }
 
     @Test
