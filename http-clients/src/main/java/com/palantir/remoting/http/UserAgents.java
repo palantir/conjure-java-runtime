@@ -33,7 +33,7 @@ public final class UserAgents {
      * java.util.jar.Attributes.Name#IMPLEMENTATION_VERSION} of the package of the provided class. The default value for
      * both properties is "{@value DEFAULT_VALUE}".
      */
-    public static String getUserAgent(Class<?> clazz) {
+    public static String fromClass(Class<?> clazz) {
         Package classPackage = clazz.getPackage();
         String userAgent = Optional.fromNullable(classPackage.getImplementationTitle()).or(DEFAULT_VALUE);
         String version = Optional.fromNullable(classPackage.getImplementationVersion()).or(DEFAULT_VALUE);

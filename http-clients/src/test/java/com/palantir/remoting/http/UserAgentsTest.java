@@ -32,7 +32,7 @@ public final class UserAgentsTest {
 
     @Test
     public void testGetUserAgent_fromExternalVersionTestJar() throws IOException {
-        assertThat(UserAgents.getUserAgent(VersionTest.class), is(String.format("test-name (test-version)")));
+        assertThat(UserAgents.fromClass(VersionTest.class), is("test-name (test-version)"));
     }
 
 }
