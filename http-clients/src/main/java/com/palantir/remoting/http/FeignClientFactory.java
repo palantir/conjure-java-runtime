@@ -30,6 +30,7 @@ import feign.Contract;
 import feign.Feign;
 import feign.Logger.Level;
 import feign.Request;
+import feign.TraceResponseDecoder;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
@@ -69,7 +70,7 @@ public final class FeignClientFactory {
             String userAgent) {
         this.contract = contract;
         this.encoder = encoder;
-        this.decoder = decoder;
+        this.decoder = new TraceResponseDecoder(decoder);
         this.errorDecoder = errorDecoder;
         this.clientSupplier = clientSupplier;
         this.backoffStrategy = backoffStrategy;
@@ -119,6 +120,7 @@ public final class FeignClientFactory {
                 .contract(contract)
                 .encoder(encoder)
                 .decoder(decoder)
+                .requestInterceptor(TraceRequestInterceptor.INSTANCE)
                 .errorDecoder(errorDecoder)
                 .client(clientSupplier.apply(sslSocketFactory))
                 .options(requestOptions)
@@ -151,6 +153,7 @@ public final class FeignClientFactory {
                 .contract(contract)
                 .encoder(encoder)
                 .decoder(decoder)
+                .requestInterceptor(TraceRequestInterceptor.INSTANCE)
                 .errorDecoder(errorDecoder)
                 .client(client)
                 .retryer(target)
