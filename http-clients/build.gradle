@@ -21,6 +21,7 @@ dependencies {
     compile libs.wsRsApi
 
     testCompile project(':http-servers')
+    testCompile files('lib/VersionTest.jar')
 
     testCompile libs.dropwizard.testing
     testCompile libs.hamcrest
