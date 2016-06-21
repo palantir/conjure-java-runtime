@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import com.squareup.okhttp.OkHttpClient;
 import feign.Feign;
 import feign.RetryableException;
 import feign.jaxrs.JAXRSContract;
@@ -36,6 +35,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import okhttp3.OkHttpClient;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -98,8 +98,7 @@ public final class DropwizardSslClientAuthTests {
         SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
 
         String endpointUri = "https://localhost:" + APP.getLocalPort();
-        OkHttpClient okHttpClient = new OkHttpClient();
-        okHttpClient.setSslSocketFactory(factory);
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().sslSocketFactory(factory).build();
         return Feign.builder()
                 .client(new feign.okhttp.OkHttpClient(okHttpClient))
                 .contract(new JAXRSContract())
