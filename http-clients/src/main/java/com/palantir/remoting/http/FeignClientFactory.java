@@ -212,9 +212,11 @@ public final class FeignClientFactory {
             new Function<Optional<SSLSocketFactory>, Client>() {
                 @Override
                 public Client apply(Optional<SSLSocketFactory> sslSocketFactory) {
-                    com.squareup.okhttp.OkHttpClient client = new com.squareup.okhttp.OkHttpClient();
-                    client.setSslSocketFactory(sslSocketFactory.orNull());
-                    return new OkHttpClient(client);
+                    okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
+                    if (sslSocketFactory.isPresent()) {
+                        client.sslSocketFactory(sslSocketFactory.get());
+                    }
+                    return new OkHttpClient(client.build());
                 }
             };
 
@@ -227,7 +229,7 @@ public final class FeignClientFactory {
             };
 
     /**
-     * Supplies a feign {@link Client} wrapping a {@link com.squareup.okhttp.OkHttpClient} client with optionally
+     * Supplies a feign {@link Client} wrapping a {@link okhttp3.OkHttpClient} client with optionally
      * specified {@link SSLSocketFactory}.
      */
     public static Function<Optional<SSLSocketFactory>, Client> okHttpClient() {
