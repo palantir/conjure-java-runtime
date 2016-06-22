@@ -16,7 +16,6 @@
 
 package com.palantir.remoting.http;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -53,17 +52,17 @@ public final class FeignClientFactory {
     private final Encoder encoder;
     private final Decoder decoder;
     private final ErrorDecoder errorDecoder;
-    private final Function<Optional<SSLSocketFactory>, Client> clientSupplier;
+    private final ClientSupplier clientSupplier;
     private final BackoffStrategy backoffStrategy;
     private final Request.Options options;
-    private final UserAgentInterceptor userAgentInterceptor;
+    private final String userAgent;
 
     private FeignClientFactory(
             Contract contract,
             Encoder encoder,
             Decoder decoder,
             ErrorDecoder errorDecoder,
-            Function<Optional<SSLSocketFactory>, Client> clientSupplier,
+            ClientSupplier clientSupplier,
             BackoffStrategy backoffStrategy,
             Request.Options options,
             String userAgent) {
@@ -74,7 +73,7 @@ public final class FeignClientFactory {
         this.clientSupplier = clientSupplier;
         this.backoffStrategy = backoffStrategy;
         this.options = options;
-        this.userAgentInterceptor = UserAgentInterceptor.of(userAgent);
+        this.userAgent = userAgent;
     }
 
     /**
@@ -87,7 +86,7 @@ public final class FeignClientFactory {
             Encoder encoder,
             Decoder decoder,
             ErrorDecoder errorDecoder,
-            Function<Optional<SSLSocketFactory>, Client> clientSupplier,
+            ClientSupplier clientSupplier,
             String userAgent) {
         return new FeignClientFactory(contract, encoder, decoder, errorDecoder, clientSupplier,
                 NeverRetryingBackoffStrategy.INSTANCE, new Request.Options(), userAgent);
@@ -101,7 +100,7 @@ public final class FeignClientFactory {
             Encoder encoder,
             Decoder decoder,
             ErrorDecoder errorDecoder,
-            Function<Optional<SSLSocketFactory>, Client> clientSupplier,
+            ClientSupplier clientSupplier,
             BackoffStrategy backoffStrategy,
             Request.Options options,
             String userAgent) {
@@ -120,11 +119,11 @@ public final class FeignClientFactory {
                 .encoder(encoder)
                 .decoder(decoder)
                 .errorDecoder(errorDecoder)
-                .client(clientSupplier.apply(sslSocketFactory))
+                .client(clientSupplier.createClient(sslSocketFactory, userAgent))
                 .options(requestOptions)
                 .logger(new Slf4jLogger(FeignClients.class))
                 .logLevel(Level.BASIC)
-                .requestInterceptor(userAgentInterceptor)
+                .requestInterceptor(UserAgentInterceptor.of(userAgent))
                 .target(type, uri);
     }
 
@@ -145,7 +144,7 @@ public final class FeignClientFactory {
     public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type,
             Request.Options requestOptions) {
         FailoverFeignTarget<T> target = new FailoverFeignTarget<>(uris, type, backoffStrategy);
-        Client client = clientSupplier.apply(sslSocketFactory);
+        Client client = clientSupplier.createClient(sslSocketFactory, userAgent);
         client = target.wrapClient(client);
         return Feign.builder()
                 .contract(contract)
@@ -157,7 +156,7 @@ public final class FeignClientFactory {
                 .options(requestOptions)
                 .logger(new Slf4jLogger(FeignClients.class))
                 .logLevel(Level.BASIC)
-                .requestInterceptor(userAgentInterceptor)
+                .requestInterceptor(UserAgentInterceptor.of(userAgent))
                 .target(target);
     }
 
@@ -208,10 +207,10 @@ public final class FeignClientFactory {
         return ret;
     }
 
-    private static final Function<Optional<SSLSocketFactory>, Client> OKHTTP_CLIENT_SUPPLIER =
-            new Function<Optional<SSLSocketFactory>, Client>() {
+    private static final ClientSupplier OKHTTP_CLIENT_SUPPLIER =
+            new ClientSupplier() {
                 @Override
-                public Client apply(Optional<SSLSocketFactory> sslSocketFactory) {
+                public Client createClient(Optional<SSLSocketFactory> sslSocketFactory, String userAgent) {
                     okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
                     if (sslSocketFactory.isPresent()) {
                         client.sslSocketFactory(sslSocketFactory.get());
@@ -220,10 +219,10 @@ public final class FeignClientFactory {
                 }
             };
 
-    private static final Function<Optional<SSLSocketFactory>, Client> DEFAULT_CLIENT_SUPPLIER =
-            new Function<Optional<SSLSocketFactory>, Client>() {
+    private static final ClientSupplier DEFAULT_CLIENT_SUPPLIER =
+            new ClientSupplier() {
                 @Override
-                public Client apply(Optional<SSLSocketFactory> sslSocketFactory) {
+                public Client createClient(Optional<SSLSocketFactory> sslSocketFactory, String userAgent) {
                     return new Client.Default(sslSocketFactory.orNull(), null);
                 }
             };
@@ -232,7 +231,7 @@ public final class FeignClientFactory {
      * Supplies a feign {@link Client} wrapping a {@link okhttp3.OkHttpClient} client with optionally
      * specified {@link SSLSocketFactory}.
      */
-    public static Function<Optional<SSLSocketFactory>, Client> okHttpClient() {
+    public static ClientSupplier okHttpClient() {
         return OKHTTP_CLIENT_SUPPLIER;
     }
 
@@ -240,7 +239,7 @@ public final class FeignClientFactory {
      * Supplies a feign {@link feign.Client.Default} client with default {@link javax.net.ssl.HostnameVerifier} and
      * optionally specified {@link SSLSocketFactory}.
      */
-    public static Function<Optional<SSLSocketFactory>, Client> defaultClient() {
+    public static ClientSupplier defaultClient() {
         return DEFAULT_CLIENT_SUPPLIER;
     }
 
