@@ -78,10 +78,11 @@ public final class UserAgentTest {
 
     @Test
     public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
+        FeignClientFactory factory = FeignClients.standard("!@");
+
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()-/\\.,_\\s]+': !@"));
-
-        FeignClients.standard("!@");
+        factory.createProxy(Optional.<SSLSocketFactory>absent(), "foo", TestService.class);
     }
 
     @Path("/")
