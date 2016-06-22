@@ -14,31 +14,28 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.http;
+package com.palantir.remoting.http.server;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-import com.google.common.base.Optional;
-import com.palantir.remoting.ssl.SslConfiguration;
-import com.palantir.remoting.ssl.SslSocketFactories;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
-import java.nio.file.Paths;
-import javax.net.ssl.SSLSocketFactory;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -48,11 +45,12 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 
-public final class FeignClientFactoryTest {
+public final class DropwizardBraveTracingFiltersTest {
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestEchoServer.class,
-            "src/test/resources/test-server-ssl.yml");
+            "src/test/resources/test-server.yml");
 
+    private WebTarget target;
     @Mock
     private Appender<ILoggingEvent> mockAppender;
 
@@ -60,58 +58,33 @@ public final class FeignClientFactoryTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
 
+        String endpointUri = "http://localhost:" + APP.getLocalPort();
+        JerseyClientBuilder builder = new JerseyClientBuilder();
+        Client client = builder.build();
+        target = client.target(endpointUri);
+
         when(mockAppender.getName()).thenReturn("MOCK");
         ch.qos.logback.classic.Logger resourceLog =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ClientTracer(test suite user agent)");
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ServerTracer(testTracerName)");
         resourceLog.addAppender(mockAppender);
     }
 
     @Test
-    public void testSslSocketFactory_cannotConnectWhenSocketFactoryIsNotSet() throws Exception {
-        String endpointUri = "https://localhost:" + APP.getLocalPort();
-        TestEchoService service = FeignClients.standard("test suite user agent")
-                .createProxy(Optional.<SSLSocketFactory>absent(), endpointUri, TestEchoService.class);
-
-        try {
-            service.echo("foo");
-        } catch (RuntimeException e) {
-            assertThat(e.getMessage(),
-                    containsString("sun.security.validator.ValidatorException: PKIX path building failed:"));
-        }
-    }
-
-    @Test
-    public void testSslSocketFactory_canConnectWhenSocketFactoryIsSet() throws Exception {
-        TestEchoService service = createProxy();
-        assertThat(service.echo("foo"), is("foo"));
-    }
-
-    @Test
     public void testBraveTracing() throws Exception {
-        TestEchoService service = createProxy();
-        service.echo("foo");
+        target.path("echo").request().get();
 
         ArgumentCaptor<ILoggingEvent> requestEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(mockAppender).doAppend(requestEvent.capture());
         assertThat(requestEvent.getValue().getFormattedMessage(),
-                containsString("\"serviceName\":\"test suite user agent\","));
+                containsString("\"serviceName\":\"testtracername\",\"ipv4\":\"0.0.0.0\",\"port\":61827}"));
         Mockito.verifyNoMoreInteractions(mockAppender);
-    }
-
-    private TestEchoService createProxy() {
-        String endpointUri = "https://localhost:" + APP.getLocalPort();
-        SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
-        return FeignClients.standard("test suite user agent")
-                .createProxy(
-                        Optional.of(SslSocketFactories.createSslSocketFactory(sslConfig)),
-                        endpointUri,
-                        TestEchoService.class);
     }
 
     public static final class TestEchoServer extends Application<Configuration> {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
+            DropwizardBraveTracingFilters.registerBraveTracers(env.jersey(), config, "testTracerName");
         }
 
         public static final class TestEchoResource implements TestEchoService {

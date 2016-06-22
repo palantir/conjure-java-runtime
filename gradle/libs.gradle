@@ -1,4 +1,8 @@
 project.ext.libs = [
+    'brave': [
+        'okhttp': 'io.zipkin.brave:brave-okhttp:3.9.0',
+        'jaxrs2': 'io.zipkin.brave:brave-jaxrs2:3.9.0'
+    ],
     'dropwizard': [
         'testing': 'io.dropwizard:dropwizard-testing:0.8.2',
         'core': 'io.dropwizard:dropwizard-core:0.8.2',

@@ -16,10 +16,19 @@
 
 package com.palantir.remoting.http;
 
+import com.github.kristofa.brave.ClientRequestInterceptor;
+import com.github.kristofa.brave.ClientResponseInterceptor;
+import com.github.kristofa.brave.ClientTracer;
+import com.github.kristofa.brave.LoggingSpanCollector;
+import com.github.kristofa.brave.Sampler;
+import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
+import com.github.kristofa.brave.http.DefaultSpanNameProvider;
+import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.net.InetAddresses;
 import com.palantir.config.service.ServiceConfiguration;
 import com.palantir.config.service.ServiceDiscoveryConfiguration;
 import com.palantir.remoting.ssl.SslConfiguration;
@@ -35,8 +44,11 @@ import feign.codec.ErrorDecoder;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import io.dropwizard.util.Duration;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import javax.net.ssl.SSLSocketFactory;
 
@@ -215,6 +227,21 @@ public final class FeignClientFactory {
                     if (sslSocketFactory.isPresent()) {
                         client.sslSocketFactory(sslSocketFactory.get());
                     }
+
+                    // Set up Zipkin/Brave tracing
+                    ClientTracer tracer = ClientTracer.builder()
+                            .traceSampler(Sampler.ALWAYS_SAMPLE)
+                            .randomGenerator(new Random())
+                            .state(new ThreadLocalServerClientAndLocalSpanState(getIpAddress(), 0, userAgent))
+                            .spanCollector(new LoggingSpanCollector("ClientTracer(" + userAgent + ")"))
+                            .build();
+                    BraveOkHttpRequestResponseInterceptor braveInterceptor =
+                            new BraveOkHttpRequestResponseInterceptor(
+                                    new ClientRequestInterceptor(tracer),
+                                    new ClientResponseInterceptor(tracer),
+                                    new DefaultSpanNameProvider());
+                    client.addInterceptor(braveInterceptor);
+
                     return new OkHttpClient(client.build());
                 }
             };
@@ -228,8 +255,9 @@ public final class FeignClientFactory {
             };
 
     /**
-     * Supplies a feign {@link Client} wrapping a {@link okhttp3.OkHttpClient} client with optionally
-     * specified {@link SSLSocketFactory}.
+     * Supplies a feign {@link Client} wrapping a {@link okhttp3.OkHttpClient} client with optionally specified {@link
+     * SSLSocketFactory}. The client emits Zipkin/Brave traces to a {@link java.util.logging.Logger} with log-level
+     * INFO.
      */
     public static ClientSupplier okHttpClient() {
         return OKHTTP_CLIENT_SUPPLIER;
@@ -243,4 +271,13 @@ public final class FeignClientFactory {
         return DEFAULT_CLIENT_SUPPLIER;
     }
 
+    // Returns the IP address returned by InetAddress.getLocalHost(), or -1 if it cannot be determined.
+    // TODO(rfink) What if there are multiple? Can we find the "correct" one?
+    private static int getIpAddress() {
+        try {
+            return InetAddresses.coerceToInteger(InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+            return -1;
+        }
+    }
 }
