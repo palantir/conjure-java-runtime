@@ -20,6 +20,10 @@ import com.google.common.base.Optional;
 import feign.Client;
 import javax.net.ssl.SSLSocketFactory;
 
+/**
+ * Given an optional {@link javax.net.ssl.SSLSocketFactory} and a user agent, creates and returns a {@link feign.Client
+ * Feign client}.
+ */
 public interface ClientSupplier {
     Client createClient(Optional<SSLSocketFactory> sslSocketFactory, String userAgent);
 }
