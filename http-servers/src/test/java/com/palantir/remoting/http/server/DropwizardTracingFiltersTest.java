@@ -45,7 +45,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 
-public final class DropwizardBraveTracingFiltersTest {
+public final class DropwizardTracingFiltersTest {
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestEchoServer.class,
             "src/test/resources/test-server.yml");
@@ -84,7 +84,7 @@ public final class DropwizardBraveTracingFiltersTest {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
-            DropwizardBraveTracingFilters.registerBraveTracers(env.jersey(), config, "testTracerName");
+            DropwizardTracingFilters.registerBraveTracers(env.jersey(), config, "testTracerName");
         }
 
         public static final class TestEchoResource implements TestEchoService {

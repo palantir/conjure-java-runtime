@@ -40,9 +40,9 @@ import java.net.UnknownHostException;
 import java.util.Random;
 
 /** Static utilities for registering Brave/Zipkin filters with Dropwizard applications. */
-public final class DropwizardBraveTracingFilters {
+public final class DropwizardTracingFilters {
 
-    private DropwizardBraveTracingFilters() {}
+    private DropwizardTracingFilters() {}
 
     /**
      * Registers Brave request&response filters for logging Zipkin-style tracing information. The Zipkin logger carries
