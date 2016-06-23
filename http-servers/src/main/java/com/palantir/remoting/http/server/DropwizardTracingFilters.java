@@ -30,14 +30,16 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.net.InetAddresses;
 import io.dropwizard.Configuration;
-import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.jetty.ConnectorFactory;
 import io.dropwizard.jetty.HttpConnectorFactory;
 import io.dropwizard.jetty.HttpsConnectorFactory;
 import io.dropwizard.server.DefaultServerFactory;
+import io.dropwizard.setup.Environment;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.EnumSet;
 import java.util.Random;
+import javax.servlet.DispatcherType;
 
 /** Static utilities for registering Brave/Zipkin filters with Dropwizard applications. */
 public final class DropwizardTracingFilters {
@@ -45,21 +47,25 @@ public final class DropwizardTracingFilters {
     private DropwizardTracingFilters() {}
 
     /**
-     * Registers Brave request&response filters for logging Zipkin-style tracing information. The Zipkin logger carries
-     * the given tracerName and logs server IP/Port information extracted from the given Dropwizard configuration with
-     * "best effort".
+     * Registers Brave request&response filters for logging Zipkin-style tracing information, as well as for augmenting
+     * the SFL4J {@link org.slf4j.MDC} with with a {@link TraceIdLoggingFilter#MDC_KEY trace id field}. The Zipkin log
+     * collector carries the given tracerName and logs server IP/Port information extracted from the given Dropwizard
+     * configuration with "best effort".
      * <p>
      * TODO(rfink) Is there a more stable way to retrieve IP/Port information?
      */
-    public static void registerTracers(JerseyEnvironment environment, Configuration config, String tracerName) {
+    public static void registerTracers(Environment environment, Configuration config, String tracerName) {
         ServerTracer serverTracer = getServerTracer(extractIp(config), extractPort(config), tracerName);
-        environment.register(new BraveContainerRequestFilter(
+        environment.jersey().register(new BraveContainerRequestFilter(
                 new ServerRequestInterceptor(serverTracer),
                 new DefaultSpanNameProvider()
         ));
-        environment.register(new BraveContainerResponseFilter(
+        environment.jersey().register(new BraveContainerResponseFilter(
                 new ServerResponseInterceptor(serverTracer)
         ));
+        environment.servlets()
+                .addFilter(TraceIdLoggingFilter.class.getSimpleName(), TraceIdLoggingFilter.INSTANCE)
+                .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
     }
 
     private static ServerTracer getServerTracer(int ip, int port, String name) {

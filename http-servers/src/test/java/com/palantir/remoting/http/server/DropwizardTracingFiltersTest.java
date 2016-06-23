@@ -21,12 +21,17 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.OutputStreamAppender;
+import com.github.kristofa.brave.http.BraveHttpHeaders;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import java.io.ByteArrayOutputStream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -46,13 +51,18 @@ import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 
 public final class DropwizardTracingFiltersTest {
+    private static final ch.qos.logback.classic.Logger logger =
+            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(DropwizardTracingFiltersTest.class);
+
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestEchoServer.class,
             "src/test/resources/test-server.yml");
 
     private WebTarget target;
     @Mock
-    private Appender<ILoggingEvent> mockAppender;
+    private Appender<ILoggingEvent> braveMockAppender;
+    @Mock
+    private Appender<ILoggingEvent> classMockAppender;
 
     @Before
     public void before() {
@@ -63,33 +73,56 @@ public final class DropwizardTracingFiltersTest {
         Client client = builder.build();
         target = client.target(endpointUri);
 
-        when(mockAppender.getName()).thenReturn("MOCK");
-        ch.qos.logback.classic.Logger resourceLog =
+        when(braveMockAppender.getName()).thenReturn("MOCK");
+        // the logger used by the brave server instance
+        ch.qos.logback.classic.Logger braveLogger =
                 (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ServerTracer(testTracerName)");
-        resourceLog.addAppender(mockAppender);
+        braveLogger.addAppender(braveMockAppender);
     }
 
     @Test
-    public void testBraveTracing() throws Exception {
-        target.path("echo").request().get();
+    public void testBraveTracing_serverLogsTraceId() throws Exception {
+        target.path("echo").request().header(BraveHttpHeaders.TraceId.getName(), "myTraceId").get();
 
         ArgumentCaptor<ILoggingEvent> requestEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
-        verify(mockAppender).doAppend(requestEvent.capture());
+        verify(braveMockAppender).doAppend(requestEvent.capture());
         assertThat(requestEvent.getValue().getFormattedMessage(),
                 containsString("\"serviceName\":\"testtracername\",\"ipv4\":\"0.0.0.0\",\"port\":61827}"));
-        Mockito.verifyNoMoreInteractions(mockAppender);
+        Mockito.verifyNoMoreInteractions(braveMockAppender);
+    }
+
+    @Test
+    public void testLogAppenderCanAccessTraceId() throws Exception {
+        // Augment logger with custom appender whose output we can read
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        PatternLayoutEncoder ple = new PatternLayoutEncoder();
+        ple.setPattern("traceId: %X{traceId}");
+        ple.setContext(lc);
+        ple.start();
+        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
+        appender.setEncoder(ple);
+        appender.setContext(lc);
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        appender.setOutputStream(byteStream);
+        appender.start();
+        logger.addAppender(appender);
+
+        // Invoke server and observe servers log messages; note that the server uses the same logger.
+        target.path("echo").request().header(BraveHttpHeaders.TraceId.getName(), "myTraceId").get();
+        assertThat(byteStream.toString(), containsString("traceId: myTraceId"));
     }
 
     public static final class TestEchoServer extends Application<Configuration> {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
-            DropwizardTracingFilters.registerTracers(env.jersey(), config, "testTracerName");
+            DropwizardTracingFilters.registerTracers(env, config, "testTracerName");
         }
 
         public static final class TestEchoResource implements TestEchoService {
             @Override
             public String echo(String value) {
+                logger.info("test log message");
                 return value;
             }
         }
