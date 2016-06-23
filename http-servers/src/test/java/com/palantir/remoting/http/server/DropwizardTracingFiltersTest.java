@@ -62,8 +62,6 @@ public final class DropwizardTracingFiltersTest {
     private WebTarget target;
     @Mock
     private Appender<ILoggingEvent> braveMockAppender;
-    @Mock
-    private Appender<ILoggingEvent> classMockAppender;
 
     @Before
     public void before() {
