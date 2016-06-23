@@ -1,7 +1,8 @@
 server:
   applicationConnectors:
     - type: http
-      port: 0
+      # specifies port that gets picked up in Brave tracing test
+      port: 61827
   adminConnectors:
     - type: http
       port: 0

@@ -3,13 +3,13 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(':error-handling')
+    compile libs.brave.jaxrs2
+    compile libs.dropwizard.core
     compile libs.jackson.databind
     compile libs.jsr305
-    compile libs.dropwizard.core
 
+    testCompile project(':ssl-config')
     testCompile libs.dropwizard.testing
     testCompile libs.hamcrest
     testCompile libs.junit
-
-    processor libs.immutables
 }

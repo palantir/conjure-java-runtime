@@ -11,6 +11,10 @@
     <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="Javadoc*" />
     <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="VariableDeclarationUsageDistance" />
 
+    <!-- Allow logback imports in these tests. -->
+    <suppress files="[/\\]src[/\\].*(DropwizardTracingFiltersTest.java)" checks="IllegalImport" />
+    <suppress files="[/\\]src[/\\].*(FeignClientFactoryTest.java)" checks="IllegalImport" />
+
     <!-- JavadocStyle enforces existence of package-info.java package-level Javadoc; we consider this a bug. -->
     <suppress files="package-info.java" checks="JavadocStyle" />
 
