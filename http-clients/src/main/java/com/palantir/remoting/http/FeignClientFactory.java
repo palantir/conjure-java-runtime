@@ -232,7 +232,8 @@ public final class FeignClientFactory {
                     ClientTracer tracer = ClientTracer.builder()
                             .traceSampler(Sampler.ALWAYS_SAMPLE)
                             .randomGenerator(new Random())
-                            .state(new ThreadLocalServerClientAndLocalSpanState(getIpAddress(), 0, userAgent))
+                            .state(new ThreadLocalServerClientAndLocalSpanState(
+                                    getIpAddress(), 0 /** Client TCP port. */, userAgent))
                             .spanCollector(new LoggingSpanCollector("ClientTracer(" + userAgent + ")"))
                             .build();
                     BraveOkHttpRequestResponseInterceptor braveInterceptor =
@@ -266,7 +267,9 @@ public final class FeignClientFactory {
     /**
      * Supplies a feign {@link feign.Client.Default} client with default {@link javax.net.ssl.HostnameVerifier} and
      * optionally specified {@link SSLSocketFactory}.
+     * @deprecated will be removed in a future version, use {@link #okHttpClient} instead
      */
+    @Deprecated
     public static ClientSupplier defaultClient() {
         return DEFAULT_CLIENT_SUPPLIER;
     }

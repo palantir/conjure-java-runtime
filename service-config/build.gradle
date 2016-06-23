@@ -1,3 +1,5 @@
+apply plugin: 'org.inferred.processors'
+
 apply from: "$rootDir/gradle/libs.gradle"
 apply from: "$rootDir/gradle/publish.gradle"
 
@@ -6,8 +8,6 @@ dependencies {
     compile libs.tokens
     compile libs.dropwizard.utils
 
-    processor libs.immutables
-
     testCompile libs.dropwizard.testing
     testCompile (libs.feign.jaxrs) {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
@@ -15,4 +15,6 @@ dependencies {
     }
     testCompile libs.feign.okhttp
     testCompile libs.junit
+
+    processor libs.immutables
 }

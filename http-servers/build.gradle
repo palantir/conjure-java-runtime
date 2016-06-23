@@ -12,6 +12,4 @@ dependencies {
     testCompile libs.dropwizard.testing
     testCompile libs.hamcrest
     testCompile libs.junit
-
-    processor libs.immutables
 }
