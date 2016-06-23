@@ -49,7 +49,7 @@ public final class SerializableErrorToExceptionConverter {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public static Exception getException(Collection<String> contentTypes, int status, String reason,
+    public static RuntimeException getException(Collection<String> contentTypes, int status, String reason,
             @CheckForNull InputStream body) {
         if (body != null) {
             String bodyAsString = readBodyAsString(body);
@@ -76,7 +76,7 @@ public final class SerializableErrorToExceptionConverter {
 
                 // Construct local exception that wraps the remote exception and fill with stack trace of local
                 // call (yet without the reflection overhead).
-                Exception localException =
+                RuntimeException localException =
                         constructException(error.getExceptionClassName(), error.getMessage(), status,
                                 remoteException);
                 localException.fillInStackTrace();
@@ -85,9 +85,7 @@ public final class SerializableErrorToExceptionConverter {
 
             } else if (contentTypes.contains(MediaType.TEXT_HTML) || contentTypes.contains(MediaType.TEXT_PLAIN)
                     || contentTypes.contains(MediaType.TEXT_XML)) {
-                String message =
-                        String.format("Error %s. Reason: %s. Body:%n%s", status, reason,
-                                bodyAsString);
+                String message = String.format("Error %s. Reason: %s. Body:%n%s", status, reason, bodyAsString);
                 log.error(message);
                 return new RuntimeException(message);
             }
@@ -102,11 +100,11 @@ public final class SerializableErrorToExceptionConverter {
 
     // wrappedException may be null to indicate an unknown cause
     @SuppressWarnings("unchecked")
-    private static Exception constructException(String exceptionClassName, String message, int status,
+    private static RuntimeException constructException(String exceptionClassName, String message, int status,
             @CheckForNull Throwable wrappedException) {
-        Class<? extends Exception> exceptionClass;
+        Class<? extends RuntimeException> exceptionClass;
         try {
-            exceptionClass = (Class<? extends Exception>) Class.forName(exceptionClassName);
+            exceptionClass = (Class<? extends RuntimeException>) Class.forName(exceptionClassName);
         } catch (ClassNotFoundException e) {
             // use the most expressive constructor that exists in Jersey 1.x
             return new WebApplicationException(wrappedException, status);

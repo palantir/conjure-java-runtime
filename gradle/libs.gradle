@@ -26,9 +26,12 @@ project.ext.libs = [
     'jsr305': 'com.google.code.findbugs:jsr305:3.0.0',
     'junit': 'junit:junit:4.12',
     'mockito': 'org.mockito:mockito-core:1.10.19',
-    'mockwebserver': 'com.squareup.okhttp:mockwebserver:2.7.5',
-    'okhttp': 'com.squareup.okhttp:okhttp:2.7.5',
-    'retrofit': 'com.squareup.retrofit:retrofit:1.9.0',
+    'mockwebserver': 'com.squareup.okhttp3:mockwebserver:3.2.0',
+    'okhttp': 'com.squareup.okhttp3:okhttp:3.2.0',
+    'retrofit': [
+        'retrofit': 'com.squareup.retrofit2:retrofit:2.1.0',
+        'gson': 'com.squareup.retrofit2:converter-gson:2.1.0'
+     ],
     'slf4j': 'org.slf4j:slf4j-api:1.7.12',
     'tokens': 'com.palantir.tokens:auth-tokens:0.2.3',
     'wsRsApi': 'javax.ws.rs:javax.ws.rs-api:2.0.1'
