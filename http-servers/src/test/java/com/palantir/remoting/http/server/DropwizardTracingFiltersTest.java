@@ -84,7 +84,7 @@ public final class DropwizardTracingFiltersTest {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
-            DropwizardTracingFilters.registerBraveTracers(env.jersey(), config, "testTracerName");
+            DropwizardTracingFilters.registerTracers(env.jersey(), config, "testTracerName");
         }
 
         public static final class TestEchoResource implements TestEchoService {

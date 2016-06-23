@@ -168,7 +168,7 @@ public final class FeignClientFactoryTest {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
-            DropwizardTracingFilters.registerBraveTracers(
+            DropwizardTracingFilters.registerTracers(
                     env.jersey(), config, ProxyingEchoServer.class.getSimpleName());
         }
 
@@ -185,7 +185,7 @@ public final class FeignClientFactoryTest {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
-            DropwizardTracingFilters.registerBraveTracers(env.jersey(), config, TestEchoServer.class.getSimpleName());
+            DropwizardTracingFilters.registerTracers(env.jersey(), config, TestEchoServer.class.getSimpleName());
         }
 
         private static final class TestEchoResource implements TestEchoService {

@@ -51,7 +51,7 @@ public final class DropwizardTracingFilters {
      * <p>
      * TODO(rfink) Is there a more stable way to retrieve IP/Port information?
      */
-    public static void registerBraveTracers(JerseyEnvironment environment, Configuration config, String tracerName) {
+    public static void registerTracers(JerseyEnvironment environment, Configuration config, String tracerName) {
         ServerTracer serverTracer = getServerTracer(extractIp(config), extractPort(config), tracerName);
         environment.register(new BraveContainerRequestFilter(
                 new ServerRequestInterceptor(serverTracer),
