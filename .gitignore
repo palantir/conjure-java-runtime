@@ -1,6 +1,5 @@
 # Gradle
 *.class
-*.jar
 .gradle
 build/
 

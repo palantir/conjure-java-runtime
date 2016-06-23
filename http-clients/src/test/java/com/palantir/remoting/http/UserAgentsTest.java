@@ -21,9 +21,14 @@ import static org.junit.Assert.assertThat;
 
 import com.palantir.VersionTest;
 import java.io.IOException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public final class UserAgentsTest {
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void testGetUserAgent_format() {
@@ -33,6 +38,13 @@ public final class UserAgentsTest {
     @Test
     public void testGetUserAgent_fromExternalVersionTestJar() throws IOException {
         assertThat(UserAgents.fromClass(VersionTest.class), is("test-name (test-version)"));
+    }
+
+    @Test
+    public void testGetUserAgent_fromExternalVersionWithoutManifestTestJar() throws IOException {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Cannot load user agent from implementation title");
+        UserAgents.fromClass(UserAgentsTest.class);
     }
 
 }
