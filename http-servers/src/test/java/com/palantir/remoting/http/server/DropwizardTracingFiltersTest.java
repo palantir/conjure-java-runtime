@@ -32,6 +32,7 @@ import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -109,7 +110,7 @@ public final class DropwizardTracingFiltersTest {
 
         // Invoke server and observe servers log messages; note that the server uses the same logger.
         target.path("echo").request().header(BraveHttpHeaders.TraceId.getName(), "myTraceId").get();
-        assertThat(byteStream.toString(), containsString("traceId: myTraceId"));
+        assertThat(byteStream.toString(StandardCharsets.UTF_8.name()), containsString("traceId: myTraceId"));
     }
 
     public static final class TestEchoServer extends Application<Configuration> {
