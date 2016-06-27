@@ -41,9 +41,7 @@ public final class SslSocketFactories {
      * @return an {@link SSLContext} according to the input configuration
      */
     public static SSLContext createSslContext(SslConfiguration config) {
-        TrustManager[] trustManagers = createTrustManagerFactory(
-                config.trustStorePath(),
-                config.trustStoreType()).getTrustManagers();
+        TrustManager[] trustManagers = createTrustManagers(config);
 
         KeyManager[] keyManagers = null;
         if (config.keyStorePath().isPresent()) {
@@ -63,7 +61,17 @@ public final class SslSocketFactories {
         }
     }
 
-    public static TrustManagerFactory createTrustManagerFactory(
+    /**
+     * Create a {@link TrustManager[]} initialized from the provided configuration.
+     *
+     * @param config an {@link SslConfiguration} describing at least the trust store configuration
+     * @return an {@link TrustManager[]} according to the input configuration
+     */
+    public static TrustManager[] createTrustManagers(SslConfiguration config) {
+        return createTrustManagerFactory(config.trustStorePath(), config.trustStoreType()).getTrustManagers();
+    }
+    
+    private static TrustManagerFactory createTrustManagerFactory(
             Path trustStorePath,
             SslConfiguration.StoreType trustStoreType) {
 
