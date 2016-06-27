@@ -63,7 +63,7 @@ public final class SslSocketFactories {
         }
     }
 
-    private static TrustManagerFactory createTrustManagerFactory(
+    public static TrustManagerFactory createTrustManagerFactory(
             Path trustStorePath,
             SslConfiguration.StoreType trustStoreType) {
 
