@@ -70,7 +70,7 @@ public final class SslSocketFactories {
     public static TrustManager[] createTrustManagers(SslConfiguration config) {
         return createTrustManagerFactory(config.trustStorePath(), config.trustStoreType()).getTrustManagers();
     }
-    
+
     private static TrustManagerFactory createTrustManagerFactory(
             Path trustStorePath,
             SslConfiguration.StoreType trustStoreType) {
