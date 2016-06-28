@@ -1,3 +1,4 @@
+include ':ext:brave-extensions'
 include 'error-handling'
 include 'http-clients'
 include 'http-servers'

@@ -1,0 +1,7 @@
+apply from: "${rootDir}/gradle/libs.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile libs.brave.core
+    compile libs.slf4j
+}

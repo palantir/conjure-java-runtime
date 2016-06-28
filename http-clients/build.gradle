@@ -3,6 +3,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(':error-handling')
+    compile project(':ext:brave-extensions')
     compile project(':service-config')
 
     compile libs.brave.okhttp
