@@ -1,8 +1,6 @@
 # Gradle
 *.class
 *.jar
-!gradle/wrapper/gradle-wrapper.jar
-!http-clients/lib/VersionTest.jar
 .gradle
 build/
 
