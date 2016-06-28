@@ -30,8 +30,9 @@ public final class UserAgents {
 
     /**
      * Constructs a user agent from the {@link java.util.jar.Attributes.Name#IMPLEMENTATION_TITLE} and {@link
-     * java.util.jar.Attributes.Name#IMPLEMENTATION_VERSION} of the package of the provided class. The default value for
-     * both properties is "{@value DEFAULT_VALUE}".
+     * java.util.jar.Attributes.Name#IMPLEMENTATION_VERSION} of the package of the provided class. Typically, the title
+     * and version are extracted from {@code MANIFEST.MF} entries of the Jar package containing the given class. The
+     * default value for both properties is "{@value DEFAULT_VALUE}".
      */
     public static String fromClass(Class<?> clazz) {
         Package classPackage = clazz.getPackage();
