@@ -16,7 +16,6 @@
 
 package com.palantir.remoting.http.server;
 
-import com.github.kristofa.brave.LoggingSpanCollector;
 import com.github.kristofa.brave.Sampler;
 import com.github.kristofa.brave.ServerRequestInterceptor;
 import com.github.kristofa.brave.ServerResponseInterceptor;
@@ -29,6 +28,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.net.InetAddresses;
+import com.palantir.ext.brave.SlfLoggingSpanCollector;
 import io.dropwizard.Configuration;
 import io.dropwizard.jetty.ConnectorFactory;
 import io.dropwizard.jetty.HttpConnectorFactory;
@@ -73,7 +73,7 @@ public final class DropwizardTracingFilters {
                 .traceSampler(Sampler.ALWAYS_SAMPLE)
                 .randomGenerator(new Random())
                 .state(new ThreadLocalServerClientAndLocalSpanState(ip, port, name))
-                .spanCollector(new LoggingSpanCollector("ServerTracer(" + name + ")"))
+                .spanCollector(new SlfLoggingSpanCollector("ServerTracer(" + name + ")"))
                 .build();
     }
 

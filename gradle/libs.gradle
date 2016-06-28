@@ -1,5 +1,6 @@
 project.ext.libs = [
     'brave': [
+        'core': 'io.zipkin.brave:brave-core:3.9.0',
         'okhttp': 'io.zipkin.brave:brave-okhttp:3.9.0',
         'jaxrs2': 'io.zipkin.brave:brave-jaxrs2:3.9.0'
     ],

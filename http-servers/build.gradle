@@ -3,6 +3,8 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(':error-handling')
+    compile project(':ext:brave-extensions')
+
     compile libs.brave.jaxrs2
     compile libs.dropwizard.core
     compile libs.jackson.databind

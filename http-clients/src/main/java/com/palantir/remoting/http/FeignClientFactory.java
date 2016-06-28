@@ -19,7 +19,6 @@ package com.palantir.remoting.http;
 import com.github.kristofa.brave.ClientRequestInterceptor;
 import com.github.kristofa.brave.ClientResponseInterceptor;
 import com.github.kristofa.brave.ClientTracer;
-import com.github.kristofa.brave.LoggingSpanCollector;
 import com.github.kristofa.brave.Sampler;
 import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
 import com.github.kristofa.brave.http.DefaultSpanNameProvider;
@@ -31,6 +30,7 @@ import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import com.palantir.config.service.ServiceConfiguration;
 import com.palantir.config.service.ServiceDiscoveryConfiguration;
+import com.palantir.ext.brave.SlfLoggingSpanCollector;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.remoting.ssl.SslSocketFactories;
 import feign.Client;
@@ -234,7 +234,7 @@ public final class FeignClientFactory {
                             .randomGenerator(new Random())
                             .state(new ThreadLocalServerClientAndLocalSpanState(
                                     getIpAddress(), 0 /** Client TCP port. */, userAgent))
-                            .spanCollector(new LoggingSpanCollector("ClientTracer(" + userAgent + ")"))
+                            .spanCollector(new SlfLoggingSpanCollector("ClientTracer(" + userAgent + ")"))
                             .build();
                     BraveOkHttpRequestResponseInterceptor braveInterceptor =
                             new BraveOkHttpRequestResponseInterceptor(
