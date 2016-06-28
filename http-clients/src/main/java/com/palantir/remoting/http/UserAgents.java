@@ -16,9 +16,11 @@
 
 package com.palantir.remoting.http;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import com.google.common.base.Optional;
 
 public final class UserAgents {
+
+    public static final String DEFAULT_VALUE = "unknown";
 
     private UserAgents() {}
 
@@ -28,20 +30,13 @@ public final class UserAgents {
 
     /**
      * Constructs a user agent from the {@link java.util.jar.Attributes.Name#IMPLEMENTATION_TITLE} and {@link
-     * java.util.jar.Attributes.Name#IMPLEMENTATION_VERSION} of the package of the provided class.
-     * <p>
-     * Typically, the title and version are extracted from {@code MANIFEST.MF} entries of the Jar package containing the
-     * given class.
-     *
-     * @throws IllegalArgumentException if the implementation title or version are not provided in the class's {@link
-     * Package}
+     * java.util.jar.Attributes.Name#IMPLEMENTATION_VERSION} of the package of the provided class. The default value for
+     * both properties is "{@value DEFAULT_VALUE}".
      */
     public static String fromClass(Class<?> clazz) {
         Package classPackage = clazz.getPackage();
-        String userAgent = classPackage.getImplementationTitle();
-        String version = classPackage.getImplementationVersion();
-        checkArgument(userAgent != null, "Cannot load user agent from implementation title for class: %s", clazz);
-        checkArgument(version != null, "Cannot load version from implementation version for class: %s", clazz);
+        String userAgent = Optional.fromNullable(classPackage.getImplementationTitle()).or(DEFAULT_VALUE);
+        String version = Optional.fromNullable(classPackage.getImplementationVersion()).or(DEFAULT_VALUE);
         return getUserAgent(userAgent, version);
     }
 
