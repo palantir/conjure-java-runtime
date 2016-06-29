@@ -22,32 +22,28 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule;
 
 public final class ObjectMappers {
 
-    private static final ObjectMapper VANILLA_MAPPER = new ObjectMapper();
-
-    private static final ObjectMapper GUAVA_JDK7_MAPPER;
-
-    // TODO: Replace this code with shading to support different versions of Jackson
-    static {
-        GUAVA_JDK7_MAPPER = new ObjectMapper()
-                .registerModule(new GuavaModule());
-        try {
-            // Newer versions of Jackson no longer ship this module.
-            Class<?> jdk7Module = Class.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module");
-            Module module = (Module) jdk7Module.newInstance();
-            GUAVA_JDK7_MAPPER.registerModule(module);
-        } catch (ReflectiveOperationException e) {
-            // We're using a recent version of Jackson
-        }
-    }
+    static final ObjectMapper VANILLA_MAPPER = vanilla();
+    static final ObjectMapper GUAVA_JDK7_MAPPER = guavaJdk7();
 
     private ObjectMappers() {}
 
     public static ObjectMapper vanilla() {
-        return VANILLA_MAPPER;
+        return new ObjectMapper();
     }
 
     public static ObjectMapper guavaJdk7() {
-        return GUAVA_JDK7_MAPPER;
+        // TODO: Replace this code with shading to support different versions of Jackson
+        ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
+        try {
+            // Newer versions of Jackson no longer ship this module.
+            Class<?> jdk7Module = Class.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module");
+            Module module = (Module) jdk7Module.newInstance();
+            mapper.registerModule(module);
+        } catch (ReflectiveOperationException e) {
+            // We're using a recent version of Jackson
+        }
+
+        return mapper;
     }
 
 }

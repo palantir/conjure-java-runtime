@@ -73,7 +73,7 @@ public final class FeignClients {
      */
     @Deprecated
     public static FeignClientFactory standard(Request.Options timeoutOptions) {
-        return withMapper(ObjectMappers.guavaJdk7(), timeoutOptions);
+        return withMapper(ObjectMappers.GUAVA_JDK7_MAPPER, timeoutOptions);
     }
 
     /**
@@ -81,7 +81,7 @@ public final class FeignClients {
      * com.fasterxml.jackson.datatype.guava.GuavaModule} and {@link com.fasterxml.jackson.datatype.jdk7.Jdk7Module}.
      */
     public static FeignClientFactory standard(Request.Options timeoutOptions, String userAgent) {
-        return withMapper(ObjectMappers.guavaJdk7(), timeoutOptions, userAgent);
+        return withMapper(ObjectMappers.GUAVA_JDK7_MAPPER, timeoutOptions, userAgent);
     }
 
     /**
@@ -107,8 +107,8 @@ public final class FeignClients {
     @Deprecated
     public static FeignClientFactory standardJackson24(Request.Options timeoutOptions) {
         return withEncoderAndDecoder(
-                new Jackson24Encoder(ObjectMappers.guavaJdk7()),
-                new JacksonDecoder(ObjectMappers.guavaJdk7()),
+                new Jackson24Encoder(ObjectMappers.GUAVA_JDK7_MAPPER),
+                new JacksonDecoder(ObjectMappers.GUAVA_JDK7_MAPPER),
                 timeoutOptions);
     }
 
@@ -117,8 +117,8 @@ public final class FeignClients {
      */
     public static FeignClientFactory standardJackson24(Request.Options timeoutOptions, String userAgent) {
         return withEncoderAndDecoder(
-                new Jackson24Encoder(ObjectMappers.guavaJdk7()),
-                new JacksonDecoder(ObjectMappers.guavaJdk7()),
+                new Jackson24Encoder(ObjectMappers.GUAVA_JDK7_MAPPER),
+                new JacksonDecoder(ObjectMappers.GUAVA_JDK7_MAPPER),
                 timeoutOptions,
                 userAgent);
     }
@@ -145,14 +145,14 @@ public final class FeignClients {
      */
     @Deprecated
     public static FeignClientFactory vanilla(Request.Options timeoutOptions) {
-        return withMapper(ObjectMappers.vanilla(), timeoutOptions);
+        return withMapper(ObjectMappers.VANILLA_MAPPER, timeoutOptions);
     }
 
     /**
      * Provides a {@link FeignClientFactory} with an unmodified {@link ObjectMapper}.
      */
     public static FeignClientFactory vanilla(Request.Options timeoutOptions, String userAgent) {
-        return withMapper(ObjectMappers.vanilla(), timeoutOptions, userAgent);
+        return withMapper(ObjectMappers.VANILLA_MAPPER, timeoutOptions, userAgent);
     }
 
     /**
