@@ -22,32 +22,44 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule;
 
 public final class ObjectMappers {
 
-    private static final ObjectMapper VANILLA_MAPPER = new ObjectMapper();
+    /**
+     * Default {@link ObjectMapper}. This is a single shared instance that can be accessed directly to minimize
+     * allocations and memory use and should not be mutated.
+     */
+    static final ObjectMapper VANILLA_MAPPER = vanilla();
 
-    private static final ObjectMapper GUAVA_JDK7_MAPPER;
+    /**
+     * {@link ObjectMapper} that is configured with the Guava module and the JDK 7 module (if present). This is a single
+     * shared instance that can be accessed directly to minimize allocations and memory use and should not be mutated.
+     */
+    static final ObjectMapper GUAVA_JDK7_MAPPER = guavaJdk7();
 
-    // TODO: Replace this code with shading to support different versions of Jackson
-    static {
-        GUAVA_JDK7_MAPPER = new ObjectMapper()
-                .registerModule(new GuavaModule());
+    private ObjectMappers() {}
+
+    /**
+     * Returns a newly allocated default {@link ObjectMapper}.
+     */
+    public static ObjectMapper vanilla() {
+        return new ObjectMapper();
+    }
+
+    /**
+     * Returns a newly allocated {@link ObjectMapper} that is configured with the Guava module and the JDK 7 module
+     * (if present).
+     */
+    public static ObjectMapper guavaJdk7() {
+        // TODO: Replace this code with shading to support different versions of Jackson
+        ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
         try {
             // Newer versions of Jackson no longer ship this module.
             Class<?> jdk7Module = Class.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module");
             Module module = (Module) jdk7Module.newInstance();
-            GUAVA_JDK7_MAPPER.registerModule(module);
+            mapper.registerModule(module);
         } catch (ReflectiveOperationException e) {
             // We're using a recent version of Jackson
         }
-    }
 
-    private ObjectMappers() {}
-
-    public static ObjectMapper vanilla() {
-        return VANILLA_MAPPER;
-    }
-
-    public static ObjectMapper guavaJdk7() {
-        return GUAVA_JDK7_MAPPER;
+        return mapper;
     }
 
 }

@@ -17,6 +17,7 @@
 package com.palantir.remoting.http;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -51,4 +52,11 @@ public final class ObjectMappersTest {
             fail();
         }
     }
+
+    @Test
+    public void testMappersReturnNewInstance() {
+        assertNotSame(ObjectMappers.guavaJdk7(), ObjectMappers.guavaJdk7());
+        assertNotSame(ObjectMappers.vanilla(), ObjectMappers.vanilla());
+    }
+
 }
