@@ -22,15 +22,31 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule;
 
 public final class ObjectMappers {
 
+    /**
+     * Default {@link ObjectMapper}. This is a single shared instance that can be accessed directly to minimize
+     * allocations and memory use and should not be mutated.
+     */
     static final ObjectMapper VANILLA_MAPPER = vanilla();
+
+    /**
+     * {@link ObjectMapper} that is configured with the Guava module and the JDK 7 module (if present). This is a single
+     * shared instance that can be accessed directly to minimize allocations and memory use and should not be mutated.
+     */
     static final ObjectMapper GUAVA_JDK7_MAPPER = guavaJdk7();
 
     private ObjectMappers() {}
 
+    /**
+     * Returns a newly allocated default {@link ObjectMapper}.
+     */
     public static ObjectMapper vanilla() {
         return new ObjectMapper();
     }
 
+    /**
+     * Returns a newly allocated {@link ObjectMapper} that is configured with the Guava module and the JDK 7 module
+     * (if present).
+     */
     public static ObjectMapper guavaJdk7() {
         // TODO: Replace this code with shading to support different versions of Jackson
         ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
