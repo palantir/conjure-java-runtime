@@ -8,7 +8,8 @@ dependencies {
     // ssl-config is not used in this project, but we depend on it here in order to provide
     // it transitively to users of retrofit-clients as a convenience.
     compile project(':ssl-config')
-    compile libs.retrofit
+    compile libs.retrofit.retrofit
+    compile libs.retrofit.gson
     compile libs.okhttp
     compile libs.slf4j
 

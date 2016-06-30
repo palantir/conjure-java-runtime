@@ -17,13 +17,11 @@
 package com.palantir.remoting.retrofit;
 
 import com.google.common.base.Optional;
-import com.palantir.remoting.retrofit.errors.RetrofitSerializableErrorErrorHandler;
-import com.squareup.okhttp.OkHttpClient;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
-import retrofit.RestAdapter;
-import retrofit.client.Client;
-import retrofit.client.OkClient;
+import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Utilities to help create Retrofit proxies. Feign clients should be preferred except in cases where proxies must
@@ -40,29 +38,37 @@ public final class RetrofitClientFactory {
 
     private RetrofitClientFactory() {}
 
-    private static Client newHttpClient(Optional<SSLSocketFactory> sslSocketFactory, OkHttpClientOptions options,
-            String userAgent) {
-        OkHttpClient okClient = new OkHttpClient();
+    private static OkHttpClient newHttpClient(
+            Optional<SSLSocketFactory> sslSocketFactory, OkHttpClientOptions options, String userAgent) {
+
+        OkHttpClient.Builder okClient = new OkHttpClient.Builder();
 
         // timeouts
-        okClient.setConnectTimeout(
-                options.getConnectTimeoutMs().or((long) okClient.getConnectTimeout()), TimeUnit.MILLISECONDS);
-        okClient.setReadTimeout(options.getReadTimeoutMs().or((long) okClient.getReadTimeout()), TimeUnit.MILLISECONDS);
-        okClient.setWriteTimeout(
-                options.getWriteTimeoutMs().or((long) okClient.getWriteTimeout()), TimeUnit.MILLISECONDS);
+        if (options.getConnectTimeoutMs().isPresent()) {
+            okClient.connectTimeout(options.getConnectTimeoutMs().get(), TimeUnit.MILLISECONDS);
+        }
+        if (options.getReadTimeoutMs().isPresent()) {
+            okClient.readTimeout(options.getReadTimeoutMs().get(), TimeUnit.MILLISECONDS);
+        }
+        if (options.getWriteTimeoutMs().isPresent()) {
+            okClient.writeTimeout(options.getWriteTimeoutMs().get(), TimeUnit.MILLISECONDS);
+        }
 
-        // retries
-        RetryInterceptor retryInterceptor = options.getMaxNumberRetries().isPresent()
-                ? new RetryInterceptor(options.getMaxNumberRetries().get())
-                : new RetryInterceptor();
+        // SSL configuration
+        if (sslSocketFactory.isPresent()) {
+            // TODO(rfink) OkHttp would prefer to also be given a X509TrustManager. Where can we get one?
+            okClient.sslSocketFactory(sslSocketFactory.get());
+        }
 
-        okClient.interceptors().add(retryInterceptor);
-        okClient.interceptors().add(UserAgentInterceptor.of(userAgent));
+        // retry configuration
+        if (options.getMaxNumberRetries().isPresent()) {
+            okClient.addInterceptor(new RetryInterceptor(options.getMaxNumberRetries().get()));
+        }
 
-        // ssl
-        okClient.setSslSocketFactory(sslSocketFactory.orNull());
+        okClient.addInterceptor(UserAgentInterceptor.of(userAgent));
+        okClient.addInterceptor(SerializableErrorInterceptor.INSTANCE);
 
-        return new OkClient(okClient);
+        return okClient.build();
     }
 
     /**
@@ -76,12 +82,12 @@ public final class RetrofitClientFactory {
 
     public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
             OkHttpClientOptions options, String userAgent) {
-        Client client = newHttpClient(sslSocketFactoryOptional, options, userAgent);
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint(uri)
-                .setClient(client)
-                .setErrorHandler(RetrofitSerializableErrorErrorHandler.INSTANCE)
+        okhttp3.OkHttpClient client = newHttpClient(sslSocketFactoryOptional, options, userAgent);
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
+                .baseUrl(uri)
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        return restAdapter.create(type);
+        return retrofit.create(type);
     }
 }

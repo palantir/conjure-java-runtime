@@ -16,10 +16,10 @@
 
 package com.palantir.remoting.retrofit;
 
-import com.squareup.okhttp.Interceptor;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 import java.io.IOException;
+import okhttp3.Interceptor;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,5 +66,4 @@ public final class RetryInterceptor implements Interceptor {
 
         return response;
     }
-
 }
