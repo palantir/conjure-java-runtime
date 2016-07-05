@@ -7,7 +7,7 @@ dependencies {
     compile project(':error-handling')
     // ssl-config is not used in this project, but we depend on it here in order to provide
     // it transitively to users of retrofit-clients as a convenience.
-    compile project(':ssl-config')
+    runtime project(':ssl-config')
     compile libs.retrofit2.retrofit
     compile libs.retrofit2.gson
     compile libs.slf4j
