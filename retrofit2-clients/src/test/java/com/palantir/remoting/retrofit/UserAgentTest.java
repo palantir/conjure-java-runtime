@@ -96,19 +96,6 @@ public final class UserAgentTest {
     }
 
     @Test
-    public void testUserAgent_deprecatedDefaultIsUnspecified() throws InterruptedException, IOException {
-        TestService service = RetrofitClientFactory.createProxy(
-                Optional.<SSLSocketFactory>absent(),
-                endpointUri,
-                TestService.class,
-                OkHttpClientOptions.builder().build());
-        service.get().execute();
-
-        RecordedRequest capturedRequest = server.takeRequest();
-        assertThat(capturedRequest.getHeader("User-Agent"), is("UnspecifiedUserAgent"));
-    }
-
-    @Test
     public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()-/\\.,_\\s]+': !@"));

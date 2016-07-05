@@ -70,15 +70,6 @@ public final class RetrofitClientFactory {
         return okClient.build();
     }
 
-    /**
-     * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
-     */
-    @Deprecated
-    public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
-            OkHttpClientOptions options) {
-        return createProxy(sslSocketFactoryOptional, uri, type, options, "UnspecifiedUserAgent");
-    }
-
     public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
             OkHttpClientOptions options, String userAgent) {
         okhttp3.OkHttpClient client = newHttpClient(sslSocketFactoryOptional, options, userAgent);

@@ -68,8 +68,12 @@ public final class SerializableErrorInterceptorTest {
         MockitoAnnotations.initMocks(this);
         when(chain.request()).thenReturn(REQUEST);
 
-        service = RetrofitClientFactory.createProxy(Optional.<SSLSocketFactory>absent(),
-                "http://localhost:" + server.getPort(), TestService.class, OkHttpClientOptions.builder().build());
+        service = RetrofitClientFactory.createProxy(
+                Optional.<SSLSocketFactory>absent(),
+                "http://localhost:" + server.getPort(),
+                TestService.class,
+                OkHttpClientOptions.builder().build(),
+                "user agent");
     }
 
     @Test
