@@ -9,7 +9,7 @@ dependencies {
     // it transitively to users of retrofit-clients as a convenience.
     compile project(':ssl-config')
     compile libs.retrofit
-    compile libs.okhttp
+    compile libs.okhttp2
     compile libs.slf4j
 
     testCompile libs.hamcrest
