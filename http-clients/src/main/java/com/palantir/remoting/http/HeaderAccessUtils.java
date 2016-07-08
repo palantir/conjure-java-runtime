@@ -18,9 +18,7 @@ package com.palantir.remoting.http;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Used to access headers in a case-insensitive manner. This is necessary for compatibility with OkHttp 3.3.0+ as
@@ -32,29 +30,29 @@ import java.util.TreeMap;
 public final class HeaderAccessUtils {
     private HeaderAccessUtils() {}
 
-    public static boolean caseInsensitiveContains(Map<String, Collection<String>> headers, String header) {
-        for (String headerName : headers.keySet()) {
-            if (headerName.equalsIgnoreCase(header)) {
+    public static boolean caseInsensitiveContains(Map<String, Collection<String>> headers, String headerName) {
+        for (String key : headers.keySet()) {
+            if (headerName.equalsIgnoreCase(key)) {
                 return true;
             }
         }
         return false;
     }
 
-    public static Collection<String> caseInsensitiveGet(Map<String, Collection<String>> headers, String header) {
-        return caseInsensitiveMultimapOf(headers).get(header);
-    }
-
-    // returns a case-insensitive TreeMap in which the values for all keys equal modulo case are merged.
-    private static Map<String, List<String>> caseInsensitiveMultimapOf(Map<String, Collection<String>> headers) {
-        Map<String, List<String>> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    /**
+     * Compares the keys of the map to the headerName in a case-insensitive manner and returns null
+     * if it was never found.
+     */
+    public static Collection<String> caseInsensitiveGet(Map<String, Collection<String>> headers, String headerName) {
+        Collection<String> result = new LinkedList<>();
+        boolean neverFound = true;
         for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
-            String headerName = entry.getKey();
-            if (!result.containsKey(headerName)) {
-                result.put(headerName, new LinkedList<String>());
+            String key = entry.getKey();
+            if (headerName.equalsIgnoreCase(key)) {
+                neverFound = false;
+                result.addAll(entry.getValue());
             }
-            result.get(headerName).addAll(entry.getValue());
         }
-        return result;
+        return neverFound ? null : result;
     }
 }
