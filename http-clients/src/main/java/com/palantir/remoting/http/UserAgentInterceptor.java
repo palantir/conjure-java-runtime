@@ -18,6 +18,7 @@ package com.palantir.remoting.http;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.net.HttpHeaders;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import java.util.regex.Pattern;
@@ -40,8 +41,8 @@ public final class UserAgentInterceptor implements RequestInterceptor {
 
     @Override
     public void apply(RequestTemplate template) {
-        if (!template.headers().containsKey("User-Agent")) {
-            template.header("User-Agent", userAgent);
+        if (!HeaderAccessUtils.caseInsensitiveContains(template.headers(), HttpHeaders.USER_AGENT)) {
+            template.header(HttpHeaders.USER_AGENT, userAgent);
         }
     }
 }
