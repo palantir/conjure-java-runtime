@@ -18,6 +18,7 @@ package com.palantir.remoting.http.errors;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
+import com.palantir.remoting.http.HeaderAccessUtils;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import java.io.IOException;
@@ -29,7 +30,8 @@ public enum FeignSerializableErrorErrorDecoder implements ErrorDecoder {
 
     @Override
     public Exception decode(String methodKey, Response response) {
-        Collection<String> contentTypes = response.headers().get(HttpHeaders.CONTENT_TYPE);
+        Collection<String> contentTypes =
+                HeaderAccessUtils.caseInsensitiveGet(response.headers(), HttpHeaders.CONTENT_TYPE);
         if (contentTypes == null) {
             contentTypes = ImmutableSet.of();
         }

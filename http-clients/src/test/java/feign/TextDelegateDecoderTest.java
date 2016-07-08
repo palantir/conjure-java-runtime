@@ -85,6 +85,16 @@ public final class TextDelegateDecoderTest {
     }
 
     @Test
+    public void testUsesStringDecoderWithTextPlainWithWeirdHeaderCapitalization() throws Exception {
+        headers.put("content-TYPE", ImmutableSet.of(MediaType.TEXT_PLAIN));
+        Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
+        Object decodedObject = textDelegateDecoder.decode(response, String.class);
+
+        assertEquals(decodedObject, "text response");
+        verifyZeroInteractions(delegate);
+    }
+
+    @Test
     public void testUsesDelegateWithNoHeader() throws Exception {
         when(delegate.decode((Response) any(), (Type) any())).thenReturn(DELEGATE_RESPONSE);
         Response response = Response.create(200, "OK", headers, new byte[0]);

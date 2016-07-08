@@ -24,40 +24,42 @@ import com.google.common.collect.ImmutableMap;
 import feign.Response;
 import java.util.Collection;
 import java.util.Collections;
-import javax.annotation.CheckForNull;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
 
 public final class FeignSerializableErrorErrorDecoderTests {
-
+    // most tests are in SerializableErrorErrorDecoderTests
     private static final FeignSerializableErrorErrorDecoder decoder = FeignSerializableErrorErrorDecoder.INSTANCE;
 
     @Test
     public void testSanity() {
-        // most tests are in SerializableErrorErrorDecoderTests
-        Response response = getResponse(MediaType.TEXT_PLAIN, "errorbody");
-        Exception decode = decoder.decode("ignored", response);
-        assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is("Error 400. Reason: reason. Body:\nerrorbody"));
+        String expectedMessage = "Error 400. Reason: reason. Body:\nerrorbody";
+        checkExceptionAndMessage(getResponse(HttpHeaders.CONTENT_TYPE), expectedMessage);
+    }
+
+    @Test
+    public void testSanityWithArbitraryHeaderCapitalization() {
+        String expectedMessage = "Error 400. Reason: reason. Body:\nerrorbody";
+        checkExceptionAndMessage(getResponse("ConteNT-TYPE"), expectedMessage);
     }
 
     @Test
     public void testNoContentType() {
         Response response = Response.create(400, "reason", ImmutableMap.<String, Collection<String>>of(), "errorbody",
                 feign.Util.UTF_8);
+        String expectedMessage = "Error 400. Reason: reason. Body content type: []. Body as String: errorbody";
+        checkExceptionAndMessage(response, expectedMessage);
+    }
+
+    private void checkExceptionAndMessage(Response response, String expectedMessage) {
         Exception decode = decoder.decode("ignored", response);
         assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(),
-                is("Error 400. Reason: reason. Body content type: []. Body as String: errorbody"));
+        assertThat(decode.getMessage(), is(expectedMessage));
     }
 
-    private static Response getResponse(String contentType, @CheckForNull String body) {
-        return getResponse(contentType, body, 400);
-    }
-
-    private static Response getResponse(String contentType, @CheckForNull String body, int status) {
-        return Response.create(status, "reason", ImmutableMap.<String, Collection<String>>of(HttpHeaders.CONTENT_TYPE,
-                Collections.singletonList(contentType)), body, feign.Util.UTF_8);
+    private static Response getResponse(String headerName) {
+        return Response.create(400, "reason", ImmutableMap.<String, Collection<String>>of(headerName,
+                Collections.singletonList(MediaType.TEXT_PLAIN)), "errorbody", feign.Util.UTF_8);
     }
 }
