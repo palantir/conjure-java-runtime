@@ -34,8 +34,11 @@ import retrofit.client.OkClient;
  * For services, recommended user agents are of the form: {@code ServiceName (Version)}, e.g. MyServer (1.2.3)
  * For services that run multiple instances, recommended user agents are of the form:
  * {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3)
+ * <p>
+ * @deprecated The retrofit-clients project uses Retrofit 1.x and is considered deprecated. This class will be removed
+ * in a future release.
  */
-
+@Deprecated
 public final class RetrofitClientFactory {
 
     private RetrofitClientFactory() {}
