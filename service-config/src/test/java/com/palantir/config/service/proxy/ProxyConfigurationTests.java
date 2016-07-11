@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.palantir.config.service;
+package com.palantir.config.service.proxy;
 
 import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.io.Resources;
+import com.palantir.config.service.BasicCredentials;
 import io.dropwizard.jackson.Jackson;
 import java.io.IOException;
 import java.net.InetSocketAddress;

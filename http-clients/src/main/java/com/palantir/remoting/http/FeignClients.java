@@ -19,6 +19,8 @@ package com.palantir.remoting.http;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 import com.palantir.remoting.http.errors.FeignSerializableErrorErrorDecoder;
+import com.palantir.config.service.proxy.DefaultProxyConfigurationProviderChain;
+import com.palantir.config.service.proxy.ProxyConfigurationProvider;
 import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
 import feign.OptionalAwareDecoder;
@@ -45,6 +47,8 @@ import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
 public final class FeignClients {
 
     private static final Options DEFAULT_TIMEOUT_OPTIONS = new Request.Options();
+    private static final ProxyConfigurationProvider DEFAULT_PROXY_AUTHENTICATOR_PROVIDER
+            = new DefaultProxyConfigurationProviderChain();
 
     private FeignClients() {}
 
@@ -85,6 +89,15 @@ public final class FeignClients {
     }
 
     /**
+     * Provides a {@link FeignClientFactory} with an {@link ObjectMapper} configured with {@link
+     * com.fasterxml.jackson.datatype.guava.GuavaModule} and {@link com.fasterxml.jackson.datatype.jdk7.Jdk7Module}.
+     */
+    public static FeignClientFactory standard(Request.Options timeoutOptions, String userAgent,
+                                              ProxyConfigurationProvider proxyConfigurationProvider) {
+        return withMapper(ObjectMappers.GUAVA_JDK7_MAPPER, timeoutOptions, userAgent, proxyConfigurationProvider);
+    }
+
+    /**
      * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
      * Provides a {@link FeignClientFactory} compatible with jackson 2.4.
      */
@@ -120,7 +133,21 @@ public final class FeignClients {
                 new Jackson24Encoder(ObjectMappers.GUAVA_JDK7_MAPPER),
                 new JacksonDecoder(ObjectMappers.GUAVA_JDK7_MAPPER),
                 timeoutOptions,
-                userAgent);
+                userAgent,
+                DEFAULT_PROXY_AUTHENTICATOR_PROVIDER);
+    }
+
+    /**
+     * Provides a {@link FeignClientFactory} compatible with jackson 2.4.
+     */
+    public static FeignClientFactory standardJackson24(Request.Options timeoutOptions, String userAgent,
+                                                       ProxyConfigurationProvider proxyConfigurationProvider) {
+        return withEncoderAndDecoder(
+                new Jackson24Encoder(ObjectMappers.GUAVA_JDK7_MAPPER),
+                new JacksonDecoder(ObjectMappers.GUAVA_JDK7_MAPPER),
+                timeoutOptions,
+                userAgent,
+                proxyConfigurationProvider);
     }
 
     /**
@@ -156,6 +183,14 @@ public final class FeignClients {
     }
 
     /**
+     * Provides a {@link FeignClientFactory} with an unmodified {@link ObjectMapper}.
+     */
+    public static FeignClientFactory vanilla(Request.Options timeoutOptions, String userAgent,
+                                             ProxyConfigurationProvider proxyConfigurationProvider) {
+        return withMapper(ObjectMappers.VANILLA_MAPPER, timeoutOptions, userAgent, proxyConfigurationProvider);
+    }
+
+    /**
      * @deprecated Clients should specify a user agent. This method will be removed when clients have updated.
      * Provides a {@link FeignClientFactory} with the specified {@link ObjectMapper}.
      */
@@ -184,7 +219,17 @@ public final class FeignClients {
      * Provides a {@link FeignClientFactory} with the specified {@link ObjectMapper}.
      */
     public static FeignClientFactory withMapper(ObjectMapper mapper, Request.Options timeoutOptions, String userAgent) {
-        return withEncoderAndDecoder(new JacksonEncoder(mapper), new JacksonDecoder(mapper), timeoutOptions, userAgent);
+        return withEncoderAndDecoder(new JacksonEncoder(mapper), new JacksonDecoder(mapper), timeoutOptions, userAgent,
+                DEFAULT_PROXY_AUTHENTICATOR_PROVIDER);
+    }
+
+    /**
+     * Provides a {@link FeignClientFactory} with the specified {@link ObjectMapper}.
+     */
+    public static FeignClientFactory withMapper(ObjectMapper mapper, Request.Options timeoutOptions, String userAgent,
+                                                ProxyConfigurationProvider proxyConfigurationProvider) {
+        return withEncoderAndDecoder(new JacksonEncoder(mapper), new JacksonDecoder(mapper), timeoutOptions, userAgent,
+                proxyConfigurationProvider);
     }
 
     /**
@@ -194,14 +239,15 @@ public final class FeignClients {
     @Deprecated
     private static FeignClientFactory withEncoderAndDecoder(Encoder encoder, Decoder decoder,
             Request.Options timeoutOptions) {
-        return withEncoderAndDecoder(encoder, decoder, timeoutOptions, "UnspecifiedUserAgent");
+        return withEncoderAndDecoder(encoder, decoder, timeoutOptions, "UnspecifiedUserAgent",
+                DEFAULT_PROXY_AUTHENTICATOR_PROVIDER);
     }
 
     /**
      * Provides a {@link FeignClientFactory} with the specified {@link Encoder} and {@link Decoder}.
      */
     private static FeignClientFactory withEncoderAndDecoder(Encoder encoder, Decoder decoder,
-            Request.Options timeoutOptions, String userAgent) {
+            Request.Options timeoutOptions, String userAgent, ProxyConfigurationProvider proxyConfigurationProvider) {
         return FeignClientFactory.of(
                 new SlashEncodingContract(new GuavaOptionalAwareContract(new JaxRsWithHeaderAndQueryMapContract())),
                 new InputStreamDelegateEncoder(new TextDelegateEncoder(encoder)),
@@ -210,7 +256,8 @@ public final class FeignClients {
                 FeignClientFactory.okHttpClient(),
                 NeverRetryingBackoffStrategy.INSTANCE,
                 timeoutOptions,
-                userAgent);
+                userAgent,
+                proxyConfigurationProvider);
     }
 
 }

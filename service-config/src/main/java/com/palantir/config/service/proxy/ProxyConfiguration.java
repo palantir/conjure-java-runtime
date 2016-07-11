@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.palantir.config.service;
+package com.palantir.config.service.proxy;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Optional;
+import com.palantir.config.service.BasicCredentials;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import org.immutables.value.Value.Immutable;

@@ -107,7 +107,8 @@ public final class FailoverFeignTargetTest {
                 FeignClientFactory.okHttpClient(),
                 backoffStrategy,
                 new Request.Options(),
-                "test suite user agent")
+                "test suite user agent",
+                null)
                 .createProxy(Optional.<SSLSocketFactory>absent(),
                         ImmutableSet.of("http://localhost:" + server1.getPort(),
                                 "http://localhost:" + server2.getPort()),
