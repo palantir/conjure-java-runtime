@@ -16,53 +16,45 @@
 
 package com.palantir.config.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Optional;
-import com.palantir.remoting.ssl.SslConfiguration;
-import com.palantir.tokens.auth.BearerToken;
-import io.dropwizard.util.Duration;
-import java.util.List;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import org.immutables.value.Value.Immutable;
+import org.immutables.value.Value.Lazy;
 import org.immutables.value.Value.Style;
 
 @Immutable
-@JsonDeserialize(as = ImmutableServiceConfiguration.class)
+@JsonDeserialize(as = ImmutableProxyConfiguration.class)
 @Style(visibility = Style.ImplementationVisibility.PACKAGE)
-public abstract class ServiceConfiguration {
+public abstract class ProxyConfiguration {
 
     /**
-     * The API token to be used to interact with the service.
+     * The hostname of the HTTP/HTTPS Proxy.
      */
-    public abstract Optional<BearerToken> apiToken();
+    public abstract String host();
 
     /**
-     * The SSL configuration needed to interact with the service.
+     * Port for the proxy.
      */
-    public abstract Optional<SslConfiguration> security();
+    public abstract int port();
 
     /**
-     * Connect timeout for requests.
+     * Credentials if the proxy needs authentication.
      */
-    public abstract Optional<Duration> connectTimeout();
+    public abstract Optional<BasicCredentials> credentials();
 
-    /**
-     * Read timeout for requests.
-     */
-    public abstract Optional<Duration> readTimeout();
-
-    /**
-     * A list of service URIs.
-     */
-    public abstract List<String> uris();
-
-    /**
-     * Proxy configuration for connecting to the service.
-     */
-    public abstract Optional<ProxyConfiguration> proxyConfiguration();
+    @Lazy
+    @SuppressWarnings("checkstyle:designforextension")
+    @JsonIgnore
+    public Proxy toProxy() {
+        return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host(), port()));
+    }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    public static final class Builder extends ImmutableServiceConfiguration.Builder {}
+    public static final class Builder extends ImmutableProxyConfiguration.Builder {}
 }
