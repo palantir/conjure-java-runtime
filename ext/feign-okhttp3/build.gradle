@@ -1,7 +1,7 @@
 apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
-tasks.checkstyleMain.onlyIf { false }
+tasks.checkstyleMain.enabled = false
 dependencies {
     compile libs.feign.core
     compile libs.okhttp3

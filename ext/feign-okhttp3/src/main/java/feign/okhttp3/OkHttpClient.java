@@ -14,8 +14,8 @@
  * limitations under the License.
  *
  * This file was copied verbatim from
- * https://github.com/Netflix/feign/blob/master/okhttp/src/main/java/feign/okhttp/OkHttpClient.java into the
- * feign.okhttp3 package in order to avoid binary incompatibility between Feign <=8.16 and >=8.17.
+ * https://github.com/Netflix/feign/blob/6717142afc42b6bec35e008fc9a0f41a8268a204/okhttp/src/main/java/feign/okhttp/OkHttpClient.java
+ * into the feign.okhttp3 package in order to avoid binary incompatibility between Feign <=8.16 and >=8.17.
  */
 package feign.okhttp3;
 
