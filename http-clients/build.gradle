@@ -12,7 +12,7 @@ dependencies {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: 'javax.ws.rs', module: 'jsr311-api'
     }
-    compile libs.feign.okhttp
+    compile project(':ext:feign-okhttp3')
     compile libs.feign.slf4j
     compile libs.guava
     compile libs.jackson.databind

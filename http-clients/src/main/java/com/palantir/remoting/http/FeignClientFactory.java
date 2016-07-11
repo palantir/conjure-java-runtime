@@ -41,7 +41,7 @@ import feign.Request;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
-import feign.okhttp.OkHttpClient;
+import feign.okhttp3.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import io.dropwizard.util.Duration;
 import java.net.InetAddress;

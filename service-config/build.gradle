@@ -13,7 +13,7 @@ dependencies {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: 'javax.ws.rs', module: 'jsr311-api'
     }
-    testCompile libs.feign.okhttp
+    testCompile project(':ext:feign-okhttp3')
     testCompile libs.junit
 
     processor libs.immutables
