@@ -1,4 +1,6 @@
 include ':ext:brave-extensions'
+include ':ext:feign-okhttp3'
+include ':ext:feign-okhttp3-compat-test'
 include 'error-handling'
 include 'http-clients'
 include 'http-servers'

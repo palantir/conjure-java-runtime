@@ -10,6 +10,7 @@ project.ext.libs = [
         'utils': 'io.dropwizard:dropwizard-util:0.8.2'
     ],
     'feign': [
+        'core': 'com.netflix.feign:feign-core:8.17.0',
         'jackson': 'com.netflix.feign:feign-jackson:8.17.0',
         'jaxrs': 'com.netflix.feign:feign-jaxrs:8.17.0',
         'okhttp': 'com.netflix.feign:feign-okhttp:8.17.0',
@@ -28,6 +29,7 @@ project.ext.libs = [
     'mockito': 'org.mockito:mockito-core:1.10.19',
     'mockwebserver': 'com.squareup.okhttp3:mockwebserver:3.2.0',
     'okhttp2': 'com.squareup.okhttp:okhttp:2.7.5',
+    'okhttp3': 'com.squareup.okhttp3:okhttp:3.2.0',
     'retrofit': 'com.squareup.retrofit:retrofit:1.9.0',
     'retrofit2': [
         'retrofit': 'com.squareup.retrofit2:retrofit:2.1.0',
