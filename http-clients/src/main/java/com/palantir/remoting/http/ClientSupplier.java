@@ -17,13 +17,16 @@
 package com.palantir.remoting.http;
 
 import com.google.common.base.Optional;
+import com.palantir.config.service.ProxyConfiguration;
 import feign.Client;
 import javax.net.ssl.SSLSocketFactory;
 
 /**
- * Given an optional {@link javax.net.ssl.SSLSocketFactory} and a user agent, creates and returns a {@link feign.Client
- * Feign client}.
+ * Given an optional {@link javax.net.ssl.SSLSocketFactory},
+ * optional {@link com.palantir.config.service.ProxyConfiguration} and a user agent, creates and returns a
+ * {@link feign.Client Feign client}.
  */
 public interface ClientSupplier {
-    Client createClient(Optional<SSLSocketFactory> sslSocketFactory, String userAgent);
+    Client createClient(Optional<SSLSocketFactory> sslSocketFactory, Optional<ProxyConfiguration> proxyConfiguration,
+            String userAgent);
 }
