@@ -18,9 +18,9 @@ package com.palantir.remoting.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
-import com.palantir.remoting.http.errors.FeignSerializableErrorErrorDecoder;
 import com.palantir.config.service.proxy.DefaultProxyConfigurationProviderChain;
 import com.palantir.config.service.proxy.ProxyConfigurationProvider;
+import com.palantir.remoting.http.errors.FeignSerializableErrorErrorDecoder;
 import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
 import feign.OptionalAwareDecoder;

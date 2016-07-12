@@ -4,7 +4,8 @@
 package com.palantir.config.service.proxy;
 
 /**
- * A {@link com.palantir.config.service.proxy.ProxyConfigurationProviderChain} consisting of:
+ * A default {@link com.palantir.config.service.proxy.ProxyConfigurationProviderChain}.
+ * This chain consists of:
  * <ol>
  *     <li>{@link com.palantir.config.service.proxy.SystemPropertiesProxyConfigurationProvider}</li>
  *     <li>{@link com.palantir.config.service.proxy.EnvironmentVariableProxyConfigurationProvider}</li>

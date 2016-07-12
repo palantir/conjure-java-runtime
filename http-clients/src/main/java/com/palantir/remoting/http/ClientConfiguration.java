@@ -16,18 +16,18 @@ import org.immutables.value.Value.Style;
 public abstract class ClientConfiguration {
 
     /**
-     * An optional {@link javax.net.ssl.SSLSocketFactory} for the client to use
+     * An optional {@link javax.net.ssl.SSLSocketFactory} for the client to use.
      */
     public abstract Optional<SSLSocketFactory> sslSocketFactory();
 
     /**
      * An {@link com.palantir.config.service.proxy.ProxyConfigurationProvider} providing optional configuration for a
-     * proxy
+     * proxy.
      */
     public abstract ProxyConfigurationProvider proxyConfigurationProvider();
 
     /**
-     * A user agent
+     * A user agent.
      */
     public abstract String userAgent();
 
