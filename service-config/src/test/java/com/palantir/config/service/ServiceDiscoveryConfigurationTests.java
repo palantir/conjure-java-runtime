@@ -27,6 +27,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
+import com.palantir.config.service.proxy.ProxyConfiguration;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
 import io.dropwizard.jackson.Jackson;
@@ -54,6 +55,7 @@ public final class ServiceDiscoveryConfigurationTests {
         assertFalse(discoveryConfig.defaultApiToken().isPresent());
         assertFalse(discoveryConfig.defaultConnectTimeout().isPresent());
         assertFalse(discoveryConfig.defaultReadTimeout().isPresent());
+        assertFalse(discoveryConfig.defaultProxyConfiguration().isPresent());
 
         // testing service api token property
         // 1) with token
@@ -65,6 +67,9 @@ public final class ServiceDiscoveryConfigurationTests {
         assertEquals(Duration.minutes(5), discoveryConfig.getConnectTimeout("service3").get());
         assertEquals(Duration.seconds(30), discoveryConfig.getReadTimeout("service3").get());
         assertFalse(discoveryConfig.getApiToken("service3").isPresent());
+        assertEquals(ProxyConfiguration.builder().host("squid").port(3128).build(),
+                discoveryConfig.getProxyConfiguration("service3").get());
+        assertFalse(discoveryConfig.getProxyConfiguration("service2").isPresent());
 
         // testing getter for services that don't exist
         try {
@@ -88,6 +93,8 @@ public final class ServiceDiscoveryConfigurationTests {
         assertEquals(Duration.seconds(45), discoveryConfig.defaultConnectTimeout().get());
         assertTrue(discoveryConfig.defaultConnectTimeout().isPresent());
         assertEquals(Duration.minutes(15), discoveryConfig.defaultReadTimeout().get());
+        assertEquals(ProxyConfiguration.builder().host("globalSquid").port(3128).build(),
+                discoveryConfig.defaultProxyConfiguration().get());
 
         // testing service api token property
         // 1) with token
@@ -96,6 +103,10 @@ public final class ServiceDiscoveryConfigurationTests {
         assertEquals(BearerToken.valueOf("defaultApiToken"), discoveryConfig.getApiToken("service3").get());
         assertEquals(BearerToken.valueOf("defaultApiToken"),
                 discoveryConfig.getServices().get("service3").apiToken().get());
+        assertEquals(ProxyConfiguration.builder().host("globalSquid").port(3128).build(),
+                discoveryConfig.getProxyConfiguration("service1").get());
+        assertEquals(ProxyConfiguration.builder().host("service3squid").port(3128).build(),
+                discoveryConfig.getProxyConfiguration("service3").get());
     }
 
     @Test
@@ -115,6 +126,8 @@ public final class ServiceDiscoveryConfigurationTests {
         SslConfiguration security = SslConfiguration.of(mock(Path.class));
         Duration defaultReadTimeout = Duration.seconds(30);
         Duration connectTimeout = Duration.hours(1);
+        ProxyConfiguration defaultProxyConfiguration =
+                ProxyConfiguration.builder().host("globalsquid").port(3128).build();
 
         ServiceConfiguration service = ServiceConfiguration.builder()
                 .security(security)
@@ -125,6 +138,7 @@ public final class ServiceDiscoveryConfigurationTests {
                 .defaultApiToken(defaultApiToken)
                 .originalServices(ImmutableMap.of("service1", service))
                 .defaultReadTimeout(defaultReadTimeout)
+                .defaultProxyConfiguration(defaultProxyConfiguration)
                 .build();
 
         assertEquals(defaultApiToken, services.defaultApiToken().get());
@@ -137,5 +151,7 @@ public final class ServiceDiscoveryConfigurationTests {
         assertEquals(security, services.getSecurity("service1").get());
         assertEquals(security, services.getServices().get("service1").security().get());
         assertEquals(connectTimeout, services.getServices().get("service1").connectTimeout().get());
+        assertEquals(defaultProxyConfiguration, services.defaultProxyConfiguration().get());
+        assertEquals(defaultProxyConfiguration, services.getServices().get("service1").proxyConfiguration().get());
     }
 }

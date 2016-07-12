@@ -17,6 +17,7 @@
 package com.palantir.remoting.retrofit.errors;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.http.errors.SerializableErrorToExceptionConverter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +36,7 @@ public enum RetrofitSerializableErrorErrorHandler implements ErrorHandler {
 
         Collection<String> contentTypes = ImmutableSet.of();
         for (Header header : response.getHeaders()) {
-            if (header.getName().equals("Content-Type")) {
+            if (header.getName().equalsIgnoreCase(HttpHeaders.CONTENT_TYPE)) {
                 contentTypes = ImmutableSet.of(header.getValue());
                 break;
             }

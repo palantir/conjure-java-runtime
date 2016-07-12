@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.palantir.config.service.proxy.ProxyConfiguration;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
 import io.dropwizard.util.Duration;
@@ -59,13 +60,19 @@ public abstract class ServiceDiscoveryConfiguration {
     abstract Map<String, ServiceConfiguration> originalServices();
 
     /**
-     * Default global connect timeout .
+     * Default global proxy configuration for connecting to the services.
+     */
+    @JsonProperty("proxyConfiguration")
+    public abstract Optional<ProxyConfiguration> defaultProxyConfiguration();
+
+    /**
+     * Default global connect timeout.
      */
     @JsonProperty("connectTimeout")
     public abstract Optional<Duration> defaultConnectTimeout();
 
     /**
-     * Default global read timeout .
+     * Default global read timeout.
      */
     @JsonProperty("readTimeout")
     public abstract Optional<Duration> defaultReadTimeout();
@@ -84,6 +91,7 @@ public abstract class ServiceDiscoveryConfiguration {
             ServiceConfiguration configWithDefaults = ImmutableServiceConfiguration.builder()
                     .apiToken(originalConfig.apiToken().or(defaultApiToken()))
                     .security(originalConfig.security().or(defaultSecurity()))
+                    .proxyConfiguration(originalConfig.proxyConfiguration().or(defaultProxyConfiguration()))
                     .connectTimeout(originalConfig.connectTimeout().or(defaultConnectTimeout()))
                     .readTimeout(originalConfig.readTimeout().or(defaultReadTimeout()))
                     .uris(originalConfig.uris()).build();
@@ -126,6 +134,17 @@ public abstract class ServiceDiscoveryConfiguration {
      */
     public final List<String> getUris(String serviceName) {
         return getServiceConfig(serviceName).uris();
+    }
+
+    /**
+     * Uses the provided service name as the key to retrieve the proxy configuration for the respective
+     * {@link ServiceConfiguration}.
+     *
+     * @param serviceName the name of the service
+     * @return the {@link ProxyConfiguration} for the specified service
+     */
+    public final Optional<ProxyConfiguration> getProxyConfiguration(String serviceName) {
+        return getServiceConfig(serviceName).proxyConfiguration();
     }
 
     public final Optional<Duration> getConnectTimeout(String serviceName) {

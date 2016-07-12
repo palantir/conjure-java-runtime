@@ -22,5 +22,8 @@ services:
   service3:
     uris:
       - https://some.internal.url:8443/thirdservice/api
+    proxyConfiguration:
+      host: squid
+      port: 3128
     connectTimeout: 5 minutes
     readTimeout: 30 seconds

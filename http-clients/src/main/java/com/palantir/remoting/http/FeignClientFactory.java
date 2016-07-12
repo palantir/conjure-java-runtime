@@ -25,11 +25,19 @@ import com.github.kristofa.brave.http.DefaultSpanNameProvider;
 import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.net.HttpHeaders;
 import com.google.common.net.InetAddresses;
+import com.palantir.config.service.BasicCredentials;
 import com.palantir.config.service.ServiceConfiguration;
 import com.palantir.config.service.ServiceDiscoveryConfiguration;
+import com.palantir.config.service.proxy.EmptyProxyConfigurationProvider;
+import com.palantir.config.service.proxy.ProxyConfiguration;
+import com.palantir.config.service.proxy.ProxyConfigurationProvider;
+import com.palantir.config.service.proxy.WrapperProxyConfigurationProvider;
 import com.palantir.ext.brave.SlfLoggingSpanCollector;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.remoting.ssl.SslSocketFactories;
@@ -38,12 +46,14 @@ import feign.Contract;
 import feign.Feign;
 import feign.Logger.Level;
 import feign.Request;
+import feign.Target;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
 import feign.okhttp3.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import io.dropwizard.util.Duration;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
@@ -51,6 +61,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import javax.net.ssl.SSLSocketFactory;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import okhttp3.Response;
+import okhttp3.Route;
 
 /**
  * Factory for initializing Feign-based HTTP-invoking dynamic proxies around service interfaces.
@@ -68,6 +82,7 @@ public final class FeignClientFactory {
     private final BackoffStrategy backoffStrategy;
     private final Request.Options options;
     private final String userAgent;
+    private final ProxyConfigurationProvider defaultProxyConfigurationProvider;
 
     private FeignClientFactory(
             Contract contract,
@@ -77,7 +92,8 @@ public final class FeignClientFactory {
             ClientSupplier clientSupplier,
             BackoffStrategy backoffStrategy,
             Request.Options options,
-            String userAgent) {
+            String userAgent,
+            ProxyConfigurationProvider proxyConfigurationProvider) {
         this.contract = contract;
         this.encoder = encoder;
         this.decoder = decoder;
@@ -86,6 +102,7 @@ public final class FeignClientFactory {
         this.backoffStrategy = backoffStrategy;
         this.options = options;
         this.userAgent = userAgent;
+        this.defaultProxyConfigurationProvider = proxyConfigurationProvider;
     }
 
     /**
@@ -101,7 +118,8 @@ public final class FeignClientFactory {
             ClientSupplier clientSupplier,
             String userAgent) {
         return new FeignClientFactory(contract, encoder, decoder, errorDecoder, clientSupplier,
-                NeverRetryingBackoffStrategy.INSTANCE, new Request.Options(), userAgent);
+                NeverRetryingBackoffStrategy.INSTANCE, new Request.Options(), userAgent,
+                new EmptyProxyConfigurationProvider());
     }
 
     /**
@@ -117,68 +135,129 @@ public final class FeignClientFactory {
             Request.Options options,
             String userAgent) {
         return new FeignClientFactory(
-                contract, encoder, decoder, errorDecoder, clientSupplier, backoffStrategy, options, userAgent);
+                contract, encoder, decoder, errorDecoder, clientSupplier, backoffStrategy, options, userAgent,
+                new EmptyProxyConfigurationProvider());
     }
 
     /**
-     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and feign {@link
-     * feign.Client.Default} HTTP client.
+     * Returns a new instance using the specified contract/encoder/decoder/client when constructing clients.
+     */
+    public static FeignClientFactory of(
+            Contract contract,
+            Encoder encoder,
+            Decoder decoder,
+            ErrorDecoder errorDecoder,
+            ClientSupplier clientSupplier,
+            BackoffStrategy backoffStrategy,
+            Request.Options options,
+            String userAgent,
+            ProxyConfigurationProvider proxyConfigurationProvider) {
+        return new FeignClientFactory(
+                contract, encoder, decoder, errorDecoder, clientSupplier, backoffStrategy, options, userAgent,
+                proxyConfigurationProvider);
+    }
+
+    /**
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and {@link
+     * okhttp3.OkHttpClient} wrapped in {@link feign.okhttp.OkHttpClient}.
+     */
+    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, String uri, Class<T> type) {
+        return createProxy(sslSocketFactory, uri, type, defaultProxyConfigurationProvider);
+    }
+
+    /**
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and {@link
+     * okhttp3.OkHttpClient} wrapped in {@link feign.okhttp.OkHttpClient}.
      */
     public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, String uri, Class<T> type,
             Request.Options requestOptions) {
-        return Feign.builder()
-                .contract(contract)
-                .encoder(encoder)
-                .decoder(decoder)
-                .errorDecoder(errorDecoder)
-                .client(clientSupplier.createClient(sslSocketFactory, userAgent))
-                .options(requestOptions)
-                .logger(new Slf4jLogger(FeignClients.class))
-                .logLevel(Level.BASIC)
-                .requestInterceptor(UserAgentInterceptor.of(userAgent))
-                .target(type, uri);
+        return createProxy(sslSocketFactory, uri, type, defaultProxyConfigurationProvider, requestOptions);
     }
 
     /**
-     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and feign {@link
-     * feign.Client.Default} HTTP client.
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and {@link
+     * okhttp3.OkHttpClient} wrapped in {@link feign.okhttp.OkHttpClient}.
      */
-    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, String uri, Class<T> type) {
-        return createProxy(sslSocketFactory, uri, type, options);
+    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, String uri, Class<T> type,
+            ProxyConfigurationProvider proxyConfigurationProvider) {
+        return createProxy(sslSocketFactory, uri, type, proxyConfigurationProvider, options);
     }
 
-
     /**
-     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and feign {@link
-     * feign.Client.Default} HTTP client. A {@link FailoverFeignTarget} is used to cycle through the given uris on
-     * failure.
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and {@link
+     * okhttp3.OkHttpClient} wrapped in {@link feign.okhttp.OkHttpClient}.
      */
-    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type,
-            Request.Options requestOptions) {
-        FailoverFeignTarget<T> target = new FailoverFeignTarget<>(uris, type, backoffStrategy);
-        Client client = clientSupplier.createClient(sslSocketFactory, userAgent);
-        client = target.wrapClient(client);
-        return Feign.builder()
-                .contract(contract)
-                .encoder(encoder)
-                .decoder(decoder)
-                .errorDecoder(errorDecoder)
-                .client(client)
-                .retryer(target)
-                .options(requestOptions)
-                .logger(new Slf4jLogger(FeignClients.class))
-                .logLevel(Level.BASIC)
-                .requestInterceptor(UserAgentInterceptor.of(userAgent))
-                .target(target);
+    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, String uri, Class<T> type,
+            ProxyConfigurationProvider proxyConfigurationProvider, Request.Options requestOptions) {
+        return createProxy(sslSocketFactory, ImmutableSet.of(uri), type, proxyConfigurationProvider, requestOptions);
     }
 
     /**
-     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and feign {@link
-     * feign.Client.Default} HTTP client. A {@link FailoverFeignTarget} is used to cycle through the given uris on
-     * failure.
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and
+     * {@link okhttp3.OkHttpClient} wrapped in {@link feign.okhttp.OkHttpClient}. A {@link FailoverFeignTarget}
+     * is used to cycle through the given uris on failure if there's more than one uri.
      */
     public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type) {
         return createProxy(sslSocketFactory, uris, type, options);
+    }
+
+    /**
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, and {@link
+     * okhttp3.OkHttpClient} wrapped in {@link feign.okhttp.OkHttpClient}. A {@link FailoverFeignTarget} is used
+     * to cycle through the given uris on failure if there's more than one uri.
+     */
+    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type,
+            Request.Options requestOptions) {
+        return createProxy(sslSocketFactory, uris, type, defaultProxyConfigurationProvider, requestOptions);
+    }
+
+    /**
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, proxy
+     * configuration provider, and {@link okhttp3.OkHttpClient} wrapped in {@link feign.okhttp.OkHttpClient}.
+     * A {@link FailoverFeignTarget} is used to cycle through the given uris on failure if there's more than one uri.
+     */
+    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type,
+                             ProxyConfigurationProvider proxyConfigurationProvider) {
+        return createProxy(sslSocketFactory, uris, type, proxyConfigurationProvider, options);
+    }
+
+    /**
+     * Constructs a dynamic proxy for the specified type, using the supplied SSL factory if is present, the proxy
+     * if present and {@link okhttp3.OkHttpClient} wrapped in {@link feign.okhttp.OkHttpClient}. A
+     * {@link FailoverFeignTarget} is used to cycle through the given uris on failure if there's more than one uri.
+     */
+    public <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactory, Set<String> uris, Class<T> type,
+                             ProxyConfigurationProvider proxyConfigurationProvider, Request.Options requestOptions) {
+
+        ClientConfiguration configuration = ImmutableClientConfiguration.builder()
+                .sslSocketFactory(sslSocketFactory)
+                .proxyConfigurationProvider(proxyConfigurationProvider)
+                .userAgent(userAgent)
+                .build();
+
+        Client client = clientSupplier.createClient(configuration);
+        Feign.Builder builder = Feign.builder()
+                .contract(contract)
+                .encoder(encoder)
+                .decoder(decoder)
+                .errorDecoder(errorDecoder)
+                .options(requestOptions)
+                .logger(new Slf4jLogger(FeignClients.class))
+                .logLevel(Level.BASIC)
+                .requestInterceptor(UserAgentInterceptor.of(userAgent));
+
+        Target<T> target;
+        if (uris.size() > 1) {
+            FailoverFeignTarget<T> retryTarget = new FailoverFeignTarget<>(uris, type, backoffStrategy);
+            builder.retryer(retryTarget);
+            client = retryTarget.wrapClient(client);
+            target = retryTarget;
+        } else {
+            target = new Target.HardCodedTarget<>(type, Iterables.getOnlyElement(uris));
+        }
+
+        return builder.client(client)
+                .target(target);
     }
 
     /**
@@ -193,6 +272,7 @@ public final class FeignClientFactory {
                 "Unable to find the configuration for " + serviceName + ".");
 
         Optional<SSLSocketFactory> socketFactory = Optional.absent();
+        Optional<ProxyConfiguration> proxyConfiguration = discoveryConfig.getProxyConfiguration(serviceName);
         Optional<SslConfiguration> sslConfig = discoveryConfig.getSecurity(serviceName);
 
         if (sslConfig.isPresent()) {
@@ -203,7 +283,8 @@ public final class FeignClientFactory {
         Request.Options requestOptions = new Request.Options((int) serviceConfig.connectTimeout()
                 .or(CONNECT_TIMEOUT).toMilliseconds(), (int) serviceConfig.readTimeout()
                 .or(READ_TIMEOUT).toMilliseconds());
-        return createProxy(socketFactory, uris, serviceClass, requestOptions);
+        return createProxy(socketFactory, uris, serviceClass, new WrapperProxyConfigurationProvider(proxyConfiguration),
+                requestOptions);
     }
 
     /**
@@ -222,12 +303,35 @@ public final class FeignClientFactory {
     private static final ClientSupplier OKHTTP_CLIENT_SUPPLIER =
             new ClientSupplier() {
                 @Override
-                public Client createClient(Optional<SSLSocketFactory> sslSocketFactory, String userAgent) {
+                public Client createClient(ClientConfiguration clientConfiguration) {
                     okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
+
+                    Optional<SSLSocketFactory> sslSocketFactory = clientConfiguration.sslSocketFactory();
                     if (sslSocketFactory.isPresent()) {
                         client.sslSocketFactory(sslSocketFactory.get());
                     }
 
+                    Optional<ProxyConfiguration> proxyConfiguration = clientConfiguration.proxyConfigurationProvider()
+                            .getProxyConfiguration();
+                    if (proxyConfiguration.isPresent()) {
+                        ProxyConfiguration proxy = proxyConfiguration.get();
+                        client.proxy(proxy.toProxy());
+
+                        if (proxy.credentials().isPresent()) {
+                            BasicCredentials basicCreds = proxy.credentials().get();
+                            final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
+                            client.proxyAuthenticator(new Authenticator() {
+                                @Override
+                                public okhttp3.Request authenticate(Route route, Response response) throws IOException {
+                                    return response.request().newBuilder()
+                                            .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
+                                            .build();
+                                }
+                            });
+                        }
+                    }
+
+                    String userAgent = clientConfiguration.userAgent();
                     // Set up Zipkin/Brave tracing
                     ClientTracer tracer = ClientTracer.builder()
                             .traceSampler(Sampler.ALWAYS_SAMPLE)
@@ -250,8 +354,8 @@ public final class FeignClientFactory {
     private static final ClientSupplier DEFAULT_CLIENT_SUPPLIER =
             new ClientSupplier() {
                 @Override
-                public Client createClient(Optional<SSLSocketFactory> sslSocketFactory, String userAgent) {
-                    return new Client.Default(sslSocketFactory.orNull(), null);
+                public Client createClient(ClientConfiguration clientConfiguration) {
+                    return new Client.Default(clientConfiguration.sslSocketFactory().orNull(), null);
                 }
             };
 

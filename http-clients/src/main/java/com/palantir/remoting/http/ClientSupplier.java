@@ -16,14 +16,14 @@
 
 package com.palantir.remoting.http;
 
-import com.google.common.base.Optional;
 import feign.Client;
-import javax.net.ssl.SSLSocketFactory;
+
 
 /**
- * Given an optional {@link javax.net.ssl.SSLSocketFactory} and a user agent, creates and returns a {@link feign.Client
- * Feign client}.
+ * Creates and returns a {@link feign.Client Feign client} using the provided
+ * {@link com.palantir.remoting.http.ClientConfiguration}.
  */
 public interface ClientSupplier {
-    Client createClient(Optional<SSLSocketFactory> sslSocketFactory, String userAgent);
+
+    Client createClient(ClientConfiguration clientConfiguration);
 }

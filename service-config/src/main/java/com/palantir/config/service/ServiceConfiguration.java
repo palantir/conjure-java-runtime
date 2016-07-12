@@ -18,6 +18,7 @@ package com.palantir.config.service;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Optional;
+import com.palantir.config.service.proxy.ProxyConfiguration;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
 import io.dropwizard.util.Duration;
@@ -54,6 +55,11 @@ public abstract class ServiceConfiguration {
      * A list of service URIs.
      */
     public abstract List<String> uris();
+
+    /**
+     * Proxy configuration for connecting to the service.
+     */
+    public abstract Optional<ProxyConfiguration> proxyConfiguration();
 
     public static Builder builder() {
         return new Builder();

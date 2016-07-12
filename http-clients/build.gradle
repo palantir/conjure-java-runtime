@@ -1,6 +1,8 @@
 apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
+apply plugin: 'org.inferred.processors'
+
 dependencies {
     compile project(':error-handling')
     compile project(':ext:brave-extensions')
@@ -29,4 +31,6 @@ dependencies {
     testCompile libs.hamcrest
     testCompile libs.junit
     testCompile libs.mockwebserver
+
+    processor libs.immutables
 }

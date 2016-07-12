@@ -17,9 +17,19 @@
 package com.palantir.remoting.retrofit;
 
 import com.google.common.base.Optional;
+import com.google.common.net.HttpHeaders;
+import com.palantir.config.service.BasicCredentials;
+import com.palantir.config.service.proxy.DefaultProxyConfigurationProviderChain;
+import com.palantir.config.service.proxy.ProxyConfiguration;
+import com.palantir.config.service.proxy.ProxyConfigurationProvider;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
+import okhttp3.Route;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -38,7 +48,8 @@ public final class RetrofitClientFactory {
     private RetrofitClientFactory() {}
 
     private static OkHttpClient newHttpClient(
-            Optional<SSLSocketFactory> sslSocketFactory, OkHttpClientOptions options, String userAgent) {
+            Optional<SSLSocketFactory> sslSocketFactory, OkHttpClientOptions options, String userAgent,
+            ProxyConfigurationProvider proxyConfigurationProvider) {
 
         OkHttpClient.Builder okClient = new OkHttpClient.Builder();
 
@@ -59,6 +70,25 @@ public final class RetrofitClientFactory {
             okClient.sslSocketFactory(sslSocketFactory.get());
         }
 
+        Optional<ProxyConfiguration> proxyConfiguration = proxyConfigurationProvider.getProxyConfiguration();
+        if (proxyConfiguration.isPresent()) {
+            ProxyConfiguration proxy = proxyConfiguration.get();
+            okClient.proxy(proxy.toProxy());
+
+            if (proxy.credentials().isPresent()) {
+                BasicCredentials basicCreds = proxy.credentials().get();
+                final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
+                okClient.proxyAuthenticator(new Authenticator() {
+                    @Override
+                    public okhttp3.Request authenticate(Route route, Response response) throws IOException {
+                        return response.request().newBuilder()
+                                .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
+                                .build();
+                    }
+                });
+            }
+        }
+
         // retry configuration
         if (options.getMaxNumberRetries().isPresent()) {
             okClient.addInterceptor(new RetryInterceptor(options.getMaxNumberRetries().get()));
@@ -72,7 +102,15 @@ public final class RetrofitClientFactory {
 
     public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
             OkHttpClientOptions options, String userAgent) {
-        okhttp3.OkHttpClient client = newHttpClient(sslSocketFactoryOptional, options, userAgent);
+        return createProxy(sslSocketFactoryOptional, uri, type, options, userAgent,
+                new DefaultProxyConfigurationProviderChain());
+    }
+
+    public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
+                                    OkHttpClientOptions options, String userAgent,
+                                    ProxyConfigurationProvider proxyConfigurationProvider) {
+        okhttp3.OkHttpClient client = newHttpClient(sslSocketFactoryOptional, options, userAgent,
+                proxyConfigurationProvider);
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(uri)
