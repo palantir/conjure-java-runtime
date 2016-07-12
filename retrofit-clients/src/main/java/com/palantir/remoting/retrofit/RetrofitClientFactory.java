@@ -17,8 +17,19 @@
 package com.palantir.remoting.retrofit;
 
 import com.google.common.base.Optional;
+import com.google.common.net.HttpHeaders;
+import com.palantir.config.service.BasicCredentials;
+import com.palantir.config.service.proxy.DefaultProxyConfigurationProviderChain;
+import com.palantir.config.service.proxy.ProxyConfiguration;
+import com.palantir.config.service.proxy.ProxyConfigurationProvider;
 import com.palantir.remoting.retrofit.errors.RetrofitSerializableErrorErrorHandler;
+import com.squareup.okhttp.Authenticator;
+import com.squareup.okhttp.Credentials;
 import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+import java.io.IOException;
+import java.net.Proxy;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 import retrofit.RestAdapter;
@@ -44,7 +55,7 @@ public final class RetrofitClientFactory {
     private RetrofitClientFactory() {}
 
     private static Client newHttpClient(Optional<SSLSocketFactory> sslSocketFactory, OkHttpClientOptions options,
-            String userAgent) {
+            String userAgent, ProxyConfigurationProvider proxyConfigurationProvider) {
         OkHttpClient okClient = new OkHttpClient();
 
         // timeouts
@@ -53,6 +64,31 @@ public final class RetrofitClientFactory {
         okClient.setReadTimeout(options.getReadTimeoutMs().or((long) okClient.getReadTimeout()), TimeUnit.MILLISECONDS);
         okClient.setWriteTimeout(
                 options.getWriteTimeoutMs().or((long) okClient.getWriteTimeout()), TimeUnit.MILLISECONDS);
+
+        Optional<ProxyConfiguration> proxyConfiguration = proxyConfigurationProvider.getProxyConfiguration();
+        if (proxyConfiguration.isPresent()) {
+            ProxyConfiguration proxy = proxyConfiguration.get();
+            okClient.setProxy(proxy.toProxy());
+
+            if (proxy.credentials().isPresent()) {
+                BasicCredentials basicCreds = proxy.credentials().get();
+                final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
+                okClient.setAuthenticator(new Authenticator() {
+
+                    @Override
+                    public Request authenticate(Proxy proxy, Response response) throws IOException {
+                        return null;
+                    }
+
+                    @Override
+                    public Request authenticateProxy(Proxy proxy, Response response) throws IOException {
+                        return response.request().newBuilder()
+                                .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
+                                .build();
+                    }
+                });
+            }
+        }
 
         // retries
         RetryInterceptor retryInterceptor = options.getMaxNumberRetries().isPresent()
@@ -79,7 +115,14 @@ public final class RetrofitClientFactory {
 
     public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
             OkHttpClientOptions options, String userAgent) {
-        Client client = newHttpClient(sslSocketFactoryOptional, options, userAgent);
+        return createProxy(sslSocketFactoryOptional, uri, type, options, userAgent,
+                new DefaultProxyConfigurationProviderChain());
+    }
+
+    public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
+                                    OkHttpClientOptions options, String userAgent,
+                                    ProxyConfigurationProvider proxyConfigurationProvider) {
+        Client client = newHttpClient(sslSocketFactoryOptional, options, userAgent, proxyConfigurationProvider);
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint(uri)
                 .setClient(client)
