@@ -3,7 +3,6 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(':error-handling')
-    compile project(':feign-config')
     compile project(':ext:brave-extensions')
     compile project(':service-config')
 
