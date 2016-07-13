@@ -14,5 +14,5 @@ dependencies {
     testCompile libs.hamcrest
     testCompile libs.junit
 
-    processor libs.immutables
+    processor libs.immutables.value
 }

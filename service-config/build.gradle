@@ -16,5 +16,5 @@ dependencies {
     testCompile libs.feign.okhttp
     testCompile libs.junit
 
-    processor libs.immutables
+    processor libs.immutables.value
 }

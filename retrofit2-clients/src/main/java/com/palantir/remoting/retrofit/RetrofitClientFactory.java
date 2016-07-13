@@ -18,6 +18,9 @@ package com.palantir.remoting.retrofit;
 
 import com.google.common.base.Optional;
 import com.google.common.net.HttpHeaders;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapterFactory;
 import com.palantir.config.service.BasicCredentials;
 import com.palantir.config.service.proxy.DefaultProxyConfigurationProviderChain;
 import com.palantir.config.service.proxy.ProxyConfiguration;
@@ -101,20 +104,28 @@ public final class RetrofitClientFactory {
     }
 
     public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
-            OkHttpClientOptions options, String userAgent) {
+            OkHttpClientOptions options, String userAgent, TypeAdapterFactory... typeAdapterFactories) {
         return createProxy(sslSocketFactoryOptional, uri, type, options, userAgent,
-                new DefaultProxyConfigurationProviderChain());
+                new DefaultProxyConfigurationProviderChain(), typeAdapterFactories);
     }
 
     public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
                                     OkHttpClientOptions options, String userAgent,
-                                    ProxyConfigurationProvider proxyConfigurationProvider) {
+                                    ProxyConfigurationProvider proxyConfigurationProvider,
+                                    TypeAdapterFactory... typeAdapterFactories) {
         okhttp3.OkHttpClient client = newHttpClient(sslSocketFactoryOptional, options, userAgent,
                 proxyConfigurationProvider);
+
+        GsonBuilder builder = new GsonBuilder();
+        for (TypeAdapterFactory factory : typeAdapterFactories) {
+            builder.registerTypeAdapterFactory(factory);
+        }
+        Gson gson = builder.create();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(uri)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
         return retrofit.create(type);
     }

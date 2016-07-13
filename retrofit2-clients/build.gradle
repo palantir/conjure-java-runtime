@@ -13,11 +13,12 @@ dependencies {
     compile libs.retrofit2.retrofit
     compile libs.retrofit2.gson
     compile libs.slf4j
+    compile libs.immutables.gson
 
     testCompile libs.hamcrest
     testCompile libs.junit
     testCompile libs.mockito
     testCompile libs.mockwebserver
 
-    processor libs.immutables
+    processor libs.immutables.value
 }
