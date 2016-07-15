@@ -24,8 +24,10 @@ import com.github.kristofa.brave.Sampler;
 import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
 import com.github.kristofa.brave.http.DefaultSpanNameProvider;
 import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.net.InetAddresses;
 import com.palantir.ext.brave.SlfLoggingSpanCollector;
+import com.palantir.remoting.http.BackoffStrategy;
 import com.palantir.remoting.http.FailoverFeignTarget;
 import com.palantir.remoting.http.GuavaOptionalAwareContract;
 import com.palantir.remoting.http.NeverRetryingBackoffStrategy;
@@ -60,6 +62,17 @@ final class FeignJaxRsClientBuilder extends ClientBuilder {
     private static final Duration CONNECT_TIMEOUT = Duration.standardMinutes(10);
     private static final Duration READ_TIMEOUT = Duration.standardMinutes(10);
 
+    private final BackoffStrategy backoffStrategy;
+
+    @VisibleForTesting
+    FeignJaxRsClientBuilder(BackoffStrategy backoffStrategy) {
+        this.backoffStrategy = backoffStrategy;
+    }
+
+    FeignJaxRsClientBuilder() {
+        this.backoffStrategy = NeverRetryingBackoffStrategy.INSTANCE;
+    }
+
     @Override
     public <T> T build(Class<T> serviceClass, String userAgent, List<String> uris) {
         FailoverFeignTarget<T> target = createTarget(serviceClass, uris);
@@ -79,7 +92,7 @@ final class FeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private <T> FailoverFeignTarget<T> createTarget(Class<T> serviceClass, List<String> uris) {
-        return new FailoverFeignTarget<>(uris, serviceClass, NeverRetryingBackoffStrategy.INSTANCE);
+        return new FailoverFeignTarget<>(uris, serviceClass, backoffStrategy);
     }
 
     private Contract createContract() {

@@ -26,9 +26,14 @@ public final class Client {
 
     private Client() {}
 
-    /** Creates a client for the given service configuration. The user agent */
+    /**
+     * Creates a {@link T T client} for the given service configuration. The HTTP {@code User-Agent} header of every
+     * request is set to the given non-empty {@code userAgent} string. Recommended user agents are of the form: {@code
+     * ServiceName (Version)}, e.g. MyServer (1.2.3) For services that run multiple instances, recommended user agents
+     * are of the form: {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3).
+     */
     public static <T> T create(Class<T> serviceClass, String userAgent, ServiceConfiguration config) {
-        ClientBuilder client = jaxrs().ssl(config.security());
+        ClientBuilder client = builder().ssl(config.security());
         if (config.connectTimeout().isPresent()) {
             client.connectTimeout(config.connectTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
 
@@ -43,7 +48,7 @@ public final class Client {
      * Creates a builder for a client for a JAX-RS-specified service that attempts to connect to the given URIs with
      * round-robin fail-over.
      */
-    public static ClientBuilder jaxrs() {
+    public static ClientBuilder builder() {
         return new FeignJaxRsClientBuilder();
     }
 }
