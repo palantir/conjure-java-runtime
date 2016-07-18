@@ -18,6 +18,7 @@ package com.palantir.remoting.jaxrs;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.palantir.config.service.ProxyConfiguration;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.remoting.ssl.SslSocketFactories;
 import java.util.Arrays;
@@ -32,7 +33,9 @@ public abstract class ClientBuilder {
     private Optional<X509TrustManager> thisTrustManager = Optional.absent();
     private Optional<Duration> thisConnectTimeout = Optional.absent();
     private Optional<Duration> thisReadTimeout = Optional.absent();
+    private Optional<ProxyConfiguration> thisProxyConfiguration = Optional.absent();
 
+    // TODO(rfink) Rename these getters.
     final Optional<SSLSocketFactory> getThisSslSocketFactory() {
         return thisSslSocketFactory;
     }
@@ -43,6 +46,10 @@ public abstract class ClientBuilder {
 
     final Optional<Duration> getThisReadTimeout() {
         return thisReadTimeout;
+    }
+
+    final Optional<ProxyConfiguration> getProxyConfiguration() {
+        return thisProxyConfiguration;
     }
 
     /**
@@ -82,7 +89,11 @@ public abstract class ClientBuilder {
         return this;
     }
 
-    // TODO(rfink) Add proxy support.
+    public final ClientBuilder proxy(ProxyConfiguration proxyConfiguration) {
+        Preconditions.checkArgument(!thisProxyConfiguration.isPresent(), "proxy already set");
+        thisProxyConfiguration = Optional.of(proxyConfiguration);
+        return this;
+    }
 
     private void verifySslConfigurationUnset() {
         Preconditions.checkArgument(!thisSslSocketFactory.isPresent(), "sslSocketFactory already set");

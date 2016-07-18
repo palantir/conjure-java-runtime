@@ -25,7 +25,10 @@ import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
 import com.github.kristofa.brave.http.DefaultSpanNameProvider;
 import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.net.HttpHeaders;
 import com.google.common.net.InetAddresses;
+import com.palantir.config.service.BasicCredentials;
+import com.palantir.config.service.ProxyConfiguration;
 import com.palantir.ext.brave.SlfLoggingSpanCollector;
 import com.palantir.remoting.http.BackoffStrategy;
 import com.palantir.remoting.http.FailoverFeignTarget;
@@ -51,10 +54,15 @@ import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
 import feign.okhttp3.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Random;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
+import okhttp3.Response;
+import okhttp3.Route;
 import org.joda.time.Duration;
 
 final class FeignJaxRsClientBuilder extends ClientBuilder {
@@ -137,6 +145,25 @@ final class FeignJaxRsClientBuilder extends ClientBuilder {
                         new ClientResponseInterceptor(tracer),
                         new DefaultSpanNameProvider());
         client.addInterceptor(braveInterceptor);
+
+        // Set up HTTP proxy configuration
+        if (getProxyConfiguration().isPresent()) {
+            ProxyConfiguration proxy = getProxyConfiguration().get();
+            client.proxy(proxy.toProxy());
+
+            if (proxy.credentials().isPresent()) {
+                BasicCredentials basicCreds = proxy.credentials().get();
+                final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
+                client.proxyAuthenticator(new Authenticator() {
+                    @Override
+                    public okhttp3.Request authenticate(Route route, Response response) throws IOException {
+                        return response.request().newBuilder()
+                                .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
+                                .build();
+                    }
+                });
+            }
+        }
 
         return new OkHttpClient(client.build());
     }
