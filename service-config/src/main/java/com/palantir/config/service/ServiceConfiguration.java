@@ -55,6 +55,11 @@ public abstract class ServiceConfiguration {
      */
     public abstract List<String> uris();
 
+    /**
+     * Proxy configuration for connecting to the service.
+     */
+    public abstract Optional<ProxyConfiguration> proxyConfiguration();
+
     public static Builder builder() {
         return new Builder();
     }
