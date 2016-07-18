@@ -34,12 +34,16 @@ public final class Client {
      */
     public static <T> T create(Class<T> serviceClass, String userAgent, ServiceConfiguration config) {
         ClientBuilder client = builder().ssl(config.security());
+        // TODO(rfink) Is there a better API for this?
         if (config.connectTimeout().isPresent()) {
             client.connectTimeout(config.connectTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
 
         }
         if (config.readTimeout().isPresent()) {
             client.readTimeout(config.readTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
+        }
+        if (config.proxyConfiguration().isPresent()) {
+            client.proxy(config.proxyConfiguration().get());
         }
         return client.build(serviceClass, userAgent, config.uris());
     }
