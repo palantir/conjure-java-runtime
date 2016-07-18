@@ -54,7 +54,10 @@ import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Factory for initializing Feign-based HTTP-invoking dynamic proxies around service interfaces.
+ * <p>
+ * @deprecated use JaxRsClients instead.
  */
+@Deprecated
 public final class FeignClientFactory {
 
     private static final Duration CONNECT_TIMEOUT = Duration.minutes(10);

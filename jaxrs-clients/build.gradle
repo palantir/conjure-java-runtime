@@ -1,0 +1,33 @@
+apply from: "${rootDir}/gradle/libs.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile project(':error-handling')
+    compile project(':feign-config')
+    compile project(':ext:brave-extensions')
+    compile project(':service-config')
+
+    compile libs.brave.okhttp
+    compile libs.feign.jackson
+    compile(libs.feign.jaxrs){
+        // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
+        exclude group: 'javax.ws.rs', module: 'jsr311-api'
+    }
+    compile project(':ext:feign-okhttp3')
+    compile libs.feign.slf4j
+    compile libs.guava
+    compile libs.jackson.databind
+    compile libs.jackson.guava
+    compile libs.jackson.jdk7
+    compile libs.jsr305
+    compile libs.slf4j
+    compile libs.wsRsApi
+
+    testCompile project(':http-servers')
+    testCompile files('lib/VersionTest.jar')
+
+    testCompile libs.dropwizard.testing
+    testCompile libs.hamcrest
+    testCompile libs.junit
+    testCompile libs.mockwebserver
+}

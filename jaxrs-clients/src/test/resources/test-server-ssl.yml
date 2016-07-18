@@ -1,0 +1,10 @@
+server:
+  applicationConnectors:
+    - type: https
+      port: 0
+      keyStorePassword: keystore
+      keyStorePath: src/test/resources/keyStore.jks
+      trustStorePath: src/test/resources/trustStore.jks
+  adminConnectors:
+    - type: http
+      port: 0
