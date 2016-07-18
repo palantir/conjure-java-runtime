@@ -16,6 +16,7 @@
 
 package com.palantir.remoting.jaxrs;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kristofa.brave.ClientRequestInterceptor;
 import com.github.kristofa.brave.ClientResponseInterceptor;
@@ -30,6 +31,7 @@ import com.palantir.ext.brave.SlfLoggingSpanCollector;
 import com.palantir.remoting.http.BackoffStrategy;
 import com.palantir.remoting.http.FailoverFeignTarget;
 import com.palantir.remoting.http.GuavaOptionalAwareContract;
+import com.palantir.remoting.http.Jackson24Encoder;
 import com.palantir.remoting.http.NeverRetryingBackoffStrategy;
 import com.palantir.remoting.http.ObjectMappers;
 import com.palantir.remoting.http.SlashEncodingContract;
@@ -107,12 +109,24 @@ final class FeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private Encoder createEncoder(ObjectMapper objectMapper) {
-        // TODO(rfink) Get Jackson24Encoder if ObjectMapper#writerFor is unavailable
-        return new InputStreamDelegateEncoder(new TextDelegateEncoder(new JacksonEncoder(objectMapper)));
+        Encoder jacksonEncoder = hasJackson25()
+                ? new JacksonEncoder(objectMapper)
+                : new Jackson24Encoder(objectMapper);
+        return new InputStreamDelegateEncoder(new TextDelegateEncoder(jacksonEncoder));
+    }
+
+    // Uses reflection to determine if Jackson >= 2.5 is on the classpath by checking for the existence of the
+    // ObjectMapper#writerFor method.
+    private boolean hasJackson25() {
+        try {
+            ObjectMapper.class.getMethod("writerFor", JavaType.class);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
     }
 
     private Decoder createDecoder(ObjectMapper objectMapper) {
-        // TODO(rfink) Get Jackson24Decoder if ObjectMapper#writerFor is unavailable
         return new OptionalAwareDecoder(
                 new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(objectMapper))));
     }

@@ -1,0 +1,19 @@
+apply from: "${rootDir}/gradle/libs.gradle"
+
+dependencies {
+    testCompile project(':jaxrs-clients')
+
+    testCompile libs.hamcrest
+    testCompile libs.junit
+    testCompile libs.mockwebserver
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.fasterxml.jackson.core:jackson-databind:2.4.0'
+        force 'com.fasterxml.jackson.core:jackson-annotations:2.4.0'
+        force 'com.fasterxml.jackson.core:jackson-core:2.4.0'
+        force 'com.fasterxml.jackson.datatype:jackson-datatype-guava:2.4.0'
+        force 'com.fasterxml.jackson.datatype:jackson-datatype-jdk7:2.4.0'
+    }
+}
