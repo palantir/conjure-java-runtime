@@ -8,6 +8,8 @@ security:
 
 apiToken: defaultApiToken
 
+proxyConfiguration:
+  hostAndPort: globalSquid:3128
 connectTimeout: 45 seconds
 readTimeout: 15 minutes
 
@@ -37,3 +39,5 @@ services:
       - https://some.internal.url:8443/thirdservice/api
     connectTimeout: 5 minutes
     readTimeout: 30 seconds
+    proxyConfiguration:
+      hostAndPort: service3squid:3128
