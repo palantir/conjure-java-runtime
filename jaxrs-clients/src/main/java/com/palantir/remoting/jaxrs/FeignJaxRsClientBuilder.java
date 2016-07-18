@@ -16,6 +16,7 @@
 
 package com.palantir.remoting.jaxrs;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kristofa.brave.ClientRequestInterceptor;
 import com.github.kristofa.brave.ClientResponseInterceptor;
@@ -118,7 +119,7 @@ final class FeignJaxRsClientBuilder extends ClientBuilder {
     // ObjectMapper#writerFor method.
     private boolean hasJackson25() {
         try {
-            ObjectMapper.class.getMethod("writerFor", Class.class);
+            ObjectMapper.class.getMethod("writerFor", JavaType.class);
             return true;
         } catch (NoSuchMethodException e) {
             return false;

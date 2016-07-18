@@ -35,9 +35,7 @@ public final class Jackson24Test {
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    // Note that the gradle setup of the integrationTests configuration forces Jackson 2.4 for this project.
-    // This construction does not work in IntelliJ since different configurations have the same dependencies
-    // (, Jackson 2.6 in this case).
+    // Note that the Gradle setup forces Jackson 2.4 for this project.
     @Test
     public void test_CanBuildClientWithJackson24() throws JsonProcessingException {
         TestEchoService service = Client.builder()
