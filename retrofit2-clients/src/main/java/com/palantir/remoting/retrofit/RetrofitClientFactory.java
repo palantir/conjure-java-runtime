@@ -72,11 +72,18 @@ public final class RetrofitClientFactory {
 
     public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
             OkHttpClientOptions options, String userAgent) {
+        return createProxy(sslSocketFactoryOptional, uri, type, options, userAgent, GsonConverterFactory.create());
+    }
+
+    public static <T> T createProxy(Optional<SSLSocketFactory> sslSocketFactoryOptional, String uri, Class<T> type,
+                                    OkHttpClientOptions options, String userAgent,
+                                    GsonConverterFactory gsonConverterFactory) {
         okhttp3.OkHttpClient client = newHttpClient(sslSocketFactoryOptional, options, userAgent);
+
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(uri)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(gsonConverterFactory)
                 .build();
         return retrofit.create(type);
     }
