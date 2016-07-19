@@ -16,5 +16,5 @@ dependencies {
     testCompile project(':ext:feign-okhttp3')
     testCompile libs.junit
 
-    processor libs.immutables
+    processor libs.immutables.value
 }
