@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 /**
  * Utilities to help create Retrofit proxies. Feign clients should be preferred except in cases where proxies must
@@ -76,7 +76,7 @@ public final class RetrofitClientFactory {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(uri)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(JacksonConverterFactory.create())
                 .build();
         return retrofit.create(type);
     }
