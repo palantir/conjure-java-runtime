@@ -9,7 +9,7 @@ dependencies {
     // it transitively to users of retrofit-clients as a convenience.
     runtime project(':ssl-config')
     compile libs.retrofit2.retrofit
-    compile libs.retrofit2.gson
+    compile libs.retrofit2.jackson
     compile libs.slf4j
 
     testCompile libs.hamcrest
