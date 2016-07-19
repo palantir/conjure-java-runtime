@@ -22,7 +22,7 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.palantir.remoting.jaxrs.Client;
+import com.palantir.remoting.jaxrs.JaxRsClient;
 import feign.Contract;
 import feign.HeaderMap;
 import feign.MethodMetadata;
@@ -80,7 +80,7 @@ public final class JaxRsWithHeaderAndQueryMapContractTests {
 
     @Test
     public void testJaxRsInterfaceWithHeaderMap() throws Exception {
-        HeaderMapTestInterface proxy = Client.builder()
+        HeaderMapTestInterface proxy = JaxRsClient.builder()
                 .build(HeaderMapTestInterface.class, "agent", "http://localhost:" + server.getPort());
         server.enqueue(new MockResponse());
 
@@ -125,7 +125,7 @@ public final class JaxRsWithHeaderAndQueryMapContractTests {
 
     @Test
     public void testJaxRsInterfaceWithQueryMap() throws Exception {
-        QueryMapTestInterface proxy = Client.builder()
+        QueryMapTestInterface proxy = JaxRsClient.builder()
                 .build(QueryMapTestInterface.class, "agent", "http://localhost:" + server.getPort());
         server.enqueue(new MockResponse());
 

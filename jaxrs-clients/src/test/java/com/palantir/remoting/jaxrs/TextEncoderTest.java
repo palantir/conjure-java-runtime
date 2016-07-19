@@ -39,7 +39,7 @@ public final class TextEncoderTest {
 
     @Before
     public void before() {
-        service = Client.builder().build(TextEncoderService.class, "agent", "http://localhost:" + server.getPort());
+        service = JaxRsClient.builder().build(TextEncoderService.class, "agent", "http://localhost:" + server.getPort());
         server.enqueue(new MockResponse().setBody("{}"));
     }
 

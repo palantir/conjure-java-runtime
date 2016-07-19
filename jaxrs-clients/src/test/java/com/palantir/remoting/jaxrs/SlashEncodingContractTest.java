@@ -54,9 +54,9 @@ public final class SlashEncodingContractTest {
 
     @Before
     public void before() {
-        jerseyProxy = Client.builder()
+        jerseyProxy = JaxRsClient.builder()
                 .build(FakeoInterface.class, "agent", "http://localhost:" + APP.getLocalPort());
-        inMemoryProxy = Client.builder()
+        inMemoryProxy = JaxRsClient.builder()
                 .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }

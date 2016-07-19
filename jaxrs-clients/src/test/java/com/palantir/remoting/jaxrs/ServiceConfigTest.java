@@ -34,9 +34,9 @@ public final class ServiceConfigTest {
         ServiceDiscoveryConfiguration discoveryConfiguration =
                 rule.getConfiguration().getServiceDiscoveryConfiguration();
 
-        ServiceConfigTestServer.HelloService helloClient = Client.create(
+        ServiceConfigTestServer.HelloService helloClient = JaxRsClient.create(
                 ServiceConfigTestServer.HelloService.class, "agent", discoveryConfiguration.getServices().get("hello"));
-        ServiceConfigTestServer.GoodbyeService goodbyeClient = Client.create(
+        ServiceConfigTestServer.GoodbyeService goodbyeClient = JaxRsClient.create(
                 ServiceConfigTestServer.GoodbyeService.class,
                 "agent",
                 discoveryConfiguration.getServices().get("goodbye"));

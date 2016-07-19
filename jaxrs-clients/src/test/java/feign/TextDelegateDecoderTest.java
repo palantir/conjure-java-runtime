@@ -31,6 +31,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
+import com.palantir.remoting.jaxrs.JaxRsClient;
 import com.palantir.remoting.jaxrs.TestServer;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
@@ -69,7 +70,7 @@ public final class TextDelegateDecoderTest {
         textDelegateDecoder = new TextDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = com.palantir.remoting.jaxrs.Client.builder()
+        service = JaxRsClient.builder()
                 .build(TestServer.TestService.class, "agent", endpointUri);
     }
 

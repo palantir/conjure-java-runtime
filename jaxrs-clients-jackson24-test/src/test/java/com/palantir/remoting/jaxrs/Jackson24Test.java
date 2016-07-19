@@ -38,7 +38,7 @@ public final class Jackson24Test {
     // Note that the Gradle setup forces Jackson 2.4 for this project.
     @Test
     public void test_CanBuildClientWithJackson24() throws JsonProcessingException {
-        TestEchoService service = Client.builder()
+        TestEchoService service = JaxRsClient.builder()
                 .build(TestEchoService.class, "agent", "http://localhost:" + server.getPort());
         ServiceConfiguration config = ServiceConfiguration.builder().addUris("http://foo").build();
         server.enqueue(new MockResponse().setBody(

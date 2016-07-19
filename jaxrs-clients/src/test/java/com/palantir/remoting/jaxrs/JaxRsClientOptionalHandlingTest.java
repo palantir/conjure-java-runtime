@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class ClientOptionalHandlingTest {
+public final class JaxRsClientOptionalHandlingTest {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -42,7 +42,7 @@ public final class ClientOptionalHandlingTest {
 
     @Before
     public void before() {
-        proxy = Client.builder()
+        proxy = JaxRsClient.builder()
                 .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
@@ -72,11 +72,11 @@ public final class ClientOptionalHandlingTest {
     @Test
     public void testCannotDecorateInterfaceWithOptionalPathParam() {
         try {
-            Client.builder().build(CannotDecorateInterface.class, "agent", "http://localhost:" + server.getPort());
+            JaxRsClient.builder().build(CannotDecorateInterface.class, "agent", "http://localhost:" + server.getPort());
             fail();
         } catch (RuntimeException e) {
             assertThat(e.getMessage(), is("Cannot use Guava Optionals with PathParams."
-                    + " (Class: com.palantir.remoting.jaxrs.ClientOptionalHandlingTest$CannotDecorateInterface,"
+                    + " (Class: com.palantir.remoting.jaxrs.JaxRsClientOptionalHandlingTest$CannotDecorateInterface,"
                     + " Method: path, Param: arg0)"));
         }
     }
