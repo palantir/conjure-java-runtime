@@ -26,11 +26,14 @@ import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
 import com.github.kristofa.brave.http.DefaultSpanNameProvider;
 import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.InetAddresses;
 import com.palantir.config.service.BasicCredentials;
 import com.palantir.config.service.ProxyConfiguration;
 import com.palantir.ext.brave.SlfLoggingSpanCollector;
+import com.palantir.remoting.clients.ClientBuilder;
+import com.palantir.remoting.clients.ClientConfig;
 import com.palantir.remoting.http.BackoffStrategy;
 import com.palantir.remoting.http.FailoverFeignTarget;
 import com.palantir.remoting.http.GuavaOptionalAwareContract;
@@ -61,16 +64,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.Response;
 import okhttp3.Route;
-import org.joda.time.Duration;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
-
-    private static final Duration CONNECT_TIMEOUT = Duration.standardMinutes(10);
-    private static final Duration READ_TIMEOUT = Duration.standardMinutes(10);
 
     private final BackoffStrategy backoffStrategy;
     private final ClientConfig config;
@@ -115,8 +115,8 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private Request.Options createRequestOptions() {
         return new Request.Options(
-                (int) config.getConnectTimeout().or(CONNECT_TIMEOUT).getMillis(),
-                (int) config.getReadTimeout().or(READ_TIMEOUT).getMillis());
+                (int) config.getConnectTimeout().getMillis(),
+                (int) config.getReadTimeout().getMillis());
     }
 
     private Encoder createEncoder(ObjectMapper objectMapper) {
@@ -144,9 +144,19 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private feign.Client createOkHttpClient(String userAgent) {
         okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
+
+        // SSL
         if (config.getSslSocketFactory().isPresent()) {
-            client.sslSocketFactory(config.getSslSocketFactory().get());
+            Preconditions.checkArgument(config.getX509TrustManager().isPresent(),
+                    "Internal error: ClientConfig provided SslSocketFactory, but no X509TrustManager");
+            client.sslSocketFactory(config.getSslSocketFactory().get(), config.getX509TrustManager().get());
         }
+
+        // timeouts
+        // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
+        // with its own default otherwise. Feign does not provide a mechanism for write timeouts. We thus need to set
+        // write timeouts here and connect&read timeouts on FeignBuilder.
+        client.writeTimeout(config.getWriteTimeout().getMillis(), TimeUnit.MILLISECONDS);
 
         // Set up Zipkin/Brave tracing
         ClientTracer tracer = ClientTracer.builder()

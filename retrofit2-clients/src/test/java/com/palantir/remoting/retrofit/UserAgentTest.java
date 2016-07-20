@@ -23,9 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Optional;
 import java.io.IOException;
-import javax.net.ssl.SSLSocketFactory;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
 import okhttp3.Request;
@@ -53,11 +51,8 @@ public final class UserAgentTest {
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    private String endpointUri;
-
     @Before
     public void before() {
-        endpointUri = "http://localhost:" + server.getPort();
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
 
@@ -83,12 +78,8 @@ public final class UserAgentTest {
 
     @Test
     public void testUserAgent_defaultHeaderIsSent() throws InterruptedException, IOException {
-        TestService service = RetrofitClientFactory.createProxy(
-                Optional.<SSLSocketFactory>absent(),
-                endpointUri,
-                TestService.class,
-                OkHttpClientOptions.builder().build(),
-                USER_AGENT);
+        TestService service =
+                Retrofit2Client.builder().build(TestService.class, USER_AGENT, "http://localhost:" + server.getPort());
         service.get().execute();
 
         RecordedRequest capturedRequest = server.takeRequest();
@@ -99,11 +90,7 @@ public final class UserAgentTest {
     public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()-/\\.,_\\s]+': !@"));
-
-        OkHttpClientOptions okHttpClientOptions = OkHttpClientOptions.builder().build();
-
-        RetrofitClientFactory.createProxy(Optional.<SSLSocketFactory>absent(), "", String.class, okHttpClientOptions,
-                "!@");
+        Retrofit2Client.builder().build(TestService.class, "!@", "http://localhost:" + server.getPort());
     }
 
     private static Response responseWithCode(Request request, int code) {

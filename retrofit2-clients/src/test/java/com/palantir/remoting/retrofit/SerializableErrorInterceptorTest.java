@@ -23,11 +23,9 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.palantir.remoting.http.errors.SerializableError;
 import java.io.IOException;
-import javax.net.ssl.SSLSocketFactory;
 import javax.xml.ws.WebServiceException;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -67,13 +65,7 @@ public final class SerializableErrorInterceptorTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         when(chain.request()).thenReturn(REQUEST);
-
-        service = RetrofitClientFactory.createProxy(
-                Optional.<SSLSocketFactory>absent(),
-                "http://localhost:" + server.getPort(),
-                TestService.class,
-                OkHttpClientOptions.builder().build(),
-                "user agent");
+        service = Retrofit2Client.builder().build(TestService.class, "agent", "http://localhost:" + server.getPort());
     }
 
     @Test
