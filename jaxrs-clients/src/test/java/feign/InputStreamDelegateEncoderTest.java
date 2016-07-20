@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
+import com.palantir.remoting.jaxrs.JaxRsClient;
 import com.palantir.remoting.jaxrs.TestServer;
 import feign.codec.Encoder;
 import io.dropwizard.Configuration;
@@ -54,7 +55,7 @@ public final class InputStreamDelegateEncoderTest {
         inputStreamDelegateEncoder = new InputStreamDelegateEncoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = com.palantir.remoting.jaxrs.Client.builder()
+        service = JaxRsClient.builder()
                 .build(TestServer.TestService.class, "agent", endpointUri);
     }
 

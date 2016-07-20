@@ -67,19 +67,22 @@ import okhttp3.Response;
 import okhttp3.Route;
 import org.joda.time.Duration;
 
-final class FeignJaxRsClientBuilder extends ClientBuilder {
+public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private static final Duration CONNECT_TIMEOUT = Duration.standardMinutes(10);
     private static final Duration READ_TIMEOUT = Duration.standardMinutes(10);
 
     private final BackoffStrategy backoffStrategy;
+    private final ClientConfig config;
 
     @VisibleForTesting
-    FeignJaxRsClientBuilder(BackoffStrategy backoffStrategy) {
+    FeignJaxRsClientBuilder(ClientConfig config, BackoffStrategy backoffStrategy) {
         this.backoffStrategy = backoffStrategy;
+        this.config = config;
     }
 
-    FeignJaxRsClientBuilder() {
+    FeignJaxRsClientBuilder(ClientConfig config) {
+        this.config = config;
         this.backoffStrategy = NeverRetryingBackoffStrategy.INSTANCE;
     }
 
@@ -95,7 +98,7 @@ final class FeignJaxRsClientBuilder extends ClientBuilder {
                 .client(target.wrapClient(createOkHttpClient(userAgent)))
                 .retryer(target)
                 .options(createRequestOptions())
-                .logger(new Slf4jLogger(Client.class))
+                .logger(new Slf4jLogger(JaxRsClient.class))
                 .logLevel(Logger.Level.BASIC)
                 .requestInterceptor(UserAgentInterceptor.of(userAgent))
                 .target(target);
@@ -112,8 +115,8 @@ final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private Request.Options createRequestOptions() {
         return new Request.Options(
-                (int) getThisConnectTimeout().or(CONNECT_TIMEOUT).getMillis(),
-                (int) getThisReadTimeout().or(READ_TIMEOUT).getMillis());
+                (int) config.getConnectTimeout().or(CONNECT_TIMEOUT).getMillis(),
+                (int) config.getReadTimeout().or(READ_TIMEOUT).getMillis());
     }
 
     private Encoder createEncoder(ObjectMapper objectMapper) {
@@ -141,8 +144,8 @@ final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private feign.Client createOkHttpClient(String userAgent) {
         okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
-        if (getThisSslSocketFactory().isPresent()) {
-            client.sslSocketFactory(getThisSslSocketFactory().get());
+        if (config.getSslSocketFactory().isPresent()) {
+            client.sslSocketFactory(config.getSslSocketFactory().get());
         }
 
         // Set up Zipkin/Brave tracing
@@ -161,8 +164,8 @@ final class FeignJaxRsClientBuilder extends ClientBuilder {
         client.addInterceptor(braveInterceptor);
 
         // Set up HTTP proxy configuration
-        if (getProxyConfiguration().isPresent()) {
-            ProxyConfiguration proxy = getProxyConfiguration().get();
+        if (config.getProxyConfiguration().isPresent()) {
+            ProxyConfiguration proxy = config.getProxyConfiguration().get();
             client.proxy(proxy.toProxy());
 
             if (proxy.credentials().isPresent()) {

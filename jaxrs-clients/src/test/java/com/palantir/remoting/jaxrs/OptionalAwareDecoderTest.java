@@ -46,7 +46,7 @@ public final class OptionalAwareDecoderTest {
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = com.palantir.remoting.jaxrs.Client.builder()
+        service = JaxRsClient.builder()
                 .build(TestServer.TestService.class, "agent", endpointUri);
     }
 

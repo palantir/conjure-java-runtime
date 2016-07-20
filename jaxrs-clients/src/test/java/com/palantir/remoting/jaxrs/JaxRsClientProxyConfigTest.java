@@ -28,7 +28,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class ClientProxyConfigTest {
+public final class JaxRsClientProxyConfigTest {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -40,11 +40,10 @@ public final class ClientProxyConfigTest {
         server.enqueue(new MockResponse().setBody("\"server\""));
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        FakeoInterface directService = Client.builder()
+        FakeoInterface directService = JaxRsClient.builder()
                 .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
         ProxyConfiguration proxyConfiguration = ProxyConfiguration.of("localhost:" + proxyServer.getPort());
-        FakeoInterface proxiedService = Client.builder()
-                .proxy(proxyConfiguration)
+        FakeoInterface proxiedService = JaxRsClient.builder(ClientConfig.empty().proxy(proxyConfiguration))
                 .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
 
         assertThat(directService.blah()).isEqualTo("server");
@@ -61,8 +60,7 @@ public final class ClientProxyConfigTest {
         ProxyConfiguration authProxyConfig = ProxyConfiguration.of(
                 "localhost:" + proxyServer.getPort(),
                 BasicCredentials.of("fakeUser", "fakePassword"));
-        FakeoInterface authClient = Client.builder()
-                .proxy(authProxyConfig)
+        FakeoInterface authClient = JaxRsClient.builder(ClientConfig.empty().proxy(authProxyConfig))
                 .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
 
         assertThat(authClient.blah()).isEqualTo("proxyServer");

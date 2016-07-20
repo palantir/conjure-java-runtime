@@ -48,7 +48,7 @@ public final class QueryMapUsingServerWithoutContextTests {
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = Client.builder().build(QueryMapTestServer.TestClientService.class, "agent", endpointUri);
+        service = JaxRsClient.builder().build(QueryMapTestServer.TestClientService.class, "agent", endpointUri);
     }
 
     @Test

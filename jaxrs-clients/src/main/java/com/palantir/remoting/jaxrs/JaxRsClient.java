@@ -17,14 +17,13 @@
 package com.palantir.remoting.jaxrs;
 
 import com.palantir.config.service.ServiceConfiguration;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Static factory methods for producing creating HTTP proxies.
  */
-public final class Client {
+public final class JaxRsClient {
 
-    private Client() {}
+    private JaxRsClient() {}
 
     /**
      * Creates a {@link T T client} for the given service configuration. The HTTP {@code User-Agent} header of every
@@ -32,20 +31,9 @@ public final class Client {
      * ServiceName (Version)}, e.g. MyServer (1.2.3) For services that run multiple instances, recommended user agents
      * are of the form: {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3).
      */
-    public static <T> T create(Class<T> serviceClass, String userAgent, ServiceConfiguration config) {
-        ClientBuilder client = builder().ssl(config.security());
-        // TODO(rfink) Is there a better API for this?
-        if (config.connectTimeout().isPresent()) {
-            client.connectTimeout(config.connectTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
-
-        }
-        if (config.readTimeout().isPresent()) {
-            client.readTimeout(config.readTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
-        }
-        if (config.proxyConfiguration().isPresent()) {
-            client.proxy(config.proxyConfiguration().get());
-        }
-        return client.build(serviceClass, userAgent, config.uris());
+    public static <T> T create(Class<T> serviceClass, String userAgent, ServiceConfiguration serviceConfig) {
+        ClientConfig config = ClientConfig.fromServiceConfig(serviceConfig);
+        return new FeignJaxRsClientBuilder(config).build(serviceClass, userAgent, serviceConfig.uris());
     }
 
     /**
@@ -53,6 +41,11 @@ public final class Client {
      * round-robin fail-over.
      */
     public static ClientBuilder builder() {
-        return new FeignJaxRsClientBuilder();
+        return new FeignJaxRsClientBuilder(ClientConfig.empty());
+    }
+
+    // TODO
+    public static ClientBuilder builder(ClientConfig config) {
+        return new FeignJaxRsClientBuilder(config);
     }
 }

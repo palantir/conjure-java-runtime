@@ -37,7 +37,7 @@ import org.junit.Test;
 import org.mockito.InOrder;
 
 
-public final class ClientFailoverTest {
+public final class JaxRsClientFailoverTest {
 
     @Rule
     public final MockWebServer server1 = new MockWebServer();
@@ -49,16 +49,16 @@ public final class ClientFailoverTest {
         server1.shutdown();
         server2.enqueue(new MockResponse().setBody("\"foo\""));
 
-        FakeoInterface proxy = Client.builder().build(FakeoInterface.class, "agent",
-                        ImmutableList.of(
-                                "http://localhost:" + server1.getPort(),
-                                "http://localhost:" + server2.getPort()));
+        FakeoInterface proxy = JaxRsClient.builder().build(FakeoInterface.class, "agent",
+                ImmutableList.of(
+                        "http://localhost:" + server1.getPort(),
+                        "http://localhost:" + server2.getPort()));
         assertThat(proxy.blah(), is("foo"));
     }
 
     @Test
     public void testConsecutiveCalls() throws Exception {
-        FakeoInterface proxy = Client.builder().build(FakeoInterface.class, "agent",
+        FakeoInterface proxy = JaxRsClient.builder().build(FakeoInterface.class, "agent",
                 ImmutableList.of(
                         "http://localhost:" + server1.getPort(),
                         "http://localhost:" + server2.getPort()));
@@ -89,9 +89,10 @@ public final class ClientFailoverTest {
         BackoffStrategy backoffStrategy = mock(BackoffStrategy.class);
         when(backoffStrategy.backoff(anyInt())).thenReturn(true, false, true, false);
 
-        FakeoInterface proxy = new FeignJaxRsClientBuilder(backoffStrategy).build(FakeoInterface.class, "agent",
-                ImmutableList.of("http://localhost:" + server1.getPort(),
-                        "http://localhost:" + server2.getPort()));
+        FakeoInterface proxy = new FeignJaxRsClientBuilder(ClientConfig.empty(), backoffStrategy)
+                .build(FakeoInterface.class, "agent",
+                        ImmutableList.of("http://localhost:" + server1.getPort(),
+                                "http://localhost:" + server2.getPort()));
         try {
             proxy.blah();
             fail();

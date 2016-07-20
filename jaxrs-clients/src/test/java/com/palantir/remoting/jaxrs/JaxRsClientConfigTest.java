@@ -51,7 +51,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 
-public final class ClientConfigTest {
+public final class JaxRsClientConfigTest {
     @ClassRule
     public static final DropwizardAppRule<Configuration> ECHO_SERVER =
             new DropwizardAppRule<>(TestEchoServer.class, "src/test/resources/test-server-ssl.yml");
@@ -90,7 +90,7 @@ public final class ClientConfigTest {
     @Test
     public void testSslSocketFactory_cannotConnectWhenSocketFactoryIsNotSet() throws Exception {
         String endpointUri = "https://localhost:" + ECHO_SERVER.getLocalPort();
-        TestEchoService service = Client.builder().build(TestEchoService.class, "agent", endpointUri);
+        TestEchoService service = JaxRsClient.builder().build(TestEchoService.class, "agent", endpointUri);
 
         try {
             service.echo("foo");
@@ -155,9 +155,10 @@ public final class ClientConfigTest {
     private static TestEchoService createProxy(int port, String name) {
         String endpointUri = "https://localhost:" + port;
         SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
-        return Client.builder()
-                .ssl(SslSocketFactories.createSslSocketFactory(sslConfig),
-                        (X509TrustManager) SslSocketFactories.createTrustManagers(sslConfig)[0])
+        return JaxRsClient.builder(
+                ClientConfig.empty()
+                        .ssl(SslSocketFactories.createSslSocketFactory(sslConfig),
+                                (X509TrustManager) SslSocketFactories.createTrustManagers(sslConfig)[0]))
                 .build(TestEchoService.class, name, endpointUri);
     }
 

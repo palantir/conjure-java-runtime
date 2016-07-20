@@ -24,6 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
+import com.palantir.remoting.jaxrs.JaxRsClient;
 import com.palantir.remoting.jaxrs.TestServer;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
@@ -52,7 +53,7 @@ public final class InputStreamDelegateDecoderTest {
         inputStreamDelegateDecoder = new InputStreamDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = com.palantir.remoting.jaxrs.Client.builder()
+        service = JaxRsClient.builder()
                 .build(TestServer.TestService.class, "agent", endpointUri);
     }
 
