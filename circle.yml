@@ -3,14 +3,7 @@ machine:
     version: oraclejdk7
   environment:
     TERM: dumb
-    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2048m -XX:+HeapDumpOnOutOfMemoryError"'
-
-general:
-  artifacts:
-    - error-handling/build/libs
-    - http-clients/build/libs
-    - http-servers/build/libs
-    - ssl-config/build/libs
+    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3400m -XX:+HeapDumpOnOutOfMemoryError"'
 
 dependencies:
   override:
@@ -18,7 +11,7 @@ dependencies:
 
 test:
   override:
-    - ./gradlew build testBouncyCastle testSun
+    - ./gradlew --daemon --parallel build testBouncyCastle testSun
 
 deployment:
   release:
