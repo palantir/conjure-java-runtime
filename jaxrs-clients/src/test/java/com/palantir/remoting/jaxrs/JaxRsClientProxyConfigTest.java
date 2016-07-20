@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.config.service.BasicCredentials;
 import com.palantir.config.service.ProxyConfiguration;
+import com.palantir.remoting.clients.ClientConfig;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import okhttp3.mockwebserver.MockResponse;

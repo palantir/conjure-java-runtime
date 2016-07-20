@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.jaxrs;
+package com.palantir.remoting.retrofit;
 
 import com.palantir.config.service.ServiceConfiguration;
-import com.palantir.remoting.clients.ClientBuilder;
-import com.palantir.remoting.clients.ClientConfig;
 
 /**
  * Static factory methods for producing creating JAX-RS HTTP proxies.
  */
-public final class JaxRsClient {
+public final class Retrofit2Client {
 
-    private JaxRsClient() {}
+    private Retrofit2Client() {}
 
     /**
      * Creates a {@link T T client} for the given service configuration. The HTTP {@code User-Agent} header of every

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.jaxrs;
+package com.palantir.remoting.clients;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -35,27 +35,27 @@ public final class ClientConfig {
     private Optional<Duration> thisReadTimeout = Optional.absent();
     private Optional<ProxyConfiguration> thisProxyConfiguration = Optional.absent();
 
-    Optional<SSLSocketFactory> getSslSocketFactory() {
+    public Optional<SSLSocketFactory> getSslSocketFactory() {
         return thisSslSocketFactory;
     }
 
-    Optional<Duration> getConnectTimeout() {
+    public Optional<Duration> getConnectTimeout() {
         return thisConnectTimeout;
     }
 
-    Optional<Duration> getReadTimeout() {
+    public Optional<Duration> getReadTimeout() {
         return thisReadTimeout;
     }
 
-    Optional<ProxyConfiguration> getProxyConfiguration() {
+    public Optional<ProxyConfiguration> getProxyConfiguration() {
         return thisProxyConfiguration;
     }
 
-    static ClientConfig empty() {
+    public static ClientConfig empty() {
         return new ClientConfig();
     }
 
-    static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
+    public static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
         ClientConfig jaxRsConfig = new ClientConfig();
 
         // ssl
@@ -91,6 +91,7 @@ public final class ClientConfig {
         thisTrustManager = Optional.of(trustManager);
         return this;
     }
+
     public ClientConfig connectTimeout(long connectTimeout, TimeUnit unit) {
         Preconditions.checkArgument(!thisConnectTimeout.isPresent(), "connectTimeout already set");
         thisConnectTimeout = Optional.of(Duration.millis(TimeUnit.MILLISECONDS.convert(connectTimeout, unit)));

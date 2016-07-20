@@ -31,6 +31,8 @@ import com.google.common.net.InetAddresses;
 import com.palantir.config.service.BasicCredentials;
 import com.palantir.config.service.ProxyConfiguration;
 import com.palantir.ext.brave.SlfLoggingSpanCollector;
+import com.palantir.remoting.clients.ClientBuilder;
+import com.palantir.remoting.clients.ClientConfig;
 import com.palantir.remoting.http.BackoffStrategy;
 import com.palantir.remoting.http.FailoverFeignTarget;
 import com.palantir.remoting.http.GuavaOptionalAwareContract;
