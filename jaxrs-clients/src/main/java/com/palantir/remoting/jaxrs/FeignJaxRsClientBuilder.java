@@ -73,15 +73,15 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     private static final Duration READ_TIMEOUT = Duration.standardMinutes(10);
 
     private final BackoffStrategy backoffStrategy;
-    private final JaxRsClientConfig config;
+    private final ClientConfig config;
 
     @VisibleForTesting
-    FeignJaxRsClientBuilder(JaxRsClientConfig config, BackoffStrategy backoffStrategy) {
+    FeignJaxRsClientBuilder(ClientConfig config, BackoffStrategy backoffStrategy) {
         this.backoffStrategy = backoffStrategy;
         this.config = config;
     }
 
-    FeignJaxRsClientBuilder(JaxRsClientConfig config) {
+    FeignJaxRsClientBuilder(ClientConfig config) {
         this.config = config;
         this.backoffStrategy = NeverRetryingBackoffStrategy.INSTANCE;
     }

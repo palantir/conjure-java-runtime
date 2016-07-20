@@ -6,6 +6,7 @@ dependencies {
     compile project(':feign-config')
     compile project(':ext:brave-extensions')
     compile project(':service-config')
+    compile project(':http-clients-api')
 
     compile libs.brave.okhttp
     compile libs.feign.jackson

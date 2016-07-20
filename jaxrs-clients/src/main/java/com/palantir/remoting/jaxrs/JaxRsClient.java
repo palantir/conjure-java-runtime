@@ -32,7 +32,7 @@ public final class JaxRsClient {
      * are of the form: {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3).
      */
     public static <T> T create(Class<T> serviceClass, String userAgent, ServiceConfiguration serviceConfig) {
-        JaxRsClientConfig config = JaxRsClientConfig.fromServiceConfig(serviceConfig);
+        ClientConfig config = ClientConfig.fromServiceConfig(serviceConfig);
         return new FeignJaxRsClientBuilder(config).build(serviceClass, userAgent, serviceConfig.uris());
     }
 
@@ -41,11 +41,11 @@ public final class JaxRsClient {
      * round-robin fail-over.
      */
     public static ClientBuilder builder() {
-        return new FeignJaxRsClientBuilder(JaxRsClientConfig.empty());
+        return new FeignJaxRsClientBuilder(ClientConfig.empty());
     }
 
     // TODO
-    public static ClientBuilder builder(JaxRsClientConfig config) {
+    public static ClientBuilder builder(ClientConfig config) {
         return new FeignJaxRsClientBuilder(config);
     }
 }

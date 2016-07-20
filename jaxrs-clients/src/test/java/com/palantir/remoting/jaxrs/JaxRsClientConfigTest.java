@@ -156,7 +156,7 @@ public final class JaxRsClientConfigTest {
         String endpointUri = "https://localhost:" + port;
         SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
         return JaxRsClient.builder(
-                JaxRsClientConfig.empty()
+                ClientConfig.empty()
                         .ssl(SslSocketFactories.createSslSocketFactory(sslConfig),
                                 (X509TrustManager) SslSocketFactories.createTrustManagers(sslConfig)[0]))
                 .build(TestEchoService.class, name, endpointUri);

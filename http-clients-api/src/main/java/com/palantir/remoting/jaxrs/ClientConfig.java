@@ -28,7 +28,7 @@ import javax.net.ssl.X509TrustManager;
 import org.joda.time.Duration;
 
 // TODO(rfink) Is there anything JaxRs-specific in here? Can we reuse the same configuration for Retrofit2 clients?
-public final class JaxRsClientConfig {
+public final class ClientConfig {
     private Optional<SSLSocketFactory> thisSslSocketFactory = Optional.absent();
     private Optional<X509TrustManager> thisTrustManager = Optional.absent();
     private Optional<Duration> thisConnectTimeout = Optional.absent();
@@ -51,12 +51,12 @@ public final class JaxRsClientConfig {
         return thisProxyConfiguration;
     }
 
-    static JaxRsClientConfig empty() {
-        return new JaxRsClientConfig();
+    static ClientConfig empty() {
+        return new ClientConfig();
     }
 
-    static JaxRsClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
-        JaxRsClientConfig jaxRsConfig = new JaxRsClientConfig();
+    static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
+        ClientConfig jaxRsConfig = new ClientConfig();
 
         // ssl
         jaxRsConfig.ssl(serviceConfig.security());
@@ -77,7 +77,7 @@ public final class JaxRsClientConfig {
         return jaxRsConfig;
     }
 
-    public JaxRsClientConfig ssl(Optional<SslConfiguration> config) {
+    public ClientConfig ssl(Optional<SslConfiguration> config) {
         if (config.isPresent()) {
             ssl(SslSocketFactories.createSslSocketFactory(config.get()),
                     (X509TrustManager) SslSocketFactories.createTrustManagers(config.get())[0]);
@@ -85,25 +85,25 @@ public final class JaxRsClientConfig {
         return this;
     }
 
-    public JaxRsClientConfig ssl(SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
+    public ClientConfig ssl(SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
         verifySslConfigurationUnset();
         thisSslSocketFactory = Optional.of(sslSocketFactory);
         thisTrustManager = Optional.of(trustManager);
         return this;
     }
-    public JaxRsClientConfig connectTimeout(long connectTimeout, TimeUnit unit) {
+    public ClientConfig connectTimeout(long connectTimeout, TimeUnit unit) {
         Preconditions.checkArgument(!thisConnectTimeout.isPresent(), "connectTimeout already set");
         thisConnectTimeout = Optional.of(Duration.millis(TimeUnit.MILLISECONDS.convert(connectTimeout, unit)));
         return this;
     }
 
-    public JaxRsClientConfig readTimeout(long readTimeout, TimeUnit unit) {
+    public ClientConfig readTimeout(long readTimeout, TimeUnit unit) {
         Preconditions.checkArgument(!thisReadTimeout.isPresent(), "readTimeout already set");
         thisReadTimeout = Optional.of(Duration.millis(TimeUnit.MILLISECONDS.convert(readTimeout, unit)));
         return this;
     }
 
-    public JaxRsClientConfig proxy(ProxyConfiguration proxyConfiguration) {
+    public ClientConfig proxy(ProxyConfiguration proxyConfiguration) {
         Preconditions.checkArgument(!thisProxyConfiguration.isPresent(), "proxy already set");
         thisProxyConfiguration = Optional.of(proxyConfiguration);
         return this;
