@@ -17,9 +17,11 @@
 package com.palantir.remoting.retrofit;
 
 import com.palantir.config.service.ServiceConfiguration;
+import com.palantir.remoting.clients.ClientBuilder;
+import com.palantir.remoting.clients.ClientConfig;
 
 /**
- * Static factory methods for producing creating JAX-RS HTTP proxies.
+ * Static factory methods for producing creating Retrofit2 HTTP proxies.
  */
 public final class Retrofit2Client {
 
@@ -33,22 +35,22 @@ public final class Retrofit2Client {
      */
     public static <T> T create(Class<T> serviceClass, String userAgent, ServiceConfiguration serviceConfig) {
         ClientConfig config = ClientConfig.fromServiceConfig(serviceConfig);
-        return new FeignJaxRsClientBuilder(config).build(serviceClass, userAgent, serviceConfig.uris());
+        return new Retrofit2ClientBuilder(config).build(serviceClass, userAgent, serviceConfig.uris());
     }
 
     /**
-     * Creates a builder for a clients for a JAX-RS-specified service that attempts to connect to the given URIs with
+     * Creates a builder for a clients for a Retrofit2-specified service that attempts to connect to the given URIs with
      * round-robin fail-over.
      */
     public static ClientBuilder builder() {
-        return new FeignJaxRsClientBuilder(ClientConfig.empty());
+        return new Retrofit2ClientBuilder(ClientConfig.empty());
     }
 
     /**
-     * Creates a builder for a clients for a JAX-RS-specified service that attempts to connect to the given URIs with
+     * Creates a builder for a clients for a Retrofit2-specified service that attempts to connect to the given URIs with
      * round-robin fail-over, based on the given client configuration.
      */
     public static ClientBuilder builder(ClientConfig config) {
-        return new FeignJaxRsClientBuilder(config);
+        return new Retrofit2ClientBuilder(config);
     }
 }

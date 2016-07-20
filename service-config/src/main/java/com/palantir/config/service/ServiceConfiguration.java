@@ -51,6 +51,11 @@ public abstract class ServiceConfiguration {
     public abstract Optional<Duration> readTimeout();
 
     /**
+     * Write timeout for requests.
+     */
+    public abstract Optional<Duration> writeTimeout();
+
+    /**
      * A list of service URIs.
      */
     public abstract List<String> uris();
