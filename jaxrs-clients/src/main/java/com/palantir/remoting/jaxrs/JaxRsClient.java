@@ -39,7 +39,7 @@ public final class JaxRsClient {
     }
 
     /**
-     * Creates a builder for a clients for a JAX-RS-specified service that attempts to connect to the given URIs with
+     * Creates a builder for clients for a JAX-RS-specified service that attempts to connect to the given URIs with
      * round-robin fail-over.
      */
     public static ClientBuilder builder() {
@@ -47,7 +47,7 @@ public final class JaxRsClient {
     }
 
     /**
-     * Creates a builder for a clients for a JAX-RS-specified service that attempts to connect to the given URIs with
+     * Creates a builder for clients for a JAX-RS-specified service that attempts to connect to the given URIs with
      * round-robin fail-over, based on the given client configuration.
      */
     public static ClientBuilder builder(ClientConfig config) {
