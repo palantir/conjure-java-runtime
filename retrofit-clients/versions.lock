@@ -1,0 +1,142 @@
+{
+    "compileClasspath": {
+        "com.fasterxml.jackson.core:jackson-annotations": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-core": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting:ssl-config"
+            ]
+        },
+        "com.google.code.findbugs:jsr305": {
+            "locked": "3.0.0",
+            "transitive": [
+                "com.palantir.remoting:error-handling"
+            ]
+        },
+        "com.google.code.gson:gson": {
+            "locked": "2.3.1",
+            "transitive": [
+                "com.squareup.retrofit:retrofit"
+            ]
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0",
+            "transitive": [
+                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting:ssl-config"
+            ]
+        },
+        "com.palantir.remoting:error-handling": {
+            "project": true
+        },
+        "com.palantir.remoting:ssl-config": {
+            "project": true
+        },
+        "com.squareup.okhttp:okhttp": {
+            "locked": "2.7.5"
+        },
+        "com.squareup.okio:okio": {
+            "locked": "1.6.0",
+            "transitive": [
+                "com.squareup.okhttp:okhttp"
+            ]
+        },
+        "com.squareup.retrofit:retrofit": {
+            "locked": "1.9.0"
+        },
+        "javax.ws.rs:javax.ws.rs-api": {
+            "locked": "2.0.1",
+            "transitive": [
+                "com.palantir.remoting:error-handling"
+            ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.remoting:error-handling"
+            ]
+        }
+    },
+    "runtime": {
+        "com.fasterxml.jackson.core:jackson-annotations": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-core": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting:ssl-config"
+            ]
+        },
+        "com.google.code.findbugs:jsr305": {
+            "locked": "3.0.0",
+            "transitive": [
+                "com.palantir.remoting:error-handling"
+            ]
+        },
+        "com.google.code.gson:gson": {
+            "locked": "2.3.1",
+            "transitive": [
+                "com.squareup.retrofit:retrofit"
+            ]
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0",
+            "transitive": [
+                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting:ssl-config"
+            ]
+        },
+        "com.palantir.remoting:error-handling": {
+            "project": true
+        },
+        "com.palantir.remoting:ssl-config": {
+            "project": true
+        },
+        "com.squareup.okhttp:okhttp": {
+            "locked": "2.7.5"
+        },
+        "com.squareup.okio:okio": {
+            "locked": "1.6.0",
+            "transitive": [
+                "com.squareup.okhttp:okhttp"
+            ]
+        },
+        "com.squareup.retrofit:retrofit": {
+            "locked": "1.9.0"
+        },
+        "javax.ws.rs:javax.ws.rs-api": {
+            "locked": "2.0.1",
+            "transitive": [
+                "com.palantir.remoting:error-handling"
+            ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.remoting:error-handling"
+            ]
+        }
+    }
+}

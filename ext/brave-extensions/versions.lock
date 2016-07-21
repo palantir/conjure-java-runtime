@@ -1,0 +1,30 @@
+{
+    "compileClasspath": {
+        "io.zipkin.brave:brave-core": {
+            "locked": "3.9.0"
+        },
+        "io.zipkin.java:zipkin": {
+            "locked": "1.0.0",
+            "transitive": [
+                "io.zipkin.brave:brave-core"
+            ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12"
+        }
+    },
+    "runtime": {
+        "io.zipkin.brave:brave-core": {
+            "locked": "3.9.0"
+        },
+        "io.zipkin.java:zipkin": {
+            "locked": "1.0.0",
+            "transitive": [
+                "io.zipkin.brave:brave-core"
+            ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12"
+        }
+    }
+}
