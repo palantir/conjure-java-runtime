@@ -51,4 +51,9 @@ subprojects {
     if (System.env.CIRCLE_TEST_REPORTS) {
         test.reports.junitXml.destination = new File(System.env.CIRCLE_TEST_REPORTS, it.getName())
     }
+
+    test {
+        minHeapSize = "512m"
+        maxHeapSize = "512m"
+    }
 }
