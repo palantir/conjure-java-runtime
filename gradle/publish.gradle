@@ -1,21 +1,8 @@
-apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
-
-task sourceJar(type: Jar) {
-    from sourceSets.main.allSource
-    classifier 'sources'
-}
-
-publishing {
-    publications {
-        bintray(MavenPublication) {
-            from components.java
-            artifact(sourceJar) {
-                classifier 'sources'
-            }
-        }
-    }
-}
+apply plugin: 'nebula.maven-base-publish'
+apply plugin: 'nebula.maven-resolved-dependencies'
+apply plugin: 'nebula.javadoc-jar'
+apply plugin: 'nebula.source-jar'
 
 bintray {
     user = System.env.BINTRAY_USER
@@ -26,7 +13,7 @@ bintray {
         name = 'http-remoting'
         userOrg = 'palantir'
         licenses = ['Apache-2.0']
-        publications = ['bintray']
+        publications = ['nebula']
     }
 }
 

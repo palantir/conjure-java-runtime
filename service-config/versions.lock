@@ -1,0 +1,130 @@
+{
+    "compileClasspath": {
+        "com.fasterxml.jackson.core:jackson-annotations": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind",
+                "io.dropwizard:dropwizard-util"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-core": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting:ssl-config",
+                "com.palantir.tokens:auth-tokens"
+            ]
+        },
+        "com.google.code.findbugs:jsr305": {
+            "locked": "3.0.0",
+            "transitive": [
+                "io.dropwizard:dropwizard-util"
+            ]
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0",
+            "transitive": [
+                "com.palantir.remoting:ssl-config",
+                "com.palantir.tokens:auth-tokens",
+                "io.dropwizard:dropwizard-util"
+            ]
+        },
+        "com.palantir.remoting:ssl-config": {
+            "project": true
+        },
+        "com.palantir.tokens:auth-tokens": {
+            "locked": "0.2.3"
+        },
+        "io.dropwizard:dropwizard-util": {
+            "locked": "0.8.2"
+        },
+        "joda-time:joda-time": {
+            "locked": "2.7",
+            "transitive": [
+                "io.dropwizard:dropwizard-util"
+            ]
+        },
+        "org.slf4j:jcl-over-slf4j": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.tokens:auth-tokens"
+            ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.tokens:auth-tokens",
+                "org.slf4j:jcl-over-slf4j"
+            ]
+        }
+    },
+    "runtime": {
+        "com.fasterxml.jackson.core:jackson-annotations": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind",
+                "io.dropwizard:dropwizard-util"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-core": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting:ssl-config",
+                "com.palantir.tokens:auth-tokens"
+            ]
+        },
+        "com.google.code.findbugs:jsr305": {
+            "locked": "3.0.0",
+            "transitive": [
+                "io.dropwizard:dropwizard-util"
+            ]
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0",
+            "transitive": [
+                "com.palantir.remoting:ssl-config",
+                "com.palantir.tokens:auth-tokens",
+                "io.dropwizard:dropwizard-util"
+            ]
+        },
+        "com.palantir.remoting:ssl-config": {
+            "project": true
+        },
+        "com.palantir.tokens:auth-tokens": {
+            "locked": "0.2.3"
+        },
+        "io.dropwizard:dropwizard-util": {
+            "locked": "0.8.2"
+        },
+        "joda-time:joda-time": {
+            "locked": "2.7",
+            "transitive": [
+                "io.dropwizard:dropwizard-util"
+            ]
+        },
+        "org.slf4j:jcl-over-slf4j": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.tokens:auth-tokens"
+            ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.tokens:auth-tokens",
+                "org.slf4j:jcl-over-slf4j"
+            ]
+        }
+    }
+}

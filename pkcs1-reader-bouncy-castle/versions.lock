@@ -1,0 +1,78 @@
+{
+    "compileClasspath": {
+        "com.fasterxml.jackson.core:jackson-annotations": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-core": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting:ssl-config"
+            ]
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0",
+            "transitive": [
+                "com.palantir.remoting:ssl-config"
+            ]
+        },
+        "com.palantir.remoting:ssl-config": {
+            "project": true
+        },
+        "org.bouncycastle:bcpkix-jdk15on": {
+            "locked": "1.54"
+        },
+        "org.bouncycastle:bcprov-jdk15on": {
+            "locked": "1.54",
+            "transitive": [
+                "org.bouncycastle:bcpkix-jdk15on"
+            ]
+        }
+    },
+    "runtime": {
+        "com.fasterxml.jackson.core:jackson-annotations": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-core": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting:ssl-config"
+            ]
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0",
+            "transitive": [
+                "com.palantir.remoting:ssl-config"
+            ]
+        },
+        "com.palantir.remoting:ssl-config": {
+            "project": true
+        },
+        "org.bouncycastle:bcpkix-jdk15on": {
+            "locked": "1.54"
+        },
+        "org.bouncycastle:bcprov-jdk15on": {
+            "locked": "1.54",
+            "transitive": [
+                "org.bouncycastle:bcpkix-jdk15on"
+            ]
+        }
+    }
+}

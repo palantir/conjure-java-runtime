@@ -1,10 +1,10 @@
-apply from: "${rootDir}/gradle/libs.gradle"
-
 dependencies {
-    testCompile project(':ext:feign-okhttp3')
-    testCompile project(':http-clients')
-    testCompile 'com.netflix.feign:feign-okhttp:8.10.0'
-    testCompile libs.hamcrest
-    testCompile libs.junit
-    testCompile libs.mockwebserver
+    testCompile project(":ext:feign-okhttp3")
+    testCompile project(":http-clients")
+    testCompile "com.netflix.feign:feign-okhttp:8.10.0"
+
+    testCompile "com.squareup.okhttp3:mockwebserver"
+    testCompile "io.dropwizard:dropwizard-testing"
+    testCompile "org.hamcrest:hamcrest-all"
+    testCompile "junit:junit"
 }
