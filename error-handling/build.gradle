@@ -1,18 +1,17 @@
 apply plugin: 'org.inferred.processors'
 
-apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
-    compile libs.guava
-    compile libs.jackson.databind
-    compile libs.jsr305
-    compile libs.slf4j
-    compile libs.wsRsApi
+    compile "com.fasterxml.jackson.core:jackson-databind"
+    compile "com.google.code.findbugs:jsr305"
+    compile "com.google.guava:guava"
+    compile "javax.ws.rs:javax.ws.rs-api"
+    compile "org.slf4j:slf4j-api"
 
-    testCompile libs.dropwizard.testing
-    testCompile libs.hamcrest
-    testCompile libs.junit
+    testCompile "io.dropwizard:dropwizard-testing"
+    testCompile "org.hamcrest:hamcrest-all"
+    testCompile "junit:junit"
 
-    processor libs.immutables
+    processor "org.immutables:value"
 }

@@ -1,20 +1,21 @@
-apply plugin: 'org.inferred.processors'
+apply plugin: "org.inferred.processors"
 
-apply from: "$rootDir/gradle/libs.gradle"
 apply from: "$rootDir/gradle/publish.gradle"
 
 dependencies {
-    compile project(':ssl-config')
-    compile libs.tokens
-    compile libs.dropwizard.utils
+    compile project(":ssl-config")
 
-    testCompile libs.dropwizard.testing
-    testCompile (libs.feign.jaxrs) {
+    compile "com.palantir.tokens:auth-tokens"
+    compile "io.dropwizard:dropwizard-util"
+
+    testCompile project(":ext:feign-okhttp3")
+
+    testCompile("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
-        exclude group: 'javax.ws.rs', module: 'jsr311-api'
+        exclude group: "javax.ws.rs", module: "jsr311-api"
     }
-    testCompile project(':ext:feign-okhttp3')
-    testCompile libs.junit
+    testCompile "io.dropwizard:dropwizard-testing"
+    testCompile "junit:junit"
 
-    processor libs.immutables
+    processor "org.immutables:value"
 }

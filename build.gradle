@@ -4,8 +4,11 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.palantir:gradle-baseline-java:${baselineVersion}"
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:${bintrayPlugin}"
+        classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:4.2.0'
+        classpath 'com.netflix.nebula:nebula-dependency-recommender:3.1.0'
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:4.4.4'
+        classpath "com.palantir:gradle-baseline-java:${baselineVersion}"
     }
 }
 
@@ -25,6 +28,11 @@ repositories {
 allprojects {
     version gitVersion()
     group 'com.palantir.remoting'
+
+    apply plugin: 'nebula.dependency-recommender'
+    dependencyRecommendations {
+        propertiesFile file: project.rootProject.file('versions.props')
+    }
 }
 
 subprojects {
@@ -39,6 +47,24 @@ subprojects {
     }
 
     sourceCompatibility = 1.7
+
+    apply plugin: 'nebula.dependency-lock'
+    dependencyLock {
+        includeTransitives = true
+        lockFile = 'versions.lock'
+        configurationNames = ['runtime', 'compileClasspath']
+    }
+    task verifyDependencyLocksAreCurrent << {
+        def expectedDependencies = tasks.saveLock.getOutputLock()
+        def actualDependencies = tasks.saveLock.getGeneratedLock()
+        def digester = java.security.MessageDigest.getInstance('SHA')
+        logger.info("Verifying integrity of dependency locks: {} vs {}", expectedDependencies, actualDependencies)
+        if (digester.digest(expectedDependencies.bytes) != digester.digest(actualDependencies.bytes)) {
+            throw new GradleException("The dependencies of project " + project.name + " do not match the expected "
+                + "dependencies recorded in " + expectedDependencies + ". "
+                + "Run `./gradlew generateLock saveLock` and commit the updated version.lock files")
+        }
+    }
 
     tasks.withType(Javadoc) {
         // suppress Javadoc doclint warnings in Java 8+

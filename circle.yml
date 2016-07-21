@@ -8,6 +8,8 @@ machine:
 dependencies:
   override:
     - ./gradlew resolveConfigurations
+    - ./gradlew --stacktrace generateLock verifyDependencyLocksAreCurrent
+    - ./gradlew testClasses
 
 test:
   override:

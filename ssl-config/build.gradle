@@ -1,23 +1,22 @@
 apply plugin: 'org.inferred.processors'
 
-apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
-    compile libs.guava
-    compile libs.jackson.databind
+    compile "com.fasterxml.jackson.core:jackson-databind"
+    compile "com.google.guava:guava"
 
-    testCompile libs.dropwizard.core
-    testCompile libs.dropwizard.testing
-    testCompile (libs.feign.jaxrs) {
-        // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
-        exclude group: 'javax.ws.rs', module: 'jsr311-api'
-    }
     testCompile project(':ext:feign-okhttp3')
-    testCompile libs.hamcrest
-    testCompile libs.junit
+    testCompile("com.netflix.feign:feign-jaxrs") {
+        // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
+        exclude group: "javax.ws.rs", module: "jsr311-api"
+    }
+    testCompile "org.hamcrest:hamcrest-all"
+    testCompile "io.dropwizard:dropwizard-core"
+    testCompile "io.dropwizard:dropwizard-testing"
+    testCompile "junit:junit"
 
-    processor libs.immutables
+    processor "org.immutables:value"
 }
 
 task generateCerts(type:Exec) {

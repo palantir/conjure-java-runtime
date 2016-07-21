@@ -1,11 +1,9 @@
-apply from: "${rootDir}/gradle/libs.gradle"
-
 dependencies {
     testCompile project(':jaxrs-clients')
 
-    testCompile libs.hamcrest
-    testCompile libs.junit
-    testCompile libs.mockwebserver
+    testCompile "com.squareup.okhttp3:mockwebserver"
+    testCompile "junit:junit"
+    testCompile "org.hamcrest:hamcrest-all"
 }
 
 configurations.all {

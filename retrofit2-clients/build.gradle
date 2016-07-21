@@ -1,29 +1,29 @@
-apply plugin: 'org.inferred.processors'
+apply plugin: "org.inferred.processors"
 
-apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
-    compile project(':error-handling')
-    compile project(':http-clients-api')
-    compile project(':service-config')
+    compile project(":error-handling")
+    compile project(":http-clients-api")
+    compile project(":service-config")
     // ssl-config is not used in this project, but we depend on it here in order to provide
     // it transitively to users of retrofit-clients as a convenience.
-    runtime project(':ssl-config')
-    compile libs.retrofit2.retrofit
-    compile libs.retrofit2.jackson
-    compile libs.slf4j
+    runtime project(":ssl-config")
 
-    testCompile libs.hamcrest
-    testCompile libs.junit
-    testCompile libs.mockito
-    testCompile libs.mockwebserver
+    compile "com.squareup.retrofit2:converter-jackson"
+    compile "com.squareup.retrofit2:retrofit"
+    compile "org.slf4j:slf4j-api"
 
-    processor libs.immutables
+    testCompile "com.squareup.okhttp3:mockwebserver"
+    testCompile "junit:junit"
+    testCompile "org.hamcrest:hamcrest-all"
+    testCompile "org.mockito:mockito-core"
+
+    processor "org.immutables:value"
 }
 
 configurations.all {
     resolutionStrategy {
-        force 'com.squareup.okhttp3:okhttp:3.4.1'
+        force "com.squareup.okhttp3:okhttp:3.4.1"
     }
 }

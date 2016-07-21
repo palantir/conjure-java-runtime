@@ -1,7 +1,6 @@
-apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
-    compile libs.brave.core
-    compile libs.slf4j
+    compile "io.zipkin.brave:brave-core"
+    compile "org.slf4j:slf4j-api"
 }

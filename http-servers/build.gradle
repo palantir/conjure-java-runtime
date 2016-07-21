@@ -1,17 +1,17 @@
-apply from: "${rootDir}/gradle/libs.gradle"
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
-    compile project(':error-handling')
-    compile project(':ext:brave-extensions')
+    compile project(":error-handling")
+    compile project(":ext:brave-extensions")
 
-    compile libs.brave.jaxrs2
-    compile libs.dropwizard.core
-    compile libs.jackson.databind
-    compile libs.jsr305
+    compile "com.fasterxml.jackson.core:jackson-databind"
+    compile "com.google.code.findbugs:jsr305"
+    compile "io.dropwizard:dropwizard-core"
+    compile "io.zipkin.brave:brave-jaxrs2"
 
-    testCompile project(':ssl-config')
-    testCompile libs.dropwizard.testing
-    testCompile libs.hamcrest
-    testCompile libs.junit
+    testCompile project(":ssl-config")
+
+    testCompile "io.dropwizard:dropwizard-testing"
+    testCompile "junit:junit"
+    testCompile "org.hamcrest:hamcrest-all"
 }
