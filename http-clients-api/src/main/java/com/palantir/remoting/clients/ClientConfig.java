@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.jaxrs;
+package com.palantir.remoting.clients;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
@@ -27,54 +27,76 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import org.joda.time.Duration;
 
-// TODO(rfink) Is there anything JaxRs-specific in here? Can we reuse the same configuration for Retrofit2 clients?
+// TODO(rfink) Use immutables? How is this different from ServiceConfiguration? Is it just the SslConfiguration?
 public final class ClientConfig {
+
+    private static final Duration CONNECT_TIMEOUT = Duration.standardSeconds(10);
+    private static final Duration READ_TIMEOUT = Duration.standardMinutes(10);
+    private static final Duration WRITE_TIMEOUT = Duration.standardMinutes(10);
+    private static final int MAX_NUM_RETRIES = 1;
+
     private Optional<SSLSocketFactory> thisSslSocketFactory = Optional.absent();
     private Optional<X509TrustManager> thisTrustManager = Optional.absent();
     private Optional<Duration> thisConnectTimeout = Optional.absent();
     private Optional<Duration> thisReadTimeout = Optional.absent();
+    private Optional<Duration> thisWriteTimeout = Optional.absent();
     private Optional<ProxyConfiguration> thisProxyConfiguration = Optional.absent();
+    private Optional<Integer> thisMaxNumRetries = Optional.absent();
 
-    Optional<SSLSocketFactory> getSslSocketFactory() {
+
+    public Optional<SSLSocketFactory> getSslSocketFactory() {
         return thisSslSocketFactory;
     }
 
-    Optional<Duration> getConnectTimeout() {
-        return thisConnectTimeout;
+    public Optional<X509TrustManager> getX509TrustManager() {
+        return thisTrustManager;
     }
 
-    Optional<Duration> getReadTimeout() {
-        return thisReadTimeout;
+    public Duration getConnectTimeout() {
+        return thisConnectTimeout.or(CONNECT_TIMEOUT);
     }
 
-    Optional<ProxyConfiguration> getProxyConfiguration() {
+    public Duration getReadTimeout() {
+        return thisReadTimeout.or(READ_TIMEOUT);
+    }
+
+    public Duration getWriteTimeout() {
+        return thisWriteTimeout.or(WRITE_TIMEOUT);
+    }
+
+    public int getMaxNumRetries() {
+        return thisMaxNumRetries.or(MAX_NUM_RETRIES);
+    }
+
+    public Optional<ProxyConfiguration> getProxyConfiguration() {
         return thisProxyConfiguration;
     }
 
-    static ClientConfig empty() {
+    public static ClientConfig empty() {
         return new ClientConfig();
     }
 
-    static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
-        ClientConfig jaxRsConfig = new ClientConfig();
+    public static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
+        ClientConfig clientConfig = new ClientConfig();
 
         // ssl
-        jaxRsConfig.ssl(serviceConfig.security());
+        clientConfig.ssl(serviceConfig.security());
 
         // timeouts
-        // TODO(rfink) Is there a better API for this?
         if (serviceConfig.connectTimeout().isPresent()) {
-            jaxRsConfig.connectTimeout(serviceConfig.connectTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
-
+            clientConfig.connectTimeout(serviceConfig.connectTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
         }
         if (serviceConfig.readTimeout().isPresent()) {
-            jaxRsConfig.readTimeout(serviceConfig.readTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
+            clientConfig.readTimeout(serviceConfig.readTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
+        }
+        if (serviceConfig.writeTimeout().isPresent()) {
+            clientConfig.writeTimeout(serviceConfig.writeTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
         }
         if (serviceConfig.proxyConfiguration().isPresent()) {
-            jaxRsConfig.proxy(serviceConfig.proxyConfiguration().get());
+            clientConfig.proxy(serviceConfig.proxyConfiguration().get());
         }
 
-        return jaxRsConfig;
+        return clientConfig;
     }
 
     public ClientConfig ssl(Optional<SslConfiguration> config) {
@@ -91,6 +113,7 @@ public final class ClientConfig {
         thisTrustManager = Optional.of(trustManager);
         return this;
     }
+
     public ClientConfig connectTimeout(long connectTimeout, TimeUnit unit) {
         Preconditions.checkArgument(!thisConnectTimeout.isPresent(), "connectTimeout already set");
         thisConnectTimeout = Optional.of(Duration.millis(TimeUnit.MILLISECONDS.convert(connectTimeout, unit)));
@@ -100,6 +123,18 @@ public final class ClientConfig {
     public ClientConfig readTimeout(long readTimeout, TimeUnit unit) {
         Preconditions.checkArgument(!thisReadTimeout.isPresent(), "readTimeout already set");
         thisReadTimeout = Optional.of(Duration.millis(TimeUnit.MILLISECONDS.convert(readTimeout, unit)));
+        return this;
+    }
+
+    public ClientConfig writeTimeout(long writeTimeout, TimeUnit unit) {
+        Preconditions.checkArgument(!thisWriteTimeout.isPresent(), "writeTimeout already set");
+        thisWriteTimeout = Optional.of(Duration.millis(TimeUnit.MILLISECONDS.convert(writeTimeout, unit)));
+        return this;
+    }
+
+    public ClientConfig maxNumRetries(int maxNumRetries) {
+        Preconditions.checkArgument(!thisMaxNumRetries.isPresent(), "maxNumRetries already set");
+        thisMaxNumRetries = Optional.of(maxNumRetries);
         return this;
     }
 

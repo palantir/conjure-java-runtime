@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.jaxrs;
+package com.palantir.remoting.clients;
 
 import java.util.Arrays;
 import java.util.List;

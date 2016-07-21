@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import com.palantir.remoting.clients.ClientConfig;
 import com.palantir.remoting.http.server.DropwizardTracingFilters;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.remoting.ssl.SslSocketFactories;
