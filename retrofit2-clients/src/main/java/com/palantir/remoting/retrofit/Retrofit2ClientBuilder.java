@@ -18,11 +18,20 @@ package com.palantir.remoting.retrofit;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
+import com.google.common.net.HttpHeaders;
+import com.palantir.config.service.BasicCredentials;
+import com.palantir.config.service.ProxyConfiguration;
 import com.palantir.remoting.clients.ClientBuilder;
 import com.palantir.remoting.clients.ClientConfig;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import okhttp3.Authenticator;
+import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Route;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -57,6 +66,25 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
             Preconditions.checkArgument(config.getX509TrustManager().isPresent(),
                     "Internal error: ClientConfig provided SslSocketFactory, but no X509TrustManager");
             client.sslSocketFactory(config.getSslSocketFactory().get(), config.getX509TrustManager().get());
+        }
+
+        // proxy
+        if (config.getProxyConfiguration().isPresent()) {
+            ProxyConfiguration proxy = config.getProxyConfiguration().get();
+            client.proxy(proxy.toProxy());
+
+            if (proxy.credentials().isPresent()) {
+                BasicCredentials proxyCredentials = proxy.credentials().get();
+                final String credentials = Credentials.basic(proxyCredentials.username(), proxyCredentials.password());
+                client.proxyAuthenticator(new Authenticator() {
+                    @Override
+                    public Request authenticate(Route route, Response response) throws IOException {
+                        return response.request().newBuilder()
+                                .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
+                                .build();
+                    }
+                });
+            }
         }
 
         // timeouts
