@@ -19,37 +19,47 @@ package com.palantir.remoting.jaxrs;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.palantir.config.service.ServiceConfiguration;
-import com.palantir.remoting.http.ObjectMappers;
-import java.nio.charset.StandardCharsets;
-import javax.ws.rs.POST;
+import feign.Feign;
+import feign.jaxrs.JAXRSContract;
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class Jackson24Test {
+// Verifies that Feign can be used simultaneously with OkHttp 2.x and 3.x.
+public final class TestOkhttpFeignCompatibility {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    // Note that the Gradle setup forces Jackson 2.4 for this project.
+    private String endpointUri;
+
+    @Before
+    public void before() {
+        endpointUri = "http://localhost:" + server.getPort();
+        server.enqueue(new MockResponse().setBody("\"foo\""));
+    }
+
     @Test
-    public void test_CanBuildClientWithJackson24() throws JsonProcessingException {
-        TestEchoService service = JaxRsClient.builder()
-                .build(TestEchoService.class, "agent", "http://localhost:" + server.getPort());
-        ServiceConfiguration config = ServiceConfiguration.builder().addUris("http://foo").build();
-        server.enqueue(new MockResponse().setBody(
-                new String(ObjectMappers.guavaJdk7().writeValueAsBytes(config), StandardCharsets.UTF_8)));
-        assertThat(service.echo(config), is(config));
+    public void testOkHttp3_usingStandardJaxRsClient() throws Exception {
+        TestService service = JaxRsClient.builder().build(TestService.class, "agent", endpointUri);
+        assertThat(service.get(), is("foo"));
+    }
+
+    @Test
+    public void testOkHttp2_withVanillaFeign() throws Exception {
+        TestService service = Feign.builder()
+                .contract(new JAXRSContract())
+                .target(TestService.class, endpointUri);
+        assertThat(service.get(), is("\"foo\""));
     }
 
     @Path("/")
-    public interface TestEchoService {
-        @POST
-        @Path("/echo")
-        ServiceConfiguration echo(ServiceConfiguration value);
+    public interface TestService {
+        @GET
+        String get();
     }
 }

@@ -54,14 +54,17 @@
             "transitive": [
                 "com.netflix.feign:feign-jackson",
                 "com.netflix.feign:feign-jaxrs",
-                "com.netflix.feign:feign-slf4j",
-                "com.palantir.remoting:feign-okhttp3"
+                "com.netflix.feign:feign-okhttp",
+                "com.netflix.feign:feign-slf4j"
             ]
         },
         "com.netflix.feign:feign-jackson": {
             "locked": "8.17.0"
         },
         "com.netflix.feign:feign-jaxrs": {
+            "locked": "8.17.0"
+        },
+        "com.netflix.feign:feign-okhttp": {
             "locked": "8.17.0"
         },
         "com.netflix.feign:feign-slf4j": {
@@ -71,9 +74,6 @@
             "project": true
         },
         "com.palantir.remoting:error-handling": {
-            "project": true
-        },
-        "com.palantir.remoting:feign-okhttp3": {
             "project": true
         },
         "com.palantir.remoting:service-config": {
@@ -94,7 +94,7 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
-                "com.palantir.remoting:feign-okhttp3",
+                "com.netflix.feign:feign-okhttp",
                 "io.zipkin.brave:brave-okhttp"
             ]
         },
@@ -222,14 +222,17 @@
             "transitive": [
                 "com.netflix.feign:feign-jackson",
                 "com.netflix.feign:feign-jaxrs",
-                "com.netflix.feign:feign-slf4j",
-                "com.palantir.remoting:feign-okhttp3"
+                "com.netflix.feign:feign-okhttp",
+                "com.netflix.feign:feign-slf4j"
             ]
         },
         "com.netflix.feign:feign-jackson": {
             "locked": "8.17.0"
         },
         "com.netflix.feign:feign-jaxrs": {
+            "locked": "8.17.0"
+        },
+        "com.netflix.feign:feign-okhttp": {
             "locked": "8.17.0"
         },
         "com.netflix.feign:feign-slf4j": {
@@ -239,9 +242,6 @@
             "project": true
         },
         "com.palantir.remoting:error-handling": {
-            "project": true
-        },
-        "com.palantir.remoting:feign-okhttp3": {
             "project": true
         },
         "com.palantir.remoting:service-config": {
@@ -262,7 +262,7 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
-                "com.palantir.remoting:feign-okhttp3",
+                "com.netflix.feign:feign-okhttp",
                 "io.zipkin.brave:brave-okhttp"
             ]
         },

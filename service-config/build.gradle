@@ -8,12 +8,11 @@ dependencies {
     compile "com.palantir.tokens:auth-tokens"
     compile "io.dropwizard:dropwizard-util"
 
-    testCompile project(":ext:feign-okhttp3")
-
     testCompile("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
     }
+    testCompile "com.netflix.feign:feign-okhttp"
     testCompile "io.dropwizard:dropwizard-testing"
     testCompile "junit:junit"
 

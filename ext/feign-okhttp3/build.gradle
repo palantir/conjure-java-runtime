@@ -1,7 +1,0 @@
-apply from: "${rootDir}/gradle/publish.gradle"
-
-tasks.checkstyleMain.enabled = false
-dependencies {
-    compile "com.netflix.feign:feign-core"
-    compile "com.squareup.okhttp3:okhttp"
-}

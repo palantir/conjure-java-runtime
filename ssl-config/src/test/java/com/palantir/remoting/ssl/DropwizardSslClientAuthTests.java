@@ -100,7 +100,7 @@ public final class DropwizardSslClientAuthTests {
         String endpointUri = "https://localhost:" + APP.getLocalPort();
         OkHttpClient okHttpClient = new OkHttpClient.Builder().sslSocketFactory(factory).build();
         return Feign.builder()
-                .client(new feign.okhttp3.OkHttpClient(okHttpClient))
+                .client(new feign.okhttp.OkHttpClient(okHttpClient))
                 .contract(new JAXRSContract())
                 .target(TestEchoService.class, endpointUri);
     }
