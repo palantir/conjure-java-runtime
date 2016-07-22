@@ -4,6 +4,7 @@ buildscript {
     }
 
     dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
         classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:${bintrayPlugin}"
         classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:4.2.0'
         classpath 'com.netflix.nebula:nebula-dependency-recommender:3.1.0'
