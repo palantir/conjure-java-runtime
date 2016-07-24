@@ -1,4 +1,4 @@
-apply from: "${rootDir}/gradle/publish.gradle"
+apply plugin: 'com.github.johnrengelman.shadow'
 
 dependencies {
     compile project(":error-handling")
@@ -14,3 +14,65 @@ dependencies {
     testCompile "junit:junit"
     testCompile "org.hamcrest:hamcrest-all"
 }
+
+shadowJar {
+    mergeServiceFiles()
+    relocate('com.fasterxml.jackson', 'httpremoting.shaded.com.fasterxml.jackson')
+    relocate('com.google', 'httpremoting.shaded.com.google')
+    relocate('feign', 'httpremoting.shaded.feign')
+    relocate('zipkin', 'httpremoting.shaded.zipkin')
+    relocate('okhttp3', 'httpremoting.shaded.okhttp3')
+    relocate('io.zipkin.brave', 'httpremoting.shaded.io.zipkin.brave')
+    relocate('org.joda.time', 'httpremoting.shaded.org.joda.time')
+    relocate('okio', 'httpremoting.shaded.okio')
+    relocate('com.github.kristofa.brave', 'httpremoting.shaded.com.github.kristofa.brave')
+    classifier = ''
+}
+
+tasks.shadowJar {
+    from('licenses/') {
+        into 'META-INF/LICENSES'
+    }
+}
+
+task checkLicenseInformation(dependsOn: 'shadowJar') << {
+    def jar = zipTree(tasks.shadowJar.archivePath)
+    def licenseFiles = jar.matching { include 'META-INF/LICENSES/*' }
+    if (licenseFiles.files.size() != 5) {
+        throw new GradleException("Expected 5 META-INF/LICENSES/* files in shadowJar, found: " + licenseFiles.files)
+    }
+}
+check.dependsOn checkLicenseInformation
+
+// Publishing, taken mostly from gradle/publish.gradle
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+apply plugin: 'nebula.javadoc-jar'
+apply plugin: 'nebula.source-jar'
+
+publishing.publications {
+    shadow(MavenPublication) {
+        from components.shadow
+    }
+}
+
+bintray {
+    user = System.env.BINTRAY_USER
+    key = System.env.BINTRAY_KEY
+    publish = true
+    pkg {
+        repo = 'releases'
+        name = 'http-remoting'
+        userOrg = 'palantir'
+        licenses = ['Apache-2.0']
+        publications = ['shadow']
+    }
+}
+
+bintrayUpload.onlyIf {
+    project.version ==~ /\d+\.\d+\.\d+(-rc[0-9]+)?/
+}
+
+bintrayUpload.dependsOn { generatePomFileForShadowPublication }
+bintrayUpload.dependsOn { sourceJar }
+bintrayUpload.dependsOn { build }

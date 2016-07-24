@@ -57,7 +57,7 @@ import feign.codec.Encoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
-import feign.okhttp3.OkHttpClient;
+import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import java.io.IOException;
 import java.net.InetAddress;

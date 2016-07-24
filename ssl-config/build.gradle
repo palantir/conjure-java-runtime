@@ -6,11 +6,11 @@ dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind"
     compile "com.google.guava:guava"
 
-    testCompile project(':ext:feign-okhttp3')
     testCompile("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
     }
+    testCompile "com.netflix.feign:feign-okhttp"
     testCompile "org.hamcrest:hamcrest-all"
     testCompile "io.dropwizard:dropwizard-core"
     testCompile "io.dropwizard:dropwizard-testing"

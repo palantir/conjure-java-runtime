@@ -24,4 +24,3 @@ bintrayUpload.onlyIf {
 bintrayUpload.dependsOn { generatePomFileForBintrayPublication }
 bintrayUpload.dependsOn { sourceJar }
 bintrayUpload.dependsOn { build }
-
