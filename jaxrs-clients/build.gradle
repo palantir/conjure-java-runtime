@@ -29,6 +29,21 @@ shadowJar {
     classifier = ''
 }
 
+tasks.shadowJar {
+    from('licenses/') {
+        into 'META-INF/LICENSES'
+    }
+}
+
+task checkLicenseInformation(dependsOn: 'shadowJar') << {
+    def jar = zipTree(tasks.shadowJar.archivePath)
+    def licenseFiles = jar.matching { include 'META-INF/LICENSES/*' }
+    if (licenseFiles.files.size() != 5) {
+        throw new GradleException("Expected 5 META-INF/LICENSES/* files in shadowJar, found: " + licenseFiles.files)
+    }
+}
+check.dependsOn checkLicenseInformation
+
 // Publishing, taken mostly from gradle/publish.gradle
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
