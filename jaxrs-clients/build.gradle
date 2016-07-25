@@ -17,7 +17,10 @@ dependencies {
 
 shadowJar {
     mergeServiceFiles()
-    relocate('com.fasterxml.jackson', 'httpremoting.shaded.com.fasterxml.jackson')
+    relocate('com.fasterxml.jackson', 'httpremoting.shaded.com.fasterxml.jackson') {
+        exclude 'com.fasterxml.jackson.annotation.*'
+        exclude 'com.fasterxml.jackson.databind.annotation.*'
+    }
     relocate('feign', 'httpremoting.shaded.feign')
     relocate('zipkin', 'httpremoting.shaded.zipkin')
     relocate('okhttp3', 'httpremoting.shaded.okhttp3')
@@ -26,11 +29,6 @@ shadowJar {
     relocate('org.joda.time', 'httpremoting.shaded.org.joda.time')
     relocate('okio', 'httpremoting.shaded.okio')
     relocate('com.github.kristofa.brave', 'httpremoting.shaded.com.github.kristofa.brave')
-    dependencies {
-        exclude(project(':error-handling'))
-        exclude(project(':service-config'))
-        exclude(project(':ssl-config'))
-    }
     classifier = ''
 }
 
