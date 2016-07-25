@@ -18,7 +18,6 @@ dependencies {
 shadowJar {
     mergeServiceFiles()
     relocate('com.fasterxml.jackson', 'httpremoting.shaded.com.fasterxml.jackson')
-    relocate('com.google', 'httpremoting.shaded.com.google')
     relocate('feign', 'httpremoting.shaded.feign')
     relocate('zipkin', 'httpremoting.shaded.zipkin')
     relocate('okhttp3', 'httpremoting.shaded.okhttp3')
