@@ -16,7 +16,6 @@
 
 package com.palantir.remoting.jaxrs;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kristofa.brave.ClientRequestInterceptor;
 import com.github.kristofa.brave.ClientResponseInterceptor;
@@ -37,7 +36,6 @@ import com.palantir.remoting.clients.ClientConfig;
 import com.palantir.remoting.http.BackoffStrategy;
 import com.palantir.remoting.http.FailoverFeignTarget;
 import com.palantir.remoting.http.GuavaOptionalAwareContract;
-import com.palantir.remoting.http.Jackson24Encoder;
 import com.palantir.remoting.http.NeverRetryingBackoffStrategy;
 import com.palantir.remoting.http.ObjectMappers;
 import com.palantir.remoting.http.SlashEncodingContract;
@@ -90,9 +88,10 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     public <T> T build(Class<T> serviceClass, String userAgent, List<String> uris) {
         FailoverFeignTarget<T> target = createTarget(serviceClass, uris);
         ObjectMapper objectMapper = ObjectMappers.guavaJdk7();
+        Encoder jacksonEncoder = new JacksonEncoder(objectMapper);
         return Feign.builder()
                 .contract(createContract())
-                .encoder(createEncoder(objectMapper))
+                .encoder(new InputStreamDelegateEncoder(new TextDelegateEncoder(jacksonEncoder)))
                 .decoder(createDecoder(objectMapper))
                 .errorDecoder(FeignSerializableErrorErrorDecoder.INSTANCE)
                 .client(target.wrapClient(createOkHttpClient(userAgent)))
@@ -117,24 +116,6 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         return new Request.Options(
                 (int) config.getConnectTimeout().getMillis(),
                 (int) config.getReadTimeout().getMillis());
-    }
-
-    private Encoder createEncoder(ObjectMapper objectMapper) {
-        Encoder jacksonEncoder = hasJackson25()
-                ? new JacksonEncoder(objectMapper)
-                : new Jackson24Encoder(objectMapper);
-        return new InputStreamDelegateEncoder(new TextDelegateEncoder(jacksonEncoder));
-    }
-
-    // Uses reflection to determine if Jackson >= 2.5 is on the classpath by checking for the existence of the
-    // ObjectMapper#writerFor method.
-    private boolean hasJackson25() {
-        try {
-            ObjectMapper.class.getMethod("writerFor", JavaType.class);
-            return true;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
     }
 
     private Decoder createDecoder(ObjectMapper objectMapper) {
