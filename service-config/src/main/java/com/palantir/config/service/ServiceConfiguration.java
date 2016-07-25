@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.base.Optional;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
-import io.dropwizard.util.Duration;
 import java.util.List;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Style;

@@ -6,7 +6,6 @@ dependencies {
     compile project(":ssl-config")
 
     compile "com.palantir.tokens:auth-tokens"
-    compile "io.dropwizard:dropwizard-util"
 
     testCompile("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard

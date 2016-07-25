@@ -30,7 +30,6 @@ import com.google.common.io.Resources;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
 import io.dropwizard.jackson.Jackson;
-import io.dropwizard.util.Duration;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;

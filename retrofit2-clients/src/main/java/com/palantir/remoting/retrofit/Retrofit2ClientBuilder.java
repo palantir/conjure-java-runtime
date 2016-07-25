@@ -88,9 +88,9 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         }
 
         // timeouts
-        client.connectTimeout(config.getConnectTimeout().getMillis(), TimeUnit.MILLISECONDS);
-        client.readTimeout(config.getReadTimeout().getMillis(), TimeUnit.MILLISECONDS);
-        client.writeTimeout(config.getWriteTimeout().getMillis(), TimeUnit.MILLISECONDS);
+        client.connectTimeout(config.getConnectTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
+        client.readTimeout(config.getReadTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
+        client.writeTimeout(config.getWriteTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
 
         // retry configuration
         if (config.getMaxNumRetries() > 1) {

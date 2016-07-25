@@ -114,8 +114,8 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private Request.Options createRequestOptions() {
         return new Request.Options(
-                (int) config.getConnectTimeout().getMillis(),
-                (int) config.getReadTimeout().getMillis());
+                (int) config.getConnectTimeout().toMilliseconds(),
+                (int) config.getReadTimeout().toMilliseconds());
     }
 
     private Decoder createDecoder(ObjectMapper objectMapper) {
@@ -137,7 +137,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
         // with its own default otherwise. Feign does not provide a mechanism for write timeouts. We thus need to set
         // write timeouts here and connect&read timeouts on FeignBuilder.
-        client.writeTimeout(config.getWriteTimeout().getMillis(), TimeUnit.MILLISECONDS);
+        client.writeTimeout(config.getWriteTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
 
         // Set up Zipkin/Brave tracing
         ClientTracer tracer = ClientTracer.builder()

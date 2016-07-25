@@ -18,21 +18,20 @@ package com.palantir.remoting.clients;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.palantir.config.service.Duration;
 import com.palantir.config.service.ProxyConfiguration;
 import com.palantir.config.service.ServiceConfiguration;
 import com.palantir.remoting.ssl.SslSocketFactories;
-import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
-import org.joda.time.Duration;
 
 /** Implementation-independent configuration options for HTTP-based dynamic proxies. */
 // TODO(rfink) Use immutables? How is this different from ServiceConfiguration? Is it just the SslConfiguration?
 public final class ClientConfig {
 
-    private static final Duration CONNECT_TIMEOUT = Duration.standardSeconds(10);
-    private static final Duration READ_TIMEOUT = Duration.standardMinutes(10);
-    private static final Duration WRITE_TIMEOUT = Duration.standardMinutes(10);
+    private static final Duration CONNECT_TIMEOUT = Duration.seconds(10);
+    private static final Duration READ_TIMEOUT = Duration.minutes(10);
+    private static final Duration WRITE_TIMEOUT = Duration.minutes(10);
     private static final int MAX_NUM_RETRIES = 1;
 
     private Optional<SSLSocketFactory> thisSslSocketFactory = Optional.absent();
@@ -87,13 +86,13 @@ public final class ClientConfig {
 
         // timeouts
         if (serviceConfig.connectTimeout().isPresent()) {
-            clientConfig.connectTimeout(serviceConfig.connectTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
+            clientConfig.connectTimeout(serviceConfig.connectTimeout().get());
         }
         if (serviceConfig.readTimeout().isPresent()) {
-            clientConfig.readTimeout(serviceConfig.readTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
+            clientConfig.readTimeout(serviceConfig.readTimeout().get());
         }
         if (serviceConfig.writeTimeout().isPresent()) {
-            clientConfig.writeTimeout(serviceConfig.writeTimeout().get().toMilliseconds(), TimeUnit.MILLISECONDS);
+            clientConfig.writeTimeout(serviceConfig.writeTimeout().get());
         }
         if (serviceConfig.proxyConfiguration().isPresent()) {
             clientConfig.proxy(serviceConfig.proxyConfiguration().get());
@@ -109,21 +108,21 @@ public final class ClientConfig {
         return this;
     }
 
-    public ClientConfig connectTimeout(long connectTimeout, TimeUnit unit) {
+    public ClientConfig connectTimeout(Duration duration) {
         Preconditions.checkArgument(!thisConnectTimeout.isPresent(), "connectTimeout already set");
-        thisConnectTimeout = Optional.of(Duration.millis(TimeUnit.MILLISECONDS.convert(connectTimeout, unit)));
+        thisConnectTimeout = Optional.of(duration);
         return this;
     }
 
-    public ClientConfig readTimeout(long readTimeout, TimeUnit unit) {
+    public ClientConfig readTimeout(Duration duration) {
         Preconditions.checkArgument(!thisReadTimeout.isPresent(), "readTimeout already set");
-        thisReadTimeout = Optional.of(Duration.millis(TimeUnit.MILLISECONDS.convert(readTimeout, unit)));
+        thisReadTimeout = Optional.of(duration);
         return this;
     }
 
-    public ClientConfig writeTimeout(long writeTimeout, TimeUnit unit) {
+    public ClientConfig writeTimeout(Duration duration) {
         Preconditions.checkArgument(!thisWriteTimeout.isPresent(), "writeTimeout already set");
-        thisWriteTimeout = Optional.of(Duration.millis(TimeUnit.MILLISECONDS.convert(writeTimeout, unit)));
+        thisWriteTimeout = Optional.of(duration);
         return this;
     }
 
