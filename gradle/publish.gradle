@@ -21,6 +21,6 @@ bintrayUpload.onlyIf {
     project.version ==~ /\d+\.\d+\.\d+(-rc[0-9]+)?/
 }
 
-bintrayUpload.dependsOn { generatePomFileForBintrayPublication }
+bintrayUpload.dependsOn { generatePomFileForNebulaPublication }
 bintrayUpload.dependsOn { sourceJar }
 bintrayUpload.dependsOn { build }
