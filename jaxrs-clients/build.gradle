@@ -25,6 +25,11 @@ shadowJar {
     relocate('org.joda.time', 'httpremoting.shaded.org.joda.time')
     relocate('okio', 'httpremoting.shaded.okio')
     relocate('com.github.kristofa.brave', 'httpremoting.shaded.com.github.kristofa.brave')
+    dependencies {
+        exclude(project(':error-handling'))
+        exclude(project(':service-config'))
+        exclude(project(':ssl-config'))
+    }
     classifier = ''
 }
 
