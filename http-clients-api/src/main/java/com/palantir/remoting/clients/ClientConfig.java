@@ -20,13 +20,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.palantir.config.service.ProxyConfiguration;
 import com.palantir.config.service.ServiceConfiguration;
-import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.remoting.ssl.SslSocketFactories;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import org.joda.time.Duration;
 
+/** Implementation-independent configuration options for HTTP-based dynamic proxies. */
 // TODO(rfink) Use immutables? How is this different from ServiceConfiguration? Is it just the SslConfiguration?
 public final class ClientConfig {
 
@@ -80,7 +80,10 @@ public final class ClientConfig {
         ClientConfig clientConfig = new ClientConfig();
 
         // ssl
-        clientConfig.ssl(serviceConfig.security());
+        if (serviceConfig.security().isPresent()) {
+            clientConfig.ssl(SslSocketFactories.createSslSocketFactory(serviceConfig.security().get()),
+                    (X509TrustManager) SslSocketFactories.createTrustManagers(serviceConfig.security().get())[0]);
+        }
 
         // timeouts
         if (serviceConfig.connectTimeout().isPresent()) {
@@ -97,14 +100,6 @@ public final class ClientConfig {
         }
 
         return clientConfig;
-    }
-
-    public ClientConfig ssl(Optional<SslConfiguration> config) {
-        if (config.isPresent()) {
-            ssl(SslSocketFactories.createSslSocketFactory(config.get()),
-                    (X509TrustManager) SslSocketFactories.createTrustManagers(config.get())[0]);
-        }
-        return this;
     }
 
     public ClientConfig ssl(SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {

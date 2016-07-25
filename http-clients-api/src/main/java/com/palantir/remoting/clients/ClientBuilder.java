@@ -19,9 +19,18 @@ package com.palantir.remoting.clients;
 import java.util.Arrays;
 import java.util.List;
 
+/** Abstraction for creating HTTP-invoking dynamic proxies around service interfaces. */
 public abstract class ClientBuilder {
+
+    /**
+     * Creates and returns a dynamic proxy of the given {@code serviceClass} type against the given URIs. The user agent
+     * string is embedded as the HTTP {@code User-Agent} header for all requests. Recommended user agents are of the
+     * form: {@code ServiceName (Version)}, e.g. MyServer (1.2.3) For services that run multiple instances, recommended
+     * user agents are of the form: {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3).
+     */
     public abstract <T> T build(Class<T> serviceClass, String userAgent, List<String> uris);
 
+    /** See {@link #build}. */
     public final <T> T build(Class<T> serviceClass, String userAgent, String... uris) {
         return build(serviceClass, userAgent, Arrays.asList(uris));
     }
