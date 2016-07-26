@@ -1,7 +1,6 @@
 include ':ext:brave-extensions'
 include 'error-handling'
 include 'feign-config'
-include 'http-clients'
 include 'http-clients-api'
 include 'http-servers'
 include 'jaxrs-clients'
