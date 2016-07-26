@@ -34,7 +34,7 @@ public final class ClientConfigTest {
         SSLSocketFactory sslSocketFactory = mock(SSLSocketFactory.class);
         ClientConfig.Builder config = ClientConfig.builder().sslSocketFactory(sslSocketFactory);
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Must set either both sslSocketFactory and TrustManager, or neither");
+        expectedException.expectMessage("Must set either both SslSocketFactory and TrustManager, or neither");
         config.build();
     }
 
@@ -43,7 +43,7 @@ public final class ClientConfigTest {
         X509TrustManager trustManager = mock(X509TrustManager.class);
         ClientConfig.Builder config = ClientConfig.builder().trustManager(trustManager);
         expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("Must set either both sslSocketFactory and TrustManager, or neither");
+        expectedException.expectMessage("Must set either both SslSocketFactory and TrustManager, or neither");
         config.build();
     }
 }

@@ -68,7 +68,7 @@ public abstract class ClientConfig {
     @Value.Check
     public void check() {
         Preconditions.checkState(sslSocketFactory().isPresent() == trustManager().isPresent(),
-                "Must set either both sslSocketFactory and TrustManager, or neither");
+                "Must set either both SslSocketFactory and TrustManager, or neither");
     }
 
     public static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
