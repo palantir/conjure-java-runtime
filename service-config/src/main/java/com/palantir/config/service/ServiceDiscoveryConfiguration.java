@@ -23,7 +23,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.palantir.remoting.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
-import io.dropwizard.util.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;

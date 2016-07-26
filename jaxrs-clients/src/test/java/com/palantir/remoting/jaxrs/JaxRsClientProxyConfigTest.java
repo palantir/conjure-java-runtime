@@ -44,7 +44,7 @@ public final class JaxRsClientProxyConfigTest {
         FakeoInterface directService = JaxRsClient.builder()
                 .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
         ProxyConfiguration proxyConfiguration = ProxyConfiguration.of("localhost:" + proxyServer.getPort());
-        FakeoInterface proxiedService = JaxRsClient.builder(ClientConfig.empty().proxy(proxyConfiguration))
+        FakeoInterface proxiedService = JaxRsClient.builder(ClientConfig.builder().proxy(proxyConfiguration).build())
                 .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
 
         assertThat(directService.blah()).isEqualTo("server");
@@ -61,7 +61,7 @@ public final class JaxRsClientProxyConfigTest {
         ProxyConfiguration authProxyConfig = ProxyConfiguration.of(
                 "localhost:" + proxyServer.getPort(),
                 BasicCredentials.of("fakeUser", "fakePassword"));
-        FakeoInterface authClient = JaxRsClient.builder(ClientConfig.empty().proxy(authProxyConfig))
+        FakeoInterface authClient = JaxRsClient.builder(ClientConfig.builder().proxy(authProxyConfig).build())
                 .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
 
         assertThat(authClient.blah()).isEqualTo("proxyServer");

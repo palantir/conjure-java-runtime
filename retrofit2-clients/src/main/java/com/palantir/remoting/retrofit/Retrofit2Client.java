@@ -43,7 +43,7 @@ public final class Retrofit2Client {
      * round-robin fail-over.
      */
     public static ClientBuilder builder() {
-        return new Retrofit2ClientBuilder(ClientConfig.empty());
+        return new Retrofit2ClientBuilder();
     }
 
     /**

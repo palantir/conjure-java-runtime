@@ -114,8 +114,8 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private Request.Options createRequestOptions() {
         return new Request.Options(
-                (int) config.getConnectTimeout().getMillis(),
-                (int) config.getReadTimeout().getMillis());
+                (int) config.connectTimeout().toMilliseconds(),
+                (int) config.readTimeout().toMilliseconds());
     }
 
     private Decoder createDecoder(ObjectMapper objectMapper) {
@@ -127,17 +127,17 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
 
         // SSL
-        if (config.getSslSocketFactory().isPresent()) {
-            Preconditions.checkArgument(config.getX509TrustManager().isPresent(),
+        if (config.sslSocketFactory().isPresent()) {
+            Preconditions.checkArgument(config.trustManager().isPresent(),
                     "Internal error: ClientConfig provided SslSocketFactory, but no X509TrustManager");
-            client.sslSocketFactory(config.getSslSocketFactory().get(), config.getX509TrustManager().get());
+            client.sslSocketFactory(config.sslSocketFactory().get(), config.trustManager().get());
         }
 
         // timeouts
         // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
         // with its own default otherwise. Feign does not provide a mechanism for write timeouts. We thus need to set
         // write timeouts here and connect&read timeouts on FeignBuilder.
-        client.writeTimeout(config.getWriteTimeout().getMillis(), TimeUnit.MILLISECONDS);
+        client.writeTimeout(config.writeTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
 
         // Set up Zipkin/Brave tracing
         ClientTracer tracer = ClientTracer.builder()
@@ -155,8 +155,8 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         client.addInterceptor(braveInterceptor);
 
         // Set up HTTP proxy configuration
-        if (config.getProxyConfiguration().isPresent()) {
-            ProxyConfiguration proxy = config.getProxyConfiguration().get();
+        if (config.proxy().isPresent()) {
+            ProxyConfiguration proxy = config.proxy().get();
             client.proxy(proxy.toProxy());
 
             if (proxy.credentials().isPresent()) {
