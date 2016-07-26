@@ -84,19 +84,11 @@ public final class ClientConfig {
                     (X509TrustManager) SslSocketFactories.createTrustManagers(serviceConfig.security().get())[0]);
         }
 
-        // timeouts
-        if (serviceConfig.connectTimeout().isPresent()) {
-            clientConfig.connectTimeout(serviceConfig.connectTimeout().get());
-        }
-        if (serviceConfig.readTimeout().isPresent()) {
-            clientConfig.readTimeout(serviceConfig.readTimeout().get());
-        }
-        if (serviceConfig.writeTimeout().isPresent()) {
-            clientConfig.writeTimeout(serviceConfig.writeTimeout().get());
-        }
-        if (serviceConfig.proxyConfiguration().isPresent()) {
-            clientConfig.proxy(serviceConfig.proxyConfiguration().get());
-        }
+        // timeouts & proxy
+        clientConfig.connectTimeout(serviceConfig.connectTimeout());
+        clientConfig.readTimeout(serviceConfig.readTimeout());
+        clientConfig.writeTimeout(serviceConfig.writeTimeout());
+        clientConfig.proxy(serviceConfig.proxyConfiguration());
 
         return clientConfig;
     }
@@ -108,15 +100,36 @@ public final class ClientConfig {
         return this;
     }
 
+    public ClientConfig connectTimeout(Optional<Duration> duration) {
+        if (duration.isPresent()) {
+            connectTimeout(duration.get());
+        }
+        return this;
+    }
+
     public ClientConfig connectTimeout(Duration duration) {
         Preconditions.checkArgument(!thisConnectTimeout.isPresent(), "connectTimeout already set");
         thisConnectTimeout = Optional.of(duration);
         return this;
     }
 
+    public ClientConfig readTimeout(Optional<Duration> duration) {
+        if (duration.isPresent()) {
+            readTimeout(duration.get());
+        }
+        return this;
+    }
+
     public ClientConfig readTimeout(Duration duration) {
         Preconditions.checkArgument(!thisReadTimeout.isPresent(), "readTimeout already set");
         thisReadTimeout = Optional.of(duration);
+        return this;
+    }
+
+    public ClientConfig writeTimeout(Optional<Duration> duration) {
+        if (duration.isPresent()) {
+            writeTimeout(duration.get());
+        }
         return this;
     }
 
@@ -129,6 +142,13 @@ public final class ClientConfig {
     public ClientConfig maxNumRetries(int maxNumRetries) {
         Preconditions.checkArgument(!thisMaxNumRetries.isPresent(), "maxNumRetries already set");
         thisMaxNumRetries = Optional.of(maxNumRetries);
+        return this;
+    }
+
+    public ClientConfig proxy(Optional<ProxyConfiguration> proxyConfiguration) {
+        if (proxyConfiguration.isPresent()) {
+            proxy(proxyConfiguration.get());
+        }
         return this;
     }
 
