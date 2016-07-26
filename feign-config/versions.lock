@@ -3,8 +3,7 @@
         "com.fasterxml.jackson.core:jackson-annotations": {
             "locked": "2.6.1",
             "transitive": [
-                "com.fasterxml.jackson.core:jackson-databind",
-                "io.dropwizard:dropwizard-util"
+                "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
@@ -35,8 +34,7 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting:error-handling",
-                "io.dropwizard:dropwizard-util"
+                "com.palantir.remoting:error-handling"
             ]
         },
         "com.google.guava:guava": {
@@ -45,8 +43,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting:error-handling",
                 "com.palantir.remoting:ssl-config",
-                "com.palantir.tokens:auth-tokens",
-                "io.dropwizard:dropwizard-util"
+                "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.netflix.feign:feign-core": {
@@ -104,12 +101,6 @@
                 "com.squareup.okhttp3:okhttp"
             ]
         },
-        "io.dropwizard:dropwizard-util": {
-            "locked": "0.8.2",
-            "transitive": [
-                "com.palantir.remoting:service-config"
-            ]
-        },
         "io.zipkin.brave:brave-core": {
             "locked": "3.9.0",
             "transitive": [
@@ -136,12 +127,6 @@
             "locked": "2.0.1",
             "transitive": [
                 "com.palantir.remoting:error-handling"
-            ]
-        },
-        "joda-time:joda-time": {
-            "locked": "2.7",
-            "transitive": [
-                "io.dropwizard:dropwizard-util"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
@@ -171,8 +156,7 @@
         "com.fasterxml.jackson.core:jackson-annotations": {
             "locked": "2.6.1",
             "transitive": [
-                "com.fasterxml.jackson.core:jackson-databind",
-                "io.dropwizard:dropwizard-util"
+                "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
@@ -203,8 +187,7 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting:error-handling",
-                "io.dropwizard:dropwizard-util"
+                "com.palantir.remoting:error-handling"
             ]
         },
         "com.google.guava:guava": {
@@ -213,8 +196,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting:error-handling",
                 "com.palantir.remoting:ssl-config",
-                "com.palantir.tokens:auth-tokens",
-                "io.dropwizard:dropwizard-util"
+                "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.netflix.feign:feign-core": {
@@ -272,12 +254,6 @@
                 "com.squareup.okhttp3:okhttp"
             ]
         },
-        "io.dropwizard:dropwizard-util": {
-            "locked": "0.8.2",
-            "transitive": [
-                "com.palantir.remoting:service-config"
-            ]
-        },
         "io.zipkin.brave:brave-core": {
             "locked": "3.9.0",
             "transitive": [
@@ -304,12 +280,6 @@
             "locked": "2.0.1",
             "transitive": [
                 "com.palantir.remoting:error-handling"
-            ]
-        },
-        "joda-time:joda-time": {
-            "locked": "2.7",
-            "transitive": [
-                "io.dropwizard:dropwizard-util"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
