@@ -90,7 +90,7 @@ public final class JaxRsClientFailoverTest {
         BackoffStrategy backoffStrategy = mock(BackoffStrategy.class);
         when(backoffStrategy.backoff(anyInt())).thenReturn(true, false, true, false);
 
-        FakeoInterface proxy = new FeignJaxRsClientBuilder(ClientConfig.empty(), backoffStrategy)
+        FakeoInterface proxy = new FeignJaxRsClientBuilder(ClientConfig.builder().build(), backoffStrategy)
                 .build(FakeoInterface.class, "agent",
                         ImmutableList.of("http://localhost:" + server1.getPort(),
                                 "http://localhost:" + server2.getPort()));

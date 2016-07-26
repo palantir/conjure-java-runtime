@@ -45,8 +45,9 @@ public final class Retrofit2ClientProxyTest {
 
         TestService directService = Retrofit2Client.builder().build(
                 TestService.class, "agent", "http://localhost:" + server.getPort());
-        ClientConfig clientConfig = ClientConfig.empty()
-                .proxy(ProxyConfiguration.of("localhost:" + proxyServer.getPort()));
+        ClientConfig clientConfig = ClientConfig.builder()
+                .proxy(ProxyConfiguration.of("localhost:" + proxyServer.getPort()))
+                .build();
         TestService proxiedService = Retrofit2Client.builder(clientConfig).build(
                 TestService.class, "agent", "http://localhost:" + server.getPort());
 
@@ -61,8 +62,10 @@ public final class Retrofit2ClientProxyTest {
         proxyServer.enqueue(new MockResponse().setResponseCode(407)); // indicates authenticated proxy
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        ClientConfig clientConfig = ClientConfig.empty().proxy(ProxyConfiguration.of(
-                "localhost:" + proxyServer.getPort(), BasicCredentials.of("fakeUser", "fakePassword")));
+        ClientConfig clientConfig = ClientConfig.builder()
+                .proxy(ProxyConfiguration.of(
+                        "localhost:" + proxyServer.getPort(), BasicCredentials.of("fakeUser", "fakePassword")))
+                .build();
 
         TestService proxiedService = Retrofit2Client.builder(clientConfig).build(
                 TestService.class, "agent", "http://localhost:" + server.getPort());

@@ -1,5 +1,9 @@
+apply plugin: "org.inferred.processors"
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":service-config")
+    testCompile "junit:junit"
+    testCompile "org.mockito:mockito-core"
+    processor "org.immutables:value"
 }

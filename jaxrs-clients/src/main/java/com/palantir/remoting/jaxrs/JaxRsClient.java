@@ -43,7 +43,7 @@ public final class JaxRsClient {
      * round-robin fail-over.
      */
     public static ClientBuilder builder() {
-        return new FeignJaxRsClientBuilder(ClientConfig.empty());
+        return new FeignJaxRsClientBuilder(ClientConfig.builder().build());
     }
 
     /**

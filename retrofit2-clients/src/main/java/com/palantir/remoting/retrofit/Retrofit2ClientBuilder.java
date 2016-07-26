@@ -39,6 +39,10 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
 
     private final ClientConfig config;
 
+    public Retrofit2ClientBuilder() {
+        this.config = ClientConfig.builder().build();
+    }
+
     public Retrofit2ClientBuilder(ClientConfig config) {
         this.config = config;
     }
@@ -62,15 +66,15 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // SSL
-        if (config.getSslSocketFactory().isPresent()) {
-            Preconditions.checkArgument(config.getX509TrustManager().isPresent(),
+        if (config.sslSocketFactory().isPresent()) {
+            Preconditions.checkArgument(config.trustManager().isPresent(),
                     "Internal error: ClientConfig provided SslSocketFactory, but no X509TrustManager");
-            client.sslSocketFactory(config.getSslSocketFactory().get(), config.getX509TrustManager().get());
+            client.sslSocketFactory(config.sslSocketFactory().get(), config.trustManager().get());
         }
 
         // proxy
-        if (config.getProxyConfiguration().isPresent()) {
-            ProxyConfiguration proxy = config.getProxyConfiguration().get();
+        if (config.proxy().isPresent()) {
+            ProxyConfiguration proxy = config.proxy().get();
             client.proxy(proxy.toProxy());
 
             if (proxy.credentials().isPresent()) {
@@ -88,13 +92,13 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         }
 
         // timeouts
-        client.connectTimeout(config.getConnectTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
-        client.readTimeout(config.getReadTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
-        client.writeTimeout(config.getWriteTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
+        client.connectTimeout(config.connectTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
+        client.readTimeout(config.readTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
+        client.writeTimeout(config.writeTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
 
         // retry configuration
-        if (config.getMaxNumRetries() > 1) {
-            client.addInterceptor(new RetryInterceptor(config.getMaxNumRetries()));
+        if (config.maxNumRetries() > 1) {
+            client.addInterceptor(new RetryInterceptor(config.maxNumRetries()));
         }
 
         client.addInterceptor(UserAgentInterceptor.of(userAgent));
