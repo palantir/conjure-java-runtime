@@ -27,10 +27,10 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 /**
- * Utility functions for creating {@link SSLSocketFactory}s
- * that are configured with Java trust stores and key stores.
+ * Utility functions for creating {@link SSLSocketFactory}s that are configured with Java trust stores and key stores.
  */
 public final class SslSocketFactories {
     private SslSocketFactories() {}
@@ -81,6 +81,23 @@ public final class SslSocketFactories {
      */
     public static TrustManager[] createTrustManagers(SslConfiguration config) {
         return createTrustManagerFactory(config.trustStorePath(), config.trustStoreType()).getTrustManagers();
+    }
+
+    /**
+     * Returns the first {@link TrustManager} initialized from the given configuration. This is always an {@link
+     * javax.net.ssl.X509TrustManager}.
+     */
+    public static X509TrustManager createX509TrustManager(SslConfiguration config) {
+        TrustManager trustManager = createTrustManagers(config)[0];
+        if (trustManager instanceof X509TrustManager) {
+            return (X509TrustManager) trustManager;
+        } else {
+            throw new RuntimeException(String.format(
+                    "First TrustManager associated with SslConfiguration was expected to be a %s, but was a %s: %s",
+                    X509TrustManager.class.getSimpleName(),
+                    trustManager.getClass().getSimpleName(),
+                    config.trustStorePath()));
+        }
     }
 
     private static TrustManagerFactory createTrustManagerFactory(

@@ -27,7 +27,6 @@ import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.NoSuchFileException;
-import javax.net.ssl.SSLSocketFactory;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -48,9 +47,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(TestConstants.CA_TRUST_STORE_TYPE)
                 .build();
 
-        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
-
-        assertThat(factory, notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
     }
 
     @Test
@@ -61,9 +59,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(TestConstants.SERVER_KEY_STORE_P12_TYPE)
                 .build();
 
-        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
-
-        assertThat(factory, notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
     }
 
     @Test
@@ -74,9 +71,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
-
-        assertThat(factory, notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
     }
 
     @Test
@@ -87,9 +83,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
-
-        assertThat(factory, notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
     }
 
     @Test
@@ -106,9 +101,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
-
-        assertThat(factory, notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
     }
 
     @Test
@@ -128,9 +122,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(SslConfiguration.StoreType.PUPPET)
                 .build();
 
-        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
-
-        assertThat(factory, notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
     }
 
     @Test
@@ -156,9 +149,8 @@ public final class SslSocketFactoriesTests {
                 .keyStoreType(SslConfiguration.StoreType.PUPPET)
                 .build();
 
-        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
-
-        assertThat(factory, notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
     }
 
     @Test
@@ -173,9 +165,8 @@ public final class SslSocketFactoriesTests {
                 .keyStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
-
-        assertThat(factory, notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
     }
 
     @Test
@@ -185,9 +176,8 @@ public final class SslSocketFactoriesTests {
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .build();
 
-        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
-
-        assertThat(factory, notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
     }
 
     @Test
@@ -200,9 +190,8 @@ public final class SslSocketFactoriesTests {
                 .keyStoreType(TestConstants.SERVER_KEY_STORE_JKS_TYPE)
                 .build();
 
-        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
-
-        assertThat(factory, notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
     }
 
     @Test
@@ -214,9 +203,8 @@ public final class SslSocketFactoriesTests {
                 .keyStorePassword(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
                 .build();
 
-        SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
-
-        assertThat(factory, notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
     }
 
     @Test
