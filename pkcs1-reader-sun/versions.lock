@@ -15,16 +15,16 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.1",
             "transitive": [
-                "com.palantir.remoting:ssl-config"
+                "com.palantir.remoting1:ssl-config"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting:ssl-config"
+                "com.palantir.remoting1:ssl-config"
             ]
         },
-        "com.palantir.remoting:ssl-config": {
+        "com.palantir.remoting1:ssl-config": {
             "project": true
         }
     },
@@ -44,16 +44,16 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.1",
             "transitive": [
-                "com.palantir.remoting:ssl-config"
+                "com.palantir.remoting1:ssl-config"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting:ssl-config"
+                "com.palantir.remoting1:ssl-config"
             ]
         },
-        "com.palantir.remoting:ssl-config": {
+        "com.palantir.remoting1:ssl-config": {
             "project": true
         }
     }

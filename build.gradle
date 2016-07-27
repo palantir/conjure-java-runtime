@@ -28,7 +28,7 @@ repositories {
 
 allprojects {
     version gitVersion()
-    group 'com.palantir.remoting'
+    group 'com.palantir.remoting1'
 
     apply plugin: 'nebula.dependency-recommender'
     dependencyRecommendations {

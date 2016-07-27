@@ -19,7 +19,7 @@ package feign;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
-import com.palantir.remoting.jaxrs.feignimpl.HeaderAccessUtils;
+import com.palantir.remoting1.jaxrs.feignimpl.HeaderAccessUtils;
 import feign.codec.Decoder;
 import feign.codec.StringDecoder;
 import java.io.IOException;
