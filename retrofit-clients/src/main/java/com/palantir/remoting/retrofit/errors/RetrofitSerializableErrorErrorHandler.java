@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.palantir.remoting.retrofit.errors;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
-import com.palantir.remoting.http.errors.SerializableErrorToExceptionConverter;
+import com.palantir.remoting.errors.SerializableErrorToExceptionConverter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;

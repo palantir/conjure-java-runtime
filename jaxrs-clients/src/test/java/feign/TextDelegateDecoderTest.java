@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,7 @@ package feign;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -32,7 +30,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.jaxrs.JaxRsClient;
-import com.palantir.remoting.jaxrs.TestServer;
+import com.palantir.remoting.jaxrs.feignimpl.TestServer;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -42,6 +40,7 @@ import java.util.Collection;
 import java.util.Map;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MediaType;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -131,14 +130,14 @@ public final class TextDelegateDecoderTest {
 
     @Test
     public void testInterplayOfOptionalAwareDecoderAndTextDelegateDecoder() {
-        assertNull(service.getString(null));
+        Assert.assertNull(service.getString(null));
 
         Optional<String> result = service.getOptionalString("string");
         assertEquals(Optional.of("string"), result);
 
         try {
             service.getOptionalString(null);
-            fail();
+            Assert.fail();
         } catch (NotFoundException e) {
             assertThat(e.getMessage(), containsString("HTTP 404 Not Found"));
         }

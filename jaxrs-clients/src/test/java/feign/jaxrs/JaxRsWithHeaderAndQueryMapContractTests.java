@@ -16,7 +16,6 @@
 
 package feign.jaxrs;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -38,6 +37,7 @@ import javax.ws.rs.QueryParam;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -64,7 +64,7 @@ public final class JaxRsWithHeaderAndQueryMapContractTests {
         try {
             contract.parseAndValidatateMetadata(QueryMapTestInterfaceWithBodyJaxRs.class);
         } catch (IllegalStateException e) {
-            assertThat(e.getMessage(), containsString("Method has too many Body parameters"));
+            assertThat(e.getMessage(), Matchers.containsString("Method has too many Body parameters"));
         }
     }
 
@@ -109,7 +109,7 @@ public final class JaxRsWithHeaderAndQueryMapContractTests {
         try {
             contract.parseAndValidatateMetadata(QueryMapTestInterfaceWithBodyJaxRs.class);
         } catch (IllegalStateException e) {
-            assertThat(e.getMessage(), containsString("Method has too many Body parameters"));
+            assertThat(e.getMessage(), Matchers.containsString("Method has too many Body parameters"));
         }
     }
 
