@@ -15,30 +15,30 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.1",
             "transitive": [
-                "com.palantir.remoting:ssl-config",
+                "com.palantir.remoting1:ssl-config",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting:ssl-config",
+                "com.palantir.remoting1:ssl-config",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
-        "com.palantir.remoting:service-config": {
+        "com.palantir.remoting1:service-config": {
             "project": true
         },
-        "com.palantir.remoting:ssl-config": {
+        "com.palantir.remoting1:ssl-config": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting:service-config"
+                "com.palantir.remoting1:service-config"
             ]
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "0.2.3",
             "transitive": [
-                "com.palantir.remoting:service-config"
+                "com.palantir.remoting1:service-config"
             ]
         },
         "org.slf4j:jcl-over-slf4j": {
@@ -71,30 +71,30 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.1",
             "transitive": [
-                "com.palantir.remoting:ssl-config",
+                "com.palantir.remoting1:ssl-config",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting:ssl-config",
+                "com.palantir.remoting1:ssl-config",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
-        "com.palantir.remoting:service-config": {
+        "com.palantir.remoting1:service-config": {
             "project": true
         },
-        "com.palantir.remoting:ssl-config": {
+        "com.palantir.remoting1:ssl-config": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting:service-config"
+                "com.palantir.remoting1:service-config"
             ]
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "0.2.3",
             "transitive": [
-                "com.palantir.remoting:service-config"
+                "com.palantir.remoting1:service-config"
             ]
         },
         "org.slf4j:jcl-over-slf4j": {

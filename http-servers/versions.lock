@@ -34,7 +34,7 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.1",
             "transitive": [
-                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson"
             ]
         },
@@ -95,23 +95,23 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-util"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-util"
             ]
         },
-        "com.palantir.remoting:brave-extensions": {
+        "com.palantir.remoting1:brave-extensions": {
             "project": true
         },
-        "com.palantir.remoting:error-handling": {
+        "com.palantir.remoting1:error-handling": {
             "project": true
         },
         "io.dropwizard.metrics:metrics-annotation": {
@@ -260,7 +260,7 @@
         "io.zipkin.brave:brave-core": {
             "locked": "3.9.0",
             "transitive": [
-                "com.palantir.remoting:brave-extensions",
+                "com.palantir.remoting1:brave-extensions",
                 "io.zipkin.brave:brave-http"
             ]
         },
@@ -311,7 +311,7 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting1:error-handling",
                 "org.glassfish.jersey.containers:jersey-container-servlet",
                 "org.glassfish.jersey.containers:jersey-container-servlet-core",
                 "org.glassfish.jersey.core:jersey-client",
@@ -568,8 +568,8 @@
             "locked": "1.7.12",
             "transitive": [
                 "ch.qos.logback:logback-classic",
-                "com.palantir.remoting:brave-extensions",
-                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting1:brave-extensions",
+                "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-logging",
@@ -622,7 +622,7 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.1",
             "transitive": [
-                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson"
             ]
         },
@@ -683,23 +683,23 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-util"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-util"
             ]
         },
-        "com.palantir.remoting:brave-extensions": {
+        "com.palantir.remoting1:brave-extensions": {
             "project": true
         },
-        "com.palantir.remoting:error-handling": {
+        "com.palantir.remoting1:error-handling": {
             "project": true
         },
         "io.dropwizard.metrics:metrics-annotation": {
@@ -848,7 +848,7 @@
         "io.zipkin.brave:brave-core": {
             "locked": "3.9.0",
             "transitive": [
-                "com.palantir.remoting:brave-extensions",
+                "com.palantir.remoting1:brave-extensions",
                 "io.zipkin.brave:brave-http"
             ]
         },
@@ -899,7 +899,7 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting1:error-handling",
                 "org.glassfish.jersey.containers:jersey-container-servlet",
                 "org.glassfish.jersey.containers:jersey-container-servlet-core",
                 "org.glassfish.jersey.core:jersey-client",
@@ -1156,8 +1156,8 @@
             "locked": "1.7.12",
             "transitive": [
                 "ch.qos.logback:logback-classic",
-                "com.palantir.remoting:brave-extensions",
-                "com.palantir.remoting:error-handling",
+                "com.palantir.remoting1:brave-extensions",
+                "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-logging",
