@@ -18,10 +18,10 @@ package com.palantir.remoting.clients;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.palantir.config.service.Duration;
-import com.palantir.config.service.ProxyConfiguration;
-import com.palantir.config.service.ServiceConfiguration;
-import com.palantir.remoting.ssl.SslSocketFactories;
+import com.palantir.remoting.config.service.Duration;
+import com.palantir.remoting.config.service.ProxyConfiguration;
+import com.palantir.remoting.config.service.ServiceConfiguration;
+import com.palantir.remoting.config.ssl.SslSocketFactories;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import org.immutables.value.Value;

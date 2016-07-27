@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.remoting.clients.ClientConfig;
-import com.palantir.remoting.http.BackoffStrategy;
+import com.palantir.remoting.jaxrs.feignimpl.BackoffStrategy;
 import feign.RetryableException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

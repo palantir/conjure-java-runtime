@@ -3,12 +3,26 @@ apply plugin: 'com.github.johnrengelman.shadow'
 dependencies {
     compile project(":error-handling")
     compile project(":ext:brave-extensions")
-    compile project(":feign-config")
     compile project(":http-clients-api")
+    compile project(":service-config")
+
+    compile "com.fasterxml.jackson.core:jackson-databind"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-guava"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk7"
+    compile "com.google.code.findbugs:jsr305"
+    compile "com.google.guava:guava"
+    compile "com.netflix.feign:feign-jackson"
+    compile("com.netflix.feign:feign-jaxrs") {
+        // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
+        exclude group: "javax.ws.rs", module: "jsr311-api"
+    }
+    compile "com.netflix.feign:feign-okhttp"
+    compile "io.zipkin.brave:brave-okhttp"
+    compile "javax.ws.rs:javax.ws.rs-api"
+    compile "org.slf4j:slf4j-api"
+    compile "com.netflix.feign:feign-slf4j"
 
     testCompile project(":http-servers")
-    testCompile files("lib/VersionTest.jar")
-
     testCompile "com.squareup.okhttp3:mockwebserver"
     testCompile "io.dropwizard:dropwizard-testing"
     testCompile "junit:junit"

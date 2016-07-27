@@ -20,12 +20,11 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting.jaxrs.JaxRsClient;
-import com.palantir.remoting.jaxrs.TestServer;
+import com.palantir.remoting.jaxrs.feignimpl.TestServer;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -37,6 +36,7 @@ import java.util.Collection;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public final class InputStreamDelegateDecoderTest {
     @ClassRule
@@ -49,7 +49,7 @@ public final class InputStreamDelegateDecoderTest {
 
     @Before
     public void before() {
-        delegate = mock(Decoder.class);
+        delegate = Mockito.mock(Decoder.class);
         inputStreamDelegateDecoder = new InputStreamDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();

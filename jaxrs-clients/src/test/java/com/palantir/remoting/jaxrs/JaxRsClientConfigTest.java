@@ -12,6 +12,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Included from Dropwizard's https://github.com/dropwizard/dropwizard/blob/b9e9e835fd5be10180a839a3f38ca93b9c8e0652/dropwizard-util/src/main/java/io/dropwizard/util/Duration.java
+ * under Apache2 license.
  */
 
 package com.palantir.remoting.jaxrs;
@@ -26,9 +29,9 @@ import static org.mockito.Mockito.when;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.palantir.remoting.clients.ClientConfig;
-import com.palantir.remoting.http.server.DropwizardTracingFilters;
-import com.palantir.remoting.ssl.SslConfiguration;
-import com.palantir.remoting.ssl.SslSocketFactories;
+import com.palantir.remoting.config.ssl.SslConfiguration;
+import com.palantir.remoting.config.ssl.SslSocketFactories;
+import com.palantir.remoting.server.DropwizardTracingFilters;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;

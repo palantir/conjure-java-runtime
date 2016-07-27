@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
 import com.palantir.remoting.jaxrs.JaxRsClient;
-import com.palantir.remoting.jaxrs.TestServer;
+import com.palantir.remoting.jaxrs.feignimpl.TestServer;
 import feign.codec.Encoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;

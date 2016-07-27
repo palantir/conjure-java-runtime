@@ -22,7 +22,7 @@ import static org.junit.Assert.assertThat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.palantir.config.service.ServiceConfiguration;
+import com.palantir.remoting.config.service.ServiceConfiguration;
 import java.nio.charset.StandardCharsets;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;

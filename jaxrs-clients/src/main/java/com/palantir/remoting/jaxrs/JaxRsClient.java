@@ -16,9 +16,9 @@
 
 package com.palantir.remoting.jaxrs;
 
-import com.palantir.config.service.ServiceConfiguration;
 import com.palantir.remoting.clients.ClientBuilder;
 import com.palantir.remoting.clients.ClientConfig;
+import com.palantir.remoting.config.service.ServiceConfiguration;
 
 /**
  * Static factory methods for producing creating JAX-RS HTTP proxies.
