@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.server;
+package com.palantir.remoting.servers;
 
-import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public final class RuntimeExceptionMapper extends JsonExceptionMapper<RuntimeException> {
+public final class WebApplicationExceptionMapper extends JsonExceptionMapper<WebApplicationException> {
 
-    public RuntimeExceptionMapper(boolean includeStackTrace) {
+    public WebApplicationExceptionMapper(boolean includeStackTrace) {
         super(includeStackTrace);
     }
 
     @Override
-    protected StatusType getStatus(RuntimeException exception) {
-        return Status.INTERNAL_SERVER_ERROR;
+    protected StatusType getStatus(WebApplicationException exception) {
+        return exception.getResponse().getStatusInfo();
     }
 }

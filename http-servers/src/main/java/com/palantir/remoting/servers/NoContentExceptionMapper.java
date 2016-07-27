@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.server;
+package com.palantir.remoting.servers;
 
+import javax.ws.rs.core.NoContentException;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
-public final class ExceptionMappers {
+@Provider
+public final class NoContentExceptionMapper implements ExceptionMapper<NoContentException> {
 
-    /** Java7-compatible version of Java8 Consumer. */
-    public interface Consumer<T> {
-        void accept(T object);
+    @Override
+    public Response toResponse(NoContentException exception) {
+        return Response.noContent().build();
     }
 
-    private ExceptionMappers() {}
-
-    public static void visitExceptionMappers(boolean includeStackTrace,
-            Consumer<ExceptionMapper<? extends Throwable>> consumer) {
-        consumer.accept(new IllegalArgumentExceptionMapper(includeStackTrace));
-        consumer.accept(new NoContentExceptionMapper());
-        consumer.accept(new RuntimeExceptionMapper(includeStackTrace));
-        consumer.accept(new WebApplicationExceptionMapper(includeStackTrace));
-    }
 }

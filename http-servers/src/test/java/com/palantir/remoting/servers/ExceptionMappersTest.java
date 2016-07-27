@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.server;
+package com.palantir.remoting.servers;
 
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting.server.ExceptionMappers.Consumer;
+import com.palantir.remoting.servers.ExceptionMappers.Consumer;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;

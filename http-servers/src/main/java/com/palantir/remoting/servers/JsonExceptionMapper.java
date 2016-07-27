@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.server;
+package com.palantir.remoting.servers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

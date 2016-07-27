@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.server;
+package com.palantir.remoting.servers;
 
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.StatusType;

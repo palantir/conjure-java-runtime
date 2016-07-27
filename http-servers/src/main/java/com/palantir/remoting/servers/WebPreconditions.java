@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.server;
+package com.palantir.remoting.servers;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;

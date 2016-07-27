@@ -18,9 +18,9 @@ package com.palantir.remoting.jaxrs.feignimpl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting.server.NoContentExceptionMapper;
-import com.palantir.remoting.server.OptionalAsNoContentMessageBodyWriter;
-import com.palantir.remoting.server.WebApplicationExceptionMapper;
+import com.palantir.remoting.servers.NoContentExceptionMapper;
+import com.palantir.remoting.servers.OptionalAsNoContentMessageBodyWriter;
+import com.palantir.remoting.servers.WebApplicationExceptionMapper;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;

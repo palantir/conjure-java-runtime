@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.server;
+package com.palantir.remoting.servers;
 
 import com.github.kristofa.brave.http.BraveHttpHeaders;
 import java.io.IOException;
