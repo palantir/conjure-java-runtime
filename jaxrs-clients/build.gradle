@@ -31,10 +31,14 @@ dependencies {
 
 shadowJar {
     mergeServiceFiles()
-    relocate('com.fasterxml.jackson', 'httpremoting.shaded.com.fasterxml.jackson')
+    relocate('com.fasterxml.jackson', 'httpremoting.shaded.com.fasterxml.jackson') {
+        exclude 'com.fasterxml.jackson.annotation.*'
+        exclude 'com.fasterxml.jackson.databind.annotation.*'
+    }
     relocate('feign', 'httpremoting.shaded.feign')
     relocate('zipkin', 'httpremoting.shaded.zipkin')
     relocate('okhttp3', 'httpremoting.shaded.okhttp3')
+    relocate('io.dropwizard', 'httpremoting.shaded.io.dropwizard')
     relocate('io.zipkin.brave', 'httpremoting.shaded.io.zipkin.brave')
     relocate('org.joda.time', 'httpremoting.shaded.org.joda.time')
     relocate('okio', 'httpremoting.shaded.okio')
