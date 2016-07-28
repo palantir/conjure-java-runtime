@@ -27,11 +27,19 @@ dependencies {
     testCompile "io.dropwizard:dropwizard-testing"
     testCompile "junit:junit"
     testCompile "org.hamcrest:hamcrest-all"
+
+    // Keep in sync with the dependencies excluded from shadowJar.
+    shadow project(':error-handling')
+    shadow project(':service-config')
+    shadow project(':ssl-config')
+    shadow "javax.ws.rs:javax.ws.rs-api"
+    shadow "com.fasterxml.jackson.core:jackson-databind"
+    shadow "com.fasterxml.jackson.datatype:jackson-datatype-guava"
+    shadow "com.fasterxml.jackson.datatype:jackson-datatype-jdk7"
 }
 
 shadowJar {
     mergeServiceFiles()
-    relocate('com.fasterxml.jackson', 'httpremoting.shaded.com.fasterxml.jackson')
     relocate('feign', 'httpremoting.shaded.feign')
     relocate('zipkin', 'httpremoting.shaded.zipkin')
     relocate('okhttp3', 'httpremoting.shaded.okhttp3')
@@ -39,6 +47,13 @@ shadowJar {
     relocate('org.joda.time', 'httpremoting.shaded.org.joda.time')
     relocate('okio', 'httpremoting.shaded.okio')
     relocate('com.github.kristofa.brave', 'httpremoting.shaded.com.github.kristofa.brave')
+    dependencies {
+        exclude(project(':error-handling'))
+        exclude(project(':service-config'))
+        exclude(project(':ssl-config'))
+        exclude(dependency { it.moduleGroup.contains("javax.ws.rs") })
+        exclude(dependency { it.moduleGroup.contains("com.fasterxml.jackson") })
+    }
     classifier = ''
 }
 
@@ -57,11 +72,11 @@ task checkLicenseInformation(dependsOn: 'shadowJar') << {
 }
 check.dependsOn checkLicenseInformation
 
-// Publishing, taken mostly from gradle/publish.gradle
+// Publishing, taken mostly from gradle/publish.gradle.
+// This thing is super-brittle, be very careful when making changes.
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'maven-publish'
-apply plugin: 'nebula.javadoc-jar'
-apply plugin: 'nebula.source-jar'
+apply plugin: 'nebula.maven-resolved-dependencies'
 
 publishing.publications {
     shadow(MavenPublication) {
