@@ -35,9 +35,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Attempts to convert a HTTP {@link Response} body as a JSON representation of a {@link SerializableError} and
- * re-create the original (or close-to) exception including exception type, message, and stacktrace. Creates
- * {@link RuntimeException} if the body cannot be interpreted as a {@link SerializableError}, or if the exception
- * otherwise fails to get re-created.
+ * re-create the original (or close-to) exception including exception type, message, and stacktrace. Creates {@link
+ * RuntimeException} if the body cannot be interpreted as a {@link SerializableError}, or if the exception otherwise
+ * fails to get re-created.
  */
 public final class SerializableErrorToExceptionConverter {
 
@@ -99,7 +99,7 @@ public final class SerializableErrorToExceptionConverter {
     }
 
     // wrappedException may be null to indicate an unknown cause
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "checkstyle:cyclomaticcomplexity"})
     private static RuntimeException constructException(String exceptionClassName, String message, int status,
             @CheckForNull Throwable wrappedException) {
         Class<? extends RuntimeException> exceptionClass;
@@ -126,6 +126,16 @@ public final class SerializableErrorToExceptionConverter {
                 try {
                     return exceptionClass.getConstructor(String.class, Throwable.class, int.class)
                             .newInstance(message, wrappedException, status);
+                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                        | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                    // use the most expressive constructor that exists in Jersey 1.x
+                    return new WebApplicationException(wrappedException, status);
+                }
+
+            case "javax.ws.rs.NotAuthorizedException":
+                try {
+                    return exceptionClass.getConstructor(String.class, Response.class, Throwable.class)
+                            .newInstance(message, Response.status(status).build(), wrappedException);
                 } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                         | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                     // use the most expressive constructor that exists in Jersey 1.x
