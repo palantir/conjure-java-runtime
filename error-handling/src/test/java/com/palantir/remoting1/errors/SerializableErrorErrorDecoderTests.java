@@ -30,9 +30,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.junit.Test;
 
@@ -45,6 +47,19 @@ public final class SerializableErrorErrorDecoderTests {
         testEncodingAndDecodingWebException(ClientErrorException.class, Status.NOT_ACCEPTABLE);
         testEncodingAndDecodingWebException(ServerErrorException.class, Status.BAD_GATEWAY);
         testEncodingAndDecodingWebException(WebApplicationException.class, Status.NOT_MODIFIED);
+    }
+
+    @Test
+    public void testNotAuthorizedException() throws Exception {
+        NotAuthorizedException originalException =
+                new NotAuthorizedException(message, Response.status(Status.UNAUTHORIZED).build());
+
+        Exception exception = encodeAndDecode(originalException);
+        assertThat(exception.getMessage(), is(message));
+        assertEquals(Status.UNAUTHORIZED, ((WebApplicationException) exception).getResponse().getStatusInfo());
+        assertThat(exception.getCause().getMessage(), is(message));
+        assertEquals(Status.UNAUTHORIZED,
+                ((WebApplicationException) exception.getCause()).getResponse().getStatusInfo());
     }
 
     @Test
