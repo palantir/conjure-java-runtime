@@ -102,5 +102,4 @@ bintrayUpload.onlyIf {
 }
 
 bintrayUpload.dependsOn { generatePomFileForShadowPublication }
-bintrayUpload.dependsOn { sourceJar }
 bintrayUpload.dependsOn { build }
