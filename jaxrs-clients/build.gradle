@@ -97,9 +97,5 @@ bintray {
     }
 }
 
-bintrayUpload.onlyIf {
-    project.version ==~ /\d+\.\d+\.\d+(-rc[0-9]+)?/
-}
-
 bintrayUpload.dependsOn { generatePomFileForShadowPublication }
 bintrayUpload.dependsOn { build }
