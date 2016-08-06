@@ -23,6 +23,7 @@ import com.palantir.remoting1.clients.ClientBuilder;
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.service.BasicCredentials;
 import com.palantir.remoting1.config.service.ProxyConfiguration;
+import com.palantir.remoting1.config.ssl.TrustContext;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -66,10 +67,9 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // SSL
-        if (config.sslSocketFactory().isPresent()) {
-            Preconditions.checkArgument(config.trustManager().isPresent(),
-                    "Internal error: ClientConfig provided SslSocketFactory, but no X509TrustManager");
-            client.sslSocketFactory(config.sslSocketFactory().get(), config.trustManager().get());
+        if (config.trustContext().isPresent()) {
+            TrustContext context = config.trustContext().get();
+            client.sslSocketFactory(context.sslSocketFactory(), context.x509TrustManager());
         }
 
         // proxy

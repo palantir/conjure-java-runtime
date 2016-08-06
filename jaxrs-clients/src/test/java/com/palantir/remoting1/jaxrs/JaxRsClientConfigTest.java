@@ -36,7 +36,6 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -157,10 +156,7 @@ public final class JaxRsClientConfigTest {
         String endpointUri = "https://localhost:" + port;
         SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
         return JaxRsClient.builder(
-                ClientConfig.builder()
-                        .sslSocketFactory(SslSocketFactories.createSslSocketFactory(sslConfig))
-                        .trustManager((X509TrustManager) SslSocketFactories.createTrustManagers(sslConfig)[0])
-                        .build())
+                ClientConfig.builder().trustContext(SslSocketFactories.createTrustContext(sslConfig)).build())
                 .build(TestEchoService.class, name, endpointUri);
     }
 
