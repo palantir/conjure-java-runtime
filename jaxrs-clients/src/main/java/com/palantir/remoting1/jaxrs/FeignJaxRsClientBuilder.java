@@ -26,13 +26,13 @@ import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
 import com.github.kristofa.brave.http.DefaultSpanNameProvider;
 import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.InetAddresses;
 import com.palantir.remoting1.clients.ClientBuilder;
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.service.BasicCredentials;
 import com.palantir.remoting1.config.service.ProxyConfiguration;
+import com.palantir.remoting1.config.ssl.TrustContext;
 import com.palantir.remoting1.ext.brave.SlfLoggingSpanCollector;
 import com.palantir.remoting1.jaxrs.feignimpl.BackoffStrategy;
 import com.palantir.remoting1.jaxrs.feignimpl.FailoverFeignTarget;
@@ -146,10 +146,9 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
 
         // SSL
-        if (config.sslSocketFactory().isPresent()) {
-            Preconditions.checkArgument(config.trustManager().isPresent(),
-                    "Internal error: ClientConfig provided SslSocketFactory, but no X509TrustManager");
-            client.sslSocketFactory(config.sslSocketFactory().get(), config.trustManager().get());
+        if (config.trustContext().isPresent()) {
+            TrustContext context = config.trustContext().get();
+            client.sslSocketFactory(context.sslSocketFactory(), context.x509TrustManager());
         }
 
         // timeouts

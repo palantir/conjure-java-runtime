@@ -84,6 +84,14 @@ public final class SslSocketFactories {
     }
 
     /**
+     * Create SSL socket factory and trust manager from the given configuration, see {@link #createX509TrustManager} and
+     * {@link #createSslSocketFactory}.
+     */
+    public static TrustContext createTrustContext(SslConfiguration config) {
+        return TrustContext.of(createSslSocketFactory(config), createX509TrustManager(config));
+    }
+
+    /**
      * Returns the first {@link TrustManager} initialized from the given configuration. This is always an {@link
      * javax.net.ssl.X509TrustManager}.
      */

@@ -17,13 +17,11 @@
 package com.palantir.remoting1.clients;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.palantir.remoting1.config.service.Duration;
 import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.service.ServiceConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
+import com.palantir.remoting1.config.ssl.TrustContext;
 import org.immutables.value.Value;
 
 /** Implementation-independent configuration options for HTTP-based dynamic proxies. */
@@ -37,10 +35,7 @@ public abstract class ClientConfig {
     private static final int MAX_NUM_RETRIES = 1;
 
     @Value.Parameter
-    public abstract Optional<SSLSocketFactory> sslSocketFactory();
-
-    @Value.Parameter
-    public abstract Optional<X509TrustManager> trustManager();
+    public abstract Optional<TrustContext> trustContext();
 
     @Value.Default
     public Duration connectTimeout() {
@@ -65,20 +60,12 @@ public abstract class ClientConfig {
         return MAX_NUM_RETRIES;
     }
 
-    @Value.Check
-    public void check() {
-        Preconditions.checkState(sslSocketFactory().isPresent() == trustManager().isPresent(),
-                "Must set either both SslSocketFactory and TrustManager, or neither");
-    }
-
     public static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
         ClientConfig.Builder clientConfig = builder();
 
         // ssl
         if (serviceConfig.security().isPresent()) {
-            clientConfig.sslSocketFactory(SslSocketFactories.createSslSocketFactory(serviceConfig.security().get()));
-            clientConfig.trustManager(
-                    (X509TrustManager) SslSocketFactories.createTrustManagers(serviceConfig.security().get())[0]);
+            clientConfig.trustContext(SslSocketFactories.createTrustContext(serviceConfig.security().get()));
         }
 
         // timeouts & proxy
