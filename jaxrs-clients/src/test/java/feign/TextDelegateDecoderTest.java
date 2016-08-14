@@ -29,6 +29,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
+import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.jaxrs.JaxRsClient;
 import com.palantir.remoting1.jaxrs.feignimpl.TestServer;
 import feign.codec.Decoder;
@@ -38,7 +39,6 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.MediaType;
 import org.junit.Assert;
 import org.junit.Before;
@@ -138,7 +138,7 @@ public final class TextDelegateDecoderTest {
         try {
             service.getOptionalString(null);
             Assert.fail();
-        } catch (NotFoundException e) {
+        } catch (RemoteException e) {
             assertThat(e.getMessage(), containsString("HTTP 404 Not Found"));
         }
     }

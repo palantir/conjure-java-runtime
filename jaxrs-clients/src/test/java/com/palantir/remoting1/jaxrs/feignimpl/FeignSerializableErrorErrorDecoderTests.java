@@ -48,7 +48,7 @@ public final class FeignSerializableErrorErrorDecoderTests {
     public void testNoContentType() {
         Response response = Response.create(400, "reason", ImmutableMap.<String, Collection<String>>of(), "errorbody",
                 feign.Util.UTF_8);
-        String expectedMessage = "Error 400. Reason: reason. Body content type: []. Body as String: errorbody";
+        String expectedMessage = "Error 400. Reason: reason. Body:\nerrorbody";
         checkExceptionAndMessage(response, expectedMessage);
     }
 

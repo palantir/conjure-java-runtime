@@ -16,8 +16,6 @@
 
 package com.palantir.remoting1.errors;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.List;
@@ -37,36 +35,28 @@ public abstract class SerializableError {
 
     public abstract String getMessage();
 
-    @JsonProperty("exceptionClass")
-    public abstract String getExceptionClassName();
-
-    /**
-     * @deprecated Use {@link #getExceptionClassName()} instead.
-     */
-    @Deprecated
-    @JsonIgnore
-    @SuppressWarnings("unchecked")
-    public final Class<? extends Exception> getExceptionClass() {
-        try {
-            return (Class<? extends Exception>) Class.forName(getExceptionClassName());
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    public abstract String getExceptionName();
 
     @Nullable
     public abstract List<StackTraceElement> getStackTrace();
 
+    /** Constructs a new error whose exception name is the fully-qualified name of the given class. */
     public static SerializableError of(String message, Class<? extends Exception> exceptionClass) {
-        return ImmutableSerializableError.builder().message(message).exceptionClassName(exceptionClass.getName())
+        return ImmutableSerializableError.builder()
+                .message(message)
+                .exceptionName(exceptionClass.getName())
                 .build();
     }
 
+    /**
+     * Constructs a new error whose exception name is the fully-qualified name of the given class, and with the given
+     * stack trace.
+     */
     public static SerializableError of(
             String message, Class<? extends Exception> exceptionClass, List<StackTraceElement> stackTrace) {
         return ImmutableSerializableError.builder()
                 .message(message)
-                .exceptionClassName(exceptionClass.getName())
+                .exceptionName(exceptionClass.getName())
                 .stackTrace(stackTrace)
                 .build();
     }

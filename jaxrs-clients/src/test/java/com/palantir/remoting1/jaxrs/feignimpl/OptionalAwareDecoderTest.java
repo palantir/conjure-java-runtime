@@ -22,11 +22,10 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.jaxrs.JaxRsClient;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotFoundException;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -65,7 +64,7 @@ public final class OptionalAwareDecoderTest {
 
     @Test
     public void testThrowsNotFound() {
-        expectedException.expect(NotFoundException.class);
+        expectedException.expect(RemoteException.class);
         expectedException.expectMessage(containsString("Not found"));
         service.getThrowsNotFound(null);
     }
@@ -73,7 +72,7 @@ public final class OptionalAwareDecoderTest {
     @Test
     public void testThrowsNotAuthorized() {
         // Throws RuntimeException since no exception mapper is registered.
-        expectedException.expect(RuntimeException.class);
+        expectedException.expect(RemoteException.class);
         expectedException.expectMessage(containsString("Unauthorized"));
         service.getThrowsNotAuthorized(null);
     }
@@ -81,21 +80,21 @@ public final class OptionalAwareDecoderTest {
     @Test
     public void testOptionalThrowsNotAuthorized() {
         // Throws RuntimeException since no exception mapper is registered.
-        expectedException.expect(RuntimeException.class);
+        expectedException.expect(RemoteException.class);
         expectedException.expectMessage(containsString("Unauthorized"));
         service.getOptionalThrowsNotAuthorized(null);
     }
 
     @Test
     public void testThrowsFordidden() {
-        expectedException.expect(ForbiddenException.class);
+        expectedException.expect(RemoteException.class);
         expectedException.expectMessage(containsString("Forbidden"));
         service.getThrowsForbidden(null);
     }
 
     @Test
     public void testOptionalThrowsFordidden() {
-        expectedException.expect(ForbiddenException.class);
+        expectedException.expect(RemoteException.class);
         expectedException.expectMessage(containsString("Forbidden"));
         service.getOptionalThrowsForbidden(null);
     }

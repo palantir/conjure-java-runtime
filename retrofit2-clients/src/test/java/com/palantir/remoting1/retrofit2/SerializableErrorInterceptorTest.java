@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.errors.SerializableError;
 import java.io.IOException;
 import javax.xml.ws.WebServiceException;
@@ -113,7 +114,7 @@ public final class SerializableErrorInterceptorTest {
                 .setResponseCode(400);
         server.enqueue(mockResponse);
 
-        expectedException.expect(WebServiceException.class);
+        expectedException.expect(RemoteException.class);
         expectedException.expectMessage("error message");
         service.get().execute();
     }
