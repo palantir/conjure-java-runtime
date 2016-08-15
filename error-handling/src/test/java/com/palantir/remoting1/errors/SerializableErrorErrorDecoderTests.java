@@ -41,6 +41,7 @@ import org.junit.Test;
 public final class SerializableErrorErrorDecoderTests {
 
     private static final String message = "hello";
+    private static final int STATUS_42 = 42;
 
     @Test
     public void testWebApplicationExceptions() {
@@ -70,21 +71,21 @@ public final class SerializableErrorErrorDecoderTests {
 
     @Test
     public void testTextPlainException() {
-        Exception decode = decode(MediaType.TEXT_PLAIN, 42, "errorbody");
+        Exception decode = decode(MediaType.TEXT_PLAIN, STATUS_42, "errorbody");
         assertThat(decode, is(instanceOf(RuntimeException.class)));
         assertThat(decode.getMessage(), is("Error 42. Reason: reason. Body:\nerrorbody"));
     }
 
     @Test
     public void testTextHtmlException() {
-        Exception decode = decode(MediaType.TEXT_HTML, 42, "errorbody");
+        Exception decode = decode(MediaType.TEXT_HTML, STATUS_42, "errorbody");
         assertThat(decode, is(instanceOf(RuntimeException.class)));
         assertThat(decode.getMessage(), is("Error 42. Reason: reason. Body:\nerrorbody"));
     }
 
     @Test
     public void testNonTextException() {
-        Exception decode = decode(MediaType.MULTIPART_FORM_DATA, 42, "errorbody");
+        Exception decode = decode(MediaType.MULTIPART_FORM_DATA, STATUS_42, "errorbody");
         assertThat(decode, is(instanceOf(RuntimeException.class)));
         assertThat(decode.getMessage(),
                 is("Error 42. Reason: reason. Body:\nerrorbody"));
@@ -92,7 +93,7 @@ public final class SerializableErrorErrorDecoderTests {
 
     @Test
     public void testExceptionInErrorParsing() {
-        Exception decode = decode(MediaType.APPLICATION_JSON, 42, "notjsonifiable!");
+        Exception decode = decode(MediaType.APPLICATION_JSON, STATUS_42, "notjsonifiable!");
         assertThat(decode, is(instanceOf(RuntimeException.class)));
         assertThat(decode.getMessage(), is(
                 "Error 42. Reason: reason. Failed to parse error body and deserialize exception: "
@@ -103,7 +104,7 @@ public final class SerializableErrorErrorDecoderTests {
 
     @Test
     public void testNullBody() {
-        Exception decode = decode(MediaType.APPLICATION_JSON, 42, null);
+        Exception decode = decode(MediaType.APPLICATION_JSON, STATUS_42, null);
         assertThat(decode, is(instanceOf(RuntimeException.class)));
         assertThat(decode.getMessage(), is("42 reason"));
     }
@@ -113,10 +114,10 @@ public final class SerializableErrorErrorDecoderTests {
         Object error = SerializableError.of("msg", IllegalArgumentException.class,
                 Lists.newArrayList(new RuntimeException().getStackTrace()));
         String json = new ObjectMapper().writeValueAsString(error);
-        RemoteException decode = (RemoteException) decode(MediaType.APPLICATION_JSON, 42, json);
+        RemoteException decode = (RemoteException) decode(MediaType.APPLICATION_JSON, STATUS_42, json);
 
         assertThat(decode.getMessage(), is("msg"));
-        assertThat(decode.getStatus(), is(42));
+        assertThat(decode.getStatus(), is(STATUS_42));
         assertThat(decode.getStackTrace()[0].getMethodName(), is("getException"));
         assertThat(decode.getCause(), is(nullValue()));
         assertThat(decode.getRemoteException().getExceptionName(), is(IllegalArgumentException.class.getName()));
