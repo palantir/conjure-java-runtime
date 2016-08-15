@@ -16,6 +16,7 @@
 
 package com.palantir.remoting1.errors;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.List;
@@ -35,6 +36,8 @@ public abstract class SerializableError {
 
     public abstract String getMessage();
 
+    // TODO(rfink) This needs to get renamed once a wire-break is acceptable.
+    @JsonProperty("exceptionClass")
     public abstract String getExceptionName();
 
     @Nullable
