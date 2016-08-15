@@ -26,7 +26,7 @@ public final class DropwizardServers {
 
     /**
      * Server-side stacktraces are serialized and transferred to the client iff {@code serializeStacktrace} is {@code
-     * true}.Configures a Dropwizard/Jersey server w.r.t. http-remoting conventions: registers tracer filters and
+     * true}. Configures a Dropwizard/Jersey server w.r.t. http-remoting conventions: registers tracer filters and
      * exception mappers.
      */
     public static void configure(
