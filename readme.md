@@ -1,52 +1,34 @@
 [![CircleCI Build Status](https://circleci.com/gh/palantir/http-remoting/tree/develop.svg?style=shield)](https://circleci.com/gh/palantir/http-remoting)
 [![Download](https://api.bintray.com/packages/palantir/releases/http-remoting/images/download.svg) ](https://bintray.com/palantir/releases/http-remoting/_latestVersion)
 
-HTTP Remoting Utilities
-=======================
+## HTTP Remoting Utilities
 This repository holds a small collection of useful utilities for use with HTTP Remoting setups,
-in particular those that use Feign as a client and Jersey as a server.
+in particular those that use Feign or Retrofit as a client and Jersey as a server.
 
-While allowing for further customizations, this library makes the following opinionated choices
-regarding the interplay of Java and HTTP interfaces:
-- Server-side Java exceptions are serialized as JSON objects. Client-side error deserializers
-  rethrow the original exception if possible, or a RuntimeException else.
-- `Optional<>` service interfaces give rise to a 204 HTTP response code to encode `Optional#absent`.
-  Client-side, 204 response codes are translated back to `Optional#absent`.
-- `String` service interfaces are supported for HTTP media type TEXT_PLAIN.
-
-http-clients
-------------
-Provides Feign decoders for translating HTTP error codes to appropriate JAX-RS Java exceptions,
+- **jaxrs-clients**: Provides Feign decoders for translating HTTP error codes to appropriate JAX-RS Java exceptions,
 and utilities for creating Feign clients in commonly used configurations. Additionally,
 offers a basic round-robin failover client configuration for basic failover between multiple
 equivalent endpoints.
 
-retrofit-clients
-----------------
-Similar to `http-clients`, but generates proxies using the [Retrofit](http://square.github.io/retrofit/)
-library.
+- **retrofit-clients, retrofit2-clients**: Similar to `http-clients`, but generates proxies using the
+  [Retrofit](http://square.github.io/retrofit/) library.
 
-ssl-config
-----------
-Provides utilities for interacting with Java trust stores and key stores and acquiring
-`SSLSocketFactory` instances using those stores, as well as a configuration class for
-use in server configuration files.
+- **service-config**: Provides classes for setting up service clients from file-based or programmatic configuration.
 
-error-handling
---------------
-Provides utilities for relaying Java exceptions across JVM boundaries by serializing exceptions
-as JSON POJOs.
+- **ssl-config**: Provides utilities for interacting with Java trust stores and key stores and acquiring
+  `SSLSocketFactory` instances using those stores, as well as a configuration class for use in server configuration
+  files.
 
-http-servers
-------------
-Provides Dropwizard/Jersey exception mappers for translating common JAX-RS exceptions to
-appropriate HTTP error codes.
+- **error-handling**: Provides utilities for relaying Java exceptions across JVM boundaries by serializing exceptions
+  as JSON POJOs.
 
-Usage
-=====
+- **http-servers**: Provides Dropwizard/Jersey exception mappers for translating common JAX-RS exceptions to
+  appropriate HTTP error codes.
 
-ssl-config
-----------
+
+## Usage
+
+### ssl-config
 The `SslConfiguration` class specifies the configuration that should be used for a particular
 `SSLContext`. The configuration is required to include information for creating a trust store and
 can optionally be provided with information for creating a key store (for client authentication).
@@ -110,25 +92,36 @@ The `pkcs1-reader-sun` does not include any extra dependencies, but assumes the 
 available as part of most popular JVM implementations, including the Oracle and OpenJDK JVMs for
 Java 7 and Java 8.
 
-Add Dependency Using Gradle
----------------------------
+### Add Dependency Using Gradle
 
-    repositories {
-      jcenter()
-    }
-    dependencies {
-      compile "com.palantir.remoting:http-clients:$version"
-      compile "com.palantir.remoting:retrofit-clients:$version"
-      compile "com.palantir.remoting:http-servers:$version"
-      compile "com.palantir.remoting:ssl-config:$version"
-      compile "com.palantir.remoting:error-handling:$version"
-      // support for PEM key store type using Bouncy Castle libraries
-      // compile "com.palantir.remoting:pkcs1-reader-bouncy-castle:$version"
-      // support for PEM key store type using Sun libraries
-      // compile "com.palantir.remoting:pkcs1-reader-sun:$version"
-    }
+```groovy
+repositories {
+  jcenter()
+}
+dependencies {
+  compile "com.palantir.remoting:http-clients:$version"
+  compile "com.palantir.remoting:retrofit-clients:$version"
+  compile "com.palantir.remoting:http-servers:$version"
+  compile "com.palantir.remoting:ssl-config:$version"
+  compile "com.palantir.remoting:error-handling:$version"
+  // support for PEM key store type using Bouncy Castle libraries
+  // compile "com.palantir.remoting:pkcs1-reader-bouncy-castle:$version"
+  // support for PEM key store type using Sun libraries
+  // compile "com.palantir.remoting:pkcs1-reader-sun:$version"
+}
+```
 
 
-License
--------
+## API Contracts
+
+While allowing for further customizations, this library makes the following opinionated choices
+regarding the interplay of Java and HTTP interfaces:
+- Server-side Java exceptions are serialized as JSON objects. Client-side error deserializers
+  rethrow the original exception if possible, or a RuntimeException else.
+- `Optional<>` service interfaces give rise to a 204 HTTP response code to encode `Optional#absent`.
+  Client-side, 204 response codes are translated back to `Optional#absent`.
+- `String` service interfaces are supported for HTTP media type TEXT_PLAIN.
+
+
+## License
 This repository is made available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
