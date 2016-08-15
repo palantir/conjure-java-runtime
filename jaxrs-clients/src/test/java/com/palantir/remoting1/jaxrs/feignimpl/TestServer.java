@@ -18,9 +18,7 @@ package com.palantir.remoting1.jaxrs.feignimpl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting1.servers.NoContentExceptionMapper;
-import com.palantir.remoting1.servers.OptionalAsNoContentMessageBodyWriter;
-import com.palantir.remoting1.servers.WebApplicationExceptionMapper;
+import com.palantir.remoting1.servers.DropwizardServers;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -46,11 +44,7 @@ public class TestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(new TestResource());
-        env.jersey().register(new OptionalAsNoContentMessageBodyWriter());
-
-        // Not registering all mappers so that we can test behaviour for exceptions without registered mapper.
-        env.jersey().register(new NoContentExceptionMapper());
-        env.jersey().register(new WebApplicationExceptionMapper(true));
+        DropwizardServers.configure(env, config, "unused tracer name", true /** ship stacktraces */);
     }
 
     static class TestResource implements TestService {

@@ -33,7 +33,7 @@ import javax.ws.rs.core.NoContentException;
  * instead throws {@link NoContentException}.
  */
 @Produces(MediaType.APPLICATION_JSON)
-public final class OptionalAsNoContentMessageBodyWriter extends OptionalMessageBodyWriter {
+final class OptionalAsNoContentMessageBodyWriter extends OptionalMessageBodyWriter {
 
     @Override
     public void writeTo(Optional<?> entity,

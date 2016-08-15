@@ -42,7 +42,7 @@ import java.util.Random;
 import javax.servlet.DispatcherType;
 
 /** Static utilities for registering Brave/Zipkin filters with Dropwizard applications. */
-public final class DropwizardTracingFilters {
+final class DropwizardTracingFilters {
 
     private DropwizardTracingFilters() {}
 
@@ -54,7 +54,7 @@ public final class DropwizardTracingFilters {
      * <p>
      * TODO(rfink) Is there a more stable way to retrieve IP/Port information?
      */
-    public static void registerTracers(Environment environment, Configuration config, String tracerName) {
+    static void registerTracers(Environment environment, Configuration config, String tracerName) {
         ServerTracer serverTracer = getServerTracer(extractIp(config), extractPort(config), tracerName);
         environment.jersey().register(new BraveContainerRequestFilter(
                 new ServerRequestInterceptor(serverTracer),

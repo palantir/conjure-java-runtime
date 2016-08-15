@@ -18,16 +18,16 @@ package com.palantir.remoting1.servers;
 
 import javax.ws.rs.ext.ExceptionMapper;
 
-public final class ExceptionMappers {
+final class ExceptionMappers {
 
     /** Java7-compatible version of Java8 Consumer. */
-    public interface Consumer<T> {
+    interface Consumer<T> {
         void accept(T object);
     }
 
     private ExceptionMappers() {}
 
-    public static void visitExceptionMappers(boolean includeStackTrace,
+    static void visitExceptionMappers(boolean includeStackTrace,
             Consumer<ExceptionMapper<? extends Throwable>> consumer) {
         consumer.accept(new IllegalArgumentExceptionMapper(includeStackTrace));
         consumer.accept(new NoContentExceptionMapper());

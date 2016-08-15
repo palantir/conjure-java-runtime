@@ -21,9 +21,9 @@ import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalArgumentException> {
+final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalArgumentException> {
 
-    public IllegalArgumentExceptionMapper(boolean includeStackTrace) {
+    IllegalArgumentExceptionMapper(boolean includeStackTrace) {
         super(includeStackTrace);
     }
 
