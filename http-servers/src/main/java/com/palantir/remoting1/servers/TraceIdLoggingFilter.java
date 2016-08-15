@@ -27,11 +27,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.MDC;
 
-public enum TraceIdLoggingFilter implements Filter {
+enum TraceIdLoggingFilter implements Filter {
     INSTANCE;
 
     /** The key under which trace ids are inserted into SLF4J {@link org.slf4j.MDC MDCs}. */
-    public static final String MDC_KEY = "traceId";
+    static final String MDC_KEY = "traceId";
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {}

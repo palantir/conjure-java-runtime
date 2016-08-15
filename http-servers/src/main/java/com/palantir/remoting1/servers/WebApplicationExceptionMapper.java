@@ -21,9 +21,9 @@ import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public final class WebApplicationExceptionMapper extends JsonExceptionMapper<WebApplicationException> {
+final class WebApplicationExceptionMapper extends JsonExceptionMapper<WebApplicationException> {
 
-    public WebApplicationExceptionMapper(boolean includeStackTrace) {
+    WebApplicationExceptionMapper(boolean includeStackTrace) {
         super(includeStackTrace);
     }
 

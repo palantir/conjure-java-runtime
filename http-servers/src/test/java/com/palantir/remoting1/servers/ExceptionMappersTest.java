@@ -20,7 +20,6 @@ package com.palantir.remoting1.servers;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting1.servers.ExceptionMappers.Consumer;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -38,7 +37,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.ExceptionMapper;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -94,13 +92,7 @@ public final class ExceptionMappersTest {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new ExceptionTestResource());
-
-            ExceptionMappers.visitExceptionMappers(false, new Consumer<ExceptionMapper<? extends Throwable>>() {
-                @Override
-                public void accept(ExceptionMapper<? extends Throwable> mapper) {
-                    env.jersey().register(mapper);
-                }
-            });
+            DropwizardServers.configure(env, config, "unused tracer name", true);
         }
     }
 

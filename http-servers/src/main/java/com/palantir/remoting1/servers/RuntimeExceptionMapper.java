@@ -21,9 +21,9 @@ import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public final class RuntimeExceptionMapper extends JsonExceptionMapper<RuntimeException> {
+final class RuntimeExceptionMapper extends JsonExceptionMapper<RuntimeException> {
 
-    public RuntimeExceptionMapper(boolean includeStackTrace) {
+    RuntimeExceptionMapper(boolean includeStackTrace) {
         super(includeStackTrace);
     }
 
