@@ -70,7 +70,7 @@ public final class OptionalAwareDecoderTest {
             fail();
         } catch (RemoteException e) {
             assertThat(e.getMessage(), containsString("Not found"));
-            assertThat(e.getRemoteException().getExceptionName(), is("javax.ws.rs.NotFoundException"));
+            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.NotFoundException"));
         }
     }
 
@@ -81,7 +81,7 @@ public final class OptionalAwareDecoderTest {
             fail();
         } catch (RemoteException e) {
             assertThat(e.getMessage(), containsString("Unauthorized"));
-            assertThat(e.getRemoteException().getExceptionName(), is("javax.ws.rs.NotAuthorizedException"));
+            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.NotAuthorizedException"));
         }
     }
 
@@ -92,7 +92,7 @@ public final class OptionalAwareDecoderTest {
             fail();
         } catch (RemoteException e) {
             assertThat(e.getMessage(), containsString("Unauthorized"));
-            assertThat(e.getRemoteException().getExceptionName(), is("javax.ws.rs.NotAuthorizedException"));
+            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.NotAuthorizedException"));
         }
     }
 
@@ -103,7 +103,7 @@ public final class OptionalAwareDecoderTest {
             fail();
         } catch (RemoteException e) {
             assertThat(e.getMessage(), containsString("Forbidden"));
-            assertThat(e.getRemoteException().getExceptionName(), is("javax.ws.rs.ForbiddenException"));
+            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.ForbiddenException"));
         }
     }
 
@@ -114,7 +114,7 @@ public final class OptionalAwareDecoderTest {
             fail();
         } catch (RemoteException e) {
             assertThat(e.getMessage(), containsString("Forbidden"));
-            assertThat(e.getRemoteException().getExceptionName(), is("javax.ws.rs.ForbiddenException"));
+            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.ForbiddenException"));
         }
     }
 }

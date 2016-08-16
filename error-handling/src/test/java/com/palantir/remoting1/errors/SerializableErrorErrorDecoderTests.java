@@ -58,7 +58,7 @@ public final class SerializableErrorErrorDecoderTests {
         RemoteException exception = (RemoteException) encodeAndDecode(originalException);
         assertThat(exception.getCause(), is(nullValue()));
         assertThat(exception.getStatus(), is(Status.UNAUTHORIZED.getStatusCode()));
-        assertThat(exception.getRemoteException().getExceptionName(), is(NotAuthorizedException.class.getName()));
+        assertThat(exception.getRemoteException().getErrorName(), is(NotAuthorizedException.class.getName()));
         assertThat(exception.getMessage(), is(message));
     }
 
@@ -120,7 +120,7 @@ public final class SerializableErrorErrorDecoderTests {
         assertThat(decode.getStatus(), is(STATUS_42));
         assertThat(decode.getStackTrace()[0].getMethodName(), is("getException"));
         assertThat(decode.getCause(), is(nullValue()));
-        assertThat(decode.getRemoteException().getExceptionName(), is(IllegalArgumentException.class.getName()));
+        assertThat(decode.getRemoteException().getErrorName(), is(IllegalArgumentException.class.getName()));
         assertThat(decode.getRemoteException().getMessage(), is("msg"));
         assertThat(decode.getRemoteException().getStackTrace().get(0).getMethodName(),
                 is("testRemoteExceptionCarriesSerializedError"));
@@ -167,7 +167,7 @@ public final class SerializableErrorErrorDecoderTests {
         RemoteException exception = (RemoteException) encodeAndDecode(exceptionToProcess);
         assertThat(exception.getCause(), is(nullValue()));
         assertThat(exception.getStatus(), is(status.getStatusCode()));
-        assertThat(exception.getRemoteException().getExceptionName(), is(exceptionClass.getName()));
+        assertThat(exception.getRemoteException().getErrorName(), is(exceptionClass.getName()));
         assertThat(exception.getMessage(), is(message));
     }
 
