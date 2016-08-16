@@ -17,6 +17,7 @@
 package com.palantir.remoting1.servers;
 
 import com.github.kristofa.brave.http.BraveHttpHeaders;
+import java.io.Closeable;
 import java.io.IOException;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -39,16 +40,32 @@ enum TraceIdLoggingFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+        try (Closeable ignored = populateTraceContext(request)) {
+            chain.doFilter(request, response);
+        }
+    }
+
+    private Closeable populateTraceContext(ServletRequest request) {
         if (request instanceof HttpServletRequest) {
             HttpServletRequest httpRequest = (HttpServletRequest) request;
             String traceId = httpRequest.getHeader(BraveHttpHeaders.TraceId.getName());
             if (traceId != null) {
-                MDC.put(MDC_KEY, traceId);
+                return MDC.putCloseable(MDC_KEY, traceId);
             }
         }
-        chain.doFilter(request, response);
+        return NoOpCloseable.INSTANCE;
     }
 
     @Override
     public void destroy() {}
+
+    private enum NoOpCloseable implements Closeable {
+        INSTANCE;
+
+        @Override
+        public void close() {
+            // no-op
+        }
+    }
+
 }

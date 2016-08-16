@@ -16,28 +16,101 @@
 
 package com.palantir.remoting1.servers;
 
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.github.kristofa.brave.http.BraveHttpHeaders;
+import java.io.IOException;
+import java.util.Map;
 import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.MDC;
 
 public final class TraceIdLoggingFilterTest {
 
+    private static final String TRACE_ID = "myTraceId";
+
+    @Before
+    public void setUp() throws Exception {
+        MDC.clear();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        Map<String, String> contextMap = MDC.getCopyOfContextMap();
+        if (contextMap != null) {
+            assertThat(contextMap.entrySet(), empty());
+        }
+    }
+
     @Test
     public void testFilter_setsMdcIfTraceIdHeaderIsPresent() throws Exception {
         HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getHeader(BraveHttpHeaders.TraceId.getName())).thenReturn("myTraceId");
+        when(request.getHeader(BraveHttpHeaders.TraceId.getName())).thenReturn(TRACE_ID);
         HttpServletResponse response = mock(HttpServletResponse.class);
-        FilterChain chain = mock(FilterChain.class);
+        FilterChain chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest request, ServletResponse response)
+                    throws IOException, ServletException {
+                assertThat(MDC.get(TraceIdLoggingFilter.MDC_KEY), is(TRACE_ID));
+            }
+        };
 
         TraceIdLoggingFilter.INSTANCE.doFilter(request, response, chain);
-        assertThat(MDC.get(TraceIdLoggingFilter.MDC_KEY), is("myTraceId"));
+        assertThat(MDC.get(TraceIdLoggingFilter.MDC_KEY), is(nullValue()));
+    }
+
+
+    @Test
+    public void testFilter_setsMdcIfTraceIdHeaderIsNotPresent() throws Exception {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getHeader(BraveHttpHeaders.TraceId.getName())).thenReturn(null);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        FilterChain chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest request, ServletResponse response)
+                    throws IOException, ServletException {
+                assertThat(MDC.get(TraceIdLoggingFilter.MDC_KEY), is(nullValue()));
+            }
+        };
+
+        TraceIdLoggingFilter.INSTANCE.doFilter(request, response, chain);
+        assertThat(MDC.get(TraceIdLoggingFilter.MDC_KEY), is(nullValue()));
+    }
+
+    @Test
+    public void testFilter_clearsMdc() throws Exception {
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        when(request.getHeader(BraveHttpHeaders.TraceId.getName())).thenReturn(TRACE_ID);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+        FilterChain chain = new FilterChain() {
+            @Override
+            public void doFilter(ServletRequest request, ServletResponse response)
+                    throws IOException, ServletException {
+                assertThat(MDC.get(TraceIdLoggingFilter.MDC_KEY), is("myTraceId"));
+                throw new IOException("expected");
+            }
+        };
+
+        try {
+            TraceIdLoggingFilter.INSTANCE.doFilter(request, response, chain);
+            fail("Expected exception");
+        } catch (IOException expected) {
+            assertThat(expected.getMessage(), is("expected"));
+        } finally {
+            assertThat(MDC.get(TraceIdLoggingFilter.MDC_KEY), is(nullValue()));
+        }
     }
 }
