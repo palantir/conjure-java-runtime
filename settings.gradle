@@ -1,7 +1,7 @@
 include ':ext:brave-extensions'
 include 'error-handling'
 include 'http-clients-api'
-include 'http-servers'
+include 'dropwizard-servers'
 include 'jaxrs-clients'
 include 'jaxrs-clients-compat-test'
 include 'pkcs1-reader-bouncy-castle'
