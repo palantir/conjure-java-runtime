@@ -92,7 +92,7 @@ public final class ExceptionMappersTest {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new ExceptionTestResource());
-            DropwizardServers.configure(env, config, "unused tracer name", true);
+            DropwizardServers.configure(env, config, "unused tracer name", DropwizardServers.Stacktraces.PROPAGATE);
         }
     }
 
