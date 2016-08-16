@@ -56,7 +56,5 @@ public final class ObjectMappersTest {
     @Test
     public void testMappersReturnNewInstance() {
         assertNotSame(ObjectMappers.guavaJdk7(), ObjectMappers.guavaJdk7());
-        assertNotSame(ObjectMappers.vanilla(), ObjectMappers.vanilla());
     }
-
 }
