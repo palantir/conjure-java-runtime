@@ -61,7 +61,11 @@ public class MyServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(new MyResource());
-        DropwizardServers.configure(env, config, MyServerc.class.getSimpleName(), false /** do not ship stacktraces */);
+        DropwizardServers.configure(
+                env,
+                config,
+                MyServer.class.getSimpleName(),
+                DropwizardServers.Stacktraces.DO_NOT_PROPAGATE);
     }
 }
 ```
@@ -173,16 +177,30 @@ cannot be handled by this object mapper.
 The `DropwizardServers#configure` routine installs exception mappers for `IllegalArgumentException`,
 `NoContentException`, `RuntimeException` and `WebApplicationException`. The exception mapper sets the response media
 type to `application/json` and returns as response body a JSON representation of a `SerializableError` capturing the
-message, exception name, and optionally stacktrace of the exception.
+message, exception name, and optionally stacktrace of the exception. Both JaxRsClient and Retrofit2Client intercept
+non-successful HTTP responses and throw a `RemoteException` wrapping the deserialized server-side `SerializableError`.
+The error name of the `RemoteException` is defined by the service API and clients should switch&dispatch based on the
+error name. The `SerializableError` format is:
 
-Both JaxRsClient and Retrofit2Client intercept non-successful HTTP responses and throw a `RemoteException` wrapping the
-deserialized server-side `SerializableError`. The error name of the `RemoteException` is defined by the service API and
-clients should switch&dispatch based on the error name.
+```json
+{
+  "message": "A string explaning the error",
+  "exceptionClass": "applicationSpecificErrorName",
+  "stackTrace": [ {"methodName":"...","fileName":"...","lineNumber":...,"className":"...","nativeMethod":false, {...} ]
+}
+```
+
+Note that the JSON field `exceptionClass` carries this name for historic and back-compatibility reasons and will be
+changed to `errorName` in a future version of this library. The optional `stackTrace` field contains a list of
+serialized Java `StackTraceElement` objects indicating the server-side stack trace at the time of the exception. A
+future version of http-remoting may replace the stack trace mechanism with a more OS-independent API for relaying stack
+traces.
 
 #### Optional return values
 When a call to a service interface declaring an `Optional<T>` return value with media type `application/json` yields:
-- a `Optional#empty` return value, then the HTTP response has error code 204.
-- a non-empty return value, then the HTTP reponse carries the deserialized `T` object, rather than
+- a `Optional#empty` return value, then the HTTP response has error code 204 and an empty response body.
+- a non-empty return value, then the HTTP response has error code 200 and the body carries the deserialized `T` object
+  directly, rather than a deserialized `Optional<T>` object.
 
 Declaring `Optional<>` return values with media type `text/plain` is discouraged since the behavior may be unexpected,
 cf.
@@ -200,7 +218,7 @@ headers into all requests which get propagated by Jetty servers into subsequent 
 
 #### Endpoints returning plain strings
 
-Endpoints returning plan strings should produce media type `text/plain`. Return type `Optional<String>` is only
+Endpoints returning plain strings should produce media type `text/plain`. Return type `Optional<String>` is only
 supported for media type `application/json`.
 
 #### Failover
