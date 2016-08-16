@@ -54,7 +54,6 @@ public final class RetrofitSerializableErrorErrorDecoderTests {
                 RetrofitError.httpError("url", response, new GsonConverter(new Gson()), String.class);
         Throwable error = decoder.handleError(retrofitError);
         assertThat(error, is(instanceOf(RuntimeException.class)));
-        assertThat(error.getMessage(),
-                is("Error 400. Reason: reason. Body content type: []. Body as String: errorbody"));
+        assertThat(error.getMessage(), is("Error 400. Reason: reason. Body:\nerrorbody"));
     }
 }

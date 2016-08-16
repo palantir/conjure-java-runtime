@@ -19,14 +19,14 @@ package com.palantir.remoting1.jaxrs.feignimpl;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.jaxrs.JaxRsClient;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
-import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.NotFoundException;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -65,38 +65,56 @@ public final class OptionalAwareDecoderTest {
 
     @Test
     public void testThrowsNotFound() {
-        expectedException.expect(NotFoundException.class);
-        expectedException.expectMessage(containsString("Not found"));
-        service.getThrowsNotFound(null);
+        try {
+            service.getThrowsNotFound(null);
+            fail();
+        } catch (RemoteException e) {
+            assertThat(e.getMessage(), containsString("Not found"));
+            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.NotFoundException"));
+        }
     }
 
     @Test
     public void testThrowsNotAuthorized() {
-        // Throws RuntimeException since no exception mapper is registered.
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage(containsString("Unauthorized"));
-        service.getThrowsNotAuthorized(null);
+        try {
+            service.getThrowsNotAuthorized(null);
+            fail();
+        } catch (RemoteException e) {
+            assertThat(e.getMessage(), containsString("Unauthorized"));
+            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.NotAuthorizedException"));
+        }
     }
 
     @Test
     public void testOptionalThrowsNotAuthorized() {
-        // Throws RuntimeException since no exception mapper is registered.
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage(containsString("Unauthorized"));
-        service.getOptionalThrowsNotAuthorized(null);
+        try {
+            service.getOptionalThrowsNotAuthorized(null);
+            fail();
+        } catch (RemoteException e) {
+            assertThat(e.getMessage(), containsString("Unauthorized"));
+            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.NotAuthorizedException"));
+        }
     }
 
     @Test
     public void testThrowsFordidden() {
-        expectedException.expect(ForbiddenException.class);
-        expectedException.expectMessage(containsString("Forbidden"));
-        service.getThrowsForbidden(null);
+        try {
+            service.getThrowsForbidden(null);
+            fail();
+        } catch (RemoteException e) {
+            assertThat(e.getMessage(), containsString("Forbidden"));
+            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.ForbiddenException"));
+        }
     }
 
     @Test
     public void testOptionalThrowsFordidden() {
-        expectedException.expect(ForbiddenException.class);
-        expectedException.expectMessage(containsString("Forbidden"));
-        service.getOptionalThrowsForbidden(null);
+        try {
+            service.getOptionalThrowsForbidden(null);
+            fail();
+        } catch (RemoteException e) {
+            assertThat(e.getMessage(), containsString("Forbidden"));
+            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.ForbiddenException"));
+        }
     }
 }
