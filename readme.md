@@ -196,6 +196,31 @@ serialized Java `StackTraceElement` objects indicating the server-side stack tra
 future version of http-remoting may replace the stack trace mechanism with a more OS-independent API for relaying stack
 traces.
 
+#### Serialization of Optional and Nullable objects
+`@Nullable` or `Optional<?>` fields in complex types are serialized using the standard Jackson mechanism:
+- a present value is serialized as itself (in particular, without being wrapped in a JSON object representing the `Optional` object)
+- an absent value is serialized as a JSON `null`.
+For example, assume a Java type of the form
+```java
+public final class ComplexType {
+    private final Optional<ComplexType> nested;
+    private final Optional<String> string;
+}
+```
+, and an instance
+```java
+ComplexType value = new ComplexType(
+        Optional.of(
+                new ComplexType(
+                        Optional.<ComplexType>absent(),
+                        Optional.<String>absent(),
+        Optional.of("baz"));
+```
+The JSON-serialized representation of this object is:
+```json
+{"nested":{"nested":null,"string":null},"string":"baz"}
+```
+
 #### Optional return values
 When a call to a service interface declaring an `Optional<T>` return value with media type `application/json` yields:
 - a `Optional#empty` return value, then the HTTP response has error code 204 and an empty response body.

@@ -27,6 +27,7 @@ import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.jaxrs.JaxRsClient;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import java.nio.file.Paths;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -116,5 +117,19 @@ public final class OptionalAwareDecoderTest {
             assertThat(e.getMessage(), containsString("Forbidden"));
             assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.ForbiddenException"));
         }
+    }
+
+    @Test
+    public void testComplexType() {
+        ComplexType value = new ComplexType(
+                Optional.of(
+                        new ComplexType(
+                                Optional.<ComplexType>absent(),
+                                Optional.<String>absent(),
+                                Paths.get("bar"))),
+                Optional.of("baz"),
+                Paths.get("foo"));
+        // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
+        assertThat(service.getComplexType(value), is(value));
     }
 }

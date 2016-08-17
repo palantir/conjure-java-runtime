@@ -134,12 +134,18 @@ public class TestServer extends Application<Configuration> {
         public Optional<String> getOptionalString(@Nullable String value) {
             return Optional.fromNullable(value);
         }
+
+        @Override
+        public ComplexType getComplexType(ComplexType complexType) {
+            return complexType;
+        }
     }
 
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public interface TestService {
+
         @GET
         @Path("/optional")
         @Consumes(MediaType.APPLICATION_JSON)
@@ -206,5 +212,12 @@ public class TestServer extends Application<Configuration> {
         @Consumes(MediaType.TEXT_PLAIN)
         @Produces(MediaType.TEXT_PLAIN)
         Optional<String> getOptionalString(@QueryParam("value") @Nullable String value);
+
+        @POST
+        @Path("/complexType")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        ComplexType getComplexType(ComplexType complexType);
     }
+
 }
