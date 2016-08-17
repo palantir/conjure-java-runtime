@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.ext.brave;
+package com.github.kristofa.brave.ext;
 
 import com.github.kristofa.brave.LoggingSpanCollector;
 import com.github.kristofa.brave.SpanCollector;
