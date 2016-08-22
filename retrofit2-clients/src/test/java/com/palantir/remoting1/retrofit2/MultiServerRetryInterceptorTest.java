@@ -28,6 +28,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -38,11 +39,11 @@ public final class MultiServerRetryInterceptorTest {
     public final MockWebServer availableNode = new MockWebServer();
 
     @Test
-    public void interceptsRequestAndRedirectsToAvailableNode() throws IOException {
+    public void interceptsRequestAndRedirectsToAvailableNode() throws IOException, InterruptedException {
         unavailableNode.shutdown();
 
-        HttpUrl unavailable = unavailableNode.url("/");
-        HttpUrl available = availableNode.url("/");
+        HttpUrl unavailable = unavailableNode.url("/api");
+        HttpUrl available = availableNode.url("/api");
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(MultiServerRetryInterceptor.create(
@@ -50,7 +51,7 @@ public final class MultiServerRetryInterceptorTest {
                 .build();
 
         Request request = new Request.Builder()
-                .url(unavailable)
+                .url(unavailable.newBuilder().addPathSegment("ping").build())
                 .get()
                 .build();
 
@@ -59,5 +60,8 @@ public final class MultiServerRetryInterceptorTest {
         Call call = okHttpClient.newCall(request);
 
         assertThat(call.execute().body().string(), is("pong"));
+
+        RecordedRequest recordedRequest = availableNode.takeRequest();
+        assertThat(recordedRequest.getPath(), is("/api/ping"));
     }
 }
