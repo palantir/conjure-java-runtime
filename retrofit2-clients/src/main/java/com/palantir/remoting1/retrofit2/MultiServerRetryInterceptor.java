@@ -17,6 +17,7 @@
 package com.palantir.remoting1.retrofit2;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import java.io.IOException;
 import java.net.HttpRetryException;
 import java.net.MalformedURLException;
@@ -40,7 +41,7 @@ public final class MultiServerRetryInterceptor implements Interceptor {
     private final List<String> uris;
 
     private MultiServerRetryInterceptor(List<String> uris) {
-        this.uris = uris;
+        this.uris = ImmutableList.copyOf(uris);
     }
 
     public static MultiServerRetryInterceptor create(List<String> uris) {
@@ -62,45 +63,50 @@ public final class MultiServerRetryInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
+
         Exception lastException = null;
+        String lastUri = null;
 
         for (String uri : uris) {
+            if (lastUri != null) {
+                logger.warn("Redirecting request from {} to {}", lastUri, uri);
+            }
             request = redirectRequest(request, uri);
             try {
                 return chain.proceed(request);
             } catch (SocketTimeoutException | UnknownHostException | HttpRetryException
                     | MalformedURLException | SocketException | UnknownServiceException e) {
                 lastException = e;
+                lastUri = uri;
                 logger.warn("Failed to send request to " + request.url(), e);
-            } catch (IOException e) {
-                throw e;
             }
         }
-        throw new IllegalStateException(
-                "Could not connect to any node. Please check that the URIs are valid and servers are up.",
-                lastException);
+        throw new IllegalStateException("Could not connect to any of the following servers: " + uris + ". "
+                + "Please check that the URIs are correct and servers are accessible.", lastException);
     }
 
     private Request redirectRequest(Request request, String redirectToUri) {
-        final String currentUrl = request.url().toString();
+        final String requestUri = request.url().toString();
 
         String matchingUri = null;
+        // Find which server from `uris` is used in the current request, then ...
         for (String uri : uris) {
-            if (currentUrl.startsWith(uri)) {
+            if (requestUri.startsWith(uri)) {
                 matchingUri = uri;
                 break;
             }
         }
 
         if (matchingUri == null) {
-            throw new IllegalStateException(
-                    String.format("None of the URIs %s matched request URL %s", uris, currentUrl));
+            throw new IllegalStateException(String.format("Unrecognized server URI in the request %s. "
+                            + "Supported servers are %s. Did you use different server URI for the initial request?",
+                    requestUri, uris));
         }
 
-        final String newUrl = currentUrl.replaceFirst(matchingUri, redirectToUri);
-
+        // ... replace it with the URI of the server to redirect to.
+        final String newRequestUrl = requestUri.replaceFirst(matchingUri, redirectToUri);
         return request.newBuilder()
-                .url(HttpUrl.parse(newUrl))
+                .url(HttpUrl.parse(newRequestUrl))
                 // Request.this.tag field by default points to request itself if it was not set in RequestBuilder.
                 // We don't want to reference old request in new one - that is why we need to reset tag to null.
                 .tag(request.tag().equals(request) ? null : request.tag())
