@@ -33,6 +33,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -100,6 +101,11 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         if (config.maxNumRetries() > 1) {
             client.addInterceptor(new RetryInterceptor(config.maxNumRetries()));
         }
+
+        // HTTP request/response logging
+        HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor();
+        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        client.addInterceptor(httpLoggingInterceptor);
 
         client.addInterceptor(UserAgentInterceptor.of(userAgent));
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
