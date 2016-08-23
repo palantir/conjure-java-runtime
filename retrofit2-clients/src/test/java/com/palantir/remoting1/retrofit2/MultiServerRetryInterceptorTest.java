@@ -34,16 +34,16 @@ import org.junit.Test;
 
 public final class MultiServerRetryInterceptorTest {
     @Rule
-    public final MockWebServer unavailableNode = new MockWebServer();
+    public final MockWebServer unavailableServer = new MockWebServer();
     @Rule
-    public final MockWebServer availableNode = new MockWebServer();
+    public final MockWebServer availableServer = new MockWebServer();
 
     @Test
-    public void interceptsRequestAndRedirectsToAvailableNode() throws IOException, InterruptedException {
-        unavailableNode.shutdown();
+    public void interceptsRequestAndRedirectsToAvailableServer() throws IOException, InterruptedException {
+        unavailableServer.shutdown();
 
-        HttpUrl unavailable = unavailableNode.url("/api");
-        HttpUrl available = availableNode.url("/api");
+        HttpUrl unavailable = unavailableServer.url("/api");
+        HttpUrl available = availableServer.url("/api");
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(MultiServerRetryInterceptor.create(
@@ -55,13 +55,13 @@ public final class MultiServerRetryInterceptorTest {
                 .get()
                 .build();
 
-        availableNode.enqueue(new MockResponse().setBody("pong"));
+        availableServer.enqueue(new MockResponse().setBody("pong"));
 
         Call call = okHttpClient.newCall(request);
 
         assertThat(call.execute().body().string(), is("pong"));
 
-        RecordedRequest recordedRequest = availableNode.takeRequest();
+        RecordedRequest recordedRequest = availableServer.takeRequest();
         assertThat(recordedRequest.getPath(), is("/api/ping"));
     }
 }
