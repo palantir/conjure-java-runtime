@@ -29,39 +29,91 @@ import okhttp3.Request;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public final class MultiServerRetryInterceptorTest {
     @Rule
-    public final MockWebServer unavailableServer = new MockWebServer();
+    public final MockWebServer serverA = new MockWebServer();
     @Rule
-    public final MockWebServer availableServer = new MockWebServer();
+    public final MockWebServer serverB = new MockWebServer();
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    private HttpUrl urlA;
+    private HttpUrl urlB;
+    private OkHttpClient okHttpClient;
+
+    @Before
+    public void before() {
+        urlA = serverA.url("/api/");
+        urlB = serverB.url("/api/");
+        okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(MultiServerRetryInterceptor.create(
+                        ImmutableList.of(urlA.toString(), urlB.toString()), false))
+                .build();
+    }
 
     @Test
-    public void interceptsRequestAndRedirectsToAvailableServer() throws IOException, InterruptedException {
-        unavailableServer.shutdown();
-
-        HttpUrl unavailable = unavailableServer.url("/api");
-        HttpUrl available = availableServer.url("/api");
-
-        OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .addInterceptor(MultiServerRetryInterceptor.create(
-                        ImmutableList.of(unavailable.toString(), available.toString()), false))
-                .build();
-
+    public void testDoNotHitSecondServerWhenFirstServerIsAvailable() throws IOException, InterruptedException {
         Request request = new Request.Builder()
-                .url(unavailable.newBuilder().addPathSegment("ping").build())
+                .url(urlA.newBuilder().addPathSegment("ping").build())
                 .get()
                 .build();
 
-        availableServer.enqueue(new MockResponse().setBody("pong"));
+        serverA.enqueue(new MockResponse().setBody("pong"));
 
         Call call = okHttpClient.newCall(request);
 
         assertThat(call.execute().body().string(), is("pong"));
 
-        RecordedRequest recordedRequest = availableServer.takeRequest();
+        RecordedRequest recordedRequest = serverA.takeRequest();
         assertThat(recordedRequest.getPath(), is("/api/ping"));
+    }
+
+    @Test
+    public void testRedirectToAvailableServerWhenFirstServerIsDown() throws IOException, InterruptedException {
+        serverA.shutdown();
+
+        Request request = new Request.Builder()
+                .url(urlA.newBuilder().addPathSegment("ping").build())
+                .get()
+                .build();
+
+        serverB.enqueue(new MockResponse().setBody("pong"));
+
+        Call call = okHttpClient.newCall(request);
+
+        assertThat(call.execute().body().string(), is("pong"));
+
+        RecordedRequest recordedRequest = serverB.takeRequest();
+        assertThat(recordedRequest.getPath(), is("/api/ping"));
+    }
+
+    @Test
+    public void testThrowIllegalStateExceptionWhenNoServerIsAvailable() throws IOException {
+        serverA.shutdown();
+        serverB.shutdown();
+
+        Request request = new Request.Builder()
+                .url(urlA.newBuilder().addPathSegment("ping").build())
+                .get()
+                .build();
+
+        expectedException.expect(IllegalStateException.class);
+        okHttpClient.newCall(request).execute();
+    }
+
+    @Test
+    public void testRetrofit2ClientWithMultiServerRetryInterceptorRedirectToAvailableServer() throws IOException {
+        TestService service = Retrofit2Client.builder()
+                .build(TestService.class, "agent", ImmutableList.of(urlA.toString(), urlB.toString()));
+
+        serverA.shutdown();
+        serverB.enqueue(new MockResponse().setBody("\"pong\""));
+
+        assertThat(service.get().execute().body(), is("pong"));
     }
 }
