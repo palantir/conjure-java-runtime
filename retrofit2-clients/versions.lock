@@ -60,8 +60,7 @@
             ]
         },
         "com.squareup.okhttp3:logging-interceptor": {
-            "locked": "3.3.1",
-            "requested": "3.3.1"
+            "locked": "3.4.1"
         },
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
@@ -167,8 +166,7 @@
             ]
         },
         "com.squareup.okhttp3:logging-interceptor": {
-            "locked": "3.3.1",
-            "requested": "3.3.1"
+            "locked": "3.4.1"
         },
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
