@@ -79,4 +79,22 @@ public abstract class SerializableError {
                 .stackTrace(stackTrace)
                 .build();
     }
+
+    @Override
+    public final String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Remote exception of type ");
+        builder.append(getErrorName()).append(" thrown: ");
+        builder.append(getMessage()).append("\n");
+        if (getStackTrace() != null && !getStackTrace().isEmpty()) {
+            builder.append("Remote stacktrace:\n");
+            for (StackTraceElement traceElement : getStackTrace()) {
+                builder.append("\tat ").append(traceElement).append("\n");
+            }
+            builder.append("End remote stacktrace");
+        } else {
+            builder.append("Remote stacktrace not available\n");
+        }
+        return builder.toString();
+    }
 }
