@@ -36,6 +36,37 @@ public abstract class ClientConfig {
     private static final boolean ENABLE_REQUEST_RESPONSE_LOGGING = false;
     private static final int MAX_NUM_RETRIES = 1;
 
+    @Value.Parameter
+    public abstract Optional<TrustContext> trustContext();
+
+    @Value.Default
+    public Duration connectTimeout() {
+        return CONNECT_TIMEOUT;
+    }
+
+    @Value.Default
+    public Duration readTimeout() {
+        return READ_TIMEOUT;
+    }
+
+    @Value.Default
+    public Duration writeTimeout() {
+        return WRITE_TIMEOUT;
+    }
+
+    @Value.Parameter
+    public abstract Optional<ProxyConfiguration> proxy();
+
+    @Value.Default
+    public Integer maxNumRetries() {
+        return MAX_NUM_RETRIES;
+    }
+
+    @Value.Default
+    public boolean enableHttpRequestResponseLogging() {
+        return ENABLE_REQUEST_RESPONSE_LOGGING;
+    }
+
     public static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
         ClientConfig.Builder clientConfig = builder();
 
@@ -57,36 +88,5 @@ public abstract class ClientConfig {
         return new Builder();
     }
 
-    @Value.Default
-    public Duration connectTimeout() {
-        return CONNECT_TIMEOUT;
-    }
-
-    @Value.Default
-    public Duration readTimeout() {
-        return READ_TIMEOUT;
-    }
-
-    @Value.Default
-    public Duration writeTimeout() {
-        return WRITE_TIMEOUT;
-    }
-
-    @Value.Default
-    public Integer maxNumRetries() {
-        return MAX_NUM_RETRIES;
-    }
-
-    @Value.Default
-    public boolean enableHttpRequestResponseLogging() {
-        return ENABLE_REQUEST_RESPONSE_LOGGING;
-    }
-
     public static final class Builder extends com.palantir.remoting1.clients.ImmutableClientConfig.Builder {}
-
-    @Value.Parameter
-    public abstract Optional<TrustContext> trustContext();
-
-    @Value.Parameter
-    public abstract Optional<ProxyConfiguration> proxy();
 }
