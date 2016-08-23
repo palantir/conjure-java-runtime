@@ -33,7 +33,7 @@ public abstract class ClientConfig {
     private static final Duration READ_TIMEOUT = Duration.minutes(10);
     private static final Duration WRITE_TIMEOUT = Duration.minutes(10);
 
-    private static final boolean ENABLE_REQUEST_RESPONSE_LOGGING = false;
+    private static final Boolean ENABLE_REQUEST_RESPONSE_LOGGING = false;
     private static final int MAX_NUM_RETRIES = 1;
 
     @Value.Parameter
@@ -63,7 +63,7 @@ public abstract class ClientConfig {
     }
 
     @Value.Default
-    public boolean enableHttpRequestResponseLogging() {
+    public Boolean enableHttpRequestResponseLogging() {
         return ENABLE_REQUEST_RESPONSE_LOGGING;
     }
 
