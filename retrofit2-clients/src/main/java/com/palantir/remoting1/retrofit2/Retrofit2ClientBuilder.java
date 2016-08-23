@@ -17,7 +17,6 @@
 package com.palantir.remoting1.retrofit2;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting1.clients.ClientBuilder;
 import com.palantir.remoting1.clients.ClientConfig;
@@ -55,19 +54,17 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
 
     @Override
     public <T> T build(Class<T> serviceClass, String userAgent, List<String> uris) {
-        Preconditions.checkArgument(uris.size() == 1,
-                "%s support single URI targets only", Retrofit2Client.class.getSimpleName());
-        String uri = Iterables.getOnlyElement(uris);
-        okhttp3.OkHttpClient client = createOkHttpClient(userAgent);
+        Preconditions.checkArgument(!uris.isEmpty());
+        okhttp3.OkHttpClient client = createOkHttpClient(userAgent, uris);
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl(uri)
+                .baseUrl(uris.get(0))
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
         return retrofit.create(serviceClass);
     }
 
-    private OkHttpClient createOkHttpClient(String userAgent) {
+    private OkHttpClient createOkHttpClient(String userAgent, List<String> uris) {
 
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
@@ -123,6 +120,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
             client.addInterceptor(httpLoggingInterceptor);
         }
 
+        client.addInterceptor(MultiServerRetryInterceptor.create(uris));
         client.addInterceptor(UserAgentInterceptor.of(userAgent));
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
 

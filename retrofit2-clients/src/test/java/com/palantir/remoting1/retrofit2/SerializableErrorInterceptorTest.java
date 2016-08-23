@@ -44,8 +44,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import retrofit2.Call;
-import retrofit2.http.GET;
 
 public final class SerializableErrorInterceptorTest {
 
@@ -126,10 +124,5 @@ public final class SerializableErrorInterceptorTest {
                 .protocol(Protocol.HTTP_1_1)
                 .code(code)
                 .build();
-    }
-
-    public interface TestService {
-        @GET("/")
-        Call<String> get();
     }
 }
