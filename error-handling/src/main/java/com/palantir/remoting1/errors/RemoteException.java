@@ -38,4 +38,9 @@ public final class RemoteException extends RuntimeException {
         this.remoteException = remoteException;
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + remoteException.toString();
+    }
 }
