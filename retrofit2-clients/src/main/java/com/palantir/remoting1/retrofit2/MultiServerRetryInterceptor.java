@@ -86,7 +86,7 @@ public final class MultiServerRetryInterceptor implements Interceptor {
     }
 
     private Request redirectRequest(Request request, String redirectToUri) {
-        final String requestUri = request.url().toString();
+        String requestUri = request.url().toString();
 
         String matchingUri = null;
         // Find which server from `uris` is used in the current request, then ...
@@ -104,7 +104,7 @@ public final class MultiServerRetryInterceptor implements Interceptor {
         }
 
         // ... replace it with the URI of the server to redirect to.
-        final String newRequestUrl = requestUri.replaceFirst(matchingUri, redirectToUri);
+        String newRequestUrl = requestUri.replaceFirst(matchingUri, redirectToUri);
         return request.newBuilder()
                 .url(HttpUrl.parse(newRequestUrl))
                 // Request.this.tag field by default points to request itself if it was not set in RequestBuilder.
