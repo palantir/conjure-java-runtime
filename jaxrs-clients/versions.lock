@@ -26,7 +26,10 @@
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
-            "locked": "2.6.1"
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:error-handling"
+            ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
             "locked": "2.6.1"
@@ -185,7 +188,10 @@
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
-            "locked": "2.6.1"
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:error-handling"
+            ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
             "locked": "2.6.1"
