@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -79,20 +81,21 @@ public abstract class SerializableError {
 
         List<SerializableStackTraceElement> serializableStackTrace = null;
         if (stackTrace != null) {
-            serializableStackTrace = Lists.transform(
+            // take copy because transformed list doesn't serialize well (Jackson bug?)
+            serializableStackTrace = ImmutableList.copyOf(Lists.transform(
                     stackTrace,
                     new Function<StackTraceElement, SerializableStackTraceElement>() {
                         @Nullable
                         @Override
                         public SerializableStackTraceElement apply(@Nullable StackTraceElement input) {
                             return SerializableStackTraceElement.builder()
-                                    .className(input.getClassName())
-                                    .methodName(input.getMethodName())
-                                    .fileName(input.getFileName())
-                                    .lineNumber(input.getLineNumber())
+                                    .className(Optional.fromNullable(input.getClassName()))
+                                    .methodName(Optional.fromNullable(input.getMethodName()))
+                                    .fileName(Optional.fromNullable(input.getFileName()))
+                                    .lineNumber(Optional.fromNullable(input.getLineNumber()))
                                     .build();
                         }
-                    });
+                    }));
         }
         return ImmutableSerializableError.builder()
                 .message(message)

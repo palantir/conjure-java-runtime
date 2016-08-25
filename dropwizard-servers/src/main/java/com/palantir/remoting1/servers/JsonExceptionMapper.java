@@ -19,6 +19,7 @@ package com.palantir.remoting1.servers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.palantir.remoting1.errors.SerializableError;
 import java.util.Arrays;
 import java.util.Objects;
@@ -82,7 +83,7 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
     abstract StatusType getStatus(T exception);
 
     private static ObjectMapper getObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
+        ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
         // use pretty-print since seeing errors as a human is so much nicer that way
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
         return mapper;

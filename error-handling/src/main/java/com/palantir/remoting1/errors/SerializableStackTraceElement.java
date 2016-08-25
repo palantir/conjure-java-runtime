@@ -18,7 +18,7 @@ package com.palantir.remoting1.errors;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import javax.annotation.Nullable;
+import com.google.common.base.Optional;
 import org.immutables.value.Value;
 
 @JsonDeserialize(as = ImmutableSerializableStackTraceElement.class)
@@ -27,17 +27,13 @@ import org.immutables.value.Value;
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
 public abstract class SerializableStackTraceElement {
 
-    @Nullable
-    public abstract String getClassName();
+    public abstract Optional<String> getClassName();
 
-    @Nullable
-    public abstract String getMethodName();
+    public abstract Optional<String> getMethodName();
 
-    @Nullable
-    public abstract String getFileName();
+    public abstract Optional<String> getFileName();
 
-    @Nullable
-    public abstract Integer getLineNumber();
+    public abstract Optional<Integer> getLineNumber();
 
     public static Builder builder() {
         return new Builder();
