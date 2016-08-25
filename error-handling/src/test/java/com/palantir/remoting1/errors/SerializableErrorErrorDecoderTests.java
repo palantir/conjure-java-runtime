@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -110,7 +111,7 @@ public final class SerializableErrorErrorDecoderTests {
     }
 
     @Test
-    public void testRemoteExceptionCarriesSerializedError() throws JsonProcessingException {
+    public void testRemoteExceptionCarriesSerializedError() throws IOException {
         Object error = SerializableError.of("msg", IllegalArgumentException.class,
                 Lists.newArrayList(new RuntimeException().getStackTrace()));
         String json = new ObjectMapper().writeValueAsString(error);
@@ -124,6 +125,22 @@ public final class SerializableErrorErrorDecoderTests {
         assertThat(decode.getRemoteException().getMessage(), is("msg"));
         assertThat(decode.getRemoteException().getStackTrace().get(0).getMethodName(),
                 is("testRemoteExceptionCarriesSerializedError"));
+    }
+
+    @Test
+    public void testRemoteException_stackTraceSerializationIsCompatibleWithJavaStackTrace() throws IOException {
+        Object error = SerializableError.of("msg", IllegalArgumentException.class,
+                Lists.newArrayList(new RuntimeException().getStackTrace()));
+        String json = new ObjectMapper().writeValueAsString(error);
+        RemoteException decode = (RemoteException) decode(MediaType.APPLICATION_JSON, STATUS_42, json);
+
+        SerializableStackTraceElement element = decode.getRemoteException().getStackTrace().get(0);
+        ObjectMapper mapper = new ObjectMapper();
+        StackTraceElement stackTrace = mapper.readValue(mapper.writeValueAsBytes(element), StackTraceElement.class);
+        assertThat(stackTrace.getMethodName(), is(element.getMethodName()));
+        assertThat(stackTrace.getClassName(), is(element.getClassName()));
+        assertThat(stackTrace.getFileName(), is(element.getFileName()));
+        assertThat(stackTrace.getLineNumber(), is(element.getLineNumber()));
     }
 
     private static Exception encodeAndDecode(Exception exception) {
