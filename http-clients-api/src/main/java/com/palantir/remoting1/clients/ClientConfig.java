@@ -88,5 +88,5 @@ public abstract class ClientConfig {
         return new Builder();
     }
 
-    public static final class Builder extends com.palantir.remoting1.clients.ImmutableClientConfig.Builder {}
+    public static final class Builder extends ImmutableClientConfig.Builder {}
 }
