@@ -28,12 +28,14 @@
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "io.dropwizard:dropwizard-jackson"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.1",
             "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson"
             ]
@@ -47,6 +49,7 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.1",
             "transitive": [
+                "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson"
             ]
         },
@@ -102,6 +105,7 @@
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
@@ -616,12 +620,14 @@
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml",
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "io.dropwizard:dropwizard-jackson"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.1",
             "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson"
             ]
@@ -635,6 +641,7 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.1",
             "transitive": [
+                "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson"
             ]
         },
@@ -690,6 +697,7 @@
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
