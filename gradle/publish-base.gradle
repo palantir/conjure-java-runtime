@@ -1,0 +1,22 @@
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'nebula.maven-base-publish'
+apply plugin: 'nebula.maven-resolved-dependencies'
+apply plugin: 'nebula.javadoc-jar'
+apply plugin: 'nebula.source-jar'
+
+bintray {
+    user = System.env.BINTRAY_USERNAME
+    key = System.env.BINTRAY_PASSWORD
+    publish = true
+    pkg {
+        repo = 'releases'
+        name = 'http-remoting'
+        userOrg = 'palantir'
+        licenses = ['Apache-2.0']
+        publications = ['nebula']
+    }
+}
+
+bintrayUpload.dependsOn { generatePomFileForNebulaPublication }
+bintrayUpload.dependsOn { sourceJar }
+bintrayUpload.dependsOn { build }
