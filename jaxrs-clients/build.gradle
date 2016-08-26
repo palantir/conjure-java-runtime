@@ -1,5 +1,5 @@
 apply plugin: 'com.github.johnrengelman.shadow'
-apply from: "${rootDir}/gradle/publish.gradle"
+apply from: "${rootDir}/gradle/publish-shadow.gradle"
 
 dependencies {
     compile project(":error-handling")
@@ -72,9 +72,3 @@ task checkLicenseInformation(dependsOn: 'shadowJar') << {
     }
 }
 check.dependsOn checkLicenseInformation
-
-publishing.publications.nebula {
-    // Remove the standard jar and replace it with the shaded one
-    artifacts = artifacts.findAll({it.classifier != null})
-    artifact(shadowJar)
-}
