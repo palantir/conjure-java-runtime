@@ -72,3 +72,9 @@ task checkLicenseInformation(dependsOn: 'shadowJar') << {
     }
 }
 check.dependsOn checkLicenseInformation
+
+publishing.publications.nebula {
+    // Remove the standard jar and replace it with the shaded one
+    artifacts = artifacts.findAll({it.classifier != null})
+    artifact(shadowJar)
+}
