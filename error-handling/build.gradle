@@ -4,6 +4,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-guava"
     compile "com.google.code.findbugs:jsr305"
     compile "com.google.guava:guava"
     compile "javax.ws.rs:javax.ws.rs-api"

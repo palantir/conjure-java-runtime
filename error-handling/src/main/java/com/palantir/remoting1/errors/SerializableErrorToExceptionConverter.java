@@ -17,6 +17,7 @@
 package com.palantir.remoting1.errors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.io.CharStreams;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,7 +43,7 @@ public final class SerializableErrorToExceptionConverter {
 
     private static final Logger log = LoggerFactory.getLogger(SerializableErrorToExceptionConverter.class);
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper().registerModule(new GuavaModule());
 
     public static RuntimeException getException(Collection<String> contentTypes, int status, String reason,
             @CheckForNull InputStream body) {

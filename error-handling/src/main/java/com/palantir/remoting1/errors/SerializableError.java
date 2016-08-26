@@ -19,6 +19,10 @@ package com.palantir.remoting1.errors;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.immutables.value.Value;
@@ -49,7 +53,7 @@ public abstract class SerializableError {
 
     /** An optional representation of the server-side stacktrace of this error. */
     @Nullable
-    public abstract List<StackTraceElement> getStackTrace();
+    public abstract List<SerializableStackTraceElement> getStackTrace();
 
     /** Constructs a new error whose error name is the fully-qualified name of the given class. */
     public static SerializableError of(String message, Class<? extends Exception> exceptionClass) {
@@ -72,7 +76,40 @@ public abstract class SerializableError {
      * stack trace.
      */
     public static SerializableError of(
-            String message, Class<? extends Exception> exceptionClass, List<StackTraceElement> stackTrace) {
+            String message, Class<? extends Exception> exceptionClass,
+            @Nullable final List<StackTraceElement> stackTrace) {
+
+        List<SerializableStackTraceElement> serializableStackTrace = null;
+        if (stackTrace != null) {
+            // take copy because transformed list doesn't serialize well (Jackson bug?)
+            serializableStackTrace = ImmutableList.copyOf(Lists.transform(
+                    stackTrace,
+                    new Function<StackTraceElement, SerializableStackTraceElement>() {
+                        @Nullable
+                        @Override
+                        public SerializableStackTraceElement apply(@Nullable StackTraceElement input) {
+                            return SerializableStackTraceElement.builder()
+                                    .className(Optional.fromNullable(input.getClassName()))
+                                    .methodName(Optional.fromNullable(input.getMethodName()))
+                                    .fileName(Optional.fromNullable(input.getFileName()))
+                                    .lineNumber(Optional.fromNullable(input.getLineNumber()))
+                                    .build();
+                        }
+                    }));
+        }
+        return ImmutableSerializableError.builder()
+                .message(message)
+                .errorName(exceptionClass.getName())
+                .stackTrace(serializableStackTrace)
+                .build();
+    }
+
+    /**
+     * Constructs a new error whose error name is the fully-qualified name of the given class, and with the given
+     * stack trace.
+     */
+    public static SerializableError withCustomStackTrace(
+            String message, Class<? extends Exception> exceptionClass, List<SerializableStackTraceElement> stackTrace) {
         return ImmutableSerializableError.builder()
                 .message(message)
                 .errorName(exceptionClass.getName())
@@ -88,7 +125,7 @@ public abstract class SerializableError {
         builder.append(getMessage()).append("\n");
         if (getStackTrace() != null && !getStackTrace().isEmpty()) {
             builder.append("Remote stacktrace:\n");
-            for (StackTraceElement traceElement : getStackTrace()) {
+            for (SerializableStackTraceElement traceElement : getStackTrace()) {
                 builder.append("\tat ").append(traceElement).append("\n");
             }
             builder.append("End remote stacktrace");
