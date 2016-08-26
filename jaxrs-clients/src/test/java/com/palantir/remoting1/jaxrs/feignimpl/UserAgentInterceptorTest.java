@@ -18,6 +18,7 @@ package com.palantir.remoting1.jaxrs.feignimpl;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import com.google.common.net.HttpHeaders;
 import feign.RequestTemplate;
@@ -49,6 +50,26 @@ public final class UserAgentInterceptorTest {
         RequestTemplate template = new RequestTemplate().header("USER-agent", "Already present");
         INTERCEPTOR.apply(template);
         assertThat(template.headers(), is(singletonHeaderMap("USER-agent", "Already present")));
+    }
+
+    @Test
+    public void testUserAgentStringFormat() throws Exception {
+        for (String goodAgentString : new String[] {
+                "com.palantir.product#product-name;1.2.3-1-gabc123",
+                "product-name"
+        }) {
+            UserAgentInterceptor.of(goodAgentString);
+        }
+
+        for (String badAgentString : new String[] {"&", "!", ""}) {
+            try {
+                UserAgentInterceptor.of(badAgentString);
+                fail();
+            } catch (IllegalArgumentException e) {
+                assertThat(e.getMessage(),
+                        is("User Agent must match pattern '[A-Za-z0-9()\\-#;/.,_\\s]+': " + badAgentString));
+            }
+        }
     }
 
     private static Map<String, Collection<String>> singletonHeaderMap(String key, String value) {
