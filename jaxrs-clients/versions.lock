@@ -97,10 +97,14 @@
                 "com.palantir.remoting1:service-config"
             ]
         },
+        "com.squareup.okhttp3:logging-interceptor": {
+            "locked": "3.4.1"
+        },
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
+                "com.squareup.okhttp3:logging-interceptor",
                 "io.zipkin.brave:brave-okhttp"
             ]
         },
@@ -259,10 +263,14 @@
                 "com.palantir.remoting1:service-config"
             ]
         },
+        "com.squareup.okhttp3:logging-interceptor": {
+            "locked": "3.4.1"
+        },
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
+                "com.squareup.okhttp3:logging-interceptor",
                 "io.zipkin.brave:brave-okhttp"
             ]
         },

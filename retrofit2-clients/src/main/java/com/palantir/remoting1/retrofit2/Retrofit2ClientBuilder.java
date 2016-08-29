@@ -32,10 +32,15 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+import okhttp3.logging.HttpLoggingInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder extends ClientBuilder {
+
+    private static final Logger logger = LoggerFactory.getLogger(Retrofit2ClientBuilder.class);
 
     private final ClientConfig config;
 
@@ -96,6 +101,23 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         // retry configuration
         if (config.maxNumRetries() > 1) {
             client.addInterceptor(new RetryInterceptor(config.maxNumRetries()));
+        }
+
+        // HTTP request/response logging level
+        if (config.enableHttpRequestResponseLogging()) {
+            // configure logging for interceptor at TRACE level
+            HttpLoggingInterceptor.Logger httpLogger = new HttpLoggingInterceptor.Logger() {
+                @Override
+                public void log(String message) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(message);
+                    }
+                }
+            };
+
+            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(httpLogger);
+            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            client.addInterceptor(httpLoggingInterceptor);
         }
 
         client.addInterceptor(MultiServerRetryInterceptor.create(uris));

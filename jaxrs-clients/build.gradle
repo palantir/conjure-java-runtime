@@ -19,6 +19,7 @@ dependencies {
     }
     compile "com.netflix.feign:feign-okhttp"
     compile "io.zipkin.brave:brave-okhttp"
+    compile "com.squareup.okhttp3:logging-interceptor"
     compile "javax.ws.rs:javax.ws.rs-api"
     compile "org.slf4j:slf4j-api"
     compile "com.netflix.feign:feign-slf4j"

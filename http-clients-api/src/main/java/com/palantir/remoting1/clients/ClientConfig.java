@@ -32,6 +32,8 @@ public abstract class ClientConfig {
     private static final Duration CONNECT_TIMEOUT = Duration.seconds(10);
     private static final Duration READ_TIMEOUT = Duration.minutes(10);
     private static final Duration WRITE_TIMEOUT = Duration.minutes(10);
+
+    private static final Boolean ENABLE_REQUEST_RESPONSE_LOGGING = false;
     private static final int MAX_NUM_RETRIES = 1;
 
     @Value.Parameter
@@ -58,6 +60,11 @@ public abstract class ClientConfig {
     @Value.Default
     public Integer maxNumRetries() {
         return MAX_NUM_RETRIES;
+    }
+
+    @Value.Default
+    public Boolean enableHttpRequestResponseLogging() {
+        return ENABLE_REQUEST_RESPONSE_LOGGING;
     }
 
     public static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {

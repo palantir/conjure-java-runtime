@@ -68,9 +68,13 @@
                 "com.palantir.remoting1:service-config"
             ]
         },
+        "com.squareup.okhttp3:logging-interceptor": {
+            "locked": "3.4.1"
+        },
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
+                "com.squareup.okhttp3:logging-interceptor",
                 "com.squareup.retrofit2:retrofit"
             ]
         },
@@ -179,9 +183,13 @@
                 "com.palantir.remoting1:service-config"
             ]
         },
+        "com.squareup.okhttp3:logging-interceptor": {
+            "locked": "3.4.1"
+        },
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
+                "com.squareup.okhttp3:logging-interceptor",
                 "com.squareup.retrofit2:retrofit"
             ]
         },

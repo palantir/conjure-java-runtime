@@ -47,7 +47,6 @@ import feign.Contract;
 import feign.Feign;
 import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
-import feign.Logger;
 import feign.OptionalAwareDecoder;
 import feign.Request;
 import feign.TextDelegateDecoder;
@@ -69,8 +68,14 @@ import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.Response;
 import okhttp3.Route;
+import okhttp3.logging.HttpLoggingInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
+
+
+    private static final Logger logger = LoggerFactory.getLogger(FeignJaxRsClientBuilder.class);
 
     private final BackoffStrategy backoffStrategy;
     private final ClientConfig config;
@@ -99,7 +104,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 .retryer(target)
                 .options(createRequestOptions())
                 .logger(new Slf4jLogger(JaxRsClient.class))
-                .logLevel(Logger.Level.BASIC)
+                .logLevel(feign.Logger.Level.BASIC)
                 .requestInterceptor(UserAgentInterceptor.of(userAgent))
                 .target(target);
     }
@@ -189,6 +194,23 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                     }
                 });
             }
+        }
+
+        // HTTP request/response logging level
+        if (config.enableHttpRequestResponseLogging()) {
+            // configure logging for interceptor at TRACE level
+            HttpLoggingInterceptor.Logger httpLogger = new HttpLoggingInterceptor.Logger() {
+                @Override
+                public void log(String message) {
+                    if (logger.isTraceEnabled()) {
+                        logger.trace(message);
+                    }
+                }
+            };
+
+            HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(httpLogger);
+            httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            client.addInterceptor(httpLoggingInterceptor);
         }
 
         return new OkHttpClient(client.build());
