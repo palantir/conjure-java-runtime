@@ -3,7 +3,7 @@ apply from: "${rootDir}/gradle/publish-base.gradle"
 publishing {
     publications {
         nebula(MavenPublication) {
-            from components.java
+            from components.shadow
         }
     }
 }
