@@ -16,6 +16,7 @@
 
 package com.palantir.remoting1.errors;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -36,6 +37,7 @@ import org.immutables.value.Value;
 @JsonSerialize(as = ImmutableSerializableError.class)
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class SerializableError {
 
     /** A human-readable description of the error. */

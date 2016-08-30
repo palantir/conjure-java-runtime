@@ -16,6 +16,7 @@
 
 package com.palantir.remoting1.errors;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
@@ -25,6 +26,7 @@ import org.immutables.value.Value;
 @JsonSerialize(as = ImmutableSerializableStackTraceElement.class)
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class SerializableStackTraceElement {
 
     public abstract Optional<String> getClassName();
