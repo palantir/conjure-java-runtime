@@ -113,7 +113,7 @@ public final class JaxRsClientConfigTest {
 
         ArgumentCaptor<ILoggingEvent> clientTracerEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(clientTracerAppender).doAppend(clientTracerEvent.capture());
-        assertThat(clientTracerEvent.getValue().getFormattedMessage(), containsString("\"serviceName\":\"client\","));
+        assertThat(clientTracerEvent.getValue().getFormattedMessage(), containsString("\"serviceName\":\"test\","));
         Mockito.verifyNoMoreInteractions(clientTracerAppender);
     }
 
