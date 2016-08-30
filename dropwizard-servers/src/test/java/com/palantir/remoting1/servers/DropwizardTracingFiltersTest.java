@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -62,6 +63,7 @@ public final class DropwizardTracingFiltersTest {
     private WebTarget target;
     @Mock
     private Appender<ILoggingEvent> braveMockAppender;
+    private ch.qos.logback.classic.Logger braveLogger;
 
     @Before
     public void before() {
@@ -74,19 +76,30 @@ public final class DropwizardTracingFiltersTest {
 
         when(braveMockAppender.getName()).thenReturn("MOCK");
         // the logger used by the brave server instance
-        ch.qos.logback.classic.Logger braveLogger =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ServerTracer(testTracerName)");
+        braveLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing.server.testTracerName");
+        braveLogger.setLevel(null);
         braveLogger.addAppender(braveMockAppender);
     }
 
     @Test
     public void testBraveTracing_serverLogsTraceId() throws Exception {
+        braveLogger.setLevel(Level.INFO);
+
         target.path("echo").request().header(BraveHttpHeaders.TraceId.getName(), "myTraceId").get();
 
         ArgumentCaptor<ILoggingEvent> requestEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(braveMockAppender).doAppend(requestEvent.capture());
         assertThat(requestEvent.getValue().getFormattedMessage(),
                 containsString("\"serviceName\":\"testtracername\",\"ipv4\":\"0.0.0.0\",\"port\":61827}"));
+        Mockito.verifyNoMoreInteractions(braveMockAppender);
+    }
+
+    @Test
+    public void testBraveTracing_serverDoesNotLogAtWarn() throws Exception {
+        braveLogger.setLevel(Level.WARN);
+
+        target.path("echo").request().header(BraveHttpHeaders.TraceId.getName(), "myTraceId").get();
+
         Mockito.verifyNoMoreInteractions(braveMockAppender);
     }
 

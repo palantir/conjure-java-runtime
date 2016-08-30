@@ -73,17 +73,17 @@ public final class JaxRsClientConfigTest {
 
         when(clientTracerAppender.getName()).thenReturn("MOCK");
         ch.qos.logback.classic.Logger clientTracerLogger =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ClientTracer(client)");
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing.client.test");
         clientTracerLogger.addAppender(clientTracerAppender);
 
         when(serverTracerAppender.getName()).thenReturn("MOCK");
         ch.qos.logback.classic.Logger serverTracerLogger =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ServerTracer(TestEchoServer)");
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing.server.TestEchoServer");
         serverTracerLogger.addAppender(serverTracerAppender);
 
         when(proxyingServerTracerAppender.getName()).thenReturn("MOCK");
         ch.qos.logback.classic.Logger proxyingServerTracerLogger =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("ServerTracer(ProxyingEchoServer)");
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing.server.ProxyingEchoServer");
         proxyingServerTracerLogger.addAppender(proxyingServerTracerAppender);
     }
 
@@ -102,13 +102,13 @@ public final class JaxRsClientConfigTest {
 
     @Test
     public void testSslSocketFactory_canConnectWhenSocketFactoryIsSet() throws Exception {
-        TestEchoService service = createProxy(ECHO_SERVER.getLocalPort(), "client");
+        TestEchoService service = createProxy(ECHO_SERVER.getLocalPort(), "test");
         assertThat(service.echo("foo"), is("foo"));
     }
 
     @Test
     public void testBraveTracing_clientLogsTraces() throws Exception {
-        TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "client");
+        TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test");
         assertThat(service.echo("foo"), is("foo"));
 
         ArgumentCaptor<ILoggingEvent> clientTracerEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
@@ -122,7 +122,7 @@ public final class JaxRsClientConfigTest {
         // Simulates two-hop call chain: client --> ProxyingEchoServer --> EchoServer. Verifies that
         // trace ids logged in the three locations are identical.
 
-        TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "client");
+        TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test");
         assertThat(service.echo("foo"), is("foo"));
 
 

@@ -16,7 +16,6 @@
 
 package com.github.kristofa.brave.ext;
 
-import com.github.kristofa.brave.LoggingSpanCollector;
 import com.github.kristofa.brave.SpanCollector;
 import com.github.kristofa.brave.internal.Util;
 import com.twitter.zipkin.gen.BinaryAnnotation;
@@ -35,7 +34,7 @@ public final class SlfLoggingSpanCollector implements SpanCollector {
     private final Set<BinaryAnnotation> annotations = new LinkedHashSet<>();
 
     public SlfLoggingSpanCollector() {
-        log = LoggerFactory.getLogger(LoggingSpanCollector.class.getName());
+        this(SlfLoggingSpanCollector.class.getName());
     }
 
     public SlfLoggingSpanCollector(String loggerName) {
@@ -46,11 +45,13 @@ public final class SlfLoggingSpanCollector implements SpanCollector {
     @Override
     public void collect(Span span) {
         Util.checkNotNull(span, "span must not be null");
-        for (BinaryAnnotation ba : annotations) {
-            span.addToBinary_annotations(ba);
-        }
+        if (log.isInfoEnabled()) {
+            for (BinaryAnnotation ba : annotations) {
+                span.addToBinary_annotations(ba);
+            }
 
-        log.info("{}", span);
+            log.info(span.toString());
+        }
     }
 
     @Override

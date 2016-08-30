@@ -6,3 +6,11 @@ server:
   adminConnectors:
     - type: http
       port: 0
+
+logging:
+  level: WARN
+  loggers:
+    io.dropwizard: INFO
+    tracing: INFO
+  appenders:
+    - type: console
