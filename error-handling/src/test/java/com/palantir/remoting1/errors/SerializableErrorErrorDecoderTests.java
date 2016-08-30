@@ -145,6 +145,16 @@ public final class SerializableErrorErrorDecoderTests {
         assertThat(stackTrace.getLineNumber(), is(element.getLineNumber().get()));
     }
 
+    @Test
+    public void testRemoteExceptionIgnoresUnkownProperties() throws Exception {
+        String stackTrace = "{\"methodName\" : \"methodName\", \"fileName\" : \"fileName\", \"lineNumber\" : 0,"
+                + "\"className\" : \"className\" , \"noSuchProperty\" : false }";
+        String error = "{\"message\": \"message\", \"exceptionClass\": \"exceptionClass\","
+                + "\"stackTrace\": [" + stackTrace + "], \"noSuchProperty\": \"foo\"}";
+
+        new ObjectMapper().registerModule(new GuavaModule()).readValue(error, SerializableError.class);
+    }
+
     private static Exception encodeAndDecode(Exception exception) {
         Object error = SerializableError.of(exception.getMessage(), exception.getClass(), null);
         String json;
