@@ -20,8 +20,9 @@ import com.github.kristofa.brave.Sampler;
 import com.github.kristofa.brave.ServerRequestInterceptor;
 import com.github.kristofa.brave.ServerResponseInterceptor;
 import com.github.kristofa.brave.ServerTracer;
+import com.github.kristofa.brave.SpanCollectorMetricsHandler;
 import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
-import com.github.kristofa.brave.ext.SlfLoggingSpanCollector;
+import com.github.kristofa.brave.ext.AsyncSlf4jLoggingSpanCollector;
 import com.github.kristofa.brave.http.DefaultSpanNameProvider;
 import com.github.kristofa.brave.jaxrs2.BraveContainerRequestFilter;
 import com.github.kristofa.brave.jaxrs2.BraveContainerResponseFilter;
@@ -40,6 +41,7 @@ import java.net.UnknownHostException;
 import java.util.EnumSet;
 import java.util.Random;
 import javax.servlet.DispatcherType;
+import org.slf4j.LoggerFactory;
 
 /** Static utilities for registering Brave/Zipkin filters with Dropwizard applications. */
 final class DropwizardTracingFilters {
@@ -55,7 +57,7 @@ final class DropwizardTracingFilters {
      * TODO(rfink) Is there a more stable way to retrieve IP/Port information?
      */
     static void registerTracers(Environment environment, Configuration config, String tracerName) {
-        ServerTracer serverTracer = getServerTracer(extractIp(config), extractPort(config), tracerName);
+        ServerTracer serverTracer = getServerTracer(environment, extractIp(config), extractPort(config), tracerName);
         environment.jersey().register(new BraveContainerRequestFilter(
                 new ServerRequestInterceptor(serverTracer),
                 new DefaultSpanNameProvider()
@@ -68,12 +70,18 @@ final class DropwizardTracingFilters {
                 .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
     }
 
-    private static ServerTracer getServerTracer(int ip, int port, String name) {
+    private static ServerTracer getServerTracer(Environment environment, int ip, int port, String name) {
+        String tracerName = "tracing.server." + name;
+        SpanCollectorMetricsHandler metricsHandler = new DropwizardSpanCollectorMetricsHandler(
+                environment.metrics().counter(tracerName + ".accepted"),
+                environment.metrics().counter(tracerName + ".dropped"));
         return ServerTracer.builder()
                 .traceSampler(Sampler.ALWAYS_SAMPLE)
                 .randomGenerator(new Random())
                 .state(new ThreadLocalServerClientAndLocalSpanState(ip, port, name))
-                .spanCollector(new SlfLoggingSpanCollector("tracing.server." + name))
+                .spanCollector(new AsyncSlf4jLoggingSpanCollector(
+                        LoggerFactory.getLogger(tracerName),
+                        metricsHandler, 1 /* second flush */))
                 .build();
     }
 

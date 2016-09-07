@@ -16,7 +16,7 @@
 
 package com.palantir.remoting1.jaxrs;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.service.BasicCredentials;
