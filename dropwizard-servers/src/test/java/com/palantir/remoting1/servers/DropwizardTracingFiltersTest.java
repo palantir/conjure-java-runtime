@@ -96,6 +96,8 @@ public final class DropwizardTracingFiltersTest {
 
         target.path("echo").request().header(BraveHttpHeaders.TraceId.getName(), "myTraceId").get();
 
+        Thread.sleep(1500L); // allow flush
+
         ArgumentCaptor<ILoggingEvent> requestEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(braveMockAppender).doAppend(requestEvent.capture());
         assertThat(requestEvent.getValue().getFormattedMessage(),

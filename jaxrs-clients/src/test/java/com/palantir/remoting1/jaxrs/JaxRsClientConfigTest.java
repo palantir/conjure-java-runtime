@@ -111,6 +111,8 @@ public final class JaxRsClientConfigTest {
         TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test");
         assertThat(service.echo("foo"), is("foo"));
 
+        Thread.sleep(1500L); // allow flush
+
         ArgumentCaptor<ILoggingEvent> clientTracerEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(clientTracerAppender).doAppend(clientTracerEvent.capture());
         assertThat(clientTracerEvent.getValue().getFormattedMessage(), containsString("\"serviceName\":\"test\","));
@@ -125,6 +127,7 @@ public final class JaxRsClientConfigTest {
         TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test");
         assertThat(service.echo("foo"), is("foo"));
 
+        Thread.sleep(1500L); // allow flush
 
         // Extract client trace id.
         ArgumentCaptor<ILoggingEvent> clientTracerEvent = ArgumentCaptor.forClass(ILoggingEvent.class);

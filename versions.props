@@ -16,3 +16,4 @@ org.slf4j:slf4j-api = 1.7.12
 com.palantir.tokens:auth-tokens = 0.2.3
 javax.ws.rs:javax.ws.rs-api = 2.0.1
 org.bouncycastle:bcpkix-jdk15on = 1.54
+org.assertj:assertj-core = 3.5.2

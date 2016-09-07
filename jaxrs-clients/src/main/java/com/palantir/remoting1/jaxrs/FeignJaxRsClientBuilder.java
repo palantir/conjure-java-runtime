@@ -21,9 +21,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.kristofa.brave.ClientRequestInterceptor;
 import com.github.kristofa.brave.ClientResponseInterceptor;
 import com.github.kristofa.brave.ClientTracer;
+import com.github.kristofa.brave.EmptySpanCollectorMetricsHandler;
 import com.github.kristofa.brave.Sampler;
 import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
-import com.github.kristofa.brave.ext.SlfLoggingSpanCollector;
+import com.github.kristofa.brave.ext.AsyncSlf4jLoggingSpanCollector;
 import com.github.kristofa.brave.http.DefaultSpanNameProvider;
 import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
 import com.google.common.annotations.VisibleForTesting;
@@ -69,6 +70,7 @@ import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.Response;
 import okhttp3.Route;
+import org.slf4j.LoggerFactory;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
@@ -162,8 +164,10 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 .traceSampler(Sampler.ALWAYS_SAMPLE)
                 .randomGenerator(new Random())
                 .state(new ThreadLocalServerClientAndLocalSpanState(
-                        getIpAddress(), 0 /** Client TCP port. */, userAgent))
-                .spanCollector(new SlfLoggingSpanCollector("tracing.client." + userAgent))
+                        getIpAddress(), 0 /* Client TCP port. */, userAgent))
+                .spanCollector(new AsyncSlf4jLoggingSpanCollector(
+                        LoggerFactory.getLogger("tracing.client." + userAgent),
+                        new EmptySpanCollectorMetricsHandler(), 1 /* second flush */))
                 .build();
         BraveOkHttpRequestResponseInterceptor braveInterceptor =
                 new BraveOkHttpRequestResponseInterceptor(
