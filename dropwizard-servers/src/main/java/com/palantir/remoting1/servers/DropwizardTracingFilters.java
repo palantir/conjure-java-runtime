@@ -73,7 +73,7 @@ final class DropwizardTracingFilters {
                 .traceSampler(Sampler.ALWAYS_SAMPLE)
                 .randomGenerator(new Random())
                 .state(new ThreadLocalServerClientAndLocalSpanState(ip, port, name))
-                .spanCollector(new SlfLoggingSpanCollector("ServerTracer(" + name + ")"))
+                .spanCollector(new SlfLoggingSpanCollector("tracing.server." + name))
                 .build();
     }
 

@@ -163,7 +163,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 .randomGenerator(new Random())
                 .state(new ThreadLocalServerClientAndLocalSpanState(
                         getIpAddress(), 0 /** Client TCP port. */, userAgent))
-                .spanCollector(new SlfLoggingSpanCollector("ClientTracer(" + userAgent + ")"))
+                .spanCollector(new SlfLoggingSpanCollector("tracing.client." + userAgent))
                 .build();
         BraveOkHttpRequestResponseInterceptor braveInterceptor =
                 new BraveOkHttpRequestResponseInterceptor(
