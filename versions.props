@@ -1,4 +1,4 @@
-io.zipkin.brave:brave-* = 3.9.0
+io.zipkin.brave:brave-* = 3.11.0
 io.dropwizard:dropwizard-* = 0.8.2
 com.netflix.feign:feign-*= 8.17.0
 com.google.guava:guava = 18.0

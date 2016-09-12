@@ -1,7 +1,7 @@
 {
     "compileClasspath": {
         "io.zipkin.brave:brave-core": {
-            "locked": "3.9.0"
+            "locked": "3.11.0"
         },
         "io.zipkin.java:zipkin": {
             "locked": "1.0.0",
@@ -15,7 +15,7 @@
     },
     "runtime": {
         "io.zipkin.brave:brave-core": {
-            "locked": "3.9.0"
+            "locked": "3.11.0"
         },
         "io.zipkin.java:zipkin": {
             "locked": "1.0.0",
