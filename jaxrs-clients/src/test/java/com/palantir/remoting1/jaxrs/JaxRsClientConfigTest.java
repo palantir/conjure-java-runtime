@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.palantir.remoting1.clients.ClientConfig;
@@ -34,6 +35,7 @@ import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.ws.rs.Consumes;
@@ -42,6 +44,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import org.assertj.core.util.Maps;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -67,6 +71,9 @@ public final class JaxRsClientConfigTest {
     @Mock
     private Appender<ILoggingEvent> proxyingServerTracerAppender;
 
+    // Used by #setLogLevel to keep track of original/default log levels so they can be reset in #after()
+    private Map<String, Level> originalLogLevels = Maps.newHashMap();
+
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
@@ -85,6 +92,24 @@ public final class JaxRsClientConfigTest {
         ch.qos.logback.classic.Logger proxyingServerTracerLogger =
                 (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing.server.ProxyingEchoServer");
         proxyingServerTracerLogger.addAppender(proxyingServerTracerAppender);
+    }
+
+    @After
+    public void after() {
+        for (Map.Entry<String, Level> level : originalLogLevels.entrySet()) {
+            getLogbackLogger(level.getKey()).setLevel(level.getValue());
+        }
+    }
+
+    private void setLogLevel(String name, Level level) {
+        if (!originalLogLevels.containsKey(name)) {
+            originalLogLevels.put(name, level);
+        }
+        getLogbackLogger(name).setLevel(level);
+    }
+
+    private static ch.qos.logback.classic.Logger getLogbackLogger(String name) {
+        return (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(name);
     }
 
     @Test
@@ -108,6 +133,7 @@ public final class JaxRsClientConfigTest {
 
     @Test
     public void testBraveTracing_clientLogsTraces() throws Exception {
+        setLogLevel("tracing.client.test", Level.TRACE);
         TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test");
         assertThat(service.echo("foo"), is("foo"));
 
@@ -119,12 +145,14 @@ public final class JaxRsClientConfigTest {
 
     @Test
     public void testBraveTracing_traceIdsAreCarriedForward() throws Exception {
+        setLogLevel("tracing.client.test", Level.TRACE);
+        setLogLevel("tracing.server.ProxyingEchoServer", Level.TRACE);
+        setLogLevel("tracing.server.TestEchoServer", Level.TRACE);
         // Simulates two-hop call chain: client --> ProxyingEchoServer --> EchoServer. Verifies that
         // trace ids logged in the three locations are identical.
 
         TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test");
         assertThat(service.echo("foo"), is("foo"));
-
 
         // Extract client trace id.
         ArgumentCaptor<ILoggingEvent> clientTracerEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
