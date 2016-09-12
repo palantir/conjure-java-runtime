@@ -92,7 +92,7 @@ public final class DropwizardTracingFiltersTest {
 
     @Test
     public void testBraveTracing_serverLogsTraceId() throws Exception {
-        braveLogger.setLevel(Level.INFO);
+        braveLogger.setLevel(Level.TRACE);
 
         target.path("echo").request().header(BraveHttpHeaders.TraceId.getName(), "myTraceId").get();
 
@@ -104,8 +104,8 @@ public final class DropwizardTracingFiltersTest {
     }
 
     @Test
-    public void testBraveTracing_serverDoesNotLogAtWarn() throws Exception {
-        braveLogger.setLevel(Level.WARN);
+    public void testBraveTracing_serverDoesNotLogAtDebug() throws Exception {
+        braveLogger.setLevel(Level.DEBUG);
 
         target.path("echo").request().header(BraveHttpHeaders.TraceId.getName(), "myTraceId").get();
 

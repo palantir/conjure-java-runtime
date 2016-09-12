@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link SpanCollector} implementation that logs through SLF4J at INFO level.
+ * {@link SpanCollector} implementation that logs through SLF4J at TRACE level.
  */
 public final class SlfLoggingSpanCollector implements SpanCollector {
 
@@ -45,12 +45,12 @@ public final class SlfLoggingSpanCollector implements SpanCollector {
     @Override
     public void collect(Span span) {
         Util.checkNotNull(span, "span must not be null");
-        if (log.isInfoEnabled()) {
+        if (log.isTraceEnabled()) {
             for (BinaryAnnotation ba : annotations) {
                 span.addToBinary_annotations(ba);
             }
 
-            log.info(span.toString());
+            log.trace(span.toString());
         }
     }
 
