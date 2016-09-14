@@ -98,8 +98,9 @@ public final class DropwizardTracingFiltersTest {
 
         ArgumentCaptor<ILoggingEvent> requestEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(braveMockAppender).doAppend(requestEvent.capture());
-        assertThat(requestEvent.getValue().getFormattedMessage(),
-                containsString("\"serviceName\":\"testtracername\",\"ipv4\":\"0.0.0.0\",\"port\":61827}"));
+        String actualLogMessage = requestEvent.getValue().getFormattedMessage();
+        assertThat(actualLogMessage, containsString("\"serviceName\":\"testtracername\""));
+        assertThat(actualLogMessage, containsString("\"port\":61827"));
         Mockito.verifyNoMoreInteractions(braveMockAppender);
     }
 

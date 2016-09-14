@@ -18,6 +18,7 @@ package com.palantir.remoting1.jaxrs;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.kristofa.brave.AnnotationSubmitter;
 import com.github.kristofa.brave.ClientRequestInterceptor;
 import com.github.kristofa.brave.ClientResponseInterceptor;
 import com.github.kristofa.brave.ClientTracer;
@@ -162,8 +163,14 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 .traceSampler(Sampler.ALWAYS_SAMPLE)
                 .randomGenerator(new Random())
                 .state(new ThreadLocalServerClientAndLocalSpanState(
-                        getIpAddress(), 0 /** Client TCP port. */, userAgent))
+                        getIpAddress(), 0 /* Client TCP port. */, userAgent))
                 .spanCollector(new SlfLoggingSpanCollector("tracing.client." + userAgent))
+                .clock(new AnnotationSubmitter.Clock() {
+                    @Override
+                    public long currentTimeMicroseconds() {
+                        return TimeUnit.MICROSECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
+                    }
+                })
                 .build();
         BraveOkHttpRequestResponseInterceptor braveInterceptor =
                 new BraveOkHttpRequestResponseInterceptor(

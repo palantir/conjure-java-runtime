@@ -16,6 +16,7 @@
 
 package com.palantir.remoting1.servers;
 
+import com.github.kristofa.brave.AnnotationSubmitter;
 import com.github.kristofa.brave.Sampler;
 import com.github.kristofa.brave.ServerRequestInterceptor;
 import com.github.kristofa.brave.ServerResponseInterceptor;
@@ -39,6 +40,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.EnumSet;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
 
 /** Static utilities for registering Brave/Zipkin filters with Dropwizard applications. */
@@ -74,6 +76,12 @@ final class DropwizardTracingFilters {
                 .randomGenerator(new Random())
                 .state(new ThreadLocalServerClientAndLocalSpanState(ip, port, name))
                 .spanCollector(new SlfLoggingSpanCollector("tracing.server." + name))
+                .clock(new AnnotationSubmitter.Clock() {
+                    @Override
+                    public long currentTimeMicroseconds() {
+                        return TimeUnit.MICROSECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
+                    }
+                })
                 .build();
     }
 
