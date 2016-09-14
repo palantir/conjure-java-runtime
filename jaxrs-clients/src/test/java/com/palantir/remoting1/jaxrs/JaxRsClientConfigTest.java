@@ -30,16 +30,19 @@ import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
 import com.palantir.remoting1.servers.DropwizardServers;
+import feign.RetryableException;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -132,6 +135,17 @@ public final class JaxRsClientConfigTest {
     }
 
     @Test
+    public void testJaxRsContract_cannotUseUriTypeParameter() throws Exception {
+        TestEchoService service = createProxy(ECHO_SERVER.getLocalPort(), "test");
+        try {
+            service.uri(URI.create("https://doesnotexist"));
+        } catch (RetryableException e) {
+            assertThat(e.getMessage(), is("doesnotexist: nodename nor servname provided, or not known executing POST "
+                    + "https://doesnotexist/uri"));
+        }
+    }
+
+    @Test
     public void testBraveTracing_clientLogsTraces() throws Exception {
         setLogLevel("tracing.client.test", Level.TRACE);
         TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test");
@@ -202,6 +216,12 @@ public final class JaxRsClientConfigTest {
                 TestEchoService echoService = createProxy(ECHO_SERVER.getLocalPort(), "proxyingClient");
                 return echoService.echo(value);
             }
+
+            @Override
+            public String uri(URI uri) {
+                TestEchoService echoService = createProxy(ECHO_SERVER.getLocalPort(), "proxyingClient");
+                return echoService.uri(uri);
+            }
         }
     }
 
@@ -218,6 +238,11 @@ public final class JaxRsClientConfigTest {
             public String echo(String value) {
                 return value;
             }
+
+            @Override
+            public String uri(URI uri) {
+                return uri.toString();
+            }
         }
     }
 
@@ -228,5 +253,11 @@ public final class JaxRsClientConfigTest {
         @Consumes(MediaType.TEXT_PLAIN)
         @Produces(MediaType.TEXT_PLAIN)
         String echo(@QueryParam("value") String value);
+
+        @POST
+        @Path("/uri")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.TEXT_HTML)
+        String uri(URI uri);
     }
 }
