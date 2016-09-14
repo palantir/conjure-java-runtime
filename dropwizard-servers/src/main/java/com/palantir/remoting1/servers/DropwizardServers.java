@@ -20,7 +20,6 @@ import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import javax.ws.rs.ext.ExceptionMapper;
 
-
 public final class DropwizardServers {
     private DropwizardServers() {}
 

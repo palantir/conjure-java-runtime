@@ -78,7 +78,7 @@ public final class DropwizardTracingFiltersTest {
 
         when(braveMockAppender.getName()).thenReturn("MOCK");
         // the logger used by the brave server instance
-        braveLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing.server.testTracerName");
+        braveLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing.testTracerName");
         braveLogger.setLevel(null);
         braveLogger.addAppender(braveMockAppender);
 
