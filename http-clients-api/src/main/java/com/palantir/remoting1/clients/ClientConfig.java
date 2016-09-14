@@ -26,6 +26,7 @@ import org.immutables.value.Value;
 
 /** Implementation-independent configuration options for HTTP-based dynamic proxies. */
 @Value.Immutable
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
 @SuppressWarnings("checkstyle:designforextension")
 public abstract class ClientConfig {
 
