@@ -1,10 +1,10 @@
 {
     "compileClasspath": {
         "io.zipkin.brave:brave-core": {
-            "locked": "3.9.0"
+            "locked": "3.11.0"
         },
         "io.zipkin.java:zipkin": {
-            "locked": "1.0.0",
+            "locked": "1.8.4",
             "transitive": [
                 "io.zipkin.brave:brave-core"
             ]
@@ -15,10 +15,10 @@
     },
     "runtime": {
         "io.zipkin.brave:brave-core": {
-            "locked": "3.9.0"
+            "locked": "3.11.0"
         },
         "io.zipkin.java:zipkin": {
-            "locked": "1.0.0",
+            "locked": "1.8.4",
             "transitive": [
                 "io.zipkin.brave:brave-core"
             ]
