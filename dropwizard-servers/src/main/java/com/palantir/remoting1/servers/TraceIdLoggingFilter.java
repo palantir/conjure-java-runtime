@@ -40,11 +40,9 @@ enum TraceIdLoggingFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        Closeable traceContext = populateTraceContext(request);
-        try {
+        //noinspection unused - try-with-resources
+        try (Closeable traceContext = populateTraceContext(request)) {
             chain.doFilter(request, response);
-        } finally {
-            traceContext.close();
         }
     }
 

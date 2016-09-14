@@ -16,12 +16,13 @@
 
 package com.palantir.remoting1.servers;
 
-import com.github.kristofa.brave.AnnotationSubmitter;
+import com.github.kristofa.brave.Brave;
+import com.github.kristofa.brave.InheritableServerClientAndLocalSpanState;
 import com.github.kristofa.brave.Sampler;
+import com.github.kristofa.brave.ServerClientAndLocalSpanState;
 import com.github.kristofa.brave.ServerRequestInterceptor;
 import com.github.kristofa.brave.ServerResponseInterceptor;
-import com.github.kristofa.brave.ServerTracer;
-import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
+import com.github.kristofa.brave.SpanCollector;
 import com.github.kristofa.brave.ext.SlfLoggingSpanCollector;
 import com.github.kristofa.brave.http.DefaultSpanNameProvider;
 import com.github.kristofa.brave.jaxrs2.BraveContainerRequestFilter;
@@ -30,6 +31,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.net.InetAddresses;
+import com.twitter.zipkin.gen.Endpoint;
 import io.dropwizard.Configuration;
 import io.dropwizard.jetty.ConnectorFactory;
 import io.dropwizard.jetty.HttpConnectorFactory;
@@ -39,12 +41,13 @@ import io.dropwizard.setup.Environment;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.EnumSet;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import javax.servlet.DispatcherType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Static utilities for registering Brave/Zipkin filters with Dropwizard applications. */
 final class DropwizardTracingFilters {
+    private static final Logger logger = LoggerFactory.getLogger(DropwizardTracingFilters.class);
 
     private DropwizardTracingFilters() {}
 
@@ -57,32 +60,45 @@ final class DropwizardTracingFilters {
      * TODO(rfink) Is there a more stable way to retrieve IP/Port information?
      */
     static void registerTracers(Environment environment, Configuration config, String tracerName) {
-        ServerTracer serverTracer = getServerTracer(extractIp(config), extractPort(config), tracerName);
+        final BraveTracer tracer = getOrCreateBraveTracer(config, tracerName);
         environment.jersey().register(new BraveContainerRequestFilter(
-                new ServerRequestInterceptor(serverTracer),
+                new ServerRequestInterceptor(tracer.getBrave().serverTracer()),
                 new DefaultSpanNameProvider()
         ));
         environment.jersey().register(new BraveContainerResponseFilter(
-                new ServerResponseInterceptor(serverTracer)
+                new ServerResponseInterceptor(tracer.getBrave().serverTracer())
         ));
         environment.servlets()
                 .addFilter(TraceIdLoggingFilter.class.getSimpleName(), TraceIdLoggingFilter.INSTANCE)
                 .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
+        Tracers.setActiveTracer(tracer);
     }
 
-    private static ServerTracer getServerTracer(int ip, int port, String name) {
-        return ServerTracer.builder()
-                .traceSampler(Sampler.ALWAYS_SAMPLE)
-                .randomGenerator(new Random())
-                .state(new ThreadLocalServerClientAndLocalSpanState(ip, port, name))
-                .spanCollector(new SlfLoggingSpanCollector("tracing.server." + name))
-                .clock(new AnnotationSubmitter.Clock() {
-                    @Override
-                    public long currentTimeMicroseconds() {
-                        return TimeUnit.MICROSECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
-                    }
-                })
+
+    private static BraveTracer getOrCreateBraveTracer(Configuration config, String name) {
+        Tracer activeTracer = Tracers.activeTracer();
+        return (activeTracer instanceof BraveTracer)
+                ? (BraveTracer) activeTracer
+                : createBraveTracer(config, name);
+    }
+
+    private static BraveTracer createBraveTracer(Configuration config, String name) {
+        int ip = extractIp(config);
+        int port = extractPort(config);
+        ServerClientAndLocalSpanState state = new InheritableServerClientAndLocalSpanState(
+                Endpoint.create(name, ip, port));
+        // TODO (davids) make the sampler and collectors configurable
+        Sampler sampler = Sampler.ALWAYS_SAMPLE;
+        final String loggerName = "tracing." + name;
+        SpanCollector spanCollector = new SlfLoggingSpanCollector(loggerName);
+
+        logger.info("Starting tracer for {} writing to logger {}", name, loggerName);
+        Brave brave = new Brave.Builder(state)
+                .traceSampler(sampler)
+                .spanCollector(spanCollector)
+                .clock(BraveTracer.defaultClock())
                 .build();
+        return new BraveTracer(brave);
     }
 
     private static int extractIp(Configuration config) {
@@ -101,14 +117,14 @@ final class DropwizardTracingFilters {
                 })
                 .or("");
 
-        if (!bindHost.isEmpty()) {
+        if (bindHost.isEmpty()) {
+            return 0;
+        } else {
             try {
                 return InetAddresses.coerceToInteger(InetAddress.getByName(bindHost));
             } catch (UnknownHostException e) {
                 return 0;
             }
-        } else {
-            return 0;
         }
     }
 
@@ -136,4 +152,5 @@ final class DropwizardTracingFilters {
             return Optional.absent();
         }
     }
+
 }
