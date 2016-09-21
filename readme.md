@@ -11,6 +11,8 @@ clients and servers.
 
 Core libraries:
 - jaxrs-clients: Clients for JAX-RS-defined service interfaces
+- jaxrs-clients-all: As above, but the library includes Feign and OkHttp as shaded packages (and does not declare them
+  as Maven dependencies)
 - retrofit2-clients: Clients for Retrofit-defined service interfaces
 - dropwizard-servers: Configuration library for Dropwizard/Jersey servers
 
@@ -41,8 +43,8 @@ Provides the `JaxRsClient` factory for creating clients for JAX-RS services. Exa
 MyService service = JaxRsClient.builder()
     .build(MyService.class, "my user agent", "https://my-server/");
 ```
-The client is implemented using Feign; however, the Feign dependency is hidden away from both the Java API and the
-classpath (via shadowing).
+The client is implemented using Feign; in the `jaxrs-clients-all` package, the Feign dependency is hidden away from both
+the Java API and the classpath (via shadowing).
 
 ## retrofit2-clients
 Similar to `jaxrs-clients`, but generates clients using the Retrofit library. Example:
