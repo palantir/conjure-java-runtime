@@ -26,5 +26,6 @@ bintray {
 }
 
 bintrayUpload.dependsOn { generatePomFileForNebulaPublication }
+bintrayUpload.dependsOn { generatePomFileForNebulaShadowPublication }
 bintrayUpload.dependsOn { sourceJar }
 bintrayUpload.dependsOn { build }
