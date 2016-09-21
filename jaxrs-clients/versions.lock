@@ -77,7 +77,10 @@
             "project": true
         },
         "com.palantir.remoting1:http-clients-api": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:brave-extensions"
+            ]
         },
         "com.palantir.remoting1:service-config": {
             "project": true,
@@ -239,7 +242,10 @@
             "project": true
         },
         "com.palantir.remoting1:http-clients-api": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:brave-extensions"
+            ]
         },
         "com.palantir.remoting1:service-config": {
             "project": true,
