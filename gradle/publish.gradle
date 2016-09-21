@@ -26,6 +26,8 @@ bintray {
 }
 
 bintrayUpload.dependsOn { generatePomFileForNebulaPublication }
-bintrayUpload.dependsOn { generatePomFileForNebulaShadowPublication }
+bintrayUpload.dependsOn {
+    tasks.findAll { task -> task.name == 'generatePomFileForNebulaShadowPublication' }
+}
 bintrayUpload.dependsOn { sourceJar }
 bintrayUpload.dependsOn { build }
