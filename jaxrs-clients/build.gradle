@@ -1,5 +1,5 @@
 apply plugin: 'com.github.johnrengelman.shadow'
-apply from: "${rootDir}/gradle/publish-shadow.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":error-handling")
@@ -55,7 +55,15 @@ shadowJar {
         exclude(dependency { it.moduleGroup.contains("javax.ws.rs") })
         exclude(dependency { it.moduleGroup.contains("com.fasterxml.jackson") })
     }
-    classifier = ''
+}
+
+publishing.publications {
+    nebulaShadow(MavenPublication) {
+        artifactId project.name + '-all'
+        from components.shadow
+        artifact tasks.sourceJar
+        artifact tasks.javadocJar
+    }
 }
 
 tasks.shadowJar {
