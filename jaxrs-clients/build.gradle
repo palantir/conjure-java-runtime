@@ -57,8 +57,13 @@ shadowJar {
     }
 }
 
-publishing.publications.nebula {
-    artifact(shadowJar)
+publishing.publications {
+    nebulaShadow(MavenPublication) {
+        artifactId project.name + '-all'
+        from components.shadow
+        artifact tasks.sourceJar
+        artifact tasks.javadocJar
+    }
 }
 
 tasks.shadowJar {
