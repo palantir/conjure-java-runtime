@@ -4,6 +4,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":error-handling")
+    compile project(":ext:brave-extensions")
     compile project(":http-clients-api")
     compile project(":service-config")
     // ssl-config is not used in this project, but we depend on it here in order to provide
@@ -12,6 +13,7 @@ dependencies {
 
     compile "com.squareup.retrofit2:converter-jackson"
     compile "com.squareup.retrofit2:retrofit"
+    compile "io.zipkin.brave:brave-okhttp"
     compile "org.slf4j:slf4j-api"
 
     testCompile "com.squareup.okhttp3:mockwebserver"

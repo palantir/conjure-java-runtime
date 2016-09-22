@@ -16,6 +16,11 @@
 
 package com.palantir.remoting1.retrofit2;
 
+import com.github.kristofa.brave.ClientRequestInterceptor;
+import com.github.kristofa.brave.ClientResponseInterceptor;
+import com.github.kristofa.brave.ClientTracer;
+import com.github.kristofa.brave.http.DefaultSpanNameProvider;
+import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting1.clients.ClientBuilder;
@@ -23,6 +28,9 @@ import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.service.BasicCredentials;
 import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.ssl.TrustContext;
+import com.palantir.remoting1.servers.BraveTracer;
+import com.palantir.remoting1.servers.Tracer;
+import com.palantir.remoting1.servers.Tracers;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -32,10 +40,14 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder extends ClientBuilder {
+
+    private static final Logger logger = LoggerFactory.getLogger(Retrofit2ClientBuilder.class);
 
     private final ClientConfig config;
 
@@ -68,6 +80,8 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
             TrustContext context = config.trustContext().get();
             client.sslSocketFactory(context.sslSocketFactory(), context.x509TrustManager());
         }
+
+        setupZipkinBraveTracing(userAgent, client);
 
         // proxy
         if (config.proxy().isPresent()) {
@@ -103,5 +117,31 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
 
         return client.build();
+    }
+
+    private void setupZipkinBraveTracing(final String userAgent, okhttp3.OkHttpClient.Builder client) {
+        Tracer tracer = getTracer();
+        if (!(tracer instanceof BraveTracer)) {
+            // TODO (davids) getOrCreate Brave and set tracer
+            logger.warn("Zipkin tracing for '{}' is not enabled due to incompatible tracer {}", userAgent, tracer);
+            return;
+        }
+
+        // TODO (davids) include user agent annotation in request span annotation
+        final ClientTracer clientTracer = ((BraveTracer) tracer).getBrave().clientTracer();
+        client.addInterceptor(
+                new BraveOkHttpRequestResponseInterceptor(
+                        new ClientRequestInterceptor(clientTracer),
+                        new ClientResponseInterceptor(clientTracer),
+                        new DefaultSpanNameProvider()));
+    }
+
+    private Tracer getTracer() {
+        Tracer tracer = config.tracer();
+        Tracer activeTracer = Tracers.activeTracer();
+        if (!tracer.equals(activeTracer)) {
+            logger.warn("Found different tracers: config: {}, active: {}", tracer, activeTracer);
+        }
+        return tracer;
     }
 }
