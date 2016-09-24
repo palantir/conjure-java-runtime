@@ -16,7 +16,9 @@
 
 package com.palantir.remoting1.retrofit2;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting1.clients.ClientBuilder;
 import com.palantir.remoting1.clients.ClientConfig;
@@ -50,13 +52,25 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
     @Override
     public <T> T build(Class<T> serviceClass, String userAgent, List<String> uris) {
         Preconditions.checkArgument(!uris.isEmpty());
-        okhttp3.OkHttpClient client = createOkHttpClient(userAgent, uris);
+        List<String> sanitizedUris = sanitizeUris(uris); // adds trailing slash
+        okhttp3.OkHttpClient client = createOkHttpClient(userAgent, sanitizedUris);
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl(uris.get(0))
+                .baseUrl(sanitizedUris.get(0))
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
         return retrofit.create(serviceClass);
+    }
+
+    private List<String> sanitizeUris(List<String> uris) {
+        return Lists.transform(uris, new Function<String, String>() {
+            @Override
+            public String apply(String input) {
+                return input.substring(input.length() - 1).equals("/")
+                        ? input
+                        : input + "/";
+            }
+        });
     }
 
     private OkHttpClient createOkHttpClient(String userAgent, List<String> uris) {
