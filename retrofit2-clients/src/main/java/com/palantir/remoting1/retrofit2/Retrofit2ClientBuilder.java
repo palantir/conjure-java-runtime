@@ -52,7 +52,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
     @Override
     public <T> T build(Class<T> serviceClass, String userAgent, List<String> uris) {
         Preconditions.checkArgument(!uris.isEmpty());
-        List<String> sanitizedUris = sanitizeUris(uris); // adds trailing slash
+        List<String> sanitizedUris = addTrailingSlashes(uris);
         okhttp3.OkHttpClient client = createOkHttpClient(userAgent, sanitizedUris);
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
@@ -62,7 +62,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         return retrofit.create(serviceClass);
     }
 
-    private static List<String> sanitizeUris(List<String> uris) {
+    private static List<String> addTrailingSlashes(List<String> uris) {
         return Lists.transform(uris, new Function<String, String>() {
             @Override
             public String apply(String input) {
