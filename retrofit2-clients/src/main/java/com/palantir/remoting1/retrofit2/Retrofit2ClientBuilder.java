@@ -62,11 +62,11 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         return retrofit.create(serviceClass);
     }
 
-    private List<String> sanitizeUris(List<String> uris) {
+    private static List<String> sanitizeUris(List<String> uris) {
         return Lists.transform(uris, new Function<String, String>() {
             @Override
             public String apply(String input) {
-                return input.substring(input.length() - 1).equals("/")
+                return input.charAt(input.length() - 1) == '/'
                         ? input
                         : input + "/";
             }
