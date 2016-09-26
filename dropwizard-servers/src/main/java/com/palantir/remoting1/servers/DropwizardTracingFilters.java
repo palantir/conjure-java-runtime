@@ -16,6 +16,7 @@
 
 package com.palantir.remoting1.servers;
 
+import com.github.kristofa.brave.AnnotationSubmitter;
 import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.InheritableServerClientAndLocalSpanState;
 import com.github.kristofa.brave.Sampler;
@@ -96,7 +97,12 @@ final class DropwizardTracingFilters {
         Brave brave = new Brave.Builder(state)
                 .traceSampler(sampler)
                 .spanCollector(spanCollector)
-                .clock(BraveTracer.defaultClock())
+                .clock(new AnnotationSubmitter.Clock() {
+                    @Override
+                    public long currentTimeMicroseconds() {
+                        return TimeUnit.MICROSECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
+                    }
+                })
                 .build();
         return new BraveTracer(brave);
     }
