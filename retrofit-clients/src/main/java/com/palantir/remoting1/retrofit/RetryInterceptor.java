@@ -60,7 +60,7 @@ public final class RetryInterceptor implements Interceptor {
                 }
             }
             if (!successful) {
-                logger.error("Request to url {} failed on attempt “‘", request.url(), numTries);
+                logger.error("Request to url {} failed on attempt {}", request.url(), numTries);
             }
         }
 
