@@ -33,7 +33,7 @@ public abstract class ClientConfig {
     private static final Duration CONNECT_TIMEOUT = Duration.seconds(10);
     private static final Duration READ_TIMEOUT = Duration.minutes(10);
     private static final Duration WRITE_TIMEOUT = Duration.minutes(10);
-    private static final int MAX_NUM_RETRIES = 1;
+    private static final int MAX_NUM_RETRIES = 0;
 
     @Value.Parameter
     public abstract Optional<TrustContext> trustContext();

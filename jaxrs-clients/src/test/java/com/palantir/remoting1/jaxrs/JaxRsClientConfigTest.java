@@ -173,6 +173,16 @@ public final class JaxRsClientConfigTest {
         Mockito.verifyNoMoreInteractions(serverTracerAppender);
     }
 
+    @Test
+    public void testRetries_notSupported() throws Exception {
+        try {
+            JaxRsClient.builder(ClientConfig.builder().maxNumRetries(1).build())
+                    .build(TestEchoService.class, "agent", "uri");
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), is("Connection-level retries are not supported by JaxRsClient"));
+        }
+    }
+
     private String getTraceIdFromLogEvent(ArgumentCaptor<ILoggingEvent> event) {
         Pattern tracePattern = Pattern.compile(".*traceId\":\"([a-z0-9]+).*");
         Matcher matcher = tracePattern.matcher(event.getValue().getFormattedMessage());

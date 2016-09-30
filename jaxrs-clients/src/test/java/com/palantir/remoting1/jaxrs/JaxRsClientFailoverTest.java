@@ -20,14 +20,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.palantir.remoting1.clients.ClientConfig;
-import com.palantir.remoting1.jaxrs.feignimpl.BackoffStrategy;
 import feign.RetryableException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -35,7 +29,6 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.InOrder;
 
 
 public final class JaxRsClientFailoverTest {
@@ -80,33 +73,6 @@ public final class JaxRsClientFailoverTest {
         anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
         assertThat(proxy.blah(), is("foo"));
         anotherServer1.shutdown();
-    }
-
-    @Test
-    public void testBackoff() throws Exception {
-        server1.shutdown();
-        server2.shutdown();
-
-        BackoffStrategy backoffStrategy = mock(BackoffStrategy.class);
-        when(backoffStrategy.backoff(anyInt())).thenReturn(true, false, true, false);
-
-        FakeoInterface proxy = new FeignJaxRsClientBuilder(ClientConfig.builder().build(), backoffStrategy)
-                .build(FakeoInterface.class, "agent",
-                        ImmutableList.of("http://localhost:" + server1.getPort(),
-                                "http://localhost:" + server2.getPort()));
-        try {
-            proxy.blah();
-            fail();
-        } catch (RetryableException e) {
-            assertThat(e.getMessage(), startsWith("Failed to connect"));
-        }
-
-        InOrder inOrder = inOrder(backoffStrategy);
-        inOrder.verify(backoffStrategy).backoff(1); // server 1, attempt 1
-        inOrder.verify(backoffStrategy).backoff(2); // server 1, attempt 2
-        inOrder.verify(backoffStrategy).backoff(1); // server 2, attempt 1
-        inOrder.verify(backoffStrategy).backoff(2); // server 2, attempt 2
-        inOrder.verifyNoMoreInteractions();
     }
 
     @Path("/fakeo")
