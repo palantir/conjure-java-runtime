@@ -47,7 +47,10 @@ public final class DropwizardServers {
             Configuration config,
             String tracerName,
             Stacktraces stacktracePropagation) {
-        DropwizardTracingFilters.registerTracers(environment, config, tracerName);
+        configureStacktraceMappers(environment, stacktracePropagation);
+    }
+
+    static void configureStacktraceMappers(final Environment environment, Stacktraces stacktracePropagation) {
         ExceptionMappers.visitExceptionMappers(
                 stacktracePropagation == Stacktraces.PROPAGATE,
                 new ExceptionMappers.Consumer<ExceptionMapper<? extends Throwable>>() {

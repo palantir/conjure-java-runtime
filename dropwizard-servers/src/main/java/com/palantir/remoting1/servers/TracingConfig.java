@@ -16,26 +16,20 @@
 
 package com.palantir.remoting1.servers;
 
-public interface Tracer {
+import org.immutables.value.Value;
 
-    /**
-     * Begins a trace context for the specified component and operation.
-     *
-     * @param component component name
-     * @param operation operation name
-     *
-     * @return new trace context
-     */
-    TraceContext begin(String component, String operation);
+/** Configuration options for tracing. */
+@Value.Immutable
+@Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
+@SuppressWarnings("checkstyle:designforextension")
+public abstract class TracingConfig {
 
-    Class<? extends TraceContext> getContextClass();
-
-    interface TraceContext extends AutoCloseable {
-        /**
-         * Closes and completes the current trace context.
-         */
-        @Override
-        void close();
+    public static Builder builder() {
+        return new Builder();
     }
 
+    // TODO (davids) sampler
+    // TODO (davids) reporter
+
+    public static final class Builder extends ImmutableTracingConfig.Builder {}
 }

@@ -1,3 +1,5 @@
+apply plugin: 'org.inferred.processors'
+
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
@@ -14,4 +16,6 @@ dependencies {
     testCompile "io.dropwizard:dropwizard-testing"
     testCompile "junit:junit"
     testCompile "org.hamcrest:hamcrest-all"
+
+    processor "org.immutables:value"
 }

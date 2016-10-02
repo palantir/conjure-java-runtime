@@ -18,7 +18,6 @@ package com.palantir.remoting1.jaxrs;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -32,17 +31,17 @@ import static org.mockito.Mockito.when;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import com.github.kristofa.brave.Brave;
 import com.github.kristofa.brave.IdConversion;
+import com.github.kristofa.brave.Sampler;
+import com.github.kristofa.brave.ext.SlfLoggingSpanCollector;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
-import com.palantir.remoting1.servers.BraveTracer;
 import com.palantir.remoting1.servers.ProxyingEchoServer;
 import com.palantir.remoting1.servers.TestEchoServer;
-import com.palantir.remoting1.servers.Tracer;
-import com.palantir.remoting1.servers.Tracers;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
@@ -76,6 +75,7 @@ public final class JaxRsClientConfigTest {
     @ClassRule
     public static final DropwizardAppRule<Configuration> PROXYING_ECHO_SERVER =
             new DropwizardAppRule<>(ProxyingEchoServer.class, CONFIG_PATH);
+
 
     @Mock
     private Appender<ILoggingEvent> tracingAppender;
@@ -129,7 +129,8 @@ public final class JaxRsClientConfigTest {
 
     @Test
     public void testSslSocketFactory_canConnectWhenSocketFactoryIsSet() throws Exception {
-        TestEchoService service = createProxy(ECHO_SERVER.getLocalPort(), "test");
+        Brave brave = ((TestEchoServer) ECHO_SERVER.getApplication()).httpRemoting().brave();
+        TestEchoService service = createProxy(ECHO_SERVER.getLocalPort(), "test", brave);
         assertThat(service.echo("foo"), is("foo"));
     }
 
@@ -137,14 +138,15 @@ public final class JaxRsClientConfigTest {
     public void testBraveTracing_clientLogsTraces() throws Exception {
         setLogLevel("com.palantir.remoting1", Level.DEBUG);
         setLogLevel("tracing", Level.TRACE);
-        TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test");
+        Brave brave = createTestBrave();
+        TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test", brave);
 
         assertThat(service.echo("foo"), is("foo"));
 
         ArgumentCaptor<ILoggingEvent> tracingLoggingEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(tracingAppender, atLeastOnce()).doAppend(tracingLoggingEvent.capture());
         List<ILoggingEvent> traceLoggingEvents = tracingLoggingEvent.getAllValues();
-        assertThat(traceLoggingEvents, Matchers.<ILoggingEvent>iterableWithSize(6));
+        assertThat(traceLoggingEvents, Matchers.<ILoggingEvent>iterableWithSize(7));
 
         // expect 2 client send "cs" traces -- one for test to proxy, one for proxy to echo service
         assertThat(FluentIterable.from(traceLoggingEvents).filter(new Predicate<ILoggingEvent>() {
@@ -167,6 +169,13 @@ public final class JaxRsClientConfigTest {
         Mockito.verifyNoMoreInteractions(tracingAppender);
     }
 
+    private Brave createTestBrave() {
+        return new Brave.Builder("test")
+                .traceSampler(Sampler.ALWAYS_SAMPLE)
+                .spanCollector(new SlfLoggingSpanCollector("tracing"))
+                .build();
+    }
+
     @Test
     public void testBraveTracing_traceIdsAreCarriedForward() throws Exception {
         setLogLevel("com.palantir.remoting1", Level.DEBUG);
@@ -175,26 +184,22 @@ public final class JaxRsClientConfigTest {
         // Simulates two-hop call chain: client --> ProxyingEchoServer --> EchoServer.
         // Verifies that trace ids logged in the three locations are identical.
 
-        Tracer originalTracer = Tracers.activeTracer();
-        TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test");
+        Brave brave = createTestBrave();
+        TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test", brave);
 
-        assertThat(originalTracer, is(Tracers.activeTracer()));
-        assertThat(originalTracer, instanceOf(BraveTracer.class));
         assertThat(MDC.get("traceId"), is(nullValue()));
 
         String foo = service.echo("foo");
 
         assertThat(foo, is("foo"));
 
-        assertThat(originalTracer, is(Tracers.activeTracer()));
-        assertThat(originalTracer, instanceOf(BraveTracer.class));
         assertThat(MDC.get("traceId"), is(nullValue()));
 
         // expect 6 traces - 2 local, 2 client, 2 server
         ArgumentCaptor<ILoggingEvent> tracingLoggingEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
-        verify(tracingAppender, times(6)).doAppend(tracingLoggingEvent.capture());
+        verify(tracingAppender, times(7)).doAppend(tracingLoggingEvent.capture());
         List<ILoggingEvent> traceLoggingEvents = tracingLoggingEvent.getAllValues();
-        assertThat(traceLoggingEvents, hasSize(6));
+        assertThat(traceLoggingEvents, hasSize(7));
         Set<String> traceIds = new HashSet<>();
         for (ILoggingEvent traceLoggingEvent : traceLoggingEvents) {
             System.out.printf("Captured logging event to %s:%n  %s%n",
@@ -224,13 +229,14 @@ public final class JaxRsClientConfigTest {
         return matcher.group(1);
     }
 
-    private static TestEchoService createProxy(int port, String name) {
+    private TestEchoService createProxy(int port, String name, Brave brave) {
         String endpointUri = "https://localhost:" + port;
         SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
         return JaxRsClient.builder(
                 ClientConfig.builder()
                         .trustContext(SslSocketFactories.createTrustContext(sslConfig))
                         .build())
+                .withTracer(brave)
                 .build(TestEchoService.class, name, endpointUri);
     }
 

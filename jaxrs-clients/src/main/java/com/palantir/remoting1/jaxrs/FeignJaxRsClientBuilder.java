@@ -18,12 +18,14 @@ package com.palantir.remoting1.jaxrs;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.kristofa.brave.ClientRequestInterceptor;
-import com.github.kristofa.brave.ClientResponseInterceptor;
-import com.github.kristofa.brave.ClientTracer;
-import com.github.kristofa.brave.http.DefaultSpanNameProvider;
-import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
+import com.github.kristofa.brave.Brave;
+import com.github.kristofa.brave.KeyValueAnnotation;
+import com.github.kristofa.brave.okhttp.BraveTracingInterceptor;
+import com.github.kristofa.brave.okhttp.OkHttpParser;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting1.clients.ClientBuilder;
 import com.palantir.remoting1.clients.ClientConfig;
@@ -39,9 +41,6 @@ import com.palantir.remoting1.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting1.jaxrs.feignimpl.ObjectMappers;
 import com.palantir.remoting1.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting1.jaxrs.feignimpl.UserAgentInterceptor;
-import com.palantir.remoting1.servers.BraveTracer;
-import com.palantir.remoting1.servers.Tracer;
-import com.palantir.remoting1.servers.Tracers;
 import feign.Contract;
 import feign.Feign;
 import feign.InputStreamDelegateDecoder;
@@ -73,6 +72,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private final BackoffStrategy backoffStrategy;
     private final ClientConfig config;
+    private Brave brave;
 
     @VisibleForTesting
     FeignJaxRsClientBuilder(ClientConfig config, BackoffStrategy backoffStrategy) {
@@ -83,6 +83,12 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     FeignJaxRsClientBuilder(ClientConfig config) {
         this.config = config;
         this.backoffStrategy = NeverRetryingBackoffStrategy.INSTANCE;
+    }
+
+    @Override
+    public FeignJaxRsClientBuilder withTracer(Brave tracer) {
+        this.brave = tracer;
+        return this;
     }
 
     @Override
@@ -181,29 +187,32 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private void setupZipkinBraveTracing(final String userAgent, okhttp3.OkHttpClient.Builder client) {
-        Tracer tracer = getTracer();
-        if (!(tracer instanceof BraveTracer)) {
-            // TODO (davids) getOrCreate Brave and set tracer
-            logger.warn("Zipkin tracing for '{}' is not enabled due to incompatible tracer {}", userAgent, tracer);
-            return;
-        }
+        if (brave != null) {
+            // TODO (davids)
+            BraveTracingInterceptor interceptor = BraveTracingInterceptor.builder(brave)
+                    .serverName(userAgent)
+                    .parser(new OkHttpParser() {
+                        @Override
+                        public String networkSpanName(okhttp3.Request request) {
+                            return request.method() + " " + request.url().encodedPath();
+                        }
 
-        // TODO (davids) include user agent annotation in request span annotation
-        final ClientTracer clientTracer = ((BraveTracer) tracer).getBrave().clientTracer();
-        client.addInterceptor(
-                new BraveOkHttpRequestResponseInterceptor(
-                        new ClientRequestInterceptor(clientTracer),
-                        new ClientResponseInterceptor(clientTracer),
-                        new DefaultSpanNameProvider()));
-    }
-
-    private Tracer getTracer() {
-        Tracer tracer = config.tracer();
-        Tracer activeTracer = Tracers.activeTracer();
-        if (!tracer.equals(activeTracer)) {
-            logger.warn("Found different tracers: config: {}, active: {}", tracer, activeTracer);
+                        @Override
+                        public List<KeyValueAnnotation> networkRequestTags(okhttp3.Request request) {
+                            String header = request.header(HttpHeaders.USER_AGENT);
+                            if (Strings.isNullOrEmpty(header)) {
+                                return super.networkRequestTags(request);
+                            } else {
+                                return ImmutableList.copyOf(Iterables.concat(
+                                        super.networkRequestTags(request),
+                                        ImmutableList.of(KeyValueAnnotation.create(HttpHeaders.USER_AGENT, header))));
+                            }
+                        }
+                    })
+                    .build();
+            client.addInterceptor(interceptor);
+            client.addNetworkInterceptor(interceptor);
         }
-        return tracer;
     }
 
 }

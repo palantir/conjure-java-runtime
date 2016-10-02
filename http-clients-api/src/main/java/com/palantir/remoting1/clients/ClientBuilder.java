@@ -16,11 +16,14 @@
 
 package com.palantir.remoting1.clients;
 
+import com.github.kristofa.brave.Brave;
 import java.util.Arrays;
 import java.util.List;
 
 /** Abstraction for creating HTTP-invoking dynamic proxies around service interfaces. */
 public abstract class ClientBuilder {
+
+    public abstract ClientBuilder withTracer(Brave brave);
 
     /**
      * Creates and returns a dynamic proxy of the given {@code serviceClass} type against the given URIs. The user agent

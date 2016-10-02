@@ -19,12 +19,21 @@ package com.palantir.remoting1.servers;
 import com.palantir.remoting1.jaxrs.TestEchoService;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
 public final class TestEchoServer extends Application<Configuration> {
 
+    private final HttpRemotingBundle<Configuration> httpRemotingBundle = new HttpRemotingBundle<>();
+
     public static void main(String[] args) throws Exception {
         new TestEchoServer().run(args);
+    }
+
+    @Override
+    public void initialize(Bootstrap<Configuration> bootstrap) {
+        super.initialize(bootstrap);
+        bootstrap.addBundle(httpRemoting());
     }
 
     @Override
@@ -34,23 +43,24 @@ public final class TestEchoServer extends Application<Configuration> {
             public String echo(String value) {
                 logBraveState();
                 //noinspection unused - try-with-resources
-                try (Tracer.TraceContext trace = Tracers.activeTracer()
-                        .begin(TestEchoServer.class.getSimpleName(), "echo")) {
+                httpRemoting().brave().localTracer().startNewSpan("test", "echo");
+                try {
                     logBraveState();
                     return value;
+                } finally {
+                    httpRemoting().brave().localTracer().finishSpan();
                 }
             }
         });
-        DropwizardServers.configure(env, config, getClass().getName(),
-                DropwizardServers.Stacktraces.DO_NOT_PROPAGATE);
     }
 
     private void logBraveState() {
-        TestSupport.logDebugBrave(getClass().getSimpleName(), getLogger());
+        TestSupport.logDebugBrave(getClass().getSimpleName(),
+                TestSupport.getLogger(getClass()),
+                httpRemoting().brave());
     }
 
-    private ch.qos.logback.classic.Logger getLogger() {
-        return TestSupport.getLogger(getClass());
+    public HttpRemotingBundle<Configuration> httpRemoting() {
+        return httpRemotingBundle;
     }
-
 }

@@ -3,6 +3,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":service-config")
+    compile "io.zipkin.brave:brave-core"
 
     testCompile files("lib/VersionTest.jar")
     testCompile "junit:junit"

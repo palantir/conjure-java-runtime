@@ -22,8 +22,6 @@ import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.service.ServiceConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
 import com.palantir.remoting1.config.ssl.TrustContext;
-import com.palantir.remoting1.servers.Tracer;
-import com.palantir.remoting1.servers.Tracers;
 import org.immutables.value.Value;
 
 /** Implementation-independent configuration options for HTTP-based dynamic proxies. */
@@ -61,11 +59,6 @@ public abstract class ClientConfig {
     @Value.Default
     public Integer maxNumRetries() {
         return MAX_NUM_RETRIES;
-    }
-
-    @Value.Default
-    public Tracer tracer() {
-        return Tracers.activeTracer();
     }
 
     public static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {

@@ -19,11 +19,13 @@ package com.palantir.remoting1.servers;
 import com.palantir.remoting1.jaxrs.TestEchoService;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
 public final class ProxyingEchoServer extends Application<Configuration> {
 
     private volatile int echoServerPort;
+    private final HttpRemotingBundle<Configuration> httpRemotingBundle = new HttpRemotingBundle<>();
 
     @SuppressWarnings("unused") // instantiated by DropwizardAppRule
     public ProxyingEchoServer() {
@@ -39,31 +41,34 @@ public final class ProxyingEchoServer extends Application<Configuration> {
     }
 
     @Override
+    public void initialize(Bootstrap<Configuration> bootstrap) {
+        super.initialize(bootstrap);
+        bootstrap.addBundle(httpRemotingBundle);
+    }
+
+    @Override
     public void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(new TestEchoService() {
             @Override
             public String echo(String value) {
                 //noinspection unused - try-with-resources
-                try (Tracer.TraceContext trace = Tracers.activeTracer().begin(
-                        ProxyingEchoServer.class.getSimpleName(), "echo")) {
+                logBraveState();
 
-                    logBraveState();
+                TestEchoService echoService = TestSupport.createProxy(echoServerPort, "proxyingClient",
+                        httpRemotingBundle.brave());
+                String echo = echoService.echo(value);
 
-                    TestEchoService echoService = TestSupport.createProxy(echoServerPort, "proxyingClient");
-                    String echo = echoService.echo(value);
-
-                    getLogger().info("Finished proxying echo server with '{}'", value);
-                    logBraveState();
-                    return echo;
-                }
+                getLogger().info("Finished proxying echo server with '{}'", value);
+                logBraveState();
+                return echo;
             }
         });
-        DropwizardServers.configure(env, config, getClass().getName(),
-                DropwizardServers.Stacktraces.DO_NOT_PROPAGATE);
     }
 
     private void logBraveState() {
-        TestSupport.logDebugBrave(getClass().getSimpleName(), getLogger());
+        TestSupport.logDebugBrave(getClass().getSimpleName(),
+                getLogger(),
+                httpRemotingBundle.brave());
     }
 
     private ch.qos.logback.classic.Logger getLogger() {

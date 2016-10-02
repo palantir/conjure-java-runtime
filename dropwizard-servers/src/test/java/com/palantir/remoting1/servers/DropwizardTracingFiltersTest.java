@@ -16,7 +16,9 @@
 
 package com.palantir.remoting1.servers;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
@@ -31,10 +33,12 @@ import ch.qos.logback.core.OutputStreamAppender;
 import com.github.kristofa.brave.http.BraveHttpHeaders;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -78,7 +82,7 @@ public final class DropwizardTracingFiltersTest {
 
         when(braveMockAppender.getName()).thenReturn("MOCK");
         // the logger used by the brave server instance
-        braveLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing.testTracerName");
+        braveLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing");
         braveLogger.setLevel(null);
         braveLogger.addAppender(braveMockAppender);
 
@@ -94,12 +98,20 @@ public final class DropwizardTracingFiltersTest {
     public void testBraveTracing_serverLogsTraceId() throws Exception {
         braveLogger.setLevel(Level.TRACE);
 
-        target.path("echo").request().header(BraveHttpHeaders.TraceId.getName(), "myTraceId").get();
+        target.path("echo").request()
+                .header(BraveHttpHeaders.TraceId.getName(), "1234567890abcdef")
+                .header(BraveHttpHeaders.SpanId.getName(), "01234567890abcde")
+                .header(BraveHttpHeaders.Sampled.getName(), "true")
+                .get();
 
         ArgumentCaptor<ILoggingEvent> requestEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
         verify(braveMockAppender).doAppend(requestEvent.capture());
-        String actualLogMessage = requestEvent.getValue().getFormattedMessage();
-        assertThat(actualLogMessage, containsString("\"serviceName\":\"testtracername\""));
+        ILoggingEvent loggingEvent = requestEvent.getValue();
+        String actualLogMessage = loggingEvent.getMessage();
+        Map<String, String> mdcMap = loggingEvent.getMDCPropertyMap();
+        assertThat(mdcMap.keySet(), contains("traceId"));
+        assertThat(mdcMap.get("traceId"), equalTo("1234567890abcdef"));
+        assertThat(actualLogMessage, containsString("\"serviceName\":\"testechoserver\""));
         assertThat(actualLogMessage, containsString("\"port\":61827"));
         Mockito.verifyNoMoreInteractions(braveMockAppender);
     }
@@ -108,7 +120,11 @@ public final class DropwizardTracingFiltersTest {
     public void testBraveTracing_serverDoesNotLogAtDebug() throws Exception {
         braveLogger.setLevel(Level.DEBUG);
 
-        target.path("echo").request().header(BraveHttpHeaders.TraceId.getName(), "myTraceId").get();
+        target.path("echo").request()
+                .header(BraveHttpHeaders.TraceId.getName(), "1234567890abcdef")
+                .header(BraveHttpHeaders.SpanId.getName(), "01234567890abcde")
+                .header(BraveHttpHeaders.Sampled.getName(), "true")
+                .get();
 
         Mockito.verifyNoMoreInteractions(braveMockAppender);
     }
@@ -131,15 +147,28 @@ public final class DropwizardTracingFiltersTest {
 
         // Invoke server and observe servers log messages; note that the server uses the same logger at INFO.
         logger.setLevel(Level.INFO);
-        target.path("echo").request().header(BraveHttpHeaders.TraceId.getName(), "myTraceId").get();
-        assertThat(byteStream.toString(StandardCharsets.UTF_8.name()), startsWith("traceId: myTraceId"));
+        target.path("echo").request()
+                .header(BraveHttpHeaders.TraceId.getName(), "1234567890abcdef")
+                .header(BraveHttpHeaders.SpanId.getName(), "01234567890abcde")
+                .header(BraveHttpHeaders.Sampled.getName(), "true")
+                .get();
+        assertThat(byteStream.toString(StandardCharsets.UTF_8.name()), startsWith("traceId: 1234567890abcdef"));
     }
 
     public static final class TestEchoServer extends Application<Configuration> {
+
+        private final BraveBundle<Configuration> braveBundle = new BraveBundle<>();
+
+        @Override
+        public void initialize(Bootstrap<Configuration> bootstrap) {
+            super.initialize(bootstrap);
+            bootstrap.addBundle(braveBundle);
+        }
+
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
-            DropwizardServers.configure(env, config, "testTracerName", DropwizardServers.Stacktraces.PROPAGATE);
+            DropwizardServers.configureStacktraceMappers(env, DropwizardServers.Stacktraces.PROPAGATE);
         }
 
         public static final class TestEchoResource implements TestEchoService {

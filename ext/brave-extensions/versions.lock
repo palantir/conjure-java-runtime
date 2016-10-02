@@ -48,10 +48,13 @@
             ]
         },
         "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0"
+            "locked": "3.13.0",
+            "transitive": [
+                "com.palantir.remoting1:http-clients-api"
+            ]
         },
         "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
+            "locked": "1.12.0",
             "transitive": [
                 "io.zipkin.brave:brave-core"
             ]
@@ -119,10 +122,13 @@
             ]
         },
         "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0"
+            "locked": "3.13.0",
+            "transitive": [
+                "com.palantir.remoting1:http-clients-api"
+            ]
         },
         "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
+            "locked": "1.12.0",
             "transitive": [
                 "io.zipkin.brave:brave-core"
             ]

@@ -41,6 +41,15 @@
                 "com.palantir.remoting1:service-config"
             ]
         },
+        "io.zipkin.brave:brave-core": {
+            "locked": "3.13.0"
+        },
+        "io.zipkin.java:zipkin": {
+            "locked": "1.12.0",
+            "transitive": [
+                "io.zipkin.brave:brave-core"
+            ]
+        },
         "org.slf4j:jcl-over-slf4j": {
             "locked": "1.7.12",
             "transitive": [
@@ -95,6 +104,15 @@
             "locked": "0.2.3",
             "transitive": [
                 "com.palantir.remoting1:service-config"
+            ]
+        },
+        "io.zipkin.brave:brave-core": {
+            "locked": "3.13.0"
+        },
+        "io.zipkin.java:zipkin": {
+            "locked": "1.12.0",
+            "transitive": [
+                "io.zipkin.brave:brave-core"
             ]
         },
         "org.slf4j:jcl-over-slf4j": {

@@ -30,14 +30,14 @@ import org.slf4j.MDC;
 public final class TestSupport {
     private TestSupport() {}
 
-    static TestEchoService createProxy(int port, String name) {
+    static TestEchoService createProxy(int port, String name, Brave brave) {
         String endpointUri = "https://localhost:" + port;
         SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
         return JaxRsClient.builder(
                 ClientConfig.builder()
                         .trustContext(SslSocketFactories.createTrustContext(sslConfig))
-                        .tracer(Tracers.activeTracer())
                         .build())
+                .withTracer(brave)
                 .build(TestEchoService.class, name, endpointUri);
     }
 
@@ -51,15 +51,9 @@ public final class TestSupport {
         return getLogger(clazz.getName());
     }
 
-    public static Brave getBrave() {
-        throw new IllegalStateException("no Brave");
-    }
-
-    static void logDebugBrave(String tracerName, Logger logger) {
-        Tracer tracer = Tracers.activeTracer();
-        Brave brave = ((BraveTracer) tracer).getBrave();
+    static void logDebugBrave(String tracerName, Logger logger, Brave brave) {
         logger.debug("'{}' test [{}]: traceId: '{}', tracer: {}",
-                tracerName, Thread.currentThread().getName(), MDC.get("traceId"), tracer);
+                tracerName, Thread.currentThread().getName(), MDC.get("traceId"), brave);
         logger.debug("  Server: {}", brave.serverSpanThreadBinder().getCurrentServerSpan().getSpan());
         logger.debug("  Client: {}", brave.clientSpanThreadBinder().getCurrentClientSpan());
         logger.debug("  Local:  {}", brave.localSpanThreadBinder().getCurrentLocalSpan());
