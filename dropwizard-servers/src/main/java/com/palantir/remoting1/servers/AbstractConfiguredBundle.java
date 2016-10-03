@@ -16,10 +16,8 @@
 
 package com.palantir.remoting1.servers;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
@@ -36,13 +34,7 @@ public abstract class AbstractConfiguredBundle<C extends Configuration> implemen
 
     @Override
     public final void initialize(Bootstrap<?> bootstrap) {
-        Application<?> application = bootstrap.getApplication();
-        checkNotNull(application, "application");
-        Class<? extends Application> applicationClass = application.getClass();
-        checkNotNull(applicationClass, "applicationClass");
-        String appName = applicationClass.getSimpleName();
-        checkNotNull(appNameRef, "appNameRef");
-        checkNotNull(appName, "appName");
+        String appName = bootstrap.getApplication().getClass().getSimpleName();
         appNameRef.set(appName);
         log().info("Initializing bundle {} for application {}", getClass().getSimpleName(), appName());
         bootstrap(bootstrap);

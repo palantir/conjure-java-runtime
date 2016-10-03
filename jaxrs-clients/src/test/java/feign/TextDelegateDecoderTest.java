@@ -31,9 +31,9 @@ import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.jaxrs.JaxRsClient;
+import com.palantir.remoting1.jaxrs.feignimpl.TestConfiguration;
 import com.palantir.remoting1.jaxrs.feignimpl.TestServer;
 import feign.codec.Decoder;
-import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -51,7 +51,7 @@ public final class TextDelegateDecoderTest {
     private static final String DELEGATE_RESPONSE = "delegate response";
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestServer.class,
+    public static final DropwizardAppRule<TestConfiguration> APP = new DropwizardAppRule<>(TestServer.class,
             "src/test/resources/test-server.yml");
 
     @Rule

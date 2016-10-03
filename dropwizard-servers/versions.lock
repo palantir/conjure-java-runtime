@@ -294,7 +294,8 @@
             "transitive": [
                 "com.palantir.remoting1:brave-extensions",
                 "com.palantir.remoting1:http-clients-api",
-                "io.zipkin.brave:brave-http"
+                "io.zipkin.brave:brave-http",
+                "io.zipkin.brave:brave-spancollector-http"
             ]
         },
         "io.zipkin.brave:brave-http": {
@@ -304,6 +305,9 @@
             ]
         },
         "io.zipkin.brave:brave-jaxrs2": {
+            "locked": "3.13.0"
+        },
+        "io.zipkin.brave:brave-spancollector-http": {
             "locked": "3.13.0"
         },
         "io.zipkin.java:zipkin": {
@@ -917,7 +921,8 @@
             "transitive": [
                 "com.palantir.remoting1:brave-extensions",
                 "com.palantir.remoting1:http-clients-api",
-                "io.zipkin.brave:brave-http"
+                "io.zipkin.brave:brave-http",
+                "io.zipkin.brave:brave-spancollector-http"
             ]
         },
         "io.zipkin.brave:brave-http": {
@@ -927,6 +932,9 @@
             ]
         },
         "io.zipkin.brave:brave-jaxrs2": {
+            "locked": "3.13.0"
+        },
+        "io.zipkin.brave:brave-spancollector-http": {
             "locked": "3.13.0"
         },
         "io.zipkin.java:zipkin": {

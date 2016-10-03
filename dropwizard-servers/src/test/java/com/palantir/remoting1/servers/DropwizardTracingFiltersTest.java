@@ -32,7 +32,6 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.OutputStreamAppender;
 import com.github.kristofa.brave.http.BraveHttpHeaders;
 import io.dropwizard.Application;
-import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -62,7 +61,7 @@ public final class DropwizardTracingFiltersTest {
     private static final ch.qos.logback.classic.Logger logger =
             (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(DropwizardTracingFiltersTest.class);
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestEchoServer.class,
+    public static final DropwizardAppRule<TestConfiguration> APP = new DropwizardAppRule<>(TestEchoServer.class,
             "src/test/resources/test-server.yml");
 
     private WebTarget target;
@@ -155,18 +154,18 @@ public final class DropwizardTracingFiltersTest {
         assertThat(byteStream.toString(StandardCharsets.UTF_8.name()), startsWith("traceId: 1234567890abcdef"));
     }
 
-    public static final class TestEchoServer extends Application<Configuration> {
+    public static final class TestEchoServer extends Application<TestConfiguration> {
 
-        private final BraveBundle<Configuration> braveBundle = new BraveBundle<>();
+        private final BraveBundle<TestConfiguration> braveBundle = new BraveBundle<>();
 
         @Override
-        public void initialize(Bootstrap<Configuration> bootstrap) {
+        public void initialize(Bootstrap<TestConfiguration> bootstrap) {
             super.initialize(bootstrap);
             bootstrap.addBundle(braveBundle);
         }
 
         @Override
-        public void run(Configuration config, final Environment env) throws Exception {
+        public void run(TestConfiguration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
             DropwizardServers.configureStacktraceMappers(env, DropwizardServers.Stacktraces.PROPAGATE);
         }
@@ -179,6 +178,7 @@ public final class DropwizardTracingFiltersTest {
             }
         }
     }
+
 
     @Path("/")
     public interface TestEchoService {

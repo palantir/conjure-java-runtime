@@ -10,6 +10,7 @@ dependencies {
     compile "com.google.code.findbugs:jsr305"
     compile "io.dropwizard:dropwizard-core"
     compile "io.zipkin.brave:brave-jaxrs2"
+    compile "io.zipkin.brave:brave-spancollector-http"
 
     testCompile project(":ssl-config")
 

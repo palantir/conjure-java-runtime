@@ -17,27 +17,27 @@
 package com.palantir.remoting1.servers;
 
 import com.palantir.remoting1.jaxrs.TestEchoService;
+import com.palantir.remoting1.jaxrs.feignimpl.TestConfiguration;
 import io.dropwizard.Application;
-import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-public final class TestEchoServer extends Application<Configuration> {
+public final class TestEchoServer extends Application<TestConfiguration> {
 
-    private final HttpRemotingBundle<Configuration> httpRemotingBundle = new HttpRemotingBundle<>();
+    private final HttpRemotingBundle<TestConfiguration> httpRemotingBundle = new HttpRemotingBundle<>();
 
     public static void main(String[] args) throws Exception {
         new TestEchoServer().run(args);
     }
 
     @Override
-    public void initialize(Bootstrap<Configuration> bootstrap) {
+    public void initialize(Bootstrap<TestConfiguration> bootstrap) {
         super.initialize(bootstrap);
         bootstrap.addBundle(httpRemoting());
     }
 
     @Override
-    public void run(Configuration config, final Environment env) throws Exception {
+    public void run(TestConfiguration config, final Environment env) throws Exception {
         env.jersey().register(new TestEchoService() {
             @Override
             public String echo(String value) {
@@ -60,7 +60,7 @@ public final class TestEchoServer extends Application<Configuration> {
                 httpRemoting().brave());
     }
 
-    public HttpRemotingBundle<Configuration> httpRemoting() {
+    public HttpRemotingBundle<TestConfiguration> httpRemoting() {
         return httpRemotingBundle;
     }
 }

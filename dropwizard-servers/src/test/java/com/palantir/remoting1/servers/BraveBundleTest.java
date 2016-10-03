@@ -23,7 +23,6 @@ import static org.junit.Assert.assertThat;
 
 import com.github.kristofa.brave.Brave;
 import io.dropwizard.Application;
-import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -33,7 +32,7 @@ import org.junit.Test;
 public final class BraveBundleTest {
 
     @Rule
-    public DropwizardAppRule<Configuration> appRule = new DropwizardAppRule<>(
+    public DropwizardAppRule<TestConfiguration> appRule = new DropwizardAppRule<>(
             TestServer.class, "src/test/resources/test-server.yml");
 
     @Test
@@ -55,17 +54,17 @@ public final class BraveBundleTest {
         assertThat(server.braveBundle().appName(), equalTo("TestServer"));
     }
 
-    public static final class TestServer extends Application<Configuration> {
-        private final BraveBundle<Configuration> braveBundle = new BraveBundle<>();
+    public static final class TestServer extends Application<TestConfiguration> {
+        private final BraveBundle<TestConfiguration> braveBundle = new BraveBundle<>();
         private boolean isRunning;
 
         @Override
-        public void initialize(Bootstrap<Configuration> bootstrap) {
+        public void initialize(Bootstrap<TestConfiguration> bootstrap) {
             bootstrap.addBundle(braveBundle());
         }
 
         @Override
-        public void run(Configuration configuration, Environment environment) throws Exception {
+        public void run(TestConfiguration configuration, Environment environment) throws Exception {
             isRunning = true;
         }
 
@@ -73,8 +72,9 @@ public final class BraveBundleTest {
             return isRunning;
         }
 
-        public BraveBundle<Configuration> braveBundle() {
+        BraveBundle<TestConfiguration> braveBundle() {
             return braveBundle;
         }
     }
+
 }

@@ -40,9 +40,9 @@ import com.google.common.collect.FluentIterable;
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
+import com.palantir.remoting1.jaxrs.feignimpl.TestConfiguration;
 import com.palantir.remoting1.servers.ProxyingEchoServer;
 import com.palantir.remoting1.servers.TestEchoServer;
-import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -69,11 +69,11 @@ public final class JaxRsClientConfigTest {
     private static final String CONFIG_PATH = "src/test/resources/test-server-ssl.yml";
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> ECHO_SERVER =
+    public static final DropwizardAppRule<TestConfiguration> ECHO_SERVER =
             new DropwizardAppRule<>(TestEchoServer.class, CONFIG_PATH);
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> PROXYING_ECHO_SERVER =
+    public static final DropwizardAppRule<TestConfiguration> PROXYING_ECHO_SERVER =
             new DropwizardAppRule<>(ProxyingEchoServer.class, CONFIG_PATH);
 
 

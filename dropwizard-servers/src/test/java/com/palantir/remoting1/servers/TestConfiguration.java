@@ -16,20 +16,23 @@
 
 package com.palantir.remoting1.servers;
 
-import org.immutables.value.Value;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Optional;
+import com.palantir.remoting1.servers.config.TracingConfig;
+import com.palantir.remoting1.servers.config.TracingConfigProvider;
+import io.dropwizard.Configuration;
 
-/** Configuration options for tracing. */
-@Value.Immutable
-@Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
-@SuppressWarnings("checkstyle:designforextension")
-public abstract class TracingConfig {
+public final class TestConfiguration extends Configuration implements TracingConfigProvider {
 
-    public static Builder builder() {
-        return new Builder();
+    private final Optional<TracingConfig> tracingConfig;
+
+    public TestConfiguration(@JsonProperty("tracing") Optional<TracingConfig> tracingConfig) {
+        this.tracingConfig = tracingConfig;
     }
 
-    // TODO (davids) sampler
-    // TODO (davids) reporter
+    @Override
+    public Optional<TracingConfig> maybeTracingConfig() {
+        return tracingConfig;
+    }
 
-    public static final class Builder extends ImmutableTracingConfig.Builder {}
 }

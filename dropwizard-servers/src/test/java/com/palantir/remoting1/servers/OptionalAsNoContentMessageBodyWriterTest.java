@@ -23,7 +23,6 @@ import static org.junit.Assert.assertThat;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import io.dropwizard.Application;
-import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import javax.annotation.Nullable;
@@ -45,7 +44,7 @@ import org.junit.Test;
 public final class OptionalAsNoContentMessageBodyWriterTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(OptionalTestServer.class,
+    public static final DropwizardAppRule<TestConfiguration> APP = new DropwizardAppRule<>(OptionalTestServer.class,
             "src/test/resources/test-server.yml");
 
     private WebTarget target;
@@ -71,9 +70,9 @@ public final class OptionalAsNoContentMessageBodyWriterTest {
         assertThat(response.getStatus(), is(Status.NO_CONTENT.getStatusCode()));
     }
 
-    public static class OptionalTestServer extends Application<Configuration> {
+    public static class OptionalTestServer extends Application<TestConfiguration> {
         @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
+        public final void run(TestConfiguration config, final Environment env) throws Exception {
             env.jersey().register(new OptionalTestResource());
             env.jersey().register(new OptionalAsNoContentMessageBodyWriter());
             env.jersey().register(new NoContentExceptionMapper());

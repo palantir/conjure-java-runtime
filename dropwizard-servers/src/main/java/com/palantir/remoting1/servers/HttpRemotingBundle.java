@@ -19,6 +19,7 @@ package com.palantir.remoting1.servers;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.github.kristofa.brave.Brave;
+import com.palantir.remoting1.servers.config.TracingConfigProvider;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -29,8 +30,7 @@ import org.slf4j.LoggerFactory;
  * Dropwizard bundle for initializing HTTP remoting client and server services.
  * Users should
  */
-// TODO (davids) //        & TracingConfigurationProvider>
-public final class HttpRemotingBundle<C extends Configuration>
+public final class HttpRemotingBundle<C extends Configuration & TracingConfigProvider>
         extends AbstractConfiguredBundle<C> {
 
     private static final Logger log = LoggerFactory.getLogger(HttpRemotingBundle.class);

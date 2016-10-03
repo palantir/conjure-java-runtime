@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import io.dropwizard.Application;
-import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -30,7 +29,7 @@ import org.junit.Test;
 public final class AbstractConfiguredBundleTest {
 
     @Rule
-    public DropwizardAppRule<Configuration> appRule = new DropwizardAppRule<>(
+    public DropwizardAppRule<TestConfiguration> appRule = new DropwizardAppRule<>(
             TestServer.class, "src/test/resources/test-server.yml");
 
     @Test
@@ -46,23 +45,23 @@ public final class AbstractConfiguredBundleTest {
         assertThat(server.getTestBundle().appName(), equalTo("TestServer"));
     }
 
-    public static final class TestServer extends Application<Configuration> {
+    public static final class TestServer extends Application<TestConfiguration> {
         private final TestConfiguredBundle testBundle = new TestConfiguredBundle();
 
         @Override
-        public void initialize(Bootstrap<Configuration> bootstrap) {
+        public void initialize(Bootstrap<TestConfiguration> bootstrap) {
             bootstrap.addBundle(getTestBundle());
         }
 
         @Override
-        public void run(Configuration configuration, Environment environment) throws Exception {
+        public void run(TestConfiguration configuration, Environment environment) throws Exception {
         }
 
         TestConfiguredBundle getTestBundle() {
             return testBundle;
         }
 
-        static final class TestConfiguredBundle extends AbstractConfiguredBundle<Configuration> {
+        static final class TestConfiguredBundle extends AbstractConfiguredBundle<TestConfiguration> {
             private boolean isBootstrapped = false;
             private boolean isStarted = false;
 
@@ -74,7 +73,7 @@ public final class AbstractConfiguredBundleTest {
             }
 
             @Override
-            protected void start(Configuration configuration, Environment environment) throws Exception {
+            protected void start(TestConfiguration configuration, Environment environment) throws Exception {
                 super.start(configuration, environment);
                 isStarted = true;
                 log().info("Started: {}", isStarted());

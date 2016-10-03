@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import io.dropwizard.Application;
-import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import javax.ws.rs.Consumes;
@@ -45,8 +44,8 @@ import org.junit.Test;
 public final class ExceptionMappersTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(ExceptionMappersTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<TestConfiguration> APP = new DropwizardAppRule<>(
+            ExceptionMappersTestServer.class, "src/test/resources/test-server.yml");
     private static final Response.Status SERVER_EXCEPTION_STATUS = Response.Status.SERVICE_UNAVAILABLE;
     private static final Response.Status WEB_EXCEPTION_STATUS = Response.Status.EXPECTATION_FAILED;
 
@@ -88,9 +87,9 @@ public final class ExceptionMappersTest {
         assertThat(response.getStatus(), is(WEB_EXCEPTION_STATUS.getStatusCode()));
     }
 
-    public static class ExceptionMappersTestServer extends Application<Configuration> {
+    public static class ExceptionMappersTestServer extends Application<TestConfiguration> {
         @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
+        public final void run(TestConfiguration config, final Environment env) throws Exception {
             env.jersey().register(new ExceptionTestResource());
             DropwizardServers.configure(env, config, "unused tracer name", DropwizardServers.Stacktraces.PROPAGATE);
         }

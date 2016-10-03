@@ -32,7 +32,10 @@ import com.github.kristofa.brave.jaxrs2.BraveContainerResponseFilter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.google.common.base.Supplier;
 import com.google.common.net.InetAddresses;
+import com.palantir.remoting1.servers.config.TracingConfig;
+import com.palantir.remoting1.servers.config.TracingConfigProvider;
 import com.twitter.zipkin.gen.Endpoint;
 import io.dropwizard.Configuration;
 import io.dropwizard.jetty.ConnectorFactory;
@@ -44,15 +47,15 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.annotation.Nullable;
 import javax.servlet.DispatcherType;
 
-// TODO (davids) config
-public final class BraveBundle<C extends Configuration> extends AbstractConfiguredBundle<C> {
+public final class BraveBundle<C extends Configuration & TracingConfigProvider> extends AbstractConfiguredBundle<C> {
 
     private final AtomicReference<Brave> braveRef = new AtomicReference<>();
 
     @Override
-    public void start(C configuration, Environment environment) throws Exception {
+    protected void start(C configuration, Environment environment) throws Exception {
         Brave brave = createBrave(configuration);
         this.braveRef.set(brave);
         registerTracers(environment, brave);
@@ -65,7 +68,7 @@ public final class BraveBundle<C extends Configuration> extends AbstractConfigur
         return brave;
     }
 
-    private Brave createBrave(Configuration config) {
+    private Brave createBrave(C config) {
         // TODO(rfink) Is there a more stable way to retrieve IP/Port information?
         Endpoint endpoint = Endpoint.builder()
                 .serviceName(appName())
@@ -73,14 +76,22 @@ public final class BraveBundle<C extends Configuration> extends AbstractConfigur
                 .port(extractPort(config))
                 .build();
 
-        // TODO (davids) make the sampler and collectors configurable
-        Sampler sampler = Sampler.ALWAYS_SAMPLE;
-        String loggerName = "tracing." + appName();
-
         // TODO (davids) use reporter instead
-        SpanCollector spanCollector = new SlfLoggingSpanCollector(loggerName);
+        SpanCollector spanCollector;
+        Sampler sampler;
 
-        log().info("Starting tracer for {} writing to logger {}", appName(), loggerName);
+        Optional<TracingConfig> maybeTracingConfig = config.maybeTracingConfig();
+        if (maybeTracingConfig.isPresent()) {
+            TracingConfig tracingConfig = maybeTracingConfig.get();
+            sampler = tracingConfig.sampler().sampler();
+            spanCollector = tracingConfig.reporter().reporter();
+        } else {
+            log().warn("Tracing configuration not specified for {}", appName());
+            sampler = Sampler.ALWAYS_SAMPLE;
+            spanCollector = new SlfLoggingSpanCollector("tracing." + appName());
+        }
+
+        log().info("Starting tracer for {} writing to {}", appName(), spanCollector);
         return new Brave.Builder(new InheritableServerClientAndLocalSpanState(endpoint))
                 .traceSampler(sampler)
                 .spanCollector(spanCollector)
@@ -116,29 +127,53 @@ public final class BraveBundle<C extends Configuration> extends AbstractConfigur
     }
 
     private static int extractIp(Configuration config) {
-        String bindHost = extractConnector(config, 0)
-                .transform(new Function<ConnectorFactory, String>() {
+        return extractConnector(config, 0)
+                .transform(new Function<ConnectorFactory, Optional<String>>() {
                     @Override
-                    public String apply(ConnectorFactory factory) {
+                    public Optional<String> apply(ConnectorFactory factory) {
+                        String host = "";
                         if (factory instanceof HttpsConnectorFactory) {
-                            return Strings.nullToEmpty(((HttpsConnectorFactory) factory).getBindHost());
+                            host = ((HttpsConnectorFactory) factory).getBindHost();
                         } else if (factory instanceof HttpConnectorFactory) {
-                            return Strings.nullToEmpty(((HttpConnectorFactory) factory).getBindHost());
-                        } else {
-                            return "";
+                            host = ((HttpConnectorFactory) factory).getBindHost();
                         }
+                        return Optional.fromNullable(Strings.emptyToNull(host));
                     }
                 })
-                .or("");
+                .or(Optional.<String>absent()).transform(hostToIp())
+                .or(new Supplier<Integer>() {
+                    @Override
+                    public Integer get() {
+                        return hostToIp(Optional.fromNullable(Strings.emptyToNull(localHostAddress())).or(""));
+                    }
+                });
+    }
 
-        if (bindHost.isEmpty()) {
-            return 0;
-        } else {
+    private static Function<String, Integer> hostToIp() {
+        return new Function<String, Integer>() {
+            @Override
+            public Integer apply(@Nullable String input) {
+                return hostToIp(input);
+            }
+        };
+    }
+
+    private static int hostToIp(String host) {
+        if (!Strings.isNullOrEmpty(host)) {
             try {
-                return InetAddresses.coerceToInteger(InetAddress.getByName(bindHost));
+                return InetAddresses.coerceToInteger(InetAddress.getByName(host));
             } catch (UnknownHostException e) {
                 return 0;
             }
+        }
+        return 0;
+    }
+
+    private static String localHostAddress() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            return null;
         }
     }
 

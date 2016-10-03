@@ -21,9 +21,9 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
 import com.palantir.remoting1.jaxrs.JaxRsClient;
+import com.palantir.remoting1.jaxrs.feignimpl.TestConfiguration;
 import com.palantir.remoting1.jaxrs.feignimpl.TestServer;
 import feign.codec.Encoder;
-import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -45,7 +45,7 @@ public final class InputStreamDelegateEncoderTest {
     private Encoder inputStreamDelegateEncoder;
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestServer.class,
+    public static final DropwizardAppRule<TestConfiguration> APP = new DropwizardAppRule<>(TestServer.class,
             "src/test/resources/test-server.yml");
 
     private TestServer.TestService service;

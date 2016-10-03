@@ -17,15 +17,15 @@
 package com.palantir.remoting1.servers;
 
 import com.palantir.remoting1.jaxrs.TestEchoService;
+import com.palantir.remoting1.jaxrs.feignimpl.TestConfiguration;
 import io.dropwizard.Application;
-import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-public final class ProxyingEchoServer extends Application<Configuration> {
+public final class ProxyingEchoServer extends Application<TestConfiguration> {
 
     private volatile int echoServerPort;
-    private final HttpRemotingBundle<Configuration> httpRemotingBundle = new HttpRemotingBundle<>();
+    private final HttpRemotingBundle<TestConfiguration> httpRemotingBundle = new HttpRemotingBundle<>();
 
     @SuppressWarnings("unused") // instantiated by DropwizardAppRule
     public ProxyingEchoServer() {
@@ -41,13 +41,13 @@ public final class ProxyingEchoServer extends Application<Configuration> {
     }
 
     @Override
-    public void initialize(Bootstrap<Configuration> bootstrap) {
+    public void initialize(Bootstrap<TestConfiguration> bootstrap) {
         super.initialize(bootstrap);
         bootstrap.addBundle(httpRemotingBundle);
     }
 
     @Override
-    public void run(Configuration config, final Environment env) throws Exception {
+    public void run(TestConfiguration config, final Environment env) throws Exception {
         env.jersey().register(new TestEchoService() {
             @Override
             public String echo(String value) {

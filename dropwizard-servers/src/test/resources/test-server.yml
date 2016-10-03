@@ -14,3 +14,10 @@ logging:
     tracing: INFO
   appenders:
     - type: console
+
+tracing:
+  sampler:
+    probability: 1.0
+  reporter:
+    type: log
+
