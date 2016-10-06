@@ -27,7 +27,7 @@ import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
 import com.github.kristofa.brave.ext.SlfLoggingSpanCollector;
 import com.github.kristofa.brave.http.DefaultSpanNameProvider;
 import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.InetAddresses;
 import com.palantir.remoting1.clients.ClientBuilder;
@@ -35,7 +35,6 @@ import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.service.BasicCredentials;
 import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.ssl.TrustContext;
-import com.palantir.remoting1.jaxrs.feignimpl.BackoffStrategy;
 import com.palantir.remoting1.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting1.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting1.jaxrs.feignimpl.GuavaOptionalAwareContract;
@@ -73,18 +72,12 @@ import okhttp3.Route;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
-    private final BackoffStrategy backoffStrategy;
     private final ClientConfig config;
-
-    @VisibleForTesting
-    FeignJaxRsClientBuilder(ClientConfig config, BackoffStrategy backoffStrategy) {
-        this.backoffStrategy = backoffStrategy;
-        this.config = config;
-    }
 
     FeignJaxRsClientBuilder(ClientConfig config) {
         this.config = config;
-        this.backoffStrategy = NeverRetryingBackoffStrategy.INSTANCE;
+        Preconditions.checkArgument(config.maxNumRetries() == 0,
+                "Connection-level retries are not supported by %s", JaxRsClient.class.getSimpleName());
     }
 
     @Override
@@ -106,7 +99,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private <T> FailoverFeignTarget<T> createTarget(Class<T> serviceClass, List<String> uris) {
-        return new FailoverFeignTarget<>(uris, serviceClass, backoffStrategy);
+        return new FailoverFeignTarget<>(uris, serviceClass, NeverRetryingBackoffStrategy.INSTANCE);
     }
 
     private Contract createContract() {
