@@ -37,6 +37,7 @@ dependencies {
     shadow "com.fasterxml.jackson.core:jackson-databind"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-guava"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-jdk7"
+    shadow "com.google.guava:guava"
 }
 
 shadowJar {
@@ -54,6 +55,7 @@ shadowJar {
         exclude(project(':ssl-config'))
         exclude(dependency { it.moduleGroup.contains("javax.ws.rs") })
         exclude(dependency { it.moduleGroup.contains("com.fasterxml.jackson") })
+        exclude(dependency { it.moduleGroup.contains("com.google.guava") })
     }
     classifier ''
 }
