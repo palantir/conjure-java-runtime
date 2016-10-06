@@ -24,9 +24,9 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting1.jaxrs.JaxRsClient;
+import com.palantir.remoting1.jaxrs.feignimpl.TestConfiguration;
 import com.palantir.remoting1.jaxrs.feignimpl.TestServer;
 import feign.codec.Decoder;
-import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +40,7 @@ import org.mockito.Mockito;
 
 public final class InputStreamDelegateDecoderTest {
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestServer.class,
+    public static final DropwizardAppRule<TestConfiguration> APP = new DropwizardAppRule<>(TestServer.class,
             "src/test/resources/test-server.yml");
 
     private TestServer.TestService service;

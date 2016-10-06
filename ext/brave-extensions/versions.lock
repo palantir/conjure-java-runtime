@@ -1,30 +1,150 @@
 {
     "compileClasspath": {
+        "com.fasterxml.jackson.core:jackson-annotations": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-core": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.tokens:auth-tokens"
+            ]
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0",
+            "transitive": [
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.tokens:auth-tokens"
+            ]
+        },
+        "com.palantir.remoting1:http-clients-api": {
+            "project": true
+        },
+        "com.palantir.remoting1:service-config": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:http-clients-api"
+            ]
+        },
+        "com.palantir.remoting1:ssl-config": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:service-config"
+            ]
+        },
+        "com.palantir.tokens:auth-tokens": {
+            "locked": "0.2.3",
+            "transitive": [
+                "com.palantir.remoting1:service-config"
+            ]
+        },
         "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0"
+            "locked": "3.13.0",
+            "transitive": [
+                "com.palantir.remoting1:http-clients-api"
+            ]
         },
         "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
+            "locked": "1.12.0",
             "transitive": [
                 "io.zipkin.brave:brave-core"
             ]
         },
+        "org.slf4j:jcl-over-slf4j": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.tokens:auth-tokens"
+            ]
+        },
         "org.slf4j:slf4j-api": {
-            "locked": "1.7.12"
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.tokens:auth-tokens",
+                "org.slf4j:jcl-over-slf4j"
+            ]
         }
     },
     "runtime": {
+        "com.fasterxml.jackson.core:jackson-annotations": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-core": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.tokens:auth-tokens"
+            ]
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0",
+            "transitive": [
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.tokens:auth-tokens"
+            ]
+        },
+        "com.palantir.remoting1:http-clients-api": {
+            "project": true
+        },
+        "com.palantir.remoting1:service-config": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:http-clients-api"
+            ]
+        },
+        "com.palantir.remoting1:ssl-config": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:service-config"
+            ]
+        },
+        "com.palantir.tokens:auth-tokens": {
+            "locked": "0.2.3",
+            "transitive": [
+                "com.palantir.remoting1:service-config"
+            ]
+        },
         "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0"
+            "locked": "3.13.0",
+            "transitive": [
+                "com.palantir.remoting1:http-clients-api"
+            ]
         },
         "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
+            "locked": "1.12.0",
             "transitive": [
                 "io.zipkin.brave:brave-core"
             ]
         },
+        "org.slf4j:jcl-over-slf4j": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.tokens:auth-tokens"
+            ]
+        },
         "org.slf4j:slf4j-api": {
-            "locked": "1.7.12"
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.tokens:auth-tokens",
+                "org.slf4j:jcl-over-slf4j"
+            ]
         }
     }
 }

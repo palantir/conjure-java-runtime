@@ -18,18 +18,15 @@ package com.palantir.remoting1.jaxrs;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.kristofa.brave.AnnotationSubmitter;
-import com.github.kristofa.brave.ClientRequestInterceptor;
-import com.github.kristofa.brave.ClientResponseInterceptor;
-import com.github.kristofa.brave.ClientTracer;
-import com.github.kristofa.brave.Sampler;
-import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
-import com.github.kristofa.brave.ext.SlfLoggingSpanCollector;
-import com.github.kristofa.brave.http.DefaultSpanNameProvider;
-import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
+import com.github.kristofa.brave.Brave;
+import com.github.kristofa.brave.KeyValueAnnotation;
+import com.github.kristofa.brave.okhttp.BraveTracingInterceptor;
+import com.github.kristofa.brave.okhttp.OkHttpParser;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
-import com.google.common.net.InetAddresses;
 import com.palantir.remoting1.clients.ClientBuilder;
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.service.BasicCredentials;
@@ -48,7 +45,6 @@ import feign.Contract;
 import feign.Feign;
 import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
-import feign.Logger;
 import feign.OptionalAwareDecoder;
 import feign.Request;
 import feign.TextDelegateDecoder;
@@ -61,20 +57,22 @@ import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.Response;
 import okhttp3.Route;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
+    private static final Logger logger = LoggerFactory.getLogger(FeignJaxRsClientBuilder.class);
+
     private final BackoffStrategy backoffStrategy;
     private final ClientConfig config;
+    private Brave brave;
 
     @VisibleForTesting
     FeignJaxRsClientBuilder(ClientConfig config, BackoffStrategy backoffStrategy) {
@@ -85,6 +83,12 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     FeignJaxRsClientBuilder(ClientConfig config) {
         this.config = config;
         this.backoffStrategy = NeverRetryingBackoffStrategy.INSTANCE;
+    }
+
+    @Override
+    public FeignJaxRsClientBuilder withTracer(Brave tracer) {
+        this.brave = tracer;
+        return this;
     }
 
     @Override
@@ -100,7 +104,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 .retryer(target)
                 .options(createRequestOptions())
                 .logger(new Slf4jLogger(JaxRsClient.class))
-                .logLevel(Logger.Level.BASIC)
+                .logLevel(feign.Logger.Level.BASIC)
                 .requestInterceptor(UserAgentInterceptor.of(userAgent))
                 .target(target);
     }
@@ -143,7 +147,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(objectMapper))));
     }
 
-    private feign.Client createOkHttpClient(String userAgent) {
+    private feign.Client createOkHttpClient(final String userAgent) {
         okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
 
         // SSL
@@ -158,26 +162,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         // write timeouts here and connect&read timeouts on FeignBuilder.
         client.writeTimeout(config.writeTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
 
-        // Set up Zipkin/Brave tracing
-        ClientTracer tracer = ClientTracer.builder()
-                .traceSampler(Sampler.ALWAYS_SAMPLE)
-                .randomGenerator(new Random())
-                .state(new ThreadLocalServerClientAndLocalSpanState(
-                        getIpAddress(), 0 /* Client TCP port. */, userAgent))
-                .spanCollector(new SlfLoggingSpanCollector("tracing.client." + userAgent))
-                .clock(new AnnotationSubmitter.Clock() {
-                    @Override
-                    public long currentTimeMicroseconds() {
-                        return TimeUnit.MICROSECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
-                    }
-                })
-                .build();
-        BraveOkHttpRequestResponseInterceptor braveInterceptor =
-                new BraveOkHttpRequestResponseInterceptor(
-                        new ClientRequestInterceptor(tracer),
-                        new ClientResponseInterceptor(tracer),
-                        new DefaultSpanNameProvider());
-        client.addInterceptor(braveInterceptor);
+        setupZipkinBraveTracing(userAgent, client);
 
         // Set up HTTP proxy configuration
         if (config.proxy().isPresent()) {
@@ -201,13 +186,33 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         return new OkHttpClient(client.build());
     }
 
-    // Returns the IP address returned by InetAddress.getLocalHost(), or -1 if it cannot be determined.
-    // TODO(rfink) What if there are multiple? Can we find the "correct" one?
-    private static int getIpAddress() {
-        try {
-            return InetAddresses.coerceToInteger(InetAddress.getLocalHost());
-        } catch (UnknownHostException e) {
-            return -1;
+    private void setupZipkinBraveTracing(final String userAgent, okhttp3.OkHttpClient.Builder client) {
+        if (brave != null) {
+            // TODO (davids)
+            BraveTracingInterceptor interceptor = BraveTracingInterceptor.builder(brave)
+                    .serverName(userAgent)
+                    .parser(new OkHttpParser() {
+                        @Override
+                        public String networkSpanName(okhttp3.Request request) {
+                            return request.method() + " " + request.url().encodedPath();
+                        }
+
+                        @Override
+                        public List<KeyValueAnnotation> networkRequestTags(okhttp3.Request request) {
+                            String header = request.header(HttpHeaders.USER_AGENT);
+                            if (Strings.isNullOrEmpty(header)) {
+                                return super.networkRequestTags(request);
+                            } else {
+                                return ImmutableList.copyOf(Iterables.concat(
+                                        super.networkRequestTags(request),
+                                        ImmutableList.of(KeyValueAnnotation.create(HttpHeaders.USER_AGENT, header))));
+                            }
+                        }
+                    })
+                    .build();
+            client.addInterceptor(interceptor);
+            client.addNetworkInterceptor(interceptor);
         }
     }
+
 }

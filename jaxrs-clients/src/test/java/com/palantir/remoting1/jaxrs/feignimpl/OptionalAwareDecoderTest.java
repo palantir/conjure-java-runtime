@@ -25,7 +25,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.jaxrs.JaxRsClient;
-import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
 import org.junit.Before;
@@ -37,7 +36,7 @@ import org.junit.rules.ExpectedException;
 public final class OptionalAwareDecoderTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestServer.class,
+    public static final DropwizardAppRule<TestConfiguration> APP = new DropwizardAppRule<>(TestServer.class,
             "src/test/resources/test-server.yml");
 
     @Rule

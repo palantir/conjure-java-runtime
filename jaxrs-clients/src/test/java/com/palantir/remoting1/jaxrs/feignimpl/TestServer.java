@@ -18,10 +18,10 @@ package com.palantir.remoting1.jaxrs.feignimpl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting1.servers.DropwizardServers;
+import com.palantir.remoting1.servers.HttpRemotingBundle;
 import feign.Util;
 import io.dropwizard.Application;
-import io.dropwizard.Configuration;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -40,11 +40,19 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.assertj.core.util.Strings;
 
-public class TestServer extends Application<Configuration> {
+public class TestServer extends Application<TestConfiguration> {
+
+    private final HttpRemotingBundle<TestConfiguration> httpRemotingBundle = new HttpRemotingBundle<>();
+
     @Override
-    public final void run(Configuration config, final Environment env) throws Exception {
+    public final void initialize(Bootstrap<TestConfiguration> bootstrap) {
+        super.initialize(bootstrap);
+        bootstrap.addBundle(httpRemotingBundle);
+    }
+
+    @Override
+    public final void run(TestConfiguration config, final Environment env) throws Exception {
         env.jersey().register(new TestResource());
-        DropwizardServers.configure(env, config, "unused tracer name", DropwizardServers.Stacktraces.PROPAGATE);
     }
 
     static class TestResource implements TestService {

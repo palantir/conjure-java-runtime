@@ -37,6 +37,8 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.tokens:auth-tokens",
                 "io.dropwizard:dropwizard-jackson"
             ]
         },
@@ -107,6 +109,8 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.tokens:auth-tokens",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-util"
@@ -117,6 +121,30 @@
         },
         "com.palantir.remoting1:error-handling": {
             "project": true
+        },
+        "com.palantir.remoting1:http-clients-api": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:brave-extensions"
+            ]
+        },
+        "com.palantir.remoting1:service-config": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:http-clients-api"
+            ]
+        },
+        "com.palantir.remoting1:ssl-config": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:service-config"
+            ]
+        },
+        "com.palantir.tokens:auth-tokens": {
+            "locked": "0.2.3",
+            "transitive": [
+                "com.palantir.remoting1:service-config"
+            ]
         },
         "io.dropwizard.metrics:metrics-annotation": {
             "locked": "3.1.1",
@@ -262,23 +290,28 @@
             ]
         },
         "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0",
+            "locked": "3.13.0",
             "transitive": [
                 "com.palantir.remoting1:brave-extensions",
-                "io.zipkin.brave:brave-http"
+                "com.palantir.remoting1:http-clients-api",
+                "io.zipkin.brave:brave-http",
+                "io.zipkin.brave:brave-spancollector-http"
             ]
         },
         "io.zipkin.brave:brave-http": {
-            "locked": "3.11.0",
+            "locked": "3.13.0",
             "transitive": [
                 "io.zipkin.brave:brave-jaxrs2"
             ]
         },
         "io.zipkin.brave:brave-jaxrs2": {
-            "locked": "3.11.0"
+            "locked": "3.13.0"
+        },
+        "io.zipkin.brave:brave-spancollector-http": {
+            "locked": "3.13.0"
         },
         "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
+            "locked": "1.12.0",
             "transitive": [
                 "io.zipkin.brave:brave-core"
             ]
@@ -551,8 +584,9 @@
             ]
         },
         "org.slf4j:jcl-over-slf4j": {
-            "locked": "1.7.10",
+            "locked": "1.7.12",
             "transitive": [
+                "com.palantir.tokens:auth-tokens",
                 "io.dropwizard:dropwizard-logging"
             ]
         },
@@ -574,6 +608,7 @@
                 "ch.qos.logback:logback-classic",
                 "com.palantir.remoting1:brave-extensions",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.tokens:auth-tokens",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-logging",
@@ -629,6 +664,8 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.tokens:auth-tokens",
                 "io.dropwizard:dropwizard-jackson"
             ]
         },
@@ -699,6 +736,8 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.tokens:auth-tokens",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-util"
@@ -709,6 +748,30 @@
         },
         "com.palantir.remoting1:error-handling": {
             "project": true
+        },
+        "com.palantir.remoting1:http-clients-api": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:brave-extensions"
+            ]
+        },
+        "com.palantir.remoting1:service-config": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:http-clients-api"
+            ]
+        },
+        "com.palantir.remoting1:ssl-config": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:service-config"
+            ]
+        },
+        "com.palantir.tokens:auth-tokens": {
+            "locked": "0.2.3",
+            "transitive": [
+                "com.palantir.remoting1:service-config"
+            ]
         },
         "io.dropwizard.metrics:metrics-annotation": {
             "locked": "3.1.1",
@@ -854,23 +917,28 @@
             ]
         },
         "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0",
+            "locked": "3.13.0",
             "transitive": [
                 "com.palantir.remoting1:brave-extensions",
-                "io.zipkin.brave:brave-http"
+                "com.palantir.remoting1:http-clients-api",
+                "io.zipkin.brave:brave-http",
+                "io.zipkin.brave:brave-spancollector-http"
             ]
         },
         "io.zipkin.brave:brave-http": {
-            "locked": "3.11.0",
+            "locked": "3.13.0",
             "transitive": [
                 "io.zipkin.brave:brave-jaxrs2"
             ]
         },
         "io.zipkin.brave:brave-jaxrs2": {
-            "locked": "3.11.0"
+            "locked": "3.13.0"
+        },
+        "io.zipkin.brave:brave-spancollector-http": {
+            "locked": "3.13.0"
         },
         "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
+            "locked": "1.12.0",
             "transitive": [
                 "io.zipkin.brave:brave-core"
             ]
@@ -1143,8 +1211,9 @@
             ]
         },
         "org.slf4j:jcl-over-slf4j": {
-            "locked": "1.7.10",
+            "locked": "1.7.12",
             "transitive": [
+                "com.palantir.tokens:auth-tokens",
                 "io.dropwizard:dropwizard-logging"
             ]
         },
@@ -1166,6 +1235,7 @@
                 "ch.qos.logback:logback-classic",
                 "com.palantir.remoting1:brave-extensions",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.tokens:auth-tokens",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-logging",

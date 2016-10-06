@@ -16,7 +16,14 @@
 
 package com.palantir.remoting1.retrofit2;
 
+import com.github.kristofa.brave.Brave;
+import com.github.kristofa.brave.KeyValueAnnotation;
+import com.github.kristofa.brave.okhttp.BraveTracingInterceptor;
+import com.github.kristofa.brave.okhttp.OkHttpParser;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting1.clients.ClientBuilder;
 import com.palantir.remoting1.clients.ClientConfig;
@@ -32,12 +39,17 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder extends ClientBuilder {
 
+    private static final Logger logger = LoggerFactory.getLogger(Retrofit2ClientBuilder.class);
+
     private final ClientConfig config;
+    private Brave brave;
 
     public Retrofit2ClientBuilder() {
         this.config = ClientConfig.builder().build();
@@ -45,6 +57,12 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
 
     public Retrofit2ClientBuilder(ClientConfig config) {
         this.config = config;
+    }
+
+    @Override
+    public Retrofit2ClientBuilder withTracer(Brave tracer) {
+        this.brave = tracer;
+        return this;
     }
 
     @Override
@@ -68,6 +86,8 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
             TrustContext context = config.trustContext().get();
             client.sslSocketFactory(context.sslSocketFactory(), context.x509TrustManager());
         }
+
+        setupZipkinBraveTracing(userAgent, client);
 
         // proxy
         if (config.proxy().isPresent()) {
@@ -104,4 +124,34 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
 
         return client.build();
     }
+
+    private void setupZipkinBraveTracing(final String userAgent, okhttp3.OkHttpClient.Builder client) {
+        if (brave != null) {
+            // TODO (davids)
+            BraveTracingInterceptor interceptor = BraveTracingInterceptor.builder(brave)
+                    .serverName(userAgent)
+                    .parser(new OkHttpParser() {
+                        @Override
+                        public String networkSpanName(Request request) {
+                            return request.method() + " " + request.url().encodedPath();
+                        }
+
+                        @Override
+                        public List<KeyValueAnnotation> networkRequestTags(Request request) {
+                            String header = request.header(HttpHeaders.USER_AGENT);
+                            if (Strings.isNullOrEmpty(header)) {
+                                return super.networkRequestTags(request);
+                            } else {
+                                return ImmutableList.copyOf(Iterables.concat(
+                                        super.networkRequestTags(request),
+                                        ImmutableList.of(KeyValueAnnotation.create(HttpHeaders.USER_AGENT, header))));
+                            }
+                        }
+                    })
+                    .build();
+            client.addInterceptor(interceptor);
+            client.addNetworkInterceptor(interceptor);
+        }
+    }
+
 }
