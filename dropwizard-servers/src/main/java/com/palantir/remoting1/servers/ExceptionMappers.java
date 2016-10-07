@@ -33,5 +33,6 @@ final class ExceptionMappers {
         consumer.accept(new NoContentExceptionMapper());
         consumer.accept(new RuntimeExceptionMapper(includeStackTrace));
         consumer.accept(new WebApplicationExceptionMapper(includeStackTrace));
+        consumer.accept(new RemoteExceptionMapper(includeStackTrace));
     }
 }
