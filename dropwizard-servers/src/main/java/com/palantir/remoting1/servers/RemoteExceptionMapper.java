@@ -16,20 +16,39 @@
 
 package com.palantir.remoting1.servers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.palantir.remoting1.errors.RemoteException;
+import com.palantir.remoting1.errors.SerializableError;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response.StatusType;
+import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Provider
-final class RemoteExceptionMapper extends JsonExceptionMapper<RemoteException> {
+final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
-    RemoteExceptionMapper(boolean includeStackTrace) {
-        super(includeStackTrace);
-    }
+    private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
 
     @Override
-    protected StatusType getStatus(RemoteException exception) {
-        return Status.fromStatusCode(exception.getStatus());
+    public Response toResponse(RemoteException exception) {
+        SerializableError error = exception.getRemoteException();
+        Status status = Status.fromStatusCode(exception.getStatus());
+        ResponseBuilder builder = Response.status(status);
+        try {
+            builder.type(MediaType.APPLICATION_JSON);
+            String json = JsonExceptionMapper.MAPPER.writeValueAsString(error);
+            builder.entity(json);
+        } catch (RuntimeException | JsonProcessingException e) {
+            log.warn("Unable to translate exception to json: {}", e.getMessage(), e);
+            // simply write out the exception message
+            builder = Response.status(status);
+            builder.type(MediaType.TEXT_PLAIN);
+            builder.entity(error.getMessage());
+        }
+        return builder.build();
     }
 }
