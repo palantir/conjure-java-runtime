@@ -20,6 +20,8 @@ package com.palantir.remoting1.servers;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.palantir.remoting1.errors.RemoteException;
+import com.palantir.remoting1.errors.SerializableError;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -49,6 +51,7 @@ public final class ExceptionMappersTest {
             "src/test/resources/test-server.yml");
     private static final Response.Status SERVER_EXCEPTION_STATUS = Response.Status.SERVICE_UNAVAILABLE;
     private static final Response.Status WEB_EXCEPTION_STATUS = Response.Status.EXPECTATION_FAILED;
+    private static final int REMOTE_EXCEPTION_STATUS_CODE = 400;
 
     private WebTarget target;
 
@@ -88,6 +91,12 @@ public final class ExceptionMappersTest {
         assertThat(response.getStatus(), is(WEB_EXCEPTION_STATUS.getStatusCode()));
     }
 
+    @Test
+    public void testRemoteException() throws NoSuchMethodException, SecurityException {
+        Response response = target.path("throw-remote-exception").request().get();
+        assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
+    }
+
     public static class ExceptionMappersTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
@@ -116,6 +125,11 @@ public final class ExceptionMappersTest {
         public String throwWebApplicationException() {
             throw new WebApplicationException(WEB_EXCEPTION_STATUS);
         }
+
+        @Override
+        public String throwRemoteException() {
+            throw new RemoteException(SerializableError.of("msg", "errName"), REMOTE_EXCEPTION_STATUS_CODE);
+        }
     }
 
     @Path("/")
@@ -137,5 +151,9 @@ public final class ExceptionMappersTest {
         @GET
         @Path("/throw-web-application-exception")
         String throwWebApplicationException();
+
+        @GET
+        @Path("/throw-remote-exception")
+        String throwRemoteException();
     }
 }
