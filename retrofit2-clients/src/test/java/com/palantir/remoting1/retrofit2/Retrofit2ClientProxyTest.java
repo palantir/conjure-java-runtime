@@ -28,8 +28,6 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Rule;
 import org.junit.Test;
-import retrofit2.Call;
-import retrofit2.http.GET;
 
 public final class Retrofit2ClientProxyTest {
 
@@ -75,10 +73,5 @@ public final class Retrofit2ClientProxyTest {
         assertNull(firstRequest.getHeader("Proxy-Authorization"));
         RecordedRequest secondRequest = proxyServer.takeRequest();
         assertThat(secondRequest.getHeader("Proxy-Authorization"), is("Basic ZmFrZVVzZXI6ZmFrZVBhc3N3b3Jk"));
-    }
-
-    public interface TestService {
-        @GET("/")
-        Call<String> get();
     }
 }
