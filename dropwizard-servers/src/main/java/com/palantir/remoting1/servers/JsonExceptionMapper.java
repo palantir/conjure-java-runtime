@@ -39,7 +39,8 @@ import org.slf4j.LoggerFactory;
 abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapper<T> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
-    private static final ObjectMapper MAPPER = getObjectMapper();
+
+    static final ObjectMapper MAPPER = getObjectMapper();
 
     private final boolean includeStackTrace;
 

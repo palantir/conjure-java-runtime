@@ -20,12 +20,18 @@ package com.palantir.remoting1.servers;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.errors.SerializableError;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import java.io.IOException;
+import java.io.InputStream;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
@@ -92,9 +98,14 @@ public final class ExceptionMappersTest {
     }
 
     @Test
-    public void testRemoteException() throws NoSuchMethodException, SecurityException {
+    public void testRemoteException()
+            throws NoSuchMethodException, SecurityException, JsonParseException, JsonMappingException, IOException {
         Response response = target.path("throw-remote-exception").request().get();
         assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
+        SerializableError error =
+                new ObjectMapper().registerModule(new GuavaModule()).readValue(response.readEntity(InputStream.class),
+                        SerializableError.class);
+        assertThat(error.getErrorName(), is("errName"));
     }
 
     public static class ExceptionMappersTestServer extends Application<Configuration> {
