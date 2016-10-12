@@ -22,7 +22,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public final class NoContentExceptionMapper implements ExceptionMapper<NoContentException> {
+final class NoContentExceptionMapper implements ExceptionMapper<NoContentException> {
 
     @Override
     public Response toResponse(NoContentException exception) {
