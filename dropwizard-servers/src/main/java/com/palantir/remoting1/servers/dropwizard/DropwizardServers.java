@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers;
+package com.palantir.remoting1.servers.dropwizard;
 
+import com.palantir.remoting1.servers.jersey.ExceptionMappers;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import javax.ws.rs.ext.ExceptionMapper;

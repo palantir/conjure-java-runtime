@@ -18,7 +18,7 @@ package com.palantir.remoting1.jaxrs.feignimpl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting1.servers.DropwizardServers;
+import com.palantir.remoting1.servers.dropwizard.DropwizardServers;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;

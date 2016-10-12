@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers;
+package com.palantir.remoting1.servers.dropwizard;
 
 import com.google.common.base.Optional;
 import io.dropwizard.jersey.guava.OptionalMessageBodyWriter;

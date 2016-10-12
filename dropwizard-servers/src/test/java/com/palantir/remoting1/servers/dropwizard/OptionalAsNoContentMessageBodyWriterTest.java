@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers;
+package com.palantir.remoting1.servers.dropwizard;
 
 
 import static org.hamcrest.Matchers.is;
@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.palantir.remoting1.servers.jersey.NoContentExceptionMapper;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;

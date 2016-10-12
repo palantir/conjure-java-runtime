@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers;
+package com.palantir.remoting1.servers.jersey;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.palantir.remoting1.errors.RemoteException;

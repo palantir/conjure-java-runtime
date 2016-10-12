@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers;
+package com.palantir.remoting1.servers.dropwizard;
 
 import com.github.kristofa.brave.AnnotationSubmitter;
 import com.github.kristofa.brave.Sampler;
@@ -30,6 +30,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.net.InetAddresses;
+import com.palantir.remoting1.servers.jersey.TraceIdLoggingFilter;
 import io.dropwizard.Configuration;
 import io.dropwizard.jetty.ConnectorFactory;
 import io.dropwizard.jetty.HttpConnectorFactory;

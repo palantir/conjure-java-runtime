@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers;
+package com.palantir.remoting1.servers.jersey;
 
 import javax.ws.rs.ext.ExceptionMapper;
 
 public final class ExceptionMappers {
 
     /** Java7-compatible version of Java8 Consumer. */
-    interface Consumer<T> {
+    public interface Consumer<T> {
         void accept(T object);
     }
 
     private ExceptionMappers() {}
 
-    static void visitExceptionMappers(boolean includeStackTrace,
+    public static void visitExceptionMappers(boolean includeStackTrace,
             Consumer<ExceptionMapper<? extends Throwable>> consumer) {
         consumer.accept(new IllegalArgumentExceptionMapper(includeStackTrace));
         consumer.accept(new NoContentExceptionMapper());

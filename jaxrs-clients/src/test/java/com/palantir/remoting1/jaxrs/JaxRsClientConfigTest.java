@@ -29,7 +29,7 @@ import ch.qos.logback.core.Appender;
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
-import com.palantir.remoting1.servers.DropwizardServers;
+import com.palantir.remoting1.servers.dropwizard.DropwizardServers;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
