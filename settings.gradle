@@ -1,4 +1,3 @@
-include ':ext:brave-extensions'
 include 'error-handling'
 include 'http-clients-api'
 include 'dropwizard-servers'

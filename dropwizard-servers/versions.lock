@@ -112,9 +112,6 @@
                 "io.dropwizard:dropwizard-util"
             ]
         },
-        "com.palantir.remoting1:brave-extensions": {
-            "project": true
-        },
         "com.palantir.remoting1:error-handling": {
             "project": true,
             "transitive": [
@@ -267,33 +264,9 @@
                 "io.dropwizard:dropwizard-metrics"
             ]
         },
-        "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0",
-            "transitive": [
-                "com.palantir.remoting1:brave-extensions",
-                "io.zipkin.brave:brave-http"
-            ]
-        },
-        "io.zipkin.brave:brave-http": {
-            "locked": "3.11.0",
-            "transitive": [
-                "com.palantir.remoting1:jersey-servers",
-                "io.zipkin.brave:brave-jaxrs2"
-            ]
-        },
-        "io.zipkin.brave:brave-jaxrs2": {
-            "locked": "3.11.0"
-        },
-        "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
-            "transitive": [
-                "io.zipkin.brave:brave-core"
-            ]
-        },
         "javax.annotation:javax.annotation-api": {
             "locked": "1.2",
             "transitive": [
-                "io.zipkin.brave:brave-jaxrs2",
                 "org.glassfish.jersey.core:jersey-common",
                 "org.glassfish.jersey.core:jersey-server"
             ]
@@ -301,7 +274,6 @@
         "javax.inject:javax.inject": {
             "locked": "1",
             "transitive": [
-                "io.zipkin.brave:brave-jaxrs2",
                 "org.glassfish.hk2:hk2-api",
                 "org.glassfish.hk2:hk2-utils"
             ]
@@ -581,7 +553,6 @@
             "locked": "1.7.12",
             "transitive": [
                 "ch.qos.logback:logback-classic",
-                "com.palantir.remoting1:brave-extensions",
                 "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
@@ -713,9 +684,6 @@
                 "io.dropwizard:dropwizard-util"
             ]
         },
-        "com.palantir.remoting1:brave-extensions": {
-            "project": true
-        },
         "com.palantir.remoting1:error-handling": {
             "project": true,
             "transitive": [
@@ -868,33 +836,9 @@
                 "io.dropwizard:dropwizard-metrics"
             ]
         },
-        "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0",
-            "transitive": [
-                "com.palantir.remoting1:brave-extensions",
-                "io.zipkin.brave:brave-http"
-            ]
-        },
-        "io.zipkin.brave:brave-http": {
-            "locked": "3.11.0",
-            "transitive": [
-                "com.palantir.remoting1:jersey-servers",
-                "io.zipkin.brave:brave-jaxrs2"
-            ]
-        },
-        "io.zipkin.brave:brave-jaxrs2": {
-            "locked": "3.11.0"
-        },
-        "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
-            "transitive": [
-                "io.zipkin.brave:brave-core"
-            ]
-        },
         "javax.annotation:javax.annotation-api": {
             "locked": "1.2",
             "transitive": [
-                "io.zipkin.brave:brave-jaxrs2",
                 "org.glassfish.jersey.core:jersey-common",
                 "org.glassfish.jersey.core:jersey-server"
             ]
@@ -902,7 +846,6 @@
         "javax.inject:javax.inject": {
             "locked": "1",
             "transitive": [
-                "io.zipkin.brave:brave-jaxrs2",
                 "org.glassfish.hk2:hk2-api",
                 "org.glassfish.hk2:hk2-utils"
             ]
@@ -1182,7 +1125,6 @@
             "locked": "1.7.12",
             "transitive": [
                 "ch.qos.logback:logback-classic",
-                "com.palantir.remoting1:brave-extensions",
                 "com.palantir.remoting1:error-handling",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
