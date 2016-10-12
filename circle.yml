@@ -12,8 +12,8 @@ dependencies:
 
 test:
   override:
-    - ./gradlew --parallel build
-    - ./gradlew testBouncyCastle testSun
+    - ./gradlew --parallel testClasses assemble
+    - ./gradlew build testBouncyCastle testSun
 
 deployment:
   release:
