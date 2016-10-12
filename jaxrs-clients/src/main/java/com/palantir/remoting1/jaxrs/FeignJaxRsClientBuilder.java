@@ -18,15 +18,6 @@ package com.palantir.remoting1.jaxrs;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.kristofa.brave.AnnotationSubmitter;
-import com.github.kristofa.brave.ClientRequestInterceptor;
-import com.github.kristofa.brave.ClientResponseInterceptor;
-import com.github.kristofa.brave.ClientTracer;
-import com.github.kristofa.brave.Sampler;
-import com.github.kristofa.brave.ThreadLocalServerClientAndLocalSpanState;
-import com.github.kristofa.brave.ext.SlfLoggingSpanCollector;
-import com.github.kristofa.brave.http.DefaultSpanNameProvider;
-import com.github.kristofa.brave.okhttp.BraveOkHttpRequestResponseInterceptor;
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.InetAddresses;
@@ -63,7 +54,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Authenticator;
 import okhttp3.Credentials;
@@ -150,27 +140,6 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         // with its own default otherwise. Feign does not provide a mechanism for write timeouts. We thus need to set
         // write timeouts here and connect&read timeouts on FeignBuilder.
         client.writeTimeout(config.writeTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
-
-        // Set up Zipkin/Brave tracing
-        ClientTracer tracer = ClientTracer.builder()
-                .traceSampler(Sampler.ALWAYS_SAMPLE)
-                .randomGenerator(new Random())
-                .state(new ThreadLocalServerClientAndLocalSpanState(
-                        getIpAddress(), 0 /* Client TCP port. */, userAgent))
-                .spanCollector(new SlfLoggingSpanCollector("tracing.client." + userAgent))
-                .clock(new AnnotationSubmitter.Clock() {
-                    @Override
-                    public long currentTimeMicroseconds() {
-                        return TimeUnit.MICROSECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
-                    }
-                })
-                .build();
-        BraveOkHttpRequestResponseInterceptor braveInterceptor =
-                new BraveOkHttpRequestResponseInterceptor(
-                        new ClientRequestInterceptor(tracer),
-                        new ClientResponseInterceptor(tracer),
-                        new DefaultSpanNameProvider());
-        client.addInterceptor(braveInterceptor);
 
         // Set up HTTP proxy configuration
         if (config.proxy().isPresent()) {

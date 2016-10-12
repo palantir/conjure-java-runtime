@@ -42,21 +42,6 @@
         "com.palantir.remoting1:error-handling": {
             "project": true
         },
-        "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0",
-            "transitive": [
-                "io.zipkin.brave:brave-http"
-            ]
-        },
-        "io.zipkin.brave:brave-http": {
-            "locked": "3.11.0"
-        },
-        "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
-            "transitive": [
-                "io.zipkin.brave:brave-core"
-            ]
-        },
         "javax.servlet:javax.servlet-api": {
             "locked": "3.1.0"
         },
@@ -115,21 +100,6 @@
         },
         "com.palantir.remoting1:error-handling": {
             "project": true
-        },
-        "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0",
-            "transitive": [
-                "io.zipkin.brave:brave-http"
-            ]
-        },
-        "io.zipkin.brave:brave-http": {
-            "locked": "3.11.0"
-        },
-        "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
-            "transitive": [
-                "io.zipkin.brave:brave-core"
-            ]
         },
         "javax.servlet:javax.servlet-api": {
             "locked": "3.1.0"
