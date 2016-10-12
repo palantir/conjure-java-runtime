@@ -21,6 +21,9 @@ import com.google.common.base.Throwables;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -47,6 +50,17 @@ public final class SslSocketFactories {
     }
 
     /**
+     * Create a {@link SSLSocketFactory} from the provided certificates.
+     *
+     * @param trustCertificatesByAlias
+     *        a map of X.509 certificate in PEM or DER format by the alias to load the certificate as.
+     */
+    public static SSLSocketFactory createSslSocketFactory(Map<String, PemX509Certificate> trustCertificatesByAlias) {
+        SSLContext sslContext = createSslContext(trustCertificatesByAlias);
+        return sslContext.getSocketFactory();
+    }
+
+    /**
      * Create an {@link SSLContext} initialized from the provided configuration.
      *
      * @param config an {@link SslConfiguration} describing the trust store and key store configuration
@@ -64,6 +78,21 @@ public final class SslSocketFactories {
                     config.keyStoreKeyAlias()).getKeyManagers();
         }
 
+        return createSslContext(trustManagers, keyManagers);
+    }
+
+    /**
+     * Create an {@link SSLContext} initialized from the provided certificates.
+     *
+     * @param trustCertificatesByAlias
+     *        a map of X.509 certificate in PEM or DER format by the alias to load the certificate as.
+     */
+    public static SSLContext createSslContext(Map<String, PemX509Certificate> trustCertificatesByAlias) {
+        TrustManager[] trustManagers = createTrustManagers(trustCertificatesByAlias);
+        return createSslContext(trustManagers, new KeyManager[]{});
+    }
+
+    private static SSLContext createSslContext(TrustManager[] trustManagers, KeyManager[] keyManagers) {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(keyManagers, trustManagers, null);
@@ -84,11 +113,37 @@ public final class SslSocketFactories {
     }
 
     /**
+     * Create a {@link TrustManager[]} initialized from the given certificates in PEM or DER format.
+     *
+     * @param trustCertificatesByAlias
+     *        a map of X.509 certificate in PEM or DER format by the alias to load the certificate as.
+     */
+    public static TrustManager[] createTrustManagers(Map<String, PemX509Certificate> trustCertificatesByAlias) {
+        try {
+            TrustManagerFactory trustManagerFactory =
+                    TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustManagerFactory.init(KeyStores.createTrustStoreFromCertificates(trustCertificatesByAlias));
+            return trustManagerFactory.getTrustManagers();
+        } catch (NoSuchAlgorithmException | KeyStoreException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    /**
      * Create SSL socket factory and trust manager from the given configuration, see {@link #createX509TrustManager} and
      * {@link #createSslSocketFactory}.
      */
     public static TrustContext createTrustContext(SslConfiguration config) {
         return TrustContext.of(createSslSocketFactory(config), createX509TrustManager(config));
+    }
+
+    /**
+     * Create SSL socket factory and trust manager from the given certificates, see {@link #createX509TrustManager} and
+     * {@link #createSslSocketFactory}.
+     */
+    public static TrustContext createTrustContext(Map<String, PemX509Certificate> trustCertificatesByAlias) {
+        return TrustContext.of(
+                createSslSocketFactory(trustCertificatesByAlias), createX509TrustManager(trustCertificatesByAlias));
     }
 
     /**
@@ -105,6 +160,17 @@ public final class SslSocketFactories {
                     X509TrustManager.class.getSimpleName(),
                     trustManager.getClass().getSimpleName(),
                     config.trustStorePath()));
+        }
+    }
+
+    public static X509TrustManager createX509TrustManager(Map<String, PemX509Certificate> certificatesByAlias) {
+        TrustManager trustManager = createTrustManagers(certificatesByAlias)[0];
+        if (trustManager instanceof X509TrustManager) {
+            return (X509TrustManager) trustManager;
+        } else {
+            throw new RuntimeException(String.format(
+                    "First TrustManager associated with certificates was expected to be a %s, but was a %s",
+                    X509TrustManager.class.getSimpleName(), trustManager.getClass().getSimpleName()));
         }
     }
 
@@ -137,7 +203,6 @@ public final class SslSocketFactories {
             TrustManagerFactory trustManagerFactory =
                     TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(keyStore);
-
             return trustManagerFactory;
         } catch (GeneralSecurityException e) {
             throw Throwables.propagate(e);

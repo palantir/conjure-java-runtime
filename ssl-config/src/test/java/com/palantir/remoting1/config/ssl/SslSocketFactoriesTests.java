@@ -23,10 +23,13 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
+import java.util.Map;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -38,6 +41,15 @@ public final class SslSocketFactoriesTests {
 
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
+
+    @Test
+    public void testCreateSslSocketFactory_withPemCertificatesByAlias() throws IOException {
+        String cert = Files.toString(TestConstants.CA_PEM_CERT_PATH.toFile(), StandardCharsets.UTF_8);
+
+        Map<String, PemX509Certificate> certs = ImmutableMap.of("cert", PemX509Certificate.of(cert));
+        assertThat(SslSocketFactories.createSslSocketFactory(certs), notNullValue());
+        assertThat(SslSocketFactories.createX509TrustManager(certs), notNullValue());
+    }
 
     @Test
     public void testCreateSslSocketFactory_canCreateWithAllTrustStoreParams() {
