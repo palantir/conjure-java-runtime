@@ -14,59 +14,43 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting.retrofit;
+package com.palantir.remoting1.jaxrs;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
-import com.google.common.base.Optional;
-import com.palantir.remoting1.retrofit.OkHttpClientOptions;
-import com.palantir.remoting1.retrofit.RetrofitClientFactory;
 import com.palantir.remoting1.tracing.TraceState;
 import com.palantir.remoting1.tracing.Traces;
-import javax.net.ssl.SSLSocketFactory;
+import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import retrofit.http.GET;
 
-public final class TraceRequestInterceptorTest {
+public final class TracingTest {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    private TestRequestInterceptorService service;
+    private TestService service;
 
     @Before
     public void before() {
-        String endpointUri = "http://localhost:" + server.getPort();
-
-        service = RetrofitClientFactory.createProxy(
-                Optional.<SSLSocketFactory>absent(),
-                endpointUri,
-                TestRequestInterceptorService.class,
-                OkHttpClientOptions.builder().build());
-
-        server.enqueue(new MockResponse().setBody("{}"));
+        String uri = "http://localhost:" + server.getPort();
+        service = JaxRsClient.builder().build(TestService.class, "agent", uri);
+        server.enqueue(new MockResponse().setBody("\"server\""));
     }
 
     @Test
-    public void testTraceRequestInterceptor_sendsAValidTraceId() throws InterruptedException {
+    public void testClientIsInstrumentedWithTracer() throws InterruptedException, IOException {
         TraceState parentTrace = Traces.startSpan("");
-        service.get();
+        service.echo("foo");
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader(Traces.Headers.TRACE_ID), is(parentTrace.getTraceId()));
         assertThat(request.getHeader(Traces.Headers.SPAN_ID), is(not(parentTrace.getSpanId())));
     }
-
-    public interface TestRequestInterceptorService {
-        @GET("/")
-        Object get();
-    }
-
 }

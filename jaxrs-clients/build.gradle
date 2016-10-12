@@ -3,7 +3,7 @@ apply from: "${rootDir}/gradle/publish-shadow.gradle"
 
 dependencies {
     compile project(":error-handling")
-    compile project(":tracing")
+    compile project(":tracing-okhttp3")
     compile project(":http-clients-api")
     compile project(":service-config")
 
