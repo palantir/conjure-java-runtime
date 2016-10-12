@@ -23,9 +23,11 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -93,7 +95,7 @@ public final class KeyStoresTests {
             assertThat(e.getCause(), is(instanceOf(CertificateParsingException.class)));
             assertThat(e.getMessage(), containsString(
                     String.format("Could not read file at \"%s\" as an X.509 certificate",
-                            tempCertFile.getAbsolutePath().toString())));
+                            tempCertFile.getAbsolutePath())));
         }
     }
 
@@ -111,7 +113,30 @@ public final class KeyStoresTests {
             assertThat(e.getCause(), is(instanceOf(CertificateException.class)));
             assertThat(e.getMessage(), containsString(
                     String.format("Could not read file at \"%s\" as an X.509 certificate",
-                            tempDirFile.getAbsolutePath().toString())));
+                            tempDirFile.getAbsolutePath())));
+        }
+    }
+
+    @Test
+    public void createTrustStoreFromCertificatesFromCertificatesByAlias() throws Exception {
+        String cert = Files.toString(TestConstants.SERVER_CERT_PEM_PATH.toFile(), StandardCharsets.UTF_8);
+        KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(
+                ImmutableMap.of("server.crt", PemX509Certificate.of(cert)));
+
+        assertThat(trustStore.getCertificate("server.crt").toString(), containsString("CN=localhost"));
+    }
+
+    @Test
+    public void createTrustStoreFromCertificatesFromCertificatesByAliasInvalidCert() throws Exception {
+        String cert = Files.toString(TestConstants.COMBINED_CRL_PATH.toFile(), StandardCharsets.UTF_8);
+
+        try {
+            KeyStores.createTrustStoreFromCertificates(ImmutableMap.of("invalid.crt", PemX509Certificate.of(cert)));
+            fail();
+        } catch (RuntimeException e) {
+            assertThat(e.getCause(), is(instanceOf(CertificateParsingException.class)));
+            assertThat(e.getMessage(), containsString(
+                    "Could not read certificate alias \"invalid.crt\" as an X.509 certificate"));
         }
     }
 

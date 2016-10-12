@@ -32,6 +32,7 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -39,6 +40,7 @@ import java.security.cert.CertificateFactory;
 import java.security.spec.RSAPrivateKeySpec;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,18 +82,47 @@ final class KeyStores {
      *         entry. The returned store will not have any password.
      */
     static KeyStore createTrustStoreFromCertificates(Path path) {
-        try {
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(null, null);
+        KeyStore keyStore;
+        keyStore = createKeyStore();
 
-            for (File currFile : getFilesForPath(path)) {
-                keyStore.setCertificateEntry(currFile.getName(), readX509Certificate(currFile.toPath()));
+        for (File currFile : getFilesForPath(path)) {
+            try (InputStream in = Files.newInputStream(currFile.toPath())) {
+                keyStore.setCertificateEntry(currFile.getName(), readX509Certificate(in));
+            } catch (IOException e) {
+                throw new RuntimeException(String.format(
+                        "IOException encountered when opening '%s'", currFile.toPath()), e);
+            } catch (CertificateException | KeyStoreException e) {
+                throw new RuntimeException(String.format(
+                        "Could not read file at \"%s\" as an X.509 certificate", currFile.toPath()), e);
             }
-
-            return keyStore;
-        } catch (GeneralSecurityException | IOException e) {
-            throw Throwables.propagate(e);
         }
+
+        return keyStore;
+    }
+
+    /**
+     * Returns a {@link KeyStore} created by loading the given certificates.
+     *
+     * @param certificatesByAlias
+     *        a map of X.509 certificate in PEM or DER format by the alias to load the certificate as.
+     */
+    static KeyStore createTrustStoreFromCertificates(Map<String, PemX509Certificate> certificatesByAlias) {
+        KeyStore keyStore;
+        keyStore = createKeyStore();
+
+        for (Map.Entry<String, PemX509Certificate> entry : certificatesByAlias.entrySet()) {
+            try (InputStream certIn = new ByteArrayInputStream(
+                    entry.getValue().pemCertificate().getBytes(StandardCharsets.UTF_8))) {
+                keyStore.setCertificateEntry(entry.getKey(), readX509Certificate(certIn));
+            } catch (IOException e) {
+                throw Throwables.propagate(e);
+            } catch (KeyStoreException | CertificateException e) {
+                throw new RuntimeException(String.format(
+                        "Could not read certificate alias \"%s\" as an X.509 certificate", entry.getKey()), e);
+            }
+        }
+
+        return keyStore;
     }
 
     /**
@@ -284,26 +315,20 @@ final class KeyStores {
         }
     }
 
-    /**
-     * Returns the X.509 certificate created by reading the file at the provided path. The file should be a single X.509
-     * certificate in PEM or DER format.
-     *
-     * @param certificateFilePath
-     *        path to the certificate file
-     * @return the certificate created by reading in the file at the provided path
-     */
-    private static Certificate readX509Certificate(Path certificateFilePath) {
+    private static KeyStore createKeyStore() {
+        KeyStore keyStore;
         try {
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-            Certificate certificate;
-            try (InputStream stream = Files.newInputStream(certificateFilePath)) {
-                certificate = certFactory.generateCertificate(stream);
-            }
-            return certificate;
+            keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStore.load(null, null);
         } catch (GeneralSecurityException | IOException e) {
-            throw new RuntimeException(String.format("Could not read file at \"%s\" as an X.509 certificate",
-                    certificateFilePath.toAbsolutePath()), e);
+            throw Throwables.propagate(e);
         }
+        return keyStore;
+    }
+
+    private static Certificate readX509Certificate(InputStream certificateIn) throws CertificateException {
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        return certFactory.generateCertificate(certificateIn);
     }
 
     /**
