@@ -91,6 +91,12 @@
             ]
         },
         "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp3"
+            ]
+        },
+        "com.palantir.remoting1:tracing-okhttp3": {
             "project": true
         },
         "com.palantir.tokens:auth-tokens": {
@@ -102,7 +108,8 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
-                "com.netflix.feign:feign-okhttp"
+                "com.netflix.feign:feign-okhttp",
+                "com.palantir.remoting1:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
@@ -231,6 +238,12 @@
             ]
         },
         "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp3"
+            ]
+        },
+        "com.palantir.remoting1:tracing-okhttp3": {
             "project": true
         },
         "com.palantir.tokens:auth-tokens": {
@@ -242,7 +255,8 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
-                "com.netflix.feign:feign-okhttp"
+                "com.netflix.feign:feign-okhttp",
+                "com.palantir.remoting1:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
