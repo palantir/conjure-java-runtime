@@ -3,17 +3,17 @@ machine:
     version: oraclejdk7
   environment:
     TERM: dumb
-    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx3g -XX:+HeapDumpOnOutOfMemoryError"'
+    GRADLE_OPTS: '-Dorg.gradle.jvmargs="-Xmx2g -XX:+HeapDumpOnOutOfMemoryError"'
 
 dependencies:
   override:
     - ./gradlew --parallel resolveConfigurations
     - ./gradlew --stacktrace generateLock verifyDependencyLocksAreCurrent
-    - ./gradlew --parallel testClasses
 
 test:
   override:
-    - ./gradlew --parallel build testBouncyCastle testSun
+    - ./gradlew --parallel build
+    - ./gradlew testBouncyCastle testSun
 
 deployment:
   release:
