@@ -17,7 +17,8 @@
             "locked": "2.6.1",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
@@ -36,10 +37,14 @@
             "locked": "18.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.palantir.remoting1:error-handling": {
+            "project": true
+        },
+        "com.palantir.remoting1:tracing": {
             "project": true
         },
         "javax.servlet:javax.servlet-api": {
@@ -76,7 +81,8 @@
             "locked": "2.6.1",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
@@ -95,10 +101,14 @@
             "locked": "18.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.palantir.remoting1:error-handling": {
+            "project": true
+        },
+        "com.palantir.remoting1:tracing": {
             "project": true
         },
         "javax.servlet:javax.servlet-api": {

@@ -1,0 +1,10 @@
+apply plugin: 'org.inferred.processors'
+
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile "com.google.guava:guava"
+    compile "com.fasterxml.jackson.core:jackson-databind"
+
+    processor "org.immutables:value"
+}
