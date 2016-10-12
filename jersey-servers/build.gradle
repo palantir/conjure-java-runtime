@@ -2,6 +2,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":error-handling")
+    compile project(":tracing")
     compile "javax.servlet:javax.servlet-api"
     compile "javax.ws.rs:javax.ws.rs-api"
 

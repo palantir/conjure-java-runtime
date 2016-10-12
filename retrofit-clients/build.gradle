@@ -7,10 +7,13 @@ dependencies {
     // ssl-config is not used in this project, but we depend on it here in order to provide
     // it transitively to users of retrofit-clients as a convenience.
     compile project(":ssl-config")
+    compile project(':tracing')
 
     compile "com.squareup.okhttp:okhttp"
     compile "com.squareup.retrofit:retrofit"
     compile "org.slf4j:slf4j-api"
+
+    testCompile project(":jersey-servers")
 
     testCompile "com.squareup.okhttp3:mockwebserver"
     testCompile "io.dropwizard:dropwizard-testing"

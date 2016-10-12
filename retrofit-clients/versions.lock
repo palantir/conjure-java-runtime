@@ -18,7 +18,8 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
@@ -44,13 +45,17 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.palantir.remoting1:error-handling": {
             "project": true
         },
         "com.palantir.remoting1:ssl-config": {
+            "project": true
+        },
+        "com.palantir.remoting1:tracing": {
             "project": true
         },
         "com.squareup.okhttp:okhttp": {
@@ -97,7 +102,8 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
@@ -123,13 +129,17 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.palantir.remoting1:error-handling": {
             "project": true
         },
         "com.palantir.remoting1:ssl-config": {
+            "project": true
+        },
+        "com.palantir.remoting1:tracing": {
             "project": true
         },
         "com.squareup.okhttp:okhttp": {
