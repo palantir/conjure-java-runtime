@@ -18,7 +18,7 @@ package com.palantir.remoting1.servers;
 
 import javax.ws.rs.ext.ExceptionMapper;
 
-final class ExceptionMappers {
+public final class ExceptionMappers {
 
     /** Java7-compatible version of Java8 Consumer. */
     interface Consumer<T> {
