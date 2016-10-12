@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers;
+package com.palantir.remoting1.servers.jersey;
 
 
 import static org.hamcrest.Matchers.is;
@@ -45,6 +45,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.ExceptionMapper;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -112,7 +113,14 @@ public final class ExceptionMappersTest {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new ExceptionTestResource());
-            DropwizardServers.configure(env, config, "unused tracer name", DropwizardServers.Stacktraces.PROPAGATE);
+            ExceptionMappers.visitExceptionMappers(
+                    ExceptionMappers.StacktracePropagation.PROPAGATE,
+                    new ExceptionMappers.Consumer<ExceptionMapper<? extends Throwable>>() {
+                        @Override
+                        public void accept(ExceptionMapper<? extends Throwable> mapper) {
+                            env.jersey().register(mapper);
+                        }
+                    });
         }
     }
 

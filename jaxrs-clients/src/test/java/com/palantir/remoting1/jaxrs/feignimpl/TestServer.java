@@ -18,7 +18,8 @@ package com.palantir.remoting1.jaxrs.feignimpl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting1.servers.DropwizardServers;
+import com.palantir.remoting1.servers.dropwizard.DropwizardServers;
+import com.palantir.remoting1.servers.jersey.ExceptionMappers;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -44,7 +45,8 @@ public class TestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(new TestResource());
-        DropwizardServers.configure(env, config, "unused tracer name", DropwizardServers.Stacktraces.PROPAGATE);
+        DropwizardServers.configure(
+                env, config, "unused tracer name", ExceptionMappers.StacktracePropagation.PROPAGATE);
     }
 
     static class TestResource implements TestService {

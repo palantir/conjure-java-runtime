@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers;
+package com.palantir.remoting1.servers.dropwizard;
 
 
 import static org.hamcrest.Matchers.is;
@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
+import com.palantir.remoting1.servers.jersey.ExceptionMappers;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -74,9 +75,8 @@ public final class OptionalAsNoContentMessageBodyWriterTest {
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
+            DropwizardServers.configure(env, config, "tracer", ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
             env.jersey().register(new OptionalTestResource());
-            env.jersey().register(new OptionalAsNoContentMessageBodyWriter());
-            env.jersey().register(new NoContentExceptionMapper());
         }
     }
 

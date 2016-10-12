@@ -116,6 +116,12 @@
             "project": true
         },
         "com.palantir.remoting1:error-handling": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:jersey-servers"
+            ]
+        },
+        "com.palantir.remoting1:jersey-servers": {
             "project": true
         },
         "io.dropwizard.metrics:metrics-annotation": {
@@ -271,6 +277,7 @@
         "io.zipkin.brave:brave-http": {
             "locked": "3.11.0",
             "transitive": [
+                "com.palantir.remoting1:jersey-servers",
                 "io.zipkin.brave:brave-jaxrs2"
             ]
         },
@@ -302,6 +309,7 @@
         "javax.servlet:javax.servlet-api": {
             "locked": "3.1.0",
             "transitive": [
+                "com.palantir.remoting1:jersey-servers",
                 "org.eclipse.jetty:jetty-server"
             ]
         },
@@ -316,6 +324,7 @@
             "locked": "2.0.1",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jersey-servers",
                 "org.glassfish.jersey.containers:jersey-container-servlet",
                 "org.glassfish.jersey.containers:jersey-container-servlet-core",
                 "org.glassfish.jersey.core:jersey-client",
@@ -708,6 +717,12 @@
             "project": true
         },
         "com.palantir.remoting1:error-handling": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:jersey-servers"
+            ]
+        },
+        "com.palantir.remoting1:jersey-servers": {
             "project": true
         },
         "io.dropwizard.metrics:metrics-annotation": {
@@ -863,6 +878,7 @@
         "io.zipkin.brave:brave-http": {
             "locked": "3.11.0",
             "transitive": [
+                "com.palantir.remoting1:jersey-servers",
                 "io.zipkin.brave:brave-jaxrs2"
             ]
         },
@@ -894,6 +910,7 @@
         "javax.servlet:javax.servlet-api": {
             "locked": "3.1.0",
             "transitive": [
+                "com.palantir.remoting1:jersey-servers",
                 "org.eclipse.jetty:jetty-server"
             ]
         },
@@ -908,6 +925,7 @@
             "locked": "2.0.1",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jersey-servers",
                 "org.glassfish.jersey.containers:jersey-container-servlet",
                 "org.glassfish.jersey.containers:jersey-container-servlet-core",
                 "org.glassfish.jersey.core:jersey-client",

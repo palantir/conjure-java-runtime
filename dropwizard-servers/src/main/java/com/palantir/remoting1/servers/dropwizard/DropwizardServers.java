@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers;
+package com.palantir.remoting1.servers.dropwizard;
 
+import com.palantir.remoting1.servers.jersey.ExceptionMappers;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -23,20 +24,6 @@ import javax.ws.rs.ext.ExceptionMapper;
 
 public final class DropwizardServers {
     private DropwizardServers() {}
-
-    public enum Stacktraces {
-        /**
-         * The inverse of {@link #DO_NOT_PROPAGATE}. Note that this may leak sensitive information from servers to
-         * clients.
-         */
-        PROPAGATE,
-
-        /**
-         * Configures exception serializers to not include exception stacktraces in {@link
-         * com.palantir.remoting1.errors.SerializableError serialized errors}. This is the recommended setting.
-         */
-        DO_NOT_PROPAGATE
-    }
 
     /**
      * Server-side stacktraces are serialized and transferred to the client iff {@code serializeStacktrace} is {@code
@@ -47,10 +34,10 @@ public final class DropwizardServers {
             final Environment environment,
             Configuration config,
             String tracerName,
-            Stacktraces stacktracePropagation) {
+            ExceptionMappers.StacktracePropagation stacktracePropagation) {
         DropwizardTracingFilters.registerTracers(environment, config, tracerName);
         ExceptionMappers.visitExceptionMappers(
-                stacktracePropagation == Stacktraces.PROPAGATE,
+                stacktracePropagation,
                 new ExceptionMappers.Consumer<ExceptionMapper<? extends Throwable>>() {
                     @Override
                     public void accept(ExceptionMapper<? extends Throwable> mapper) {

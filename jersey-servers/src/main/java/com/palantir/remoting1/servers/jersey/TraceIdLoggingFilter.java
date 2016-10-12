@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers;
+package com.palantir.remoting1.servers.jersey;
 
 import com.github.kristofa.brave.http.BraveHttpHeaders;
 import java.io.Closeable;
@@ -28,7 +28,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.MDC;
 
-enum TraceIdLoggingFilter implements Filter {
+public enum TraceIdLoggingFilter implements Filter {
     INSTANCE;
 
     /** The key under which trace ids are inserted into SLF4J {@link org.slf4j.MDC MDCs}. */
@@ -51,6 +51,7 @@ enum TraceIdLoggingFilter implements Filter {
     private Closeable populateTraceContext(ServletRequest request) {
         if (request instanceof HttpServletRequest) {
             HttpServletRequest httpRequest = (HttpServletRequest) request;
+            // TODO(rfink) Remove Brave dependency
             String traceId = httpRequest.getHeader(BraveHttpHeaders.TraceId.getName());
             if (traceId != null) {
                 return MDC.putCloseable(MDC_KEY, traceId);

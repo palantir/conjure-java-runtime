@@ -14,21 +14,36 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers;
+package com.palantir.remoting1.servers.jersey;
 
 import javax.ws.rs.ext.ExceptionMapper;
 
-final class ExceptionMappers {
+public final class ExceptionMappers {
+
+    public enum StacktracePropagation {
+        /**
+         * The inverse of {@link #DO_NOT_PROPAGATE}. Note that this may leak sensitive information from servers to
+         * clients.
+         */
+        PROPAGATE,
+
+        /**
+         * Configures exception serializers to not include exception stacktraces in {@link
+         * com.palantir.remoting1.errors.SerializableError serialized errors}. This is the recommended setting.
+         */
+        DO_NOT_PROPAGATE
+    }
 
     /** Java7-compatible version of Java8 Consumer. */
-    interface Consumer<T> {
+    public interface Consumer<T> {
         void accept(T object);
     }
 
     private ExceptionMappers() {}
 
-    static void visitExceptionMappers(boolean includeStackTrace,
-            Consumer<ExceptionMapper<? extends Throwable>> consumer) {
+    public static void visitExceptionMappers(
+            StacktracePropagation stacktracePropagation, Consumer<ExceptionMapper<? extends Throwable>> consumer) {
+        boolean includeStackTrace = stacktracePropagation == StacktracePropagation.PROPAGATE;
         consumer.accept(new IllegalArgumentExceptionMapper(includeStackTrace));
         consumer.accept(new NoContentExceptionMapper());
         consumer.accept(new RuntimeExceptionMapper(includeStackTrace));
