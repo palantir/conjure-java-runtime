@@ -51,6 +51,7 @@ enum TraceIdLoggingFilter implements Filter {
     private Closeable populateTraceContext(ServletRequest request) {
         if (request instanceof HttpServletRequest) {
             HttpServletRequest httpRequest = (HttpServletRequest) request;
+            // TODO(rfink) Remove Brave dependency
             String traceId = httpRequest.getHeader(BraveHttpHeaders.TraceId.getName());
             if (traceId != null) {
                 return MDC.putCloseable(MDC_KEY, traceId);
