@@ -6,5 +6,9 @@ dependencies {
     compile "com.google.guava:guava"
     compile "com.fasterxml.jackson.core:jackson-databind"
 
+    testCompile "junit:junit"
+    testCompile "org.assertj:assertj-core"
+    testCompile "org.mockito:mockito-core"
+
     processor "org.immutables:value"
 }

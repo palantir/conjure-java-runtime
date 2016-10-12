@@ -22,6 +22,12 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Set;
 
+/**
+ * The singleton entry point for handling Zipkin-style traces and spans. Provides functionality for starting and
+ * completing spans, and for registering subscribers to span completion events.
+ * <p>
+ * This class is thread-safe.
+ */
 public final class Traces {
 
     public interface Headers {
@@ -30,7 +36,7 @@ public final class Traces {
         String SPAN_ID = "X-B3-SpanId";
     }
 
-    // stack of trace states
+    // Stack of trace states; thread-local (and thus thread-safe).
     private static final ThreadLocal<Deque<TraceState>> STATE = new ThreadLocal<Deque<TraceState>>() {
         @Override
         protected Deque<TraceState> initialValue() {
@@ -38,6 +44,7 @@ public final class Traces {
         }
     };
 
+    // Thread-safe set implementation
     private static final Set<Subscriber> SUBSCRIBERS = Sets.newConcurrentHashSet();
 
     public static Optional<TraceState> getTrace() {
@@ -51,8 +58,7 @@ public final class Traces {
     }
 
     /**
-     * Derives a new call trace from the currently known call trace labeled with the
-     * provided operation.
+     * Derives a new call trace from the currently known call trace labeled with the provided operation.
      */
     public static TraceState startSpan(String operation) {
         Optional<TraceState> prevState = getTrace();
@@ -62,7 +68,7 @@ public final class Traces {
 
         if (prevState.isPresent()) {
             newStateBuilder.traceId(prevState.get().getTraceId())
-                .parentSpanId(prevState.get().getSpanId()); // span -> parent
+                    .parentSpanId(prevState.get().getSpanId()); // span -> parent
         }
 
         TraceState newState = newStateBuilder.build();
@@ -70,6 +76,10 @@ public final class Traces {
         return newState;
     }
 
+    /**
+     * Completes and returns the current span (if it exists) and notifies all {@link #SUBSCRIBERS subscribers} about the
+     * completed span.
+     */
     public static Optional<Span> completeSpan() {
         Deque<TraceState> stack = STATE.get();
         if (stack.isEmpty()) {
@@ -94,22 +104,26 @@ public final class Traces {
         }
     }
 
+    /**
+     * Subscribes the given span consumer to all "span completed" events. Subscribers are expected "cheap", i.e., do all
+     * non-trivial work (logging, sending network messages, etc) asynchronously.
+     */
     public static void subscribe(Subscriber subscriber) {
         SUBSCRIBERS.add(subscriber);
     }
 
+    /** The inverse of {@link #subscribe}. */
     public static void unsubscribe(Subscriber subscriber) {
         SUBSCRIBERS.remove(subscriber);
     }
 
     /**
-     * Represents the event receiver for trace completion events. Implementations are invoked
-     * synchronously on the primary execution thread, and as a result should execute quickly.
+     * Represents the event receiver for trace completion events. Implementations are invoked synchronously on the
+     * primary execution thread, and as a result should execute quickly.
      */
     public interface Subscriber {
         void consume(Span span);
     }
 
     private Traces() {}
-
 }
