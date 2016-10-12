@@ -2,6 +2,8 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":jersey-servers")
+    compile project(':tracing')
+
     compile "com.fasterxml.jackson.core:jackson-databind"
     compile "com.google.code.findbugs:jsr305"
     compile "io.dropwizard:dropwizard-core"

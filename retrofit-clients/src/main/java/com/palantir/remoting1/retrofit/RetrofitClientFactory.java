@@ -54,6 +54,9 @@ public final class RetrofitClientFactory {
         okClient.setWriteTimeout(
                 options.getWriteTimeoutMs().or((long) okClient.getWriteTimeout()), TimeUnit.MILLISECONDS);
 
+        // tracing
+        okClient.interceptors().add(TraceInterceptor.INSTANCE);
+
         // retries
         RetryInterceptor retryInterceptor = options.getMaxNumberRetries().isPresent()
                 ? new RetryInterceptor(options.getMaxNumberRetries().get())
