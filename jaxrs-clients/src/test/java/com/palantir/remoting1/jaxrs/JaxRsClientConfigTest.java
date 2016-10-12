@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import com.google.common.collect.Maps;
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
@@ -35,13 +36,6 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
 import java.util.Map;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import org.assertj.core.util.Maps;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -96,13 +90,6 @@ public final class JaxRsClientConfigTest {
         }
     }
 
-    private void setLogLevel(String name, Level level) {
-        if (!originalLogLevels.containsKey(name)) {
-            originalLogLevels.put(name, level);
-        }
-        getLogbackLogger(name).setLevel(level);
-    }
-
     private static ch.qos.logback.classic.Logger getLogbackLogger(String name) {
         return (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(name);
     }
@@ -110,7 +97,7 @@ public final class JaxRsClientConfigTest {
     @Test
     public void testSslSocketFactory_cannotConnectWhenSocketFactoryIsNotSet() throws Exception {
         String endpointUri = "https://localhost:" + ECHO_SERVER.getLocalPort();
-        TestEchoService service = JaxRsClient.builder().build(TestEchoService.class, "agent", endpointUri);
+        TestService service = JaxRsClient.builder().build(TestService.class, "agent", endpointUri);
 
         try {
             service.echo("foo");
@@ -122,7 +109,7 @@ public final class JaxRsClientConfigTest {
 
     @Test
     public void testSslSocketFactory_canConnectWhenSocketFactoryIsSet() throws Exception {
-        TestEchoService service = createProxy(ECHO_SERVER.getLocalPort(), "test");
+        TestService service = createProxy(ECHO_SERVER.getLocalPort(), "test");
         assertThat(service.echo("foo"), is("foo"));
     }
 
@@ -130,18 +117,18 @@ public final class JaxRsClientConfigTest {
     public void testRetries_notSupported() throws Exception {
         try {
             JaxRsClient.builder(ClientConfig.builder().maxNumRetries(1).build())
-                    .build(TestEchoService.class, "agent", "uri");
+                    .build(TestService.class, "agent", "uri");
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), is("Connection-level retries are not supported by JaxRsClient"));
         }
     }
 
-    private static TestEchoService createProxy(int port, String name) {
+    private static TestService createProxy(int port, String name) {
         String endpointUri = "https://localhost:" + port;
         SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
         return JaxRsClient.builder(
                 ClientConfig.builder().trustContext(SslSocketFactories.createTrustContext(sslConfig)).build())
-                .build(TestEchoService.class, name, endpointUri);
+                .build(TestService.class, name, endpointUri);
     }
 
     public static final class ProxyingEchoServer extends Application<Configuration> {
@@ -152,10 +139,10 @@ public final class JaxRsClientConfigTest {
                     ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
         }
 
-        private static final class TestEchoResource implements TestEchoService {
+        private static final class TestEchoResource implements TestService {
             @Override
             public String echo(String value) {
-                TestEchoService echoService = createProxy(ECHO_SERVER.getLocalPort(), "proxyingClient");
+                TestService echoService = createProxy(ECHO_SERVER.getLocalPort(), "proxyingClient");
                 return echoService.echo(value);
             }
         }
@@ -169,20 +156,11 @@ public final class JaxRsClientConfigTest {
                     ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
         }
 
-        private static final class TestEchoResource implements TestEchoService {
+        private static final class TestEchoResource implements TestService {
             @Override
             public String echo(String value) {
                 return value;
             }
         }
-    }
-
-    @Path("/")
-    public interface TestEchoService {
-        @GET
-        @Path("/echo")
-        @Consumes(MediaType.TEXT_PLAIN)
-        @Produces(MediaType.TEXT_PLAIN)
-        String echo(@QueryParam("value") String value);
     }
 }

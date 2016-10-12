@@ -19,6 +19,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens",
                 "com.squareup.retrofit2:converter-jackson"
             ]
@@ -41,6 +42,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -62,6 +64,15 @@
                 "com.palantir.remoting1:service-config"
             ]
         },
+        "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp3"
+            ]
+        },
+        "com.palantir.remoting1:tracing-okhttp3": {
+            "project": true
+        },
         "com.palantir.tokens:auth-tokens": {
             "locked": "0.2.3",
             "transitive": [
@@ -71,6 +82,7 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
+                "com.palantir.remoting1:tracing-okhttp3",
                 "com.squareup.retrofit2:retrofit"
             ]
         },
@@ -130,6 +142,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens",
                 "com.squareup.retrofit2:converter-jackson"
             ]
@@ -152,6 +165,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -173,6 +187,15 @@
                 "com.palantir.remoting1:service-config"
             ]
         },
+        "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp3"
+            ]
+        },
+        "com.palantir.remoting1:tracing-okhttp3": {
+            "project": true
+        },
         "com.palantir.tokens:auth-tokens": {
             "locked": "0.2.3",
             "transitive": [
@@ -182,6 +205,7 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
+                "com.palantir.remoting1:tracing-okhttp3",
                 "com.squareup.retrofit2:retrofit"
             ]
         },

@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
-import com.google.common.net.InetAddresses;
 import com.palantir.remoting1.clients.ClientBuilder;
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.service.BasicCredentials;
@@ -34,6 +33,7 @@ import com.palantir.remoting1.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting1.jaxrs.feignimpl.ObjectMappers;
 import com.palantir.remoting1.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting1.jaxrs.feignimpl.UserAgentInterceptor;
+import com.palantir.remoting1.tracing.okhttp3.OkhttpTraceInterceptor;
 import feign.Contract;
 import feign.Feign;
 import feign.InputStreamDelegateDecoder;
@@ -51,8 +51,6 @@ import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Authenticator;
@@ -79,7 +77,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 .encoder(createEncoder(objectMapper))
                 .decoder(createDecoder(objectMapper))
                 .errorDecoder(FeignSerializableErrorErrorDecoder.INSTANCE)
-                .client(target.wrapClient(createOkHttpClient(userAgent)))
+                .client(target.wrapClient(createOkHttpClient()))
                 .retryer(target)
                 .options(createRequestOptions())
                 .logger(new Slf4jLogger(JaxRsClient.class))
@@ -126,7 +124,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(objectMapper))));
     }
 
-    private feign.Client createOkHttpClient(String userAgent) {
+    private feign.Client createOkHttpClient() {
         okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
 
         // SSL
@@ -134,6 +132,9 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
             TrustContext context = config.trustContext().get();
             client.sslSocketFactory(context.sslSocketFactory(), context.x509TrustManager());
         }
+
+        // tracing
+        client.interceptors().add(OkhttpTraceInterceptor.INSTANCE);
 
         // timeouts
         // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
@@ -161,15 +162,5 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         }
 
         return new OkHttpClient(client.build());
-    }
-
-    // Returns the IP address returned by InetAddress.getLocalHost(), or -1 if it cannot be determined.
-    // TODO(rfink) What if there are multiple? Can we find the "correct" one?
-    private static int getIpAddress() {
-        try {
-            return InetAddresses.coerceToInteger(InetAddress.getLocalHost());
-        } catch (UnknownHostException e) {
-            return -1;
-        }
     }
 }

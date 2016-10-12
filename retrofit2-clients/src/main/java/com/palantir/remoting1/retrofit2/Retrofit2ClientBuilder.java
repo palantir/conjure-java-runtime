@@ -25,6 +25,7 @@ import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.service.BasicCredentials;
 import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.ssl.TrustContext;
+import com.palantir.remoting1.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -101,6 +102,9 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
                 });
             }
         }
+
+        // tracing
+        client.interceptors().add(OkhttpTraceInterceptor.INSTANCE);
 
         // timeouts
         client.connectTimeout(config.connectTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
