@@ -29,6 +29,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.OutputStreamAppender;
 import com.github.kristofa.brave.http.BraveHttpHeaders;
+import com.palantir.remoting1.servers.jersey.ExceptionMappers;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -139,7 +140,8 @@ public final class DropwizardTracingFiltersTest {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
-            DropwizardServers.configure(env, config, "testTracerName", DropwizardServers.Stacktraces.PROPAGATE);
+            DropwizardServers.configure(
+                    env, config, "testTracerName", ExceptionMappers.StacktracePropagation.PROPAGATE);
         }
 
         public static final class TestEchoResource implements TestEchoService {

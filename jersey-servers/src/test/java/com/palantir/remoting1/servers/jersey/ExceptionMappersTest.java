@@ -114,7 +114,7 @@ public final class ExceptionMappersTest {
         public final void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new ExceptionTestResource());
             ExceptionMappers.visitExceptionMappers(
-                    true,
+                    ExceptionMappers.StacktracePropagation.PROPAGATE,
                     new ExceptionMappers.Consumer<ExceptionMapper<? extends Throwable>>() {
                         @Override
                         public void accept(ExceptionMapper<? extends Throwable> mapper) {

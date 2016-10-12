@@ -30,6 +30,7 @@ import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
 import com.palantir.remoting1.servers.dropwizard.DropwizardServers;
+import com.palantir.remoting1.servers.jersey.ExceptionMappers;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -203,7 +204,7 @@ public final class JaxRsClientConfigTest {
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
             DropwizardServers.configure(env, config, ProxyingEchoServer.class.getSimpleName(),
-                    DropwizardServers.Stacktraces.DO_NOT_PROPAGATE);
+                    ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
         }
 
         private static final class TestEchoResource implements TestEchoService {
@@ -219,8 +220,8 @@ public final class JaxRsClientConfigTest {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
-            DropwizardServers.configure(
-                    env, config, TestEchoServer.class.getSimpleName(), DropwizardServers.Stacktraces.DO_NOT_PROPAGATE);
+            DropwizardServers.configure(env, config, TestEchoServer.class.getSimpleName(),
+                    ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
         }
 
         private static final class TestEchoResource implements TestEchoService {
