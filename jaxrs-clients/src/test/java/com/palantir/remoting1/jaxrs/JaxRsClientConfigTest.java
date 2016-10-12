@@ -19,8 +19,6 @@ package com.palantir.remoting1.jaxrs;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ch.qos.logback.classic.Level;
@@ -37,8 +35,6 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -50,9 +46,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 
@@ -133,48 +127,6 @@ public final class JaxRsClientConfigTest {
     }
 
     @Test
-    public void testBraveTracing_clientLogsTraces() throws Exception {
-        setLogLevel("tracing.client.test", Level.TRACE);
-        TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test");
-        assertThat(service.echo("foo"), is("foo"));
-
-        ArgumentCaptor<ILoggingEvent> clientTracerEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
-        verify(clientTracerAppender).doAppend(clientTracerEvent.capture());
-        assertThat(clientTracerEvent.getValue().getFormattedMessage(), containsString("\"serviceName\":\"test\","));
-        Mockito.verifyNoMoreInteractions(clientTracerAppender);
-    }
-
-    @Test
-    public void testBraveTracing_traceIdsAreCarriedForward() throws Exception {
-        setLogLevel("tracing.client.test", Level.TRACE);
-        setLogLevel("tracing.server.ProxyingEchoServer", Level.TRACE);
-        setLogLevel("tracing.server.TestEchoServer", Level.TRACE);
-        // Simulates two-hop call chain: client --> ProxyingEchoServer --> EchoServer. Verifies that
-        // trace ids logged in the three locations are identical.
-
-        TestEchoService service = createProxy(PROXYING_ECHO_SERVER.getLocalPort(), "test");
-        assertThat(service.echo("foo"), is("foo"));
-
-        // Extract client trace id.
-        ArgumentCaptor<ILoggingEvent> clientTracerEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
-        verify(clientTracerAppender).doAppend(clientTracerEvent.capture());
-        String clientTraceId = getTraceIdFromLogEvent(clientTracerEvent);
-        Mockito.verifyNoMoreInteractions(clientTracerAppender);
-
-        // Verify client and proxying echo server trace ids are identical
-        ArgumentCaptor<ILoggingEvent> proxyingServerTracerEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
-        verify(proxyingServerTracerAppender).doAppend(proxyingServerTracerEvent.capture());
-        assertThat(clientTraceId, is(getTraceIdFromLogEvent(proxyingServerTracerEvent)));
-        Mockito.verifyNoMoreInteractions(proxyingServerTracerAppender);
-
-        // Verify client and echo server trace ids are identical
-        ArgumentCaptor<ILoggingEvent> serverTracerEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
-        verify(serverTracerAppender).doAppend(serverTracerEvent.capture());
-        assertThat(clientTraceId, is(getTraceIdFromLogEvent(serverTracerEvent)));
-        Mockito.verifyNoMoreInteractions(serverTracerAppender);
-    }
-
-    @Test
     public void testRetries_notSupported() throws Exception {
         try {
             JaxRsClient.builder(ClientConfig.builder().maxNumRetries(1).build())
@@ -182,13 +134,6 @@ public final class JaxRsClientConfigTest {
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), is("Connection-level retries are not supported by JaxRsClient"));
         }
-    }
-
-    private String getTraceIdFromLogEvent(ArgumentCaptor<ILoggingEvent> event) {
-        Pattern tracePattern = Pattern.compile(".*traceId\":\"([a-z0-9]+).*");
-        Matcher matcher = tracePattern.matcher(event.getValue().getFormattedMessage());
-        assertTrue(matcher.matches());
-        return matcher.group(1);
     }
 
     private static TestEchoService createProxy(int port, String name) {

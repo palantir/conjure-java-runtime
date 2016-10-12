@@ -2,7 +2,6 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":error-handling")
-    compile "io.zipkin.brave:brave-http"
     compile "javax.servlet:javax.servlet-api"
     compile "javax.ws.rs:javax.ws.rs-api"
 
