@@ -56,10 +56,19 @@
             "project": true
         },
         "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp2"
+            ]
+        },
+        "com.palantir.remoting1:tracing-okhttp2": {
             "project": true
         },
         "com.squareup.okhttp:okhttp": {
-            "locked": "2.7.5"
+            "locked": "2.7.5",
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp2"
+            ]
         },
         "com.squareup.okio:okio": {
             "locked": "1.6.0",
@@ -140,10 +149,19 @@
             "project": true
         },
         "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp2"
+            ]
+        },
+        "com.palantir.remoting1:tracing-okhttp2": {
             "project": true
         },
         "com.squareup.okhttp:okhttp": {
-            "locked": "2.7.5"
+            "locked": "2.7.5",
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp2"
+            ]
         },
         "com.squareup.okio:okio": {
             "locked": "1.6.0",

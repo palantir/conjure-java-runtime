@@ -28,7 +28,6 @@ public final class Traces {
         String TRACE_ID = "X-B3-TraceId";
         String PARENT_SPAN_ID = "X-B3-ParentSpanId";
         String SPAN_ID = "X-B3-SpanId";
-        String SPAN_NAME = "X-Span-Name";
     }
 
     // stack of trace states
