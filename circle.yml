@@ -7,13 +7,13 @@ machine:
 
 dependencies:
   override:
-    - ./gradlew resolveConfigurations
+    - ./gradlew --parallel resolveConfigurations
     - ./gradlew --stacktrace generateLock verifyDependencyLocksAreCurrent
-    - ./gradlew testClasses
+    - ./gradlew --parallel testClasses
 
 test:
   override:
-    - ./gradlew build testBouncyCastle testSun
+    - ./gradlew --parallel build testBouncyCastle testSun
 
 deployment:
   release:
