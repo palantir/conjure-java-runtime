@@ -22,6 +22,7 @@
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -46,6 +47,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -87,6 +89,9 @@
             "transitive": [
                 "com.palantir.remoting1:service-config"
             ]
+        },
+        "com.palantir.remoting1:tracing": {
+            "project": true
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "0.2.3",
@@ -157,6 +162,7 @@
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -181,6 +187,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -222,6 +229,9 @@
             "transitive": [
                 "com.palantir.remoting1:service-config"
             ]
+        },
+        "com.palantir.remoting1:tracing": {
+            "project": true
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "0.2.3",

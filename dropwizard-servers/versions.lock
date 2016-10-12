@@ -37,6 +37,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "io.dropwizard:dropwizard-jackson"
             ]
         },
@@ -107,6 +108,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-util"
@@ -120,6 +122,12 @@
         },
         "com.palantir.remoting1:jersey-servers": {
             "project": true
+        },
+        "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:jersey-servers"
+            ]
         },
         "io.dropwizard.metrics:metrics-annotation": {
             "locked": "3.1.1",
@@ -609,6 +617,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "io.dropwizard:dropwizard-jackson"
             ]
         },
@@ -679,6 +688,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-util"
@@ -692,6 +702,12 @@
         },
         "com.palantir.remoting1:jersey-servers": {
             "project": true
+        },
+        "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:jersey-servers"
+            ]
         },
         "io.dropwizard.metrics:metrics-annotation": {
             "locked": "3.1.1",
