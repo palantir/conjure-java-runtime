@@ -117,6 +117,7 @@
             "locked": "1.7.12",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens",
                 "org.slf4j:jcl-over-slf4j"
             ]
@@ -240,6 +241,7 @@
             "locked": "1.7.12",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens",
                 "org.slf4j:jcl-over-slf4j"
             ]

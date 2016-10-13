@@ -17,6 +17,9 @@
         },
         "com.google.guava:guava": {
             "locked": "18.0"
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12"
         }
     },
     "runtime": {
@@ -37,6 +40,9 @@
         },
         "com.google.guava:guava": {
             "locked": "18.0"
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12"
         }
     }
 }
