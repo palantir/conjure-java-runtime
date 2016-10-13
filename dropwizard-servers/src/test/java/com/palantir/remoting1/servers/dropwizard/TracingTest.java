@@ -72,7 +72,7 @@ public final class TracingTest {
     public static class TracingTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            DropwizardServers.configure(env, config, "", ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
+            DropwizardServers.configure(env, ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
             env.jersey().register(new TracingTestResource());
         }
     }

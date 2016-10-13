@@ -75,7 +75,7 @@ public final class OptionalAsNoContentMessageBodyWriterTest {
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            DropwizardServers.configure(env, config, "tracer", ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
+            DropwizardServers.configure(env, ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
             env.jersey().register(new OptionalTestResource());
         }
     }
