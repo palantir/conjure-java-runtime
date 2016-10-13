@@ -55,9 +55,9 @@ public final class OkhttpTraceInterceptorTest {
         verifyNoMoreInteractions(chain);
 
         Request intercepted = argument.getValue();
-        assertThat(intercepted.header(Traces.Headers.SPAN_ID)).isNotNull();
-        assertThat(intercepted.header(Traces.Headers.TRACE_ID)).isNotNull();
-        assertThat(intercepted.header(Traces.Headers.PARENT_SPAN_ID)).isNull();
+        assertThat(intercepted.header(Traces.HttpHeaders.SPAN_ID)).isNotNull();
+        assertThat(intercepted.header(Traces.HttpHeaders.TRACE_ID)).isNotNull();
+        assertThat(intercepted.header(Traces.HttpHeaders.PARENT_SPAN_ID)).isNull();
     }
 
     @Test
@@ -75,10 +75,10 @@ public final class OkhttpTraceInterceptorTest {
         verifyNoMoreInteractions(chain);
 
         Request intercepted = argument.getValue();
-        assertThat(intercepted.header(Traces.Headers.SPAN_ID)).isNotNull();
-        assertThat(intercepted.header(Traces.Headers.SPAN_ID)).isNotEqualTo(parentState.getSpanId());
-        assertThat(intercepted.header(Traces.Headers.TRACE_ID)).isEqualTo(parentState.getTraceId());
-        assertThat(intercepted.header(Traces.Headers.PARENT_SPAN_ID)).isEqualTo(parentState.getSpanId());
+        assertThat(intercepted.header(Traces.HttpHeaders.SPAN_ID)).isNotNull();
+        assertThat(intercepted.header(Traces.HttpHeaders.SPAN_ID)).isNotEqualTo(parentState.getSpanId());
+        assertThat(intercepted.header(Traces.HttpHeaders.TRACE_ID)).isEqualTo(parentState.getTraceId());
+        assertThat(intercepted.header(Traces.HttpHeaders.PARENT_SPAN_ID)).isEqualTo(parentState.getSpanId());
     }
 
     @Test

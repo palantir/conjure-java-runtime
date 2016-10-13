@@ -24,17 +24,28 @@ import java.util.Set;
 
 /**
  * The singleton entry point for handling Zipkin-style traces and spans. Provides functionality for starting and
- * completing spans, and for registering subscribers to span completion events.
+ * completing spans, and for subscribing observers to span completion events.
  * <p>
  * This class is thread-safe.
  */
 public final class Traces {
 
-    public interface Headers {
+    /** Zipkin-compatible HTTP header names. */
+    public interface HttpHeaders {
         String TRACE_ID = "X-B3-TraceId";
         String PARENT_SPAN_ID = "X-B3-ParentSpanId";
         String SPAN_ID = "X-B3-SpanId";
     }
+
+    /**
+     * Represents the event receiver for span completion events. Implementations are invoked synchronously on the
+     * primary execution thread, and as a result must execute quickly.
+     */
+    public interface SpanObserver {
+        void consume(Span span);
+    }
+
+    private Traces() {}
 
     // Stack of trace states; thread-local (and thus thread-safe).
     private static final ThreadLocal<Deque<TraceState>> STATE = new ThreadLocal<Deque<TraceState>>() {
@@ -45,7 +56,7 @@ public final class Traces {
     };
 
     // Thread-safe set implementation
-    private static final Set<Subscriber> SUBSCRIBERS = Sets.newConcurrentHashSet();
+    private static final Set<SpanObserver> observers = Sets.newConcurrentHashSet();
 
     public static Optional<TraceState> getTrace() {
         Deque<TraceState> stack = STATE.get();
@@ -77,7 +88,7 @@ public final class Traces {
     }
 
     /**
-     * Completes and returns the current span (if it exists) and notifies all {@link #SUBSCRIBERS subscribers} about the
+     * Completes and returns the current span (if it exists) and notifies all {@link #observers subscribers} about the
      * completed span.
      */
     public static Optional<Span> completeSpan() {
@@ -96,8 +107,8 @@ public final class Traces {
                     .build();
 
             // notify subscribers
-            for (Subscriber subscriber : SUBSCRIBERS) {
-                subscriber.consume(span);
+            for (SpanObserver observer : observers) {
+                observer.consume(span);
             }
 
             return Optional.of(span);
@@ -105,25 +116,15 @@ public final class Traces {
     }
 
     /**
-     * Subscribes the given span consumer to all "span completed" events. Subscribers are expected to be "cheap", i.e.,
+     * Subscribes the given span observer to all "span completed" events. Observersare expected to be "cheap", i.e.,
      * do all non-trivial work (logging, sending network messages, etc) asynchronously.
      */
-    public static void subscribe(Subscriber subscriber) {
-        SUBSCRIBERS.add(subscriber);
+    public static void subscribe(SpanObserver observer) {
+        observers.add(observer);
     }
 
     /** The inverse of {@link #subscribe}. */
-    public static void unsubscribe(Subscriber subscriber) {
-        SUBSCRIBERS.remove(subscriber);
+    public static void unsubscribe(SpanObserver observer) {
+        observers.remove(observer);
     }
-
-    /**
-     * Represents the event receiver for trace completion events. Implementations are invoked synchronously on the
-     * primary execution thread, and as a result must execute quickly.
-     */
-    public interface Subscriber {
-        void consume(Span span);
-    }
-
-    private Traces() {}
 }
