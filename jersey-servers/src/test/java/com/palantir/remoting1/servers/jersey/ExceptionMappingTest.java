@@ -20,8 +20,6 @@ package com.palantir.remoting1.servers.jersey;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.palantir.remoting1.errors.RemoteException;
@@ -50,11 +48,11 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public final class ExceptionMappersTest {
+public final class ExceptionMappingTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(ExceptionMappersTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(ExceptionMappersTestServer.class, "src/test/resources/test-server.yml");
     private static final Response.Status SERVER_EXCEPTION_STATUS = Response.Status.SERVICE_UNAVAILABLE;
     private static final Response.Status WEB_EXCEPTION_STATUS = Response.Status.EXPECTATION_FAILED;
     private static final int REMOTE_EXCEPTION_STATUS_CODE = 400;
@@ -98,8 +96,7 @@ public final class ExceptionMappersTest {
     }
 
     @Test
-    public void testRemoteException()
-            throws NoSuchMethodException, SecurityException, JsonParseException, JsonMappingException, IOException {
+    public void testRemoteException() throws NoSuchMethodException, SecurityException, IOException {
         Response response = target.path("throw-remote-exception").request().get();
         assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
         SerializableError error =
@@ -112,7 +109,7 @@ public final class ExceptionMappersTest {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new ExceptionTestResource());
-            JerseyServers.configure(env.jersey().getResourceConfig(), ExceptionMappers.StacktracePropagation.PROPAGATE);
+            JerseyServers.configure(env.jersey().getResourceConfig(), JerseyServers.StacktracePropagation.PROPAGATE);
         }
     }
 

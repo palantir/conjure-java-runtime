@@ -28,7 +28,6 @@ import com.google.common.collect.Maps;
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
-import com.palantir.remoting1.servers.jersey.ExceptionMappers;
 import com.palantir.remoting1.servers.jersey.JerseyServers;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -136,7 +135,7 @@ public final class JaxRsClientConfigTest {
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
             JerseyServers.configure(env.jersey().getResourceConfig(),
-                    ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
+                    JerseyServers.StacktracePropagation.DO_NOT_PROPAGATE);
         }
 
         private static final class TestEchoResource implements TestService {
@@ -153,7 +152,7 @@ public final class JaxRsClientConfigTest {
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
             JerseyServers.configure(env.jersey().getResourceConfig(),
-                    ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
+                    JerseyServers.StacktracePropagation.DO_NOT_PROPAGATE);
         }
 
         private static final class TestEchoResource implements TestService {

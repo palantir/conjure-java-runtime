@@ -16,7 +16,6 @@
 
 package com.palantir.remoting1.servers.jersey;
 
-import javax.ws.rs.ext.ExceptionMapper;
 import org.glassfish.jersey.server.ResourceConfig;
 
 
@@ -28,12 +27,33 @@ public final class JerseyServers {
      * true}. Configures a Jersey server w.r.t. http-remoting conventions: registers tracer filters and
      * exception mappers.
      */
-    public static void configure(
-            final ResourceConfig jersey, ExceptionMappers.StacktracePropagation stacktracePropagation) {
-        for (ExceptionMapper mapper : ExceptionMappers.getExceptionMappers(stacktracePropagation)) {
-            jersey.register(mapper);
-        }
+    public static void configure(ResourceConfig jersey, StacktracePropagation stacktracePropagation) {
+        // Exception mappers
+        boolean includeStackTrace = stacktracePropagation == StacktracePropagation.PROPAGATE;
+        jersey.register(new IllegalArgumentExceptionMapper(includeStackTrace));
+        jersey.register(new NoContentExceptionMapper());
+        jersey.register(new RuntimeExceptionMapper(includeStackTrace));
+        jersey.register(new WebApplicationExceptionMapper(includeStackTrace));
+        jersey.register(new RemoteExceptionMapper());
+
+        // Optional handling
         jersey.register(new OptionalMessageBodyWriter());
+
+        // Tracing
         jersey.register(new TraceEnrichingFilter());
+    }
+
+    public enum StacktracePropagation {
+        /**
+         * The inverse of {@link #DO_NOT_PROPAGATE}. Note that this may leak sensitive information from servers to
+         * clients.
+         */
+        PROPAGATE,
+
+        /**
+         * Configures exception serializers to not include exception stacktraces in {@link
+         * com.palantir.remoting1.errors.SerializableError serialized errors}. This is the recommended setting.
+         */
+        DO_NOT_PROPAGATE
     }
 }
