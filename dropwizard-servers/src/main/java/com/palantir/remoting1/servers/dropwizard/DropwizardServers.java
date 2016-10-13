@@ -17,6 +17,7 @@
 package com.palantir.remoting1.servers.dropwizard;
 
 import com.palantir.remoting1.servers.jersey.ExceptionMappers;
+import com.palantir.remoting1.servers.jersey.TraceEnrichingFilter;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -44,5 +45,6 @@ public final class DropwizardServers {
                     }
                 });
         environment.jersey().register(new OptionalAsNoContentMessageBodyWriter());
+        environment.jersey().register(new TraceEnrichingFilter());
     }
 }
