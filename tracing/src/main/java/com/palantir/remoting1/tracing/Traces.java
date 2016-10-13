@@ -105,8 +105,8 @@ public final class Traces {
     }
 
     /**
-     * Subscribes the given span consumer to all "span completed" events. Subscribers are expected "cheap", i.e., do all
-     * non-trivial work (logging, sending network messages, etc) asynchronously.
+     * Subscribes the given span consumer to all "span completed" events. Subscribers are expected to be "cheap", i.e.,
+     * do all non-trivial work (logging, sending network messages, etc) asynchronously.
      */
     public static void subscribe(Subscriber subscriber) {
         SUBSCRIBERS.add(subscriber);
@@ -119,7 +119,7 @@ public final class Traces {
 
     /**
      * Represents the event receiver for trace completion events. Implementations are invoked synchronously on the
-     * primary execution thread, and as a result should execute quickly.
+     * primary execution thread, and as a result must execute quickly.
      */
     public interface Subscriber {
         void consume(Span span);

@@ -18,19 +18,19 @@ package com.palantir.remoting1.tracing;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 public final class TracesTest {
 
     @Mock
-    Traces.Subscriber subscriber1;
+    private Traces.Subscriber subscriber1;
     @Mock
-    Traces.Subscriber subscriber2;
+    private Traces.Subscriber subscriber2;
 
     @Before
     public void before() {
@@ -47,16 +47,16 @@ public final class TracesTest {
         Span span = startAndCompleteSpan();
         verify(subscriber1).consume(span);
         verify(subscriber2).consume(span);
-        Mockito.verifyNoMoreInteractions(subscriber1, subscriber2);
+        verifyNoMoreInteractions(subscriber1, subscriber2);
 
         Traces.unsubscribe(subscriber1);
         span = startAndCompleteSpan();
         verify(subscriber2).consume(span);
-        Mockito.verifyNoMoreInteractions(subscriber1, subscriber2);
+        verifyNoMoreInteractions(subscriber1, subscriber2);
 
         Traces.unsubscribe(subscriber2);
         startAndCompleteSpan();
-        Mockito.verifyNoMoreInteractions(subscriber1, subscriber2);
+        verifyNoMoreInteractions(subscriber1, subscriber2);
     }
 
     @Test
@@ -65,15 +65,15 @@ public final class TracesTest {
         Traces.subscribe(subscriber1);
         Span span = startAndCompleteSpan();
         verify(subscriber1, times(1)).consume(span);
-        Mockito.verifyNoMoreInteractions(subscriber1, subscriber2);
+        verifyNoMoreInteractions(subscriber1, subscriber2);
     }
 
     @Test
-    public void testDoesNotNotifySubscribersWhenComplitingNonexistingSpan() throws Exception {
+    public void testDoesNotNotifySubscribersWhenCompletingNonexistingSpan() throws Exception {
         Traces.subscribe(subscriber1);
         Traces.subscribe(subscriber2);
         Traces.completeSpan(); // no active span.
-        Mockito.verifyNoMoreInteractions(subscriber1, subscriber2);
+        verifyNoMoreInteractions(subscriber1, subscriber2);
     }
 
     private static Span startAndCompleteSpan() {
