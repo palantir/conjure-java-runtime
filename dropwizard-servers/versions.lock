@@ -562,6 +562,7 @@
             "transitive": [
                 "ch.qos.logback:logback-classic",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-logging",
@@ -1142,6 +1143,7 @@
             "transitive": [
                 "ch.qos.logback:logback-classic",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "io.dropwizard:dropwizard-jackson",
                 "io.dropwizard:dropwizard-lifecycle",
                 "io.dropwizard:dropwizard-logging",
