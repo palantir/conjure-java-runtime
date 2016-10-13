@@ -141,6 +141,7 @@
             "transitive": [
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens",
                 "org.slf4j:jcl-over-slf4j"
             ]
@@ -288,6 +289,7 @@
             "transitive": [
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens",
                 "org.slf4j:jcl-over-slf4j"
             ]

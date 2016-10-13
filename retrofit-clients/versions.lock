@@ -88,7 +88,8 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
             ]
         }
     },
@@ -181,7 +182,8 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
             ]
         }
     }
