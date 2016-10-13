@@ -135,7 +135,7 @@ public final class JaxRsClientConfigTest {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
-            DropwizardServers.configure(env, config, ProxyingEchoServer.class.getSimpleName(),
+            DropwizardServers.configure(env,
                     ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
         }
 
@@ -152,7 +152,7 @@ public final class JaxRsClientConfigTest {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
-            DropwizardServers.configure(env, config, TestEchoServer.class.getSimpleName(),
+            DropwizardServers.configure(env,
                     ExceptionMappers.StacktracePropagation.DO_NOT_PROPAGATE);
         }
 

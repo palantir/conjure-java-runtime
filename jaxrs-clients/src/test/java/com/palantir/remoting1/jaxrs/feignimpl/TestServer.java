@@ -46,7 +46,7 @@ public class TestServer extends Application<Configuration> {
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(new TestResource());
         DropwizardServers.configure(
-                env, config, "unused tracer name", ExceptionMappers.StacktracePropagation.PROPAGATE);
+                env, ExceptionMappers.StacktracePropagation.PROPAGATE);
     }
 
     static class TestResource implements TestService {
