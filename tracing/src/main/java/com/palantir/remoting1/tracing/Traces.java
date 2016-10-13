@@ -21,6 +21,8 @@ import com.google.common.collect.Sets;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * The singleton entry point for handling Zipkin-style traces and spans. Provides functionality for starting and
@@ -46,6 +48,21 @@ public final class Traces {
 
     // Thread-safe set implementation
     private static final Set<Subscriber> SUBSCRIBERS = Sets.newConcurrentHashSet();
+
+    /**
+     * Package-local state copy mechanism for thread inheritance.
+     */
+    static Deque<TraceState> getCopyOfState() {
+        return new ArrayDeque<>(STATE.get());
+    }
+
+    /**
+     * Package-local state forcing mechanism for thread inheritance.
+     */
+    static void forceState(Deque<TraceState> stateToForce) {
+        STATE.get().remove();
+        STATE.get().addAll(stateToForce);
+    }
 
     public static Optional<TraceState> getTrace() {
         Deque<TraceState> stack = STATE.get();
@@ -102,6 +119,20 @@ public final class Traces {
 
             return Optional.of(span);
         }
+    }
+
+    /**
+     * Wraps the provided executor service to make submitted tasks traceable.
+     */
+    public static ExecutorService wrap(ExecutorService executorService) {
+        return new TracingAwareExecutorService(executorService);
+    }
+
+    /**
+     * Wraps the provided scheduled executor service to make submitted tasks traceable.
+     */
+    public static ScheduledExecutorService wrap(ScheduledExecutorService executorService) {
+        return new TracingAwareScheduledExecutorService(executorService);
     }
 
     /**
