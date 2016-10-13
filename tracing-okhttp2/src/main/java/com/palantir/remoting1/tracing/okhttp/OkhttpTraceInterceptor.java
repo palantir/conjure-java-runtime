@@ -37,10 +37,10 @@ public enum OkhttpTraceInterceptor implements Interceptor {
                 .headers(request.headers())
                 .url(request.url())
                 .method(request.method(), request.body())
-                .header(Traces.Headers.TRACE_ID, callState.getTraceId())
-                .header(Traces.Headers.SPAN_ID, callState.getSpanId());
+                .header(Traces.HttpHeaders.TRACE_ID, callState.getTraceId())
+                .header(Traces.HttpHeaders.SPAN_ID, callState.getSpanId());
         if (callState.getParentSpanId().isPresent()) {
-            instrumentedRequest.header(Traces.Headers.PARENT_SPAN_ID, callState.getParentSpanId().get());
+            instrumentedRequest.header(Traces.HttpHeaders.PARENT_SPAN_ID, callState.getParentSpanId().get());
         }
 
         Response response;
