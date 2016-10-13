@@ -39,9 +39,9 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
                 .append(requestContext.getUriInfo().getPath())
                 .toString();
 
-        String traceId = requestContext.getHeaderString(Traces.Headers.TRACE_ID);
-        String parentSpanId = requestContext.getHeaderString(Traces.Headers.PARENT_SPAN_ID);
-        String spanId = requestContext.getHeaderString(Traces.Headers.SPAN_ID);
+        String traceId = requestContext.getHeaderString(Traces.HttpHeaders.TRACE_ID);
+        String parentSpanId = requestContext.getHeaderString(Traces.HttpHeaders.PARENT_SPAN_ID);
+        String spanId = requestContext.getHeaderString(Traces.HttpHeaders.SPAN_ID);
 
         if (Strings.isNullOrEmpty(traceId)) {
             // no trace for this request, just derive a new one
@@ -68,10 +68,10 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
         Optional<Span> maybeSpan = Traces.completeSpan();
         if (maybeSpan.isPresent()) {
             Span span = maybeSpan.get();
-            headers.putSingle(Traces.Headers.TRACE_ID, span.getTraceId());
-            headers.putSingle(Traces.Headers.SPAN_ID, span.getSpanId());
+            headers.putSingle(Traces.HttpHeaders.TRACE_ID, span.getTraceId());
+            headers.putSingle(Traces.HttpHeaders.SPAN_ID, span.getSpanId());
             if (span.getParentSpanId().isPresent()) {
-                headers.putSingle(Traces.Headers.PARENT_SPAN_ID, span.getParentSpanId().get());
+                headers.putSingle(Traces.HttpHeaders.PARENT_SPAN_ID, span.getParentSpanId().get());
             }
         }
     }
