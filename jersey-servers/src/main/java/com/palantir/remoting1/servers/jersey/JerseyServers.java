@@ -30,14 +30,9 @@ public final class JerseyServers {
      */
     public static void configure(
             final ResourceConfig jersey, ExceptionMappers.StacktracePropagation stacktracePropagation) {
-        ExceptionMappers.visitExceptionMappers(
-                stacktracePropagation,
-                new ExceptionMappers.Consumer<ExceptionMapper<? extends Throwable>>() {
-                    @Override
-                    public void accept(ExceptionMapper<? extends Throwable> mapper) {
-                        jersey.register(mapper);
-                    }
-                });
+        for (ExceptionMapper mapper : ExceptionMappers.getExceptionMappers(stacktracePropagation)) {
+            jersey.register(mapper);
+        }
         jersey.register(new OptionalMessageBodyWriter());
         jersey.register(new TraceEnrichingFilter());
     }

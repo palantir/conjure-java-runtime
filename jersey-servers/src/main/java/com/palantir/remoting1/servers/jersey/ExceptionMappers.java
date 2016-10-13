@@ -16,6 +16,8 @@
 
 package com.palantir.remoting1.servers.jersey;
 
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import javax.ws.rs.ext.ExceptionMapper;
 
 public final class ExceptionMappers {
@@ -34,20 +36,16 @@ public final class ExceptionMappers {
         DO_NOT_PROPAGATE
     }
 
-    /** Java7-compatible version of Java8 Consumer. */
-    public interface Consumer<T> {
-        void accept(T object);
-    }
-
     private ExceptionMappers() {}
 
-    public static void visitExceptionMappers(
-            StacktracePropagation stacktracePropagation, Consumer<ExceptionMapper<? extends Throwable>> consumer) {
+    public static List<ExceptionMapper<? extends Exception>> getExceptionMappers(
+            StacktracePropagation stacktracePropagation) {
         boolean includeStackTrace = stacktracePropagation == StacktracePropagation.PROPAGATE;
-        consumer.accept(new IllegalArgumentExceptionMapper(includeStackTrace));
-        consumer.accept(new NoContentExceptionMapper());
-        consumer.accept(new RuntimeExceptionMapper(includeStackTrace));
-        consumer.accept(new WebApplicationExceptionMapper(includeStackTrace));
-        consumer.accept(new RemoteExceptionMapper());
+        return ImmutableList.of(
+                new IllegalArgumentExceptionMapper(includeStackTrace),
+                new NoContentExceptionMapper(),
+                new RuntimeExceptionMapper(includeStackTrace),
+                new WebApplicationExceptionMapper(includeStackTrace),
+                new RemoteExceptionMapper());
     }
 }
