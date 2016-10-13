@@ -38,7 +38,7 @@ public final class Traces {
     }
 
     /**
-     * Represents the event receiver for trace completion events. Implementations are invoked synchronously on the
+     * Represents the event receiver for span completion events. Implementations are invoked synchronously on the
      * primary execution thread, and as a result must execute quickly.
      */
     public interface SpanObserver {
