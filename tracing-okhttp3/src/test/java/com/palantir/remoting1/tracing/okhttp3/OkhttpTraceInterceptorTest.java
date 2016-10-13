@@ -82,6 +82,13 @@ public final class OkhttpTraceInterceptorTest {
     }
 
     @Test
+    public void testPopsSpan() throws IOException {
+        Optional<TraceState> before = Traces.getTrace();
+        OkhttpTraceInterceptor.INSTANCE.intercept(chain);
+        assertThat(Traces.getTrace()).isEqualTo(before);
+    }
+
+    @Test
     public void testPopsSpanEvenWhenChainFails() throws IOException {
         Optional<TraceState> before = Traces.getTrace();
         when(chain.proceed(any(Request.class))).thenThrow(new IllegalStateException());
