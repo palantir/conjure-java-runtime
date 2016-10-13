@@ -28,8 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A {@link Traces.SpanObserver} whose observations are executed on a supplied {@link
- * java.util.concurrent.ExecutorService}.
+ * A {@link Traces.SpanObserver} whose observations are executed on a supplied {@link ExecutorService}.
  */
 public final class AsyncSpanObserver implements Traces.SpanObserver {
 
@@ -90,7 +89,7 @@ public final class AsyncSpanObserver implements Traces.SpanObserver {
             });
         } else {
             log.trace("Failed to notify span observer since the maximum number of allowed concurrent observations was "
-                    + "exceeded: " + maxInflights);
+                    + "exceeded: {}", maxInflights);
             numInflights.decrementAndGet();
         }
     }

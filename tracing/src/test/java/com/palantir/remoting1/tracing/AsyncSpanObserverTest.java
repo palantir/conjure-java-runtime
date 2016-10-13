@@ -19,12 +19,12 @@ package com.palantir.remoting1.tracing;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import org.jmock.lib.concurrent.DeterministicScheduler;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 public final class AsyncSpanObserverTest {
@@ -53,7 +53,7 @@ public final class AsyncSpanObserverTest {
         scheduler.runNextPendingCommand();
         verify(observer).consume(span(2));
         scheduler.runUntilIdle();
-        Mockito.verifyNoMoreInteractions(observer);
+        verifyNoMoreInteractions(observer);
     }
 
     @Test
@@ -70,7 +70,7 @@ public final class AsyncSpanObserverTest {
         scheduler.runNextPendingCommand();
         verify(observer).consume(span(3));
         scheduler.runUntilIdle();
-        Mockito.verifyNoMoreInteractions(observer);
+        verifyNoMoreInteractions(observer);
     }
 
     private AsyncSpanObserver createAsyncObserver(int maxInflights) {
