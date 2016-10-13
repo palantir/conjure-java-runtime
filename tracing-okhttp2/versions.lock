@@ -35,6 +35,12 @@
             "transitive": [
                 "com.squareup.okhttp:okhttp"
             ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.remoting1:tracing"
+            ]
         }
     },
     "runtime": {
@@ -72,6 +78,12 @@
             "locked": "1.6.0",
             "transitive": [
                 "com.squareup.okhttp:okhttp"
+            ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.remoting1:tracing"
             ]
         }
     }
