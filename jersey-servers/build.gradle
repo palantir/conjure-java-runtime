@@ -3,8 +3,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 dependencies {
     compile project(":error-handling")
     compile project(":tracing")
-    compile "javax.servlet:javax.servlet-api"
-    compile "javax.ws.rs:javax.ws.rs-api"
+    compile "org.glassfish.jersey.core:jersey-server"
 
     testCompile project(":ssl-config")
     testCompile "io.dropwizard:dropwizard-testing"

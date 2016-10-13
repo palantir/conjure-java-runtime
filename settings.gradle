@@ -1,6 +1,5 @@
 include 'error-handling'
 include 'http-clients-api'
-include 'dropwizard-servers'
 include 'jaxrs-clients'
 include 'jaxrs-clients-compat-test'
 include 'jersey-servers'
