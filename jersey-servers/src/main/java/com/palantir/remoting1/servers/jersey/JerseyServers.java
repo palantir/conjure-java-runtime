@@ -14,33 +14,31 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.servers.dropwizard;
+package com.palantir.remoting1.servers.jersey;
 
-import com.palantir.remoting1.servers.jersey.ExceptionMappers;
-import com.palantir.remoting1.servers.jersey.TraceEnrichingFilter;
-import io.dropwizard.setup.Environment;
 import javax.ws.rs.ext.ExceptionMapper;
+import org.glassfish.jersey.server.ResourceConfig;
 
 
-public final class DropwizardServers {
-    private DropwizardServers() {}
+public final class JerseyServers {
+    private JerseyServers() {}
 
     /**
      * Server-side stacktraces are serialized and transferred to the client iff {@code serializeStacktrace} is {@code
-     * true}. Configures a Dropwizard/Jersey server w.r.t. http-remoting conventions: registers tracer filters and
+     * true}. Configures a Jersey server w.r.t. http-remoting conventions: registers tracer filters and
      * exception mappers.
      */
     public static void configure(
-            final Environment environment, ExceptionMappers.StacktracePropagation stacktracePropagation) {
+            final ResourceConfig jersey, ExceptionMappers.StacktracePropagation stacktracePropagation) {
         ExceptionMappers.visitExceptionMappers(
                 stacktracePropagation,
                 new ExceptionMappers.Consumer<ExceptionMapper<? extends Throwable>>() {
                     @Override
                     public void accept(ExceptionMapper<? extends Throwable> mapper) {
-                        environment.jersey().register(mapper);
+                        jersey.register(mapper);
                     }
                 });
-        environment.jersey().register(new OptionalAsNoContentMessageBodyWriter());
-        environment.jersey().register(new TraceEnrichingFilter());
+        jersey.register(new OptionalMessageBodyWriter());
+        jersey.register(new TraceEnrichingFilter());
     }
 }
