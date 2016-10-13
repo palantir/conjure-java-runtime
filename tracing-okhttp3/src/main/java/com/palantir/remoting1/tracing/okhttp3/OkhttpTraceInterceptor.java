@@ -33,10 +33,10 @@ public enum OkhttpTraceInterceptor implements Interceptor {
         Request request = chain.request();
         TraceState callState = Traces.startSpan(request.method() + " " + request.url());
         Request.Builder tracedRequest = request.newBuilder()
-                .addHeader(Traces.Headers.TRACE_ID, callState.getTraceId())
-                .addHeader(Traces.Headers.SPAN_ID, callState.getSpanId());
+                .addHeader(Traces.HttpHeaders.TRACE_ID, callState.getTraceId())
+                .addHeader(Traces.HttpHeaders.SPAN_ID, callState.getSpanId());
         if (callState.getParentSpanId().isPresent()) {
-            tracedRequest.header(Traces.Headers.PARENT_SPAN_ID, callState.getParentSpanId().get());
+            tracedRequest.header(Traces.HttpHeaders.PARENT_SPAN_ID, callState.getParentSpanId().get());
         }
 
         try {

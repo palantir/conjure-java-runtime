@@ -57,8 +57,8 @@ public final class TracingTest {
         service.get();
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getHeader(Traces.Headers.TRACE_ID), is(parentTrace.getTraceId()));
-        assertThat(request.getHeader(Traces.Headers.SPAN_ID), is(not(parentTrace.getSpanId())));
+        assertThat(request.getHeader(Traces.HttpHeaders.TRACE_ID), is(parentTrace.getTraceId()));
+        assertThat(request.getHeader(Traces.HttpHeaders.SPAN_ID), is(not(parentTrace.getSpanId())));
     }
 
     public interface TestService {

@@ -28,9 +28,9 @@ import org.mockito.MockitoAnnotations;
 public final class TracesTest {
 
     @Mock
-    private Traces.Subscriber subscriber1;
+    private Traces.SpanObserver observer1;
     @Mock
-    private Traces.Subscriber subscriber2;
+    private Traces.SpanObserver observer2;
 
     @Before
     public void before() {
@@ -42,38 +42,38 @@ public final class TracesTest {
         // no error when completing span without a registered subscriber
         startAndCompleteSpan();
 
-        Traces.subscribe(subscriber1);
-        Traces.subscribe(subscriber2);
+        Traces.subscribe(observer1);
+        Traces.subscribe(observer2);
         Span span = startAndCompleteSpan();
-        verify(subscriber1).consume(span);
-        verify(subscriber2).consume(span);
-        verifyNoMoreInteractions(subscriber1, subscriber2);
+        verify(observer1).consume(span);
+        verify(observer2).consume(span);
+        verifyNoMoreInteractions(observer1, observer2);
 
-        Traces.unsubscribe(subscriber1);
+        Traces.unsubscribe(observer1);
         span = startAndCompleteSpan();
-        verify(subscriber2).consume(span);
-        verifyNoMoreInteractions(subscriber1, subscriber2);
+        verify(observer2).consume(span);
+        verifyNoMoreInteractions(observer1, observer2);
 
-        Traces.unsubscribe(subscriber2);
+        Traces.unsubscribe(observer2);
         startAndCompleteSpan();
-        verifyNoMoreInteractions(subscriber1, subscriber2);
+        verifyNoMoreInteractions(observer1, observer2);
     }
 
     @Test
     public void testSubscribingIsIdempontent() throws Exception {
-        Traces.subscribe(subscriber1);
-        Traces.subscribe(subscriber1);
+        Traces.subscribe(observer1);
+        Traces.subscribe(observer1);
         Span span = startAndCompleteSpan();
-        verify(subscriber1, times(1)).consume(span);
-        verifyNoMoreInteractions(subscriber1, subscriber2);
+        verify(observer1, times(1)).consume(span);
+        verifyNoMoreInteractions(observer1, observer2);
     }
 
     @Test
-    public void testDoesNotNotifySubscribersWhenCompletingNonexistingSpan() throws Exception {
-        Traces.subscribe(subscriber1);
-        Traces.subscribe(subscriber2);
+    public void testDoesNotNotifyObserversWhenCompletingNonexistingSpan() throws Exception {
+        Traces.subscribe(observer1);
+        Traces.subscribe(observer2);
         Traces.completeSpan(); // no active span.
-        verifyNoMoreInteractions(subscriber1, subscriber2);
+        verifyNoMoreInteractions(observer1, observer2);
     }
 
     private static Span startAndCompleteSpan() {
