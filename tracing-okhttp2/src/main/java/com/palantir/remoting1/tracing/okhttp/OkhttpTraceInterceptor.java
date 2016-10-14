@@ -16,8 +16,9 @@
 
 package com.palantir.remoting1.tracing.okhttp;
 
-import com.palantir.remoting1.tracing.TraceState;
-import com.palantir.remoting1.tracing.Traces;
+import com.palantir.remoting1.tracing.OpenSpan;
+import com.palantir.remoting1.tracing.TraceHttpHeaders;
+import com.palantir.remoting1.tracing.Tracer;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -32,22 +33,22 @@ public enum OkhttpTraceInterceptor implements Interceptor {
         Request request = chain.request();
 
         // instrument request
-        TraceState callState = Traces.startSpan(request.method() + " " + request.urlString());
+        OpenSpan callState = Tracer.startSpan(request.method() + " " + request.urlString());
         Request.Builder instrumentedRequest = new Request.Builder()
                 .headers(request.headers())
                 .url(request.url())
                 .method(request.method(), request.body())
-                .header(Traces.HttpHeaders.TRACE_ID, callState.getTraceId())
-                .header(Traces.HttpHeaders.SPAN_ID, callState.getSpanId());
+                .header(TraceHttpHeaders.TRACE_ID, Tracer.getTraceId())
+                .header(TraceHttpHeaders.SPAN_ID, callState.getSpanId());
         if (callState.getParentSpanId().isPresent()) {
-            instrumentedRequest.header(Traces.HttpHeaders.PARENT_SPAN_ID, callState.getParentSpanId().get());
+            instrumentedRequest.header(TraceHttpHeaders.PARENT_SPAN_ID, callState.getParentSpanId().get());
         }
 
         Response response;
         try {
             response = chain.proceed(instrumentedRequest.build());
         } finally {
-            Traces.completeSpan();
+            Tracer.completeSpan();
         }
 
         return response;

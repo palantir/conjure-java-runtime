@@ -23,11 +23,14 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
-import com.palantir.remoting1.tracing.TraceState;
+import com.palantir.remoting1.tracing.OpenSpan;
+import com.palantir.remoting1.tracing.TraceHttpHeaders;
+import com.palantir.remoting1.tracing.Tracer;
 import com.palantir.remoting1.tracing.Traces;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Request;
 import java.io.IOException;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -46,6 +49,11 @@ public final class OkhttpTraceInterceptorTest {
         when(chain.request()).thenReturn(request);
     }
 
+    @After
+    public void after() {
+        Tracer.initTrace(Optional.of(true), Traces.randomId());
+    }
+
     @Test
     public void testPopulatesNewTrace_whenNoTraceIsPresentInGlobalState() throws IOException {
         OkhttpTraceInterceptor.INSTANCE.intercept(chain);
@@ -55,18 +63,19 @@ public final class OkhttpTraceInterceptorTest {
         verifyNoMoreInteractions(chain);
 
         Request intercepted = argument.getValue();
-        assertThat(intercepted.header(Traces.HttpHeaders.SPAN_ID)).isNotNull();
-        assertThat(intercepted.header(Traces.HttpHeaders.TRACE_ID)).isNotNull();
-        assertThat(intercepted.header(Traces.HttpHeaders.PARENT_SPAN_ID)).isNull();
+        assertThat(intercepted.header(TraceHttpHeaders.SPAN_ID)).isNotNull();
+        assertThat(intercepted.header(TraceHttpHeaders.TRACE_ID)).isNotNull();
+        assertThat(intercepted.header(TraceHttpHeaders.PARENT_SPAN_ID)).isNull();
     }
 
     @Test
     public void testPopulatesNewTrace_whenParentTraceIsPresent() throws IOException {
-        TraceState parentState = Traces.startSpan("operation");
+        OpenSpan parentState = Tracer.startSpan("operation");
+        String traceId = Tracer.getTraceId();
         try {
             OkhttpTraceInterceptor.INSTANCE.intercept(chain);
         } finally {
-            Traces.completeSpan();
+            Tracer.completeSpan();
         }
 
         verify(chain).request();
@@ -75,19 +84,26 @@ public final class OkhttpTraceInterceptorTest {
         verifyNoMoreInteractions(chain);
 
         Request intercepted = argument.getValue();
-        assertThat(intercepted.header(Traces.HttpHeaders.SPAN_ID)).isNotNull();
-        assertThat(intercepted.header(Traces.HttpHeaders.SPAN_ID)).isNotEqualTo(parentState.getSpanId());
-        assertThat(intercepted.header(Traces.HttpHeaders.TRACE_ID)).isEqualTo(parentState.getTraceId());
-        assertThat(intercepted.header(Traces.HttpHeaders.PARENT_SPAN_ID)).isEqualTo(parentState.getSpanId());
+        assertThat(intercepted.header(TraceHttpHeaders.SPAN_ID)).isNotNull();
+        assertThat(intercepted.header(TraceHttpHeaders.SPAN_ID)).isNotEqualTo(parentState.getSpanId());
+        assertThat(intercepted.header(TraceHttpHeaders.TRACE_ID)).isEqualTo(traceId);
+        assertThat(intercepted.header(TraceHttpHeaders.PARENT_SPAN_ID)).isEqualTo(parentState.getSpanId());
+    }
+
+    @Test
+    public void testPopsSpan() throws IOException {
+        OpenSpan before = Tracer.startSpan("");
+        OkhttpTraceInterceptor.INSTANCE.intercept(chain);
+        assertThat(Tracer.startSpan("").getParentSpanId().get()).isEqualTo(before.getSpanId());
     }
 
     @Test
     public void testPopsSpanEvenWhenChainFails() throws IOException {
-        Optional<TraceState> before = Traces.getTrace();
+        OpenSpan before = Tracer.startSpan("op");
         when(chain.proceed(any(Request.class))).thenThrow(new IllegalStateException());
         try {
             OkhttpTraceInterceptor.INSTANCE.intercept(chain);
         } catch (IllegalStateException e) { /* expected */ }
-        assertThat(Traces.getTrace()).isEqualTo(before);
+        assertThat(Tracer.startSpan("").getParentSpanId().get()).isEqualTo(before.getSpanId());
     }
 }

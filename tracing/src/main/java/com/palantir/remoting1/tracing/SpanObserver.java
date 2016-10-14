@@ -16,13 +16,10 @@
 
 package com.palantir.remoting1.tracing;
 
-import java.util.concurrent.ThreadLocalRandom;
-
-public final class Traces {
-    private Traces() {}
-
-    /** Returns a random ID suitable for span and trace IDs. */
-    public static String randomId() {
-        return Long.toHexString(ThreadLocalRandom.current().nextLong());
-    }
+/**
+ * Represents the event receiver for span completion events. Implementations are invoked synchronously on the
+ * primary execution thread, and as a result must execute quickly.
+ */
+public interface SpanObserver {
+    void consume(Span span);
 }
