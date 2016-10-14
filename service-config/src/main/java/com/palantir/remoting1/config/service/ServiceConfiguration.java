@@ -64,6 +64,17 @@ public abstract class ServiceConfiguration {
      */
     public abstract Optional<ProxyConfiguration> proxyConfiguration();
 
+    /**
+     * The list of hosts we are allowed to receive cookies from
+     */
+    public abstract Optional<List<String>> allowedCookieHosts();
+
+    /**
+     * The list of cookie names we are allowed to receive. It does a cookieName.matches(regex) so regex is allowed
+     */
+    public abstract Optional<List<String>> allowedCookieNameRegex();
+
+
     public static Builder builder() {
         return new Builder();
     }

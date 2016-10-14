@@ -26,6 +26,11 @@ import com.palantir.remoting1.config.service.BasicCredentials;
 import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.ssl.TrustContext;
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.HttpCookie;
+import java.net.URI;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Authenticator;
@@ -34,6 +39,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+import okhttp3.internal.JavaNetCookieJar;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -51,6 +57,8 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
 
     @Override
     public <T> T build(Class<T> serviceClass, String userAgent, List<String> uris) {
+        CookieManager cm = new CookieManager();
+        CookieHandler.setDefault(cm);
         Preconditions.checkArgument(!uris.isEmpty());
         List<String> sanitizedUris = addTrailingSlashes(uris);
         okhttp3.OkHttpClient client = createOkHttpClient(userAgent, sanitizedUris);
@@ -106,6 +114,33 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         client.connectTimeout(config.connectTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
         client.readTimeout(config.readTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
         client.writeTimeout(config.writeTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
+
+        // cookies
+        CookieManager cm = new CookieManager(null, new CookiePolicy(){
+
+            @Override
+            public boolean shouldAccept(URI uri, HttpCookie cookie) {
+                return (isAllowedUri(uri) && isAllowedCookieName(cookie));
+            }
+
+            private boolean isAllowedUri(URI uri){
+                return (config.allowedCookieHosts().isPresent()) && config.allowedCookieHosts().get().contains(uri.getHost());
+            }
+
+            private boolean isAllowedCookieName(HttpCookie cookie){
+                if (config.allowedCookieNameRegex().isPresent()){
+                    for (String nameRegex : config.allowedCookieNameRegex().get()){
+                        if (cookie.getName().matches(nameRegex)){
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+        } );
+
+        client.cookieJar(new JavaNetCookieJar(cm));
 
         // retry configuration
         if (config.maxNumRetries() > 1) {
