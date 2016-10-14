@@ -22,6 +22,7 @@ import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.service.ServiceConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
 import com.palantir.remoting1.config.ssl.TrustContext;
+import java.util.List;
 import org.immutables.value.Value;
 
 /** Implementation-independent configuration options for HTTP-based dynamic proxies. */
@@ -56,6 +57,14 @@ public abstract class ClientConfig {
     @Value.Parameter
     public abstract Optional<ProxyConfiguration> proxy();
 
+    // The list of hosts we are allowed to receive cookies from
+    @Value.Parameter
+    public abstract Optional<List<String>> allowedCookieHosts();
+
+    // The list of cookie names we are allowed to receive. It does a cookieName.matches(regex) so regex is allowed
+    @Value.Parameter
+    public abstract Optional<List<String>> allowedCookieNameRegex();
+
     @Value.Default
     public Integer maxNumRetries() {
         return MAX_NUM_RETRIES;
@@ -74,6 +83,8 @@ public abstract class ClientConfig {
         clientConfig.readTimeout(serviceConfig.readTimeout().or(READ_TIMEOUT));
         clientConfig.writeTimeout(serviceConfig.writeTimeout().or(WRITE_TIMEOUT));
         clientConfig.proxy(serviceConfig.proxyConfiguration());
+        clientConfig.allowedCookieHosts(serviceConfig.allowedCookieHosts());
+        clientConfig.allowedCookieNameRegex(serviceConfig.allowedCookieNameRegex());
 
         return clientConfig.build();
     }
