@@ -20,8 +20,12 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
 
-import com.palantir.remoting1.tracing.Traces;
+import com.palantir.remoting1.tracing.Span;
+import com.palantir.remoting1.tracing.SpanObserver;
+import com.palantir.remoting1.tracing.TraceHttpHeaders;
+import com.palantir.remoting1.tracing.Tracer;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -36,11 +40,15 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public final class TraceEnrichingFilterTest {
 
@@ -48,62 +56,75 @@ public final class TraceEnrichingFilterTest {
     public static final DropwizardAppRule<Configuration> APP =
             new DropwizardAppRule<>(TracingTestServer.class, "src/test/resources/test-server.yml");
 
+    @Captor
+    private ArgumentCaptor<Span> span;
+
+    @Mock
+    private SpanObserver observer;
+
     private WebTarget target;
 
     @Before
     public void before() {
+        MockitoAnnotations.initMocks(this);
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         JerseyClientBuilder builder = new JerseyClientBuilder();
         Client client = builder.build();
         target = client.target(endpointUri);
+        Tracer.subscribe(observer);
+    }
+
+    @After
+    public void after() {
+        Tracer.unsubscribe(observer);
     }
 
     @Test
     public void testTraceState_withHeaderUsesTraceId() {
         Response response = target.path("/trace").request()
-                .header(Traces.HttpHeaders.TRACE_ID, "traceId")
-                .header(Traces.HttpHeaders.PARENT_SPAN_ID, "parentSpanId")
-                .header(Traces.HttpHeaders.SPAN_ID, "spanId")
+                .header(TraceHttpHeaders.TRACE_ID, "traceId")
+                .header(TraceHttpHeaders.PARENT_SPAN_ID, "parentSpanId")
+                .header(TraceHttpHeaders.SPAN_ID, "spanId")
                 .get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("GET /trace"));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.TRACE_ID), is("traceId"));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.PARENT_SPAN_ID), is("parentSpanId"));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.SPAN_ID), is("spanId"));
+        assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), is("traceId"));
+        assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
+        assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
+        verify(observer).consume(span.capture());
+        assertThat(span.getValue().getOperation(), is("GET /trace"));
     }
 
     @Test
     public void testTraceState_respectsMethod() {
         Response response = target.path("/trace").request()
-                .header(Traces.HttpHeaders.TRACE_ID, "traceId")
-                .header(Traces.HttpHeaders.PARENT_SPAN_ID, "parentSpanId")
-                .header(Traces.HttpHeaders.SPAN_ID, "spanId")
+                .header(TraceHttpHeaders.TRACE_ID, "traceId")
+                .header(TraceHttpHeaders.PARENT_SPAN_ID, "parentSpanId")
+                .header(TraceHttpHeaders.SPAN_ID, "spanId")
                 .post(Entity.json(""));
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("POST /trace"));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.TRACE_ID), is("traceId"));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.PARENT_SPAN_ID), is("parentSpanId"));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.SPAN_ID), is("spanId"));
+        assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), is("traceId"));
+        assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
+        assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
+        verify(observer).consume(span.capture());
+        assertThat(span.getValue().getOperation(), is("POST /trace"));
     }
 
     @Test
     public void testTraceState_withoutRequestHeadersGeneratesValidTraceResponseHeaders() {
         Response response = target.path("/trace").request().get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("GET /trace"));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.TRACE_ID), not(nullValue()));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.PARENT_SPAN_ID), is(nullValue()));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.SPAN_ID), not(nullValue()));
+        assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), not(nullValue()));
+        assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
+        assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
+        verify(observer).consume(span.capture());
+        assertThat(span.getValue().getOperation(), is("GET /trace"));
     }
 
     @Test
     public void testTraceState_withEmptyTraceIdGeneratesValidTraceResponseHeaders() {
-        Response response = target.path("/trace").request().header(Traces.HttpHeaders.TRACE_ID, "").get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("GET /trace"));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.TRACE_ID), not(nullValue()));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.PARENT_SPAN_ID), is(nullValue()));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.SPAN_ID), not(nullValue()));
+        Response response = target.path("/trace").request().header(TraceHttpHeaders.TRACE_ID, "").get();
+        assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), not(nullValue()));
+        assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
+        assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
+        verify(observer).consume(span.capture());
+        assertThat(span.getValue().getOperation(), is("GET /trace"));
     }
 
     public static class TracingTestServer extends Application<Configuration> {
@@ -116,14 +137,10 @@ public final class TraceEnrichingFilterTest {
 
     public static final class TracingTestResource implements TracingTestService {
         @Override
-        public String getTraceOperation() {
-            return Traces.getTrace().get().getOperation();
-        }
+        public void getTraceOperation() {}
 
         @Override
-        public String postTraceOperation() {
-            return Traces.getTrace().get().getOperation();
-        }
+        public void postTraceOperation() {}
     }
 
     @Path("/")
@@ -132,10 +149,10 @@ public final class TraceEnrichingFilterTest {
     public interface TracingTestService {
         @GET
         @Path("/trace")
-        String getTraceOperation();
+        void getTraceOperation();
 
         @POST
         @Path("/trace")
-        String postTraceOperation();
+        void postTraceOperation();
     }
 }

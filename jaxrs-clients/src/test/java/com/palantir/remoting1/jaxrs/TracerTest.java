@@ -20,8 +20,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting1.tracing.TraceState;
-import com.palantir.remoting1.tracing.Traces;
+import com.palantir.remoting1.tracing.OpenSpan;
+import com.palantir.remoting1.tracing.TraceHttpHeaders;
+import com.palantir.remoting1.tracing.Tracer;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -30,7 +31,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class TracingTest {
+public final class TracerTest {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -46,11 +47,12 @@ public final class TracingTest {
 
     @Test
     public void testClientIsInstrumentedWithTracer() throws InterruptedException, IOException {
-        TraceState parentTrace = Traces.startSpan("");
+        OpenSpan parentTrace = Tracer.startSpan("");
+        String traceId = Tracer.getTraceId();
         service.echo("foo");
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getHeader(Traces.HttpHeaders.TRACE_ID), is(parentTrace.getTraceId()));
-        assertThat(request.getHeader(Traces.HttpHeaders.SPAN_ID), is(not(parentTrace.getSpanId())));
+        assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));
+        assertThat(request.getHeader(TraceHttpHeaders.SPAN_ID), is(not(parentTrace.getSpanId())));
     }
 }

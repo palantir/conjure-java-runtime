@@ -16,20 +16,16 @@
 
 package com.palantir.remoting1.tracing;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import org.immutables.value.Value;
 
 /**
- * A container object used to hold information about call tracing.
+ * A value object represented an open (i.e., non-completed) span. Once completed, the span is represented by a {@link
+ * Span} object.
  */
-@JsonDeserialize(as = ImmutableTraceState.class)
-@JsonSerialize(as = ImmutableTraceState.class)
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
-public abstract class TraceState {
+public abstract class OpenSpan {
 
     /**
      * Returns a description of the operation for this event.
@@ -53,15 +49,6 @@ public abstract class TraceState {
     public abstract long getStartClockNs();
 
     /**
-     * Returns a globally unique identifier representing this call trace.
-     */
-    @SuppressWarnings("checkstyle:designforextension")
-    @Value.Default
-    public String getTraceId() {
-        return randomId();
-    }
-
-    /**
      * Returns the identifier of the parent span for the current span, if one exists.
      */
     public abstract Optional<String> getParentSpanId();
@@ -69,41 +56,22 @@ public abstract class TraceState {
     /**
      * Returns a globally unique identifier representing a single span within the call trace.
      */
-    @SuppressWarnings("checkstyle:designforextension")
-    @Value.Default
-    public String getSpanId() {
-        return randomId();
-    }
+    public abstract String getSpanId();
 
     /**
-     * Returns a builder for {@link TraceState} pre-initialized to use the current time.
+     * Indicates if this trace state was sampled
+     * public abstract boolean isSampled();
+     * <p>
+     * /**
+     * Returns a builder for {@link OpenSpan} pre-initialized to use the current time.
      * <p>
      * Users should not set the {@code startTimeMs} value manually.
      */
     public static Builder builder() {
-        return ImmutableTraceState.builder()
+        return new Builder()
                 .startTimeMs(System.currentTimeMillis())
                 .startClockNs(System.nanoTime());
     }
 
-    public static String randomId() {
-        return Long.toHexString(ThreadLocalRandom.current().nextLong());
-    }
-
-    /**
-     * A safe builder interface that does not expose setting generated values.
-     */
-    public interface Builder {
-        Builder operation(String operation);
-
-        Builder traceId(String traceId);
-
-        Builder parentSpanId(Optional<String> parentSpanId);
-
-        Builder parentSpanId(String parentSpanId);
-
-        Builder spanId(String spanId);
-
-        TraceState build();
-    }
+    public static class Builder extends ImmutableOpenSpan.Builder {}
 }

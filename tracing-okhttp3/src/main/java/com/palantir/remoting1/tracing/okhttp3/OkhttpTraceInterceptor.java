@@ -17,8 +17,9 @@
 package com.palantir.remoting1.tracing.okhttp3;
 
 
-import com.palantir.remoting1.tracing.TraceState;
-import com.palantir.remoting1.tracing.Traces;
+import com.palantir.remoting1.tracing.OpenSpan;
+import com.palantir.remoting1.tracing.TraceHttpHeaders;
+import com.palantir.remoting1.tracing.Tracer;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -31,18 +32,19 @@ public enum OkhttpTraceInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
-        TraceState callState = Traces.startSpan(request.method() + " " + request.url());
+        OpenSpan span = Tracer.startSpan(request.method() + " " + request.url());
         Request.Builder tracedRequest = request.newBuilder()
-                .addHeader(Traces.HttpHeaders.TRACE_ID, callState.getTraceId())
-                .addHeader(Traces.HttpHeaders.SPAN_ID, callState.getSpanId());
-        if (callState.getParentSpanId().isPresent()) {
-            tracedRequest.header(Traces.HttpHeaders.PARENT_SPAN_ID, callState.getParentSpanId().get());
+                .addHeader(TraceHttpHeaders.TRACE_ID, Tracer.getTraceId())
+                .addHeader(TraceHttpHeaders.SPAN_ID, span.getSpanId())
+                .addHeader(TraceHttpHeaders.IS_SAMPLED, Tracer.isTraceObservable() ? "1" : "0");
+        if (span.getParentSpanId().isPresent()) {
+            tracedRequest.header(TraceHttpHeaders.PARENT_SPAN_ID, span.getParentSpanId().get());
         }
 
         try {
             return chain.proceed(tracedRequest.build());
         } finally {
-            Traces.completeSpan();
+            Tracer.completeSpan();
         }
     }
 }
