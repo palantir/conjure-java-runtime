@@ -17,9 +17,11 @@
 package com.palantir.remoting1.servers.jersey;
 
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting1.tracing.Traces;
+import com.palantir.remoting1.tracing.TraceHttpHeaders;
+import com.palantir.remoting1.tracing.Tracer;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -38,7 +40,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public final class TracingTest {
+public final class TracerTest {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP =
@@ -57,15 +59,15 @@ public final class TracingTest {
     @Test
     public void testTracingFilterIsApplied() {
         Response response = target.path("/trace").request()
-                .header(Traces.HttpHeaders.TRACE_ID, "traceId")
-                .header(Traces.HttpHeaders.PARENT_SPAN_ID, "parentSpanId")
-                .header(Traces.HttpHeaders.SPAN_ID, "spanId")
+                .header(TraceHttpHeaders.TRACE_ID, "traceId")
+                .header(TraceHttpHeaders.PARENT_SPAN_ID, "parentSpanId")
+                .header(TraceHttpHeaders.SPAN_ID, "spanId")
                 .get();
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("GET /trace"));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.TRACE_ID), is("traceId"));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.PARENT_SPAN_ID), is("parentSpanId"));
-        assertThat(response.getHeaderString(Traces.HttpHeaders.SPAN_ID), is("spanId"));
+        assertThat(response.readEntity(String.class), is("traceId"));
+        assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), is("traceId"));
+        assertNull(response.getHeaderString(TraceHttpHeaders.SPAN_ID));
+        assertNull(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID));
     }
 
     public static class TracingTestServer extends Application<Configuration> {
@@ -80,7 +82,7 @@ public final class TracingTest {
     public static final class TracingTestResource implements TracingTestService {
         @Override
         public String getTraceOperation() {
-            return Traces.getTrace().get().getOperation();
+            return Tracer.getTraceId();
         }
     }
 
