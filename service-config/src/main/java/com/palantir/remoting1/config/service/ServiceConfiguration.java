@@ -64,6 +64,13 @@ public abstract class ServiceConfiguration {
      */
     public abstract Optional<ProxyConfiguration> proxyConfiguration();
 
+    public static ServiceConfiguration of(String uri, Optional<SslConfiguration> sslConfig) {
+        return ServiceConfiguration.builder()
+                .addUris(uri)
+                .security(sslConfig)
+                .build();
+    }
+
     public static Builder builder() {
         return new Builder();
     }
