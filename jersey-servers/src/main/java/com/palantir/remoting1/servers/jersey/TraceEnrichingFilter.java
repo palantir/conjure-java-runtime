@@ -19,7 +19,8 @@ package com.palantir.remoting1.servers.jersey;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.palantir.remoting1.tracing.Span;
-import com.palantir.remoting1.tracing.TraceState;
+import com.palantir.remoting1.tracing.TraceHttpHeaders;
+import com.palantir.remoting1.tracing.Tracer;
 import com.palantir.remoting1.tracing.Traces;
 import java.io.IOException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -32,47 +33,47 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public final class TraceEnrichingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
+    // Handles incoming request
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        String operation = new StringBuilder(requestContext.getMethod())
-                .append(" /")
-                .append(requestContext.getUriInfo().getPath())
-                .toString();
-
-        String traceId = requestContext.getHeaderString(Traces.HttpHeaders.TRACE_ID);
-        String parentSpanId = requestContext.getHeaderString(Traces.HttpHeaders.PARENT_SPAN_ID);
-        String spanId = requestContext.getHeaderString(Traces.HttpHeaders.SPAN_ID);
+        String operation = requestContext.getMethod() + " /" + requestContext.getUriInfo().getPath();
+        // The following strings are all nullable
+        String traceId = requestContext.getHeaderString(TraceHttpHeaders.TRACE_ID);
+        String spanId = requestContext.getHeaderString(TraceHttpHeaders.SPAN_ID);
 
         if (Strings.isNullOrEmpty(traceId)) {
-            // no trace for this request, just derive a new one
-            Traces.startSpan(operation);
+            // HTTP request did not indicate a trace; initialize trace state and create a span.
+            Tracer.initTrace(Optional.<Boolean>absent(), Traces.randomId());
+            Tracer.startSpan(operation);
         } else {
-            // defend against badly formed requests
+            Tracer.initTrace(hasSampledHeader(requestContext), traceId);
             if (spanId == null) {
-                spanId = TraceState.randomId();
+                Tracer.startSpan(operation);
+            } else {
+                Tracer.startSpan(operation, spanId); // caller's span is this span's parent.
             }
-
-            Traces.setTrace(TraceState.builder()
-                    .traceId(traceId)
-                    .parentSpanId(Optional.fromNullable(parentSpanId))
-                    .spanId(spanId)
-                    .operation(operation)
-                    .build());
         }
     }
 
+    // Handles outgoing response
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-        Optional<Span> maybeSpan = Traces.completeSpan();
+        Optional<Span> maybeSpan = Tracer.completeSpan();
         if (maybeSpan.isPresent()) {
             Span span = maybeSpan.get();
-            headers.putSingle(Traces.HttpHeaders.TRACE_ID, span.getTraceId());
-            headers.putSingle(Traces.HttpHeaders.SPAN_ID, span.getSpanId());
-            if (span.getParentSpanId().isPresent()) {
-                headers.putSingle(Traces.HttpHeaders.PARENT_SPAN_ID, span.getParentSpanId().get());
-            }
+            headers.putSingle(TraceHttpHeaders.TRACE_ID, span.getTraceId());
+        }
+    }
+
+    // Returns true iff the context contains a "1" X-B3-Sampled header, or absent if there is no such header.
+    private static Optional<Boolean> hasSampledHeader(ContainerRequestContext context) {
+        String header = context.getHeaderString(TraceHttpHeaders.IS_SAMPLED);
+        if (header == null) {
+            return Optional.absent();
+        } else {
+            return Optional.of(header.equals("1"));
         }
     }
 }

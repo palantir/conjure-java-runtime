@@ -16,13 +16,11 @@
 
 package com.palantir.remoting1.tracing;
 
-import java.util.concurrent.ThreadLocalRandom;
+public enum AlwaysSampler implements TraceSampler {
+    INSTANCE;
 
-public final class Traces {
-    private Traces() {}
-
-    /** Returns a random ID suitable for span and trace IDs. */
-    public static String randomId() {
-        return Long.toHexString(ThreadLocalRandom.current().nextLong());
+    @Override
+    public boolean sample() {
+        return true;
     }
 }

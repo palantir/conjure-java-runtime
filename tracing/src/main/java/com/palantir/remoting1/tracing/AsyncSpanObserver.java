@@ -28,30 +28,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A {@link Traces.SpanObserver} whose observations are executed on a supplied {@link ExecutorService}.
+ * A {@link SpanObserver} whose observations are executed on a supplied {@link ExecutorService}.
  */
-public final class AsyncSpanObserver implements Traces.SpanObserver {
+public final class AsyncSpanObserver implements SpanObserver {
 
     private static final Logger log = LoggerFactory.getLogger(AsyncSpanObserver.class);
     private static final int DEFAULT_MAX_INFLIGHTS = 10_000;
 
     private final ListeningExecutorService executorService;
-    private final Traces.SpanObserver observer;
+    private final SpanObserver observer;
 
     private final AtomicInteger numInflights = new AtomicInteger(0); // number of non-completed observations
     private final int maxInflights;
 
-    private AsyncSpanObserver(ExecutorService executorService, Traces.SpanObserver observer, int maxInflights) {
+    private AsyncSpanObserver(ExecutorService executorService, SpanObserver observer, int maxInflights) {
         this.executorService = MoreExecutors.listeningDecorator(executorService);
         this.observer = observer;
         this.maxInflights = maxInflights;
     }
 
     /**
-     * Like {@link #create(ExecutorService, Traces.SpanObserver, int)}, but with at most {@link #DEFAULT_MAX_INFLIGHTS}
+     * Like {@link #create(ExecutorService, SpanObserver, int)}, but with at most {@link #DEFAULT_MAX_INFLIGHTS}
      * concurrent observations.
      */
-    public static AsyncSpanObserver create(ExecutorService executorService, Traces.SpanObserver observer) {
+    public static AsyncSpanObserver create(ExecutorService executorService, SpanObserver observer) {
         return new AsyncSpanObserver(executorService, observer, DEFAULT_MAX_INFLIGHTS);
     }
 
@@ -60,7 +60,7 @@ public final class AsyncSpanObserver implements Traces.SpanObserver {
      * observations. Any additional concurrent observation is discarded and logged.
      */
     public static AsyncSpanObserver create(
-            ExecutorService executorService, Traces.SpanObserver observer, int maxInflights) {
+            ExecutorService executorService, SpanObserver observer, int maxInflights) {
         return new AsyncSpanObserver(executorService, observer, maxInflights);
     }
 
