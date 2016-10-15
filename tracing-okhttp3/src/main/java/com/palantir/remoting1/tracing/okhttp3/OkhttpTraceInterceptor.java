@@ -32,12 +32,13 @@ public enum OkhttpTraceInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
-        OpenSpan callState = Tracer.startSpan(request.method() + " " + request.url());
+        OpenSpan span = Tracer.startSpan(request.method() + " " + request.url());
         Request.Builder tracedRequest = request.newBuilder()
                 .addHeader(TraceHttpHeaders.TRACE_ID, Tracer.getTraceId())
-                .addHeader(TraceHttpHeaders.SPAN_ID, callState.getSpanId());
-        if (callState.getParentSpanId().isPresent()) {
-            tracedRequest.header(TraceHttpHeaders.PARENT_SPAN_ID, callState.getParentSpanId().get());
+                .addHeader(TraceHttpHeaders.SPAN_ID, span.getSpanId())
+                .addHeader(TraceHttpHeaders.IS_SAMPLED, Tracer.isTraceObservable() ? "1" : "0");
+        if (span.getParentSpanId().isPresent()) {
+            tracedRequest.header(TraceHttpHeaders.PARENT_SPAN_ID, span.getParentSpanId().get());
         }
 
         try {

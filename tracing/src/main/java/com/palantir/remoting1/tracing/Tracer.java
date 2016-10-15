@@ -51,6 +51,7 @@ public final class Tracer {
      * #setSampler configured sampler} returns true.
      */
     public static void initTrace(Optional<Boolean> isObservable, String traceId) {
+        validateId(traceId, "traceId must be non-empty: %s");
         boolean observable = isObservable.or(sampler.sample());
         currentTrace.set(new Trace(observable, traceId));
     }
@@ -61,6 +62,7 @@ public final class Tracer {
     public static OpenSpan startSpan(String operation, String parentSpanId) {
         Preconditions.checkState(currentTrace.get().isEmpty(),
                 "Cannot start a span with explicit parent if the current thread's trace is non-empty");
+        validateId(parentSpanId, "parentTraceId must be non-empty: %s");
         OpenSpan span = OpenSpan.builder()
                 .spanId(Traces.randomId())
                 .operation(operation)
@@ -139,5 +141,19 @@ public final class Tracer {
     /** Returns the globally unique identifier for this thread's trace. */
     public static String getTraceId() {
         return currentTrace.get().getTraceId();
+    }
+
+    /**
+     * True iff the spans of this thread's trace are to be observed by {@link SpanObserver span obververs} upon
+     * {@link Tracer#completeSpan span completion}.
+     */
+    public static boolean isTraceObservable() {
+        return currentTrace.get().isObservable();
+    }
+
+    private static String validateId(String id, String messageTemplate) {
+        // TODO(rfink) Should we check the format?
+        Preconditions.checkArgument(id != null && !id.isEmpty(), messageTemplate, id);
+        return id;
     }
 }

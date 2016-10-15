@@ -34,18 +34,22 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 public final class OkhttpTraceInterceptorTest {
+
     @Mock
     private Interceptor.Chain chain;
-    private Request request;
+
+    @Captor
+    private ArgumentCaptor<Request> argument;
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        request = new Request.Builder().url("http://localhost").build();
+        Request request = new Request.Builder().url("http://localhost").build();
         when(chain.request()).thenReturn(request);
     }
 
@@ -58,7 +62,6 @@ public final class OkhttpTraceInterceptorTest {
     public void testPopulatesNewTrace_whenNoTraceIsPresentInGlobalState() throws IOException {
         OkhttpTraceInterceptor.INSTANCE.intercept(chain);
         verify(chain).request();
-        ArgumentCaptor<Request> argument = ArgumentCaptor.forClass(Request.class);
         verify(chain).proceed(argument.capture());
         verifyNoMoreInteractions(chain);
 
@@ -79,7 +82,6 @@ public final class OkhttpTraceInterceptorTest {
         }
 
         verify(chain).request();
-        ArgumentCaptor<Request> argument = ArgumentCaptor.forClass(Request.class);
         verify(chain).proceed(argument.capture());
         verifyNoMoreInteractions(chain);
 
@@ -88,6 +90,25 @@ public final class OkhttpTraceInterceptorTest {
         assertThat(intercepted.header(TraceHttpHeaders.SPAN_ID)).isNotEqualTo(parentState.getSpanId());
         assertThat(intercepted.header(TraceHttpHeaders.TRACE_ID)).isEqualTo(traceId);
         assertThat(intercepted.header(TraceHttpHeaders.PARENT_SPAN_ID)).isEqualTo(parentState.getSpanId());
+    }
+
+    @Test
+    public void testAddsIsSampledHeader_whenTraceIsObservable() throws IOException {
+        OkhttpTraceInterceptor.INSTANCE.intercept(chain);
+        verify(chain).proceed(argument.capture());
+        assertThat(argument.getValue().header(TraceHttpHeaders.IS_SAMPLED)).isEqualTo("1");
+    }
+
+    @Test
+    public void testHeaders_whenTraceIsNotObservable() throws IOException {
+        Tracer.initTrace(Optional.of(false), Traces.randomId());
+        String traceId = Tracer.getTraceId();
+        OkhttpTraceInterceptor.INSTANCE.intercept(chain);
+        verify(chain).proceed(argument.capture());
+        Request intercepted = argument.getValue();
+        assertThat(intercepted.header(TraceHttpHeaders.SPAN_ID)).isNotNull();
+        assertThat(intercepted.header(TraceHttpHeaders.TRACE_ID)).isEqualTo(traceId);
+        assertThat(intercepted.header(TraceHttpHeaders.IS_SAMPLED)).isEqualTo("0");
     }
 
     @Test

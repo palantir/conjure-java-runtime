@@ -16,6 +16,7 @@
 
 package com.palantir.remoting1.tracing;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -49,6 +50,33 @@ public final class TracerTest {
         Tracer.setSampler(AlwaysSampler.INSTANCE);
         Tracer.unsubscribe(observer1);
         Tracer.unsubscribe(observer2);
+    }
+
+    @Test
+    public void testIdsMustBeNonNullAndNotEmpty() throws Exception {
+        try {
+            Tracer.initTrace(Optional.<Boolean>absent(), null);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage("traceId must be non-empty: null");
+        }
+
+        try {
+            Tracer.initTrace(Optional.<Boolean>absent(), "");
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage("traceId must be non-empty: ");
+        }
+
+        try {
+            Tracer.startSpan("op", null);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage("parentTraceId must be non-empty: null");
+        }
+
+        try {
+            Tracer.startSpan("op", "");
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage("parentTraceId must be non-empty: ");
+        }
     }
 
     @Test
@@ -107,6 +135,15 @@ public final class TracerTest {
     }
 
     @Test
+    public void testDerivesNewSpansWhenTraceIsNotObservable() throws Exception {
+        Tracer.initTrace(Optional.of(false), Traces.randomId());
+        Tracer.startSpan("foo");
+        Tracer.startSpan("bar");
+        assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("bar");
+        assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("foo");
+    }
+
+    @Test
     public void testInitTraceCallsSampler() throws Exception {
         Tracer.setSampler(sampler);
         when(sampler.sample()).thenReturn(true, false);
@@ -124,7 +161,6 @@ public final class TracerTest {
         startAndCompleteSpan(); // not sampled, see above
         verifyNoMoreInteractions(observer1, sampler);
     }
-
 
     private static Span startAndCompleteSpan() {
         Tracer.startSpan("operation");

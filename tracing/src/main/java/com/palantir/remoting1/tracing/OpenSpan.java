@@ -68,23 +68,10 @@ public abstract class OpenSpan {
      * Users should not set the {@code startTimeMs} value manually.
      */
     public static Builder builder() {
-        return ImmutableOpenSpan.builder()
+        return new Builder()
                 .startTimeMs(System.currentTimeMillis())
                 .startClockNs(System.nanoTime());
     }
 
-    /**
-     * A safe builder interface that does not expose setting generated values.
-     */
-    public interface Builder {
-        Builder operation(String operation);
-
-        Builder parentSpanId(Optional<String> parentSpanId);
-
-        Builder parentSpanId(String parentSpanId);
-
-        Builder spanId(String spanId);
-
-        OpenSpan build();
-    }
+    public static class Builder extends ImmutableOpenSpan.Builder {}
 }
