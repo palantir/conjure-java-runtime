@@ -30,8 +30,9 @@ public abstract class ClientBuilder {
      */
     public abstract <T> T build(Class<T> serviceClass, String userAgent, List<String> uris);
 
-    /** See {@link #build}. */
-    public final <T> T build(Class<T> serviceClass, String userAgent, String... uris) {
+    /** See {@link #build}.
+     * @throws Exception */
+    public final <T> T build(Class<T> serviceClass, String userAgent, String... uris){
         return build(serviceClass, userAgent, Arrays.asList(uris));
     }
 }

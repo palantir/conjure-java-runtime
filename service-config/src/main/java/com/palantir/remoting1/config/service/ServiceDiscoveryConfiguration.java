@@ -64,6 +64,19 @@ public abstract class ServiceDiscoveryConfiguration {
     public abstract Optional<ProxyConfiguration> defaultProxyConfiguration();
 
     /**
+     * List of hosts we are allowed to get cookies from
+     */
+    @JsonProperty("allowedCookieHosts")
+    public abstract Optional<List<String>> defaultAllowedCookieHosts();
+
+    /**
+     * Cookie names we are allowed to accept: regex are accepted for the name
+     */
+    @JsonProperty("allowedCookieNameRegex")
+    public abstract Optional<List<String>> defaultAllowedCookieNameRegex();
+
+
+    /**
      * Default global connect timeout.
      */
     @JsonProperty("connectTimeout")
@@ -90,6 +103,8 @@ public abstract class ServiceDiscoveryConfiguration {
                     .apiToken(originalConfig.apiToken().or(defaultApiToken()))
                     .security(originalConfig.security().or(defaultSecurity()))
                     .proxyConfiguration(originalConfig.proxyConfiguration().or(defaultProxyConfiguration()))
+                    .allowedCookieHosts(originalConfig.allowedCookieHosts().or(defaultAllowedCookieHosts()))
+                    .allowedCookieNameRegex(originalConfig.allowedCookieNameRegex().or(defaultAllowedCookieNameRegex()))
                     .connectTimeout(originalConfig.connectTimeout().or(defaultConnectTimeout()))
                     .readTimeout(originalConfig.readTimeout().or(defaultReadTimeout()))
                     .uris(originalConfig.uris()).build();
@@ -143,6 +158,14 @@ public abstract class ServiceDiscoveryConfiguration {
      */
     public final Optional<ProxyConfiguration> getProxyConfiguration(String serviceName) {
         return getServiceConfig(serviceName).proxyConfiguration();
+    }
+
+    public final Optional<List<String>> getAllowedCookieHosts(String serviceName) {
+        return getServiceConfig(serviceName).allowedCookieHosts();
+    }
+
+    public final Optional<List<String>> getAllowedCookieNameRegex(String serviceName) {
+        return getServiceConfig(serviceName).allowedCookieNameRegex();
     }
 
     public final Optional<Duration> getConnectTimeout(String serviceName) {

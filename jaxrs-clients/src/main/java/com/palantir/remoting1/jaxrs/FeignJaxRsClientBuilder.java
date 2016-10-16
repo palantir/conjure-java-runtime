@@ -60,7 +60,11 @@ import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import java.io.IOException;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+import java.net.HttpCookie;
 import java.net.InetAddress;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Random;
@@ -69,6 +73,7 @@ import okhttp3.Authenticator;
 import okhttp3.Credentials;
 import okhttp3.Response;
 import okhttp3.Route;
+import okhttp3.internal.JavaNetCookieJar;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
@@ -190,6 +195,39 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 });
             }
         }
+
+
+        java.util.logging.Logger.getGlobal().log(java.util.logging.Level.WARNING, config.allowedCookieHosts().get().toString());
+
+        // cookies
+        CookieManager cm = new CookieManager(null, new CookiePolicy() {
+
+            @Override
+            public boolean shouldAccept(URI uri, HttpCookie cookie) {
+                return isAllowedUri(uri)
+                        && isAllowedCookieName(cookie);
+            }
+
+            private boolean isAllowedUri(URI uri) {
+                return config.allowedCookieHosts().isPresent()
+                        && config.allowedCookieHosts().get().contains(uri.getHost());
+            }
+
+            private boolean isAllowedCookieName(HttpCookie cookie) {
+                if (config.allowedCookieNameRegex().isPresent()) {
+                    for (String nameRegex : config.allowedCookieNameRegex().get()) {
+                        if (cookie.getName().matches(nameRegex)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+        });
+
+        client.cookieJar(new JavaNetCookieJar(cm));
+
 
         return new OkHttpClient(client.build());
     }

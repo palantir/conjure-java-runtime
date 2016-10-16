@@ -22,6 +22,7 @@ dependencies {
     compile "javax.ws.rs:javax.ws.rs-api"
     compile "org.slf4j:slf4j-api"
     compile "com.netflix.feign:feign-slf4j"
+    compile "com.squareup.okhttp3:okhttp-urlconnection:3.0.0-RC1"
 
     testCompile project(":dropwizard-servers")
     testCompile "com.squareup.okhttp3:mockwebserver"
