@@ -101,8 +101,13 @@
             "locked": "3.4.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
+                "com.squareup.okhttp3:okhttp-urlconnection",
                 "io.zipkin.brave:brave-okhttp"
             ]
+        },
+        "com.squareup.okhttp3:okhttp-urlconnection": {
+            "locked": "3.0.0-RC1",
+            "requested": "3.0.0-RC1"
         },
         "com.squareup.okio:okio": {
             "locked": "1.9.0",
@@ -263,8 +268,13 @@
             "locked": "3.4.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
+                "com.squareup.okhttp3:okhttp-urlconnection",
                 "io.zipkin.brave:brave-okhttp"
             ]
+        },
+        "com.squareup.okhttp3:okhttp-urlconnection": {
+            "locked": "3.0.0-RC1",
+            "requested": "3.0.0-RC1"
         },
         "com.squareup.okio:okio": {
             "locked": "1.9.0",

@@ -71,8 +71,13 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
+                "com.squareup.okhttp3:okhttp-urlconnection",
                 "com.squareup.retrofit2:retrofit"
             ]
+        },
+        "com.squareup.okhttp3:okhttp-urlconnection": {
+            "locked": "3.0.0-RC1",
+            "requested": "3.0.0-RC1"
         },
         "com.squareup.okio:okio": {
             "locked": "1.9.0",
@@ -182,8 +187,13 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
+                "com.squareup.okhttp3:okhttp-urlconnection",
                 "com.squareup.retrofit2:retrofit"
             ]
+        },
+        "com.squareup.okhttp3:okhttp-urlconnection": {
+            "locked": "3.0.0-RC1",
+            "requested": "3.0.0-RC1"
         },
         "com.squareup.okio:okio": {
             "locked": "1.9.0",
