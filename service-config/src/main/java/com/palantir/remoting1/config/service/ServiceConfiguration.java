@@ -65,7 +65,7 @@ public abstract class ServiceConfiguration {
     public abstract Optional<ProxyConfiguration> proxyConfiguration();
 
     /**
-     * The list of hosts we are allowed to receive cookies from
+     * The list of hosts we are allowed to receive cookies from.
      */
     public abstract Optional<List<String>> allowedCookieHosts();
 

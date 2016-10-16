@@ -120,17 +120,19 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
 
             @Override
             public boolean shouldAccept(URI uri, HttpCookie cookie) {
-                return (isAllowedUri(uri) && isAllowedCookieName(cookie));
+                return isAllowedUri(uri)
+                        && isAllowedCookieName(cookie);
             }
 
-            private boolean isAllowedUri(URI uri){
-                return (config.allowedCookieHosts().isPresent()) && config.allowedCookieHosts().get().contains(uri.getHost());
+            private boolean isAllowedUri(URI uri) {
+                return config.allowedCookieHosts().isPresent()
+                        && config.allowedCookieHosts().get().contains(uri.getHost());
             }
 
-            private boolean isAllowedCookieName(HttpCookie cookie){
-                if (config.allowedCookieNameRegex().isPresent()){
-                    for (String nameRegex : config.allowedCookieNameRegex().get()){
-                        if (cookie.getName().matches(nameRegex)){
+            private boolean isAllowedCookieName(HttpCookie cookie) {
+                if (config.allowedCookieNameRegex().isPresent()) {
+                    for (String nameRegex : config.allowedCookieNameRegex().get()) {
+                        if (cookie.getName().matches(nameRegex)) {
                             return true;
                         }
                     }
@@ -138,7 +140,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
                 return false;
             }
 
-        } );
+        });
 
         client.cookieJar(new JavaNetCookieJar(cm));
 

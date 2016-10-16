@@ -196,9 +196,6 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
             }
         }
 
-
-        java.util.logging.Logger.getGlobal().log(java.util.logging.Level.WARNING, config.allowedCookieHosts().get().toString());
-
         // cookies
         CookieManager cm = new CookieManager(null, new CookiePolicy() {
 

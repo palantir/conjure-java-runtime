@@ -32,9 +32,8 @@ public final class JaxRsClient {
      * request is set to the given non-empty {@code userAgent} string. Recommended user agents are of the form: {@code
      * ServiceName (Version)}, e.g. MyServer (1.2.3) For services that run multiple instances, recommended user agents
      * are of the form: {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3).
-     * @throws Exception
      */
-    public static <T> T create(Class<T> serviceClass, String userAgent, ServiceConfiguration serviceConfig){
+    public static <T> T create(Class<T> serviceClass, String userAgent, ServiceConfiguration serviceConfig) {
         ClientConfig config = ClientConfig.fromServiceConfig(serviceConfig);
         return new FeignJaxRsClientBuilder(config).build(serviceClass, userAgent, serviceConfig.uris());
     }

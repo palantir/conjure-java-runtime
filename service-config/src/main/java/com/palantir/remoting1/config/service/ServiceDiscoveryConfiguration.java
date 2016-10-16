@@ -64,13 +64,13 @@ public abstract class ServiceDiscoveryConfiguration {
     public abstract Optional<ProxyConfiguration> defaultProxyConfiguration();
 
     /**
-     * List of hosts we are allowed to get cookies from
+     * List of hosts we are allowed to get cookies from.
      */
     @JsonProperty("allowedCookieHosts")
     public abstract Optional<List<String>> defaultAllowedCookieHosts();
 
     /**
-     * Cookie names we are allowed to accept: regex are accepted for the name
+     * Cookie names we are allowed to accept: regex are accepted for the name.
      */
     @JsonProperty("allowedCookieNameRegex")
     public abstract Optional<List<String>> defaultAllowedCookieNameRegex();
