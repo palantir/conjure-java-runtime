@@ -26,7 +26,7 @@ import com.google.common.base.Optional;
 import com.palantir.remoting1.tracing.OpenSpan;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
-import com.palantir.remoting1.tracing.Traces;
+import com.palantir.remoting1.tracing.Tracers;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Request;
 import java.io.IOException;
@@ -55,7 +55,7 @@ public final class OkhttpTraceInterceptorTest {
 
     @After
     public void after() {
-        Tracer.initTrace(Optional.of(true), Traces.randomId());
+        Tracer.initTrace(Optional.of(true), Tracers.randomId());
     }
 
     @Test
@@ -101,7 +101,7 @@ public final class OkhttpTraceInterceptorTest {
 
     @Test
     public void testHeaders_whenTraceIsNotObservable() throws IOException {
-        Tracer.initTrace(Optional.of(false), Traces.randomId());
+        Tracer.initTrace(Optional.of(false), Tracers.randomId());
         String traceId = Tracer.getTraceId();
         OkhttpTraceInterceptor.INSTANCE.intercept(chain);
         verify(chain).proceed(argument.capture());

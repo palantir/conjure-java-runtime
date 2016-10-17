@@ -16,6 +16,10 @@
     <suppress files="[/\\]src[/\\].*(FeignClientFactoryTest.java)" checks="IllegalImport" />
     <suppress files="[/\\]src[/\\].*(ClientConfigTest.java)" checks="IllegalImport" />
 
+    <!-- Copied Guava classes. -->
+    <suppress files="[/\\]src[/\\].*(WrappingExecutorService.java)" checks="." />
+    <suppress files="[/\\]src[/\\].*(WrappingScheduledExecutorService.java)" checks="." />
+
     <!-- JavadocStyle enforces existence of package-info.java package-level Javadoc; we consider this a bug. -->
     <suppress files="package-info.java" checks="JavadocStyle" />
 

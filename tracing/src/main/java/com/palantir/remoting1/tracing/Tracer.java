@@ -35,7 +35,7 @@ public final class Tracer {
     private static final ThreadLocal<Trace> currentTrace = new ThreadLocal<Trace>() {
         @Override
         protected Trace initialValue() {
-            return new Trace(sampler.sample(), Traces.randomId());
+            return new Trace(sampler.sample(), Tracers.randomId());
         }
     };
 
@@ -64,7 +64,7 @@ public final class Tracer {
                 "Cannot start a span with explicit parent if the current thread's trace is non-empty");
         validateId(parentSpanId, "parentTraceId must be non-empty: %s");
         OpenSpan span = OpenSpan.builder()
-                .spanId(Traces.randomId())
+                .spanId(Tracers.randomId())
                 .operation(operation)
                 .parentSpanId(parentSpanId)
                 .build();
@@ -78,7 +78,7 @@ public final class Tracer {
     public static OpenSpan startSpan(String operation) {
         OpenSpan.Builder spanBuilder = OpenSpan.builder()
                 .operation(operation)
-                .spanId(Traces.randomId());
+                .spanId(Tracers.randomId());
 
         Optional<OpenSpan> prevState = currentTrace.get().top();
         if (prevState.isPresent()) {
@@ -149,6 +149,18 @@ public final class Tracer {
      */
     public static boolean isTraceObservable() {
         return currentTrace.get().isObservable();
+    }
+
+    /** Returns an independent copy of this thread's {@link Trace}. */
+    static Trace copyTrace() {
+        return currentTrace.get().deepCopy();
+    }
+
+    /**
+     * Sets the thread-local trace. Considered an internal API used only for propagating the trace state across threads.
+     */
+    static void setTrace(Trace trace) {
+        currentTrace.set(trace);
     }
 
     private static String validateId(String id, String messageTemplate) {

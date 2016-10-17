@@ -26,15 +26,18 @@ import java.util.Deque;
  */
 final class Trace {
 
-    private final Deque<OpenSpan> stack = new ArrayDeque<>();
-
+    private final Deque<OpenSpan> stack;
     private final boolean isObservable;
-
     private final String traceId;
 
-    Trace(boolean isObservable, String traceId) {
+    private Trace(ArrayDeque<OpenSpan> stack, boolean isObservable, String traceId) {
+        this.stack = stack;
         this.isObservable = isObservable;
         this.traceId = traceId;
+    }
+
+    Trace(boolean isObservable, String traceId) {
+        this(new ArrayDeque<OpenSpan>(), isObservable, traceId);
     }
 
     void push(OpenSpan span) {
@@ -66,5 +69,10 @@ final class Trace {
      */
     String getTraceId() {
         return traceId;
+    }
+
+    /** Returns a copy of this Trace which can be independently mutated. */
+    Trace deepCopy() {
+        return new Trace(new ArrayDeque<>(stack), isObservable, traceId);
     }
 }
