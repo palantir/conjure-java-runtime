@@ -22,8 +22,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 
 /** Utility methods for making {@link ExecutorService} and {@link Runnable} instances tracing-aware. */
-public final class Traces {
-    private Traces() {}
+public final class Tracers {
+    private Tracers() {}
 
     /** Returns a random ID suitable for span and trace IDs. */
     public static String randomId() {
@@ -74,6 +74,10 @@ public final class Traces {
         return new TracingAwareRunnable(delegate);
     }
 
+    /**
+     * Wraps a given callable such that its execution operates with the {@link Trace thread-local Trace} of the thread
+     * that constructs the {@link TracingAwareCallable} instance rather than the thread that executes the callable.
+     */
     private static class TracingAwareCallable<V> implements Callable<V> {
         private final Callable<V> delegate;
         private final Trace trace;
@@ -95,6 +99,10 @@ public final class Traces {
         }
     }
 
+    /**
+     * Wraps a given runnable such that its execution operates with the {@link Trace thread-local Trace} of the thread
+     * that constructs the {@link TracingAwareRunnable} instance rather than the thread that executes the runnable.
+     */
     private static class TracingAwareRunnable implements Runnable {
         private final Runnable delegate;
         private final Trace trace;

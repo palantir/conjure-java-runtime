@@ -47,7 +47,7 @@ public final class TracerTest {
 
     @After
     public void after() {
-        Tracer.initTrace(Optional.of(true), Traces.randomId());
+        Tracer.initTrace(Optional.of(true), Tracers.randomId());
         Tracer.setSampler(AlwaysSampler.INSTANCE);
         Tracer.unsubscribe(observer1);
         Tracer.unsubscribe(observer2);
@@ -123,21 +123,21 @@ public final class TracerTest {
     public void testObserversAreInvokedOnObservableTracesOnly() throws Exception {
         Tracer.subscribe(observer1);
 
-        Tracer.initTrace(Optional.of(true), Traces.randomId());
+        Tracer.initTrace(Optional.of(true), Tracers.randomId());
         Span span = startAndCompleteSpan();
         verify(observer1).consume(span);
         span = startAndCompleteSpan();
         verify(observer1).consume(span);
         verifyNoMoreInteractions(observer1);
 
-        Tracer.initTrace(Optional.of(false), Traces.randomId());
+        Tracer.initTrace(Optional.of(false), Tracers.randomId());
         startAndCompleteSpan(); // not sampled, see above
         verifyNoMoreInteractions(observer1);
     }
 
     @Test
     public void testDerivesNewSpansWhenTraceIsNotObservable() throws Exception {
-        Tracer.initTrace(Optional.of(false), Traces.randomId());
+        Tracer.initTrace(Optional.of(false), Tracers.randomId());
         Tracer.startSpan("foo");
         Tracer.startSpan("bar");
         assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("bar");
@@ -150,14 +150,14 @@ public final class TracerTest {
         when(sampler.sample()).thenReturn(true, false);
         Tracer.subscribe(observer1);
 
-        Tracer.initTrace(Optional.<Boolean>absent(), Traces.randomId());
+        Tracer.initTrace(Optional.<Boolean>absent(), Tracers.randomId());
         verify(sampler).sample();
         Span span = startAndCompleteSpan();
         verify(observer1).consume(span);
         verifyNoMoreInteractions(observer1, sampler);
 
         Mockito.reset(observer1, sampler);
-        Tracer.initTrace(Optional.<Boolean>absent(), Traces.randomId());
+        Tracer.initTrace(Optional.<Boolean>absent(), Tracers.randomId());
         verify(sampler).sample();
         startAndCompleteSpan(); // not sampled, see above
         verifyNoMoreInteractions(observer1, sampler);

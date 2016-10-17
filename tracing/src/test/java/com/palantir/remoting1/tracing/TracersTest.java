@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
-public final class TracesTest {
+public final class TracersTest {
 
     @Before
     public void before() {
@@ -38,7 +38,7 @@ public final class TracesTest {
 
     @Test
     public void testExecutorServiceWrapsCallables() throws Exception {
-        ExecutorService wrappedService = Traces.wrap(Executors.newSingleThreadExecutor());
+        ExecutorService wrappedService = Tracers.wrap(Executors.newSingleThreadExecutor());
 
         // Empty trace
         wrappedService.submit(traceExpectingCallable()).get();
@@ -57,7 +57,7 @@ public final class TracesTest {
 
     @Test
     public void testScheduledExecutorServiceWrapsCallables() throws Exception {
-        ScheduledExecutorService wrappedService = Traces.wrap(Executors.newSingleThreadScheduledExecutor());
+        ScheduledExecutorService wrappedService = Tracers.wrap(Executors.newSingleThreadScheduledExecutor());
 
         // Empty trace
         wrappedService.schedule(traceExpectingCallable(), 0, TimeUnit.SECONDS).get();
@@ -77,7 +77,7 @@ public final class TracesTest {
     @Test
     public void testWrappingRunnable_runnableTraceIsIsolated() throws Exception {
         Tracer.startSpan("outside");
-        Runnable runnable = Traces.wrap(new Runnable() {
+        Runnable runnable = Tracers.wrap(new Runnable() {
             @Override
             public void run() {
                 Tracer.startSpan("inside"); // never completed
@@ -90,7 +90,7 @@ public final class TracesTest {
     @Test
     public void testWrappingRunnable_traceStateIsCapturedAtConstructionTime() throws Exception {
         Tracer.startSpan("before-construction");
-        Runnable runnable = Traces.wrap(new Runnable() {
+        Runnable runnable = Tracers.wrap(new Runnable() {
             @Override
             public void run() {
                 assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("before-construction");
@@ -103,7 +103,7 @@ public final class TracesTest {
     @Test
     public void testWrappingCallable_runnableTraceIsIsolated() throws Exception {
         Tracer.startSpan("outside");
-        Callable<Void> runnable = Traces.wrap(new Callable<Void>() {
+        Callable<Void> runnable = Tracers.wrap(new Callable<Void>() {
             @Override
             public Void call() {
                 Tracer.startSpan("inside"); // never completed
@@ -117,7 +117,7 @@ public final class TracesTest {
     @Test
     public void testWrappingCallable_traceStateIsCapturedAtConstructionTime() throws Exception {
         Tracer.startSpan("before-construction");
-        Callable<Void> runnable = Traces.wrap(new Callable<Void>() {
+        Callable<Void> runnable = Tracers.wrap(new Callable<Void>() {
             @Override
             public Void call() {
                 assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("before-construction");
