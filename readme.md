@@ -60,12 +60,8 @@ Dropwizard server is configured for http-remoting as follows:
 public class MyServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
+        env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
         env.jersey().register(new MyResource());
-        DropwizardServers.configure(
-                env,
-                config,
-                MyServer.class.getSimpleName(),
-                DropwizardServers.Stacktraces.DO_NOT_PROPAGATE);
     }
 }
 ```
@@ -174,7 +170,7 @@ Jackson `ObjectMapper` with `GuavaModule` and `Jdk7Module`. Servers must not exp
 cannot be handled by this object mapper.
 
 #### Error propagation
-The `DropwizardServers#configure` routine installs exception mappers for `IllegalArgumentException`,
+The `HttpRemotingJerseyFeature` routine installs exception mappers for `IllegalArgumentException`,
 `NoContentException`, `RuntimeException` and `WebApplicationException`. The exception mapper sets the response media
 type to `application/json` and returns as response body a JSON representation of a `SerializableError` capturing the
 message, exception name, and optionally stacktrace of the exception. Both JaxRsClient and Retrofit2Client intercept
