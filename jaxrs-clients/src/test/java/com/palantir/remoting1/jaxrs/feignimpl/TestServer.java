@@ -18,7 +18,7 @@ package com.palantir.remoting1.jaxrs.feignimpl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting1.servers.jersey.JerseyServers;
+import com.palantir.remoting1.servers.jersey.HttpRemotingJerseyFeature;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -43,9 +43,9 @@ import org.assertj.core.util.Strings;
 public class TestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
+        env.jersey().register(
+                HttpRemotingJerseyFeature.with(HttpRemotingJerseyFeature.StacktracePropagation.PROPAGATE));
         env.jersey().register(new TestResource());
-        JerseyServers.configure(
-                env.jersey().getResourceConfig(), JerseyServers.StacktracePropagation.PROPAGATE);
     }
 
     static class TestResource implements TestService {
