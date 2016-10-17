@@ -16,31 +16,43 @@
 
 package com.palantir.remoting1.servers.jersey;
 
-import org.glassfish.jersey.server.ResourceConfig;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
 
 
-public final class JerseyServers {
-    private JerseyServers() {}
+public final class HttpRemotingJerseyFeature implements Feature {
+    public static final HttpRemotingJerseyFeature DEFAULT = with(StacktracePropagation.DO_NOT_PROPAGATE);
+    private final boolean propagateStackTraces;
+
+    private HttpRemotingJerseyFeature(StacktracePropagation stacktracePropagation) {
+        this.propagateStackTraces = stacktracePropagation == StacktracePropagation.PROPAGATE;
+    }
+
+    public static HttpRemotingJerseyFeature with(StacktracePropagation stacktracePropagation) {
+        return new HttpRemotingJerseyFeature(stacktracePropagation);
+    }
 
     /**
      * Server-side stacktraces are serialized and transferred to the client iff {@code serializeStacktrace} is {@code
      * true}. Configures a Jersey server w.r.t. http-remoting conventions: registers tracer filters and
      * exception mappers.
      */
-    public static void configure(ResourceConfig jersey, StacktracePropagation stacktracePropagation) {
+    @Override
+    public boolean configure(FeatureContext context) {
         // Exception mappers
-        boolean includeStackTrace = stacktracePropagation == StacktracePropagation.PROPAGATE;
-        jersey.register(new IllegalArgumentExceptionMapper(includeStackTrace));
-        jersey.register(new NoContentExceptionMapper());
-        jersey.register(new RuntimeExceptionMapper(includeStackTrace));
-        jersey.register(new WebApplicationExceptionMapper(includeStackTrace));
-        jersey.register(new RemoteExceptionMapper());
+        context.register(new IllegalArgumentExceptionMapper(propagateStackTraces));
+        context.register(new NoContentExceptionMapper());
+        context.register(new RuntimeExceptionMapper(propagateStackTraces));
+        context.register(new WebApplicationExceptionMapper(propagateStackTraces));
+        context.register(new RemoteExceptionMapper());
 
         // Optional handling
-        jersey.register(new OptionalMessageBodyWriter());
+        context.register(new OptionalMessageBodyWriter());
 
         // Tracing
-        jersey.register(new TraceEnrichingFilter());
+        context.register(new TraceEnrichingFilter());
+
+        return true;
     }
 
     public enum StacktracePropagation {

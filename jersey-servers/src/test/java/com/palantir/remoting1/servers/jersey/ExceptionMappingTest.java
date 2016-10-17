@@ -108,8 +108,9 @@ public final class ExceptionMappingTest {
     public static class ExceptionMappersTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
+            env.jersey().register(
+                    HttpRemotingJerseyFeature.with(HttpRemotingJerseyFeature.StacktracePropagation.PROPAGATE));
             env.jersey().register(new ExceptionTestResource());
-            JerseyServers.configure(env.jersey().getResourceConfig(), JerseyServers.StacktracePropagation.PROPAGATE);
         }
     }
 
