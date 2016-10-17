@@ -17,6 +17,7 @@
 package com.palantir.remoting1.tracing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -160,6 +161,21 @@ public final class TracerTest {
         verify(sampler).sample();
         startAndCompleteSpan(); // not sampled, see above
         verifyNoMoreInteractions(observer1, sampler);
+    }
+
+    @Test
+    public void testTraceCopyIsIndependent() throws Exception {
+        Trace trace = Tracer.copyTrace();
+        trace.push(mock(OpenSpan.class));
+        assertThat(Tracer.completeSpan().isPresent()).isFalse();
+    }
+
+    @Test
+    public void testSetTraceSetsCurrentTrace() throws Exception {
+        Tracer.startSpan("operation");
+        Tracer.setTrace(new Trace(true, "newTraceId"));
+        assertThat(Tracer.getTraceId()).isEqualTo("newTraceId");
+        assertThat(Tracer.completeSpan().isPresent()).isFalse();
     }
 
     private static Span startAndCompleteSpan() {

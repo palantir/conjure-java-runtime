@@ -151,6 +151,18 @@ public final class Tracer {
         return currentTrace.get().isObservable();
     }
 
+    /** Returns an independent copy of this thread's {@link Trace}. */
+    static Trace copyTrace() {
+        return currentTrace.get().deepCopy();
+    }
+
+    /**
+     * Sets the thread-local trace. Considered an internal API used only for propagating the trace state across threads.
+     */
+    static void setTrace(Trace trace) {
+        currentTrace.set(trace);
+    }
+
     private static String validateId(String id, String messageTemplate) {
         // TODO(rfink) Should we check the format?
         Preconditions.checkArgument(id != null && !id.isEmpty(), messageTemplate, id);
