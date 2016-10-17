@@ -18,8 +18,8 @@ package com.palantir.remoting1.tracing;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
-import java.util.Set;
+import com.google.common.collect.Maps;
+import java.util.Map;
 
 /**
  * The singleton entry point for handling Zipkin-style traces and spans. Provides functionality for starting and
@@ -39,8 +39,8 @@ public final class Tracer {
         }
     };
 
-    // Thread-safe set implementation
-    private static final Set<SpanObserver> observers = Sets.newConcurrentHashSet();
+    // Thread-safe Map implementation
+    private static final Map<String, SpanObserver> observers = Maps.newConcurrentMap();
 
     // Thread-safe since stateless
     private static TraceSampler sampler = AlwaysSampler.INSTANCE;
@@ -111,7 +111,7 @@ public final class Tracer {
 
             // Notify subscribers iff trace is observable
             if (currentTrace.get().isObservable()) {
-                for (SpanObserver observer : observers) {
+                for (SpanObserver observer : observers.values()) {
                     observer.consume(span);
                 }
             }
@@ -121,16 +121,18 @@ public final class Tracer {
     }
 
     /**
-     * Subscribes the given span observer to all "span completed" events. Observers are expected to be "cheap", i.e.,
-     * do all non-trivial work (logging, sending network messages, etc) asynchronously.
+     * Subscribes the given (named) span observer to all "span completed" events. Observers are expected to be "cheap",
+     * i.e., do all non-trivial work (logging, sending network messages, etc) asynchronously. This calls fails if an
+     * observer is already registered for the given name.
      */
-    public static void subscribe(SpanObserver observer) {
-        observers.add(observer);
+    public static void subscribe(String name, SpanObserver observer) {
+        Preconditions.checkArgument(!observers.containsKey(name), "Cannot register two observers under name %s", name);
+        observers.put(name, observer);
     }
 
-    /** The inverse of {@link #subscribe}. */
-    public static void unsubscribe(SpanObserver observer) {
-        observers.remove(observer);
+    /** The inverse of {@link #subscribe}: removes the observer registered for the given name. */
+    public static void unsubscribe(String name) {
+        observers.remove(name);
     }
 
     /** Sets the sampler (for all threads). */

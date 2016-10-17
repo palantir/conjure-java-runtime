@@ -18,7 +18,6 @@ package com.palantir.remoting1.tracing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -49,8 +48,8 @@ public final class TracerTest {
     public void after() {
         Tracer.initTrace(Optional.of(true), Tracers.randomId());
         Tracer.setSampler(AlwaysSampler.INSTANCE);
-        Tracer.unsubscribe(observer1);
-        Tracer.unsubscribe(observer2);
+        Tracer.unsubscribe("1");
+        Tracer.unsubscribe("2");
     }
 
     @Test
@@ -85,43 +84,52 @@ public final class TracerTest {
         // no error when completing span without a registered subscriber
         startAndCompleteSpan();
 
-        Tracer.subscribe(observer1);
-        Tracer.subscribe(observer2);
+        Tracer.subscribe("1", observer1);
+        Tracer.subscribe("2", observer2);
         Span span = startAndCompleteSpan();
         verify(observer1).consume(span);
         verify(observer2).consume(span);
         verifyNoMoreInteractions(observer1, observer2);
 
-        Tracer.unsubscribe(observer1);
+        Tracer.unsubscribe("1");
         span = startAndCompleteSpan();
         verify(observer2).consume(span);
         verifyNoMoreInteractions(observer1, observer2);
 
-        Tracer.unsubscribe(observer2);
+        Tracer.unsubscribe("2");
         startAndCompleteSpan();
         verifyNoMoreInteractions(observer1, observer2);
     }
 
     @Test
-    public void testSubscribingIsIdempontent() throws Exception {
-        Tracer.subscribe(observer1);
-        Tracer.subscribe(observer1);
-        Span span = startAndCompleteSpan();
-        verify(observer1, times(1)).consume(span);
-        verifyNoMoreInteractions(observer1, observer2);
+    public void testCannotSubscribeWithDuplicatesNames() throws Exception {
+        Tracer.subscribe("1", observer1);
+        try {
+            Tracer.subscribe("1", observer1);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage("Cannot register two observers under name 1");
+        }
+
+        try {
+            Tracer.subscribe("1", observer2);
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage("Cannot register two observers under name 1");
+        }
+
+        Tracer.subscribe("2", observer1); // different name, same observer instance
     }
 
     @Test
     public void testDoesNotNotifyObserversWhenCompletingNonexistingSpan() throws Exception {
-        Tracer.subscribe(observer1);
-        Tracer.subscribe(observer2);
+        Tracer.subscribe("1", observer1);
+        Tracer.subscribe("2", observer2);
         Tracer.completeSpan(); // no active span.
         verifyNoMoreInteractions(observer1, observer2);
     }
 
     @Test
     public void testObserversAreInvokedOnObservableTracesOnly() throws Exception {
-        Tracer.subscribe(observer1);
+        Tracer.subscribe("1", observer1);
 
         Tracer.initTrace(Optional.of(true), Tracers.randomId());
         Span span = startAndCompleteSpan();
@@ -148,7 +156,7 @@ public final class TracerTest {
     public void testInitTraceCallsSampler() throws Exception {
         Tracer.setSampler(sampler);
         when(sampler.sample()).thenReturn(true, false);
-        Tracer.subscribe(observer1);
+        Tracer.subscribe("1", observer1);
 
         Tracer.initTrace(Optional.<Boolean>absent(), Tracers.randomId());
         verify(sampler).sample();

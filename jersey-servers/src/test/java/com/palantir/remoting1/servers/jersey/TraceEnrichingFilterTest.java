@@ -71,12 +71,12 @@ public final class TraceEnrichingFilterTest {
         JerseyClientBuilder builder = new JerseyClientBuilder();
         Client client = builder.build();
         target = client.target(endpointUri);
-        Tracer.subscribe(observer);
+        Tracer.subscribe("", observer);
     }
 
     @After
     public void after() {
-        Tracer.unsubscribe(observer);
+        Tracer.unsubscribe("");
     }
 
     @Test
