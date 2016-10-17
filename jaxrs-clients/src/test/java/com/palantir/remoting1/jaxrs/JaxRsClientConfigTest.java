@@ -28,7 +28,7 @@ import com.google.common.collect.Maps;
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
-import com.palantir.remoting1.servers.jersey.JerseyServers;
+import com.palantir.remoting1.servers.jersey.HttpRemotingJerseyFeature;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -133,9 +133,8 @@ public final class JaxRsClientConfigTest {
     public static final class ProxyingEchoServer extends Application<Configuration> {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
+            env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
             env.jersey().register(new TestEchoResource());
-            JerseyServers.configure(env.jersey().getResourceConfig(),
-                    JerseyServers.StacktracePropagation.DO_NOT_PROPAGATE);
         }
 
         private static final class TestEchoResource implements TestService {
@@ -150,9 +149,8 @@ public final class JaxRsClientConfigTest {
     public static final class TestEchoServer extends Application<Configuration> {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
+            env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
             env.jersey().register(new TestEchoResource());
-            JerseyServers.configure(env.jersey().getResourceConfig(),
-                    JerseyServers.StacktracePropagation.DO_NOT_PROPAGATE);
         }
 
         private static final class TestEchoResource implements TestService {

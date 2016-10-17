@@ -74,8 +74,7 @@ public final class OptionalTest {
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            JerseyServers.configure(env.jersey().getResourceConfig(),
-                    JerseyServers.StacktracePropagation.DO_NOT_PROPAGATE);
+            env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
             env.jersey().register(new OptionalTestResource());
         }
     }
