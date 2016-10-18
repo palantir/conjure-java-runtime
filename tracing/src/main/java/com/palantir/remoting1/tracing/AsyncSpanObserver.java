@@ -30,39 +30,27 @@ import org.slf4j.LoggerFactory;
 /**
  * A {@link SpanObserver} whose observations are executed on a supplied {@link ExecutorService}.
  */
-public final class AsyncSpanObserver implements SpanObserver {
+abstract class AsyncSpanObserver implements SpanObserver {
 
     private static final Logger log = LoggerFactory.getLogger(AsyncSpanObserver.class);
     private static final int DEFAULT_MAX_INFLIGHTS = 10_000;
 
     private final ListeningExecutorService executorService;
-    private final SpanObserver observer;
 
     private final AtomicInteger numInflights = new AtomicInteger(0); // number of non-completed observations
     private final int maxInflights;
 
-    private AsyncSpanObserver(ExecutorService executorService, SpanObserver observer, int maxInflights) {
+    AsyncSpanObserver(ExecutorService executorService) {
+        this(executorService, DEFAULT_MAX_INFLIGHTS);
+    }
+
+    AsyncSpanObserver(ExecutorService executorService, int maxInflights) {
         this.executorService = MoreExecutors.listeningDecorator(executorService);
-        this.observer = observer;
         this.maxInflights = maxInflights;
     }
 
-    /**
-     * Like {@link #create(ExecutorService, SpanObserver, int)}, but with at most {@link #DEFAULT_MAX_INFLIGHTS}
-     * concurrent observations.
-     */
-    public static AsyncSpanObserver create(ExecutorService executorService, SpanObserver observer) {
-        return new AsyncSpanObserver(executorService, observer, DEFAULT_MAX_INFLIGHTS);
-    }
-
-    /**
-     * Creates a new {@link AsyncSpanObserver} that handles at most {@code maxInflights} number of concurrent
-     * observations. Any additional concurrent observation is discarded and logged.
-     */
-    public static AsyncSpanObserver create(
-            ExecutorService executorService, SpanObserver observer, int maxInflights) {
-        return new AsyncSpanObserver(executorService, observer, maxInflights);
-    }
+    /** The delegate for {@link SpanObserver#consume}. */
+    public abstract void doConsume(Span span);
 
     @Override
     public void consume(final Span span) {
@@ -70,7 +58,7 @@ public final class AsyncSpanObserver implements SpanObserver {
             ListenableFuture<Span> future = executorService.submit(new Callable<Span>() {
                 @Override
                 public Span call() throws Exception {
-                    observer.consume(span);
+                    doConsume(span);
                     return span;
                 }
             });
