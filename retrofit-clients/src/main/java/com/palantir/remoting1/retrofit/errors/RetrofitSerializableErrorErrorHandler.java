@@ -42,14 +42,19 @@ public enum RetrofitSerializableErrorErrorHandler implements ErrorHandler {
             }
         }
 
-        InputStream body;
         try {
-            body = response.getBody().in();
+            return SerializableErrorToExceptionConverter.getException(contentTypes, response.getStatus(),
+                    response.getReason(), retrieveBodyFromResponse(response));
         } catch (IOException e) {
             return new RuntimeException("Cannot get input stream from response: " + e.getMessage(), e);
         }
-        return SerializableErrorToExceptionConverter.getException(contentTypes, response.getStatus(),
-                response.getReason(), body);
+    }
+
+    private static InputStream retrieveBodyFromResponse(Response response) throws IOException {
+        if (response.getBody() == null) {
+            return null;
+        }
+        return response.getBody().in();
     }
 
 }
