@@ -18,6 +18,7 @@ package com.palantir.remoting1.retrofit;
 
 import com.google.common.base.Optional;
 import com.palantir.remoting1.retrofit.errors.RetrofitSerializableErrorErrorHandler;
+import com.palantir.remoting1.tracing.okhttp.OkhttpTraceInterceptor;
 import com.squareup.okhttp.OkHttpClient;
 import java.util.concurrent.TimeUnit;
 import javax.net.ssl.SSLSocketFactory;
@@ -53,6 +54,9 @@ public final class RetrofitClientFactory {
         okClient.setReadTimeout(options.getReadTimeoutMs().or((long) okClient.getReadTimeout()), TimeUnit.MILLISECONDS);
         okClient.setWriteTimeout(
                 options.getWriteTimeoutMs().or((long) okClient.getWriteTimeout()), TimeUnit.MILLISECONDS);
+
+        // tracing
+        okClient.interceptors().add(OkhttpTraceInterceptor.INSTANCE);
 
         // retries
         RetryInterceptor retryInterceptor = options.getMaxNumberRetries().isPresent()

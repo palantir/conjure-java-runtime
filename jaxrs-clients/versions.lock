@@ -22,6 +22,7 @@
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -46,6 +47,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -70,9 +72,6 @@
         "com.netflix.feign:feign-slf4j": {
             "locked": "8.17.0"
         },
-        "com.palantir.remoting1:brave-extensions": {
-            "project": true
-        },
         "com.palantir.remoting1:error-handling": {
             "project": true
         },
@@ -91,6 +90,15 @@
                 "com.palantir.remoting1:service-config"
             ]
         },
+        "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp3"
+            ]
+        },
+        "com.palantir.remoting1:tracing-okhttp3": {
+            "project": true
+        },
         "com.palantir.tokens:auth-tokens": {
             "locked": "0.2.3",
             "transitive": [
@@ -101,35 +109,13 @@
             "locked": "3.4.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
-                "io.zipkin.brave:brave-okhttp"
+                "com.palantir.remoting1:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
             "locked": "1.9.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
-            ]
-        },
-        "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0",
-            "transitive": [
-                "com.palantir.remoting1:brave-extensions",
-                "io.zipkin.brave:brave-http"
-            ]
-        },
-        "io.zipkin.brave:brave-http": {
-            "locked": "3.11.0",
-            "transitive": [
-                "io.zipkin.brave:brave-okhttp"
-            ]
-        },
-        "io.zipkin.brave:brave-okhttp": {
-            "locked": "3.11.0"
-        },
-        "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
-            "transitive": [
-                "io.zipkin.brave:brave-core"
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
@@ -154,8 +140,8 @@
             "locked": "1.7.12",
             "transitive": [
                 "com.netflix.feign:feign-slf4j",
-                "com.palantir.remoting1:brave-extensions",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens",
                 "org.slf4j:jcl-over-slf4j"
             ]
@@ -184,6 +170,7 @@
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -208,6 +195,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -232,9 +220,6 @@
         "com.netflix.feign:feign-slf4j": {
             "locked": "8.17.0"
         },
-        "com.palantir.remoting1:brave-extensions": {
-            "project": true
-        },
         "com.palantir.remoting1:error-handling": {
             "project": true
         },
@@ -253,6 +238,15 @@
                 "com.palantir.remoting1:service-config"
             ]
         },
+        "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp3"
+            ]
+        },
+        "com.palantir.remoting1:tracing-okhttp3": {
+            "project": true
+        },
         "com.palantir.tokens:auth-tokens": {
             "locked": "0.2.3",
             "transitive": [
@@ -263,35 +257,13 @@
             "locked": "3.4.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
-                "io.zipkin.brave:brave-okhttp"
+                "com.palantir.remoting1:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
             "locked": "1.9.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
-            ]
-        },
-        "io.zipkin.brave:brave-core": {
-            "locked": "3.11.0",
-            "transitive": [
-                "com.palantir.remoting1:brave-extensions",
-                "io.zipkin.brave:brave-http"
-            ]
-        },
-        "io.zipkin.brave:brave-http": {
-            "locked": "3.11.0",
-            "transitive": [
-                "io.zipkin.brave:brave-okhttp"
-            ]
-        },
-        "io.zipkin.brave:brave-okhttp": {
-            "locked": "3.11.0"
-        },
-        "io.zipkin.java:zipkin": {
-            "locked": "1.8.4",
-            "transitive": [
-                "io.zipkin.brave:brave-core"
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
@@ -316,8 +288,8 @@
             "locked": "1.7.12",
             "transitive": [
                 "com.netflix.feign:feign-slf4j",
-                "com.palantir.remoting1:brave-extensions",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens",
                 "org.slf4j:jcl-over-slf4j"
             ]

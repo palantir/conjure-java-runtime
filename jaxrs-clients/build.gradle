@@ -3,7 +3,7 @@ apply from: "${rootDir}/gradle/publish-shadow.gradle"
 
 dependencies {
     compile project(":error-handling")
-    compile project(":ext:brave-extensions")
+    compile project(":tracing-okhttp3")
     compile project(":http-clients-api")
     compile project(":service-config")
 
@@ -18,12 +18,11 @@ dependencies {
         exclude group: "javax.ws.rs", module: "jsr311-api"
     }
     compile "com.netflix.feign:feign-okhttp"
-    compile "io.zipkin.brave:brave-okhttp"
     compile "javax.ws.rs:javax.ws.rs-api"
     compile "org.slf4j:slf4j-api"
     compile "com.netflix.feign:feign-slf4j"
 
-    testCompile project(":dropwizard-servers")
+    testCompile project(":jersey-servers")
     testCompile "com.squareup.okhttp3:mockwebserver"
     testCompile "io.dropwizard:dropwizard-testing"
     testCompile "junit:junit"
@@ -45,10 +44,8 @@ shadowJar {
     relocate('feign', 'httpremoting.shaded.feign')
     relocate('zipkin', 'httpremoting.shaded.zipkin')
     relocate('okhttp3', 'httpremoting.shaded.okhttp3')
-    relocate('io.zipkin.brave', 'httpremoting.shaded.io.zipkin.brave')
     relocate('org.joda.time', 'httpremoting.shaded.org.joda.time')
     relocate('okio', 'httpremoting.shaded.okio')
-    relocate('com.github.kristofa.brave', 'httpremoting.shaded.com.github.kristofa.brave')
     dependencies {
         exclude(project(':error-handling'))
         exclude(project(':service-config'))

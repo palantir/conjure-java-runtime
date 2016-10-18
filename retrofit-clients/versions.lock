@@ -18,7 +18,8 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
@@ -44,7 +45,8 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.palantir.remoting1:error-handling": {
@@ -53,8 +55,20 @@
         "com.palantir.remoting1:ssl-config": {
             "project": true
         },
+        "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp2"
+            ]
+        },
+        "com.palantir.remoting1:tracing-okhttp2": {
+            "project": true
+        },
         "com.squareup.okhttp:okhttp": {
-            "locked": "2.7.5"
+            "locked": "2.7.5",
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp2"
+            ]
         },
         "com.squareup.okio:okio": {
             "locked": "1.6.0",
@@ -74,7 +88,8 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
             ]
         }
     },
@@ -97,7 +112,8 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
@@ -123,7 +139,8 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.palantir.remoting1:error-handling": {
@@ -132,8 +149,20 @@
         "com.palantir.remoting1:ssl-config": {
             "project": true
         },
+        "com.palantir.remoting1:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp2"
+            ]
+        },
+        "com.palantir.remoting1:tracing-okhttp2": {
+            "project": true
+        },
         "com.squareup.okhttp:okhttp": {
-            "locked": "2.7.5"
+            "locked": "2.7.5",
+            "transitive": [
+                "com.palantir.remoting1:tracing-okhttp2"
+            ]
         },
         "com.squareup.okio:okio": {
             "locked": "1.6.0",
@@ -153,7 +182,8 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
             ]
         }
     }

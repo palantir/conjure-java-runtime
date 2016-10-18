@@ -1,0 +1,12 @@
+apply plugin: 'org.inferred.processors'
+
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile project(":tracing")
+    compile "com.squareup.okhttp3:okhttp"
+
+    testCompile "junit:junit"
+    testCompile "org.assertj:assertj-core"
+    testCompile "org.mockito:mockito-core"
+}
