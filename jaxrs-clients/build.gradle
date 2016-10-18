@@ -32,6 +32,7 @@ dependencies {
     shadow project(':error-handling')
     shadow project(':service-config')
     shadow project(':ssl-config')
+    shadow project(':tracing')
     shadow "javax.ws.rs:javax.ws.rs-api"
     shadow "com.fasterxml.jackson.core:jackson-databind"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-guava"
@@ -50,6 +51,7 @@ shadowJar {
         exclude(project(':error-handling'))
         exclude(project(':service-config'))
         exclude(project(':ssl-config'))
+        exclude(project(':tracing'))
         exclude(dependency { it.moduleGroup.contains("javax.ws.rs") })
         exclude(dependency { it.moduleGroup.contains("com.fasterxml.jackson") })
         exclude(dependency { it.moduleGroup.contains("com.google.guava") })
