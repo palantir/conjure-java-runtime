@@ -90,7 +90,7 @@ In addition to cross-service call tracing, the `Tracer` library supports intra-t
 ```java
 // Record tracing information for expensive doSomeComputation() call:
 try {
-    Tracer.startSpan("operation");
+    Tracer.startSpan("doSomeComputation");
     doSomeComputation();  // may itself invoke cross-service or local traced calls
 } finally {
     Tracer.completeSpan(); // triggers all span observers
