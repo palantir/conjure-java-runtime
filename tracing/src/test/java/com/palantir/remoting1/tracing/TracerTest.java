@@ -17,6 +17,7 @@
 package com.palantir.remoting1.tracing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -62,18 +63,21 @@ public final class TracerTest {
 
         try {
             Tracer.initTrace(Optional.<Boolean>absent(), "");
+            fail("Didn't throw");
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("traceId must be non-empty: ");
         }
 
         try {
             Tracer.startSpan("op", null);
+            fail("Didn't throw");
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("parentTraceId must be non-empty: null");
         }
 
         try {
             Tracer.startSpan("op", "");
+            fail("Didn't throw");
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("parentTraceId must be non-empty: ");
         }
@@ -91,32 +95,22 @@ public final class TracerTest {
         verify(observer2).consume(span);
         verifyNoMoreInteractions(observer1, observer2);
 
-        Tracer.unsubscribe("1");
+        assertThat(Tracer.unsubscribe("1")).isEqualTo(observer1);
         span = startAndCompleteSpan();
         verify(observer2).consume(span);
         verifyNoMoreInteractions(observer1, observer2);
 
-        Tracer.unsubscribe("2");
+        assertThat(Tracer.unsubscribe("2")).isEqualTo(observer2);
         startAndCompleteSpan();
         verifyNoMoreInteractions(observer1, observer2);
     }
 
     @Test
-    public void testCannotSubscribeWithDuplicatesNames() throws Exception {
+    public void testCanSubscribeWithDuplicatesNames() throws Exception {
         Tracer.subscribe("1", observer1);
-        try {
-            Tracer.subscribe("1", observer1);
-        } catch (IllegalArgumentException e) {
-            assertThat(e).hasMessage("Cannot register two observers under name 1");
-        }
-
-        try {
-            Tracer.subscribe("1", observer2);
-        } catch (IllegalArgumentException e) {
-            assertThat(e).hasMessage("Cannot register two observers under name 1");
-        }
-
-        Tracer.subscribe("2", observer1); // different name, same observer instance
+        assertThat(Tracer.subscribe("1", observer1)).isEqualTo(observer1);
+        assertThat(Tracer.subscribe("1", observer2)).isEqualTo(observer1);
+        assertThat(Tracer.subscribe("2", observer1)).isNull();
     }
 
     @Test

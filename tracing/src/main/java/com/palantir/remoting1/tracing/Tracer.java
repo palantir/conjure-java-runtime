@@ -20,6 +20,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The singleton entry point for handling Zipkin-style traces and spans. Provides functionality for starting and
@@ -28,6 +30,8 @@ import java.util.Map;
  * This class is thread-safe.
  */
 public final class Tracer {
+
+    private static final Logger log = LoggerFactory.getLogger(Tracer.class);
 
     private Tracer() {}
 
@@ -122,17 +126,26 @@ public final class Tracer {
 
     /**
      * Subscribes the given (named) span observer to all "span completed" events. Observers are expected to be "cheap",
-     * i.e., do all non-trivial work (logging, sending network messages, etc) asynchronously. This calls fails if an
-     * observer is already registered for the given name.
+     * i.e., do all non-trivial work (logging, sending network messages, etc) asynchronously. If an observer is already
+     * registered for the given name, then it gets overwritten by this call. Returns the observer previously associated
+     * with the given name, or null if there is no such observer.
      */
-    public static void subscribe(String name, SpanObserver observer) {
-        Preconditions.checkArgument(!observers.containsKey(name), "Cannot register two observers under name %s", name);
-        observers.put(name, observer);
+    public static SpanObserver subscribe(String name, SpanObserver observer) {
+        if (observers.containsKey(name)) {
+            log.warn("Overwriting existing SpanObserver with name {} by new observer: {}", name, observer);
+        }
+        if (observers.size() >= 5) {
+            log.warn("Five or more SpanObservers registered: {}", observers.keySet());
+        }
+        return observers.put(name, observer);
     }
 
-    /** The inverse of {@link #subscribe}: removes the observer registered for the given name. */
-    public static void unsubscribe(String name) {
-        observers.remove(name);
+    /**
+     * The inverse of {@link #subscribe}: removes the observer registered for the given name. Returns the removed
+     * observer if it existed, or null otherwise.
+     */
+    public static SpanObserver unsubscribe(String name) {
+        return observers.remove(name);
     }
 
     /** Sets the sampler (for all threads). */
