@@ -42,7 +42,7 @@ public final class AsyncSpanObserverTest {
 
     @Test
     public void testDropsExcessRequests() throws Exception {
-        AsyncSpanObserver asyncObserver = createAsyncObserver(2);
+        SpanObserver asyncObserver = createAsyncObserver(2);
         asyncObserver.consume(span(1));
         asyncObserver.consume(span(2));
         asyncObserver.consume(span(3)); // gets bumped
@@ -58,7 +58,7 @@ public final class AsyncSpanObserverTest {
 
     @Test
     public void testSchedulesRequestsOnceBelowThreshold() throws Exception {
-        AsyncSpanObserver asyncObserver = createAsyncObserver(2);
+        SpanObserver asyncObserver = createAsyncObserver(2);
         asyncObserver.consume(span(1));
         asyncObserver.consume(span(2));
         scheduler.runNextPendingCommand(); // evicts span(1)
@@ -73,8 +73,8 @@ public final class AsyncSpanObserverTest {
         verifyNoMoreInteractions(observer);
     }
 
-    private AsyncSpanObserver createAsyncObserver(int maxInflights) {
-        return AsyncSpanObserver.create(scheduler, observer, maxInflights);
+    private SpanObserver createAsyncObserver(int maxInflights) {
+        return Observers.asyncDecorator(observer, scheduler, maxInflights);
     }
 
     private Span span(int id) {

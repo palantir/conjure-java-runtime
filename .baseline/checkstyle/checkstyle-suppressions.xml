@@ -12,9 +12,8 @@
     <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="VariableDeclarationUsageDistance" />
 
     <!-- Allow logback imports in these tests. -->
-    <suppress files="[/\\]src[/\\].*(DropwizardTracingFiltersTest.java)" checks="IllegalImport" />
     <suppress files="[/\\]src[/\\].*(FeignClientFactoryTest.java)" checks="IllegalImport" />
-    <suppress files="[/\\]src[/\\].*(ClientConfigTest.java)" checks="IllegalImport" />
+    <suppress files="[/\\]src[/\\].*(AsyncSlf4jSpanObserverTest.java)" checks="IllegalImport" />
 
     <!-- Copied Guava classes. -->
     <suppress files="[/\\]src[/\\].*(WrappingExecutorService.java)" checks="." />
