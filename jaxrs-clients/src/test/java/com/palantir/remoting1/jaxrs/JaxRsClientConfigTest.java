@@ -19,12 +19,7 @@ package com.palantir.remoting1.jaxrs;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.when;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
-import com.google.common.collect.Maps;
 import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
@@ -34,64 +29,13 @@ import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
-import java.util.Map;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.slf4j.LoggerFactory;
 
 public final class JaxRsClientConfigTest {
     @ClassRule
     public static final DropwizardAppRule<Configuration> ECHO_SERVER =
             new DropwizardAppRule<>(TestEchoServer.class, "src/test/resources/test-server-ssl.yml");
-
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> PROXYING_ECHO_SERVER =
-            new DropwizardAppRule<>(ProxyingEchoServer.class, "src/test/resources/test-server-ssl.yml");
-
-    @Mock
-    private Appender<ILoggingEvent> clientTracerAppender;
-    @Mock
-    private Appender<ILoggingEvent> serverTracerAppender;
-    @Mock
-    private Appender<ILoggingEvent> proxyingServerTracerAppender;
-
-    // Used by #setLogLevel to keep track of original/default log levels so they can be reset in #after()
-    private Map<String, Level> originalLogLevels = Maps.newHashMap();
-
-    @Before
-    public void before() {
-        MockitoAnnotations.initMocks(this);
-
-        when(clientTracerAppender.getName()).thenReturn("MOCK");
-        ch.qos.logback.classic.Logger clientTracerLogger =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing.client.test");
-        clientTracerLogger.addAppender(clientTracerAppender);
-
-        when(serverTracerAppender.getName()).thenReturn("MOCK");
-        ch.qos.logback.classic.Logger serverTracerLogger =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing.server.TestEchoServer");
-        serverTracerLogger.addAppender(serverTracerAppender);
-
-        when(proxyingServerTracerAppender.getName()).thenReturn("MOCK");
-        ch.qos.logback.classic.Logger proxyingServerTracerLogger =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("tracing.server.ProxyingEchoServer");
-        proxyingServerTracerLogger.addAppender(proxyingServerTracerAppender);
-    }
-
-    @After
-    public void after() {
-        for (Map.Entry<String, Level> level : originalLogLevels.entrySet()) {
-            getLogbackLogger(level.getKey()).setLevel(level.getValue());
-        }
-    }
-
-    private static ch.qos.logback.classic.Logger getLogbackLogger(String name) {
-        return (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(name);
-    }
 
     @Test
     public void testSslSocketFactory_cannotConnectWhenSocketFactoryIsNotSet() throws Exception {
@@ -128,22 +72,6 @@ public final class JaxRsClientConfigTest {
         return JaxRsClient.builder(
                 ClientConfig.builder().trustContext(SslSocketFactories.createTrustContext(sslConfig)).build())
                 .build(TestService.class, name, endpointUri);
-    }
-
-    public static final class ProxyingEchoServer extends Application<Configuration> {
-        @Override
-        public void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
-            env.jersey().register(new TestEchoResource());
-        }
-
-        private static final class TestEchoResource implements TestService {
-            @Override
-            public String echo(String value) {
-                TestService echoService = createProxy(ECHO_SERVER.getLocalPort(), "proxyingClient");
-                return echoService.echo(value);
-            }
-        }
     }
 
     public static final class TestEchoServer extends Application<Configuration> {
