@@ -51,6 +51,9 @@ public final class HttpRemotingJerseyFeature implements Feature {
 
         // Tracing
         context.register(new TraceEnrichingFilter());
+//        environment.servlets()
+//                -                .addFilter(TraceIdLoggingFilter.class.getSimpleName(), TraceIdLoggingFilter.INSTANCE)
+//                -                .addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
 
         return true;
     }
