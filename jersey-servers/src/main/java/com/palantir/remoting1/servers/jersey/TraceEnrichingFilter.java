@@ -29,9 +29,14 @@ import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
+import org.slf4j.MDC;
 
 @Provider
 public final class TraceEnrichingFilter implements ContainerRequestFilter, ContainerResponseFilter {
+    public static final TraceEnrichingFilter INSTANCE = new TraceEnrichingFilter();
+
+    /** The key under which trace ids are inserted into SLF4J {@link org.slf4j.MDC MDCs}. */
+    static final String MDC_KEY = "traceId";
 
     // Handles incoming request
     @Override
@@ -41,6 +46,7 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
         String traceId = requestContext.getHeaderString(TraceHttpHeaders.TRACE_ID);
         String spanId = requestContext.getHeaderString(TraceHttpHeaders.SPAN_ID);
 
+        // Set up thread-local span that inherits state from HTTP headers
         if (Strings.isNullOrEmpty(traceId)) {
             // HTTP request did not indicate a trace; initialize trace state and create a span.
             Tracer.initTrace(Optional.<Boolean>absent(), Tracers.randomId());
@@ -53,6 +59,13 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
                 Tracer.startSpan(operation, spanId); // caller's span is this span's parent.
             }
         }
+
+        // Give SLF4J appenders access to the trace id
+        // TODO(rfink) We should use putCloseable; when and how can we remove it though? There is no filter chain.
+        MDC.put(MDC_KEY, Tracer.getTraceId());
+
+        // Give asynchronous downstream handlers access to the trace id
+        requestContext.setProperty("com.palantir.remoting1.traceId", Tracer.getTraceId());
     }
 
     // Handles outgoing response

@@ -14,6 +14,7 @@
     <!-- Allow logback imports in these tests. -->
     <suppress files="[/\\]src[/\\].*(FeignClientFactoryTest.java)" checks="IllegalImport" />
     <suppress files="[/\\]src[/\\].*(AsyncSlf4jSpanObserverTest.java)" checks="IllegalImport" />
+    <suppress files="[/\\]src[/\\].*(TracerTest.java)" checks="IllegalImport" />
 
     <!-- Copied Guava classes. -->
     <suppress files="[/\\]src[/\\].*(WrappingExecutorService.java)" checks="." />

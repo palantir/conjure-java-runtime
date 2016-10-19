@@ -17,15 +17,23 @@
 package com.palantir.remoting1.servers.jersey;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.OutputStreamAppender;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -36,17 +44,23 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 public final class TracerTest {
+
+    private static final ch.qos.logback.classic.Logger log =
+            (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(TracerTest.class);
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP =
             new DropwizardAppRule<>(TracingTestServer.class, "src/test/resources/test-server.yml");
 
     private WebTarget target;
+    private Level previousLoggerLevel;
 
     @Before
     public void before() {
@@ -54,6 +68,12 @@ public final class TracerTest {
         JerseyClientBuilder builder = new JerseyClientBuilder();
         Client client = builder.build();
         target = client.target(endpointUri);
+        previousLoggerLevel = log.getLevel();
+    }
+
+    @After
+    public void after() throws Exception {
+        log.setLevel(previousLoggerLevel);
     }
 
     @Test
@@ -70,6 +90,29 @@ public final class TracerTest {
         assertNull(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID));
     }
 
+    @Test
+    public void testLogAppenderCanAccessTraceId() throws Exception {
+        // Augment logger with custom appender whose output we can read
+        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
+        PatternLayoutEncoder ple = new PatternLayoutEncoder();
+        ple.setPattern("traceId: %X{traceId} %-5level [%thread]: %message%n");
+        ple.setContext(lc);
+        ple.start();
+        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
+        appender.setEncoder(ple);
+        appender.setContext(lc);
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        appender.setOutputStream(byteStream);
+        appender.start();
+        log.addAppender(appender);
+
+        // Invoke server and observe servers log messages; note that the server uses the same logger at INFO.
+        log.setLevel(Level.INFO);
+        target.path("trace").request().header(TraceHttpHeaders.TRACE_ID, "myTraceId").get();
+        assertThat(byteStream.toString(StandardCharsets.UTF_8.name()), startsWith("traceId: myTraceId"));
+    }
+
+
     public static class TracingTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
@@ -81,6 +124,7 @@ public final class TracerTest {
     public static final class TracingTestResource implements TracingTestService {
         @Override
         public String getTraceOperation() {
+            log.info("foo");
             return Tracer.getTraceId();
         }
     }

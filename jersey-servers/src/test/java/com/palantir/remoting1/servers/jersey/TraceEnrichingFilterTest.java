@@ -20,7 +20,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.palantir.remoting1.tracing.Span;
 import com.palantir.remoting1.tracing.SpanObserver;
@@ -38,8 +41,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.After;
 import org.junit.Before;
@@ -49,6 +54,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.MDC;
 
 public final class TraceEnrichingFilterTest {
 
@@ -61,6 +67,10 @@ public final class TraceEnrichingFilterTest {
 
     @Mock
     private SpanObserver observer;
+    @Mock
+    private ContainerRequestContext request;
+    @Mock
+    private UriInfo uriInfo;
 
     private WebTarget target;
 
@@ -72,6 +82,12 @@ public final class TraceEnrichingFilterTest {
         Client client = builder.build();
         target = client.target(endpointUri);
         Tracer.subscribe("", observer);
+
+        MDC.clear();
+
+        when(request.getMethod()).thenReturn("GET");
+        when(uriInfo.getPath()).thenReturn("/foo");
+        when(request.getUriInfo()).thenReturn(uriInfo);
     }
 
     @After
@@ -125,6 +141,21 @@ public final class TraceEnrichingFilterTest {
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
         verify(observer).consume(span.capture());
         assertThat(span.getValue().getOperation(), is("GET /trace"));
+    }
+
+    @Test
+    public void testFilter_setsMdcIfTraceIdHeaderIsPresent() throws Exception {
+        when(request.getHeaderString(TraceHttpHeaders.TRACE_ID)).thenReturn("traceId");
+        TraceEnrichingFilter.INSTANCE.filter(request);
+        assertThat(MDC.get(TraceEnrichingFilter.MDC_KEY), is("traceId"));
+        verify(request).setProperty("com.palantir.remoting1.traceId", "traceId");
+    }
+
+    @Test
+    public void testFilter_setsMdcIfTraceIdHeaderIsNotePresent() throws Exception {
+        TraceEnrichingFilter.INSTANCE.filter(request);
+        assertThat(MDC.get(TraceEnrichingFilter.MDC_KEY).length(), is(16));
+        verify(request).setProperty(eq("com.palantir.remoting1.traceId"), anyString());
     }
 
     public static class TracingTestServer extends Application<Configuration> {
