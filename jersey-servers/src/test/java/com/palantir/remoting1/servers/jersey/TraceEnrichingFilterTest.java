@@ -20,6 +20,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -146,12 +148,14 @@ public final class TraceEnrichingFilterTest {
         when(request.getHeaderString(TraceHttpHeaders.TRACE_ID)).thenReturn("traceId");
         TraceEnrichingFilter.INSTANCE.filter(request);
         assertThat(MDC.get(TraceEnrichingFilter.MDC_KEY), is("traceId"));
+        verify(request).setProperty("com.palantir.remoting1.traceId", "traceId");
     }
 
     @Test
     public void testFilter_setsMdcIfTraceIdHeaderIsNotePresent() throws Exception {
         TraceEnrichingFilter.INSTANCE.filter(request);
         assertThat(MDC.get(TraceEnrichingFilter.MDC_KEY).length(), is(16));
+        verify(request).setProperty(eq("com.palantir.remoting1.traceId"), anyString());
     }
 
     public static class TracingTestServer extends Application<Configuration> {
