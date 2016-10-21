@@ -9,10 +9,18 @@
         "com.fasterxml.jackson.core:jackson-core": {
             "locked": "2.6.1",
             "transitive": [
-                "com.fasterxml.jackson.core:jackson-databind"
+                "com.fasterxml.jackson.core:jackson-databind",
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.palantir.remoting1:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.1",
             "transitive": [
                 "com.palantir.remoting1:tracing"
@@ -21,6 +29,7 @@
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:tracing"
             ]
         },
@@ -53,10 +62,18 @@
         "com.fasterxml.jackson.core:jackson-core": {
             "locked": "2.6.1",
             "transitive": [
-                "com.fasterxml.jackson.core:jackson-databind"
+                "com.fasterxml.jackson.core:jackson-databind",
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.palantir.remoting1:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.1",
             "transitive": [
                 "com.palantir.remoting1:tracing"
@@ -65,6 +82,7 @@
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting1:tracing"
             ]
         },
