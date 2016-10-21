@@ -89,8 +89,8 @@ public final class AsyncSlf4jSpanObserverTest {
                 .parentSpanId(Tracers.longToPaddedHex(123456789L))
                 .spanId(Tracers.longToPaddedHex(234567890L))
                 .operation("op")
-                .startTimeMs(43L)
-                .durationNs(43001L)
+                .startTimeMicroSeconds(43L)
+                .durationNanoSeconds(43001L)
                 .build();
         zipkin.Span zipkinSpan = zipkin.Span.builder()
                 .traceId(42L)
