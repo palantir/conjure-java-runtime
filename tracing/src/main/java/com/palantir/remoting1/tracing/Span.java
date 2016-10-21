@@ -31,16 +31,11 @@ import org.immutables.value.Value;
 public abstract class Span {
 
     public abstract String getTraceId();
-
     public abstract Optional<String> getParentSpanId();
-
     public abstract String getSpanId();
-
     public abstract String getOperation();
-
-    public abstract long getStartTimeMs();
-
-    public abstract long getDurationNs();
+    public abstract long getStartTimeMicroSeconds();
+    public abstract long getDurationNanoSeconds();
 
     public static final Builder builder() {
         return new Builder();
