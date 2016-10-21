@@ -4,6 +4,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-guava"
     compile "com.google.guava:guava"
     compile "org.slf4j:slf4j-api"
 
@@ -12,6 +13,7 @@ dependencies {
     testCompile "org.assertj:assertj-core"
     testCompile "org.jmock:jmock"
     testCompile "org.mockito:mockito-core"
+    testCompile "io.zipkin.java:zipkin"
 
     processor "org.immutables:value"
 }
