@@ -107,7 +107,8 @@ public final class AsyncSlf4jSpanObserverTest {
 
     @Test
     public void testNanoToMicro() throws Exception {
-        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMicro(0)).isEqualTo(0);
+        // must always round up, in particular 0ns --> 1ms
+        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMicro(0)).isEqualTo(1);
         assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMicro(1)).isEqualTo(1);
         assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMicro(1499)).isEqualTo(2);
         assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMicro(1500)).isEqualTo(2);
