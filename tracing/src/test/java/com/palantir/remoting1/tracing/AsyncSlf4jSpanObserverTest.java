@@ -23,9 +23,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import org.jmock.lib.concurrent.DeterministicScheduler;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -41,14 +44,24 @@ public final class AsyncSlf4jSpanObserverTest {
     @Captor
     private ArgumentCaptor<ILoggingEvent> event;
 
+    private Logger logger;
+    private Level originalLevel;
+
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
 
         when(appender.getName()).thenReturn("MOCK");
-        ch.qos.logback.classic.Logger logger =
-                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(AsyncSlf4jSpanObserver.class);
+        logger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(AsyncSlf4jSpanObserver.class);
         logger.addAppender(appender);
+
+        originalLevel = logger.getLevel();
+        logger.setLevel(Level.TRACE);
+    }
+
+    @After
+    public void after() {
+        logger.setLevel(originalLevel);
     }
 
     @Test
