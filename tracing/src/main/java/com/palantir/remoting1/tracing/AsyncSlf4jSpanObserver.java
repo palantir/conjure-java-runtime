@@ -43,6 +43,8 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
 
     @Override
     public void doConsume(Span span) {
-        logger.info("{}", span);
+        if (logger.isTraceEnabled()) {
+            logger.info("{}", span);
+        }
     }
 }
