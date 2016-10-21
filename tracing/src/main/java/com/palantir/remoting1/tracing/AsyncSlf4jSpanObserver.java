@@ -56,11 +56,11 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
                     .name(span.getOperation())
                     .parentId(span.getParentSpanId())
                     .timestamp(span.getStartTimeMs())
-                    .duration(nanoToMilli(span.getDurationNs()))  // Zipkin-durations are micro-seconds, rounded up
+                    .duration(nanoToMicro(span.getDurationNs()))  // Zipkin-durations are micro-seconds, rounded up
                     .build();
         }
 
-        static long nanoToMilli(long nano) {
+        static long nanoToMicro(long nano) {
             return (long) Math.ceil(nano / (double) 1000);
         }
 

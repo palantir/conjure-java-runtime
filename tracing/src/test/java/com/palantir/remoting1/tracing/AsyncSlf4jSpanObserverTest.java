@@ -107,11 +107,11 @@ public final class AsyncSlf4jSpanObserverTest {
 
     @Test
     public void testNanoToMicro() throws Exception {
-        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMilli(0)).isEqualTo(0);
-        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMilli(1)).isEqualTo(1);
-        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMilli(1499)).isEqualTo(2);
-        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMilli(1500)).isEqualTo(2);
-        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMilli(1501)).isEqualTo(2);
-        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMilli(2000)).isEqualTo(2);
+        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMicro(0)).isEqualTo(0);
+        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMicro(1)).isEqualTo(1);
+        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMicro(1499)).isEqualTo(2);
+        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMicro(1500)).isEqualTo(2);
+        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMicro(1501)).isEqualTo(2);
+        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatibleSerializableSpan.nanoToMicro(2000)).isEqualTo(2);
     }
 }
