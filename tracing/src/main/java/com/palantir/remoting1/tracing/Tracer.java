@@ -109,8 +109,8 @@ public final class Tracer {
                     .spanId(openSpan.getSpanId())
                     .parentSpanId(openSpan.getParentSpanId())
                     .operation(openSpan.getOperation())
-                    .startTimeMs(openSpan.getStartTimeMs())
-                    .durationNs(System.nanoTime() - openSpan.getStartClockNs())
+                    .startTimeMs(openSpan.getStartTimeMicroSeconds())
+                    .durationNs(System.nanoTime() - openSpan.getStartClockNanoSeconds())
                     .build();
 
             // Notify subscribers iff trace is observable

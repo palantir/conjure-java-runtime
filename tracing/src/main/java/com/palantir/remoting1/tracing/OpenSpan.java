@@ -33,12 +33,12 @@ public abstract class OpenSpan {
     public abstract String getOperation();
 
     /**
-     * Returns the start time in milliseconds of the span represented by this state.
+     * Returns the start time in microseconds since epoch start of the span represented by this state.
      * <p>
      * Users of this class should not set this value manually in the builder, it is configured
      * automatically when using the {@link #builder()} static.
      */
-    public abstract long getStartTimeMs();
+    public abstract long getStartTimeMicroSeconds();
 
     /**
      * Returns the starting clock position in nanoseconds for use in computing span duration.
@@ -46,7 +46,7 @@ public abstract class OpenSpan {
      * Users of this class should not set this value manually in the builder, it is configured
      * automatically when using the {@link #builder()} static.
      */
-    public abstract long getStartClockNs();
+    public abstract long getStartClockNanoSeconds();
 
     /**
      * Returns the identifier of the parent span for the current span, if one exists.
@@ -69,7 +69,8 @@ public abstract class OpenSpan {
      */
     public static Builder builder() {
         return new Builder()
-                .startTimeMs(System.currentTimeMillis())
+                // TODO(rfink) Use direct access to system microseconds when moving to Java8 / Java9
+                .startTimeMs(System.currentTimeMillis() * 1000)
                 .startClockNs(System.nanoTime());
     }
 
