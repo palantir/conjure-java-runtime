@@ -69,7 +69,7 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
 
         private static Iterable<? extends ZipkinCompatAnnotation> transformEvents(
                 List<Event> events, ZipkinCompatEndpoint endpoint) {
-            List<ZipkinCompatAnnotation> annotations = Lists.newArrayList();
+            List<ZipkinCompatAnnotation> annotations = Lists.newArrayListWithCapacity(events.size());
             for (Event event : events) {
                 ZipkinCompatAnnotation annotation = ImmutableZipkinCompatAnnotation.builder()
                         .value(event.type())
@@ -114,9 +114,9 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
         // port may be omitted
     }
 
-    private AsyncSlf4jSpanObserver(
-            String serviceName, InetAddress ip, Logger logger, ExecutorService executorService) {
+    private AsyncSlf4jSpanObserver(String serviceName, InetAddress ip, Logger logger, ExecutorService executorService) {
         super(executorService);
+
         ImmutableZipkinCompatEndpoint.Builder endpointBuilder = ImmutableZipkinCompatEndpoint.builder()
                 .serviceName(serviceName);
         if (ip instanceof Inet4Address) {
