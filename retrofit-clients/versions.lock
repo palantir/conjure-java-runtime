@@ -25,7 +25,8 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.1",
             "transitive": [
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.google.code.findbugs:jsr305": {
@@ -119,7 +120,8 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.1",
             "transitive": [
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
             ]
         },
         "com.google.code.findbugs:jsr305": {

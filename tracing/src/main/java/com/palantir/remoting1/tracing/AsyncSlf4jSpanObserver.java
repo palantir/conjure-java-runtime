@@ -16,7 +16,14 @@
 
 package com.palantir.remoting1.tracing;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.google.common.base.Optional;
 import java.util.concurrent.ExecutorService;
+import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +34,44 @@ import org.slf4j.LoggerFactory;
 public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
 
     private final Logger logger;
+
+    @JsonDeserialize(as = ImmutableZipkinCompatibleSerializableSpan.class)
+    @JsonSerialize(as = ImmutableZipkinCompatibleSerializableSpan.class)
+    @Value.Immutable
+    @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
+    abstract static class ZipkinCompatibleSerializableSpan {
+        private static final ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
+
+        abstract String getTraceId();
+        abstract String getId();
+        abstract String getName();
+        abstract Optional<String> getParentId();
+        abstract long getTimestamp();
+        abstract long getDuration();
+
+        static ZipkinCompatibleSerializableSpan fromSpan(Span span) {
+            return ImmutableZipkinCompatibleSerializableSpan.builder()
+                    .traceId(span.getTraceId())
+                    .id(span.getSpanId())
+                    .name(span.getOperation())
+                    .parentId(span.getParentSpanId())
+                    .timestamp(span.getStartTimeMicroSeconds())
+                    .duration(nanoToMicro(span.getDurationNanoSeconds()))  // Zipkin-durations are micro-seconds, round
+                    .build();
+        }
+
+        static long nanoToMicro(long nano) {
+            return Math.max(1, (long) Math.ceil(nano / (double) 1000));
+        }
+
+        String toJson() {
+            try {
+                return mapper.writeValueAsString(this);
+            } catch (JsonProcessingException e) {
+                return "UNSERIALIZABLE: " + toString();
+            }
+        }
+    }
 
     private AsyncSlf4jSpanObserver(Logger logger, ExecutorService executorService) {
         super(executorService);
@@ -44,7 +89,7 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
     @Override
     public void doConsume(Span span) {
         if (logger.isTraceEnabled()) {
-            logger.info("{}", span);
+            logger.trace("{}", ZipkinCompatibleSerializableSpan.fromSpan(span).toJson());
         }
     }
 }

@@ -82,8 +82,8 @@ public final class AsyncSpanObserverTest {
                 .traceId(Integer.toString(id))
                 .spanId("")
                 .operation("")
-                .startTimeMs(0)
-                .durationNs(0)
+                .startTimeMicroSeconds(0)
+                .durationNanoSeconds(0)
                 .build();
     }
 }

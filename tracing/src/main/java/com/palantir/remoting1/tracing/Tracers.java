@@ -16,6 +16,7 @@
 
 package com.palantir.remoting1.tracing;
 
+import com.google.common.base.Strings;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -27,7 +28,11 @@ public final class Tracers {
 
     /** Returns a random ID suitable for span and trace IDs. */
     public static String randomId() {
-        return Long.toHexString(ThreadLocalRandom.current().nextLong());
+        return longToPaddedHex(ThreadLocalRandom.current().nextLong());
+    }
+
+    static String longToPaddedHex(long number) {
+        return Strings.padStart(Long.toHexString(number), 16, '0');
     }
 
     /**
