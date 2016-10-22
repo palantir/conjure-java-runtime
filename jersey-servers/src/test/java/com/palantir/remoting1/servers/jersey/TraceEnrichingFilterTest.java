@@ -16,7 +16,9 @@
 
 package com.palantir.remoting1.servers.jersey;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -25,6 +27,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.palantir.remoting1.tracing.Event;
 import com.palantir.remoting1.tracing.Span;
 import com.palantir.remoting1.tracing.SpanObserver;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
@@ -63,7 +66,7 @@ public final class TraceEnrichingFilterTest {
             new DropwizardAppRule<>(TracingTestServer.class, "src/test/resources/test-server.yml");
 
     @Captor
-    private ArgumentCaptor<Span> span;
+    private ArgumentCaptor<Span> spanCaptor;
 
     @Mock
     private SpanObserver observer;
@@ -105,8 +108,8 @@ public final class TraceEnrichingFilterTest {
         assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), is("traceId"));
         assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
-        verify(observer).consume(span.capture());
-        assertThat(span.getValue().getOperation(), is("GET /trace"));
+        verify(observer).consume(spanCaptor.capture());
+        assertThat(spanCaptor.getValue().getOperation(), is("GET /trace"));
     }
 
     @Test
@@ -119,8 +122,8 @@ public final class TraceEnrichingFilterTest {
         assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), is("traceId"));
         assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
-        verify(observer).consume(span.capture());
-        assertThat(span.getValue().getOperation(), is("POST /trace"));
+        verify(observer).consume(spanCaptor.capture());
+        assertThat(spanCaptor.getValue().getOperation(), is("POST /trace"));
     }
 
     @Test
@@ -129,8 +132,8 @@ public final class TraceEnrichingFilterTest {
         assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), not(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
-        verify(observer).consume(span.capture());
-        assertThat(span.getValue().getOperation(), is("GET /trace"));
+        verify(observer).consume(spanCaptor.capture());
+        assertThat(spanCaptor.getValue().getOperation(), is("GET /trace"));
     }
 
     @Test
@@ -139,8 +142,8 @@ public final class TraceEnrichingFilterTest {
         assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), not(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
-        verify(observer).consume(span.capture());
-        assertThat(span.getValue().getOperation(), is("GET /trace"));
+        verify(observer).consume(spanCaptor.capture());
+        assertThat(spanCaptor.getValue().getOperation(), is("GET /trace"));
     }
 
     @Test
@@ -149,6 +152,25 @@ public final class TraceEnrichingFilterTest {
         TraceEnrichingFilter.INSTANCE.filter(request);
         assertThat(MDC.get(TraceEnrichingFilter.MDC_KEY), is("traceId"));
         verify(request).setProperty("com.palantir.remoting1.traceId", "traceId");
+    }
+
+    @Test
+    public void testFilter_createsReceiveAndSendEvents() throws Exception {
+        long beforeTime = System.currentTimeMillis() * 1000;
+        target.path("/trace").request().header(TraceHttpHeaders.TRACE_ID, "").get();
+        long afterTime = System.currentTimeMillis() * 1000;
+        verify(observer).consume(spanCaptor.capture());
+        Span span = spanCaptor.getValue();
+
+        assertThat(span.events(), hasSize(2));
+        Event serverReceive = span.events().get(0);
+        Event serverSend = span.events().get(1);
+        assertThat(serverReceive.type(), is("sr"));
+        assertThat(serverSend.type(), is("ss"));
+
+        assertThat(beforeTime, lessThanOrEqualTo(serverReceive.epochMicroSeconds()));
+        assertThat(serverReceive.epochMicroSeconds(), lessThanOrEqualTo(serverSend.epochMicroSeconds()));
+        assertThat(serverSend.epochMicroSeconds(), lessThanOrEqualTo(afterTime));
     }
 
     @Test

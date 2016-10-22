@@ -61,7 +61,8 @@ public final class Tracer {
     }
 
     /**
-     * Opens a new span for this thread's call trace, labeled with the provided operation and parent span.
+     * Opens a new span for this thread's call trace, labeled with the provided operation and parent span. Only allowed
+     * when the current trace is empty.
      */
     public static OpenSpan startSpan(String operation, String parentSpanId) {
         Preconditions.checkState(currentTrace.get().isEmpty(),
@@ -95,6 +96,24 @@ public final class Tracer {
     }
 
     /**
+     * Adds the given event to this thread's latest open span and returns the augmented span. This method is no-op and
+     * returns absent if there is no open span, i.e., if the current trace is empty.
+     */
+    public static Optional<OpenSpan> addEvent(Event event) {
+        Optional<OpenSpan> currentSpan = currentTrace.get().pop();
+        if (!currentSpan.isPresent()) {
+            return Optional.absent();
+        } else {
+            OpenSpan newSpan = OpenSpan.builder()
+                    .from(currentSpan.get())
+                    .addEvents(event)
+                    .build();
+            currentTrace.get().push(newSpan);
+            return Optional.of(newSpan);
+        }
+    }
+
+    /**
      * Completes and returns the current span (if it exists) and notifies all {@link #observers subscribers} about the
      * completed span.
      */
@@ -107,6 +126,7 @@ public final class Tracer {
             Span span = Span.builder()
                     .traceId(getTraceId())
                     .spanId(openSpan.getSpanId())
+                    .events(openSpan.events())
                     .parentSpanId(openSpan.getParentSpanId())
                     .operation(openSpan.getOperation())
                     .startTimeMicroSeconds(openSpan.getStartTimeMicroSeconds())

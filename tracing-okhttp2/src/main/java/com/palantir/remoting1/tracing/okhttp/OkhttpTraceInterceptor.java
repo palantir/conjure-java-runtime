@@ -16,6 +16,7 @@
 
 package com.palantir.remoting1.tracing.okhttp;
 
+import com.palantir.remoting1.tracing.Events;
 import com.palantir.remoting1.tracing.OpenSpan;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
@@ -23,9 +24,9 @@ import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public enum OkhttpTraceInterceptor implements Interceptor {
-
     INSTANCE;
 
     @Override
@@ -47,7 +48,9 @@ public enum OkhttpTraceInterceptor implements Interceptor {
 
         Response response;
         try {
+            Tracer.addEvent(Events.clientStart(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
             response = chain.proceed(instrumentedRequest.build());
+            Tracer.addEvent(Events.clientReceive(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
         } finally {
             Tracer.completeSpan();
         }

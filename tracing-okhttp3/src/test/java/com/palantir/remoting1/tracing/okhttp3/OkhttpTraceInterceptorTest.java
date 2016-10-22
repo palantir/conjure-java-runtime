@@ -23,7 +23,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
+import com.palantir.remoting1.tracing.Event;
 import com.palantir.remoting1.tracing.OpenSpan;
+import com.palantir.remoting1.tracing.Span;
+import com.palantir.remoting1.tracing.SpanObserver;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
 import com.palantir.remoting1.tracing.Tracers;
@@ -43,29 +46,37 @@ public final class OkhttpTraceInterceptorTest {
     @Mock
     private Interceptor.Chain chain;
 
+    @Mock
+    private SpanObserver observer;
+
     @Captor
-    private ArgumentCaptor<Request> argument;
+    private ArgumentCaptor<Request> requestCaptor;
+
+    @Captor
+    private ArgumentCaptor<Span> spanCaptor;
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
         Request request = new Request.Builder().url("http://localhost").build();
         when(chain.request()).thenReturn(request);
+        Tracer.subscribe("", observer);
     }
 
     @After
     public void after() {
         Tracer.initTrace(Optional.of(true), Tracers.randomId());
+        Tracer.unsubscribe("");
     }
 
     @Test
     public void testPopulatesNewTrace_whenNoTraceIsPresentInGlobalState() throws IOException {
         OkhttpTraceInterceptor.INSTANCE.intercept(chain);
         verify(chain).request();
-        verify(chain).proceed(argument.capture());
+        verify(chain).proceed(requestCaptor.capture());
         verifyNoMoreInteractions(chain);
 
-        Request intercepted = argument.getValue();
+        Request intercepted = requestCaptor.getValue();
         assertThat(intercepted.header(TraceHttpHeaders.SPAN_ID)).isNotNull();
         assertThat(intercepted.header(TraceHttpHeaders.TRACE_ID)).isNotNull();
         assertThat(intercepted.header(TraceHttpHeaders.PARENT_SPAN_ID)).isNull();
@@ -82,10 +93,10 @@ public final class OkhttpTraceInterceptorTest {
         }
 
         verify(chain).request();
-        verify(chain).proceed(argument.capture());
+        verify(chain).proceed(requestCaptor.capture());
         verifyNoMoreInteractions(chain);
 
-        Request intercepted = argument.getValue();
+        Request intercepted = requestCaptor.getValue();
         assertThat(intercepted.header(TraceHttpHeaders.SPAN_ID)).isNotNull();
         assertThat(intercepted.header(TraceHttpHeaders.SPAN_ID)).isNotEqualTo(parentState.getSpanId());
         assertThat(intercepted.header(TraceHttpHeaders.TRACE_ID)).isEqualTo(traceId);
@@ -95,8 +106,8 @@ public final class OkhttpTraceInterceptorTest {
     @Test
     public void testAddsIsSampledHeader_whenTraceIsObservable() throws IOException {
         OkhttpTraceInterceptor.INSTANCE.intercept(chain);
-        verify(chain).proceed(argument.capture());
-        assertThat(argument.getValue().header(TraceHttpHeaders.IS_SAMPLED)).isEqualTo("1");
+        verify(chain).proceed(requestCaptor.capture());
+        assertThat(requestCaptor.getValue().header(TraceHttpHeaders.IS_SAMPLED)).isEqualTo("1");
     }
 
     @Test
@@ -104,8 +115,8 @@ public final class OkhttpTraceInterceptorTest {
         Tracer.initTrace(Optional.of(false), Tracers.randomId());
         String traceId = Tracer.getTraceId();
         OkhttpTraceInterceptor.INSTANCE.intercept(chain);
-        verify(chain).proceed(argument.capture());
-        Request intercepted = argument.getValue();
+        verify(chain).proceed(requestCaptor.capture());
+        Request intercepted = requestCaptor.getValue();
         assertThat(intercepted.header(TraceHttpHeaders.SPAN_ID)).isNotNull();
         assertThat(intercepted.header(TraceHttpHeaders.TRACE_ID)).isEqualTo(traceId);
         assertThat(intercepted.header(TraceHttpHeaders.IS_SAMPLED)).isEqualTo("0");
@@ -126,5 +137,34 @@ public final class OkhttpTraceInterceptorTest {
             OkhttpTraceInterceptor.INSTANCE.intercept(chain);
         } catch (IllegalStateException e) { /* expected */ }
         assertThat(Tracer.startSpan("").getParentSpanId().get()).isEqualTo(before.getSpanId());
+    }
+
+    @Test
+    public void testCompletesSpan() throws Exception {
+        OpenSpan outerSpan = Tracer.startSpan("outer");
+        OkhttpTraceInterceptor.INSTANCE.intercept(chain);
+        verify(observer).consume(spanCaptor.capture());
+        Span okhttpSpan = spanCaptor.getValue();
+        assertThat(okhttpSpan.getOperation()).isEqualTo("GET http://localhost/");
+        assertThat(okhttpSpan).isNotEqualTo(outerSpan);
+    }
+
+    @Test
+    public void testSpanContainsClientEvents() throws Exception {
+        long beforeTime = System.currentTimeMillis() * 1000;
+        OkhttpTraceInterceptor.INSTANCE.intercept(chain);
+        long afterTime = System.currentTimeMillis() * 1000;
+        verify(observer).consume(spanCaptor.capture());
+        Span okhttpSpan = spanCaptor.getValue();
+
+        assertThat(okhttpSpan.events()).hasSize(2);
+        Event clientStart = okhttpSpan.events().get(0);
+        Event clientReceive = okhttpSpan.events().get(1);
+        assertThat(clientStart.type()).isEqualTo("cs");
+        assertThat(clientReceive.type()).isEqualTo("cr");
+
+        assertThat(beforeTime).isLessThanOrEqualTo(clientStart.epochMicroSeconds());
+        assertThat(clientStart.epochMicroSeconds()).isLessThanOrEqualTo(clientReceive.epochMicroSeconds());
+        assertThat(clientReceive.epochMicroSeconds()).isLessThanOrEqualTo(afterTime);
     }
 }

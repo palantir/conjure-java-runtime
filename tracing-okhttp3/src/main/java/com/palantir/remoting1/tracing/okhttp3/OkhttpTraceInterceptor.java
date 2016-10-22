@@ -16,11 +16,12 @@
 
 package com.palantir.remoting1.tracing.okhttp3;
 
-
+import com.palantir.remoting1.tracing.Events;
 import com.palantir.remoting1.tracing.OpenSpan;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -41,10 +42,15 @@ public enum OkhttpTraceInterceptor implements Interceptor {
             tracedRequest.header(TraceHttpHeaders.PARENT_SPAN_ID, span.getParentSpanId().get());
         }
 
+        Response response;
         try {
-            return chain.proceed(tracedRequest.build());
+            Tracer.addEvent(Events.clientStart(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+            response = chain.proceed(tracedRequest.build());
+            Tracer.addEvent(Events.clientReceive(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
         } finally {
             Tracer.completeSpan();
         }
+
+        return response;
     }
 }
