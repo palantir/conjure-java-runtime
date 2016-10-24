@@ -69,14 +69,14 @@ public final class TracerTest {
         }
 
         try {
-            Tracer.startSpan("op", null);
+            Tracer.startSpan("op", null, Optional.<SpanType>absent());
             fail("Didn't throw");
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("parentTraceId must be non-empty: null");
         }
 
         try {
-            Tracer.startSpan("op", "");
+            Tracer.startSpan("op", "", Optional.<SpanType>absent());
             fail("Didn't throw");
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("parentTraceId must be non-empty: ");
@@ -181,51 +181,19 @@ public final class TracerTest {
     }
 
     @Test
-    public void testAddingEventsMaintainsTraceStructure() throws Exception {
+    public void testCompletedSpanHasSameSpanType() throws Exception {
+        Tracer.startSpan("1", SpanType.SERVER_INCOMING);
+        assertThat(Tracer.completeSpan().get().type().get()).isEqualTo(SpanType.SERVER_INCOMING);
+
+        Tracer.startSpan("1", SpanType.CLIENT_OUTGOING);
+        assertThat(Tracer.completeSpan().get().type().get()).isEqualTo(SpanType.CLIENT_OUTGOING);
+
         Tracer.startSpan("1");
-        Tracer.addEvent(event(1));
-        Tracer.startSpan("2");
-        Tracer.addEvent(event(2));
-        Tracer.startSpan("3");
-        Tracer.addEvent(event(3));
-
-        Trace trace = Tracer.copyTrace();
-        OpenSpan span3 = trace.pop().get();
-        assertThat(span3.getOperation()).isEqualTo("3");
-        assertThat(span3.events()).containsExactly(event(3));
-        OpenSpan span2 = trace.pop().get();
-        assertThat(span2.getOperation()).isEqualTo("2");
-        assertThat(span2.events()).containsExactly(event(2));
-        OpenSpan span1 = trace.pop().get();
-        assertThat(span1.getOperation()).isEqualTo("1");
-        assertThat(span1.events()).containsExactly(event(1));
-        assertThat(trace.top().isPresent()).isFalse();
-    }
-
-    @Test
-    public void testCompletedSpanContainsEvent() throws Exception {
-        Tracer.startSpan("1");
-        Tracer.addEvent(event(1));
-        Tracer.addEvent(event(2));
-        Span span = Tracer.completeSpan().get();
-        assertThat(span.events()).containsExactlyInAnyOrder(event(1), event(2));
-    }
-
-    @Test
-    public void testCannotAddEventsToEmptyTrace() throws Exception {
-        assertThat(Tracer.addEvent(event(1)).isPresent()).isFalse();
-        assertThat(Tracer.completeSpan().isPresent()).isFalse();
+        assertThat(Tracer.completeSpan().get().type().isPresent()).isFalse();
     }
 
     private static Span startAndCompleteSpan() {
         Tracer.startSpan("operation");
         return Tracer.completeSpan().get();
-    }
-
-    private static Event event(int type) {
-        return ImmutableEvent.builder()
-                .type(Integer.toString(type))
-                .epochMicroSeconds(type)
-                .build();
     }
 }

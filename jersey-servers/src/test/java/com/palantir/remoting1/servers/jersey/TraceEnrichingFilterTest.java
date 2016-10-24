@@ -16,9 +16,7 @@
 
 package com.palantir.remoting1.servers.jersey;
 
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -27,9 +25,9 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.palantir.remoting1.tracing.Event;
 import com.palantir.remoting1.tracing.Span;
 import com.palantir.remoting1.tracing.SpanObserver;
+import com.palantir.remoting1.tracing.SpanType;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
 import io.dropwizard.Application;
@@ -156,21 +154,10 @@ public final class TraceEnrichingFilterTest {
 
     @Test
     public void testFilter_createsReceiveAndSendEvents() throws Exception {
-        long beforeTime = System.currentTimeMillis() * 1000;
         target.path("/trace").request().header(TraceHttpHeaders.TRACE_ID, "").get();
-        long afterTime = System.currentTimeMillis() * 1000;
         verify(observer).consume(spanCaptor.capture());
         Span span = spanCaptor.getValue();
-
-        assertThat(span.events(), hasSize(2));
-        Event serverReceive = span.events().get(0);
-        Event serverSend = span.events().get(1);
-        assertThat(serverReceive.type(), is("sr"));
-        assertThat(serverSend.type(), is("ss"));
-
-        assertThat(beforeTime, lessThanOrEqualTo(serverReceive.epochMicroSeconds()));
-        assertThat(serverReceive.epochMicroSeconds(), lessThanOrEqualTo(serverSend.epochMicroSeconds()));
-        assertThat(serverSend.epochMicroSeconds(), lessThanOrEqualTo(afterTime));
+        assertThat(span.type().get(), is(SpanType.SERVER_INCOMING));
     }
 
     @Test

@@ -18,13 +18,12 @@ package com.palantir.remoting1.servers.jersey;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
-import com.palantir.remoting1.tracing.Events;
 import com.palantir.remoting1.tracing.Span;
+import com.palantir.remoting1.tracing.SpanType;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
 import com.palantir.remoting1.tracing.Tracers;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -52,16 +51,16 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
         if (Strings.isNullOrEmpty(traceId)) {
             // HTTP request did not indicate a trace; initialize trace state and create a span.
             Tracer.initTrace(Optional.<Boolean>absent(), Tracers.randomId());
-            Tracer.startSpan(operation);
+            Tracer.startSpan(operation, SpanType.SERVER_INCOMING);
         } else {
             Tracer.initTrace(hasSampledHeader(requestContext), traceId);
             if (spanId == null) {
-                Tracer.startSpan(operation);
+                Tracer.startSpan(operation, SpanType.SERVER_INCOMING);
             } else {
-                Tracer.startSpan(operation, spanId); // caller's span is this span's parent.
+                // caller's span is this span's parent.
+                Tracer.startSpan(operation, spanId, Optional.of(SpanType.SERVER_INCOMING));
             }
         }
-        Tracer.addEvent(Events.serverReceive(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
 
         // Give SLF4J appenders access to the trace id
         // TODO(rfink) We should use putCloseable; when and how can we remove it though? There is no filter chain.
@@ -76,7 +75,6 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
         MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-        Tracer.addEvent(Events.serverSend(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
         Optional<Span> maybeSpan = Tracer.completeSpan();
         if (maybeSpan.isPresent()) {
             Span span = maybeSpan.get();

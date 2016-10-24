@@ -19,7 +19,6 @@ package com.palantir.remoting1.tracing;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
-import java.util.List;
 import org.immutables.value.Value;
 
 /**
@@ -34,12 +33,12 @@ public abstract class Span {
     public abstract String getTraceId();
     public abstract Optional<String> getParentSpanId();
     public abstract String getSpanId();
-    public abstract List<Event> events();
+    public abstract Optional<SpanType> type();
     public abstract String getOperation();
     public abstract long getStartTimeMicroSeconds();
     public abstract long getDurationNanoSeconds();
 
-    public static final Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 

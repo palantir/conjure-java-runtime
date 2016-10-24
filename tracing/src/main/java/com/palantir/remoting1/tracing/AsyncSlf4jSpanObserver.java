@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -63,20 +64,33 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
                     .parentId(span.getParentSpanId())
                     .timestamp(span.getStartTimeMicroSeconds())
                     .duration(nanoToMicro(span.getDurationNanoSeconds()))  // Zipkin-durations are micro-seconds, round
-                    .addAllAnnotations(transformEvents(span.events(), endpoint))
+                    .addAllAnnotations(spanTypeToZipkinAnnotations(span, endpoint))
                     .build();
         }
 
-        private static Iterable<? extends ZipkinCompatAnnotation> transformEvents(
-                List<Event> events, ZipkinCompatEndpoint endpoint) {
-            List<ZipkinCompatAnnotation> annotations = Lists.newArrayListWithCapacity(events.size());
-            for (Event event : events) {
-                ZipkinCompatAnnotation annotation = ImmutableZipkinCompatAnnotation.builder()
-                        .value(event.type())
-                        .timestamp(event.epochMicroSeconds())
-                        .endpoint(endpoint)
-                        .build();
-                annotations.add(annotation);
+        private static Iterable<? extends ZipkinCompatAnnotation> spanTypeToZipkinAnnotations(
+                Span span, ZipkinCompatEndpoint endpoint) {
+            if (!span.type().isPresent()) {
+                return ImmutableList.of();
+            }
+
+            List<ZipkinCompatAnnotation> annotations = Lists.newArrayListWithCapacity(2);
+            switch (span.type().get()) {
+                case CLIENT_OUTGOING:
+                    annotations.add(ZipkinCompatAnnotation.of(span.getStartTimeMicroSeconds(), "cs", endpoint));
+                    annotations.add(ZipkinCompatAnnotation.of(
+                            span.getStartTimeMicroSeconds() + nanoToMicro(span.getDurationNanoSeconds()),
+                            "cr",
+                            endpoint));
+                    break;
+                case SERVER_INCOMING:
+                    annotations.add(ZipkinCompatAnnotation.of(span.getStartTimeMicroSeconds(), "sr", endpoint));
+                    annotations.add(ZipkinCompatAnnotation.of(
+                            span.getStartTimeMicroSeconds() + nanoToMicro(span.getDurationNanoSeconds()),
+                            "ss",
+                            endpoint));
+                    break;
+                default: // empty
             }
             return annotations;
         }
@@ -101,6 +115,14 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
         abstract long timestamp(); // epoch microseconds
         abstract String value();
         abstract ZipkinCompatEndpoint endpoint();
+
+        static ZipkinCompatAnnotation of(long timestamp, String value, ZipkinCompatEndpoint endpoint) {
+            return ImmutableZipkinCompatAnnotation.builder()
+                    .timestamp(timestamp)
+                    .value(value)
+                    .endpoint(endpoint)
+                    .build();
+        }
     }
 
     @JsonSerialize(as = ImmutableZipkinCompatEndpoint.class)

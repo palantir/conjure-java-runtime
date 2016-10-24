@@ -17,7 +17,6 @@
 package com.palantir.remoting1.tracing;
 
 import com.google.common.base.Optional;
-import java.util.List;
 import org.immutables.value.Value;
 
 /**
@@ -59,8 +58,8 @@ public abstract class OpenSpan {
      */
     public abstract String getSpanId();
 
-    /** A list of events (e.g., server received message, client sent message, etc) associated with this span. */
-    public abstract List<Event> events();
+    /** Indicates the {@link SpanType} of this span; maybe be absent to indicate an unknown type. */
+    public abstract Optional<SpanType> type();
 
     /**
      * Indicates if this trace state was sampled

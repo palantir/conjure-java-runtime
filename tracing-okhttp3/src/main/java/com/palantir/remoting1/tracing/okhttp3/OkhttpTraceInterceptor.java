@@ -16,12 +16,11 @@
 
 package com.palantir.remoting1.tracing.okhttp3;
 
-import com.palantir.remoting1.tracing.Events;
 import com.palantir.remoting1.tracing.OpenSpan;
+import com.palantir.remoting1.tracing.SpanType;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -33,7 +32,7 @@ public enum OkhttpTraceInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
-        OpenSpan span = Tracer.startSpan(request.method() + " " + request.url());
+        OpenSpan span = Tracer.startSpan(request.method() + " " + request.url(), SpanType.CLIENT_OUTGOING);
         Request.Builder tracedRequest = request.newBuilder()
                 .addHeader(TraceHttpHeaders.TRACE_ID, Tracer.getTraceId())
                 .addHeader(TraceHttpHeaders.SPAN_ID, span.getSpanId())
@@ -44,9 +43,7 @@ public enum OkhttpTraceInterceptor implements Interceptor {
 
         Response response;
         try {
-            Tracer.addEvent(Events.clientStart(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
             response = chain.proceed(tracedRequest.build());
-            Tracer.addEvent(Events.clientReceive(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
         } finally {
             Tracer.completeSpan();
         }

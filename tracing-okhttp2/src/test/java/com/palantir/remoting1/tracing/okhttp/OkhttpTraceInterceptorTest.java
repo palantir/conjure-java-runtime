@@ -23,10 +23,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
-import com.palantir.remoting1.tracing.Event;
 import com.palantir.remoting1.tracing.OpenSpan;
 import com.palantir.remoting1.tracing.Span;
 import com.palantir.remoting1.tracing.SpanObserver;
+import com.palantir.remoting1.tracing.SpanType;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
 import com.palantir.remoting1.tracing.Tracers;
@@ -150,21 +150,10 @@ public final class OkhttpTraceInterceptorTest {
     }
 
     @Test
-    public void testSpanContainsClientEvents() throws Exception {
-        long beforeTime = System.currentTimeMillis() * 1000;
+    public void testSpanHasClientType() throws Exception {
         OkhttpTraceInterceptor.INSTANCE.intercept(chain);
-        long afterTime = System.currentTimeMillis() * 1000;
         verify(observer).consume(spanCaptor.capture());
         Span okhttpSpan = spanCaptor.getValue();
-        assertThat(okhttpSpan.events()).hasSize(2);
-
-        Event clientStart = okhttpSpan.events().get(0);
-        Event clientReceive = okhttpSpan.events().get(1);
-        assertThat(clientStart.type()).isEqualTo("cs");
-        assertThat(clientReceive.type()).isEqualTo("cr");
-
-        assertThat(beforeTime).isLessThanOrEqualTo(clientStart.epochMicroSeconds());
-        assertThat(clientStart.epochMicroSeconds()).isLessThanOrEqualTo(clientReceive.epochMicroSeconds());
-        assertThat(clientReceive.epochMicroSeconds()).isLessThanOrEqualTo(afterTime);
+        assertThat(okhttpSpan.type().get()).isEqualTo(SpanType.CLIENT_OUTGOING);
     }
 }
