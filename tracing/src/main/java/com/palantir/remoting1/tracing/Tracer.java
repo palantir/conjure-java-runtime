@@ -78,18 +78,19 @@ public final class Tracer {
         return span;
     }
 
-    /**
-     * Opens a new {@link SpanType#LOCAL LOCAL} span for this thread's call trace, labeled with the provided operation.
-     */
-    public static OpenSpan startSpan(String operation) {
-        return startSpanInternal(operation, SpanType.LOCAL);
-    }
 
     /**
-     * Like {@link #startSpan(String)}, but opens a span of the explicitly given {@link SpanType span type}.
+     * Like {@link #startLocalSpan(String)}, but opens a span of the explicitly given {@link SpanType span type}.
      */
     public static OpenSpan startSpan(String operation, SpanType type) {
         return startSpanInternal(operation, type);
+    }
+
+    /**
+     * Opens a new {@link SpanType#LOCAL LOCAL} span for this thread's call trace, labeled with the provided operation.
+     */
+    public static OpenSpan startLocalSpan(String operation) {
+        return startSpanInternal(operation, SpanType.LOCAL);
     }
 
     private static OpenSpan startSpanInternal(String operation, SpanType type) {

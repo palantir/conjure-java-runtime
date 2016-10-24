@@ -54,7 +54,7 @@ public final class TracerTest {
 
     @Test
     public void testClientIsInstrumentedWithTracer() throws InterruptedException {
-        OpenSpan parentTrace = Tracer.startSpan("");
+        OpenSpan parentTrace = Tracer.startLocalSpan("");
         String traceId = Tracer.getTraceId();
         service.get();
 

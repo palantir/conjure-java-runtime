@@ -45,9 +45,9 @@ public final class TracersTest {
         wrappedService.submit(traceExpectingRunnable()).get();
 
         // Non-empty trace
-        Tracer.startSpan("foo");
-        Tracer.startSpan("bar");
-        Tracer.startSpan("baz");
+        Tracer.startLocalSpan("foo");
+        Tracer.startLocalSpan("bar");
+        Tracer.startLocalSpan("baz");
         wrappedService.submit(traceExpectingCallable()).get();
         wrappedService.submit(traceExpectingRunnable()).get();
         Tracer.completeSpan();
@@ -64,9 +64,9 @@ public final class TracersTest {
         wrappedService.schedule(traceExpectingRunnable(), 0, TimeUnit.SECONDS).get();
 
         // Non-empty trace
-        Tracer.startSpan("foo");
-        Tracer.startSpan("bar");
-        Tracer.startSpan("baz");
+        Tracer.startLocalSpan("foo");
+        Tracer.startLocalSpan("bar");
+        Tracer.startLocalSpan("baz");
         wrappedService.schedule(traceExpectingCallable(), 0, TimeUnit.SECONDS).get();
         wrappedService.schedule(traceExpectingRunnable(), 0, TimeUnit.SECONDS).get();
         Tracer.completeSpan();
@@ -76,11 +76,11 @@ public final class TracersTest {
 
     @Test
     public void testWrappingRunnable_runnableTraceIsIsolated() throws Exception {
-        Tracer.startSpan("outside");
+        Tracer.startLocalSpan("outside");
         Runnable runnable = Tracers.wrap(new Runnable() {
             @Override
             public void run() {
-                Tracer.startSpan("inside"); // never completed
+                Tracer.startLocalSpan("inside"); // never completed
             }
         });
         runnable.run();
@@ -89,24 +89,24 @@ public final class TracersTest {
 
     @Test
     public void testWrappingRunnable_traceStateIsCapturedAtConstructionTime() throws Exception {
-        Tracer.startSpan("before-construction");
+        Tracer.startLocalSpan("before-construction");
         Runnable runnable = Tracers.wrap(new Runnable() {
             @Override
             public void run() {
                 assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("before-construction");
             }
         });
-        Tracer.startSpan("after-construction");
+        Tracer.startLocalSpan("after-construction");
         runnable.run();
     }
 
     @Test
     public void testWrappingCallable_runnableTraceIsIsolated() throws Exception {
-        Tracer.startSpan("outside");
+        Tracer.startLocalSpan("outside");
         Callable<Void> runnable = Tracers.wrap(new Callable<Void>() {
             @Override
             public Void call() {
-                Tracer.startSpan("inside"); // never completed
+                Tracer.startLocalSpan("inside"); // never completed
                 return null;
             }
         });
@@ -116,7 +116,7 @@ public final class TracersTest {
 
     @Test
     public void testWrappingCallable_traceStateIsCapturedAtConstructionTime() throws Exception {
-        Tracer.startSpan("before-construction");
+        Tracer.startLocalSpan("before-construction");
         Callable<Void> runnable = Tracers.wrap(new Callable<Void>() {
             @Override
             public Void call() {
@@ -124,7 +124,7 @@ public final class TracersTest {
                 return null;
             }
         });
-        Tracer.startSpan("after-construction");
+        Tracer.startLocalSpan("after-construction");
         runnable.call();
     }
 

@@ -84,7 +84,7 @@ public final class OkhttpTraceInterceptorTest {
 
     @Test
     public void testPopulatesNewTrace_whenParentTraceIsPresent() throws IOException {
-        OpenSpan parentState = Tracer.startSpan("operation");
+        OpenSpan parentState = Tracer.startLocalSpan("operation");
         String traceId = Tracer.getTraceId();
         try {
             OkhttpTraceInterceptor.INSTANCE.intercept(chain);
@@ -124,24 +124,24 @@ public final class OkhttpTraceInterceptorTest {
 
     @Test
     public void testPopsSpan() throws IOException {
-        OpenSpan before = Tracer.startSpan("");
+        OpenSpan before = Tracer.startLocalSpan("");
         OkhttpTraceInterceptor.INSTANCE.intercept(chain);
-        assertThat(Tracer.startSpan("").getParentSpanId().get()).isEqualTo(before.getSpanId());
+        assertThat(Tracer.startLocalSpan("").getParentSpanId().get()).isEqualTo(before.getSpanId());
     }
 
     @Test
     public void testPopsSpanEvenWhenChainFails() throws IOException {
-        OpenSpan before = Tracer.startSpan("op");
+        OpenSpan before = Tracer.startLocalSpan("op");
         when(chain.proceed(any(Request.class))).thenThrow(new IllegalStateException());
         try {
             OkhttpTraceInterceptor.INSTANCE.intercept(chain);
         } catch (IllegalStateException e) { /* expected */ }
-        assertThat(Tracer.startSpan("").getParentSpanId().get()).isEqualTo(before.getSpanId());
+        assertThat(Tracer.startLocalSpan("").getParentSpanId().get()).isEqualTo(before.getSpanId());
     }
 
     @Test
     public void testCompletesSpan() throws Exception {
-        OpenSpan outerSpan = Tracer.startSpan("outer");
+        OpenSpan outerSpan = Tracer.startLocalSpan("outer");
         OkhttpTraceInterceptor.INSTANCE.intercept(chain);
         verify(observer).consume(spanCaptor.capture());
         Span okhttpSpan = spanCaptor.getValue();
