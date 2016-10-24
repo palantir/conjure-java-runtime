@@ -79,20 +79,20 @@ public final class Tracer {
     }
 
     /**
-     * Opens a new span for this thread's call trace, labeled with the provided operation.
+     * Opens a new {@link SpanType#LOCAL LOCAL} span for this thread's call trace, labeled with the provided operation.
      */
     public static OpenSpan startSpan(String operation) {
-        return startSpanInternal(operation, Optional.<SpanType>absent());
+        return startSpanInternal(operation, SpanType.LOCAL);
     }
 
     /**
-     * Like {@link #startSpan(String)}, but opens a span of the given type.
+     * Like {@link #startSpan(String)}, but opens a span of the explicitly given {@link SpanType span type}.
      */
     public static OpenSpan startSpan(String operation, SpanType type) {
-        return startSpanInternal(operation, Optional.of(type));
+        return startSpanInternal(operation, type);
     }
 
-    private static OpenSpan startSpanInternal(String operation, Optional<SpanType> type) {
+    private static OpenSpan startSpanInternal(String operation, SpanType type) {
         OpenSpan.Builder spanBuilder = OpenSpan.builder()
                 .operation(operation)
                 .spanId(Tracers.randomId())

@@ -22,7 +22,7 @@ import com.google.common.base.Optional;
 import org.immutables.value.Value;
 
 /**
- * A value class representing a completed Span.
+ * A value class representing a completed Span, see {@link OpenSpan} for a description of the fields.
  */
 @JsonDeserialize(as = ImmutableSpan.class)
 @JsonSerialize(as = ImmutableSpan.class)
@@ -33,7 +33,7 @@ public abstract class Span {
     public abstract String getTraceId();
     public abstract Optional<String> getParentSpanId();
     public abstract String getSpanId();
-    public abstract Optional<SpanType> type();
+    public abstract SpanType type();
     public abstract String getOperation();
     public abstract long getStartTimeMicroSeconds();
     public abstract long getDurationNanoSeconds();

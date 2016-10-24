@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
@@ -70,12 +69,9 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
 
         private static Iterable<? extends ZipkinCompatAnnotation> spanTypeToZipkinAnnotations(
                 Span span, ZipkinCompatEndpoint endpoint) {
-            if (!span.type().isPresent()) {
-                return ImmutableList.of();
-            }
 
             List<ZipkinCompatAnnotation> annotations = Lists.newArrayListWithCapacity(2);
-            switch (span.type().get()) {
+            switch (span.type()) {
                 case CLIENT_OUTGOING:
                     annotations.add(ZipkinCompatAnnotation.of(span.getStartTimeMicroSeconds(), "cs", endpoint));
                     annotations.add(ZipkinCompatAnnotation.of(
@@ -90,7 +86,11 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
                             "ss",
                             endpoint));
                     break;
-                default: // empty
+                case LOCAL:
+                    annotations.add(ZipkinCompatAnnotation.of(span.getStartTimeMicroSeconds(), "lc", endpoint));
+                    break;
+                default:
+                    throw new RuntimeException("Unhandled SpanType: " + span.type());
             }
             return annotations;
         }

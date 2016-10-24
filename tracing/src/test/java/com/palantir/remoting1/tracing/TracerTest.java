@@ -181,15 +181,15 @@ public final class TracerTest {
     }
 
     @Test
-    public void testCompletedSpanHasSameSpanType() throws Exception {
-        Tracer.startSpan("1", SpanType.SERVER_INCOMING);
-        assertThat(Tracer.completeSpan().get().type().get()).isEqualTo(SpanType.SERVER_INCOMING);
+    public void testCompletedSpanHasCorrectSpanType() throws Exception {
+        for (SpanType type : SpanType.values()) {
+            Tracer.startSpan("1", type);
+            assertThat(Tracer.completeSpan().get().type()).isEqualTo(type);
+        }
 
-        Tracer.startSpan("1", SpanType.CLIENT_OUTGOING);
-        assertThat(Tracer.completeSpan().get().type().get()).isEqualTo(SpanType.CLIENT_OUTGOING);
-
+        // Default is LOCAL
         Tracer.startSpan("1");
-        assertThat(Tracer.completeSpan().get().type().isPresent()).isFalse();
+        assertThat(Tracer.completeSpan().get().type()).isEqualTo(SpanType.LOCAL);
     }
 
     private static Span startAndCompleteSpan() {

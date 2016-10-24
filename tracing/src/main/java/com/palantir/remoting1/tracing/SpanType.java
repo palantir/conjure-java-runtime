@@ -27,5 +27,8 @@ public enum SpanType {
      * Indicates that this is the innermost span encapsulating remote work, typically the last span opened by an RPC
      * client.
      */
-    CLIENT_OUTGOING
+    CLIENT_OUTGOING,
+
+    /** Indicates a local method call or computation that does not involve RPC. */
+    LOCAL
 }

@@ -58,8 +58,8 @@ public abstract class OpenSpan {
      */
     public abstract String getSpanId();
 
-    /** Indicates the {@link SpanType} of this span; maybe be absent to indicate an unknown type. */
-    public abstract Optional<SpanType> type();
+    /** Indicates the {@link SpanType} of this span, e.g., a server-side vs. client-side vs local span. */
+    public abstract SpanType type();
 
     /**
      * Indicates if this trace state was sampled

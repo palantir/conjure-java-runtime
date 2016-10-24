@@ -157,7 +157,7 @@ public final class TraceEnrichingFilterTest {
         target.path("/trace").request().header(TraceHttpHeaders.TRACE_ID, "").get();
         verify(observer).consume(spanCaptor.capture());
         Span span = spanCaptor.getValue();
-        assertThat(span.type().get(), is(SpanType.SERVER_INCOMING));
+        assertThat(span.type(), is(SpanType.SERVER_INCOMING));
     }
 
     @Test
