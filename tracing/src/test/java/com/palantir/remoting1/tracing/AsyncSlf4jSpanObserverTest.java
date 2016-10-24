@@ -172,7 +172,7 @@ public final class AsyncSlf4jSpanObserverTest {
         assertThat(AsyncSlf4jSpanObserver.ZipkinCompatSpan.nanoToMicro(1499)).isEqualTo(2);
         assertThat(AsyncSlf4jSpanObserver.ZipkinCompatSpan.nanoToMicro(1500)).isEqualTo(2);
         assertThat(AsyncSlf4jSpanObserver.ZipkinCompatSpan.nanoToMicro(1501)).isEqualTo(2);
-        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatSpan.nanoToMicro(2000)).isEqualTo(2);
+        assertThat(AsyncSlf4jSpanObserver.ZipkinCompatSpan.nanoToMicro(2000)).isEqualTo(3);
     }
 
     private static AsyncSlf4jSpanObserver.ZipkinCompatSpan zipkinSpan(long start, long duration, SpanType type) {

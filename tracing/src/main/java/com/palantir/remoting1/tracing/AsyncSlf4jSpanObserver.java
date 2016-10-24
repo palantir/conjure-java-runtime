@@ -96,7 +96,7 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
         }
 
         static long nanoToMicro(long nano) {
-            return Math.max(1, (nano + 999) / 1000L);
+            return (nano + 1000) / 1000L;
         }
 
         String toJson() {
