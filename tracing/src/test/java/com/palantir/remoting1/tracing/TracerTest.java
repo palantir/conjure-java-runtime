@@ -69,14 +69,14 @@ public final class TracerTest {
         }
 
         try {
-            Tracer.startSpan("op", null, Optional.<SpanType>absent());
+            Tracer.startSpan("op", null, null);
             fail("Didn't throw");
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("parentTraceId must be non-empty: null");
         }
 
         try {
-            Tracer.startSpan("op", "", Optional.<SpanType>absent());
+            Tracer.startSpan("op", "", null);
             fail("Didn't throw");
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("parentTraceId must be non-empty: ");

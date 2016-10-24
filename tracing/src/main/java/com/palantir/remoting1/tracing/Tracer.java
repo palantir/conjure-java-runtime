@@ -64,7 +64,7 @@ public final class Tracer {
      * Opens a new span for this thread's call trace, labeled with the provided operation and parent span. Only allowed
      * when the current trace is empty.
      */
-    public static OpenSpan startSpan(String operation, String parentSpanId, Optional<SpanType> type) {
+    public static OpenSpan startSpan(String operation, String parentSpanId, SpanType type) {
         Preconditions.checkState(currentTrace.get().isEmpty(),
                 "Cannot start a span with explicit parent if the current thread's trace is non-empty");
         validateId(parentSpanId, "parentTraceId must be non-empty: %s");
