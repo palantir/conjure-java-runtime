@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 
 import com.palantir.remoting1.tracing.Span;
 import com.palantir.remoting1.tracing.SpanObserver;
+import com.palantir.remoting1.tracing.SpanType;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
 import io.dropwizard.Application;
@@ -63,7 +64,7 @@ public final class TraceEnrichingFilterTest {
             new DropwizardAppRule<>(TracingTestServer.class, "src/test/resources/test-server.yml");
 
     @Captor
-    private ArgumentCaptor<Span> span;
+    private ArgumentCaptor<Span> spanCaptor;
 
     @Mock
     private SpanObserver observer;
@@ -105,8 +106,8 @@ public final class TraceEnrichingFilterTest {
         assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), is("traceId"));
         assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
-        verify(observer).consume(span.capture());
-        assertThat(span.getValue().getOperation(), is("GET /trace"));
+        verify(observer).consume(spanCaptor.capture());
+        assertThat(spanCaptor.getValue().getOperation(), is("GET /trace"));
     }
 
     @Test
@@ -119,8 +120,8 @@ public final class TraceEnrichingFilterTest {
         assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), is("traceId"));
         assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
-        verify(observer).consume(span.capture());
-        assertThat(span.getValue().getOperation(), is("POST /trace"));
+        verify(observer).consume(spanCaptor.capture());
+        assertThat(spanCaptor.getValue().getOperation(), is("POST /trace"));
     }
 
     @Test
@@ -129,8 +130,8 @@ public final class TraceEnrichingFilterTest {
         assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), not(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
-        verify(observer).consume(span.capture());
-        assertThat(span.getValue().getOperation(), is("GET /trace"));
+        verify(observer).consume(spanCaptor.capture());
+        assertThat(spanCaptor.getValue().getOperation(), is("GET /trace"));
     }
 
     @Test
@@ -139,8 +140,8 @@ public final class TraceEnrichingFilterTest {
         assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), not(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
-        verify(observer).consume(span.capture());
-        assertThat(span.getValue().getOperation(), is("GET /trace"));
+        verify(observer).consume(spanCaptor.capture());
+        assertThat(spanCaptor.getValue().getOperation(), is("GET /trace"));
     }
 
     @Test
@@ -149,6 +150,14 @@ public final class TraceEnrichingFilterTest {
         TraceEnrichingFilter.INSTANCE.filter(request);
         assertThat(MDC.get(TraceEnrichingFilter.MDC_KEY), is("traceId"));
         verify(request).setProperty("com.palantir.remoting1.traceId", "traceId");
+    }
+
+    @Test
+    public void testFilter_createsReceiveAndSendEvents() throws Exception {
+        target.path("/trace").request().header(TraceHttpHeaders.TRACE_ID, "").get();
+        verify(observer).consume(spanCaptor.capture());
+        Span span = spanCaptor.getValue();
+        assertThat(span.type(), is(SpanType.SERVER_INCOMING));
     }
 
     @Test

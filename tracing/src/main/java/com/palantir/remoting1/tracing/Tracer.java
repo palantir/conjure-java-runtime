@@ -61,9 +61,10 @@ public final class Tracer {
     }
 
     /**
-     * Opens a new span for this thread's call trace, labeled with the provided operation and parent span.
+     * Opens a new span for this thread's call trace, labeled with the provided operation and parent span. Only allowed
+     * when the current trace is empty.
      */
-    public static OpenSpan startSpan(String operation, String parentSpanId) {
+    public static OpenSpan startSpan(String operation, String parentSpanId, SpanType type) {
         Preconditions.checkState(currentTrace.get().isEmpty(),
                 "Cannot start a span with explicit parent if the current thread's trace is non-empty");
         validateId(parentSpanId, "parentTraceId must be non-empty: %s");
@@ -71,18 +72,32 @@ public final class Tracer {
                 .spanId(Tracers.randomId())
                 .operation(operation)
                 .parentSpanId(parentSpanId)
+                .type(type)
                 .build();
         currentTrace.get().push(span);
         return span;
     }
 
+
     /**
-     * Opens a new span for this thread's call trace, labeled with the provided operation.
+     * Like {@link #startSpan(String)}, but opens a span of the explicitly given {@link SpanType span type}.
+     */
+    public static OpenSpan startSpan(String operation, SpanType type) {
+        return startSpanInternal(operation, type);
+    }
+
+    /**
+     * Opens a new {@link SpanType#LOCAL LOCAL} span for this thread's call trace, labeled with the provided operation.
      */
     public static OpenSpan startSpan(String operation) {
+        return startSpanInternal(operation, SpanType.LOCAL);
+    }
+
+    private static OpenSpan startSpanInternal(String operation, SpanType type) {
         OpenSpan.Builder spanBuilder = OpenSpan.builder()
                 .operation(operation)
-                .spanId(Tracers.randomId());
+                .spanId(Tracers.randomId())
+                .type(type);
 
         Optional<OpenSpan> prevState = currentTrace.get().top();
         if (prevState.isPresent()) {
@@ -107,6 +122,7 @@ public final class Tracer {
             Span span = Span.builder()
                     .traceId(getTraceId())
                     .spanId(openSpan.getSpanId())
+                    .type(openSpan.type())
                     .parentSpanId(openSpan.getParentSpanId())
                     .operation(openSpan.getOperation())
                     .startTimeMicroSeconds(openSpan.getStartTimeMicroSeconds())

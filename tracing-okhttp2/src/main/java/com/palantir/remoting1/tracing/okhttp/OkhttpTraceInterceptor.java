@@ -17,6 +17,7 @@
 package com.palantir.remoting1.tracing.okhttp;
 
 import com.palantir.remoting1.tracing.OpenSpan;
+import com.palantir.remoting1.tracing.SpanType;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
 import com.squareup.okhttp.Interceptor;
@@ -25,7 +26,6 @@ import com.squareup.okhttp.Response;
 import java.io.IOException;
 
 public enum OkhttpTraceInterceptor implements Interceptor {
-
     INSTANCE;
 
     @Override
@@ -33,7 +33,7 @@ public enum OkhttpTraceInterceptor implements Interceptor {
         Request request = chain.request();
 
         // instrument request
-        OpenSpan callState = Tracer.startSpan(request.method() + " " + request.urlString());
+        OpenSpan callState = Tracer.startSpan(request.method() + " " + request.urlString(), SpanType.CLIENT_OUTGOING);
         Request.Builder instrumentedRequest = new Request.Builder()
                 .headers(request.headers())
                 .url(request.url())

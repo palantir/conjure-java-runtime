@@ -19,6 +19,7 @@ package com.palantir.remoting1.servers.jersey;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.palantir.remoting1.tracing.Span;
+import com.palantir.remoting1.tracing.SpanType;
 import com.palantir.remoting1.tracing.TraceHttpHeaders;
 import com.palantir.remoting1.tracing.Tracer;
 import com.palantir.remoting1.tracing.Tracers;
@@ -50,13 +51,14 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
         if (Strings.isNullOrEmpty(traceId)) {
             // HTTP request did not indicate a trace; initialize trace state and create a span.
             Tracer.initTrace(Optional.<Boolean>absent(), Tracers.randomId());
-            Tracer.startSpan(operation);
+            Tracer.startSpan(operation, SpanType.SERVER_INCOMING);
         } else {
             Tracer.initTrace(hasSampledHeader(requestContext), traceId);
             if (spanId == null) {
-                Tracer.startSpan(operation);
+                Tracer.startSpan(operation, SpanType.SERVER_INCOMING);
             } else {
-                Tracer.startSpan(operation, spanId); // caller's span is this span's parent.
+                // caller's span is this span's parent.
+                Tracer.startSpan(operation, spanId, SpanType.SERVER_INCOMING);
             }
         }
 

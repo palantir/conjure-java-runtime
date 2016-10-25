@@ -69,14 +69,14 @@ public final class TracerTest {
         }
 
         try {
-            Tracer.startSpan("op", null);
+            Tracer.startSpan("op", null, null);
             fail("Didn't throw");
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("parentTraceId must be non-empty: null");
         }
 
         try {
-            Tracer.startSpan("op", "");
+            Tracer.startSpan("op", "", null);
             fail("Didn't throw");
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("parentTraceId must be non-empty: ");
@@ -178,6 +178,18 @@ public final class TracerTest {
         Tracer.setTrace(new Trace(true, "newTraceId"));
         assertThat(Tracer.getTraceId()).isEqualTo("newTraceId");
         assertThat(Tracer.completeSpan().isPresent()).isFalse();
+    }
+
+    @Test
+    public void testCompletedSpanHasCorrectSpanType() throws Exception {
+        for (SpanType type : SpanType.values()) {
+            Tracer.startSpan("1", type);
+            assertThat(Tracer.completeSpan().get().type()).isEqualTo(type);
+        }
+
+        // Default is LOCAL
+        Tracer.startSpan("1");
+        assertThat(Tracer.completeSpan().get().type()).isEqualTo(SpanType.LOCAL);
     }
 
     private static Span startAndCompleteSpan() {

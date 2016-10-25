@@ -16,12 +16,17 @@
 
 package com.palantir.remoting1.tracing;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import org.immutables.value.Value;
 import org.slf4j.Logger;
@@ -32,15 +37,15 @@ import org.slf4j.LoggerFactory;
  * with log-level {@link Logger#info INFO}. Logging is performed asynchronously on a given executor service.
  */
 public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
+    private static final ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
 
     private final Logger logger;
+    private final ZipkinCompatEndpoint endpoint;
 
-    @JsonDeserialize(as = ImmutableZipkinCompatibleSerializableSpan.class)
-    @JsonSerialize(as = ImmutableZipkinCompatibleSerializableSpan.class)
+    @JsonSerialize(as = ImmutableZipkinCompatSpan.class)
     @Value.Immutable
     @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
-    abstract static class ZipkinCompatibleSerializableSpan {
-        private static final ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
+    abstract static class ZipkinCompatSpan {
 
         abstract String getTraceId();
         abstract String getId();
@@ -48,20 +53,50 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
         abstract Optional<String> getParentId();
         abstract long getTimestamp();
         abstract long getDuration();
+        abstract List<ZipkinCompatAnnotation> annotations();
 
-        static ZipkinCompatibleSerializableSpan fromSpan(Span span) {
-            return ImmutableZipkinCompatibleSerializableSpan.builder()
+        static ZipkinCompatSpan fromSpan(Span span, ZipkinCompatEndpoint endpoint) {
+            return ImmutableZipkinCompatSpan.builder()
                     .traceId(span.getTraceId())
                     .id(span.getSpanId())
                     .name(span.getOperation())
                     .parentId(span.getParentSpanId())
                     .timestamp(span.getStartTimeMicroSeconds())
                     .duration(nanoToMicro(span.getDurationNanoSeconds()))  // Zipkin-durations are micro-seconds, round
+                    .addAllAnnotations(spanTypeToZipkinAnnotations(span, endpoint))
                     .build();
         }
 
+        private static Iterable<? extends ZipkinCompatAnnotation> spanTypeToZipkinAnnotations(
+                Span span, ZipkinCompatEndpoint endpoint) {
+
+            List<ZipkinCompatAnnotation> annotations = Lists.newArrayListWithCapacity(2);
+            switch (span.type()) {
+                case CLIENT_OUTGOING:
+                    annotations.add(ZipkinCompatAnnotation.of(span.getStartTimeMicroSeconds(), "cs", endpoint));
+                    annotations.add(ZipkinCompatAnnotation.of(
+                            span.getStartTimeMicroSeconds() + nanoToMicro(span.getDurationNanoSeconds()),
+                            "cr",
+                            endpoint));
+                    break;
+                case SERVER_INCOMING:
+                    annotations.add(ZipkinCompatAnnotation.of(span.getStartTimeMicroSeconds(), "sr", endpoint));
+                    annotations.add(ZipkinCompatAnnotation.of(
+                            span.getStartTimeMicroSeconds() + nanoToMicro(span.getDurationNanoSeconds()),
+                            "ss",
+                            endpoint));
+                    break;
+                case LOCAL:
+                    annotations.add(ZipkinCompatAnnotation.of(span.getStartTimeMicroSeconds(), "lc", endpoint));
+                    break;
+                default:
+                    throw new RuntimeException("Unhandled SpanType: " + span.type());
+            }
+            return annotations;
+        }
+
         static long nanoToMicro(long nano) {
-            return Math.max(1, (long) Math.ceil(nano / (double) 1000));
+            return (nano + 1000) / 1000L;
         }
 
         String toJson() {
@@ -73,23 +108,63 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
         }
     }
 
-    private AsyncSlf4jSpanObserver(Logger logger, ExecutorService executorService) {
+    @JsonSerialize(as = ImmutableZipkinCompatAnnotation.class)
+    @Value.Immutable
+    @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
+    abstract static class ZipkinCompatAnnotation {
+        abstract long timestamp(); // epoch microseconds
+        abstract String value();
+        abstract ZipkinCompatEndpoint endpoint();
+
+        static ZipkinCompatAnnotation of(long timestamp, String value, ZipkinCompatEndpoint endpoint) {
+            return ImmutableZipkinCompatAnnotation.builder()
+                    .timestamp(timestamp)
+                    .value(value)
+                    .endpoint(endpoint)
+                    .build();
+        }
+    }
+
+    @JsonSerialize(as = ImmutableZipkinCompatEndpoint.class)
+    @Value.Immutable
+    @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    abstract static class ZipkinCompatEndpoint {
+        abstract String serviceName();
+        abstract Optional<String> ipv4();
+        abstract Optional<String> ipv6();
+        // port may be omitted
+    }
+
+    private AsyncSlf4jSpanObserver(String serviceName, InetAddress ip, Logger logger, ExecutorService executorService) {
         super(executorService);
+
+        ImmutableZipkinCompatEndpoint.Builder endpointBuilder = ImmutableZipkinCompatEndpoint.builder()
+                .serviceName(serviceName);
+        if (ip instanceof Inet4Address) {
+            endpointBuilder.ipv4(ip.getHostAddress());
+        } else if (ip instanceof Inet6Address) {
+            endpointBuilder.ipv6(ip.getHostAddress());
+        }
+        this.endpoint = endpointBuilder.build();
+
         this.logger = logger;
     }
 
-    public static AsyncSlf4jSpanObserver of(ExecutorService executorService) {
-        return new AsyncSlf4jSpanObserver(LoggerFactory.getLogger(AsyncSlf4jSpanObserver.class), executorService);
+    public static AsyncSlf4jSpanObserver of(String serviceName, ExecutorService executorService) {
+        return new AsyncSlf4jSpanObserver(serviceName, InetAddressSupplier.INSTANCE.get(),
+                LoggerFactory.getLogger(AsyncSlf4jSpanObserver.class), executorService);
     }
 
-    public static AsyncSlf4jSpanObserver of(Logger logger, ExecutorService executorService) {
-        return new AsyncSlf4jSpanObserver(logger, executorService);
+    public static AsyncSlf4jSpanObserver of(
+            String serviceName, InetAddress ip, Logger logger, ExecutorService executorService) {
+        return new AsyncSlf4jSpanObserver(serviceName, ip, logger, executorService);
     }
 
     @Override
     public void doConsume(Span span) {
         if (logger.isTraceEnabled()) {
-            logger.trace("{}", ZipkinCompatibleSerializableSpan.fromSpan(span).toJson());
+            logger.trace("{}", ZipkinCompatSpan.fromSpan(span, endpoint).toJson());
         }
     }
 }
