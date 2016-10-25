@@ -80,7 +80,7 @@ public final class Tracer {
 
 
     /**
-     * Like {@link #startLocalSpan(String)}, but opens a span of the explicitly given {@link SpanType span type}.
+     * Like {@link #startSpan(String)}, but opens a span of the explicitly given {@link SpanType span type}.
      */
     public static OpenSpan startSpan(String operation, SpanType type) {
         return startSpanInternal(operation, type);
@@ -89,7 +89,7 @@ public final class Tracer {
     /**
      * Opens a new {@link SpanType#LOCAL LOCAL} span for this thread's call trace, labeled with the provided operation.
      */
-    public static OpenSpan startLocalSpan(String operation) {
+    public static OpenSpan startSpan(String operation) {
         return startSpanInternal(operation, SpanType.LOCAL);
     }
 

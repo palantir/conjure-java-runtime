@@ -140,8 +140,8 @@ public final class TracerTest {
     @Test
     public void testDerivesNewSpansWhenTraceIsNotObservable() throws Exception {
         Tracer.initTrace(Optional.of(false), Tracers.randomId());
-        Tracer.startLocalSpan("foo");
-        Tracer.startLocalSpan("bar");
+        Tracer.startSpan("foo");
+        Tracer.startSpan("bar");
         assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("bar");
         assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("foo");
     }
@@ -174,7 +174,7 @@ public final class TracerTest {
 
     @Test
     public void testSetTraceSetsCurrentTrace() throws Exception {
-        Tracer.startLocalSpan("operation");
+        Tracer.startSpan("operation");
         Tracer.setTrace(new Trace(true, "newTraceId"));
         assertThat(Tracer.getTraceId()).isEqualTo("newTraceId");
         assertThat(Tracer.completeSpan().isPresent()).isFalse();
@@ -188,12 +188,12 @@ public final class TracerTest {
         }
 
         // Default is LOCAL
-        Tracer.startLocalSpan("1");
+        Tracer.startSpan("1");
         assertThat(Tracer.completeSpan().get().type()).isEqualTo(SpanType.LOCAL);
     }
 
     private static Span startAndCompleteSpan() {
-        Tracer.startLocalSpan("operation");
+        Tracer.startSpan("operation");
         return Tracer.completeSpan().get();
     }
 }
