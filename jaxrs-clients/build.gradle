@@ -6,7 +6,6 @@ dependencies {
     compile project(":tracing-okhttp3")
     compile project(":http-clients-api")
     compile project(":service-config")
-    compile project(":tracing-okhttp3")
 
     compile "com.fasterxml.jackson.core:jackson-databind"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-guava"
@@ -33,28 +32,32 @@ dependencies {
     shadow project(':error-handling')
     shadow project(':service-config')
     shadow project(':ssl-config')
+    shadow project(":tracing-okhttp3")
     shadow "javax.ws.rs:javax.ws.rs-api"
     shadow "com.fasterxml.jackson.core:jackson-databind"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-guava"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-jdk7"
     shadow "com.google.guava:guava"
+    shadow "com.squareup.okhttp3:okhttp"
 }
 
 shadowJar {
     mergeServiceFiles()
-    relocate('com.palantir.tracing', 'httpremoting.shaded.com.palantir.tracing')
+    // relocate('com.palantir.remoting1.tracing', 'httpremoting.shaded.com.palantir.remoting1.tracing')
     relocate('feign', 'httpremoting.shaded.feign')
     relocate('zipkin', 'httpremoting.shaded.zipkin')
-    relocate('okhttp3', 'httpremoting.shaded.okhttp3')
     relocate('org.joda.time', 'httpremoting.shaded.org.joda.time')
     relocate('okio', 'httpremoting.shaded.okio')
     dependencies {
         exclude(project(':error-handling'))
         exclude(project(':service-config'))
         exclude(project(':ssl-config'))
+        exclude(project(':tracing'))
+        exclude(project(':tracing-okhttp3'))
         exclude(dependency { it.moduleGroup.contains("javax.ws.rs") })
         exclude(dependency { it.moduleGroup.contains("com.fasterxml.jackson") })
         exclude(dependency { it.moduleGroup.contains("com.google.guava") })
+        exclude(dependency { it.moduleGroup.contains("com.squareup.okhttp3") })
     }
     classifier = ''
 }
