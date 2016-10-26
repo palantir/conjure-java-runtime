@@ -12,7 +12,7 @@ clients and servers.
 Core libraries:
 - jaxrs-clients: Clients for JAX-RS-defined service interfaces
 - retrofit2-clients: Clients for Retrofit-defined service interfaces
-- dropwizard-servers: Configuration library for Dropwizard/Jersey servers
+- jersey-servers: Configuration library for Dropwizard/Jersey servers
 
 # Usage
 
@@ -26,7 +26,7 @@ repositories {
 dependencies {
   compile "com.palantir.remoting1:jaxrs-clients:$version"
   compile "com.palantir.remoting1:retrofit2-clients:$version"
-  compile "com.palantir.remoting1:dropwizard-servers:$version"
+  compile "com.palantir.remoting1:jersey-servers:$version"
   // optional support for PEM key store type using Bouncy Castle libraries:
   //     compile "com.palantir.remoting1:pkcs1-reader-bouncy-castle:$version"
   // optional support for PEM key store type using Sun libraries:
