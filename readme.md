@@ -97,6 +97,25 @@ try {
 }
 ```
 
+The `tracing` library can be used independently of `jaxrs-clients` or `retrofit2-clients`:
+
+```groovy
+// build.gradle
+dependencies {
+  compile "com.palantir.remoting1:tracing:$version"
+}
+```
+```java
+Tracer.subscribe("SLF4J", AsyncSlf4jSpanObserver.of(executor));
+try {
+    Tracer.startSpan("doSomeComputation");
+    doSomeComputation();
+} finally {
+    Tracer.completeSpan();
+}
+
+```
+
 
 ## service-config
 Provides utilities for setting up service clients from file-based configuration. Example:
