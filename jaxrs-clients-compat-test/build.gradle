@@ -5,9 +5,6 @@ dependencies {
 
     // Versions incompatible with jaxrs-clients's shaded internals.
     // Note that this only works correctly in Gradle, not in Eclipse/IntelliJ.
-    testCompile "com.fasterxml.jackson.core:jackson-databind:2.4.0"
-    testCompile "com.fasterxml.jackson.datatype:jackson-datatype-guava:2.4.0"
-    testCompile "com.fasterxml.jackson.datatype:jackson-datatype-jdk7:2.4.0"
     testCompile "com.netflix.feign:feign-okhttp:8.10.0"
     testCompile "com.netflix.feign:feign-jaxrs:8.10.0"
     testCompile "javax.ws.rs:javax.ws.rs-api"
@@ -19,12 +16,6 @@ dependencies {
 
 configurations.all {
     resolutionStrategy {
-        force "com.fasterxml.jackson.datatype:jackson-datatype-guava:2.4.0"
-        force "com.fasterxml.jackson.core:jackson-databind:2.4.0"
-        force "com.fasterxml.jackson.core:jackson-core:2.4.0"
-        force "com..fasterxml.jackson.datatype:jackson-datatype-jdk7:2.4.0"
-        force "com.fasterxml.jackson.core:jackson-core:2.4.0"
-        force "com.fasterxml.jackson.core:jackson-databind:2.4.0"
         force "com.netflix.feign:feign-okhttp:8.10.0"
         force "com.netflix.feign:feign-core:8.10.0"
         force "com.squareup.okhttp:okhttp:2.5.0"

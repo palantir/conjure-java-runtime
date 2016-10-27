@@ -16,7 +16,6 @@
 
 package com.palantir.remoting1.jaxrs;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
@@ -28,7 +27,6 @@ import com.palantir.remoting1.config.ssl.TrustContext;
 import com.palantir.remoting1.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting1.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting1.jaxrs.feignimpl.GuavaOptionalAwareContract;
-import com.palantir.remoting1.jaxrs.feignimpl.Jackson24Encoder;
 import com.palantir.remoting1.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting1.jaxrs.feignimpl.ObjectMappers;
 import com.palantir.remoting1.jaxrs.feignimpl.SlashEncodingContract;
@@ -102,21 +100,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private Encoder createEncoder(ObjectMapper objectMapper) {
-        Encoder jacksonEncoder = hasJackson25()
-                ? new JacksonEncoder(objectMapper)
-                : new Jackson24Encoder(objectMapper);
-        return new InputStreamDelegateEncoder(new TextDelegateEncoder(jacksonEncoder));
-    }
-
-    // Uses reflection to determine if Jackson >= 2.5 is on the classpath by checking for the existence of the
-    // ObjectMapper#writerFor method.
-    private boolean hasJackson25() {
-        try {
-            ObjectMapper.class.getMethod("writerFor", JavaType.class);
-            return true;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
+        return new InputStreamDelegateEncoder(new TextDelegateEncoder(new JacksonEncoder(objectMapper)));
     }
 
     private Decoder createDecoder(ObjectMapper objectMapper) {
