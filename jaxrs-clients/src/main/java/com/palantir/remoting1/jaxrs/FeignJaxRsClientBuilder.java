@@ -60,6 +60,8 @@ import okhttp3.Route;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7();
+
     private final ClientConfig config;
 
     FeignJaxRsClientBuilder(ClientConfig config) {
@@ -71,11 +73,10 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     @Override
     public <T> T build(Class<T> serviceClass, String userAgent, List<String> uris) {
         FailoverFeignTarget<T> target = createTarget(serviceClass, uris);
-        ObjectMapper objectMapper = ObjectMappers.guavaJdk7();
         return Feign.builder()
                 .contract(createContract())
-                .encoder(createEncoder(objectMapper))
-                .decoder(createDecoder(objectMapper))
+                .encoder(createEncoder(OBJECT_MAPPER))
+                .decoder(createDecoder(OBJECT_MAPPER))
                 .errorDecoder(FeignSerializableErrorErrorDecoder.INSTANCE)
                 .client(target.wrapClient(createOkHttpClient()))
                 .retryer(target)
@@ -103,8 +104,8 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private Encoder createEncoder(ObjectMapper objectMapper) {
         Encoder jacksonEncoder = hasJackson25()
-                ? new JacksonEncoder(objectMapper)
-                : new Jackson24Encoder(objectMapper);
+                ? new JacksonEncoder(OBJECT_MAPPER)
+                : new Jackson24Encoder(OBJECT_MAPPER);
         return new InputStreamDelegateEncoder(new TextDelegateEncoder(jacksonEncoder));
     }
 
@@ -121,7 +122,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private Decoder createDecoder(ObjectMapper objectMapper) {
         return new OptionalAwareDecoder(
-                new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(objectMapper))));
+                new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(OBJECT_MAPPER))));
     }
 
     private feign.Client createOkHttpClient() {

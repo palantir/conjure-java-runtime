@@ -40,6 +40,8 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder extends ClientBuilder {
 
+    private static final JacksonConverterFactory JACKSON_CONVERTER_FACTORY = JacksonConverterFactory.create();
+
     private final ClientConfig config;
 
     public Retrofit2ClientBuilder() {
@@ -58,7 +60,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(sanitizedUris.get(0))
-                .addConverterFactory(JacksonConverterFactory.create())
+                .addConverterFactory(JACKSON_CONVERTER_FACTORY)
                 .build();
         return retrofit.create(serviceClass);
     }
