@@ -16,6 +16,7 @@
 
 package com.palantir.remoting1.retrofit2;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -40,7 +41,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder extends ClientBuilder {
 
-    private static final JacksonConverterFactory JACKSON_CONVERTER_FACTORY = JacksonConverterFactory.create();
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7();
 
     private final ClientConfig config;
 
@@ -60,7 +61,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(sanitizedUris.get(0))
-                .addConverterFactory(JACKSON_CONVERTER_FACTORY)
+                .addConverterFactory(JacksonConverterFactory.create(OBJECT_MAPPER))
                 .build();
         return retrofit.create(serviceClass);
     }

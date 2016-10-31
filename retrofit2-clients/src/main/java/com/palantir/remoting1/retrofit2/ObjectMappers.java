@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.jaxrs.feignimpl;
+package com.palantir.remoting1.retrofit2;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;

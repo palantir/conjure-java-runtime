@@ -11,6 +11,7 @@ dependencies {
     // it transitively to users of retrofit-clients as a convenience.
     runtime project(":ssl-config")
 
+    compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.squareup.retrofit2:converter-jackson"
     compile "com.squareup.retrofit2:retrofit"
     compile "org.slf4j:slf4j-api"
