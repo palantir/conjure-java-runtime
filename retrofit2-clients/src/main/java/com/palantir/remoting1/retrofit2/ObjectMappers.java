@@ -31,8 +31,9 @@ public final class ObjectMappers {
      */
     public static ObjectMapper guavaJdk7() {
         // TODO: Replace this code with shading to support different versions of Jackson
-        ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
-        mapper.registerModule(new AfterburnerModule());
+        ObjectMapper mapper = new ObjectMapper()
+                .registerModule(new GuavaModule())
+                .registerModule(new AfterburnerModule());
         try {
             // Newer versions of Jackson no longer ship this module.
             Class<?> jdk7Module = Class.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module");
