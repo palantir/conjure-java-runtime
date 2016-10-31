@@ -3,6 +3,8 @@ apply from: "${rootDir}/gradle/publish.gradle"
 dependencies {
     compile project(":error-handling")
     compile project(":tracing")
+
+    compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "org.glassfish.jersey.core:jersey-server"
 
     testCompile project(":ssl-config")

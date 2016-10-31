@@ -10,16 +10,21 @@
             "locked": "2.6.1",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
-                "com.fasterxml.jackson.datatype:jackson-datatype-guava"
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.module:jackson-module-afterburner"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.1",
             "transitive": [
-                "com.fasterxml.jackson.datatype:jackson-datatype-guava"
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.module:jackson-module-afterburner"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
+            "locked": "2.6.1"
+        },
+        "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.1"
         },
         "com.google.code.findbugs:jsr305": {
@@ -49,16 +54,21 @@
             "locked": "2.6.1",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
-                "com.fasterxml.jackson.datatype:jackson-datatype-guava"
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.module:jackson-module-afterburner"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.1",
             "transitive": [
-                "com.fasterxml.jackson.datatype:jackson-datatype-guava"
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.module:jackson-module-afterburner"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
+            "locked": "2.6.1"
+        },
+        "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.1"
         },
         "com.google.code.findbugs:jsr305": {

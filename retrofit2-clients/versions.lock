@@ -34,7 +34,11 @@
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
-            "locked": "2.6.1"
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
+            ]
         },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
@@ -164,7 +168,11 @@
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
-            "locked": "2.6.1"
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
+            ]
         },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
