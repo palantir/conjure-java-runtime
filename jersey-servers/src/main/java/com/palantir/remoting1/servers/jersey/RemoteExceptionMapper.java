@@ -40,7 +40,7 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
         ResponseBuilder builder = Response.status(status);
         try {
             builder.type(MediaType.APPLICATION_JSON);
-            String json = JsonExceptionMapper.MAPPER.writeValueAsString(error);
+            String json = JsonExceptionMapper.getObjectMapper().writeValueAsString(error);
             builder.entity(json);
         } catch (RuntimeException | JsonProcessingException e) {
             log.warn("Unable to translate exception to json: {}", e.getMessage(), e);

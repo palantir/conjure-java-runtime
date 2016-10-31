@@ -40,8 +40,7 @@ import org.slf4j.LoggerFactory;
 public abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapper<T> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
-
-    static final ObjectMapper MAPPER = new ObjectMapper()
+    private static final ObjectMapper MAPPER = new ObjectMapper()
             .registerModule(new GuavaModule())
             .registerModule(new AfterburnerModule())
             // use pretty-print since seeing errors as a human is so much nicer that way
@@ -87,5 +86,9 @@ public abstract class JsonExceptionMapper<T extends Exception> implements Except
     }
 
     protected abstract StatusType getStatus(T exception);
+
+    protected static ObjectMapper getObjectMapper() {
+        return MAPPER;
+    }
 
 }
