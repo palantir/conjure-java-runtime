@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk7.Jdk7Module;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import java.io.IOException;
 import org.junit.Test;
 
@@ -29,7 +30,8 @@ public final class SerializationTests {
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .registerModule(new GuavaModule())
-            .registerModule(new Jdk7Module());
+            .registerModule(new Jdk7Module())
+            .registerModule(new AfterburnerModule());
 
     @Test
     public void testJsonSerDe() throws IOException {

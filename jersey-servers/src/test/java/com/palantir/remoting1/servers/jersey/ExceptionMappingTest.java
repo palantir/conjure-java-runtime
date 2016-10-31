@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.errors.SerializableError;
 import io.dropwizard.Application;
@@ -100,7 +101,10 @@ public final class ExceptionMappingTest {
         Response response = target.path("throw-remote-exception").request().get();
         assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
         SerializableError error =
-                new ObjectMapper().registerModule(new GuavaModule()).readValue(response.readEntity(InputStream.class),
+                new ObjectMapper()
+                        .registerModule(new GuavaModule())
+                        .registerModule(new AfterburnerModule())
+                        .readValue(response.readEntity(InputStream.class),
                         SerializableError.class);
         assertThat(error.getErrorName(), is("errName"));
     }

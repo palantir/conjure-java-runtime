@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.palantir.remoting1.errors.SerializableError;
 import java.util.Arrays;
 import java.util.Objects;
@@ -40,7 +41,11 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
 
-    static final ObjectMapper MAPPER = getObjectMapper();
+    static final ObjectMapper MAPPER = new ObjectMapper()
+            .registerModule(new GuavaModule())
+            .registerModule(new AfterburnerModule())
+            // use pretty-print since seeing errors as a human is so much nicer that way
+            .enable(SerializationFeature.INDENT_OUTPUT);
 
     private final boolean includeStackTrace;
 
@@ -83,10 +88,4 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
 
     abstract StatusType getStatus(T exception);
 
-    private static ObjectMapper getObjectMapper() {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
-        // use pretty-print since seeing errors as a human is so much nicer that way
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        return mapper;
-    }
 }

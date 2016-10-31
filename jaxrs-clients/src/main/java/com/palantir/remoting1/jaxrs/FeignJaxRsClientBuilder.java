@@ -16,7 +16,6 @@
 
 package com.palantir.remoting1.jaxrs;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.net.HttpHeaders;
@@ -60,6 +59,8 @@ import okhttp3.Route;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7();
+
     private final ClientConfig config;
 
     FeignJaxRsClientBuilder(ClientConfig config) {
@@ -71,11 +72,10 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     @Override
     public <T> T build(Class<T> serviceClass, String userAgent, List<String> uris) {
         FailoverFeignTarget<T> target = createTarget(serviceClass, uris);
-        ObjectMapper objectMapper = ObjectMappers.guavaJdk7();
         return Feign.builder()
                 .contract(createContract())
-                .encoder(createEncoder(objectMapper))
-                .decoder(createDecoder(objectMapper))
+                .encoder(createEncoder(OBJECT_MAPPER))
+                .decoder(createDecoder(OBJECT_MAPPER))
                 .errorDecoder(FeignSerializableErrorErrorDecoder.INSTANCE)
                 .client(target.wrapClient(createOkHttpClient()))
                 .retryer(target)
@@ -102,26 +102,15 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private Encoder createEncoder(ObjectMapper objectMapper) {
-        Encoder jacksonEncoder = hasJackson25()
+        Encoder jacksonEncoder = ObjectMappers.hasJackson25()
                 ? new JacksonEncoder(objectMapper)
                 : new Jackson24Encoder(objectMapper);
         return new InputStreamDelegateEncoder(new TextDelegateEncoder(jacksonEncoder));
     }
 
-    // Uses reflection to determine if Jackson >= 2.5 is on the classpath by checking for the existence of the
-    // ObjectMapper#writerFor method.
-    private boolean hasJackson25() {
-        try {
-            ObjectMapper.class.getMethod("writerFor", JavaType.class);
-            return true;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
-    }
-
     private Decoder createDecoder(ObjectMapper objectMapper) {
         return new OptionalAwareDecoder(
-                new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(objectMapper))));
+                new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(OBJECT_MAPPER))));
     }
 
     private feign.Client createOkHttpClient() {

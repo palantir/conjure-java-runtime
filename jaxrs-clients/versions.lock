@@ -11,7 +11,8 @@
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.fasterxml.jackson.datatype:jackson-datatype-jdk7"
+                "com.fasterxml.jackson.datatype:jackson-datatype-jdk7",
+                "com.fasterxml.jackson.module:jackson-module-afterburner"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
@@ -19,6 +20,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk7",
+                "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
@@ -35,6 +37,13 @@
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
             "locked": "2.6.1"
+        },
+        "com.fasterxml.jackson.module:jackson-module-afterburner": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
+            ]
         },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
@@ -160,7 +169,8 @@
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.fasterxml.jackson.datatype:jackson-datatype-jdk7"
+                "com.fasterxml.jackson.datatype:jackson-datatype-jdk7",
+                "com.fasterxml.jackson.module:jackson-module-afterburner"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
@@ -168,6 +178,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk7",
+                "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:ssl-config",
@@ -184,6 +195,13 @@
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
             "locked": "2.6.1"
+        },
+        "com.fasterxml.jackson.module:jackson-module-afterburner": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:tracing"
+            ]
         },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",

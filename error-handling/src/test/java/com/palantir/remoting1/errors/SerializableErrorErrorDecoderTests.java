@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import java.io.ByteArrayInputStream;
@@ -45,6 +46,9 @@ public final class SerializableErrorErrorDecoderTests {
 
     private static final String message = "hello";
     private static final int STATUS_42 = 42;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .registerModule(new GuavaModule())
+            .registerModule(new AfterburnerModule());
 
     @Test
     public void testWebApplicationExceptions() {
@@ -116,7 +120,7 @@ public final class SerializableErrorErrorDecoderTests {
     public void testRemoteExceptionCarriesSerializedError() throws IOException {
         Object error = SerializableError.of("msg", IllegalArgumentException.class,
                 Lists.newArrayList(new RuntimeException().getStackTrace()));
-        String json = new ObjectMapper().registerModule(new GuavaModule()).writeValueAsString(error);
+        String json = OBJECT_MAPPER.writeValueAsString(error);
         RemoteException decode = (RemoteException) decode(MediaType.APPLICATION_JSON, STATUS_42, json);
 
         assertThat(decode.getMessage(), is("msg"));
@@ -133,12 +137,12 @@ public final class SerializableErrorErrorDecoderTests {
     public void testRemoteException_stackTraceSerializationIsCompatibleWithJavaStackTrace() throws IOException {
         SerializableError error = SerializableError.of("msg", IllegalArgumentException.class,
                 Lists.newArrayList(new RuntimeException().getStackTrace()));
-        ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
-        String json = mapper.writeValueAsString(error);
+        String json = OBJECT_MAPPER.writeValueAsString(error);
         RemoteException decode = (RemoteException) decode(MediaType.APPLICATION_JSON, STATUS_42, json);
 
         SerializableStackTraceElement element = decode.getRemoteException().getStackTrace().get(0);
-        StackTraceElement stackTrace = mapper.readValue(mapper.writeValueAsBytes(element), StackTraceElement.class);
+        StackTraceElement stackTrace = OBJECT_MAPPER.readValue(OBJECT_MAPPER.writeValueAsBytes(element),
+                StackTraceElement.class);
         assertThat(stackTrace.getMethodName(), is(element.getMethodName().get()));
         assertThat(stackTrace.getClassName(), is(element.getClassName().get()));
         assertThat(stackTrace.getFileName(), is(element.getFileName().get()));
@@ -152,14 +156,14 @@ public final class SerializableErrorErrorDecoderTests {
         String error = "{\"message\": \"message\", \"exceptionClass\": \"exceptionClass\","
                 + "\"stackTrace\": [" + stackTrace + "], \"noSuchProperty\": \"foo\"}";
 
-        new ObjectMapper().registerModule(new GuavaModule()).readValue(error, SerializableError.class);
+        OBJECT_MAPPER.readValue(error, SerializableError.class);
     }
 
     private static Exception encodeAndDecode(Exception exception) {
         Object error = SerializableError.of(exception.getMessage(), exception.getClass(), null);
         String json;
         try {
-            json = new ObjectMapper().registerModule(new GuavaModule()).writeValueAsString(error);
+            json = OBJECT_MAPPER.writeValueAsString(error);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
