@@ -36,15 +36,15 @@ import org.slf4j.LoggerFactory;
  * Writes out exceptions as serialized {@link SerializableError}s with {@link MediaType#APPLICATION_JSON JSON media
  * type}.
  */
-abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapper<T> {
+public abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapper<T> {
+
+    protected static final ObjectMapper MAPPER = getObjectMapper();
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
 
-    static final ObjectMapper MAPPER = getObjectMapper();
-
     private final boolean includeStackTrace;
 
-    JsonExceptionMapper(boolean includeStackTrace) {
+    protected JsonExceptionMapper(boolean includeStackTrace) {
         this.includeStackTrace = includeStackTrace;
     }
 
@@ -81,7 +81,7 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
         return builder.build();
     }
 
-    abstract StatusType getStatus(T exception);
+    protected abstract StatusType getStatus(T exception);
 
     private static ObjectMapper getObjectMapper() {
         ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
