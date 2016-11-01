@@ -87,8 +87,4 @@ public abstract class JsonExceptionMapper<T extends Exception> implements Except
 
     protected abstract StatusType getStatus(T exception);
 
-    protected static ObjectMapper getObjectMapper() {
-        return MAPPER;
-    }
-
 }
