@@ -117,11 +117,12 @@ public final class ServiceDiscoveryConfigurationTests {
     }
 
     @Test
-    public void testBuilder() {
+    public void testMergingExplicitWithDefaultProperties() {
         BearerToken defaultApiToken = BearerToken.valueOf("someToken");
         SslConfiguration security = SslConfiguration.of(mock(Path.class));
         Duration defaultReadTimeout = Duration.seconds(30);
         Duration connectTimeout = Duration.hours(1);
+        Duration defaultConnectTimeout = Duration.hours(2);
         ProxyConfiguration defaultProxyConfiguration = ProxyConfiguration.of("globalsquid:3128");
 
         ServiceConfiguration service = ServiceConfiguration.builder()
@@ -134,8 +135,10 @@ public final class ServiceDiscoveryConfigurationTests {
                 .originalServices(ImmutableMap.of("service1", service))
                 .defaultReadTimeout(defaultReadTimeout)
                 .defaultProxyConfiguration(defaultProxyConfiguration)
+                .defaultConnectTimeout(defaultConnectTimeout)
                 .build();
 
+        // Test service discovery merging
         assertEquals(defaultApiToken, services.defaultApiToken().get());
         assertEquals(defaultReadTimeout, services.defaultReadTimeout().get());
         assertEquals(defaultApiToken, services.getApiToken("service1").get());
@@ -146,7 +149,17 @@ public final class ServiceDiscoveryConfigurationTests {
         assertEquals(security, services.getSecurity("service1").get());
         assertEquals(security, services.getServices().get("service1").security().get());
         assertEquals(connectTimeout, services.getServices().get("service1").connectTimeout().get());
+        assertEquals(defaultConnectTimeout, services.defaultConnectTimeout().get());
         assertEquals(defaultProxyConfiguration, services.defaultProxyConfiguration().get());
         assertEquals(defaultProxyConfiguration, services.getServices().get("service1").proxyConfiguration().get());
+
+        // Test specifying explicit service conf to merge with
+        ServiceConfiguration serviceWithDefaults = services.getServiceWithDefaults(service);
+        assertEquals(defaultApiToken, serviceWithDefaults.apiToken().get());
+        assertEquals(defaultReadTimeout, serviceWithDefaults.readTimeout().get());
+        assertEquals(defaultProxyConfiguration, serviceWithDefaults.proxyConfiguration().get());
+        assertEquals(security, serviceWithDefaults.security().get());
+        assertEquals(connectTimeout, serviceWithDefaults.connectTimeout().get());
     }
+
 }
