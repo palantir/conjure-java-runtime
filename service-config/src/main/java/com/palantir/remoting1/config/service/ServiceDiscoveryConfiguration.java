@@ -85,19 +85,27 @@ public abstract class ServiceDiscoveryConfiguration {
         Map<String, ServiceConfiguration> intializedServices = new HashMap<String, ServiceConfiguration>();
 
         for (Map.Entry<String, ServiceConfiguration> entry : originalServices().entrySet()) {
-            ServiceConfiguration originalConfig = entry.getValue();
-            ServiceConfiguration configWithDefaults = ImmutableServiceConfiguration.builder()
-                    .apiToken(originalConfig.apiToken().or(defaultApiToken()))
-                    .security(originalConfig.security().or(defaultSecurity()))
-                    .proxyConfiguration(originalConfig.proxyConfiguration().or(defaultProxyConfiguration()))
-                    .connectTimeout(originalConfig.connectTimeout().or(defaultConnectTimeout()))
-                    .readTimeout(originalConfig.readTimeout().or(defaultReadTimeout()))
-                    .uris(originalConfig.uris()).build();
-
+            ServiceConfiguration configWithDefaults = getServiceWithDefaults(entry.getValue());
             intializedServices.put(entry.getKey(), configWithDefaults);
         }
 
         return Collections.unmodifiableMap(intializedServices);
+    }
+
+    /**
+     * Returns a new {@link ServiceConfiguration} obtained by copying all values from the given configuration and then
+     * filling in absent optional values with defaults from this {@link ServiceDiscoveryConfiguration}.
+     */
+    public final ServiceConfiguration getServiceWithDefaults(ServiceConfiguration conf) {
+        return ImmutableServiceConfiguration.builder()
+                .from(conf)
+                .apiToken(conf.apiToken().or(defaultApiToken()))
+                .security(conf.security().or(defaultSecurity()))
+                .proxyConfiguration(conf.proxyConfiguration().or(defaultProxyConfiguration()))
+                .connectTimeout(conf.connectTimeout().or(defaultConnectTimeout()))
+                .readTimeout(conf.readTimeout().or(defaultReadTimeout()))
+                .uris(conf.uris())
+                .build();
     }
 
     /**
