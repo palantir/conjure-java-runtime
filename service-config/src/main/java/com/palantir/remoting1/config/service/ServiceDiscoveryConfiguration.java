@@ -93,8 +93,8 @@ public abstract class ServiceDiscoveryConfiguration {
     }
 
     /**
-     * Returns the {@link ServiceConfiguration} with missing properties populated with the properties found in this
-     * {@link ServiceDiscoveryConfiguration}.
+     * Returns a new {@link ServiceConfiguration} obtained by copying all values from the given configuration and then
+     * filling in absent optional values with defaults from this {@link ServiceDiscoveryConfiguration}.
      */
     public final ServiceConfiguration getServiceWithDefaults(ServiceConfiguration conf) {
         return ImmutableServiceConfiguration.builder()
