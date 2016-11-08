@@ -274,10 +274,6 @@ When a call to a service interface declaring an `Optional<T>` return value with 
 - a non-empty return value, then the HTTP response has error code 200 and the body carries the deserialized `T` object
   directly, rather than a deserialized `Optional<T>` object.
 
-Declaring `Optional<>` return values with media type `text/plain` is discouraged since the behavior may be unexpected,
-cf.
-[OptionalAwareDecoderTest](https://github.com/palantir/http-remoting/blob/develop/jaxrs-clients/src/test/java/com/palantir/remoting1/jaxrs/feignimpl/OptionalAwareDecoderTest.java).
-
 JaxRsClients intercept such responses, deserialize the `T`-typed return value and return it to the caller wrapped as an
 `Optional<T>`. No is no equivalent concept for Retrofit2Clients.
 
