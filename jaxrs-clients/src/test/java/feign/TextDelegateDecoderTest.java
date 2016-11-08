@@ -16,7 +16,6 @@
 
 package feign;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -29,7 +28,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
-import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.jaxrs.JaxRsClient;
 import com.palantir.remoting1.jaxrs.feignimpl.TestServer;
 import feign.codec.Decoder;
@@ -146,11 +144,6 @@ public final class TextDelegateDecoderTest {
         Optional<String> result = service.getOptionalString("string");
         assertEquals(Optional.of("string"), result);
 
-        try {
-            service.getOptionalString(null);
-            Assert.fail();
-        } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("HTTP 404 Not Found"));
-        }
+        assertThat(service.getOptionalString(null), is(Optional.<String>absent()));
     }
 }

@@ -35,7 +35,7 @@ import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.message.MessageBodyWorkers;
 
 @Provider
-@Produces(MediaType.APPLICATION_JSON)
+@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 public final class OptionalMessageBodyWriter implements MessageBodyWriter<Optional<?>> {
 
     @Inject

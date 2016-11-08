@@ -19,7 +19,6 @@
 package com.palantir.remoting1.servers.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Optional;
@@ -30,9 +29,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
 import org.junit.Test;
@@ -43,6 +42,7 @@ public final class OptionalMessageBodyWriterTest extends JerseyTest {
     protected Application configure() {
         forceSet(TestProperties.CONTAINER_PORT, "0");
         return DropwizardResourceConfig.forTesting(new MetricRegistry())
+                .register(HttpRemotingJerseyFeature.DEFAULT)
                 .register(OptionalReturnResource.class);
     }
 
@@ -56,13 +56,8 @@ public final class OptionalMessageBodyWriterTest extends JerseyTest {
 
     @Test
     public void absentOptionalsThrowANotFound() throws Exception {
-        try {
-            target("/optional-return/").request().get(String.class);
-            failBecauseExceptionWasNotThrown(WebApplicationException.class);
-        } catch (WebApplicationException e) {
-            assertThat(e.getResponse().getStatus())
-                    .isEqualTo(404);
-        }
+        Response response = target("/optional-return/").request().get();
+        assertThat(response.getStatus()).isEqualTo(204);
     }
 
     @Path("/optional-return/")
