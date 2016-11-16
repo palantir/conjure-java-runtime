@@ -34,7 +34,6 @@ dependencies {
     shadow "javax.ws.rs:javax.ws.rs-api"
     shadow "com.fasterxml.jackson.core:jackson-databind"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-guava"
-    shadow "com.fasterxml.jackson.datatype:jackson-datatype-jdk7"
     shadow "com.google.guava:guava"
     shadow "com.squareup.okhttp3:okhttp"
 }
