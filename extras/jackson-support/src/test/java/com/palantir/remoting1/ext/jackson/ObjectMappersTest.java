@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.jaxrs.feignimpl;
+package com.palantir.remoting1.ext.jackson;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +35,7 @@ public final class ObjectMappersTest {
         String json = "\"" + pathSeparator + "tmp" + pathSeparator + "foo.txt\"";
 
         try {
-            assertThat(MAPPER.readValue(json, Path.class), is(Paths.get(":tmp:foo.txt")));
+            assertThat(MAPPER.readValue(json, Path.class)).isEqualTo(Paths.get(":tmp:foo.txt"));
         } catch (IOException e) {
             fail();
         }
@@ -47,7 +45,7 @@ public final class ObjectMappersTest {
     public void serializeJdk7ModuleObject() {
         Path path = Paths.get(":tmp:foo.txt");
         try {
-            assertThat(MAPPER.writeValueAsString(path), is("\":tmp:foo.txt\""));
+            assertThat(MAPPER.writeValueAsString(path)).isEqualTo("\":tmp:foo.txt\"");
         } catch (IOException e) {
             fail();
         }
@@ -55,6 +53,6 @@ public final class ObjectMappersTest {
 
     @Test
     public void testMappersReturnNewInstance() {
-        assertNotSame(ObjectMappers.guavaJdk7(), ObjectMappers.guavaJdk7());
+        assertThat(ObjectMappers.guavaJdk7()).isNotSameAs(ObjectMappers.guavaJdk7());
     }
 }
