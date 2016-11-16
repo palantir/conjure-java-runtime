@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting1.jaxrs.feignimpl;
+package com.palantir.remoting1.ext.jackson;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.Module;

@@ -2,15 +2,12 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply from: "${rootDir}/gradle/publish-shadow.gradle"
 
 dependencies {
+    compile project(":extras:jackson-support")
     compile project(":error-handling")
     compile project(":tracing-okhttp3")
     compile project(":http-clients-api")
     compile project(":service-config")
 
-    compile "com.fasterxml.jackson.core:jackson-databind"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-guava"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk7"
-    compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.google.code.findbugs:jsr305"
     compile "com.google.guava:guava"
     compile "com.netflix.feign:feign-jackson"

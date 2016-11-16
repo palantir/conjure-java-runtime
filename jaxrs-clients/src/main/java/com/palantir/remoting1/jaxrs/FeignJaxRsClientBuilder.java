@@ -24,12 +24,12 @@ import com.palantir.remoting1.clients.ClientConfig;
 import com.palantir.remoting1.config.service.BasicCredentials;
 import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.ssl.TrustContext;
+import com.palantir.remoting1.ext.jackson.ObjectMappers;
 import com.palantir.remoting1.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting1.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting1.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.remoting1.jaxrs.feignimpl.Jackson24Encoder;
 import com.palantir.remoting1.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
-import com.palantir.remoting1.jaxrs.feignimpl.ObjectMappers;
 import com.palantir.remoting1.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting1.jaxrs.feignimpl.UserAgentInterceptor;
 import com.palantir.remoting1.tracing.okhttp3.OkhttpTraceInterceptor;
@@ -101,16 +101,16 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 (int) config.readTimeout().toMilliseconds());
     }
 
-    private Encoder createEncoder(ObjectMapper objectMapper) {
+    private static Encoder createEncoder(ObjectMapper objectMapper) {
         Encoder jacksonEncoder = ObjectMappers.hasJackson25()
                 ? new JacksonEncoder(objectMapper)
                 : new Jackson24Encoder(objectMapper);
         return new InputStreamDelegateEncoder(new TextDelegateEncoder(jacksonEncoder));
     }
 
-    private Decoder createDecoder(ObjectMapper objectMapper) {
+    private static Decoder createDecoder(ObjectMapper objectMapper) {
         return new OptionalAwareDecoder(
-                new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(OBJECT_MAPPER))));
+                new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(objectMapper))));
     }
 
     private feign.Client createOkHttpClient() {
