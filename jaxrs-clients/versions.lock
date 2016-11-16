@@ -23,6 +23,7 @@
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:ssl-config",
                 "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
@@ -32,17 +33,22 @@
             "locked": "2.6.1",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
-            "locked": "2.6.1"
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:jackson-support"
+            ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.1",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:tracing"
             ]
         },
@@ -87,6 +93,9 @@
             "project": true
         },
         "com.palantir.remoting1:http-clients-api": {
+            "project": true
+        },
+        "com.palantir.remoting1:jackson-support": {
             "project": true
         },
         "com.palantir.remoting1:service-config": {
@@ -175,6 +184,7 @@
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:ssl-config",
                 "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
@@ -184,17 +194,22 @@
             "locked": "2.6.1",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
-            "locked": "2.6.1"
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:jackson-support"
+            ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.1",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:tracing"
             ]
         },
@@ -239,6 +254,9 @@
             "project": true
         },
         "com.palantir.remoting1:http-clients-api": {
+            "project": true
+        },
+        "com.palantir.remoting1:jackson-support": {
             "project": true
         },
         "com.palantir.remoting1:service-config": {
