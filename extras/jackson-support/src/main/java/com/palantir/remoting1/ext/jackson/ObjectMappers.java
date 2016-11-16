@@ -17,7 +17,6 @@
 package com.palantir.remoting1.ext.jackson;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
@@ -32,20 +31,13 @@ public final class ObjectMappers {
      */
     public static ObjectMapper guavaJdk7() {
         // TODO: Replace this code with shading to support different versions of Jackson
-        ObjectMapper mapper = new ObjectMapper().registerModule(new GuavaModule());
+        ObjectMapper mapper = new ObjectMapper()
+                .registerModule(new GuavaModule())
+                .registerModule(new ShimJdk7Module());
         if (hasJackson25()) {
             // Afterburner on Jackson 2.4 will throw
             // java.lang.NoSuchMethodError: com.fasterxml.jackson.core.JsonParser.isExpectedStartObjectToken()Z
             mapper.registerModule(new AfterburnerModule());
-        }
-
-        try {
-            // Newer versions of Jackson no longer ship this module.
-            Class<?> jdk7Module = Class.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module");
-            Module module = (Module) jdk7Module.newInstance();
-            mapper.registerModule(module);
-        } catch (ReflectiveOperationException e) {
-            // We're using a recent version of Jackson
         }
 
         return mapper;
