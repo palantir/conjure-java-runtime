@@ -93,7 +93,8 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                             CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
                             CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
                             CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
-                    .build());
+                    .build(),
+                    ConnectionSpec.CLEARTEXT);
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7();
 
