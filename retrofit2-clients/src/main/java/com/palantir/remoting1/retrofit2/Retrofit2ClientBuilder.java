@@ -51,7 +51,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
 
     private static final ImmutableList<ConnectionSpec> CONNECTION_SPEC = ImmutableList.of(
             new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                    .tlsVersions(TlsVersion.TLS_1_2)
+                    .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_1, TlsVersion.TLS_1_0)
                     .cipherSuites(
                             // In an ideal world, we'd use GCM suites, but they're an order of
                             // magnitude slower than the CBC suites, which have JVM optimizations
