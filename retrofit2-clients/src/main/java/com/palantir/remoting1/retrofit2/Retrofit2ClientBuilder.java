@@ -19,6 +19,7 @@ package com.palantir.remoting1.retrofit2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting1.clients.ClientBuilder;
@@ -31,17 +32,52 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Authenticator;
+import okhttp3.CipherSuite;
+import okhttp3.ConnectionPool;
+import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+import okhttp3.TlsVersion;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder extends ClientBuilder {
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7();
+
+    private static final ImmutableList<ConnectionSpec> CONNECTION_SPEC = ImmutableList.of(
+            new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                    .tlsVersions(TlsVersion.TLS_1_2)
+                    .cipherSuites(
+                            // In an ideal world, we'd use GCM suites, but they're an order of
+                            // magnitude slower than the CBC suites, which have JVM optimizations
+                            // already. We should revisit with JDK9.
+                            // See also:
+                            //  - http://openjdk.java.net/jeps/246
+                            //  - https://bugs.openjdk.java.net/secure/attachment/25422/GCM%20Analysis.pdf
+                            // CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                            // CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                            // CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
+                            // CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
+                            // CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384,
+                            // CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+                            CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
+                            CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
+                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
+                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                            CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
+                            CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
+                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
+                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
+                            CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
+                    .build());
 
     private final ClientConfig config;
 
@@ -122,6 +158,12 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         client.addInterceptor(MultiServerRetryInterceptor.create(uris));
         client.addInterceptor(UserAgentInterceptor.of(userAgent));
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
+
+        // cipher setup
+        client.connectionSpecs(CONNECTION_SPEC);
+
+        // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
+        client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
 
         return client.build();
     }
