@@ -68,7 +68,8 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
             } else {
                 String errorId = UUID.randomUUID().toString();
                 logMessage = String.format("Error %s: %s", errorId, exceptionMessage);
-                error = SerializableError.of(errorId, exception.getClass());
+                error = SerializableError.of("Refer to the server logs with this errorId: "
+                        + errorId, exception.getClass());
             }
             builder.type(MediaType.APPLICATION_JSON);
             String json = MAPPER.writeValueAsString(error);
