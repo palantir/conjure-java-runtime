@@ -24,7 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.Test;
 
-public final class PathDeserializderTest {
+public final class ShimJdk7ModuleTest {
 
     @Test
     public void testPathSerDe() throws IOException {
