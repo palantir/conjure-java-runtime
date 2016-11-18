@@ -17,6 +17,10 @@
 package com.palantir.remoting1.servers.jersey;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.errors.SerializableError;
 import javax.ws.rs.core.MediaType;
@@ -32,6 +36,11 @@ import org.slf4j.LoggerFactory;
 final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .registerModule(new GuavaModule())
+            .registerModule(new AfterburnerModule())
+            // use pretty-print since seeing errors as a human is so much nicer that way
+            .enable(SerializationFeature.INDENT_OUTPUT);
 
     @Override
     public Response toResponse(RemoteException exception) {
@@ -40,7 +49,7 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
         ResponseBuilder builder = Response.status(status);
         try {
             builder.type(MediaType.APPLICATION_JSON);
-            String json = JsonExceptionMapper.MAPPER.writeValueAsString(error);
+            String json = MAPPER.writeValueAsString(error);
             builder.entity(json);
         } catch (RuntimeException | JsonProcessingException e) {
             log.warn("Unable to translate exception to json: {}", e.getMessage(), e);
