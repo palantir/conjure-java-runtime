@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class RetryInterceptor implements Interceptor {
 
-    private static final Logger logger = LoggerFactory.getLogger(RetryInterceptor.class);
+    private static final Logger log = LoggerFactory.getLogger(RetryInterceptor.class);
     private static final Integer DEFAULT_MAX_NUM_RETRIES = 3;
 
     private final long maxNumTries;
@@ -60,7 +60,7 @@ public final class RetryInterceptor implements Interceptor {
                 }
             }
             if (!successful) {
-                logger.error("Request to url {} failed on attempt “‘", request.url(), numTries);
+                log.error("Request to url {} failed on attempt {}", request.url(), numTries);
             }
         }
 

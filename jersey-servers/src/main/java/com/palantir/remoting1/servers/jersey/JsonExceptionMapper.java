@@ -56,7 +56,6 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
     @Override
     public final Response toResponse(T exception) {
         String exceptionMessage = Objects.toString(exception.getMessage());
-        String logMessage = exceptionMessage;
         StatusType status = this.getStatus(exception);
         ResponseBuilder builder = Response.status(status);
         try {
@@ -65,9 +64,10 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
                 StackTraceElement[] stackTrace = exception.getStackTrace();
                 error = SerializableError.of(exceptionMessage, exception.getClass(),
                         Arrays.asList(stackTrace));
+                log.error("Error: {}", exceptionMessage);
             } else {
                 String errorId = UUID.randomUUID().toString();
-                logMessage = String.format("Error %s: %s", errorId, exceptionMessage);
+                log.error("Error {}: {}", errorId, exceptionMessage);
                 error = SerializableError.of("Refer to the server logs with this errorId: "
                         + errorId, exception.getClass());
             }
@@ -75,14 +75,11 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
             String json = MAPPER.writeValueAsString(error);
             builder.entity(json);
         } catch (RuntimeException | JsonProcessingException e) {
-            log.warn("Unable to translate exception to json: {}", e.getMessage(), e);
+            log.warn("Unable to translate exception to json:", e);
             // simply write out the exception message
             builder = Response.status(status);
             builder.type(MediaType.TEXT_PLAIN);
             builder.entity(exceptionMessage);
-        } finally {
-            // always log error server-side
-            log.error(logMessage, exception);
         }
         return builder.build();
     }
