@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 @Provider
 final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
-    private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(RemoteExceptionMapper.class);
 
     @Override
     public Response toResponse(RemoteException exception) {
@@ -43,7 +43,7 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
             String json = JsonExceptionMapper.MAPPER.writeValueAsString(error);
             builder.entity(json);
         } catch (RuntimeException | JsonProcessingException e) {
-            log.warn("Unable to translate exception to json: {}", e.getMessage(), e);
+            log.warn("Unable to translate exception to json:", e);
             // simply write out the exception message
             builder = Response.status(status);
             builder.type(MediaType.TEXT_PLAIN);

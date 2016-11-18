@@ -73,3 +73,7 @@ task checkLicenseInformation(dependsOn: 'shadowJar') << {
     }
 }
 check.dependsOn checkLicenseInformation
+
+test {
+   jvmArgs "-Ddeployment.security.TLSv1.2=true"
+}

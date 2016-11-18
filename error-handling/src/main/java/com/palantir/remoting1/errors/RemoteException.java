@@ -20,6 +20,8 @@ package com.palantir.remoting1.errors;
  * An exception thrown to propagate a remote exception.
  */
 public final class RemoteException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
     private final SerializableError remoteException;
     private final int status;
 
