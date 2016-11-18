@@ -11,6 +11,7 @@
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.datatype:jackson-datatype-jdk7",
                 "com.fasterxml.jackson.module:jackson-module-afterburner"
             ]
         },
@@ -18,8 +19,10 @@
             "locked": "2.6.1",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.datatype:jackson-datatype-jdk7",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:ssl-config",
                 "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens",
@@ -30,14 +33,22 @@
             "locked": "2.6.1",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
+            ]
+        },
+        "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:jackson-support"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.1",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:tracing"
             ]
         },
@@ -61,6 +72,9 @@
             "project": true
         },
         "com.palantir.remoting1:http-clients-api": {
+            "project": true
+        },
+        "com.palantir.remoting1:jackson-support": {
             "project": true
         },
         "com.palantir.remoting1:service-config": {
@@ -139,6 +153,7 @@
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.datatype:jackson-datatype-jdk7",
                 "com.fasterxml.jackson.module:jackson-module-afterburner"
             ]
         },
@@ -146,8 +161,10 @@
             "locked": "2.6.1",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.datatype:jackson-datatype-jdk7",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:ssl-config",
                 "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens",
@@ -158,14 +175,22 @@
             "locked": "2.6.1",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:tracing",
                 "com.palantir.tokens:auth-tokens"
+            ]
+        },
+        "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
+            "locked": "2.6.1",
+            "transitive": [
+                "com.palantir.remoting1:jackson-support"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.1",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
+                "com.palantir.remoting1:jackson-support",
                 "com.palantir.remoting1:tracing"
             ]
         },
@@ -189,6 +214,9 @@
             "project": true
         },
         "com.palantir.remoting1:http-clients-api": {
+            "project": true
+        },
+        "com.palantir.remoting1:jackson-support": {
             "project": true
         },
         "com.palantir.remoting1:service-config": {

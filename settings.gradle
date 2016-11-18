@@ -1,3 +1,4 @@
+include 'extras:jackson-support'
 include 'error-handling'
 include 'http-clients-api'
 include 'jaxrs-clients'
