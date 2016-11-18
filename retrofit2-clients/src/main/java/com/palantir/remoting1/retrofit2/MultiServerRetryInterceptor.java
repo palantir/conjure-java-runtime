@@ -78,7 +78,7 @@ public final class MultiServerRetryInterceptor implements Interceptor {
                     | MalformedURLException | SocketException | UnknownServiceException e) {
                 lastException = e;
                 lastUri = uri;
-                logger.warn("Failed to send request to " + request.url(), e);
+                logger.warn("Failed to send request to {}", request.url(), e);
             }
         }
         throw new IllegalStateException("Could not connect to any of the following servers: " + uris + ". "
