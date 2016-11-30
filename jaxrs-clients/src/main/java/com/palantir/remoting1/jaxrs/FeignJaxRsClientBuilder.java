@@ -61,13 +61,11 @@ import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.Response;
 import okhttp3.Route;
-import okhttp3.TlsVersion;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private static final ImmutableList<ConnectionSpec> CONNECTION_SPEC = ImmutableList.of(
             new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                    .tlsVersions(TlsVersion.TLS_1_2)
                     .cipherSuites(
                             // In an ideal world, we'd use GCM suites, but they're an order of
                             // magnitude slower than the CBC suites, which have JVM optimizations
