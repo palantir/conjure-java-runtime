@@ -26,6 +26,7 @@ import com.palantir.remoting1.config.service.BasicCredentials;
 import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.ssl.TrustContext;
 import com.palantir.remoting1.ext.jackson.ObjectMappers;
+import com.palantir.remoting1.jaxrs.feignimpl.CustomizableInterceptor;
 import com.palantir.remoting1.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting1.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting1.jaxrs.feignimpl.GuavaOptionalAwareContract;
@@ -120,6 +121,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 .logger(new Slf4jLogger(JaxRsClient.class))
                 .logLevel(Logger.Level.BASIC)
                 .requestInterceptor(UserAgentInterceptor.of(userAgent))
+                .requestInterceptor(CustomizableInterceptor.of(config.headers()))
                 .target(target);
     }
 

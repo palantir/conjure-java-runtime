@@ -17,11 +17,13 @@
 package com.palantir.remoting1.clients;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import com.palantir.remoting1.config.service.Duration;
 import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.service.ServiceConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
 import com.palantir.remoting1.config.ssl.TrustContext;
+import java.util.Map;
 import org.immutables.value.Value;
 
 /** Implementation-independent configuration options for HTTP-based dynamic proxies. */
@@ -59,6 +61,11 @@ public abstract class ClientConfig {
     @Value.Default
     public Integer maxNumRetries() {
         return MAX_NUM_RETRIES;
+    }
+
+    @Value.Default
+    public Map<String, String> headers() {
+        return Maps.newHashMap();
     }
 
     public static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
