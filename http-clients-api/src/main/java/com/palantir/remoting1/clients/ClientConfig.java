@@ -17,7 +17,6 @@
 package com.palantir.remoting1.clients;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Maps;
 import com.palantir.remoting1.config.service.Duration;
 import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.service.ServiceConfiguration;
@@ -63,10 +62,8 @@ public abstract class ClientConfig {
         return MAX_NUM_RETRIES;
     }
 
-    @Value.Default
-    public Map<String, String> headers() {
-        return Maps.newHashMap();
-    }
+    @Value.Parameter
+    public abstract Map<String, String> headers();
 
     public static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
         ClientConfig.Builder clientConfig = builder();

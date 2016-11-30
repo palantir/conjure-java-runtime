@@ -16,21 +16,22 @@
 
 package com.palantir.remoting1.jaxrs.feignimpl;
 
+import com.google.common.collect.ImmutableMap;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import java.util.Collections;
 import java.util.Map;
 
-public final class CustomizableInterceptor implements RequestInterceptor {
+public final class HeaderInterceptor implements RequestInterceptor {
 
     private final Map<String, String> headers;
 
-    private CustomizableInterceptor(Map<String, String> headers) {
-        this.headers = (headers != null) ? headers : Collections.<String, String>emptyMap();
+    private HeaderInterceptor(Map<String, String> headers) {
+        this.headers = (headers != null) ? ImmutableMap.copyOf(headers) : Collections.<String, String>emptyMap();
     }
 
-    public static CustomizableInterceptor of(Map<String, String> headers) {
-        return new CustomizableInterceptor(headers);
+    public static HeaderInterceptor of(Map<String, String> headers) {
+        return new HeaderInterceptor(headers);
     }
 
     @Override
