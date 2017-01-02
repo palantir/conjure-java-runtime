@@ -27,7 +27,7 @@ repositories {
 }
 
 allprojects {
-    version gitVersion()
+    version System.env.CIRCLE_TAG ?: gitVersion()
     group 'com.palantir.remoting1'
 
     apply plugin: 'com.palantir.configuration-resolver'
