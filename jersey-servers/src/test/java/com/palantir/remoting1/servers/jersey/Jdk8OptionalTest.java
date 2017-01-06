@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ package com.palantir.remoting1.servers.jersey;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -42,7 +42,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public final class GoogleOptionalTest {
+public final class Jdk8OptionalTest {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(OptionalTestServer.class,
@@ -83,7 +83,7 @@ public final class GoogleOptionalTest {
         @Override
         public Optional<String> getOptional(@Nullable String value) {
             if (Strings.isNullOrEmpty(value)) {
-                return Optional.absent();
+                return Optional.empty();
             } else {
                 return Optional.of(value + value);
             }
