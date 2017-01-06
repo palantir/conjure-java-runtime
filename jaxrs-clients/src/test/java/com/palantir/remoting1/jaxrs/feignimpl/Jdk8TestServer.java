@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package com.palantir.remoting1.jaxrs.feignimpl;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting1.servers.jersey.HttpRemotingJerseyFeature;
 import feign.Util;
@@ -27,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
@@ -40,7 +40,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.assertj.core.util.Strings;
 
-public class GoogleTestServer extends Application<Configuration> {
+public class Jdk8TestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(
@@ -52,7 +52,7 @@ public class GoogleTestServer extends Application<Configuration> {
         @Override
         public Optional<ImmutableMap<String, String>> getOptional(@Nullable String value) {
             if (Strings.isNullOrEmpty(value)) {
-                return Optional.absent();
+                return Optional.empty();
             } else {
                 return Optional.of(ImmutableMap.of(value, value));
             }
@@ -133,11 +133,12 @@ public class GoogleTestServer extends Application<Configuration> {
 
         @Override
         public Optional<String> getOptionalString(@Nullable String value) {
-            return Optional.fromNullable(value);
+            return Optional.ofNullable(value);
         }
 
         @Override
-        public GoogleComplexType getGoogleComplexType(GoogleComplexType complexType) {
+        public Jdk8ComplexType getJdk8ComplexType(Jdk8ComplexType complexType) {
+            System.out.println(complexType.toString());
             return complexType;
         }
     }
@@ -218,7 +219,7 @@ public class GoogleTestServer extends Application<Configuration> {
         @Path("/complexType")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        GoogleComplexType getGoogleComplexType(GoogleComplexType complexType);
+        Jdk8ComplexType getJdk8ComplexType(Jdk8ComplexType complexType);
     }
 
 }
