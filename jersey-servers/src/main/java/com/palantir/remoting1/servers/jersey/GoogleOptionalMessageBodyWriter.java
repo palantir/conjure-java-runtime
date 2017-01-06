@@ -36,7 +36,7 @@ import org.glassfish.jersey.message.MessageBodyWorkers;
 
 @Provider
 @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
-public final class OptionalMessageBodyWriter implements MessageBodyWriter<Optional<?>> {
+public final class GoogleOptionalMessageBodyWriter implements MessageBodyWriter<Optional<?>> {
 
     @Inject
     private javax.inject.Provider<MessageBodyWorkers> mbw;
