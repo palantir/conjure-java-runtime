@@ -24,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import java.io.Serializable;
 import java.util.List;
 import javax.annotation.Nullable;
 import org.immutables.value.Value;
@@ -38,7 +39,7 @@ import org.immutables.value.Value;
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class SerializableError {
+public abstract class SerializableError implements Serializable {
 
     /** A human-readable description of the error. */
     public abstract String getMessage();

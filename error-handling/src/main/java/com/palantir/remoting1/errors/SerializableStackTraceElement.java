@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
+import java.io.Serializable;
 import org.immutables.value.Value;
 
 @JsonDeserialize(as = ImmutableSerializableStackTraceElement.class)
@@ -27,7 +28,7 @@ import org.immutables.value.Value;
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class SerializableStackTraceElement {
+public abstract class SerializableStackTraceElement implements Serializable {
 
     public abstract Optional<String> getClassName();
 
