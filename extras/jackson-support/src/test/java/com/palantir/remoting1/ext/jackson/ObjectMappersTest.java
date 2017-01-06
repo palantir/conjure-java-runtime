@@ -24,10 +24,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.junit.Test;
 
 public final class ObjectMappersTest {
-    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7();
+    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk8();
 
     @Test
     public void deserializeJdk7ModuleObject() {
@@ -52,7 +53,33 @@ public final class ObjectMappersTest {
     }
 
     @Test
+    public void deserializeJdk8ModuleObject() {
+        String jsonPresent = "\"Test\"";
+        String jsonNone = "null";
+
+        try {
+            assertThat(MAPPER.readValue(jsonPresent, Optional.class)).isEqualTo(Optional.of("Test"));
+            assertThat(MAPPER.readValue(jsonNone, Optional.class)).isEqualTo(Optional.empty());
+        } catch (IOException e) {
+            fail();
+        }
+    }
+
+    @Test
+    public void serializeJdk8ModuleObject() {
+        Optional<String> optPresent = Optional.of("Test");
+        Optional<String> optNone = Optional.empty();
+        try {
+            System.out.println(MAPPER.writeValueAsString(optNone));
+            assertThat(MAPPER.writeValueAsString(optPresent)).isEqualTo("\"Test\"");
+            assertThat(MAPPER.writeValueAsString(optNone)).isEqualTo("null");
+        } catch (IOException e) {
+            fail();
+        }
+    }
+
+    @Test
     public void testMappersReturnNewInstance() {
-        assertThat(ObjectMappers.guavaJdk7()).isNotSameAs(ObjectMappers.guavaJdk7());
+        assertThat(ObjectMappers.guavaJdk8()).isNotSameAs(ObjectMappers.guavaJdk8());
     }
 }
