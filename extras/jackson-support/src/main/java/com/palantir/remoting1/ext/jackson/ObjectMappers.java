@@ -18,6 +18,7 @@ package com.palantir.remoting1.ext.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 
 public final class ObjectMappers {
@@ -31,6 +32,7 @@ public final class ObjectMappers {
         return new ObjectMapper()
                 .registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
+                .registerModule(new Jdk8Module())
                 .registerModule(new AfterburnerModule());
     }
 }
