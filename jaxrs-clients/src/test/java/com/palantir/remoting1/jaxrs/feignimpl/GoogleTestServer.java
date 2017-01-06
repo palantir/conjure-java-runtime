@@ -40,7 +40,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.assertj.core.util.Strings;
 
-public class TestServer extends Application<Configuration> {
+public class GoogleTestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(
@@ -140,11 +140,6 @@ public class TestServer extends Application<Configuration> {
         public GoogleComplexType getGoogleComplexType(GoogleComplexType complexType) {
             return complexType;
         }
-
-        @Override
-        public Jdk8ComplexType getJdk8ComplexType(Jdk8ComplexType complexType) {
-            return complexType;
-        }
     }
 
     @Path("/")
@@ -220,16 +215,10 @@ public class TestServer extends Application<Configuration> {
         Optional<String> getOptionalString(@QueryParam("value") @Nullable String value);
 
         @POST
-        @Path("/googleComplexType")
+        @Path("/complexType")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         GoogleComplexType getGoogleComplexType(GoogleComplexType complexType);
-
-        @POST
-        @Path("/jdk8ComplexType")
-        @Consumes(MediaType.APPLICATION_JSON)
-        @Produces(MediaType.APPLICATION_JSON)
-        Jdk8ComplexType getJdk8ComplexType(Jdk8ComplexType complexType);
     }
 
 }

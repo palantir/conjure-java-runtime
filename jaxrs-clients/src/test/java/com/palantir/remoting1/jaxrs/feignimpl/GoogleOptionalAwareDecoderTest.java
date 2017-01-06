@@ -34,22 +34,22 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public final class OptionalAwareDecoderTest {
+public final class GoogleOptionalAwareDecoderTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestServer.class,
+    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GoogleTestServer.class,
             "src/test/resources/test-server.yml");
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private TestServer.TestService service;
+    private GoogleTestServer.TestService service;
 
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.builder()
-                .build(TestServer.TestService.class, "agent", endpointUri);
+                .build(GoogleTestServer.TestService.class, "agent", endpointUri);
     }
 
     @Test
@@ -121,15 +121,15 @@ public final class OptionalAwareDecoderTest {
 
     @Test
     public void testComplexType() {
-        ComplexType value = new ComplexType(
+        GoogleComplexType value = new GoogleComplexType(
                 Optional.of(
-                        new ComplexType(
-                                Optional.<ComplexType>absent(),
+                        new GoogleComplexType(
+                                Optional.<GoogleComplexType>absent(),
                                 Optional.<String>absent(),
                                 Paths.get("bar"))),
                 Optional.of("baz"),
                 Paths.get("foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
-        assertThat(service.getComplexType(value), is(value));
+        assertThat(service.getGoogleComplexType(value), is(value));
     }
 }
