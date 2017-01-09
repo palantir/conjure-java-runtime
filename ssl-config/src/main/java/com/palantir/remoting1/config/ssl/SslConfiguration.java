@@ -16,6 +16,7 @@
 
 package com.palantir.remoting1.config.ssl;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
@@ -24,10 +25,10 @@ import java.nio.file.Path;
 import org.immutables.value.Value;
 import org.immutables.value.Value.Style.ImplementationVisibility;
 
-@JsonDeserialize(as = ImmutableSslConfiguration.class)
+@JsonDeserialize(builder = SslConfiguration.Builder.class)
 @JsonSerialize(as = ImmutableSslConfiguration.class)
 @Value.Immutable
-@Value.Style(visibility = ImplementationVisibility.PACKAGE)
+@Value.Style(visibility = ImplementationVisibility.PACKAGE, builder = "new")
 public abstract class SslConfiguration {
 
     public enum StoreType {
@@ -88,6 +89,37 @@ public abstract class SslConfiguration {
         return new Builder();
     }
 
-    public static class Builder extends ImmutableSslConfiguration.Builder {}
+    public static final class Builder extends ImmutableSslConfiguration.Builder {
 
+        @JsonProperty("trust-store-path")
+        Builder trustStorePathKebabCaseKebabCase(Path trustStorePath) {
+            return trustStorePath(trustStorePath);
+        }
+
+        @JsonProperty("trust-store-type")
+        Builder trustStoreTypeKebabCaseKebabCase(StoreType storeType) {
+            return trustStoreType(storeType);
+        }
+
+        @JsonProperty("key-store-path")
+        Builder keyStorePathKebabCase(Optional<Path> keyStorePath) {
+            return keyStorePath(keyStorePath);
+        }
+
+        @JsonProperty("key-store-password")
+        Builder keyStorePasswordKebabCase(Optional<String> keyStorePassword) {
+            return keyStorePassword(keyStorePassword);
+        }
+
+        @JsonProperty("key-store-type")
+        Builder keyStoretypeKebabCase(StoreType keyStoreType) {
+            return keyStoreType(keyStoreType);
+        }
+
+        @JsonProperty("key-store-key-alias")
+        Builder keyStoreKeyAliasKebabCase(Optional<String> keyStoreKeyAlias) {
+            return keyStoreKeyAlias(keyStoreKeyAlias);
+        }
+
+    }
 }

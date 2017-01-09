@@ -19,6 +19,7 @@ package com.palantir.remoting1.config.service;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
@@ -36,7 +37,8 @@ import org.immutables.value.Value.Style;
  * and provides utility methods for apps to build service clients.
  */
 @Immutable
-@JsonDeserialize(as = ImmutableServiceDiscoveryConfiguration.class)
+@JsonDeserialize(builder = ServiceDiscoveryConfiguration.Builder.class)
+@JsonSerialize(as = ImmutableServiceDiscoveryConfiguration.class)
 @Style(visibility = Style.ImplementationVisibility.PACKAGE)
 public abstract class ServiceDiscoveryConfiguration {
 
@@ -184,5 +186,27 @@ public abstract class ServiceDiscoveryConfiguration {
         return new Builder();
     }
 
-    public static final class Builder extends ImmutableServiceDiscoveryConfiguration.Builder {}
+    public static final class Builder extends ImmutableServiceDiscoveryConfiguration.Builder {
+
+        @JsonProperty("api-token")
+        Builder defaultApiTokenKebabCase(Optional<BearerToken> defaultApiToken) {
+            return defaultApiToken(defaultApiToken);
+        }
+
+        @JsonProperty("proxy-configuration")
+        Builder defaultProxyConfigurationKebabCase(Optional<ProxyConfiguration> defaultProxyConfiguration) {
+            return defaultProxyConfiguration(defaultProxyConfiguration);
+        }
+
+        @JsonProperty("connect-timeout")
+        Builder defaultConnectTimeoutKebabCase(Optional<Duration> defaultConnectTimeout) {
+            return defaultConnectTimeout(defaultConnectTimeout);
+        }
+
+        @JsonProperty("read-timeout")
+        Builder defaultReadTimeoutKebabCase(Optional<Duration> defaultReadTimeout) {
+            return defaultReadTimeout(defaultReadTimeout);
+        }
+
+    }
 }

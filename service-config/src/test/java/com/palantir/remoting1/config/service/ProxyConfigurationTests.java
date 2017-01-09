@@ -16,11 +16,13 @@
 
 package com.palantir.remoting1.config.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.io.Resources;
+import com.palantir.remoting1.ext.jackson.ObjectMappers;
 import io.dropwizard.jackson.Jackson;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -58,4 +60,21 @@ public final class ProxyConfigurationTests {
         Proxy expected = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("squid", 3128));
         assertEquals(expected, proxyConfiguration.toProxy());
     }
+
+    @Test
+    public void serDe() throws Exception {
+        ProxyConfiguration serialized = ProxyConfiguration.of("host:80", BasicCredentials.of("username", "password"));
+        String deserializedCamelCase =
+                "{\"hostAndPort\":\"host:80\",\"credentials\":{\"username\":\"username\",\"password\":\"password\"}}";
+        String deserializedKebabCase =
+                "{\"host-and-port\":\"host:80\",\"credentials\":{\"username\":\"username\",\"password\":\"password\"}}";
+
+        assertThat(ObjectMappers.guavaJdk7().writeValueAsString(serialized))
+                .isEqualTo(deserializedCamelCase);
+        assertThat(ObjectMappers.guavaJdk7().readValue(deserializedCamelCase, ProxyConfiguration.class))
+                .isEqualTo(serialized);
+        assertThat(ObjectMappers.guavaJdk7().readValue(deserializedKebabCase, ProxyConfiguration.class))
+                .isEqualTo(serialized);
+    }
+
 }

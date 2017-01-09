@@ -16,7 +16,9 @@
 
 package com.palantir.remoting1.config.service;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
@@ -25,7 +27,8 @@ import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Style;
 
 @Immutable
-@JsonDeserialize(as = ImmutableServiceConfiguration.class)
+@JsonDeserialize(builder = ServiceConfiguration.Builder.class)
+@JsonSerialize(as = ImmutableServiceConfiguration.class)
 @Style(visibility = Style.ImplementationVisibility.PACKAGE)
 public abstract class ServiceConfiguration {
 
@@ -75,5 +78,33 @@ public abstract class ServiceConfiguration {
         return new Builder();
     }
 
-    public static final class Builder extends ImmutableServiceConfiguration.Builder {}
+    public static final class Builder extends ImmutableServiceConfiguration.Builder {
+
+        @JsonProperty("api-token")
+        Builder apiTokenKebabCase(Optional<BearerToken> apiToken) {
+            return apiToken(apiToken);
+        }
+
+        @JsonProperty("connect-timeout")
+        Builder connectTimeoutKebabCase(Optional<Duration> connectTimeout) {
+            return connectTimeout(connectTimeout);
+        }
+
+        @JsonProperty("read-timeout")
+        Builder readTimeoutKebabCase(Optional<Duration> readTimeout) {
+            return readTimeout(readTimeout);
+        }
+
+        @JsonProperty("write-timeout")
+        Builder writeTimeoutKebabCase(Optional<Duration> writeTimeout) {
+            return writeTimeout(writeTimeout);
+        }
+
+        @JsonProperty("proxy-configuration")
+        Builder proxyConfigurationKebabCase(Optional<ProxyConfiguration> proxyConfiguration) {
+            return proxyConfiguration(proxyConfiguration);
+        }
+
+    }
+
 }

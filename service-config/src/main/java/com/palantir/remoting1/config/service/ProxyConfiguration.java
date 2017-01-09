@@ -17,7 +17,9 @@
 package com.palantir.remoting1.config.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.net.HostAndPort;
@@ -29,8 +31,9 @@ import org.immutables.value.Value.Lazy;
 import org.immutables.value.Value.Style;
 
 @Immutable
-@JsonDeserialize(as = ImmutableProxyConfiguration.class)
-@Style(visibility = Style.ImplementationVisibility.PACKAGE)
+@JsonDeserialize(builder = ProxyConfiguration.Builder.class)
+@JsonSerialize(as = ImmutableProxyConfiguration.class)
+@Style(visibility = Style.ImplementationVisibility.PACKAGE, builder = "new")
 public abstract class ProxyConfiguration {
 
     /**
@@ -59,10 +62,20 @@ public abstract class ProxyConfiguration {
     }
 
     public static ProxyConfiguration of(String hostAndPort) {
-        return ImmutableProxyConfiguration.builder().hostAndPort(hostAndPort).build();
+        return new ProxyConfiguration.Builder().hostAndPort(hostAndPort).build();
     }
 
     public static ProxyConfiguration of(String hostAndPort, BasicCredentials credentials) {
-        return ImmutableProxyConfiguration.builder().hostAndPort(hostAndPort).credentials(credentials).build();
+        return new ProxyConfiguration.Builder().hostAndPort(hostAndPort).credentials(credentials).build();
     }
+
+    static final class Builder extends ImmutableProxyConfiguration.Builder {
+
+        @JsonProperty("host-and-port")
+        Builder hostAndPortKebabCase(String hostAndPort) {
+            return hostAndPort(hostAndPort);
+        }
+
+    }
+
 }
