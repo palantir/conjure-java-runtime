@@ -6,6 +6,7 @@ dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind"
     compile "com.google.guava:guava"
 
+    testCompile project(":extras:jackson-support")
     testCompile("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"

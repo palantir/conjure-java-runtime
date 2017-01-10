@@ -16,6 +16,7 @@
 
 package com.palantir.remoting1.config.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -24,15 +25,18 @@ import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.palantir.remoting1.config.ssl.SslConfiguration;
+import com.palantir.remoting1.ext.jackson.ObjectMappers;
 import com.palantir.tokens.auth.BearerToken;
 import io.dropwizard.jackson.Jackson;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.junit.Test;
 
 /**
@@ -60,7 +64,8 @@ public final class ServiceDiscoveryConfigurationTests {
         // 2) without token
         assertEquals(BearerToken.valueOf("service1ApiToken"), discoveryConfig.getApiToken("service1").get());
         assertEquals(BearerToken.valueOf("service2ApiToken"), discoveryConfig.getApiToken("service2").get());
-        assertEquals(ImmutableList.of("https://some.internal.url:8443/thirdservice/api"), discoveryConfig.getUris("service3"));
+        assertEquals(ImmutableList.of("https://some.internal.url:8443/thirdservice/api"),
+                discoveryConfig.getUris("service3"));
         assertEquals(Duration.minutes(1), discoveryConfig.getReadTimeout("service2").get());
         assertEquals(Duration.minutes(5), discoveryConfig.getConnectTimeout("service3").get());
         assertEquals(Duration.seconds(30), discoveryConfig.getReadTimeout("service3").get());
@@ -160,6 +165,55 @@ public final class ServiceDiscoveryConfigurationTests {
         assertEquals(defaultProxyConfiguration, serviceWithDefaults.proxyConfiguration().get());
         assertEquals(security, serviceWithDefaults.security().get());
         assertEquals(connectTimeout, serviceWithDefaults.connectTimeout().get());
+    }
+
+    @Test
+    public void serDe() throws Exception {
+        ServiceDiscoveryConfiguration serialized = ServiceDiscoveryConfiguration.builder()
+                .defaultApiToken(BearerToken.valueOf("bearerToken"))
+                .defaultSecurity(SslConfiguration.of(Paths.get("truststore.jks")))
+                .putOriginalServices("service", ServiceConfiguration.of("uri", Optional.<SslConfiguration>absent()))
+                .defaultProxyConfiguration(ProxyConfiguration.of("host:80"))
+                .defaultConnectTimeout(Duration.days(1))
+                .defaultReadTimeout(Duration.days(1))
+                .build();
+        String deserializedCamelCase = "{\"apiToken\":\"bearerToken\",\"security\":"
+                + "{\"trustStorePath\":\"truststore.jks\",\"trustStoreType\":\"JKS\",\"keyStorePath\":null,"
+                + "\"keyStorePassword\":null,\"keyStoreType\":\"JKS\",\"keyStoreKeyAlias\":null},\"services\":"
+                + "{\"service\":{\"apiToken\":null,\"security\":null,\"connectTimeout\":null,\"readTimeout\":null,"
+                + "\"writeTimeout\":null,\"uris\":[\"uri\"],\"proxyConfiguration\":null}},\"proxyConfiguration\":"
+                + "{\"hostAndPort\":\"host:80\",\"credentials\":null},\"connectTimeout\":\"1 day\","
+                + "\"readTimeout\":\"1 day\"}";
+        String deserializedKebabCase = "{\"api-token\":\"bearerToken\",\"security\":"
+                + "{\"trust-store-path\":\"truststore.jks\",\"trust-store-type\":\"JKS\",\"key-store-path\":null,"
+                + "\"key-store-password\":null,\"key-store-type\":\"JKS\",\"key-store-key-alias\":null},\"services\":"
+                + "{\"service\":{\"apiToken\":null,\"security\":null,\"connect-timeout\":null,\"read-timeout\":null,"
+                + "\"write-timeout\":null,\"uris\":[\"uri\"],\"proxy-configuration\":null}},\"proxy-configuration\":"
+                + "{\"host-and-port\":\"host:80\",\"credentials\":null},\"connect-timeout\":\"1 day\","
+                + "\"read-timeout\":\"1 day\"}";
+
+        assertThat(ObjectMappers.guavaJdk7().writeValueAsString(serialized))
+                .isEqualTo(deserializedCamelCase);
+        assertThat(ObjectMappers.guavaJdk7().readValue(deserializedCamelCase, ServiceDiscoveryConfiguration.class))
+                .isEqualTo(serialized);
+        assertThat(ObjectMappers.guavaJdk7().readValue(deserializedKebabCase, ServiceDiscoveryConfiguration.class))
+                .isEqualTo(serialized);
+    }
+
+    @Test
+    public void serDe_optional() throws Exception {
+        ServiceDiscoveryConfiguration serialized = ServiceDiscoveryConfiguration.builder().build();
+        String deserializedCamelCase = "{\"apiToken\":null,\"security\":null,\"services\":{},"
+                + "\"proxyConfiguration\":null,\"connectTimeout\":null,\"readTimeout\":null}";
+        String deserializedKebabCase = "{\"api-token\":null,\"security\":null,\"services\":{},"
+                + "\"proxy-configuration\":null,\"connect-timeout\":null,\"read-timeout\":null}";
+
+        assertThat(ObjectMappers.guavaJdk7().writeValueAsString(serialized))
+                .isEqualTo(deserializedCamelCase);
+        assertThat(ObjectMappers.guavaJdk7().readValue(deserializedCamelCase, ServiceDiscoveryConfiguration.class))
+                .isEqualTo(serialized);
+        assertThat(ObjectMappers.guavaJdk7().readValue(deserializedKebabCase, ServiceDiscoveryConfiguration.class))
+                .isEqualTo(serialized);
     }
 
 }
