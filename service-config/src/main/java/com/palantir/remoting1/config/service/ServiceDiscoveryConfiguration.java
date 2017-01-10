@@ -37,6 +37,7 @@ import org.immutables.value.Value.Style;
  */
 @Immutable
 @JsonDeserialize(as = ImmutableServiceDiscoveryConfiguration.class)
+@JsonSerialize(as = ImmutableServiceDiscoveryConfiguration.class)
 @Style(visibility = Style.ImplementationVisibility.PACKAGE)
 public abstract class ServiceDiscoveryConfiguration {
 

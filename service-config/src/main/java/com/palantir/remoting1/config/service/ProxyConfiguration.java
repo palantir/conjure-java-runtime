@@ -31,6 +31,7 @@ import org.immutables.value.Value.Style;
 @Immutable
 @JsonDeserialize(as = ImmutableProxyConfiguration.class)
 @Style(visibility = Style.ImplementationVisibility.PACKAGE)
+@JsonSerialize(as = ImmutableProxyConfiguration.class)
 public abstract class ProxyConfiguration {
 
     /**
