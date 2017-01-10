@@ -26,6 +26,7 @@ import org.immutables.value.Value.Style;
 
 @Immutable
 @JsonDeserialize(as = ImmutableServiceConfiguration.class)
+@JsonSerialize(as = ImmutableServiceConfiguration.class)
 @Style(visibility = Style.ImplementationVisibility.PACKAGE)
 public abstract class ServiceConfiguration {
 
