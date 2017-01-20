@@ -36,6 +36,7 @@ dependencies {
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-guava"
     shadow "com.google.guava:guava"
     shadow "com.squareup.okhttp3:okhttp"
+    shadow "org.slf4j:slf4j-api"
 }
 
 shadowJar {
@@ -55,6 +56,7 @@ shadowJar {
         exclude(dependency { it.moduleGroup.contains("com.fasterxml.jackson") })
         exclude(dependency { it.moduleGroup.contains("com.google.guava") })
         exclude(dependency { it.moduleGroup.contains("com.squareup.okhttp3") })
+        exclude(dependency { it.moduleGroup.contains("org.slf4j") })
     }
     classifier = ''
 }
