@@ -120,6 +120,11 @@ public final class Jdk8OptionalAwareDecoderTest {
     }
 
     @Test
+    public void testOptionalString() {
+        assertThat(service.getOptionalString("foo"), is(Optional.of("foo")));
+    }
+
+    @Test
     public void testComplexType() {
         Jdk8ComplexType value = new Jdk8ComplexType(
                 Optional.of(
