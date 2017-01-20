@@ -47,6 +47,7 @@ public final class HttpRemotingJerseyFeature implements Feature {
         context.register(new RemoteExceptionMapper());
 
         // Optional handling
+        context.register(GuavaOptionalMessageBodyWriter.class);
         context.register(GuavaOptionalParamConverterProvider.class);
         context.register(Java8OptionalMessageBodyWriter.class);
         context.register(Java8OptionalParamConverterProvider.class);
