@@ -47,7 +47,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder extends ClientBuilder {
 
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk8();
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7Jdk8();
 
     private static final ImmutableList<ConnectionSpec> CONNECTION_SPEC = ImmutableList.of(
             new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)

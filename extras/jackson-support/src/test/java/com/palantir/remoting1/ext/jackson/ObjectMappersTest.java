@@ -28,7 +28,7 @@ import java.util.Optional;
 import org.junit.Test;
 
 public final class ObjectMappersTest {
-    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk8();
+    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7Jdk8();
 
     @Test
     public void deserializeJdk7ModuleObject() throws IOException {
@@ -66,6 +66,6 @@ public final class ObjectMappersTest {
 
     @Test
     public void testMappersReturnNewInstance() {
-        assertThat(ObjectMappers.guavaJdk8()).isNotSameAs(ObjectMappers.guavaJdk8());
+        assertThat(ObjectMappers.guavaJdk7Jdk8()).isNotSameAs(ObjectMappers.guavaJdk7Jdk8());
     }
 }

@@ -95,7 +95,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                     .build(),
             ConnectionSpec.CLEARTEXT);
 
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk8();
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7Jdk8();
 
     private final ClientConfig config;
 

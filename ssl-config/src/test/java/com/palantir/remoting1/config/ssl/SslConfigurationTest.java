@@ -41,11 +41,11 @@ public final class SslConfigurationTest {
                 + "\"key-store-path\":\"keystore.jks\",\"key-store-password\":\"password\","
                 + "\"key-store-type\":\"JKS\",\"key-store-key-alias\":\"alias\"}";
 
-        assertThat(ObjectMappers.guavaJdk8().writeValueAsString(serialized))
+        assertThat(ObjectMappers.guavaJdk7Jdk8().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
-        assertThat(ObjectMappers.guavaJdk8().readValue(deserializedCamelCase, SslConfiguration.class))
+        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedCamelCase, SslConfiguration.class))
                 .isEqualTo(serialized);
-        assertThat(ObjectMappers.guavaJdk8().readValue(deserializedKebabCase, SslConfiguration.class))
+        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedKebabCase, SslConfiguration.class))
                 .isEqualTo(serialized);
     }
 
@@ -58,11 +58,11 @@ public final class SslConfigurationTest {
                 + "\"key-store-path\":null,\"key-store-password\":null,\"key-store-type\":\"JKS\","
                 + "\"key-store-key-alias\":null}";
 
-        assertThat(ObjectMappers.guavaJdk8().writeValueAsString(serialized))
+        assertThat(ObjectMappers.guavaJdk7Jdk8().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
-        assertThat(ObjectMappers.guavaJdk8().readValue(deserializedCamelCase, SslConfiguration.class))
+        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedCamelCase, SslConfiguration.class))
                 .isEqualTo(serialized);
-        assertThat(ObjectMappers.guavaJdk8().readValue(deserializedKebabCase, SslConfiguration.class))
+        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedKebabCase, SslConfiguration.class))
                 .isEqualTo(serialized);
     }
 }

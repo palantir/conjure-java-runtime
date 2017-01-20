@@ -26,9 +26,10 @@ public final class ObjectMappers {
     private ObjectMappers() {}
 
     /**
-     * Returns a newly allocated {@link ObjectMapper} that is configured with the Guava module and the JDK 7 module.
+     * Returns a newly allocated {@link ObjectMapper} that is configured with modules for Guava, JDK7, JDK8, and
+     * afterburner.
      */
-    public static ObjectMapper guavaJdk7() {
+    public static ObjectMapper guavaJdk7Jdk8() {
         return new ObjectMapper()
                 .registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
