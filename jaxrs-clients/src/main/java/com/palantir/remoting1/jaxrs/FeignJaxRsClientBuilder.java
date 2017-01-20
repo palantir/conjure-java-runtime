@@ -29,7 +29,6 @@ import com.palantir.remoting1.ext.jackson.ObjectMappers;
 import com.palantir.remoting1.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting1.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting1.jaxrs.feignimpl.GuavaOptionalAwareContract;
-import com.palantir.remoting1.jaxrs.feignimpl.Jackson24Encoder;
 import com.palantir.remoting1.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting1.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting1.jaxrs.feignimpl.UserAgentInterceptor;
@@ -44,7 +43,6 @@ import feign.Request;
 import feign.TextDelegateDecoder;
 import feign.TextDelegateEncoder;
 import feign.codec.Decoder;
-import feign.codec.Encoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
@@ -94,7 +92,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                             CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
                             CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
                     .build(),
-                    ConnectionSpec.CLEARTEXT);
+            ConnectionSpec.CLEARTEXT);
 
     private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7();
 
@@ -111,7 +109,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         FailoverFeignTarget<T> target = createTarget(serviceClass, uris);
         return Feign.builder()
                 .contract(createContract())
-                .encoder(createEncoder(OBJECT_MAPPER))
+                .encoder(new InputStreamDelegateEncoder(new TextDelegateEncoder(new JacksonEncoder(OBJECT_MAPPER))))
                 .decoder(createDecoder(OBJECT_MAPPER))
                 .errorDecoder(FeignSerializableErrorErrorDecoder.INSTANCE)
                 .client(target.wrapClient(createOkHttpClient()))
@@ -136,13 +134,6 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         return new Request.Options(
                 (int) config.connectTimeout().toMilliseconds(),
                 (int) config.readTimeout().toMilliseconds());
-    }
-
-    private static Encoder createEncoder(ObjectMapper objectMapper) {
-        Encoder jacksonEncoder = ObjectMappers.hasJackson25()
-                ? new JacksonEncoder(objectMapper)
-                : new Jackson24Encoder(objectMapper);
-        return new InputStreamDelegateEncoder(new TextDelegateEncoder(jacksonEncoder));
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper) {
