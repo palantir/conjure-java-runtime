@@ -16,7 +16,6 @@
 
 package com.palantir.remoting1.ext.jackson;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
@@ -26,35 +25,12 @@ public final class ObjectMappers {
     private ObjectMappers() {}
 
     /**
-     * Returns a newly allocated {@link ObjectMapper} that is configured with the Guava module and the JDK 7 module
-     * (if present).
+     * Returns a newly allocated {@link ObjectMapper} that is configured with the Guava module and the JDK 7 module.
      */
     public static ObjectMapper guavaJdk7() {
-        // TODO: Replace this code with shading to support different versions of Jackson
-        ObjectMapper mapper = new ObjectMapper()
+        return new ObjectMapper()
                 .registerModule(new GuavaModule())
-                .registerModule(new ShimJdk7Module());
-        if (hasJackson25()) {
-            // Afterburner on Jackson 2.4 will throw
-            // java.lang.NoSuchMethodError: com.fasterxml.jackson.core.JsonParser.isExpectedStartObjectToken()Z
-            mapper.registerModule(new AfterburnerModule());
-        }
-
-        return mapper;
-    }
-
-    /**
-     * Uses reflection to determine if Jackson >= 2.5 is on the classpath by
-     * checking for the existence of the ObjectMapper#writerFor method.
-     *
-     * @return true if Jackson >= 2.5 is on the classpath
-     */
-    public static boolean hasJackson25() {
-        try {
-            ObjectMapper.class.getMethod("writerFor", JavaType.class);
-            return true;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
+                .registerModule(new ShimJdk7Module())
+                .registerModule(new AfterburnerModule());
     }
 }
