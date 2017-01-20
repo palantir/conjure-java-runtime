@@ -124,8 +124,8 @@ public final class Jdk8OptionalAwareDecoderTest {
         Jdk8ComplexType value = new Jdk8ComplexType(
                 Optional.of(
                         new Jdk8ComplexType(
-                                Optional.<Jdk8ComplexType>empty(),
-                                Optional.<String>empty(),
+                                Optional.empty(),
+                                Optional.empty(),
                                 Paths.get("bar"))),
                 Optional.of("baz"),
                 Paths.get("foo"));

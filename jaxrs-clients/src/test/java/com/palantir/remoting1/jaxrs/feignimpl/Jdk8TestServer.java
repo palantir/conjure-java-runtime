@@ -138,7 +138,6 @@ public class Jdk8TestServer extends Application<Configuration> {
 
         @Override
         public Jdk8ComplexType getJdk8ComplexType(Jdk8ComplexType complexType) {
-            System.out.println(complexType.toString());
             return complexType;
         }
     }
