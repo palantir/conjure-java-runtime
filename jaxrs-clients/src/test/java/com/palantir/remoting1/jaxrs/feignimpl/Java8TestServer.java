@@ -16,6 +16,8 @@
 
 package com.palantir.remoting1.jaxrs.feignimpl;
 
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting1.servers.jersey.HttpRemotingJerseyFeature;
 import feign.Util;
@@ -38,7 +40,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import org.assertj.core.util.Strings;
 
 public class Java8TestServer extends Application<Configuration> {
     @Override
@@ -46,6 +47,7 @@ public class Java8TestServer extends Application<Configuration> {
         env.jersey().register(
                 HttpRemotingJerseyFeature.with(HttpRemotingJerseyFeature.StacktracePropagation.PROPAGATE));
         env.jersey().register(new TestResource());
+        env.getObjectMapper().registerModule(new Jdk8Module());
     }
 
     static class TestResource implements TestService {
@@ -137,8 +139,8 @@ public class Java8TestServer extends Application<Configuration> {
         }
 
         @Override
-        public Java8ComplexType getJava8ComplexType(Java8ComplexType complexType) {
-            return complexType;
+        public Java8ComplexType getJava8ComplexType(Java8ComplexType value) {
+            return value;
         }
     }
 
@@ -218,7 +220,6 @@ public class Java8TestServer extends Application<Configuration> {
         @Path("/complexType")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        Java8ComplexType getJava8ComplexType(Java8ComplexType complexType);
+        Java8ComplexType getJava8ComplexType(Java8ComplexType value);
     }
-
 }

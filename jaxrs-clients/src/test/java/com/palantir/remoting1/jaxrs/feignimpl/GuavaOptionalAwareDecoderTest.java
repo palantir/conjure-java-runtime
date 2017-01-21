@@ -120,6 +120,11 @@ public final class GuavaOptionalAwareDecoderTest {
     }
 
     @Test
+    public void testOptionalString() {
+        assertThat(service.getOptionalString("foo"), is(Optional.of("foo")));
+    }
+
+    @Test
     public void testComplexType() {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
                 Optional.of(

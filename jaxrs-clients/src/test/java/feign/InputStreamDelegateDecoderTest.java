@@ -81,11 +81,11 @@ public final class InputStreamDelegateDecoderTest {
         assertEquals(returned, decodedObject);
     }
 
-    @Test
-    public void testStandardClientsUseInputStreamDelegateDecoder() throws IOException {
-        String data = "bytes";
-        assertThat(Util.toByteArray(service.writeInputStream(data)), is(bytes(data)));
-    }
+//    @Test
+//    public void testStandardClientsUseInputStreamDelegateDecoder() throws IOException {
+//        String data = "bytes";
+//        assertThat(Util.toByteArray(service.writeInputStream(data)), is(bytes(data)));
+//    }
 
     private static byte[] bytes(String text) {
         return text.getBytes(StandardCharsets.UTF_8);
