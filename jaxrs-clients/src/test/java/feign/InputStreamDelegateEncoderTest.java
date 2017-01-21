@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
 import com.palantir.remoting1.jaxrs.JaxRsClient;
-import com.palantir.remoting1.jaxrs.feignimpl.GoogleTestServer;
+import com.palantir.remoting1.jaxrs.feignimpl.GuavaTestServer;
 import feign.codec.Encoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -45,10 +45,10 @@ public final class InputStreamDelegateEncoderTest {
     private Encoder inputStreamDelegateEncoder;
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GoogleTestServer.class,
+    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
             "src/test/resources/test-server.yml");
 
-    private GoogleTestServer.TestService service;
+    private GuavaTestServer.TestService service;
 
     @Before
     public void before() {
@@ -56,7 +56,7 @@ public final class InputStreamDelegateEncoderTest {
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.builder()
-                .build(GoogleTestServer.TestService.class, "agent", endpointUri);
+                .build(GuavaTestServer.TestService.class, "agent", endpointUri);
     }
 
     @Test

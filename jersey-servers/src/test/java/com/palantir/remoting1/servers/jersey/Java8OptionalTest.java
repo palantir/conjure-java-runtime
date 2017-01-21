@@ -42,7 +42,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public final class Jdk8OptionalTest {
+public final class Java8OptionalTest {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(OptionalTestServer.class,

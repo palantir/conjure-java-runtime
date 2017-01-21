@@ -40,7 +40,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.assertj.core.util.Strings;
 
-public class GoogleTestServer extends Application<Configuration> {
+public class GuavaTestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(
@@ -137,7 +137,7 @@ public class GoogleTestServer extends Application<Configuration> {
         }
 
         @Override
-        public GoogleComplexType getGoogleComplexType(GoogleComplexType complexType) {
+        public GuavaOptionalComplexType getGuavaComplexType(GuavaOptionalComplexType complexType) {
             return complexType;
         }
     }
@@ -218,7 +218,7 @@ public class GoogleTestServer extends Application<Configuration> {
         @Path("/complexType")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        GoogleComplexType getGoogleComplexType(GoogleComplexType complexType);
+        GuavaOptionalComplexType getGuavaComplexType(GuavaOptionalComplexType complexType);
     }
 
 }

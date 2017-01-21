@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@ package com.palantir.remoting1.jaxrs.feignimpl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Optional;
 import java.nio.file.Path;
-import java.util.Optional;
 
 
-public final class Jdk8ComplexType {
-    private final Optional<Jdk8ComplexType> nested;
+public final class GuavaOptionalComplexType {
+    private final Optional<GuavaOptionalComplexType> nested;
     private final Optional<String> string;
     private final Path path;
 
     @JsonCreator
-    public Jdk8ComplexType(
-            @JsonProperty("nested") Optional<Jdk8ComplexType> nested,
+    public GuavaOptionalComplexType(
+            @JsonProperty("nested") Optional<GuavaOptionalComplexType> nested,
             @JsonProperty("string") Optional<String> string,
             @JsonProperty("path") Path path) {
         this.nested = nested;
@@ -37,7 +37,7 @@ public final class Jdk8ComplexType {
         this.path = path;
     }
 
-    public Optional<Jdk8ComplexType> getNested() {
+    public Optional<GuavaOptionalComplexType> getNested() {
         return nested;
     }
 
@@ -58,7 +58,7 @@ public final class Jdk8ComplexType {
             return false;
         }
 
-        Jdk8ComplexType that = (Jdk8ComplexType) other;
+        GuavaOptionalComplexType that = (GuavaOptionalComplexType) other;
 
         if (nested != null ? !nested.equals(that.nested) : that.nested != null) {
             return false;

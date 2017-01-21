@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,18 @@ package com.palantir.remoting1.jaxrs.feignimpl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Optional;
 import java.nio.file.Path;
+import java.util.Optional;
 
 
-public final class GoogleComplexType {
-    private final Optional<GoogleComplexType> nested;
+public final class Java8ComplexType {
+    private final Optional<Java8ComplexType> nested;
     private final Optional<String> string;
     private final Path path;
 
     @JsonCreator
-    public GoogleComplexType(
-            @JsonProperty("nested") Optional<GoogleComplexType> nested,
+    public Java8ComplexType(
+            @JsonProperty("nested") Optional<Java8ComplexType> nested,
             @JsonProperty("string") Optional<String> string,
             @JsonProperty("path") Path path) {
         this.nested = nested;
@@ -37,7 +37,7 @@ public final class GoogleComplexType {
         this.path = path;
     }
 
-    public Optional<GoogleComplexType> getNested() {
+    public Optional<Java8ComplexType> getNested() {
         return nested;
     }
 
@@ -58,7 +58,7 @@ public final class GoogleComplexType {
             return false;
         }
 
-        GoogleComplexType that = (GoogleComplexType) other;
+        Java8ComplexType that = (Java8ComplexType) other;
 
         if (nested != null ? !nested.equals(that.nested) : that.nested != null) {
             return false;

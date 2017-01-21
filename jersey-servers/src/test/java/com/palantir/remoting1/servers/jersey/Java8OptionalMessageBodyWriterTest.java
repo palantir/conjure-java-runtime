@@ -34,7 +34,7 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
 import org.junit.Test;
 
-public final class Jdk8OptionalMessageBodyWriterTest extends JerseyTest {
+public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
 
     @Override
     protected Application configure() {

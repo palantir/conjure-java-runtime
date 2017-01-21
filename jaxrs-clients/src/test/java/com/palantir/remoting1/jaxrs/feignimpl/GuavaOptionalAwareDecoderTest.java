@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,41 +21,41 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting1.errors.RemoteException;
 import com.palantir.remoting1.jaxrs.JaxRsClient;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public final class Jdk8OptionalAwareDecoderTest {
+public final class GuavaOptionalAwareDecoderTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(Jdk8TestServer.class,
+    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
             "src/test/resources/test-server.yml");
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private Jdk8TestServer.TestService service;
+    private GuavaTestServer.TestService service;
 
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.builder()
-                .build(Jdk8TestServer.TestService.class, "agent", endpointUri);
+                .build(GuavaTestServer.TestService.class, "agent", endpointUri);
     }
 
     @Test
     public void testOptional() {
         assertThat(service.getOptional("something"), is(Optional.of(ImmutableMap.of("something", "something"))));
-        assertThat(service.getOptional(null), is(Optional.<ImmutableMap<String, String>>empty()));
+        assertThat(service.getOptional(null), is(Optional.<ImmutableMap<String, String>>absent()));
     }
 
     @Test
@@ -120,21 +120,16 @@ public final class Jdk8OptionalAwareDecoderTest {
     }
 
     @Test
-    public void testOptionalString() {
-        assertThat(service.getOptionalString("foo"), is(Optional.of("foo")));
-    }
-
-    @Test
     public void testComplexType() {
-        Jdk8ComplexType value = new Jdk8ComplexType(
+        GuavaOptionalComplexType value = new GuavaOptionalComplexType(
                 Optional.of(
-                        new Jdk8ComplexType(
-                                Optional.empty(),
-                                Optional.empty(),
+                        new GuavaOptionalComplexType(
+                                Optional.<GuavaOptionalComplexType>absent(),
+                                Optional.<String>absent(),
                                 Paths.get("bar"))),
                 Optional.of("baz"),
                 Paths.get("foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
-        assertThat(service.getJdk8ComplexType(value), is(value));
+        assertThat(service.getGuavaComplexType(value), is(value));
     }
 }
