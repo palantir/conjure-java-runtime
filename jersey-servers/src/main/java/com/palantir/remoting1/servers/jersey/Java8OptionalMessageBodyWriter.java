@@ -69,5 +69,4 @@ public final class Java8OptionalMessageBodyWriter implements MessageBodyWriter<O
         writer.writeTo(entity.get(), entity.get().getClass(),
                 innerGenericType, annotations, mediaType, httpHeaders, entityStream);
     }
-
 }
