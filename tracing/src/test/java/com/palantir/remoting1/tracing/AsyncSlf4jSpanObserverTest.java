@@ -28,6 +28,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import org.jmock.lib.concurrent.DeterministicScheduler;
 import org.junit.After;
@@ -106,12 +108,19 @@ public final class AsyncSlf4jSpanObserverTest {
 
         executor.runNextPendingCommand();
         verify(appender).doAppend(event.capture());
-        AsyncSlf4jSpanObserver.ZipkinCompatEndpoint expectedEndpoint = ImmutableZipkinCompatEndpoint.builder()
-                .serviceName("serviceName")
-                .ipv4(InetAddressSupplier.INSTANCE.get().getHostAddress())
-                .build();
+        ImmutableZipkinCompatEndpoint.Builder expectedEndpoint = ImmutableZipkinCompatEndpoint.builder()
+                .serviceName("serviceName");
+        InetAddress address = InetAddressSupplier.INSTANCE.get();
+        if (address instanceof Inet4Address) {
+            expectedEndpoint.ipv4(address.getHostAddress());
+        } else if (address instanceof Inet6Address) {
+            expectedEndpoint.ipv6(address.getHostAddress());
+        } else {
+            throw new IllegalStateException("Cannot handle address type: " + address);
+        }
+
         assertThat(event.getValue().getFormattedMessage())
-                .isEqualTo(AsyncSlf4jSpanObserver.ZipkinCompatSpan.fromSpan(span, expectedEndpoint).toJson());
+                .isEqualTo(AsyncSlf4jSpanObserver.ZipkinCompatSpan.fromSpan(span, expectedEndpoint.build()).toJson());
         Tracer.unsubscribe("");
     }
 
