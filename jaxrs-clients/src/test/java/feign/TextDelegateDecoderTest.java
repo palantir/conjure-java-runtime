@@ -131,19 +131,19 @@ public final class TextDelegateDecoderTest {
         assertEquals(decodedObject, DELEGATE_RESPONSE);
     }
 
-//    @Test
-//    public void testStandardClientsUseTextDelegateEncoder() {
-//        assertThat(service.getString("string"), is("string"));
-//        assertThat(service.getString(null), is((String) null));
-//    }
-//
-//    @Test
-//    public void testInterplayOfOptionalAwareDecoderAndTextDelegateDecoder() {
-//        Assert.assertNull(service.getString(null));
-//
-//        Optional<String> result = service.getOptionalString("string");
-//        assertEquals(Optional.of("string"), result);
-//
-//        assertThat(service.getOptionalString(null), is(Optional.<String>absent()));
-//    }
+    @Test
+    public void testStandardClientsUseTextDelegateEncoder() {
+        assertThat(service.getString("string"), is("string"));
+        assertThat(service.getString(null), is((String) null));
+    }
+
+    @Test
+    public void testInterplayOfOptionalAwareDecoderAndTextDelegateDecoder() {
+        Assert.assertNull(service.getString(null));
+
+        Optional<String> result = service.getOptionalString("string");
+        assertEquals(Optional.of("string"), result);
+
+        assertThat(service.getOptionalString(null), is(Optional.<String>absent()));
+    }
 }
