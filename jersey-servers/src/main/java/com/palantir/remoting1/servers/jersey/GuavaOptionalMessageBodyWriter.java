@@ -37,7 +37,7 @@ import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.message.MessageBodyWorkers;
 
 @Provider
-@Produces(MediaType.WILDCARD)
+@Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 public final class GuavaOptionalMessageBodyWriter implements MessageBodyWriter<Optional<?>> {
 
     @Inject

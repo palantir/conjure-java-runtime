@@ -133,12 +133,14 @@ public final class TextDelegateDecoderTest {
 
     @Test
     public void testStandardClientsUseTextDelegateEncoder() {
+        // TODO(rfink) Need to test this for both Guava and Java8
         assertThat(service.getString("string"), is("string"));
         assertThat(service.getString(null), is((String) null));
     }
 
     @Test
     public void testInterplayOfOptionalAwareDecoderAndTextDelegateDecoder() {
+        // TODO(rfink) Need to test this for both Guava and Java8
         Assert.assertNull(service.getString(null));
 
         Optional<String> result = service.getOptionalString("string");
