@@ -77,11 +77,11 @@ public final class InputStreamDelegateEncoderTest {
         verify(delegate).encode(data, String.class, requestTemplate);
     }
 
-//    @Test
-//    public void testStandardClientsUseByteArrayDelegateEncoder() {
-//        String data = "bytes";
-//        assertThat(service.readInputStream(new ByteArrayInputStream(bytes(data))), is(data));
-//    }
+    @Test
+    public void testStandardClientsUseByteArrayDelegateEncoder() {
+        String data = "bytes";
+        assertThat(service.readInputStream(new ByteArrayInputStream(bytes(data))), is(data));
+    }
 
     private static byte[] bytes(String text) {
         return text.getBytes(StandardCharsets.UTF_8);

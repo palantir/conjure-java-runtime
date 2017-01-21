@@ -47,8 +47,6 @@ public final class HttpRemotingJerseyFeature implements Feature {
         context.register(new RemoteExceptionMapper());
 
         // Optional handling
-        // TODO(rfink) Should consider dropping this and requiring that the underlying Jersey server
-        // (Witchcraft or Dropwizard 1.x) has support for optionals.
         context.register(GuavaOptionalMessageBodyWriter.class);
         context.register(GuavaOptionalParamConverterProvider.class);
         context.register(Java8OptionalMessageBodyWriter.class);
