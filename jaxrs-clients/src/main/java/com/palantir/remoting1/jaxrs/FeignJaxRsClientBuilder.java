@@ -36,7 +36,7 @@ import com.palantir.remoting1.jaxrs.feignimpl.UserAgentInterceptor;
 import com.palantir.remoting1.tracing.okhttp3.OkhttpTraceInterceptor;
 import feign.Contract;
 import feign.Feign;
-import feign.GoogleOptionalAwareDecoder;
+import feign.GuavaOptionalAwareDecoder;
 import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
 import feign.Java8OptionalAwareDecoder;
@@ -141,7 +141,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper) {
-        return new Java8OptionalAwareDecoder(new GoogleOptionalAwareDecoder(
+        return new Java8OptionalAwareDecoder(new GuavaOptionalAwareDecoder(
                 new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(objectMapper)))));
     }
 
