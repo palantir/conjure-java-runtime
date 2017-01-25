@@ -1,13 +1,13 @@
 {
     "compileClasspath": {
         "com.fasterxml.jackson.core:jackson-annotations": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
@@ -17,7 +17,7 @@
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk7",
@@ -26,16 +26,16 @@
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
-            "locked": "2.6.1"
+            "locked": "2.6.5"
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
-            "locked": "2.6.1"
+            "locked": "2.6.5"
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
-            "locked": "2.6.1"
+            "locked": "2.6.5"
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
-            "locked": "2.6.1"
+            "locked": "2.6.5"
         },
         "com.google.guava:guava": {
             "locked": "18.0",
@@ -46,13 +46,13 @@
     },
     "runtime": {
         "com.fasterxml.jackson.core:jackson-annotations": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
@@ -62,7 +62,7 @@
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk7",
@@ -71,16 +71,16 @@
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
-            "locked": "2.6.1"
+            "locked": "2.6.5"
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
-            "locked": "2.6.1"
+            "locked": "2.6.5"
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
-            "locked": "2.6.1"
+            "locked": "2.6.5"
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
-            "locked": "2.6.1"
+            "locked": "2.6.5"
         },
         "com.google.guava:guava": {
             "locked": "18.0",
