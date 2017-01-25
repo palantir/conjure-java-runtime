@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class JaxRsClientOptionalHandlingTest {
+public final class JaxRsClientJava8OptionalHandlingTest {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -75,8 +75,8 @@ public final class JaxRsClientOptionalHandlingTest {
             JaxRsClient.builder().build(CannotDecorateInterface.class, "agent", "http://localhost:" + server.getPort());
             fail();
         } catch (RuntimeException e) {
-            assertThat(e.getMessage(), is("Cannot use Guava Optionals with PathParams."
-                    + " (Class: com.palantir.remoting1.jaxrs.JaxRsClientOptionalHandlingTest$CannotDecorateInterface,"
+            assertThat(e.getMessage(), is("Cannot use Java8 Optionals with PathParams. (Class: com.palantir.remoting1."
+                    + "jaxrs.JaxRsClientJava8OptionalHandlingTest$CannotDecorateInterface,"
                     + " Method: path, Param: arg0)"));
         }
     }
@@ -90,7 +90,7 @@ public final class JaxRsClientOptionalHandlingTest {
 
     @Test
     public void testAbsentQuery() throws Exception {
-        proxy.query(Optional.<String>absent(), "str2");
+        proxy.query(Optional.<String>empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getRequestLine(), is("GET /foo?req=str2 HTTP/1.1"));
     }
@@ -111,7 +111,7 @@ public final class JaxRsClientOptionalHandlingTest {
 
     @Test
     public void testAbsentHeader() throws Exception {
-        proxy.header(Optional.<String>absent(), "str2");
+        proxy.header(Optional.<String>empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getHeader("opt"), is(""));
         assertThat(takeRequest.getHeader("req"), is("str2"));

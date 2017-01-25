@@ -29,7 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting1.jaxrs.JaxRsClient;
-import com.palantir.remoting1.jaxrs.feignimpl.TestServer;
+import com.palantir.remoting1.jaxrs.feignimpl.GuavaTestServer;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -49,13 +49,13 @@ public final class TextDelegateDecoderTest {
     private static final String DELEGATE_RESPONSE = "delegate response";
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestServer.class,
+    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
             "src/test/resources/test-server.yml");
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private TestServer.TestService service;
+    private GuavaTestServer.TestService service;
     private Map<String, Collection<String>> headers;
     private Decoder delegate;
     private Decoder textDelegateDecoder;
@@ -68,7 +68,7 @@ public final class TextDelegateDecoderTest {
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.builder()
-                .build(TestServer.TestService.class, "agent", endpointUri);
+                .build(GuavaTestServer.TestService.class, "agent", endpointUri);
     }
 
     @Test
@@ -133,12 +133,14 @@ public final class TextDelegateDecoderTest {
 
     @Test
     public void testStandardClientsUseTextDelegateEncoder() {
+        // TODO(rfink) Need to test this for both Guava and Java8
         assertThat(service.getString("string"), is("string"));
         assertThat(service.getString(null), is((String) null));
     }
 
     @Test
     public void testInterplayOfOptionalAwareDecoderAndTextDelegateDecoder() {
+        // TODO(rfink) Need to test this for both Guava and Java8
         Assert.assertNull(service.getString(null));
 
         Optional<String> result = service.getOptionalString("string");

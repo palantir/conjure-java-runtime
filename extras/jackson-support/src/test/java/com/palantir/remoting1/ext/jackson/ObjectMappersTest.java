@@ -17,42 +17,55 @@
 package com.palantir.remoting1.ext.jackson;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.junit.Test;
 
 public final class ObjectMappersTest {
-    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7();
+    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7Jdk8();
 
     @Test
-    public void deserializeJdk7ModuleObject() {
+    public void deserializeJdk7ModuleObject() throws IOException {
         String pathSeparator = File.pathSeparator;
         String json = "\"" + pathSeparator + "tmp" + pathSeparator + "foo.txt\"";
 
-        try {
-            assertThat(MAPPER.readValue(json, Path.class)).isEqualTo(Paths.get(":tmp:foo.txt"));
-        } catch (IOException e) {
-            fail();
-        }
+        assertThat(MAPPER.readValue(json, Path.class)).isEqualTo(Paths.get(":tmp:foo.txt"));
     }
 
     @Test
-    public void serializeJdk7ModuleObject() {
+    public void serializeJdk7ModuleObject() throws JsonProcessingException {
         Path path = Paths.get(":tmp:foo.txt");
-        try {
-            assertThat(MAPPER.writeValueAsString(path)).isEqualTo("\":tmp:foo.txt\"");
-        } catch (IOException e) {
-            fail();
-        }
+        assertThat(MAPPER.writeValueAsString(path)).isEqualTo("\":tmp:foo.txt\"");
+    }
+
+    @Test
+    public void deserializeJdk8ModulePresentOptional() throws IOException {
+        assertThat(MAPPER.readValue("\"Test\"", Optional.class)).isEqualTo(Optional.of("Test"));
+    }
+
+    @Test
+    public void deserializeJdk8ModuleAbsentOptional() throws IOException {
+        assertThat(MAPPER.readValue("null", Optional.class)).isEqualTo(Optional.empty());
+    }
+
+    @Test
+    public void serializeJdk8ModulePresentOptional() throws JsonProcessingException {
+        assertThat(MAPPER.writeValueAsString(Optional.of("Test"))).isEqualTo("\"Test\"");
+    }
+
+    @Test
+    public void serializeJdk8ModuleEmptyOptional() throws JsonProcessingException {
+        assertThat(MAPPER.writeValueAsString(Optional.empty())).isEqualTo("null");
     }
 
     @Test
     public void testMappersReturnNewInstance() {
-        assertThat(ObjectMappers.guavaJdk7()).isNotSameAs(ObjectMappers.guavaJdk7());
+        assertThat(ObjectMappers.guavaJdk7Jdk8()).isNotSameAs(ObjectMappers.guavaJdk7Jdk8());
     }
 }
