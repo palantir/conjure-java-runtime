@@ -25,8 +25,6 @@ task generateCerts(type:Exec) {
   commandLine './certSetup.sh', '-f'
 }
 
-tasks.test.dependsOn(generateCerts)
-
 task testBouncyCastle(type: Test) {
     configureTestTask(it, 'bouncy-castle')
 }
@@ -34,6 +32,9 @@ task testBouncyCastle(type: Test) {
 task testSun(type: Test) {
     configureTestTask(it, 'sun')
 }
+
+[tasks.test, tasks.testBouncyCastle, tasks.testSun].each { it.dependsOn(generateCerts) }
+
 
 private void configureTestTask(Test test, String name) {
     test.classpath = test.classpath + project(":pkcs1-reader-${name}").sourceSets.main.getOutput() +
