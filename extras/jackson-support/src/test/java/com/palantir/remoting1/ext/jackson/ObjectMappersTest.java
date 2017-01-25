@@ -24,6 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 import org.junit.Test;
 
@@ -67,5 +70,19 @@ public final class ObjectMappersTest {
     @Test
     public void testMappersReturnNewInstance() {
         assertThat(ObjectMappers.guavaJdk7Jdk8()).isNotSameAs(ObjectMappers.guavaJdk7Jdk8());
+    }
+
+    @Test
+    public void testJdk8DateTimeSerialization() throws IOException {
+        assertThat(MAPPER.writeValueAsString(Duration.ofDays(2))).isEqualTo("172800.000000000"); // 2*24*60*60
+        assertThat(MAPPER.readValue("172800.000000000", Duration.class)).isEqualTo(Duration.ofDays(2));
+        assertThat(MAPPER.readValue("172800", Duration.class)).isEqualTo(Duration.ofDays(2));
+
+        ZonedDateTime now = ZonedDateTime.now().withZoneSameInstant(ZoneId.of("GMT"));
+        assertThat(MAPPER.readValue(MAPPER.writeValueAsString(now), ZonedDateTime.class)).isEqualTo(now);
+
+        // Note that objects may loose the timezone when serializing:
+        now = ZonedDateTime.now().withZoneSameInstant(ZoneId.of(ZoneId.SHORT_IDS.get("EST")));
+        assertThat(MAPPER.readValue(MAPPER.writeValueAsString(now), ZonedDateTime.class)).isNotEqualTo(now);
     }
 }
