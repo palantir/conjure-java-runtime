@@ -50,16 +50,12 @@ import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import okhttp3.Authenticator;
 import okhttp3.CipherSuite;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
-import okhttp3.Response;
-import okhttp3.Route;
 import okhttp3.TlsVersion;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
@@ -171,14 +167,9 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
             if (proxy.credentials().isPresent()) {
                 BasicCredentials basicCreds = proxy.credentials().get();
                 final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
-                client.proxyAuthenticator(new Authenticator() {
-                    @Override
-                    public okhttp3.Request authenticate(Route route, Response response) throws IOException {
-                        return response.request().newBuilder()
-                                .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
-                                .build();
-                    }
-                });
+                client.proxyAuthenticator((route, response) -> response.request().newBuilder()
+                        .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
+                        .build());
             }
         }
 

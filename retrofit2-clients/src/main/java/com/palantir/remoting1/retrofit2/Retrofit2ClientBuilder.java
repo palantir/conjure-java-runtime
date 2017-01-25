@@ -17,7 +17,6 @@
 package com.palantir.remoting1.retrofit2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -29,18 +28,13 @@ import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.ssl.TrustContext;
 import com.palantir.remoting1.ext.jackson.ObjectMappers;
 import com.palantir.remoting1.tracing.okhttp3.OkhttpTraceInterceptor;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import okhttp3.Authenticator;
 import okhttp3.CipherSuite;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.Route;
 import okhttp3.TlsVersion;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -105,14 +99,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
     }
 
     private static List<String> addTrailingSlashes(List<String> uris) {
-        return Lists.transform(uris, new Function<String, String>() {
-            @Override
-            public String apply(String input) {
-                return input.charAt(input.length() - 1) == '/'
-                        ? input
-                        : input + "/";
-            }
-        });
+        return Lists.transform(uris, input -> input.charAt(input.length() - 1) == '/' ? input : input + "/");
     }
 
     private OkHttpClient createOkHttpClient(String userAgent, List<String> uris) {
@@ -133,14 +120,9 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
             if (proxy.credentials().isPresent()) {
                 BasicCredentials proxyCredentials = proxy.credentials().get();
                 final String credentials = Credentials.basic(proxyCredentials.username(), proxyCredentials.password());
-                client.proxyAuthenticator(new Authenticator() {
-                    @Override
-                    public Request authenticate(Route route, Response response) throws IOException {
-                        return response.request().newBuilder()
-                                .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
-                                .build();
-                    }
-                });
+                client.proxyAuthenticator((route, response) -> response.request().newBuilder()
+                        .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
+                        .build());
             }
         }
 

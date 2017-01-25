@@ -76,7 +76,5 @@ public abstract class ProxyConfiguration {
         Builder hostAndPortKebabCase(String hostAndPort) {
             return hostAndPort(hostAndPort);
         }
-
     }
-
 }

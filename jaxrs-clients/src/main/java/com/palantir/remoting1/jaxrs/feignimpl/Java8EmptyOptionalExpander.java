@@ -33,5 +33,4 @@ public final class Java8EmptyOptionalExpander implements Expander {
         Optional<?> optional = (Optional<?>) value;
         return optional.isPresent() ? Objects.toString(optional.get()) : "";
     }
-
 }

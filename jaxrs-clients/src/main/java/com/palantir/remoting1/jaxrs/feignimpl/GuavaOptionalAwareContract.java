@@ -63,11 +63,5 @@ public final class GuavaOptionalAwareContract extends AbstractDelegatingContract
         }
     }
 
-    private static final Function<Annotation, Class<?>> EXTRACT_CLASS = new Function<Annotation, Class<?>>() {
-        @Override
-        public Class<?> apply(Annotation input) {
-            return input.annotationType();
-        }
-    };
-
+    private static final Function<Annotation, Class<?>> EXTRACT_CLASS = input -> input.annotationType();
 }

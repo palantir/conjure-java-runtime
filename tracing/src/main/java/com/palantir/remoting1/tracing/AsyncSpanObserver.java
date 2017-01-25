@@ -21,7 +21,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
@@ -55,12 +54,9 @@ abstract class AsyncSpanObserver implements SpanObserver {
     @Override
     public void consume(final Span span) {
         if (numInflights.incrementAndGet() <= maxInflights) {
-            ListenableFuture<Span> future = executorService.submit(new Callable<Span>() {
-                @Override
-                public Span call() throws Exception {
-                    doConsume(span);
-                    return span;
-                }
+            ListenableFuture<Span> future = executorService.submit(() -> {
+                doConsume(span);
+                return span;
             });
 
             Futures.addCallback(future, new FutureCallback<Span>() {

@@ -33,5 +33,4 @@ public final class SlashEncodingContract extends AbstractDelegatingContract {
     protected void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
         metadata.template().decodeSlash(false);
     }
-
 }
