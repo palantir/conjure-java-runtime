@@ -1,13 +1,13 @@
 {
     "compileClasspath": {
         "com.fasterxml.jackson.core:jackson-annotations": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
@@ -15,7 +15,7 @@
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
@@ -25,14 +25,14 @@
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:tracing"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:tracing"
@@ -105,13 +105,13 @@
     },
     "runtime": {
         "com.fasterxml.jackson.core:jackson-annotations": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
@@ -119,7 +119,7 @@
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
@@ -129,14 +129,14 @@
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:tracing"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.palantir.remoting1:error-handling",
                 "com.palantir.remoting1:tracing"
