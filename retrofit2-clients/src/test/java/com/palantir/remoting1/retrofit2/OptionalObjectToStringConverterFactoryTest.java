@@ -54,7 +54,9 @@ public final class OptionalObjectToStringConverterFactoryTest {
     @Test
     public void testUnwrapsJava8Optional() throws Exception {
         assertThat(guavaConverter.convert(guavaOptional("foo"))).isEqualTo("foo");
+        assertThat(guavaConverter.convert(guavaOptional(null))).isEqualTo("");
         assertThat(java8Converter.convert(java8Optional("foo"))).isEqualTo("foo");
+        assertThat(java8Converter.convert(java8Optional(null))).isEqualTo("");
     }
 
     @Test
@@ -66,12 +68,12 @@ public final class OptionalObjectToStringConverterFactoryTest {
     }
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {
-        return com.google.common.base.Optional.of(value);
+        return com.google.common.base.Optional.fromNullable(value);
     }
 
     private static <T> java.util.Optional<T> java8Optional(T value) {
 
-        return java.util.Optional.of(value);
+        return java.util.Optional.ofNullable(value);
     }
 
     private Annotation[] createAnnotations(Class... clazz) {
