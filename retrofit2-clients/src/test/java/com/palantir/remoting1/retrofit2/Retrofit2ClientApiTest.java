@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
+import java.time.LocalDate;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -33,17 +34,16 @@ public final class Retrofit2ClientApiTest {
     public final MockWebServer server = new MockWebServer();
 
     private HttpUrl url;
+    private TestService service;
 
     @Before
     public void before() {
         url = server.url("/");
+        service = Retrofit2Client.builder().build(TestService.class, "agent", ImmutableList.of(url.toString()));
     }
 
     @Test
-    public void testOptionalHandling() throws IOException, InterruptedException {
-        TestService service = Retrofit2Client.builder()
-                .build(TestService.class, "agent", ImmutableList.of(url.toString()));
-
+    public void testOptionalStringHandling() throws IOException, InterruptedException {
         server.enqueue(new MockResponse().setBody("\"pong\""));
         assertThat(service.getGuavaOptionalString(guavaOptional("p"), guavaOptional("q")).execute().body())
                 .isEqualTo(guavaOptional("pong"));
@@ -54,6 +54,20 @@ public final class Retrofit2ClientApiTest {
         assertThat(service.getJava8OptionalString(java8Optional("p"), java8Optional("q")).execute().body())
                 .isEqualTo(java8Optional("pong"));
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalString/p/?queryString=q");
+    }
+
+    @Test
+    public void testOptionalComplexReturnValues() throws IOException, InterruptedException {
+        LocalDate date = LocalDate.of(2001, 2, 3);
+        String dateString = "\"2001-02-03\"";
+
+        server.enqueue(new MockResponse().setBody(dateString));
+        assertThat(service.getComplexGuavaType(guavaOptional(date)).execute().body()).isEqualTo(guavaOptional(date));
+        assertThat(server.takeRequest().getBody().readUtf8()).isEqualTo(dateString);
+
+        server.enqueue(new MockResponse().setBody(dateString));
+        assertThat(service.getComplexJava8Type(java8Optional(date)).execute().body()).isEqualTo(java8Optional(date));
+        assertThat(server.takeRequest().getBody().readUtf8()).isEqualTo(dateString);
     }
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {
