@@ -55,7 +55,7 @@
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.palantir.remoting1:jackson-support"
             ]
@@ -213,7 +213,7 @@
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.palantir.remoting1:jackson-support"
             ]
