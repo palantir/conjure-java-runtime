@@ -105,7 +105,5 @@ public abstract class ServiceConfiguration {
         Builder proxyConfigurationKebabCase(Optional<ProxyConfiguration> proxyConfiguration) {
             return proxyConfiguration(proxyConfiguration);
         }
-
     }
-
 }

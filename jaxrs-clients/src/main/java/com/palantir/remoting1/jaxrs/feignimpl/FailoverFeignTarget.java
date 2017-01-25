@@ -19,13 +19,11 @@ package com.palantir.remoting1.jaxrs.feignimpl;
 import com.google.common.collect.ImmutableList;
 import feign.Client;
 import feign.Request;
-import feign.Request.Options;
 import feign.RequestTemplate;
 import feign.Response;
 import feign.RetryableException;
 import feign.Retryer;
 import feign.Target;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -144,17 +142,14 @@ public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
     }
 
     public Client wrapClient(final Client client) {
-        return new Client() {
-            @Override
-            public Response execute(Request request, Options options) throws IOException {
-                Response response = client.execute(request, options);
-                if (response.status() >= 200 && response.status() < 300) {
-                    // Call successful: set our attempts back to 0.
-                    failedServers.set(0);
-                    failedAttemptsForCurrentServer.set(0);
-                }
-                return response;
+        return (request, options) -> {
+            Response response = client.execute(request, options);
+            if (response.status() >= 200 && response.status() < 300) {
+                // Call successful: set our attempts back to 0.
+                failedServers.set(0);
+                failedAttemptsForCurrentServer.set(0);
             }
+            return response;
         };
     }
 }

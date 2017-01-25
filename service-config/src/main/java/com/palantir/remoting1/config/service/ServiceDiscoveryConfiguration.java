@@ -208,6 +208,5 @@ public abstract class ServiceDiscoveryConfiguration {
         Builder defaultReadTimeoutKebabCase(Optional<Duration> defaultReadTimeout) {
             return defaultReadTimeout(defaultReadTimeout);
         }
-
     }
 }

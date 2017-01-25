@@ -37,7 +37,7 @@ final class Trace {
     }
 
     Trace(boolean isObservable, String traceId) {
-        this(new ArrayDeque<OpenSpan>(), isObservable, traceId);
+        this(new ArrayDeque<>(), isObservable, traceId);
     }
 
     void push(OpenSpan span) {
@@ -45,11 +45,11 @@ final class Trace {
     }
 
     Optional<OpenSpan> top() {
-        return stack.isEmpty() ? Optional.<OpenSpan>absent() : Optional.of(stack.peekFirst());
+        return stack.isEmpty() ? Optional.absent() : Optional.of(stack.peekFirst());
     }
 
     Optional<OpenSpan> pop() {
-        return stack.isEmpty() ? Optional.<OpenSpan>absent() : Optional.of(stack.pop());
+        return stack.isEmpty() ? Optional.absent() : Optional.of(stack.pop());
     }
 
     boolean isEmpty() {
