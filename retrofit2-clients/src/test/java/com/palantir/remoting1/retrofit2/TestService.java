@@ -16,12 +16,34 @@
 
 package com.palantir.remoting1.retrofit2;
 
+import java.time.LocalDate;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 interface TestService {
     @GET(".")
     Call<String> get();
+
+    @GET("getGuavaOptionalString/{pathString}/")
+    Call<com.google.common.base.Optional<String>> getGuavaOptionalString(
+            @Path("pathString") com.google.common.base.Optional<String> pathString,
+            @Query("queryString") com.google.common.base.Optional<String> queryString);
+
+    @GET("getJava8OptionalString/{pathString}/")
+    Call<java.util.Optional<String>> getJava8OptionalString(
+            @Path("pathString") java.util.Optional<String> pathString,
+            @Query("queryString") java.util.Optional<String> queryString);
+
+    @POST("getComplexGuavaType")
+    Call<com.google.common.base.Optional<LocalDate>> getComplexGuavaType(
+            @Body com.google.common.base.Optional<LocalDate> date);
+
+    @POST("getComplexJavaType")
+    Call<java.util.Optional<LocalDate>> getComplexJava8Type(@Body java.util.Optional<LocalDate> date);
 
     @GET("relative")
     Call<String> getRelative();
