@@ -73,7 +73,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
                             CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
                             CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
                     .build(),
-                    ConnectionSpec.CLEARTEXT);
+            ConnectionSpec.CLEARTEXT);
 
     private final ClientConfig config;
 
@@ -94,6 +94,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
                 .client(client)
                 .baseUrl(sanitizedUris.get(0))
                 .addConverterFactory(JacksonConverterFactory.create(OBJECT_MAPPER))
+                .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
                 .build();
         return retrofit.create(serviceClass);
     }
