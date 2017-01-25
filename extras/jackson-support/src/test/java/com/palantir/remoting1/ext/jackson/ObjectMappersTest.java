@@ -81,7 +81,7 @@ public final class ObjectMappersTest {
         OffsetDateTime offsetDateTime = OffsetDateTime.of(2001, 2, 3, 4, 5, 6, 7, ZoneOffset.ofHours(-5));
 
         assertThat(MAPPER.writeValueAsString(duration)).isEqualTo("\"PT50H1M\"");
-        serDe(duration, Duration.class);
+        assertThat(serDe(duration, Duration.class)).isEqualTo(duration);
 
         assertThat(MAPPER.writeValueAsString(offsetDateTime)).isEqualTo("\"2001-02-03T04:05:06.000000007-05:00\"");
         assertThat(serDe(offsetDateTime, OffsetDateTime.class)).isEqualTo(offsetDateTime);
