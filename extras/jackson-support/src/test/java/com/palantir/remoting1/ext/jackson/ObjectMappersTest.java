@@ -25,7 +25,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import org.junit.Test;
@@ -74,15 +76,21 @@ public final class ObjectMappersTest {
 
     @Test
     public void testJdk8DateTimeSerialization() throws IOException {
-        assertThat(MAPPER.writeValueAsString(Duration.ofDays(2))).isEqualTo("172800.000000000"); // 2*24*60*60
-        assertThat(MAPPER.readValue("172800.000000000", Duration.class)).isEqualTo(Duration.ofDays(2));
-        assertThat(MAPPER.readValue("172800", Duration.class)).isEqualTo(Duration.ofDays(2));
+        Duration duration = Duration.ofMinutes(60 * 50 + 1); // 50h, 1min
+        ZonedDateTime zoneDateTime = ZonedDateTime.of(2001, 2, 3, 4, 5, 6, 7, ZoneId.of(ZoneId.SHORT_IDS.get("EST")));
+        OffsetDateTime offsetDateTime = OffsetDateTime.of(2001, 2, 3, 4, 5, 6, 7, ZoneOffset.ofHours(-5));
 
-        ZonedDateTime now = ZonedDateTime.now().withZoneSameInstant(ZoneId.of("GMT"));
-        assertThat(MAPPER.readValue(MAPPER.writeValueAsString(now), ZonedDateTime.class)).isEqualTo(now);
+        assertThat(MAPPER.writeValueAsString(duration)).isEqualTo("\"PT50H1M\"");
+        serDe(duration, Duration.class);
 
-        // Note that objects may loose the timezone when serializing:
-        now = ZonedDateTime.now().withZoneSameInstant(ZoneId.of(ZoneId.SHORT_IDS.get("EST")));
-        assertThat(MAPPER.readValue(MAPPER.writeValueAsString(now), ZonedDateTime.class)).isNotEqualTo(now);
+        assertThat(MAPPER.writeValueAsString(offsetDateTime)).isEqualTo("\"2001-02-03T04:05:06.000000007-05:00\"");
+        assertThat(serDe(offsetDateTime, OffsetDateTime.class)).isEqualTo(offsetDateTime);
+
+        assertThat(MAPPER.writeValueAsString(zoneDateTime)).isEqualTo("\"2001-02-03T04:05:06.000000007-05:00\"");
+        assertThat(serDe(zoneDateTime, ZonedDateTime.class)).isEqualTo(zoneDateTime);
+    }
+
+    private static <T> T serDe(Object object, Class<T> clazz) throws IOException {
+        return MAPPER.readValue(MAPPER.writeValueAsString(object), clazz);
     }
 }
