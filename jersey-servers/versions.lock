@@ -87,14 +87,14 @@
             ]
         },
         "org.glassfish.hk2.external:aopalliance-repackaged": {
-            "locked": "2.4.0-b25",
+            "locked": "2.4.0-b34",
             "transitive": [
                 "org.glassfish.hk2:hk2-api",
                 "org.glassfish.hk2:hk2-locator"
             ]
         },
         "org.glassfish.hk2.external:javax.inject": {
-            "locked": "2.4.0-b25",
+            "locked": "2.4.0-b34",
             "transitive": [
                 "org.glassfish.hk2:hk2-locator",
                 "org.glassfish.jersey.core:jersey-client",
@@ -104,7 +104,7 @@
             ]
         },
         "org.glassfish.hk2:hk2-api": {
-            "locked": "2.4.0-b25",
+            "locked": "2.4.0-b34",
             "transitive": [
                 "org.glassfish.hk2:hk2-locator",
                 "org.glassfish.jersey.core:jersey-client",
@@ -114,7 +114,7 @@
             ]
         },
         "org.glassfish.hk2:hk2-locator": {
-            "locked": "2.4.0-b25",
+            "locked": "2.4.0-b34",
             "transitive": [
                 "org.glassfish.jersey.core:jersey-client",
                 "org.glassfish.jersey.core:jersey-common",
@@ -123,7 +123,7 @@
             ]
         },
         "org.glassfish.hk2:hk2-utils": {
-            "locked": "2.4.0-b25",
+            "locked": "2.4.0-b34",
             "transitive": [
                 "org.glassfish.hk2:hk2-api",
                 "org.glassfish.hk2:hk2-locator"
@@ -137,19 +137,19 @@
             ]
         },
         "org.glassfish.jersey.bundles.repackaged:jersey-guava": {
-            "locked": "2.19",
+            "locked": "2.22.2",
             "transitive": [
                 "org.glassfish.jersey.core:jersey-common"
             ]
         },
         "org.glassfish.jersey.core:jersey-client": {
-            "locked": "2.19",
+            "locked": "2.22.2",
             "transitive": [
                 "org.glassfish.jersey.core:jersey-server"
             ]
         },
         "org.glassfish.jersey.core:jersey-common": {
-            "locked": "2.19",
+            "locked": "2.22.2",
             "transitive": [
                 "org.glassfish.jersey.core:jersey-client",
                 "org.glassfish.jersey.core:jersey-server",
@@ -157,10 +157,10 @@
             ]
         },
         "org.glassfish.jersey.core:jersey-server": {
-            "locked": "2.19"
+            "locked": "2.22.2"
         },
         "org.glassfish.jersey.media:jersey-media-jaxb": {
-            "locked": "2.19",
+            "locked": "2.22.2",
             "transitive": [
                 "org.glassfish.jersey.core:jersey-server"
             ]
@@ -267,14 +267,14 @@
             ]
         },
         "org.glassfish.hk2.external:aopalliance-repackaged": {
-            "locked": "2.4.0-b25",
+            "locked": "2.4.0-b34",
             "transitive": [
                 "org.glassfish.hk2:hk2-api",
                 "org.glassfish.hk2:hk2-locator"
             ]
         },
         "org.glassfish.hk2.external:javax.inject": {
-            "locked": "2.4.0-b25",
+            "locked": "2.4.0-b34",
             "transitive": [
                 "org.glassfish.hk2:hk2-locator",
                 "org.glassfish.jersey.core:jersey-client",
@@ -284,7 +284,7 @@
             ]
         },
         "org.glassfish.hk2:hk2-api": {
-            "locked": "2.4.0-b25",
+            "locked": "2.4.0-b34",
             "transitive": [
                 "org.glassfish.hk2:hk2-locator",
                 "org.glassfish.jersey.core:jersey-client",
@@ -294,7 +294,7 @@
             ]
         },
         "org.glassfish.hk2:hk2-locator": {
-            "locked": "2.4.0-b25",
+            "locked": "2.4.0-b34",
             "transitive": [
                 "org.glassfish.jersey.core:jersey-client",
                 "org.glassfish.jersey.core:jersey-common",
@@ -303,7 +303,7 @@
             ]
         },
         "org.glassfish.hk2:hk2-utils": {
-            "locked": "2.4.0-b25",
+            "locked": "2.4.0-b34",
             "transitive": [
                 "org.glassfish.hk2:hk2-api",
                 "org.glassfish.hk2:hk2-locator"
@@ -317,19 +317,19 @@
             ]
         },
         "org.glassfish.jersey.bundles.repackaged:jersey-guava": {
-            "locked": "2.19",
+            "locked": "2.22.2",
             "transitive": [
                 "org.glassfish.jersey.core:jersey-common"
             ]
         },
         "org.glassfish.jersey.core:jersey-client": {
-            "locked": "2.19",
+            "locked": "2.22.2",
             "transitive": [
                 "org.glassfish.jersey.core:jersey-server"
             ]
         },
         "org.glassfish.jersey.core:jersey-common": {
-            "locked": "2.19",
+            "locked": "2.22.2",
             "transitive": [
                 "org.glassfish.jersey.core:jersey-client",
                 "org.glassfish.jersey.core:jersey-server",
@@ -337,10 +337,10 @@
             ]
         },
         "org.glassfish.jersey.core:jersey-server": {
-            "locked": "2.19"
+            "locked": "2.22.2"
         },
         "org.glassfish.jersey.media:jersey-media-jaxb": {
-            "locked": "2.19",
+            "locked": "2.22.2",
             "transitive": [
                 "org.glassfish.jersey.core:jersey-server"
             ]
