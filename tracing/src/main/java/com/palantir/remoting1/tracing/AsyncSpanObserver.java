@@ -55,12 +55,9 @@ abstract class AsyncSpanObserver implements SpanObserver {
     @Override
     public void consume(final Span span) {
         if (numInflights.incrementAndGet() <= maxInflights) {
-            ListenableFuture<Span> future = executorService.submit(new Callable<Span>() {
-                @Override
-                public Span call() throws Exception {
-                    doConsume(span);
-                    return span;
-                }
+            ListenableFuture<Span> future = executorService.submit(() -> {
+                doConsume(span);
+                return span;
             });
 
             Futures.addCallback(future, new FutureCallback<Span>() {

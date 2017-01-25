@@ -54,7 +54,7 @@ abstract class WrappingExecutorService implements ExecutorService {
     /**
      * Wraps a {@code Callable} for submission to the underlying executor. This
      * method is also applied to any {@code Runnable} passed to the default
-     * implementation of {@link #wrapTest(Runnable)}.
+     * implementation of {@link #wrapTask(Runnable)}.
      */
     protected abstract <T> Callable<T> wrapTask(Callable<T> callable);
 
@@ -65,14 +65,11 @@ abstract class WrappingExecutorService implements ExecutorService {
     protected Runnable wrapTask(Runnable command) {
         final Callable<Object> wrapped = wrapTask(
                 Executors.callable(command, null));
-        return new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    wrapped.call();
-                } catch (Exception e) {
-                    Throwables.propagate(e);
-                }
+        return () -> {
+            try {
+                wrapped.call();
+            } catch (Exception e) {
+                Throwables.propagate(e);
             }
         };
     }

@@ -144,17 +144,14 @@ public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
     }
 
     public Client wrapClient(final Client client) {
-        return new Client() {
-            @Override
-            public Response execute(Request request, Options options) throws IOException {
-                Response response = client.execute(request, options);
-                if (response.status() >= 200 && response.status() < 300) {
-                    // Call successful: set our attempts back to 0.
-                    failedServers.set(0);
-                    failedAttemptsForCurrentServer.set(0);
-                }
-                return response;
+        return (request, options) -> {
+            Response response = client.execute(request, options);
+            if (response.status() >= 200 && response.status() < 300) {
+                // Call successful: set our attempts back to 0.
+                failedServers.set(0);
+                failedAttemptsForCurrentServer.set(0);
             }
+            return response;
         };
     }
 }

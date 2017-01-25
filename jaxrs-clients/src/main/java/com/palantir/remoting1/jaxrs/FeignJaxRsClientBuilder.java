@@ -171,14 +171,9 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
             if (proxy.credentials().isPresent()) {
                 BasicCredentials basicCreds = proxy.credentials().get();
                 final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
-                client.proxyAuthenticator(new Authenticator() {
-                    @Override
-                    public okhttp3.Request authenticate(Route route, Response response) throws IOException {
-                        return response.request().newBuilder()
-                                .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
-                                .build();
-                    }
-                });
+                client.proxyAuthenticator((route, response) -> response.request().newBuilder()
+                        .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
+                        .build());
             }
         }
 
