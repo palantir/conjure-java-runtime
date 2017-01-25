@@ -1,0 +1,124 @@
+{
+    "compileClasspath": {
+        "com.fasterxml.jackson.core:jackson-annotations": {
+            "locked": "2.6.5",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-core": {
+            "locked": "2.6.5",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind",
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.module:jackson-module-afterburner"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.5",
+            "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
+            "locked": "2.6.5",
+            "transitive": [
+                "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.module:jackson-module-afterburner": {
+            "locked": "2.6.5",
+            "transitive": [
+                "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0",
+            "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.palantir.remoting2:tracing": {
+            "project": true
+        },
+        "com.squareup.okhttp3:okhttp": {
+            "locked": "3.4.1"
+        },
+        "com.squareup.okio:okio": {
+            "locked": "1.9.0",
+            "transitive": [
+                "com.squareup.okhttp3:okhttp"
+            ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.remoting2:tracing"
+            ]
+        }
+    },
+    "runtime": {
+        "com.fasterxml.jackson.core:jackson-annotations": {
+            "locked": "2.6.5",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-core": {
+            "locked": "2.6.5",
+            "transitive": [
+                "com.fasterxml.jackson.core:jackson-databind",
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.module:jackson-module-afterburner"
+            ]
+        },
+        "com.fasterxml.jackson.core:jackson-databind": {
+            "locked": "2.6.5",
+            "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
+            "locked": "2.6.5",
+            "transitive": [
+                "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.module:jackson-module-afterburner": {
+            "locked": "2.6.5",
+            "transitive": [
+                "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0",
+            "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.palantir.remoting2:tracing": {
+            "project": true
+        },
+        "com.squareup.okhttp3:okhttp": {
+            "locked": "3.4.1"
+        },
+        "com.squareup.okio:okio": {
+            "locked": "1.9.0",
+            "transitive": [
+                "com.squareup.okhttp3:okhttp"
+            ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.remoting2:tracing"
+            ]
+        }
+    }
+}
