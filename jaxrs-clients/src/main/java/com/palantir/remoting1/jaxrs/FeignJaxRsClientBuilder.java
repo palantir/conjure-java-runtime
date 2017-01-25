@@ -29,16 +29,18 @@ import com.palantir.remoting1.ext.jackson.ObjectMappers;
 import com.palantir.remoting1.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting1.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting1.jaxrs.feignimpl.GuavaOptionalAwareContract;
+import com.palantir.remoting1.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting1.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting1.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting1.jaxrs.feignimpl.UserAgentInterceptor;
 import com.palantir.remoting1.tracing.okhttp3.OkhttpTraceInterceptor;
 import feign.Contract;
 import feign.Feign;
+import feign.GuavaOptionalAwareDecoder;
 import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
+import feign.Java8OptionalAwareDecoder;
 import feign.Logger;
-import feign.OptionalAwareDecoder;
 import feign.Request;
 import feign.TextDelegateDecoder;
 import feign.TextDelegateEncoder;
@@ -94,7 +96,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                     .build(),
             ConnectionSpec.CLEARTEXT);
 
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7();
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7Jdk8();
 
     private final ClientConfig config;
 
@@ -127,7 +129,9 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private Contract createContract() {
         return new SlashEncodingContract(
-                new GuavaOptionalAwareContract(new JaxRsWithHeaderAndQueryMapContract()));
+                new Java8OptionalAwareContract(
+                        new GuavaOptionalAwareContract(
+                                new JaxRsWithHeaderAndQueryMapContract())));
     }
 
     private Request.Options createRequestOptions() {
@@ -137,8 +141,8 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper) {
-        return new OptionalAwareDecoder(
-                new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(objectMapper))));
+        return new Java8OptionalAwareDecoder(new GuavaOptionalAwareDecoder(
+                new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(objectMapper)))));
     }
 
     private feign.Client createOkHttpClient() {

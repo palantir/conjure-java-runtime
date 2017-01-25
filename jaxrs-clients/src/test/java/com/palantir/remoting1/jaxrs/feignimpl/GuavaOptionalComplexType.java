@@ -22,14 +22,14 @@ import com.google.common.base.Optional;
 import java.nio.file.Path;
 
 
-public final class ComplexType {
-    private final Optional<ComplexType> nested;
+public final class GuavaOptionalComplexType {
+    private final Optional<GuavaOptionalComplexType> nested;
     private final Optional<String> string;
     private final Path path;
 
     @JsonCreator
-    public ComplexType(
-            @JsonProperty("nested") Optional<ComplexType> nested,
+    public GuavaOptionalComplexType(
+            @JsonProperty("nested") Optional<GuavaOptionalComplexType> nested,
             @JsonProperty("string") Optional<String> string,
             @JsonProperty("path") Path path) {
         this.nested = nested;
@@ -37,7 +37,7 @@ public final class ComplexType {
         this.path = path;
     }
 
-    public Optional<ComplexType> getNested() {
+    public Optional<GuavaOptionalComplexType> getNested() {
         return nested;
     }
 
@@ -58,7 +58,7 @@ public final class ComplexType {
             return false;
         }
 
-        ComplexType that = (ComplexType) other;
+        GuavaOptionalComplexType that = (GuavaOptionalComplexType) other;
 
         if (nested != null ? !nested.equals(that.nested) : that.nested != null) {
             return false;
