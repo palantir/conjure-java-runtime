@@ -17,7 +17,6 @@
 package com.palantir.remoting1.retrofit2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -29,18 +28,13 @@ import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.ssl.TrustContext;
 import com.palantir.remoting1.ext.jackson.ObjectMappers;
 import com.palantir.remoting1.tracing.okhttp3.OkhttpTraceInterceptor;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import okhttp3.Authenticator;
 import okhttp3.CipherSuite;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.Route;
 import okhttp3.TlsVersion;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
