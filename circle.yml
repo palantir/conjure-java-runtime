@@ -13,7 +13,21 @@ dependencies:
 
 test:
   override:
-    - ./gradlew build testBouncyCastle testSun
+    - ? |
+          set -eu
+          set -o pipefail
+
+          case $CIRCLE_NODE_INDEX in
+          0)
+            ./gradlew build
+            ;;
+          1)
+            ./gradlew testBouncyCastle testSun
+            ;;
+          esac
+      :
+        parallel: true
+        timeout: 1200
 
 deployment:
   release:
