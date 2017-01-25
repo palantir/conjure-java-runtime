@@ -24,13 +24,13 @@ repositories {
 }
 
 dependencies {
-  compile "com.palantir.remoting1:jaxrs-clients:$version"
-  compile "com.palantir.remoting1:retrofit2-clients:$version"
-  compile "com.palantir.remoting1:jersey-servers:$version"
+  compile "com.palantir.remoting2:jaxrs-clients:$version"
+  compile "com.palantir.remoting2:retrofit2-clients:$version"
+  compile "com.palantir.remoting2:jersey-servers:$version"
   // optional support for PEM key store type using Bouncy Castle libraries:
-  //     compile "com.palantir.remoting1:pkcs1-reader-bouncy-castle:$version"
+  //     compile "com.palantir.remoting2:pkcs1-reader-bouncy-castle:$version"
   // optional support for PEM key store type using Sun libraries:
-  //     compile "com.palantir.remoting1:pkcs1-reader-sun:$version"
+  //     compile "com.palantir.remoting2:pkcs1-reader-sun:$version"
 }
 ```
 
@@ -102,7 +102,7 @@ The `tracing` library can be used independently of `jaxrs-clients` or `retrofit2
 ```groovy
 // build.gradle
 dependencies {
-  compile "com.palantir.remoting1:tracing:$version"
+  compile "com.palantir.remoting2:tracing:$version"
 }
 ```
 ```java
