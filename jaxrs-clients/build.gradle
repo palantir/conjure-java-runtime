@@ -35,6 +35,7 @@ dependencies {
     shadow "com.fasterxml.jackson.core:jackson-databind"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-guava"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+    shadow "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     shadow "com.google.guava:guava"
     shadow "com.squareup.okhttp3:okhttp"
     shadow "org.slf4j:slf4j-api"

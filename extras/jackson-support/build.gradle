@@ -6,6 +6,7 @@ dependencies {
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk7"
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+    compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
 
     testCompile "junit:junit"
     testCompile "org.assertj:assertj-core"
