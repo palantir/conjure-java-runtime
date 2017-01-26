@@ -23,8 +23,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting1.jaxrs.JaxRsClient;
-import com.palantir.remoting1.jaxrs.feignimpl.GuavaTestServer;
+import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.feignimpl.GuavaTestServer;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;

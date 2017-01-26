@@ -43,7 +43,6 @@ dependencies {
 
 shadowJar {
     mergeServiceFiles()
-    // relocate('com.palantir.remoting1.tracing', 'httpremoting.shaded.com.palantir.remoting1.tracing')
     relocate('feign', 'httpremoting.shaded.feign')
     relocate('zipkin', 'httpremoting.shaded.zipkin')
     relocate('org.joda.time', 'httpremoting.shaded.org.joda.time')
