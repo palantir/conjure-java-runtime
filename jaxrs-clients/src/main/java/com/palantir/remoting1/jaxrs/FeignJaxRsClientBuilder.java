@@ -29,6 +29,7 @@ import com.palantir.remoting1.ext.jackson.ObjectMappers;
 import com.palantir.remoting1.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting1.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting1.jaxrs.feignimpl.GuavaOptionalAwareContract;
+import com.palantir.remoting1.jaxrs.feignimpl.HeaderInterceptor;
 import com.palantir.remoting1.jaxrs.feignimpl.Jackson24Encoder;
 import com.palantir.remoting1.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting1.jaxrs.feignimpl.SlashEncodingContract;
@@ -60,13 +61,11 @@ import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.Response;
 import okhttp3.Route;
-import okhttp3.TlsVersion;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private static final ImmutableList<ConnectionSpec> CONNECTION_SPEC = ImmutableList.of(
             new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                    .tlsVersions(TlsVersion.TLS_1_2)
                     .cipherSuites(
                             // In an ideal world, we'd use GCM suites, but they're an order of
                             // magnitude slower than the CBC suites, which have JVM optimizations
@@ -120,6 +119,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 .logger(new Slf4jLogger(JaxRsClient.class))
                 .logLevel(Logger.Level.BASIC)
                 .requestInterceptor(UserAgentInterceptor.of(userAgent))
+                .requestInterceptor(HeaderInterceptor.of(config.headers()))
                 .target(target);
     }
 

@@ -22,6 +22,7 @@ import com.palantir.remoting1.config.service.ProxyConfiguration;
 import com.palantir.remoting1.config.service.ServiceConfiguration;
 import com.palantir.remoting1.config.ssl.SslSocketFactories;
 import com.palantir.remoting1.config.ssl.TrustContext;
+import java.util.Map;
 import org.immutables.value.Value;
 
 /** Implementation-independent configuration options for HTTP-based dynamic proxies. */
@@ -60,6 +61,9 @@ public abstract class ClientConfig {
     public Integer maxNumRetries() {
         return MAX_NUM_RETRIES;
     }
+
+    @Value.Parameter
+    public abstract Map<String, String> headers();
 
     public static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
         ClientConfig.Builder clientConfig = builder();
