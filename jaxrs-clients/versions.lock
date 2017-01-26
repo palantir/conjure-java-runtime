@@ -26,61 +26,61 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.netflix.feign:feign-jackson",
-                "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:jackson-support",
-                "com.palantir.remoting1:ssl-config",
-                "com.palantir.remoting1:tracing",
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:jackson-support",
+                "com.palantir.remoting2:ssl-config",
+                "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:jackson-support",
-                "com.palantir.remoting1:tracing",
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:jackson-support",
+                "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:jackson-support"
+                "com.palantir.remoting2:jackson-support"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:jackson-support"
+                "com.palantir.remoting2:jackson-support"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:jackson-support"
+                "com.palantir.remoting2:jackson-support"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:jackson-support",
-                "com.palantir.remoting1:tracing"
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:jackson-support",
+                "com.palantir.remoting2:tracing"
             ]
         },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting2:error-handling"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:ssl-config",
-                "com.palantir.remoting1:tracing",
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:ssl-config",
+                "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -105,47 +105,47 @@
         "com.netflix.feign:feign-slf4j": {
             "locked": "8.17.0"
         },
-        "com.palantir.remoting1:error-handling": {
+        "com.palantir.remoting2:error-handling": {
             "project": true
         },
-        "com.palantir.remoting1:http-clients-api": {
+        "com.palantir.remoting2:http-clients-api": {
             "project": true
         },
-        "com.palantir.remoting1:jackson-support": {
+        "com.palantir.remoting2:jackson-support": {
             "project": true
         },
-        "com.palantir.remoting1:service-config": {
+        "com.palantir.remoting2:service-config": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting1:http-clients-api"
+                "com.palantir.remoting2:http-clients-api"
             ]
         },
-        "com.palantir.remoting1:ssl-config": {
+        "com.palantir.remoting2:ssl-config": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting1:service-config"
+                "com.palantir.remoting2:service-config"
             ]
         },
-        "com.palantir.remoting1:tracing": {
+        "com.palantir.remoting2:tracing": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting1:tracing-okhttp3"
+                "com.palantir.remoting2:tracing-okhttp3"
             ]
         },
-        "com.palantir.remoting1:tracing-okhttp3": {
+        "com.palantir.remoting2:tracing-okhttp3": {
             "project": true
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "1.0.0",
             "transitive": [
-                "com.palantir.remoting1:service-config"
+                "com.palantir.remoting2:service-config"
             ]
         },
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
-                "com.palantir.remoting1:tracing-okhttp3"
+                "com.palantir.remoting2:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
@@ -157,7 +157,7 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting2:error-handling"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
@@ -170,8 +170,8 @@
             "locked": "1.7.12",
             "transitive": [
                 "com.netflix.feign:feign-slf4j",
-                "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:tracing",
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         }
@@ -203,61 +203,61 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.netflix.feign:feign-jackson",
-                "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:jackson-support",
-                "com.palantir.remoting1:ssl-config",
-                "com.palantir.remoting1:tracing",
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:jackson-support",
+                "com.palantir.remoting2:ssl-config",
+                "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:jackson-support",
-                "com.palantir.remoting1:tracing",
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:jackson-support",
+                "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk7": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:jackson-support"
+                "com.palantir.remoting2:jackson-support"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:jackson-support"
+                "com.palantir.remoting2:jackson-support"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:jackson-support"
+                "com.palantir.remoting2:jackson-support"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:jackson-support",
-                "com.palantir.remoting1:tracing"
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:jackson-support",
+                "com.palantir.remoting2:tracing"
             ]
         },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting2:error-handling"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:ssl-config",
-                "com.palantir.remoting1:tracing",
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:ssl-config",
+                "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -282,47 +282,47 @@
         "com.netflix.feign:feign-slf4j": {
             "locked": "8.17.0"
         },
-        "com.palantir.remoting1:error-handling": {
+        "com.palantir.remoting2:error-handling": {
             "project": true
         },
-        "com.palantir.remoting1:http-clients-api": {
+        "com.palantir.remoting2:http-clients-api": {
             "project": true
         },
-        "com.palantir.remoting1:jackson-support": {
+        "com.palantir.remoting2:jackson-support": {
             "project": true
         },
-        "com.palantir.remoting1:service-config": {
+        "com.palantir.remoting2:service-config": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting1:http-clients-api"
+                "com.palantir.remoting2:http-clients-api"
             ]
         },
-        "com.palantir.remoting1:ssl-config": {
+        "com.palantir.remoting2:ssl-config": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting1:service-config"
+                "com.palantir.remoting2:service-config"
             ]
         },
-        "com.palantir.remoting1:tracing": {
+        "com.palantir.remoting2:tracing": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting1:tracing-okhttp3"
+                "com.palantir.remoting2:tracing-okhttp3"
             ]
         },
-        "com.palantir.remoting1:tracing-okhttp3": {
+        "com.palantir.remoting2:tracing-okhttp3": {
             "project": true
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "1.0.0",
             "transitive": [
-                "com.palantir.remoting1:service-config"
+                "com.palantir.remoting2:service-config"
             ]
         },
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
-                "com.palantir.remoting1:tracing-okhttp3"
+                "com.palantir.remoting2:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
@@ -334,7 +334,7 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.remoting1:error-handling"
+                "com.palantir.remoting2:error-handling"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
@@ -347,8 +347,8 @@
             "locked": "1.7.12",
             "transitive": [
                 "com.netflix.feign:feign-slf4j",
-                "com.palantir.remoting1:error-handling",
-                "com.palantir.remoting1:tracing",
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         }

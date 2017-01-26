@@ -17,7 +17,7 @@
             "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting2:ssl-config",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -31,11 +31,11 @@
             "locked": "18.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting2:ssl-config",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
-        "com.palantir.remoting1:ssl-config": {
+        "com.palantir.remoting2:ssl-config": {
             "project": true
         },
         "com.palantir.tokens:auth-tokens": {
@@ -66,7 +66,7 @@
             "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting2:ssl-config",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -80,11 +80,11 @@
             "locked": "18.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting1:ssl-config",
+                "com.palantir.remoting2:ssl-config",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
-        "com.palantir.remoting1:ssl-config": {
+        "com.palantir.remoting2:ssl-config": {
             "project": true
         },
         "com.palantir.tokens:auth-tokens": {
