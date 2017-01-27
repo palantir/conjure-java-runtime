@@ -36,7 +36,7 @@ public final class ObjectMappers {
         return new ObjectMapper()
                 .registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
-                .registerModule(new Jdk8Module())
+                .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
                 .registerModule(new AfterburnerModule())
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)

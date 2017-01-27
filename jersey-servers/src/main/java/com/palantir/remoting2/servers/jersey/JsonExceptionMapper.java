@@ -19,10 +19,8 @@ package com.palantir.remoting2.servers.jersey;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.palantir.remoting2.errors.SerializableError;
+import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
@@ -42,12 +40,7 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
 
-    static final ObjectMapper MAPPER = new ObjectMapper()
-            .registerModule(new GuavaModule())
-            .registerModule(new Jdk8Module())
-            .registerModule(new AfterburnerModule())
-            // use pretty-print since seeing errors as a human is so much nicer that way
-            .enable(SerializationFeature.INDENT_OUTPUT);
+    static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7Jdk8().enable(SerializationFeature.INDENT_OUTPUT);
 
     private final boolean includeStackTrace;
 

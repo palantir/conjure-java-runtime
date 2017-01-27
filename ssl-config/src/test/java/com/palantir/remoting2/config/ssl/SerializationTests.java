@@ -20,20 +20,13 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.fasterxml.jackson.datatype.jdk7.Jdk7Module;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.io.IOException;
 import org.junit.Test;
 
 public final class SerializationTests {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-            .registerModule(new GuavaModule())
-            .registerModule(new Jdk7Module())
-            .registerModule(new Jdk8Module())
-            .registerModule(new AfterburnerModule());
+    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7Jdk8();
 
     @Test
     public void testJsonSerDe() throws IOException {
@@ -58,12 +51,12 @@ public final class SerializationTests {
 
     private static final String JSON_STRING =
             "{"
-            + "\"trustStorePath\":\"src/test/resources/testCA/testCA.jks\","
-            + "\"trustStoreType\":\"JKS\","
-            + "\"keyStorePath\":\"src/test/resources/testServer/testServer.jks\","
-            + "\"keyStorePassword\":\"serverStore\","
-            + "\"keyStoreType\":\"JKS\","
-            + "\"keyStoreKeyAlias\":null"
-            + "}";
+                    + "\"trustStorePath\":\"src/test/resources/testCA/testCA.jks\","
+                    + "\"trustStoreType\":\"JKS\","
+                    + "\"keyStorePath\":\"src/test/resources/testServer/testServer.jks\","
+                    + "\"keyStorePassword\":\"serverStore\","
+                    + "\"keyStoreType\":\"JKS\","
+                    + "\"keyStoreKeyAlias\":null"
+                    + "}";
 
 }
