@@ -25,18 +25,19 @@ import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.common.base.Optional;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import com.palantir.remoting2.config.ssl.SslConfiguration;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import com.palantir.remoting2.ext.jackson.ShimJdk7Module;
 import com.palantir.tokens.auth.BearerToken;
-import io.dropwizard.jackson.Jackson;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.junit.Test;
 
 /**
@@ -44,7 +45,9 @@ import org.junit.Test;
  */
 public final class ServiceDiscoveryConfigurationTests {
 
-    private final ObjectMapper mapper = Jackson.newObjectMapper(new YAMLFactory());
+    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory())
+            .registerModule(new ShimJdk7Module())
+            .registerModule(new Jdk8Module());
 
     @Test
     public void testDeserializationWithoutFallbackProperites() throws IOException {
@@ -172,7 +175,7 @@ public final class ServiceDiscoveryConfigurationTests {
         ServiceDiscoveryConfiguration serialized = ServiceDiscoveryConfiguration.builder()
                 .defaultApiToken(BearerToken.valueOf("bearerToken"))
                 .defaultSecurity(SslConfiguration.of(Paths.get("truststore.jks")))
-                .putOriginalServices("service", ServiceConfiguration.of("uri", Optional.<SslConfiguration>absent()))
+                .putOriginalServices("service", ServiceConfiguration.of("uri", Optional.empty()))
                 .defaultProxyConfiguration(ProxyConfiguration.of("host:80"))
                 .defaultConnectTimeout(Duration.days(1))
                 .defaultReadTimeout(Duration.days(1))

@@ -16,7 +16,7 @@
 
 package com.palantir.remoting2.clients;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 public final class UserAgents {
 
@@ -36,9 +36,8 @@ public final class UserAgents {
      */
     public static String fromClass(Class<?> clazz) {
         Package classPackage = clazz.getPackage();
-        String userAgent = Optional.fromNullable(classPackage.getImplementationTitle()).or(DEFAULT_VALUE);
-        String version = Optional.fromNullable(classPackage.getImplementationVersion()).or(DEFAULT_VALUE);
+        String userAgent = Optional.ofNullable(classPackage.getImplementationTitle()).orElse(DEFAULT_VALUE);
+        String version = Optional.ofNullable(classPackage.getImplementationVersion()).orElse(DEFAULT_VALUE);
         return getUserAgent(userAgent, version);
     }
-
 }

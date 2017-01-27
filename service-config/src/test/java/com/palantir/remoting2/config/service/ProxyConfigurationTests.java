@@ -21,9 +21,9 @@ import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.io.Resources;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
-import io.dropwizard.jackson.Jackson;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -31,7 +31,7 @@ import java.net.URL;
 import org.junit.Test;
 
 public final class ProxyConfigurationTests {
-    private final ObjectMapper mapper = Jackson.newObjectMapper(new YAMLFactory());
+    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory()).registerModule(new Jdk8Module());
 
     @Test
     public void testDeserializationWithoutCredentials() throws IOException {
