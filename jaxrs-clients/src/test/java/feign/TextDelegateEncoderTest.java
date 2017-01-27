@@ -75,5 +75,4 @@ public final class TextDelegateEncoderTest {
         textDelegateEncoder.encode(null, null, requestTemplate);
         verifyZeroInteractions(delegate);
     }
-
 }

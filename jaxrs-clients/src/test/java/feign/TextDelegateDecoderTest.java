@@ -24,7 +24,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
@@ -33,12 +32,10 @@ import com.palantir.remoting2.jaxrs.feignimpl.GuavaTestServer;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import javax.ws.rs.core.MediaType;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -67,8 +64,7 @@ public final class TextDelegateDecoderTest {
         textDelegateDecoder = new TextDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.builder()
-                .build(GuavaTestServer.TestService.class, "agent", endpointUri);
+        service = JaxRsClient.builder().build(GuavaTestServer.TestService.class, "agent", endpointUri);
     }
 
     @Test
@@ -104,7 +100,7 @@ public final class TextDelegateDecoderTest {
 
     @Test
     public void testUsesDelegateWithNoHeader() throws Exception {
-        when(delegate.decode((Response) any(), (Type) any())).thenReturn(DELEGATE_RESPONSE);
+        when(delegate.decode(any(), any())).thenReturn(DELEGATE_RESPONSE);
         Response response = Response.create(200, "OK", headers, new byte[0]);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
@@ -114,7 +110,7 @@ public final class TextDelegateDecoderTest {
     @Test
     public void testUsesDelegateWithComplexHeader() throws Exception {
         headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON));
-        when(delegate.decode((Response) any(), (Type) any())).thenReturn(DELEGATE_RESPONSE);
+        when(delegate.decode(any(), any())).thenReturn(DELEGATE_RESPONSE);
         Response response = Response.create(200, "OK", headers, new byte[0]);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
@@ -124,7 +120,7 @@ public final class TextDelegateDecoderTest {
     @Test
     public void testUsesDelegateWithNonTextContentType() throws Exception {
         headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.APPLICATION_JSON));
-        when(delegate.decode((Response) any(), (Type) any())).thenReturn(DELEGATE_RESPONSE);
+        when(delegate.decode(any(), any())).thenReturn(DELEGATE_RESPONSE);
         Response response = Response.create(200, "OK", headers, new byte[0]);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
@@ -133,19 +129,7 @@ public final class TextDelegateDecoderTest {
 
     @Test
     public void testStandardClientsUseTextDelegateEncoder() {
-        // TODO(rfink) Need to test this for both Guava and Java8
         assertThat(service.getString("string"), is("string"));
         assertThat(service.getString(null), is((String) null));
-    }
-
-    @Test
-    public void testInterplayOfOptionalAwareDecoderAndTextDelegateDecoder() {
-        // TODO(rfink) Need to test this for both Guava and Java8
-        Assert.assertNull(service.getString(null));
-
-        Optional<String> result = service.getOptionalString("string");
-        assertEquals(Optional.of("string"), result);
-
-        assertThat(service.getOptionalString(null), is(Optional.<String>absent()));
     }
 }
