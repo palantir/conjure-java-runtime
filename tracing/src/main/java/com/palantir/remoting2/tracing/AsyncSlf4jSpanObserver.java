@@ -21,13 +21,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import org.immutables.value.Value;
 import org.slf4j.Logger;
@@ -40,6 +41,7 @@ import org.slf4j.LoggerFactory;
 public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
     private static final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new GuavaModule())
+            .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
             .registerModule(new AfterburnerModule());
 
     private final Logger logger;

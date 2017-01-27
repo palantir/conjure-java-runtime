@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.palantir.remoting2.errors.SerializableError;
 import java.util.Arrays;
@@ -43,6 +44,7 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
 
     static final ObjectMapper MAPPER = new ObjectMapper()
             .registerModule(new GuavaModule())
+            .registerModule(new Jdk8Module())
             .registerModule(new AfterburnerModule())
             // use pretty-print since seeing errors as a human is so much nicer that way
             .enable(SerializationFeature.INDENT_OUTPUT);

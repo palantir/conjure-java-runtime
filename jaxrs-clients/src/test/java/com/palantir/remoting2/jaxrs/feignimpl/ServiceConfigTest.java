@@ -25,9 +25,10 @@ import org.junit.Rule;
 import org.junit.Test;
 
 public final class ServiceConfigTest {
+
     @Rule
     public final DropwizardAppRule<ServiceConfigTestAppConfig> rule =
-            new DropwizardAppRule<ServiceConfigTestAppConfig>(ServiceConfigTestServer.ServiceConfigTestApp.class,
+            new DropwizardAppRule<>(ServiceConfigTestServer.ServiceConfigTestApp.class,
                     ServiceConfigTest.class.getClassLoader().getResource("service-config-example.yml").getPath());
 
     @Test

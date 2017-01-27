@@ -16,9 +16,9 @@
 
 package com.palantir.remoting2.tracing;
 
-import com.google.common.base.Optional;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Optional;
 
 /**
  * Represents a trace as an ordered list of non-completed spans. Supports adding and removing of spans. This class is
@@ -45,11 +45,11 @@ final class Trace {
     }
 
     Optional<OpenSpan> top() {
-        return stack.isEmpty() ? Optional.absent() : Optional.of(stack.peekFirst());
+        return stack.isEmpty() ? Optional.empty() : Optional.of(stack.peekFirst());
     }
 
     Optional<OpenSpan> pop() {
-        return stack.isEmpty() ? Optional.absent() : Optional.of(stack.pop());
+        return stack.isEmpty() ? Optional.empty() : Optional.of(stack.pop());
     }
 
     boolean isEmpty() {

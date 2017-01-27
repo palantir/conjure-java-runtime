@@ -16,12 +16,12 @@
 
 package com.palantir.remoting2.clients;
 
-import com.google.common.base.Optional;
 import com.palantir.remoting2.config.service.Duration;
 import com.palantir.remoting2.config.service.ProxyConfiguration;
 import com.palantir.remoting2.config.service.ServiceConfiguration;
 import com.palantir.remoting2.config.ssl.SslSocketFactories;
 import com.palantir.remoting2.config.ssl.TrustContext;
+import java.util.Optional;
 import org.immutables.value.Value;
 
 /** Implementation-independent configuration options for HTTP-based dynamic proxies. */
@@ -70,9 +70,9 @@ public abstract class ClientConfig {
         }
 
         // timeouts & proxy
-        clientConfig.connectTimeout(serviceConfig.connectTimeout().or(CONNECT_TIMEOUT));
-        clientConfig.readTimeout(serviceConfig.readTimeout().or(READ_TIMEOUT));
-        clientConfig.writeTimeout(serviceConfig.writeTimeout().or(WRITE_TIMEOUT));
+        clientConfig.connectTimeout(serviceConfig.connectTimeout().orElse(CONNECT_TIMEOUT));
+        clientConfig.readTimeout(serviceConfig.readTimeout().orElse(READ_TIMEOUT));
+        clientConfig.writeTimeout(serviceConfig.writeTimeout().orElse(WRITE_TIMEOUT));
         clientConfig.proxy(serviceConfig.proxyConfiguration());
 
         return clientConfig.build();

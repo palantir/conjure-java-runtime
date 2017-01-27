@@ -21,11 +21,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import org.immutables.value.Value;
 
@@ -92,10 +92,10 @@ public abstract class SerializableError implements Serializable {
                         @Override
                         public SerializableStackTraceElement apply(@Nullable StackTraceElement input) {
                             return SerializableStackTraceElement.builder()
-                                    .className(Optional.fromNullable(input.getClassName()))
-                                    .methodName(Optional.fromNullable(input.getMethodName()))
-                                    .fileName(Optional.fromNullable(input.getFileName()))
-                                    .lineNumber(Optional.fromNullable(input.getLineNumber()))
+                                    .className(Optional.ofNullable(input.getClassName()))
+                                    .methodName(Optional.ofNullable(input.getMethodName()))
+                                    .fileName(Optional.ofNullable(input.getFileName()))
+                                    .lineNumber(Optional.ofNullable(input.getLineNumber()))
                                     .build();
                         }
                     }));
