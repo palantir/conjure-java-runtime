@@ -3,6 +3,7 @@ apply from: "${rootDir}/gradle/publish-shadow.gradle"
 
 dependencies {
     compile project(":extras:jackson-support")
+    compile project(":extras:refresh-utils")
     compile project(":error-handling")
     compile project(":tracing-okhttp3")
     compile project(":http-clients-api")
