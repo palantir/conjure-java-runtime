@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.palantir.remoting2.config.ssl.SslConfiguration;
 import com.palantir.tokens.auth.BearerToken;
@@ -28,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.immutables.value.Value.Immutable;
 import org.immutables.value.Value.Lazy;
 import org.immutables.value.Value.Style;
@@ -101,13 +101,22 @@ public abstract class ServiceDiscoveryConfiguration {
     public final ServiceConfiguration getServiceWithDefaults(ServiceConfiguration conf) {
         return ImmutableServiceConfiguration.builder()
                 .from(conf)
-                .apiToken(conf.apiToken().or(defaultApiToken()))
-                .security(conf.security().or(defaultSecurity()))
-                .proxyConfiguration(conf.proxyConfiguration().or(defaultProxyConfiguration()))
-                .connectTimeout(conf.connectTimeout().or(defaultConnectTimeout()))
-                .readTimeout(conf.readTimeout().or(defaultReadTimeout()))
+                .apiToken(orElse(conf.apiToken(), defaultApiToken()))
+                .security(orElse(conf.security(), defaultSecurity()))
+                .proxyConfiguration(orElse(conf.proxyConfiguration(), defaultProxyConfiguration()))
+                .connectTimeout(orElse(conf.connectTimeout(), defaultConnectTimeout()))
+                .readTimeout(orElse(conf.readTimeout(), defaultReadTimeout()))
                 .uris(conf.uris())
                 .build();
+    }
+
+    // Returns the first Optional if present, or the second Optional otherwise.
+    private static <T> Optional<T> orElse(Optional<T> first, Optional<T> second) {
+        if (first.isPresent()) {
+            return first;
+        } else {
+            return second;
+        }
     }
 
     /**

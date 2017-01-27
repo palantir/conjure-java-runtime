@@ -16,7 +16,7 @@
 
 package com.palantir.remoting2.retrofit;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.immutables.value.Value;
 
 @Value.Immutable

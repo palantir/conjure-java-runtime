@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,13 +56,13 @@ public final class TracerTest {
     @Test
     public void testIdsMustBeNonNullAndNotEmpty() throws Exception {
         try {
-            Tracer.initTrace(Optional.<Boolean>absent(), null);
+            Tracer.initTrace(Optional.empty(), null);
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("traceId must be non-empty: null");
         }
 
         try {
-            Tracer.initTrace(Optional.<Boolean>absent(), "");
+            Tracer.initTrace(Optional.empty(), "");
             fail("Didn't throw");
         } catch (IllegalArgumentException e) {
             assertThat(e).hasMessage("traceId must be non-empty: ");
@@ -152,14 +152,14 @@ public final class TracerTest {
         when(sampler.sample()).thenReturn(true, false);
         Tracer.subscribe("1", observer1);
 
-        Tracer.initTrace(Optional.<Boolean>absent(), Tracers.randomId());
+        Tracer.initTrace(Optional.empty(), Tracers.randomId());
         verify(sampler).sample();
         Span span = startAndCompleteSpan();
         verify(observer1).consume(span);
         verifyNoMoreInteractions(observer1, sampler);
 
         Mockito.reset(observer1, sampler);
-        Tracer.initTrace(Optional.<Boolean>absent(), Tracers.randomId());
+        Tracer.initTrace(Optional.empty(), Tracers.randomId());
         verify(sampler).sample();
         startAndCompleteSpan(); // not sampled, see above
         verifyNoMoreInteractions(observer1, sampler);

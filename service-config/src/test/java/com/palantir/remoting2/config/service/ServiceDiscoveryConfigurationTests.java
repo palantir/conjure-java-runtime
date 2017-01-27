@@ -25,7 +25,6 @@ import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
@@ -37,6 +36,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.junit.Test;
 
 /**
@@ -172,7 +172,7 @@ public final class ServiceDiscoveryConfigurationTests {
         ServiceDiscoveryConfiguration serialized = ServiceDiscoveryConfiguration.builder()
                 .defaultApiToken(BearerToken.valueOf("bearerToken"))
                 .defaultSecurity(SslConfiguration.of(Paths.get("truststore.jks")))
-                .putOriginalServices("service", ServiceConfiguration.of("uri", Optional.<SslConfiguration>absent()))
+                .putOriginalServices("service", ServiceConfiguration.of("uri", Optional.empty()))
                 .defaultProxyConfiguration(ProxyConfiguration.of("host:80"))
                 .defaultConnectTimeout(Duration.days(1))
                 .defaultReadTimeout(Duration.days(1))

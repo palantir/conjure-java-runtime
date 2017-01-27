@@ -24,14 +24,15 @@ import static org.junit.Assert.assertThat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotAuthorizedException;
@@ -48,6 +49,7 @@ public final class SerializableErrorErrorDecoderTests {
     private static final int STATUS_42 = 42;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .registerModule(new GuavaModule())
+            .registerModule(new Jdk8Module())
             .registerModule(new AfterburnerModule());
 
     @Test

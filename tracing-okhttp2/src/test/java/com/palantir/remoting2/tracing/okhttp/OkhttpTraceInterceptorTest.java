@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.common.base.Optional;
 import com.palantir.remoting2.tracing.OpenSpan;
 import com.palantir.remoting2.tracing.Span;
 import com.palantir.remoting2.tracing.SpanObserver;
@@ -33,6 +32,7 @@ import com.palantir.remoting2.tracing.Tracers;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Request;
 import java.io.IOException;
+import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

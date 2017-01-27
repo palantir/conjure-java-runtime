@@ -16,7 +16,6 @@
 
 package com.palantir.remoting2.servers.jersey;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.palantir.remoting2.tracing.Span;
 import com.palantir.remoting2.tracing.SpanType;
@@ -24,6 +23,7 @@ import com.palantir.remoting2.tracing.TraceHttpHeaders;
 import com.palantir.remoting2.tracing.Tracer;
 import com.palantir.remoting2.tracing.Tracers;
 import java.io.IOException;
+import java.util.Optional;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -50,7 +50,7 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
         // Set up thread-local span that inherits state from HTTP headers
         if (Strings.isNullOrEmpty(traceId)) {
             // HTTP request did not indicate a trace; initialize trace state and create a span.
-            Tracer.initTrace(Optional.<Boolean>absent(), Tracers.randomId());
+            Tracer.initTrace(Optional.empty(), Tracers.randomId());
             Tracer.startSpan(operation, SpanType.SERVER_INCOMING);
         } else {
             Tracer.initTrace(hasSampledHeader(requestContext), traceId);
@@ -86,7 +86,7 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
     private static Optional<Boolean> hasSampledHeader(ContainerRequestContext context) {
         String header = context.getHeaderString(TraceHttpHeaders.IS_SAMPLED);
         if (header == null) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
             return Optional.of(header.equals("1"));
         }

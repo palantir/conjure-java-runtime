@@ -16,10 +16,10 @@
 
 package com.palantir.remoting2.tracing;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import java.util.Map;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +56,7 @@ public final class Tracer {
      */
     public static void initTrace(Optional<Boolean> isObservable, String traceId) {
         validateId(traceId, "traceId must be non-empty: %s");
-        boolean observable = isObservable.or(sampler.sample());
+        boolean observable = isObservable.orElse(sampler.sample());
         currentTrace.set(new Trace(observable, traceId));
     }
 
@@ -116,7 +116,7 @@ public final class Tracer {
     public static Optional<Span> completeSpan() {
         Optional<OpenSpan> maybeOpenSpan = currentTrace.get().pop();
         if (!maybeOpenSpan.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         } else {
             OpenSpan openSpan = maybeOpenSpan.get();
             Span span = Span.builder()

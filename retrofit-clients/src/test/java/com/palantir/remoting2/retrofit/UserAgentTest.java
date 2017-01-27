@@ -24,7 +24,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.base.Optional;
-
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Protocol;
 import com.squareup.okhttp.Request;

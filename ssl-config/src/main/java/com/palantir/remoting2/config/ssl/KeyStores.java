@@ -16,7 +16,6 @@
 
 package com.palantir.remoting2.config.ssl;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.io.BaseEncoding;
 import com.palantir.remoting2.config.ssl.pkcs1.Pkcs1Readers;
@@ -41,6 +40,7 @@ import java.security.spec.RSAPrivateKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

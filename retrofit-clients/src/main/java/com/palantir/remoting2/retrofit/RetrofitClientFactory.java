@@ -87,10 +87,11 @@ public final class RetrofitClientFactory {
 
         // timeouts
         okClient.setConnectTimeout(
-                options.getConnectTimeoutMs().or((long) okClient.getConnectTimeout()), TimeUnit.MILLISECONDS);
-        okClient.setReadTimeout(options.getReadTimeoutMs().or((long) okClient.getReadTimeout()), TimeUnit.MILLISECONDS);
+                options.getConnectTimeoutMs().orElse((long) okClient.getConnectTimeout()), TimeUnit.MILLISECONDS);
+        okClient.setReadTimeout(
+                options.getReadTimeoutMs().orElse((long) okClient.getReadTimeout()), TimeUnit.MILLISECONDS);
         okClient.setWriteTimeout(
-                options.getWriteTimeoutMs().or((long) okClient.getWriteTimeout()), TimeUnit.MILLISECONDS);
+                options.getWriteTimeoutMs().orElse((long) okClient.getWriteTimeout()), TimeUnit.MILLISECONDS);
 
         // tracing
         okClient.interceptors().add(OkhttpTraceInterceptor.INSTANCE);
