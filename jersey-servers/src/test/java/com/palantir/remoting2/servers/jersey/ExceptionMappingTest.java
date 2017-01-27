@@ -20,11 +20,9 @@ package com.palantir.remoting2.servers.jersey;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.palantir.remoting2.errors.RemoteException;
 import com.palantir.remoting2.errors.SerializableError;
+import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -100,12 +98,8 @@ public final class ExceptionMappingTest {
     public void testRemoteException() throws NoSuchMethodException, SecurityException, IOException {
         Response response = target.path("throw-remote-exception").request().get();
         assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
-        SerializableError error =
-                new ObjectMapper()
-                        .registerModule(new GuavaModule())
-                        .registerModule(new AfterburnerModule())
-                        .readValue(response.readEntity(InputStream.class),
-                        SerializableError.class);
+        SerializableError error = ObjectMappers.guavaJdk7Jdk8().readValue(
+                response.readEntity(InputStream.class), SerializableError.class);
         assertThat(error.getErrorName(), is("errName"));
     }
 
