@@ -16,7 +16,9 @@
 
 package com.palantir.remoting2.jaxrs.feignimpl;
 
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import io.dropwizard.Application;
+import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -26,6 +28,11 @@ import javax.ws.rs.core.MediaType;
 public final class ServiceConfigTestServer {
 
     public static final class ServiceConfigTestApp extends Application<ServiceConfigTestAppConfig> {
+
+        @Override
+        public void initialize(Bootstrap<ServiceConfigTestAppConfig> bootstrap) {
+            bootstrap.getObjectMapper().registerModule(new Jdk8Module());
+        }
 
         @Override
         public void run(ServiceConfigTestAppConfig configuration, Environment environment) throws Exception {
