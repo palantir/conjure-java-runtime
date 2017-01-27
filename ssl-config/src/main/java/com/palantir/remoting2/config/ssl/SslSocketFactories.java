@@ -16,7 +16,6 @@
 
 package com.palantir.remoting2.config.ssl;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
@@ -24,6 +23,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
+import java.util.Optional;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -182,7 +182,7 @@ public final class SslSocketFactories {
         switch (trustStoreType) {
             case JKS:
             case PKCS12:
-                keyStore = KeyStores.loadKeyStore(trustStoreType.name(), trustStorePath, Optional.<String>absent());
+                keyStore = KeyStores.loadKeyStore(trustStoreType.name(), trustStorePath, Optional.empty());
                 break;
             case PEM:
                 keyStore = KeyStores.createTrustStoreFromCertificates(trustStorePath);
