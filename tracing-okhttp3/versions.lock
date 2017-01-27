@@ -33,7 +33,7 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting2:error-handling"
+                "com.palantir.remoting2:tracing"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
@@ -102,7 +102,7 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting2:error-handling"
+                "com.palantir.remoting2:tracing"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
