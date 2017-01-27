@@ -1,0 +1,18 @@
+{
+    "compileClasspath": {
+        "com.google.code.findbugs:jsr305": {
+            "locked": "3.0.0"
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0"
+        }
+    },
+    "runtime": {
+        "com.google.code.findbugs:jsr305": {
+            "locked": "3.0.0"
+        },
+        "com.google.guava:guava": {
+            "locked": "18.0"
+        }
+    }
+}
