@@ -16,9 +16,12 @@
 
 package com.palantir.remoting2.retrofit2;
 
+import com.google.common.reflect.Reflection;
 import com.palantir.remoting2.clients.ClientBuilder;
 import com.palantir.remoting2.clients.ClientConfig;
 import com.palantir.remoting2.config.service.ServiceConfiguration;
+import com.palantir.remoting2.ext.refresh.Refreshable;
+import com.palantir.remoting2.ext.refresh.RefreshableProxyInvocationHandler;
 
 /**
  * Static factory methods for producing creating Retrofit2 HTTP proxies.
@@ -36,6 +39,20 @@ public final class Retrofit2Client {
     public static <T> T create(Class<T> serviceClass, String userAgent, ServiceConfiguration serviceConfig) {
         ClientConfig config = ClientConfig.fromServiceConfig(serviceConfig);
         return new Retrofit2ClientBuilder(config).build(serviceClass, userAgent, serviceConfig.uris());
+    }
+
+    /**
+     * Similar to {@link #create(Class, String, ServiceConfiguration)}, but creates a mutable client that updates its
+     * configuration transparently whenever the given {@link Refreshable refreshable} {@link ServiceConfiguration}
+     * changes.
+     */
+    public static <T> T create(
+            Class<T> serviceClass,
+            String userAgent,
+            Refreshable<ServiceConfiguration> serviceConfig) {
+        return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
+                serviceConfig,
+                serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration)));
     }
 
     /**
