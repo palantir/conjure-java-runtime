@@ -23,7 +23,6 @@ import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * A layman's Observable: Stores a reference to a value until it was {@link #getAndClear retrieved}.
- * TODO(rfink) Move to separate package.
  */
 @ThreadSafe
 public final class Refreshable<T> {
