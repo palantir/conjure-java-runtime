@@ -93,7 +93,11 @@
             "project": true
         },
         "com.palantir.remoting2:jackson-support": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:tracing"
+            ]
         },
         "com.palantir.remoting2:service-config": {
             "project": true,
@@ -253,7 +257,11 @@
             "project": true
         },
         "com.palantir.remoting2:jackson-support": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:tracing"
+            ]
         },
         "com.palantir.remoting2:service-config": {
             "project": true,
