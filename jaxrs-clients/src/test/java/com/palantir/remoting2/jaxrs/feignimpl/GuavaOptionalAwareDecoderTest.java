@@ -121,6 +121,7 @@ public final class GuavaOptionalAwareDecoderTest {
 
     @Test
     public void testOptionalString() {
+        assertThat(service.getOptionalString(null), is(Optional.absent()));
         assertThat(service.getOptionalString("foo"), is(Optional.of("foo")));
     }
 

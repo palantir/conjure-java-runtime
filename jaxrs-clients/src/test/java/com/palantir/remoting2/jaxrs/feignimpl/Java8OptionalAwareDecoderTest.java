@@ -121,6 +121,7 @@ public final class Java8OptionalAwareDecoderTest {
 
     @Test
     public void testOptionalString() {
+        assertThat(service.getOptionalString(null), is(Optional.empty()));
         assertThat(service.getOptionalString("foo"), is(Optional.of("foo")));
     }
 

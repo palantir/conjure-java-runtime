@@ -55,8 +55,7 @@ public final class InputStreamDelegateEncoderTest {
         inputStreamDelegateEncoder = new InputStreamDelegateEncoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.builder()
-                .build(GuavaTestServer.TestService.class, "agent", endpointUri);
+        service = JaxRsClient.builder().build(GuavaTestServer.TestService.class, "agent", endpointUri);
     }
 
     @Test
@@ -64,7 +63,6 @@ public final class InputStreamDelegateEncoderTest {
         byte[] object = bytes("data");
 
         inputStreamDelegateEncoder.encode(new ByteArrayInputStream(object), InputStream.class, requestTemplate);
-
         assertThat(requestTemplate.body(), is(object));
     }
 
@@ -73,7 +71,6 @@ public final class InputStreamDelegateEncoderTest {
         String data = "data";
 
         inputStreamDelegateEncoder.encode(data, String.class, requestTemplate);
-
         verify(delegate).encode(data, String.class, requestTemplate);
     }
 
