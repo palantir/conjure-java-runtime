@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.palantir.remoting2.errors.RemoteException;
 import com.palantir.remoting2.errors.SerializableError;
+import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.io.IOException;
 import javax.xml.ws.WebServiceException;
 import okhttp3.Headers;
@@ -47,7 +48,7 @@ import org.mockito.MockitoAnnotations;
 
 public final class SerializableErrorInterceptorTest {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7Jdk8();
     private static final Request REQUEST = new Request.Builder().url("http://url").build();
 
     @Rule

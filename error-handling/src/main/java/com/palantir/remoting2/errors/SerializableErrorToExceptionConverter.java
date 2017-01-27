@@ -17,10 +17,8 @@
 package com.palantir.remoting2.errors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.common.io.CharStreams;
+import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -45,10 +43,7 @@ public final class SerializableErrorToExceptionConverter {
 
     private static final Logger log = LoggerFactory.getLogger(SerializableErrorToExceptionConverter.class);
 
-    private static final ObjectMapper MAPPER = new ObjectMapper()
-            .registerModule(new GuavaModule())
-            .registerModule(new Jdk8Module())
-            .registerModule(new AfterburnerModule());
+    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7Jdk8();
 
     public static RuntimeException getException(Collection<String> contentTypes, int status, String reason,
             @CheckForNull InputStream body) {
