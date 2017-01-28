@@ -18,6 +18,11 @@ package com.palantir.remoting2.ext.refresh;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.ImmutableList;
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
+import java.util.concurrent.TimeUnit;
+import org.jmock.lib.concurrent.DeterministicScheduler;
 import org.junit.Test;
 
 public final class RefreshableTest {
@@ -49,5 +54,38 @@ public final class RefreshableTest {
         Refreshable<Object> refreshable = Refreshable.of(O1);
         assertThat(refreshable.set(O2)).contains(O1);
         assertThat(refreshable.getAndClear()).contains(O2);
+    }
+
+    @Test
+    public void testRefreshableFromObservable() throws InterruptedException {
+        Object o1 = new Object();
+        Object o2 = new Object();
+
+        // Observable that emits o1 for the first 10 seconds, and then o2 after 10 seconds
+        DeterministicScheduler executor = new DeterministicScheduler();
+        Observable<Object> observable = Observable
+                .interval(1, TimeUnit.SECONDS, Schedulers.from(executor)).flatMapIterable(e -> {
+                    if (e < 10) {
+                        return ImmutableList.of(o1);
+                    } else {
+                        return ImmutableList.of(o2);
+                    }
+                });
+
+        Refreshable<Object> refreshable = Refreshable.empty();
+        observable
+                .distinctUntilChanged()  // filters duplicates, i.e., Refreshable only sees distinct values.
+                .subscribe(refreshable::set);
+
+        executor.tick(1, TimeUnit.SECONDS);
+        assertThat(refreshable.getAndClear()).contains(o1);
+        assertThat(refreshable.getAndClear()).isEmpty();
+        executor.tick(2, TimeUnit.SECONDS);
+        assertThat(refreshable.getAndClear()).isEmpty();  // empty since observable is distinctUntilChanged()
+        executor.tick(11, TimeUnit.SECONDS);
+        assertThat(refreshable.getAndClear()).contains(o2);
+        assertThat(refreshable.getAndClear()).isEmpty();
+        executor.tick(12, TimeUnit.SECONDS);
+        assertThat(refreshable.getAndClear()).isEmpty();
     }
 }
