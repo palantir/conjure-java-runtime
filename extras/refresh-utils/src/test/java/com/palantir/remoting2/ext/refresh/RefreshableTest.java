@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import java.util.concurrent.TimeUnit;
 import org.jmock.lib.concurrent.DeterministicScheduler;
@@ -73,7 +74,7 @@ public final class RefreshableTest {
                 });
 
         Refreshable<Object> refreshable = Refreshable.empty();
-        observable
+        Disposable disposable = observable
                 .distinctUntilChanged()  // filters duplicates, i.e., Refreshable only sees distinct values.
                 .subscribe(refreshable::set);
 
@@ -87,5 +88,7 @@ public final class RefreshableTest {
         assertThat(refreshable.getAndClear()).isEmpty();
         executor.tick(12, TimeUnit.SECONDS);
         assertThat(refreshable.getAndClear()).isEmpty();
+
+        disposable.dispose();
     }
 }
