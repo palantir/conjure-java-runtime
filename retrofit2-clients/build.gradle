@@ -4,6 +4,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":extras:jackson-support")
+    compile project(":extras:refresh-utils")
     compile project(":error-handling")
     compile project(":http-clients-api")
     compile project(":service-config")
