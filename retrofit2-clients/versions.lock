@@ -73,7 +73,8 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting2:error-handling"
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:refresh-utils"
             ]
         },
         "com.google.guava:guava": {
@@ -81,6 +82,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:refresh-utils",
                 "com.palantir.remoting2:ssl-config",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
@@ -98,6 +100,9 @@
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:tracing"
             ]
+        },
+        "com.palantir.remoting2:refresh-utils": {
+            "project": true
         },
         "com.palantir.remoting2:service-config": {
             "project": true,
@@ -237,7 +242,8 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting2:error-handling"
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:refresh-utils"
             ]
         },
         "com.google.guava:guava": {
@@ -245,6 +251,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:refresh-utils",
                 "com.palantir.remoting2:ssl-config",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
@@ -262,6 +269,9 @@
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:tracing"
             ]
+        },
+        "com.palantir.remoting2:refresh-utils": {
+            "project": true
         },
         "com.palantir.remoting2:service-config": {
             "project": true,

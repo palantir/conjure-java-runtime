@@ -1,0 +1,12 @@
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile "com.google.code.findbugs:jsr305"
+    compile "com.google.guava:guava"
+
+    testCompile "junit:junit"
+    testCompile "org.assertj:assertj-core"
+    testCompile "org.jmock:jmock"
+    testCompile "org.mockito:mockito-core"
+    testCompile 'io.reactivex.rxjava2:rxjava'
+}
