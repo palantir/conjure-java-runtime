@@ -44,6 +44,10 @@ MyService service = JaxRsClient.builder()
 The client is implemented using Feign; however, the Feign dependency is hidden away from both the Java API and the
 classpath (via shadowing).
 
+The `JaxRsClient#create` factory comes in two flavours: one for creating immutable clients given a fixed
+`ServiceConfiguration`, and one for creating mutable clients whose configuration (e.g., server URLs, timeouts, SSL
+configuration, etc.) changes when the underlying `ServiceConfiguration` changes.
+
 ## retrofit2-clients
 Similar to `jaxrs-clients`, but generates clients using the Retrofit library. Example:
 
@@ -51,6 +55,8 @@ Similar to `jaxrs-clients`, but generates clients using the Retrofit library. Ex
 MyService service = Retrofit2Client.builder()
     .build(MyService.class, "my user agent", "https://my-server/");
 ```
+
+Similar to `JaxRsClient`, the `Retrofit2Client#create` factory can create mutable and immutable clients.
 
 ## jersey-servers
 Provides Dropwizard/Jersey exception mappers for translating common JAX-RS exceptions to appropriate HTTP error codes. A
