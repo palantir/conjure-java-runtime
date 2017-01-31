@@ -16,14 +16,35 @@
 
 package com.palantir.remoting1.ext.jackson;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 
 public final class ObjectMappers {
 
     private ObjectMappers() {}
+
+    /**
+     * Returns a newly allocated {@link ObjectMapper} that is configured with modules for Guava, JDK7, JDK8, and
+     * afterburner.
+     */
+    public static ObjectMapper guavaJdk7Jdk8() {
+        return new ObjectMapper()
+                .registerModule(new GuavaModule())
+                .registerModule(new ShimJdk7Module())
+                .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
+                .registerModule(new AfterburnerModule())
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+                .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
+    }
 
     /**
      * Returns a newly allocated {@link ObjectMapper} that is configured with the Guava module and the JDK 7 module
