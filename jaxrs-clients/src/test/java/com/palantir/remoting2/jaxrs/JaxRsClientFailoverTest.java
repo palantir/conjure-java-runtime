@@ -43,16 +43,16 @@ public final class JaxRsClientFailoverTest {
         server1.shutdown();
         server2.enqueue(new MockResponse().setBody("\"foo\""));
 
-        FakeoInterface proxy = JaxRsClient.builder().build(FakeoInterface.class, "agent",
+        Service proxy = JaxRsClient.builder().build(Service.class, "agent",
                 ImmutableList.of(
                         "http://localhost:" + server1.getPort(),
                         "http://localhost:" + server2.getPort()));
-        assertThat(proxy.blah(), is("foo"));
+        assertThat(proxy.get(), is("foo"));
     }
 
     @Test
     public void testConsecutiveCalls() throws Exception {
-        FakeoInterface proxy = JaxRsClient.builder().build(FakeoInterface.class, "agent",
+        Service proxy = JaxRsClient.builder().build(Service.class, "agent",
                 ImmutableList.of(
                         "http://localhost:" + server1.getPort(),
                         "http://localhost:" + server2.getPort()));
@@ -61,7 +61,7 @@ public final class JaxRsClientFailoverTest {
         server1.shutdown();
         server2.shutdown();
         try {
-            proxy.blah();
+            proxy.get();
             fail();
         } catch (RetryableException e) {
             assertThat(e.getMessage(), startsWith("Failed to connect"));
@@ -71,13 +71,25 @@ public final class JaxRsClientFailoverTest {
         MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
         anotherServer1.start(server1.getPort());
         anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
-        assertThat(proxy.blah(), is("foo"));
+        assertThat(proxy.get(), is("foo"));
         anotherServer1.shutdown();
     }
 
-    @Path("/fakeo")
-    public interface FakeoInterface {
+    @Test
+    public void testFailoverOnDnsFailure() throws Exception {
+        server1.enqueue(new MockResponse().setBody("\"foo\""));
+
+        Service proxy = JaxRsClient.builder().build(Service.class, "agent",
+                ImmutableList.of(
+                        "http://foo-bar-bogus-host.unresolvable:80",
+                        "http://localhost:" + server1.getPort()));
+        assertThat(proxy.get(), is("foo"));
+        assertThat(server1.getRequestCount(), is(1));
+    }
+
+    @Path("/")
+    public interface Service {
         @GET
-        String blah();
+        String get();
     }
 }
