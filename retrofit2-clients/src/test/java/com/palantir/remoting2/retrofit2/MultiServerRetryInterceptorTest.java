@@ -93,6 +93,28 @@ public final class MultiServerRetryInterceptorTest {
     }
 
     @Test
+    public void testFailoverOnDnsError() throws IOException, InterruptedException {
+        urlA = HttpUrl.parse("http://foo-bar-bogus-host.unresolvable");
+
+        okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(MultiServerRetryInterceptor.create(
+                        ImmutableList.of(urlA.toString(), urlB.toString()), false))
+                .build();
+
+        Request request = new Request.Builder()
+                .url(urlA.newBuilder().addPathSegment("ping").build())
+                .get()
+                .build();
+
+        serverB.enqueue(new MockResponse().setBody("pong"));
+        Call call = okHttpClient.newCall(request);
+        assertThat(call.execute().body().string(), is("pong"));
+
+        RecordedRequest recordedRequest = serverB.takeRequest();
+        assertThat(recordedRequest.getPath(), is("/api/ping"));
+    }
+
+    @Test
     public void testThrowIllegalStateExceptionWhenNoServerIsAvailable() throws IOException {
         serverA.shutdown();
         serverB.shutdown();

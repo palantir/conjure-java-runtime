@@ -19,6 +19,7 @@ package com.palantir.remoting2.retrofit2;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import okhttp3.HttpUrl;
@@ -63,6 +64,7 @@ public final class Retrofit2ClientBuilderTest {
             TestService service = Retrofit2Client.builder().build(TestService.class, "agent", url.toString());
             try {
                 service.getAbsolute().execute();
+                fail();
             } catch (IllegalStateException e) {
                 assertThat(e.getMessage(), startsWith(
                         "Unrecognized server URI in the request http://localhost:" + server.getPort() + "/absolute."));
