@@ -41,7 +41,6 @@ import feign.GuavaOptionalAwareDecoder;
 import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
 import feign.Java8OptionalAwareDecoder;
-import feign.Java8OptionalIntAwareDecoder;
 import feign.Logger;
 import feign.Request;
 import feign.TextDelegateDecoder;
@@ -140,12 +139,11 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper) {
-        return new Java8OptionalIntAwareDecoder(
-                new Java8OptionalAwareDecoder(
-                        new GuavaOptionalAwareDecoder(
-                                new InputStreamDelegateDecoder(
-                                        new TextDelegateDecoder(
-                                                new JacksonDecoder(objectMapper))))));
+        return new Java8OptionalAwareDecoder(
+                new GuavaOptionalAwareDecoder(
+                        new InputStreamDelegateDecoder(
+                                new TextDelegateDecoder(
+                                        new JacksonDecoder(objectMapper)))));
     }
 
     private feign.Client createOkHttpClient() {

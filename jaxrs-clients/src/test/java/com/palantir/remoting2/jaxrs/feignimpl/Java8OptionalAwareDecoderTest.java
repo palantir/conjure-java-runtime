@@ -28,6 +28,7 @@ import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.OptionalInt;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -56,6 +57,12 @@ public final class Java8OptionalAwareDecoderTest {
     public void testOptional() {
         assertThat(service.getOptional("something"), is(Optional.of(ImmutableMap.of("something", "something"))));
         assertThat(service.getOptional(null), is(Optional.<ImmutableMap<String, String>>empty()));
+    }
+
+    @Test
+    public void testOptionalInt() {
+        assertThat(service.getOptionalInt("123"), is(OptionalInt.of(123)));
+        assertThat(service.getOptionalInt(null), is(OptionalInt.empty()));
     }
 
     @Test

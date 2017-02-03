@@ -23,12 +23,15 @@ import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.Function;
 
 /**
  * Decorates a Feign {@link Decoder} such that it returns {@link Optional#empty} when observing an HTTP 204 error code
  * for a method with {@link Type} {@link Optional}.
  */
 public final class Java8OptionalAwareDecoder implements Decoder {
+    private static final int NO_CONTENT = 204;
 
     private final Decoder delegate;
 
@@ -38,17 +41,45 @@ public final class Java8OptionalAwareDecoder implements Decoder {
 
     @Override
     public Object decode(Response response, Type type) throws IOException, FeignException {
-        if (Types.getRawType(type).equals(Optional.class)) {
-            if (response.status() == 204) {
-                return Optional.empty();
-            } else {
-                Object decoded = checkNotNull(delegate.decode(response, getInnerType(type)),
-                        "Unexpected null content for response status %d", response.status());
-                return Optional.of(decoded);
-            }
-        } else {
-            return delegate.decode(response, type);
+        Class<?> rawType = Types.getRawType(type);
+        if (rawType.equals(Optional.class)) {
+            return decodeOptional(response, type);
         }
+
+        if (rawType.equals(OptionalInt.class)) {
+            return decodeOptionalInt(response);
+        }
+
+        return delegate.decode(response, type);
+    }
+
+    private Object decodeOptional(Response response, Type type) throws IOException {
+        return decodeOptionalFromContent(response, getInnerType(type),
+                Optional.empty(),
+                Optional::of
+        );
+    }
+
+    private Object decodeOptionalInt(Response response) throws IOException {
+        return decodeOptionalFromContent(response, String.class,
+                OptionalInt.empty(),
+                (decoded) -> OptionalInt.of(Integer.parseInt((String) decoded))
+        );
+    }
+
+    private <T> T decodeOptionalFromContent(
+            Response response,
+            Type type,
+            T empty,
+            Function<Object, T> notEmpty) throws IOException {
+
+        if (response.status() == NO_CONTENT) {
+            return empty;
+        }
+
+        Object decoded = checkNotNull(delegate.decode(response, type),
+                "Unexpected null content for response status %d", response.status());
+        return notEmpty.apply(decoded);
     }
 
     private static Type getInnerType(Type type) {
