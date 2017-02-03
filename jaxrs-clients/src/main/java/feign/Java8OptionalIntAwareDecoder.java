@@ -44,7 +44,7 @@ public final class Java8OptionalIntAwareDecoder implements Decoder {
             } else {
                 String decoded = (String) checkNotNull(delegate.decode(response, String.class),
                         "Unexpected null content for response status %d", response.status());
-                return OptionalInt.of(Integer.valueOf(decoded));
+                return OptionalInt.of(Integer.parseInt(decoded));
             }
         } else {
             return delegate.decode(response, type);
