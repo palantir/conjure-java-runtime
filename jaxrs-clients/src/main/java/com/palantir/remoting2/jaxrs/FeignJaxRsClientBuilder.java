@@ -30,6 +30,7 @@ import com.palantir.remoting2.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting2.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting2.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.remoting2.jaxrs.feignimpl.Java8OptionalAwareContract;
+import com.palantir.remoting2.jaxrs.feignimpl.Java8OptionalIntAwareContract;
 import com.palantir.remoting2.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting2.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting2.jaxrs.feignimpl.UserAgentInterceptor;
@@ -125,9 +126,10 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
     private Contract createContract() {
         return new SlashEncodingContract(
-                new Java8OptionalAwareContract(
-                        new GuavaOptionalAwareContract(
-                                new JaxRsWithHeaderAndQueryMapContract())));
+                new Java8OptionalIntAwareContract(
+                        new Java8OptionalAwareContract(
+                                new GuavaOptionalAwareContract(
+                                        new JaxRsWithHeaderAndQueryMapContract()))));
     }
 
     private Request.Options createRequestOptions() {
