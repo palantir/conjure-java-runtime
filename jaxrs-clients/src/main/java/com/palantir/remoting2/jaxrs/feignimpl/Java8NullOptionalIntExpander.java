@@ -18,8 +18,6 @@ package com.palantir.remoting2.jaxrs.feignimpl;
 
 import com.google.common.base.Preconditions;
 import feign.Param.Expander;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.OptionalInt;
 
 /**
@@ -30,7 +28,8 @@ public final class Java8NullOptionalIntExpander implements Expander {
 
     @Override
     public String expand(Object value) {
-        Preconditions.checkArgument(value instanceof OptionalInt, "Value must be an OptionalInt. Was: %s", value.getClass());
+        Preconditions.checkArgument(value instanceof OptionalInt,
+                "Value must be an OptionalInt. Was: %s", value.getClass());
         OptionalInt optionalInt = (OptionalInt) value;
         return optionalInt.isPresent() ? Integer.toString(optionalInt.getAsInt()) : null;
     }
