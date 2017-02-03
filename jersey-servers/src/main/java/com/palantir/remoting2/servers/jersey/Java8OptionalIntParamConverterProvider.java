@@ -40,7 +40,7 @@ public final class Java8OptionalIntParamConverterProvider implements ParamConver
                     if (value == null) {
                         return rawType.cast(OptionalInt.empty());
                     }
-                    return rawType.cast(OptionalInt.of(Integer.valueOf(value)));
+                    return rawType.cast(OptionalInt.of(Integer.parseInt(value)));
                 }
 
                 @Override
