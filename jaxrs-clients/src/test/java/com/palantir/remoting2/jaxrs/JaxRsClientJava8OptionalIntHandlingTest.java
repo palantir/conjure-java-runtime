@@ -20,8 +20,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import com.palantir.remoting2.jaxrs.JaxRsClient;
-import java.util.Optional;
 import java.util.OptionalInt;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -50,11 +48,14 @@ public final class JaxRsClientJava8OptionalIntHandlingTest {
     }
 
     @Path("/")
-    public interface CannotDecorateInterface {
+    public interface CannotDecorateInterfacePathParams {
         @GET
         @Path("{opt}/foo")
         String path(@PathParam("opt") OptionalInt opt);
+    }
 
+    @Path("/")
+    public interface CannotDecorateInterfaceHeaderParams {
         @GET
         @Path("foo")
         String header(@HeaderParam("opt") OptionalInt opt);
@@ -70,66 +71,40 @@ public final class JaxRsClientJava8OptionalIntHandlingTest {
     @Test
     public void testCannotDecorateInterfaceWithOptionalIntPathParam() {
         try {
-            JaxRsClient.builder().build(CannotDecorateInterface.class, "agent", "http://localhost:" + server.getPort());
+            JaxRsClient.builder().build(CannotDecorateInterfacePathParams.class, "agent", "http://localhost:" + server.getPort());
             fail();
         } catch (RuntimeException e) {
             assertThat(e.getMessage(), is(String.format(
                     "Cannot use Java8 OptionalInt with PathParams. (Class: %s, Method: path, Param: arg0)",
-                    CannotDecorateInterface.class.getName()
+                    CannotDecorateInterfacePathParams.class.getName()
             )));
         }
     }
 
-//    @Test
-//    public void testRegularPathParam() throws Exception {
-//        proxy.path("str2");
-//        RecordedRequest takeRequest = server.takeRequest();
-//        assertThat(takeRequest.getPath(), is("/foo/str2"));
-//    }
-//
-//    @Test
-//    public void testAbsentQuery() throws Exception {
-//        proxy.query(Optional.<String>empty(), "str2");
-//        RecordedRequest takeRequest = server.takeRequest();
-//        assertThat(takeRequest.getRequestLine(), is("GET /foo?req=str2 HTTP/1.1"));
-//    }
-//
-//    @Test
-//    public void testEmptyStringQuery() throws Exception {
-//        proxy.query(Optional.<String>of(""), "str2");
-//        RecordedRequest takeRequest = server.takeRequest();
-//        assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=&req=str2 HTTP/1.1"));
-//    }
-//
-//    @Test
-//    public void testStringQuery() throws Exception {
-//        proxy.query(Optional.<String>of("str"), "str2");
-//        RecordedRequest takeRequest = server.takeRequest();
-//        assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=str&req=str2 HTTP/1.1"));
-//    }
-//
-//    @Test
-//    public void testAbsentHeader() throws Exception {
-//        proxy.header(Optional.<String>empty(), "str2");
-//        RecordedRequest takeRequest = server.takeRequest();
-//        assertThat(takeRequest.getHeader("opt"), is(""));
-//        assertThat(takeRequest.getHeader("req"), is("str2"));
-//    }
-//
-//    @Test
-//    public void testEmptyStringHeader() throws Exception {
-//        proxy.header(Optional.<String>of(""), "str2");
-//        RecordedRequest takeRequest = server.takeRequest();
-//        assertThat(takeRequest.getHeader("opt"), is(""));
-//        assertThat(takeRequest.getHeader("req"), is("str2"));
-//    }
-//
-//    @Test
-//    public void testStringHeader() throws Exception {
-//        proxy.header(Optional.<String>of("str"), "str2");
-//        RecordedRequest takeRequest = server.takeRequest();
-//        assertThat(takeRequest.getHeader("opt"), is("str"));
-//        assertThat(takeRequest.getHeader("req"), is("str2"));
-//    }
+    @Test
+    public void testCannotDecorateInterfaceWithOptionalIntHeaderParam() {
+        try {
+            JaxRsClient.builder().build(CannotDecorateInterfaceHeaderParams.class, "agent", "http://localhost:" + server.getPort());
+            fail();
+        } catch (RuntimeException e) {
+            assertThat(e.getMessage(), is(String.format(
+                    "Cannot use Java8 OptionalInt with HeaderParams. (Class: %s, Method: header, Param: arg0)",
+                    CannotDecorateInterfaceHeaderParams.class.getName()
+            )));
+        }
+    }
 
+    @Test
+    public void testAbsentQuery() throws Exception {
+        proxy.query(OptionalInt.empty());
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getRequestLine(), is("GET /foo HTTP/1.1"));
+    }
+
+    @Test
+    public void testPresentQuery() throws Exception {
+        proxy.query(OptionalInt.of(4));
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=4 HTTP/1.1"));
+    }
 }
