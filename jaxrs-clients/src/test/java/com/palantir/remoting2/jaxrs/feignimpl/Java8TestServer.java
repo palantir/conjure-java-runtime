@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.OptionalInt;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
@@ -139,6 +140,14 @@ public class Java8TestServer extends Application<Configuration> {
         }
 
         @Override
+        public OptionalInt getOptionalInt(@Nullable String value) {
+            if (Strings.isNullOrEmpty(value)) {
+                return OptionalInt.empty();
+            }
+            return OptionalInt.of(Integer.parseInt(value));
+        }
+
+        @Override
         public Java8ComplexType getJava8ComplexType(Java8ComplexType value) {
             return value;
         }
@@ -215,6 +224,12 @@ public class Java8TestServer extends Application<Configuration> {
         @Consumes(MediaType.TEXT_PLAIN)
         @Produces(MediaType.TEXT_PLAIN)
         Optional<String> getOptionalString(@QueryParam("value") @Nullable String value);
+
+        @GET
+        @Path("/optionalint")
+        @Consumes(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.TEXT_PLAIN)
+        OptionalInt getOptionalInt(@QueryParam("value") @Nullable String value);
 
         @POST
         @Path("/complexType")
