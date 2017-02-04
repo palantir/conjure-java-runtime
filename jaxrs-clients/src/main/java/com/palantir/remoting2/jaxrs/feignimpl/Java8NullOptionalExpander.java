@@ -34,20 +34,6 @@ public final class Java8NullOptionalExpander implements Expander {
             new OptionalIntType()
     );
 
-    interface OptionalType<T> {
-        Class<?> clazz();
-        boolean isPresent(T value);
-        String asString(T value);
-
-        default boolean isAssignableFrom(Object obj) {
-            return clazz().isAssignableFrom(obj.getClass());
-        }
-
-        default String asNullableString(T value) {
-            return isPresent(value) ? asString(value) : null;
-        }
-    }
-
     @Override
     public String expand(Object value) {
         OptionalType selectedOptionalType = OPTIONAL_TYPES.stream()
@@ -62,6 +48,20 @@ public final class Java8NullOptionalExpander implements Expander {
                 });
 
         return selectedOptionalType.asNullableString(value);
+    }
+
+    interface OptionalType<T> {
+        Class<?> clazz();
+        boolean isPresent(T value);
+        String asString(T value);
+
+        default boolean isAssignableFrom(Object obj) {
+            return clazz().isAssignableFrom(obj.getClass());
+        }
+
+        default String asNullableString(T value) {
+            return isPresent(value) ? asString(value) : null;
+        }
     }
 
     private static class NormalOptionalType implements OptionalType<Optional> {
@@ -97,6 +97,4 @@ public final class Java8NullOptionalExpander implements Expander {
             return Integer.toString(value.getAsInt());
         }
     }
-
-
 }
