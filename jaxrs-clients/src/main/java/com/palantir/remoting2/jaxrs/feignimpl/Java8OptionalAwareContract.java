@@ -16,14 +16,17 @@
 
 package com.palantir.remoting2.jaxrs.feignimpl;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import feign.Contract;
 import feign.MethodMetadata;
+import feign.Param;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -45,23 +48,91 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
     protected void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Annotation[][] annotations = method.getParameterAnnotations();
+
         for (int i = 0; i < parameterTypes.length; i++) {
             Class<?> cls = parameterTypes[i];
-            if (cls.equals(Optional.class)) {
-                FluentIterable<Class<?>> paramAnnotations =
-                        FluentIterable.from(Lists.newArrayList(annotations[i])).transform(EXTRACT_CLASS);
-                if (paramAnnotations.contains(HeaderParam.class)) {
-                    metadata.indexToExpanderClass().put(i, Java8EmptyOptionalExpander.class);
-                } else if (paramAnnotations.contains(QueryParam.class)) {
-                    metadata.indexToExpanderClass().put(i, Java8NullOptionalExpander.class);
-                } else if (paramAnnotations.contains(PathParam.class)) {
-                    throw new RuntimeException(String.format(
-                            "Cannot use Java8 Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
-                            targetType.getName(), method.getName(), i));
-                }
-            }
+            Collection<Class<?>> paramAnnotations = Arrays.stream(annotations[i])
+                    .map(Annotation::annotationType)
+                    .collect(Collectors.toSet());
+
+            int copyOfI = i;
+            CannotUseExceptionFactory cannotUseExceptionFactory = (paramType) -> new RuntimeException(String.format(
+                    "Cannot use Java8 optional type with %s. (Class: %s, Method: %s, Param: arg%d)",
+                    paramType, targetType.getName(), method.getName(), copyOfI
+            ));
+
+            expanderFactoryFor(cls, cannotUseExceptionFactory)
+                    .flatMap(expanderFactory -> expanderFactory.expanderFor(paramAnnotations))
+                    .ifPresent((expander) -> metadata.indexToExpanderClass().put(copyOfI, expander));
         }
     }
 
-    private static final Function<Annotation, Class<?>> EXTRACT_CLASS = input -> input.annotationType();
+    private interface CannotUseExceptionFactory {
+        RuntimeException forType(String type);
+    }
+
+    private abstract static class ExpanderFactory {
+        private final CannotUseExceptionFactory cannotUseExceptionFactory;
+
+        ExpanderFactory(CannotUseExceptionFactory cannotUseExceptionFactory) {
+            this.cannotUseExceptionFactory = cannotUseExceptionFactory;
+        }
+
+        public Class<? extends Param.Expander> headerExpander() {
+            throw cannotUseExceptionFactory.forType("HeaderParams");
+        }
+
+        public Class<? extends Param.Expander> pathExpander() {
+            throw cannotUseExceptionFactory.forType("PathParams");
+        }
+
+        public Class<? extends Param.Expander> queryExpander() {
+            return Java8NullOptionalExpander.class;
+        }
+
+        public final Optional<Class<? extends Param.Expander>> expanderFor(Collection<Class<?>> paramAnnotations) {
+            if (paramAnnotations.contains(HeaderParam.class)) {
+                return Optional.of(headerExpander());
+            }
+
+            if (paramAnnotations.contains(QueryParam.class)) {
+                return Optional.of(queryExpander());
+            }
+
+            if (paramAnnotations.contains(PathParam.class)) {
+                return Optional.of(pathExpander());
+            }
+
+            return Optional.empty();
+        }
+    }
+
+    private static class OptionalExpanderFactory extends ExpanderFactory {
+        OptionalExpanderFactory(CannotUseExceptionFactory cannotUseExceptionFactory) {
+            super(cannotUseExceptionFactory);
+        }
+
+        @Override
+        public Class<? extends Param.Expander> headerExpander() {
+            return Java8EmptyOptionalExpander.class;
+        }
+    }
+
+    private static class OptionalIntExpanderFactory extends ExpanderFactory {
+        OptionalIntExpanderFactory(CannotUseExceptionFactory cannotUseExceptionFactory) {
+            super(cannotUseExceptionFactory);
+        }
+    }
+
+    private Optional<ExpanderFactory> expanderFactoryFor(Class<?> type, CannotUseExceptionFactory cannotUseExceptionFactory) {
+        if (type.equals(Optional.class)) {
+            return Optional.of(new OptionalExpanderFactory(cannotUseExceptionFactory));
+        }
+
+        if (type.equals(OptionalInt.class)) {
+            return Optional.of(new OptionalIntExpanderFactory(cannotUseExceptionFactory));
+        }
+
+        return Optional.empty();
+    }
 }

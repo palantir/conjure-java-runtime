@@ -17,14 +17,11 @@
 package com.palantir.remoting2.jaxrs.feignimpl;
 
 import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import feign.Contract;
 import feign.MethodMetadata;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
-import java.util.OptionalInt;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -48,21 +45,7 @@ public final class Java8OptionalIntAwareContract extends AbstractDelegatingContr
         Annotation[][] annotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterTypes.length; i++) {
             Class<?> cls = parameterTypes[i];
-            if (cls.equals(OptionalInt.class)) {
-                FluentIterable<Class<?>> paramAnnotations =
-                        FluentIterable.from(Lists.newArrayList(annotations[i])).transform(EXTRACT_CLASS);
-                if (paramAnnotations.contains(QueryParam.class)) {
-                    metadata.indexToExpanderClass().put(i, Java8NullOptionalIntExpander.class);
-                } else if (paramAnnotations.contains(HeaderParam.class)) {
-                    throw new RuntimeException(String.format(
-                            "Cannot use Java8 OptionalInt with HeaderParams. (Class: %s, Method: %s, Param: arg%d)",
-                            targetType.getName(), method.getName(), i));
-                } else if (paramAnnotations.contains(PathParam.class)) {
-                    throw new RuntimeException(String.format(
-                            "Cannot use Java8 OptionalInt with PathParams. (Class: %s, Method: %s, Param: arg%d)",
-                            targetType.getName(), method.getName(), i));
-                }
-            }
+            Java8OptionalAwareContract.optionalIntContract(targetType, method, metadata, annotations, i, cls);
         }
     }
 
