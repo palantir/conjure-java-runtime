@@ -49,6 +49,9 @@ public final class HttpRemotingJerseyFeature implements Feature {
         // Optional handling
         context.register(new OptionalMessageBodyWriter());
 
+        // Binary handling
+        context.register(new BinaryMessageProvider());
+
         // Tracing
         context.register(new TraceEnrichingFilter());
 
