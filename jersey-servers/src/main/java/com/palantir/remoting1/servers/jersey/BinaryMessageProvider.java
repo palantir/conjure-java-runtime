@@ -56,7 +56,6 @@ public final class BinaryMessageProvider extends AbstractMessageReaderWriterProv
             MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException, WebApplicationException {
         MAPPER.writeValue(entityStream, bytes);
-        //entityStream.write(Base64.encode(bytes));
     }
 
     @Override
@@ -69,8 +68,6 @@ public final class BinaryMessageProvider extends AbstractMessageReaderWriterProv
             MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
             throws IOException, WebApplicationException {
         return MAPPER.readValue(entityStream, type);
-//        byte[] encodedBytes = ByteStreams.toByteArray(entityStream);
-//        return Base64.decode(encodedBytes);
     }
 
 }
