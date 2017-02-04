@@ -75,9 +75,7 @@ public final class JaxRsClientJava8OptionalHandlingTest {
             JaxRsClient.builder().build(CannotDecorateInterface.class, "agent", "http://localhost:" + server.getPort());
             fail();
         } catch (RuntimeException e) {
-            assertThat(e.getMessage(), is("Cannot use Java8 Optionals with PathParams. (Class: com.palantir.remoting2."
-                    + "jaxrs.JaxRsClientJava8OptionalHandlingTest$CannotDecorateInterface,"
-                    + " Method: path, Param: arg0)"));
+            assertThat(e.getMessage(), is(String.format("Cannot use Java8 optional type with PathParams. (Class: %s, Method: path, Param: arg0)", CannotDecorateInterface.class.getName())));
         }
     }
 
@@ -90,14 +88,14 @@ public final class JaxRsClientJava8OptionalHandlingTest {
 
     @Test
     public void testAbsentQuery() throws Exception {
-        proxy.query(Optional.<String>empty(), "str2");
+        proxy.query(Optional.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getRequestLine(), is("GET /foo?req=str2 HTTP/1.1"));
     }
 
     @Test
     public void testEmptyStringQuery() throws Exception {
-        proxy.query(Optional.<String>of(""), "str2");
+        proxy.query(Optional.of(""), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=&req=str2 HTTP/1.1"));
     }

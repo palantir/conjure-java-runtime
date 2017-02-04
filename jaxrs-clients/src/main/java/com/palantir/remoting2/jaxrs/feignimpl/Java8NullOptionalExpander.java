@@ -16,7 +16,6 @@
 
 package com.palantir.remoting2.jaxrs.feignimpl;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import feign.Param.Expander;
 import java.util.List;
@@ -30,43 +29,42 @@ import java.util.stream.Collectors;
  * value otherwise.
  */
 public final class Java8NullOptionalExpander implements Expander {
-    private static final List<OptionalLike> OPTIONAL_LIKES = ImmutableList.of(
-            new NormalOptionalLike(),
-            new OptionalIntLike()
+    private static final List<OptionalType> OPTIONAL_TYPES = ImmutableList.of(
+            new NormalOptionalType(),
+            new OptionalIntType()
     );
 
-    interface OptionalLike<T> {
+    interface OptionalType<T> {
         Class<?> clazz();
         boolean isPresent(T value);
-        String get(T value);
+        String asString(T value);
 
         default boolean isAssignableFrom(Object obj) {
             return clazz().isAssignableFrom(obj.getClass());
         }
 
         default String asNullableString(T value) {
-            return isPresent(value) ? asNullableString(value) : null;
+            return isPresent(value) ? asString(value) : null;
         }
     }
 
     @Override
     public String expand(Object value) {
-        Preconditions.checkArgument(value instanceof OptionalInt, "Value must be an Optional. Was: %s", value.getClass());
-
-        return OPTIONAL_LIKES.stream()
-                .filter(optionalLike -> optionalLike.isAssignableFrom(value))
+        OptionalType selectedOptionalType = OPTIONAL_TYPES.stream()
+                .filter(optionalType -> optionalType.isAssignableFrom(value))
                 .findFirst()
-                .map((optionalLike) -> optionalLike.asNullableString(value))
                 .orElseThrow(() -> {
-                    List<Class<?>> clazzes = OPTIONAL_LIKES.stream()
-                            .map(OptionalLike::clazz)
+                    List<Class> clazzes = OPTIONAL_TYPES.stream()
+                            .map(OptionalType::clazz)
                             .collect(Collectors.toList());
 
                     return new RuntimeException(String.format("Value must be one of type %s. Was: %s", clazzes, value.getClass()));
                 });
+
+        return selectedOptionalType.asNullableString(value);
     }
 
-    private static class NormalOptionalLike implements OptionalLike<Optional> {
+    private static class NormalOptionalType implements OptionalType<Optional> {
         @Override
         public Class<?> clazz() {
             return Optional.class;
@@ -78,12 +76,12 @@ public final class Java8NullOptionalExpander implements Expander {
         }
 
         @Override
-        public String get(Optional value) {
+        public String asString(Optional value) {
             return Objects.toString(value.get());
         }
     }
 
-    private static class OptionalIntLike implements OptionalLike<OptionalInt> {
+    private static class OptionalIntType implements OptionalType<OptionalInt> {
         @Override
         public Class<?> clazz() {
             return OptionalInt.class;
@@ -95,7 +93,7 @@ public final class Java8NullOptionalExpander implements Expander {
         }
 
         @Override
-        public String get(OptionalInt value) {
+        public String asString(OptionalInt value) {
             return Integer.toString(value.getAsInt());
         }
     }
