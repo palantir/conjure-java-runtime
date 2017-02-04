@@ -37,7 +37,7 @@ public final class BinaryMessageProviderTest extends JerseyTest {
 
     private static final String STRING = "bytes";
     private static final byte[] BYTES = STRING.getBytes(StandardCharsets.UTF_8);
-    private static final byte[] ENCODED_BYTES = Base64.encode(BYTES);
+    private static final byte[] ENCODED_BYTES = jsonEncode(BYTES);
 
     @Override
     protected Application configure() {
@@ -63,6 +63,16 @@ public final class BinaryMessageProviderTest extends JerseyTest {
                 .buildPost(Entity.json(ENCODED_BYTES))
                 .invoke(String.class);
         assertThat(actual).isEqualTo(STRING);
+    }
+
+    /**
+     * JSON requires strings to be wrapped in quotes. The binary wire format is a base64 encoded string, so we must wrap
+     * the base64 encoded bytes in quotes.
+     */
+    private static byte[] jsonEncode(byte[] bytes) {
+        byte[] base64Bytes = Base64.encode(bytes);
+        String wrapped = "\"" + new String(base64Bytes, StandardCharsets.UTF_8) + "\"";
+        return wrapped.getBytes(StandardCharsets.UTF_8);
     }
 
     @Path("/")

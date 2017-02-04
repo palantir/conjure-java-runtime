@@ -16,7 +16,9 @@
 
 package com.palantir.remoting1.servers.jersey;
 
-import com.google.common.io.ByteStreams;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,7 +28,6 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
-import org.glassfish.jersey.internal.util.Base64;
 import org.glassfish.jersey.message.internal.AbstractMessageReaderWriterProvider;
 
 /**
@@ -34,6 +35,10 @@ import org.glassfish.jersey.message.internal.AbstractMessageReaderWriterProvider
  */
 @Provider
 public final class BinaryMessageProvider extends AbstractMessageReaderWriterProvider<byte[]> {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper()
+            .registerModule(new GuavaModule())
+            .registerModule(new AfterburnerModule());
 
     // Jersey ignores this
     @Override
@@ -50,7 +55,8 @@ public final class BinaryMessageProvider extends AbstractMessageReaderWriterProv
     public void writeTo(byte[] bytes, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException, WebApplicationException {
-        entityStream.write(Base64.encode(bytes));
+        MAPPER.writeValue(entityStream, bytes);
+        //entityStream.write(Base64.encode(bytes));
     }
 
     @Override
@@ -62,8 +68,9 @@ public final class BinaryMessageProvider extends AbstractMessageReaderWriterProv
     public byte[] readFrom(Class<byte[]> type, Type genericType, Annotation[] annotations, MediaType mediaType,
             MultivaluedMap<String, String> httpHeaders, InputStream entityStream)
             throws IOException, WebApplicationException {
-        byte[] encodedBytes = ByteStreams.toByteArray(entityStream);
-        return Base64.decode(encodedBytes);
+        return MAPPER.readValue(entityStream, type);
+//        byte[] encodedBytes = ByteStreams.toByteArray(entityStream);
+//        return Base64.decode(encodedBytes);
     }
 
 }
