@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -48,87 +49,119 @@ public final class JaxRsClientJava8OptionalHandlingTest {
     }
 
     @Path("/")
-    public interface CannotDecorateInterface {
+    public interface CannotDecorateInterfaceOptional {
         @GET
-        @Path("{opt}/foo/{req}")
-        String path(@PathParam("opt") Optional<String> opt, @PathParam("req") String req);
+        @Path("{opt}/foo")
+        String path(@PathParam("opt") Optional<String> opt);
+    }
+
+    @Path("/")
+    public interface CannotDecorateInterfaceOptionalIntPath {
+        @GET
+        @Path("{opt}/foo")
+        String path(@PathParam("opt") OptionalInt opt);
+    }
+
+    @Path("/")
+    public interface CannotDecorateInterfaceOptionalIntHeader {
+        @GET
+        @Path("{opt}/foo")
+        String path(@PathParam("opt") OptionalInt opt);
     }
 
     @Path("/")
     public interface FakeoInterface {
         @GET
-        @Path("foo/{req}")
-        String path(@PathParam("req") String req);
+        @Path("foo")
+        String query(@QueryParam("opt") Optional<String> opt);
 
         @GET
         @Path("foo")
-        String query(@QueryParam("opt") Optional<String> opt, @QueryParam("req") String req);
+        String header(@HeaderParam("opt") Optional<String> opt);
 
         @GET
         @Path("foo")
-        String header(@HeaderParam("opt") Optional<String> opt, @HeaderParam("req") String req);
+        String queryInt(@QueryParam("opt") OptionalInt opt);
     }
 
     @Test
     public void testCannotDecorateInterfaceWithOptionalPathParam() {
+        assertFailsToDecorateInterface(CannotDecorateInterfaceOptional.class);
+    }
+
+    @Test
+    public void testCannotDecorateInterfaceWithOptionalIntPathParam() {
+        assertFailsToDecorateInterface(CannotDecorateInterfaceOptionalIntPath.class);
+    }
+
+    @Test
+    public void testCannotDecorateInterfaceWithOptionalIntHeaderParam() {
+        assertFailsToDecorateInterface(CannotDecorateInterfaceOptionalIntHeader.class);
+    }
+
+    private void assertFailsToDecorateInterface(Class<?> clazz) {
         try {
-            JaxRsClient.builder().build(CannotDecorateInterface.class, "agent", "http://localhost:" + server.getPort());
+            JaxRsClient.builder().build(clazz, "agent", "http://localhost:" + server.getPort());
             fail();
         } catch (RuntimeException e) {
-            assertThat(e.getMessage(), is(String.format("Cannot use Java8 optional type with PathParams. (Class: %s, Method: path, Param: arg0)", CannotDecorateInterface.class.getName())));
+            assertThat(e.getMessage(), is(String.format("Cannot use Java8 optional type with PathParams. (Class: %s, Method: path, Param: arg0)", clazz.getName())));
         }
     }
 
     @Test
-    public void testRegularPathParam() throws Exception {
-        proxy.path("str2");
+    public void testOptionalAbsentQuery() throws Exception {
+        proxy.query(Optional.empty());
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getPath(), is("/foo/str2"));
+        assertThat(takeRequest.getPath(), is("/foo"));
     }
 
     @Test
-    public void testAbsentQuery() throws Exception {
-        proxy.query(Optional.empty(), "str2");
+    public void testOptionalEmptyStringQuery() throws Exception {
+        proxy.query(Optional.of(""));
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo?req=str2 HTTP/1.1"));
+        assertThat(takeRequest.getPath(), is("/foo?opt="));
     }
 
     @Test
-    public void testEmptyStringQuery() throws Exception {
-        proxy.query(Optional.of(""), "str2");
+    public void testOptionalStringQuery() throws Exception {
+        proxy.query(Optional.of("str"));
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=&req=str2 HTTP/1.1"));
+        assertThat(takeRequest.getPath(), is("/foo?opt=str"));
     }
 
     @Test
-    public void testStringQuery() throws Exception {
-        proxy.query(Optional.<String>of("str"), "str2");
-        RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=str&req=str2 HTTP/1.1"));
-    }
-
-    @Test
-    public void testAbsentHeader() throws Exception {
-        proxy.header(Optional.<String>empty(), "str2");
+    public void testOptionalAbsentHeader() throws Exception {
+        proxy.header(Optional.empty());
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getHeader("opt"), is(""));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
     }
 
     @Test
-    public void testEmptyStringHeader() throws Exception {
-        proxy.header(Optional.<String>of(""), "str2");
+    public void testOptionalEmptyStringHeader() throws Exception {
+        proxy.header(Optional.of(""));
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getHeader("opt"), is(""));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
     }
 
     @Test
-    public void testStringHeader() throws Exception {
-        proxy.header(Optional.<String>of("str"), "str2");
+    public void testOptionalStringHeader() throws Exception {
+        proxy.header(Optional.of("str"));
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getHeader("opt"), is("str"));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
+    }
+
+    @Test
+    public void testOptionalIntAbsentPathParam() throws InterruptedException {
+        proxy.queryInt(OptionalInt.empty());
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getPath(), is("/foo"));
+    }
+
+    @Test
+    public void testOptionalIntPathParam() throws InterruptedException {
+        proxy.queryInt(OptionalInt.of(4));
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getPath(), is("/foo?opt=4"));
     }
 
 }
