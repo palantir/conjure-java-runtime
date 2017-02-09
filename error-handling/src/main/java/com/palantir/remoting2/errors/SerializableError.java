@@ -92,10 +92,10 @@ public abstract class SerializableError implements Serializable {
                         @Override
                         public SerializableStackTraceElement apply(@Nullable StackTraceElement input) {
                             return SerializableStackTraceElement.builder()
-                                    .className(Optional.ofNullable(input.getClassName()))
-                                    .methodName(Optional.ofNullable(input.getMethodName()))
+                                    .className(input.getClassName())
+                                    .methodName(input.getMethodName())
                                     .fileName(Optional.ofNullable(input.getFileName()))
-                                    .lineNumber(Optional.ofNullable(input.getLineNumber()))
+                                    .lineNumber(input.getLineNumber())
                                     .build();
                         }
                     }));

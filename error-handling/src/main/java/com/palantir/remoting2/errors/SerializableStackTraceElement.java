@@ -38,6 +38,17 @@ public abstract class SerializableStackTraceElement implements Serializable {
 
     public abstract Optional<Integer> getLineNumber();
 
+    @Override
+    public final String toString() {
+        StackTraceElement element = new StackTraceElement(
+                getClassName().orElse("UnknownClass"),
+                getMethodName().orElse("UnknownMethod"),
+                getFileName().orElse(null),
+                getLineNumber().orElse(0));
+
+        return element.toString();
+    }
+
     public static Builder builder() {
         return new Builder();
     }

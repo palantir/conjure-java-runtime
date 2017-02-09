@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotAuthorizedException;
@@ -126,8 +125,8 @@ public final class SerializableErrorErrorDecoderTests {
         assertThat(decode.getCause(), is(nullValue()));
         assertThat(decode.getRemoteException().getErrorName(), is(IllegalArgumentException.class.getName()));
         assertThat(decode.getRemoteException().getMessage(), is("msg"));
-        assertThat(decode.getRemoteException().getStackTrace().get(0).getMethodName(),
-                is(Optional.of("testRemoteExceptionCarriesSerializedError")));
+        assertThat(decode.getRemoteException().getStackTrace().get(0).getMethodName().get(),
+                is("testRemoteExceptionCarriesSerializedError"));
     }
 
     @Test
@@ -147,7 +146,7 @@ public final class SerializableErrorErrorDecoderTests {
     }
 
     @Test
-    public void testRemoteExceptionIgnoresUnkownProperties() throws Exception {
+    public void testRemoteExceptionIgnoresUnknownProperties() throws Exception {
         String stackTrace = "{\"methodName\" : \"methodName\", \"fileName\" : \"fileName\", \"lineNumber\" : 0,"
                 + "\"className\" : \"className\" , \"noSuchProperty\" : false }";
         String error = "{\"message\": \"message\", \"exceptionClass\": \"exceptionClass\","
