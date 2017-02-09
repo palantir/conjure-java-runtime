@@ -125,7 +125,7 @@ public final class SerializableErrorErrorDecoderTests {
         assertThat(decode.getCause(), is(nullValue()));
         assertThat(decode.getRemoteException().getErrorName(), is(IllegalArgumentException.class.getName()));
         assertThat(decode.getRemoteException().getMessage(), is("msg"));
-        assertThat(decode.getRemoteException().getStackTrace().get(0).getMethodName(),
+        assertThat(decode.getRemoteException().getStackTrace().get(0).getMethodName().get(),
                 is("testRemoteExceptionCarriesSerializedError"));
     }
 
@@ -139,10 +139,10 @@ public final class SerializableErrorErrorDecoderTests {
         SerializableStackTraceElement element = decode.getRemoteException().getStackTrace().get(0);
         StackTraceElement stackTrace = OBJECT_MAPPER.readValue(OBJECT_MAPPER.writeValueAsBytes(element),
                 StackTraceElement.class);
-        assertThat(stackTrace.getMethodName(), is(element.getMethodName()));
-        assertThat(stackTrace.getClassName(), is(element.getClassName()));
+        assertThat(stackTrace.getMethodName(), is(element.getMethodName().get()));
+        assertThat(stackTrace.getClassName(), is(element.getClassName().get()));
         assertThat(stackTrace.getFileName(), is(element.getFileName().get()));
-        assertThat(stackTrace.getLineNumber(), is(element.getLineNumber()));
+        assertThat(stackTrace.getLineNumber(), is(element.getLineNumber().get()));
     }
 
     @Test

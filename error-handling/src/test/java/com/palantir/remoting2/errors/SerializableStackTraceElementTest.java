@@ -35,4 +35,11 @@ public final class SerializableStackTraceElementTest {
                 is("com.palantir.remoting2.Test.getText(Test.java:2)"));
     }
 
+    @Test
+    public void testToStringWorksEvenIfEmptyElementIsConstructed() {
+        SerializableStackTraceElement element = SerializableStackTraceElement.builder()
+                .build();
+        assertThat(element.toString(),
+                is("UnknownClass.UnknownMethod(Unknown Source)"));
+    }
 }
