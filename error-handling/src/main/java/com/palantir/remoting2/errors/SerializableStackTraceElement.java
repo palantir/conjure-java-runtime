@@ -30,13 +30,23 @@ import org.immutables.value.Value;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class SerializableStackTraceElement implements Serializable {
 
-    public abstract Optional<String> getClassName();
+    public abstract String getClassName();
 
-    public abstract Optional<String> getMethodName();
+    public abstract String getMethodName();
 
     public abstract Optional<String> getFileName();
 
-    public abstract Optional<Integer> getLineNumber();
+    public abstract int getLineNumber();
+
+    @Override
+    public final String toString() {
+        StackTraceElement element = new StackTraceElement(getClassName(),
+                getMethodName(),
+                getFileName().orElse(null),
+                getLineNumber());
+
+        return element.toString();
+    }
 
     public static Builder builder() {
         return new Builder();

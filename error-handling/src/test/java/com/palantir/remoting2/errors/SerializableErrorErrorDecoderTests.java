@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotAuthorizedException;
@@ -127,7 +126,7 @@ public final class SerializableErrorErrorDecoderTests {
         assertThat(decode.getRemoteException().getErrorName(), is(IllegalArgumentException.class.getName()));
         assertThat(decode.getRemoteException().getMessage(), is("msg"));
         assertThat(decode.getRemoteException().getStackTrace().get(0).getMethodName(),
-                is(Optional.of("testRemoteExceptionCarriesSerializedError")));
+                is("testRemoteExceptionCarriesSerializedError"));
     }
 
     @Test
@@ -140,14 +139,14 @@ public final class SerializableErrorErrorDecoderTests {
         SerializableStackTraceElement element = decode.getRemoteException().getStackTrace().get(0);
         StackTraceElement stackTrace = OBJECT_MAPPER.readValue(OBJECT_MAPPER.writeValueAsBytes(element),
                 StackTraceElement.class);
-        assertThat(stackTrace.getMethodName(), is(element.getMethodName().get()));
-        assertThat(stackTrace.getClassName(), is(element.getClassName().get()));
+        assertThat(stackTrace.getMethodName(), is(element.getMethodName()));
+        assertThat(stackTrace.getClassName(), is(element.getClassName()));
         assertThat(stackTrace.getFileName(), is(element.getFileName().get()));
-        assertThat(stackTrace.getLineNumber(), is(element.getLineNumber().get()));
+        assertThat(stackTrace.getLineNumber(), is(element.getLineNumber()));
     }
 
     @Test
-    public void testRemoteExceptionIgnoresUnkownProperties() throws Exception {
+    public void testRemoteExceptionIgnoresUnknownProperties() throws Exception {
         String stackTrace = "{\"methodName\" : \"methodName\", \"fileName\" : \"fileName\", \"lineNumber\" : 0,"
                 + "\"className\" : \"className\" , \"noSuchProperty\" : false }";
         String error = "{\"message\": \"message\", \"exceptionClass\": \"exceptionClass\","
