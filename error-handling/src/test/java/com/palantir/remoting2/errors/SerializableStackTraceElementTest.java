@@ -42,4 +42,14 @@ public final class SerializableStackTraceElementTest {
         assertThat(element.toString(),
                 is("UnknownClass.UnknownMethod(Unknown Source)"));
     }
+
+    @Test
+    public void testToStringWorksForInvalidClassAndMethodNames() {
+        SerializableStackTraceElement element = SerializableStackTraceElement.builder()
+                .className("!Invalid Java Class N@me")
+                .methodName("!Invalid Method Name")
+                .build();
+        assertThat(element.toString(),
+                is("!Invalid Java Class N@me.!Invalid Method Name(Unknown Source)"));
+    }
 }
