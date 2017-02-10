@@ -6,7 +6,7 @@ This repository provides an opinionated set of libraries for defining and creati
 on [Feign](https://github.com/OpenFeign/feign) or [Retrofit](http://square.github.io/retrofit/) as a client and
 [Dropwizard](http://www.dropwizard.io/)/[Jersey](https://jersey.java.net/) with [JAX-RS](https://jax-rs-spec.java.net/)
 service definitions as a server. Refer to the [API Contract](#api-contract) section for details on the contract between
-clients and servers.
+clients and servers.  This library supports Java 7 and Java 8.
 
 
 Core libraries:
