@@ -1,6 +1,8 @@
 /*
  * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
  *
+ * Copied&adapted under Apache License from: https://github.com/dropwizard/dropwizard/commit/37bbdd1bac6ecd243c27eb581bc63b80186afd13#diff-a7337360aabf951b0db7a838b0d76203
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
