@@ -3,6 +3,7 @@ apply from: "${rootDir}/gradle/publish-shadow.gradle"
 
 dependencies {
     compile project(":extras:jackson-support")
+    compile project(":extras:refresh-utils")
     compile project(":error-handling")
     compile project(":tracing-okhttp3")
     compile project(":http-clients-api")
@@ -34,13 +35,15 @@ dependencies {
     shadow "javax.ws.rs:javax.ws.rs-api"
     shadow "com.fasterxml.jackson.core:jackson-databind"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-guava"
+    shadow "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+    shadow "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     shadow "com.google.guava:guava"
     shadow "com.squareup.okhttp3:okhttp"
+    shadow "org.slf4j:slf4j-api"
 }
 
 shadowJar {
     mergeServiceFiles()
-    // relocate('com.palantir.remoting1.tracing', 'httpremoting.shaded.com.palantir.remoting1.tracing')
     relocate('feign', 'httpremoting.shaded.feign')
     relocate('zipkin', 'httpremoting.shaded.zipkin')
     relocate('org.joda.time', 'httpremoting.shaded.org.joda.time')
@@ -55,6 +58,7 @@ shadowJar {
         exclude(dependency { it.moduleGroup.contains("com.fasterxml.jackson") })
         exclude(dependency { it.moduleGroup.contains("com.google.guava") })
         exclude(dependency { it.moduleGroup.contains("com.squareup.okhttp3") })
+        exclude(dependency { it.moduleGroup.contains("org.slf4j") })
     }
     classifier = ''
 }

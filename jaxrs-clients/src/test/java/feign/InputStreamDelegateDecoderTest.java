@@ -23,16 +23,14 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting1.jaxrs.JaxRsClient;
-import com.palantir.remoting1.jaxrs.feignimpl.TestServer;
+import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.feignimpl.GuavaTestServer;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -40,10 +38,10 @@ import org.mockito.Mockito;
 
 public final class InputStreamDelegateDecoderTest {
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestServer.class,
+    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
             "src/test/resources/test-server.yml");
 
-    private TestServer.TestService service;
+    private GuavaTestServer.TestService service;
     private Decoder delegate;
     private Decoder inputStreamDelegateDecoder;
 
@@ -54,15 +52,14 @@ public final class InputStreamDelegateDecoderTest {
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.builder()
-                .build(TestServer.TestService.class, "agent", endpointUri);
+                .build(GuavaTestServer.TestService.class, "agent", endpointUri);
     }
 
     @Test
     public void testDecodesAsInputStream() throws Exception {
         String data = "data";
 
-        Response response =
-                Response.create(200, "OK", ImmutableMap.<String, Collection<String>>of(), data, StandardCharsets.UTF_8);
+        Response response = Response.create(200, "OK", ImmutableMap.of(), data, StandardCharsets.UTF_8);
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 
@@ -73,10 +70,8 @@ public final class InputStreamDelegateDecoderTest {
     public void testUsesDelegateWhenReturnTypeNotInputStream() throws Exception {
         String returned = "string";
 
-        when(delegate.decode((Response) any(), (Type) any())).thenReturn(returned);
-        Response response =
-                Response.create(200, "OK", ImmutableMap.<String, Collection<String>>of(), returned,
-                        StandardCharsets.UTF_8);
+        when(delegate.decode(any(), any())).thenReturn(returned);
+        Response response = Response.create(200, "OK", ImmutableMap.of(), returned, StandardCharsets.UTF_8);
         String decodedObject = (String) inputStreamDelegateDecoder.decode(response, String.class);
         assertEquals(returned, decodedObject);
     }

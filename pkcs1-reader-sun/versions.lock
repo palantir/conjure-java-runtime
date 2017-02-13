@@ -1,59 +1,59 @@
 {
     "compileClasspath": {
         "com.fasterxml.jackson.core:jackson-annotations": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting2:ssl-config"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting2:ssl-config"
             ]
         },
-        "com.palantir.remoting1:ssl-config": {
+        "com.palantir.remoting2:ssl-config": {
             "project": true
         }
     },
     "runtime": {
         "com.fasterxml.jackson.core:jackson-annotations": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.6.1",
+            "locked": "2.6.5",
             "transitive": [
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting2:ssl-config"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting1:ssl-config"
+                "com.palantir.remoting2:ssl-config"
             ]
         },
-        "com.palantir.remoting1:ssl-config": {
+        "com.palantir.remoting2:ssl-config": {
             "project": true
         }
     }

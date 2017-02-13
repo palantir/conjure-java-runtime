@@ -28,7 +28,7 @@ repositories {
 
 allprojects {
     version System.env.CIRCLE_TAG ?: gitVersion()
-    group 'com.palantir.remoting1'
+    group 'com.palantir.remoting2'
 
     apply plugin: 'com.palantir.configuration-resolver'
     apply plugin: 'nebula.dependency-recommender'
@@ -48,7 +48,7 @@ subprojects {
         jcenter()
     }
 
-    sourceCompatibility = 1.7
+    sourceCompatibility = 1.8
 
     apply plugin: 'nebula.dependency-lock'
     dependencyLock {

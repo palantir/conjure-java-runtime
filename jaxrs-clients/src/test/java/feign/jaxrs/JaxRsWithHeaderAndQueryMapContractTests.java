@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.palantir.remoting1.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.JaxRsClient;
 import feign.Contract;
 import feign.HeaderMap;
 import feign.MethodMetadata;
