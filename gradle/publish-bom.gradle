@@ -1,0 +1,10 @@
+publishing {
+    publications {
+        nebulaBom(MavenPublication) {
+            nebulaDependencyManagement.fromConfigurations { configurations.compile }
+            artifactId = project.name + '-bom'
+        }
+    }
+}
+
+bintray { pkg { publications += ['nebulaBom'] } }
