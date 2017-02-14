@@ -5,12 +5,12 @@ buildscript {
 
     dependencies {
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
-        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:${bintrayPlugin}"
-        classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:4.2.0'
-        classpath 'com.netflix.nebula:nebula-dependency-recommender:3.1.0'
-        classpath 'com.netflix.nebula:nebula-publishing-plugin:4.8.1'
-        classpath "com.palantir:gradle-baseline-java:${baselineVersion}"
-        classpath 'gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.1.0' 
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
+        classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:4.4.0'
+        classpath 'com.netflix.nebula:nebula-dependency-recommender:4.0.2'
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:4.9.1'
+        classpath 'com.palantir:gradle-baseline-java:0.9.2'
+        classpath 'gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.1.0'
     }
 }
 
@@ -33,6 +33,7 @@ allprojects {
     apply plugin: 'com.palantir.configuration-resolver'
     apply plugin: 'nebula.dependency-recommender'
     dependencyRecommendations {
+        strategy OverrideTransitives
         propertiesFile file: project.rootProject.file('versions.props')
     }
 }
