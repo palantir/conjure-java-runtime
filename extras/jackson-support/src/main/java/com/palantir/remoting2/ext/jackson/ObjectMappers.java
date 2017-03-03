@@ -40,6 +40,9 @@ public final class ObjectMappers {
                 .registerModule(new AfterburnerModule())
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
+                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .disable(DeserializationFeature.WRAP_EXCEPTIONS)
+                .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
     }
 }
