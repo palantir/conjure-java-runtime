@@ -24,11 +24,10 @@ import static org.junit.Assert.assertThat;
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import org.junit.Test;
 
 public final class HeaderAccessUtilsTest {
-    private static final Map<String, Collection<String>> TEST_HEADERS_MAP = ImmutableMap.<String, Collection<String>>of(
+    private static final ImmutableMap<String, Collection<String>> TEST_HEADERS_MAP = ImmutableMap.of(
             "header", Arrays.asList("value1"),
             "Header", Arrays.asList("value2", "value3"),
             "HEADER", Arrays.asList("value4", "value5")
