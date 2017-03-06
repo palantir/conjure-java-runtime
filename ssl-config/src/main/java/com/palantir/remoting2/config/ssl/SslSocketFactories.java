@@ -103,17 +103,17 @@ public final class SslSocketFactories {
     }
 
     /**
-     * Create a {@link TrustManager[]} initialized from the provided configuration.
+     * Create a {@link TrustManager} array initialized from the provided configuration.
      *
      * @param config an {@link SslConfiguration} describing at least the trust store configuration
-     * @return an {@link TrustManager[]} according to the input configuration
+     * @return an {@link TrustManager} array according to the input configuration
      */
     public static TrustManager[] createTrustManagers(SslConfiguration config) {
         return createTrustManagerFactory(config.trustStorePath(), config.trustStoreType()).getTrustManagers();
     }
 
     /**
-     * Create a {@link TrustManager[]} initialized from the given certificates in PEM or DER format.
+     * Create a {@link TrustManager} array initialized from the given certificates in PEM or DER format.
      *
      * @param trustCertificatesByAlias
      *        a map of X.509 certificate in PEM or DER format by the alias to load the certificate as.

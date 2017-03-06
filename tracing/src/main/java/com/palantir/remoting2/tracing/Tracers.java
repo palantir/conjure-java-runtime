@@ -63,12 +63,7 @@ public final class Tracers {
 
     /**
      * Wraps the given {@link Callable} such that it uses the thread-local {@link Trace tracing state} at the time of
-     * it's construction during its {@link TracingAwareCallable#call execution}. The {@link TracingAwareCallable}
-     * constructor is typically called by a tracing-aware executor service on the same thread on which a user creates
-     * the Callable; the {@link TracingAwareCallable#call} function is executed on an arbitrary (likely different)
-     * thread with different {@link Trace tracing state}. In order to execute the task with the original (and
-     * intuitively expected) tracing state, we remember the original state and set it for the duration of the {@link
-     * TracingAwareCallable#call execution}.
+     * it's construction during its {@link Callable#call() execution}.
      */
     public static <V> Callable<V> wrap(Callable<V> delegate) {
         return new TracingAwareCallable<>(delegate);
@@ -82,6 +77,12 @@ public final class Tracers {
     /**
      * Wraps a given callable such that its execution operates with the {@link Trace thread-local Trace} of the thread
      * that constructs the {@link TracingAwareCallable} instance rather than the thread that executes the callable.
+     * <p>
+     * The constructor is typically called by a tracing-aware executor service on the same thread on which a user
+     * creates {@link Callable delegate}, and the {@link #call()} method is executed on an arbitrary (likely different)
+     * thread with different {@link Trace tracing state}. In order to execute the task with the original (and
+     * intuitively expected) tracing state, we remember the original state and set it for the duration of the
+     * {@link #call() execution}.
      */
     private static class TracingAwareCallable<V> implements Callable<V> {
         private final Callable<V> delegate;

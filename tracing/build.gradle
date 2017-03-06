@@ -19,4 +19,5 @@ dependencies {
     testCompile "io.zipkin.java:zipkin"
 
     processor "org.immutables:value"
+    compile group: "org.immutables", name: "value", classifier: "annotations"
 }
