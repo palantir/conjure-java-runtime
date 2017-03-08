@@ -223,7 +223,7 @@ http-remoting makes the following opinionated customizations to the standard Dro
 #### Object serialization/deserialization
 
 All parameters and return values of `application/json` endpoints are serialized/deserialized to/from JSON using a
-Jackson `ObjectMapper` with `GuavaModule` and `Jdk7Module`. Servers must not expose parameters or return values that
+Jackson `ObjectMapper` with `GuavaModule`, `Jdk7Module` and `Jdk8Module`. Servers must not expose parameters or return values that
 cannot be handled by this object mapper.
 
 #### Error propagation
