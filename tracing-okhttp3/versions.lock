@@ -79,10 +79,10 @@
             "project": true
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.4.1"
+            "locked": "3.6.0"
         },
         "com.squareup.okio:okio": {
-            "locked": "1.9.0",
+            "locked": "1.11.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]
@@ -174,10 +174,10 @@
             "project": true
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.4.1"
+            "locked": "3.6.0"
         },
         "com.squareup.okio:okio": {
-            "locked": "1.9.0",
+            "locked": "1.11.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]
