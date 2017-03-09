@@ -33,7 +33,7 @@ public final class ObjectMappers {
      * @deprecated use {@link #newClientObjectMapper()} instead.
      */
     @Deprecated
-    public static ObjectMapper guavaJdk8Jdk8() {
+    public static ObjectMapper guavaJdk7Jdk8() {
         return newClientObjectMapper();
     }
 
