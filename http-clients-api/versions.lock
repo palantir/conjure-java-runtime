@@ -51,7 +51,11 @@
             ]
         },
         "org.immutables:value": {
-            "locked": "2.3.10"
+            "locked": "2.3.10",
+            "transitive": [
+                "com.palantir.remoting2:service-config",
+                "com.palantir.remoting2:ssl-config"
+            ]
         },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
@@ -109,6 +113,13 @@
             "locked": "1.0.0",
             "transitive": [
                 "com.palantir.remoting2:service-config"
+            ]
+        },
+        "org.immutables:value": {
+            "locked": "2.3.10",
+            "transitive": [
+                "com.palantir.remoting2:service-config",
+                "com.palantir.remoting2:ssl-config"
             ]
         },
         "org.slf4j:slf4j-api": {
