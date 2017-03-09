@@ -142,9 +142,6 @@
         "com.palantir.remoting2:jackson-support": {
             "project": true
         },
-        "org.immutables:value": {
-            "locked": "2.3.10"
-        },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12"
         }

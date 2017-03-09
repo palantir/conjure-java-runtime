@@ -154,9 +154,6 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1"
         },
-        "org.immutables:value": {
-            "locked": "2.3.10"
-        },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12"
         }

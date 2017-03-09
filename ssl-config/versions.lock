@@ -40,9 +40,6 @@
         },
         "com.google.guava:guava": {
             "locked": "21.0"
-        },
-        "org.immutables:value": {
-            "locked": "2.3.10"
         }
     }
 }
