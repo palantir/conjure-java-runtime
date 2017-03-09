@@ -26,7 +26,7 @@ import org.junit.Test;
 
 public final class SerializationTests {
 
-    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7Jdk8();
+    private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
 
     @Test
     public void testJsonSerDe() throws IOException {

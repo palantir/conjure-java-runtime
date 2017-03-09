@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * with log-level {@link Logger#info INFO}. Logging is performed asynchronously on a given executor service.
  */
 public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
-    private static final ObjectMapper mapper = ObjectMappers.guavaJdk7Jdk8();
+    private static final ObjectMapper mapper = ObjectMappers.newClientObjectMapper();
 
     private final Logger logger;
     private final ZipkinCompatEndpoint endpoint;

@@ -48,7 +48,7 @@ import org.mockito.MockitoAnnotations;
 
 public final class SerializableErrorInterceptorTest {
 
-    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7Jdk8();
+    private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
     private static final Request REQUEST = new Request.Builder().url("http://url").build();
 
     @Rule

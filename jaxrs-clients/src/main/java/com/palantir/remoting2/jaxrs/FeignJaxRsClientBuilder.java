@@ -65,7 +65,7 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         Http2Agent.install();
     }
 
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7Jdk8();
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
     private final ClientConfig config;
 

@@ -29,17 +29,65 @@ public final class ObjectMappers {
     private ObjectMappers() {}
 
     /**
-     * Returns a newly allocated {@link ObjectMapper} that is configured with modules for Guava, JDK7, JDK8, and
-     * afterburner.
+     * Returns result of {@link #newClientObjectMapper()}. This method maintains source and binary
+     * compatibility with previous releases of the 2.x branch.
+     *
+     * @deprecated use {@link #newClientObjectMapper()} instead.
      */
+    @Deprecated
     public static ObjectMapper guavaJdk7Jdk8() {
-        return new ObjectMapper()
+        return newClientObjectMapper();
+    }
+
+    /**
+     * Returns a default ObjectMapper with settings adjusted for use in servers.
+     * <p>
+     * Settings:
+     * <ul>
+     *   <li>Ignore unknown properties found during deserialization.
+     * </ul>
+     */
+    public static ObjectMapper newClientObjectMapper() {
+        return withDefaultModules(new ObjectMapper())
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
+
+    /**
+     * Returns a default ObjectMapper with settings adjusted for use in servers.
+     * <p>
+     * Settings:
+     * <ul>
+     *   <li>Throw on unknown properties found during deserialization.
+     * </ul>
+     */
+    public static ObjectMapper newServerObjectMapper() {
+        return withDefaultModules(new ObjectMapper())
+                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    }
+
+    /**
+     * Configures provided ObjectMapper with default modules and settings.
+     * <p>
+     * Modules: Guava, JDK7, JDK8, Afterburner, JavaTime
+     * <p>
+     * Settings:
+     * <ul>
+     *   <li>Dates written as ISO-8601 strings.
+     *   <li>Dates remain in received timezone.
+     *   <li>Exceptions will not be wrapped with Jackson exceptions.
+     *   <li>Deserializing a null for a primitive field will throw an exception.
+     * </ul>
+     */
+    public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
+        return mapper
                 .registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
                 .registerModule(new AfterburnerModule())
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
+                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+                .disable(DeserializationFeature.WRAP_EXCEPTIONS)
+                .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
     }
 }
