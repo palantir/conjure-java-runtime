@@ -61,6 +61,11 @@ public abstract class ClientConfig {
         return MAX_NUM_RETRIES;
     }
 
+    @Value.Default
+    public boolean enableGcmCipherSuites() {
+        return false;
+    }
+
     public static ClientConfig fromServiceConfig(ServiceConfiguration serviceConfig) {
         ClientConfig.Builder clientConfig = builder();
 
