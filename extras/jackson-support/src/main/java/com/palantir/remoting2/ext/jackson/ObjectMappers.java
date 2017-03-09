@@ -29,7 +29,9 @@ public final class ObjectMappers {
     private ObjectMappers() {}
 
     /**
-     * Kept to maintain source and binary compatibility.
+     * Returns result of {@link #newClientObjectMapper()}. This method maintains source and binary
+     * compatibility with previous releases of the 2.x branch.
+     *
      * @deprecated use {@link #newClientObjectMapper()} instead.
      */
     @Deprecated
