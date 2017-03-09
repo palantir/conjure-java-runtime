@@ -26,6 +26,12 @@
         },
         "com.palantir.remoting2:ssl-config": {
             "project": true
+        },
+        "org.immutables:value": {
+            "locked": "2.3.10",
+            "transitive": [
+                "com.palantir.remoting2:ssl-config"
+            ]
         }
     },
     "runtime": {
@@ -55,6 +61,12 @@
         },
         "com.palantir.remoting2:ssl-config": {
             "project": true
+        },
+        "org.immutables:value": {
+            "locked": "2.3.10",
+            "transitive": [
+                "com.palantir.remoting2:ssl-config"
+            ]
         }
     }
 }

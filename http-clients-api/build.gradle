@@ -10,4 +10,5 @@ dependencies {
     testCompile "org.mockito:mockito-core"
 
     processor "org.immutables:value"
+    compile group: "org.immutables", name: "value", classifier: "annotations"
 }

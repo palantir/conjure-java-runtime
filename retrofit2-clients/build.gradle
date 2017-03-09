@@ -27,6 +27,7 @@ dependencies {
     testCompile "org.assertj:assertj-core"
 
     processor "org.immutables:value"
+    compile group: "org.immutables", name: "value", classifier: "annotations"
 }
 
 configurations.all {
