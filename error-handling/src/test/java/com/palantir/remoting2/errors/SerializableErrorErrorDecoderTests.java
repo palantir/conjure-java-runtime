@@ -44,7 +44,7 @@ public final class SerializableErrorErrorDecoderTests {
 
     private static final String message = "hello";
     private static final int STATUS_42 = 42;
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7Jdk8();
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
     @Test
     public void testWebApplicationExceptions() {

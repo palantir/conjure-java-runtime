@@ -48,11 +48,11 @@ public final class ServiceConfigurationTest {
                 + "\"connect-timeout\":\"1 day\",\"read-timeout\":\"1 day\",\"write-timeout\":\"1 day\","
                 + "\"uris\":[\"uri1\"],\"proxy-configuration\":{\"host-and-port\":\"host:80\",\"credentials\":null}}";
 
-        assertThat(ObjectMappers.guavaJdk7Jdk8().writeValueAsString(serialized))
+        assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
-        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedCamelCase, ServiceConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedCamelCase, ServiceConfiguration.class))
                 .isEqualTo(serialized);
-        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedKebabCase, ServiceConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedKebabCase, ServiceConfiguration.class))
                 .isEqualTo(serialized);
     }
 
@@ -64,11 +64,11 @@ public final class ServiceConfigurationTest {
         String deserializedKebabCase = "{\"api-token\":null,\"security\":null,\"connect-timeout\":null,"
                 + "\"read-timeout\":null,\"write-timeout\":null,\"uris\":[],\"proxy-configuration\":null}";
 
-        assertThat(ObjectMappers.guavaJdk7Jdk8().writeValueAsString(serialized))
+        assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
-        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedCamelCase, ServiceConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedCamelCase, ServiceConfiguration.class))
                 .isEqualTo(serialized);
-        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedKebabCase, ServiceConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedKebabCase, ServiceConfiguration.class))
                 .isEqualTo(serialized);
     }
 

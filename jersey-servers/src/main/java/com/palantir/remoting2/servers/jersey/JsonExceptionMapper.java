@@ -40,7 +40,7 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
 
-    static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7Jdk8().enable(SerializationFeature.INDENT_OUTPUT);
+    static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     private final boolean includeStackTrace;
 

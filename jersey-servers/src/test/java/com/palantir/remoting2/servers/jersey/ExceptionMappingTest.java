@@ -98,7 +98,7 @@ public final class ExceptionMappingTest {
     public void testRemoteException() throws NoSuchMethodException, SecurityException, IOException {
         Response response = target.path("throw-remote-exception").request().get();
         assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
-        SerializableError error = ObjectMappers.guavaJdk7Jdk8().readValue(
+        SerializableError error = ObjectMappers.newClientObjectMapper().readValue(
                 response.readEntity(InputStream.class), SerializableError.class);
         assertThat(error.getErrorName(), is("errName"));
     }

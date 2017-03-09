@@ -43,7 +43,7 @@ public final class SerializableErrorToExceptionConverter {
 
     private static final Logger log = LoggerFactory.getLogger(SerializableErrorToExceptionConverter.class);
 
-    private static final ObjectMapper MAPPER = ObjectMappers.guavaJdk7Jdk8();
+    private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
 
     public static RuntimeException getException(Collection<String> contentTypes, int status, String reason,
             @CheckForNull InputStream body) {

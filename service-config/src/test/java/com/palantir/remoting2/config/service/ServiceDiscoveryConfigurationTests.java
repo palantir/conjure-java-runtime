@@ -195,11 +195,11 @@ public final class ServiceDiscoveryConfigurationTests {
                 + "{\"host-and-port\":\"host:80\",\"credentials\":null},\"connect-timeout\":\"1 day\","
                 + "\"read-timeout\":\"1 day\"}";
 
-        assertThat(ObjectMappers.guavaJdk7Jdk8().writeValueAsString(serialized))
+        assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
-        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedCamelCase, ServiceDiscoveryConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedCamelCase, ServiceDiscoveryConfiguration.class))
                 .isEqualTo(serialized);
-        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedKebabCase, ServiceDiscoveryConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedKebabCase, ServiceDiscoveryConfiguration.class))
                 .isEqualTo(serialized);
     }
 
@@ -211,11 +211,11 @@ public final class ServiceDiscoveryConfigurationTests {
         String deserializedKebabCase = "{\"api-token\":null,\"security\":null,\"services\":{},"
                 + "\"proxy-configuration\":null,\"connect-timeout\":null,\"read-timeout\":null}";
 
-        assertThat(ObjectMappers.guavaJdk7Jdk8().writeValueAsString(serialized))
+        assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
-        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedCamelCase, ServiceDiscoveryConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedCamelCase, ServiceDiscoveryConfiguration.class))
                 .isEqualTo(serialized);
-        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedKebabCase, ServiceDiscoveryConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedKebabCase, ServiceDiscoveryConfiguration.class))
                 .isEqualTo(serialized);
     }
 

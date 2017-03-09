@@ -69,11 +69,11 @@ public final class ProxyConfigurationTests {
         String deserializedKebabCase =
                 "{\"host-and-port\":\"host:80\",\"credentials\":{\"username\":\"username\",\"password\":\"password\"}}";
 
-        assertThat(ObjectMappers.guavaJdk7Jdk8().writeValueAsString(serialized))
+        assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
-        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedCamelCase, ProxyConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedCamelCase, ProxyConfiguration.class))
                 .isEqualTo(serialized);
-        assertThat(ObjectMappers.guavaJdk7Jdk8().readValue(deserializedKebabCase, ProxyConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedKebabCase, ProxyConfiguration.class))
                 .isEqualTo(serialized);
     }
 
