@@ -25,7 +25,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.ImmutableMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,7 +32,7 @@ import java.util.regex.Pattern;
 public final class Duration implements Comparable<Duration> {
     private static final Pattern DURATION_PATTERN = Pattern.compile("(\\d+)\\s*(\\S+)");
 
-    private static final Map<String, TimeUnit> SUFFIXES = new ImmutableMap.Builder<String, TimeUnit>()
+    private static final ImmutableMap<String, TimeUnit> SUFFIXES = new ImmutableMap.Builder<String, TimeUnit>()
             .put("ns", TimeUnit.NANOSECONDS)
             .put("nanosecond", TimeUnit.NANOSECONDS)
             .put("nanoseconds", TimeUnit.NANOSECONDS)

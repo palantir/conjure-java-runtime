@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("checkstyle:noclone")
 public final class FailoverFeignTarget<T> implements Target<T>, Retryer {
 
-    private class ThreadLocalInteger extends ThreadLocal<Integer> {
+    private static class ThreadLocalInteger extends ThreadLocal<Integer> {
         @Override
         protected Integer initialValue() {
             return 0;

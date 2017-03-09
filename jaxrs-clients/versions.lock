@@ -1,5 +1,11 @@
 {
     "compileClasspath": {
+        "com.ea.agentloader:ea-agent-loader": {
+            "locked": "1.0.2",
+            "transitive": [
+                "com.palantir.remoting2:http2-agent"
+            ]
+        },
         "com.fasterxml.jackson.core:jackson-annotations": {
             "locked": "2.6.7",
             "transitive": [
@@ -78,7 +84,7 @@
             ]
         },
         "com.google.guava:guava": {
-            "locked": "18.0",
+            "locked": "21.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting2:error-handling",
@@ -113,6 +119,9 @@
             "project": true
         },
         "com.palantir.remoting2:http-clients-api": {
+            "project": true
+        },
+        "com.palantir.remoting2:http2-agent": {
             "project": true
         },
         "com.palantir.remoting2:jackson-support": {
@@ -175,6 +184,12 @@
             "locked": "1.0",
             "transitive": [
                 "com.netflix.feign:feign-core"
+            ]
+        },
+        "org.mortbay.jetty.alpn:jetty-alpn-agent": {
+            "locked": "2.0.6",
+            "transitive": [
+                "com.palantir.remoting2:http2-agent"
             ]
         },
         "org.slf4j:slf4j-api": {
@@ -188,6 +203,12 @@
         }
     },
     "runtime": {
+        "com.ea.agentloader:ea-agent-loader": {
+            "locked": "1.0.2",
+            "transitive": [
+                "com.palantir.remoting2:http2-agent"
+            ]
+        },
         "com.fasterxml.jackson.core:jackson-annotations": {
             "locked": "2.6.7",
             "transitive": [
@@ -266,7 +287,7 @@
             ]
         },
         "com.google.guava:guava": {
-            "locked": "18.0",
+            "locked": "21.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting2:error-handling",
@@ -301,6 +322,9 @@
             "project": true
         },
         "com.palantir.remoting2:http-clients-api": {
+            "project": true
+        },
+        "com.palantir.remoting2:http2-agent": {
             "project": true
         },
         "com.palantir.remoting2:jackson-support": {
@@ -363,6 +387,12 @@
             "locked": "1.0",
             "transitive": [
                 "com.netflix.feign:feign-core"
+            ]
+        },
+        "org.mortbay.jetty.alpn:jetty-alpn-agent": {
+            "locked": "2.0.6",
+            "transitive": [
+                "com.palantir.remoting2:http2-agent"
             ]
         },
         "org.slf4j:slf4j-api": {

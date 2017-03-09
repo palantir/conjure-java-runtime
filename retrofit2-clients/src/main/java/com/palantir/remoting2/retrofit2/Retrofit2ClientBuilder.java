@@ -21,16 +21,17 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
+import com.palantir.remoting2.clients.CipherSuites;
 import com.palantir.remoting2.clients.ClientBuilder;
 import com.palantir.remoting2.clients.ClientConfig;
 import com.palantir.remoting2.config.service.BasicCredentials;
 import com.palantir.remoting2.config.service.ProxyConfiguration;
 import com.palantir.remoting2.config.ssl.TrustContext;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import com.palantir.remoting2.http2.Http2Agent;
 import com.palantir.remoting2.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import okhttp3.CipherSuite;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
@@ -41,39 +42,11 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder extends ClientBuilder {
 
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7Jdk8();
+    static {
+        Http2Agent.install();
+    }
 
-    private static final ImmutableList<ConnectionSpec> CONNECTION_SPEC = ImmutableList.of(
-            new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                    .tlsVersions(TlsVersion.TLS_1_2)
-                    .cipherSuites(
-                            // In an ideal world, we'd use GCM suites, but they're an order of
-                            // magnitude slower than the CBC suites, which have JVM optimizations
-                            // already. We should revisit with JDK9.
-                            // See also:
-                            //  - http://openjdk.java.net/jeps/246
-                            //  - https://bugs.openjdk.java.net/secure/attachment/25422/GCM%20Analysis.pdf
-                            // CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-                            // CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                            // CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
-                            // CipherSuite.TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256,
-                            // CipherSuite.TLS_RSA_WITH_AES_256_GCM_SHA384,
-                            // CipherSuite.TLS_RSA_WITH_AES_128_GCM_SHA256,
-                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
-                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
-                            CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384,
-                            CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256,
-                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA256,
-                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA256,
-                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
-                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
-                            CipherSuite.TLS_ECDH_RSA_WITH_AES_256_CBC_SHA,
-                            CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
-                            CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
-                            CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                            CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
-                    .build(),
-            ConnectionSpec.CLEARTEXT);
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7Jdk8();
 
     private final ClientConfig config;
 
@@ -145,11 +118,22 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
 
         // cipher setup
-        client.connectionSpecs(CONNECTION_SPEC);
+        client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
 
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
         client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
 
         return client.build();
+    }
+
+    private static ImmutableList<ConnectionSpec> createConnectionSpecs(boolean enableGcmCipherSuites) {
+        return ImmutableList.of(
+            new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                    .tlsVersions(TlsVersion.TLS_1_2)
+                    .cipherSuites(enableGcmCipherSuites
+                            ? CipherSuites.allCipherSuites()
+                            : CipherSuites.fastCipherSuites())
+                    .build(),
+            ConnectionSpec.CLEARTEXT);
     }
 }

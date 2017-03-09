@@ -1,0 +1,12 @@
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile 'com.ea.agentloader:ea-agent-loader'
+    compile 'org.mortbay.jetty.alpn:jetty-alpn-agent'
+
+    testCompile 'com.squareup.okhttp3:okhttp'
+    testCompile 'junit:junit'
+    testCompile 'org.assertj:assertj-core'
+    testCompile 'org.mockito:mockito-core'
+}
+
