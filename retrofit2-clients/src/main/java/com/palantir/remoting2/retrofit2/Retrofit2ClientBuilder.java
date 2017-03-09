@@ -27,6 +27,7 @@ import com.palantir.remoting2.config.service.BasicCredentials;
 import com.palantir.remoting2.config.service.ProxyConfiguration;
 import com.palantir.remoting2.config.ssl.TrustContext;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import com.palantir.remoting2.http2.Http2Agent;
 import com.palantir.remoting2.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +42,9 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder extends ClientBuilder {
 
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7Jdk8();
+    static {
+        Http2Agent.install();
+    }
 
     private static final ImmutableList<ConnectionSpec> CONNECTION_SPEC = ImmutableList.of(
             new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
@@ -71,9 +74,13 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
                             CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
                             CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
                             CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                            CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
+                            CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV,
+                            // Required by http/2 spec: https://http2.github.io/http2-spec/#rfc.section.9.2.2
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256)
                     .build(),
             ConnectionSpec.CLEARTEXT);
+
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.guavaJdk7Jdk8();
 
     private final ClientConfig config;
 

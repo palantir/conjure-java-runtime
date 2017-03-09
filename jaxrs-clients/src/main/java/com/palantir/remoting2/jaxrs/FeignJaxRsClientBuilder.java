@@ -26,6 +26,7 @@ import com.palantir.remoting2.config.service.BasicCredentials;
 import com.palantir.remoting2.config.service.ProxyConfiguration;
 import com.palantir.remoting2.config.ssl.TrustContext;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import com.palantir.remoting2.http2.Http2Agent;
 import com.palantir.remoting2.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting2.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting2.jaxrs.feignimpl.GuavaOptionalAwareContract;
@@ -60,6 +61,10 @@ import okhttp3.TlsVersion;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
+    static {
+        Http2Agent.install();
+    }
+
     private static final ImmutableList<ConnectionSpec> CONNECTION_SPEC = ImmutableList.of(
             new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
                     .tlsVersions(TlsVersion.TLS_1_2)
@@ -68,8 +73,8 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                             // magnitude slower than the CBC suites, which have JVM optimizations
                             // already. We should revisit with JDK9.
                             // See also:
-                            //  - http://openjdk.java.net/jeps/246
-                            //  - https://bugs.openjdk.java.net/secure/attachment/25422/GCM%20Analysis.pdf
+                            // - http://openjdk.java.net/jeps/246
+                            // - https://bugs.openjdk.java.net/secure/attachment/25422/GCM%20Analysis.pdf
                             // CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
                             // CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
                             // CipherSuite.TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384,
@@ -88,7 +93,9 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                             CipherSuite.TLS_ECDH_RSA_WITH_AES_128_CBC_SHA,
                             CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA,
                             CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA,
-                            CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV)
+                            CipherSuite.TLS_EMPTY_RENEGOTIATION_INFO_SCSV,
+                            // Required by http/2 spec: https://http2.github.io/http2-spec/#rfc.section.9.2.2
+                            CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256)
                     .build(),
             ConnectionSpec.CLEARTEXT);
 
