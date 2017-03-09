@@ -201,6 +201,13 @@
                 "org.glassfish.jersey.core:jersey-server"
             ]
         },
+        "org.immutables:value": {
+            "locked": "2.3.10",
+            "transitive": [
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:tracing"
+            ]
+        },
         "org.javassist:javassist": {
             "locked": "3.18.1-GA",
             "transitive": [
@@ -415,6 +422,13 @@
             "locked": "2.22.2",
             "transitive": [
                 "org.glassfish.jersey.core:jersey-server"
+            ]
+        },
+        "org.immutables:value": {
+            "locked": "2.3.10",
+            "transitive": [
+                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:tracing"
             ]
         },
         "org.javassist:javassist": {

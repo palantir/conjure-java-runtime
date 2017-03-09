@@ -17,4 +17,5 @@ dependencies {
     testCompile "junit:junit"
 
     processor "org.immutables:value"
+    compile group: "org.immutables", name: "value", classifier: "annotations"
 }

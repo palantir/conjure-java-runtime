@@ -31,7 +31,7 @@ public final class JaxRsClient {
     private JaxRsClient() {}
 
     /**
-     * Creates a {@link T T client} for the given service configuration. The HTTP {@code User-Agent} header of every
+     * Creates a {@code T client} for the given service configuration. The HTTP {@code User-Agent} header of every
      * request is set to the given non-empty {@code userAgent} string. Recommended user agents are of the form: {@code
      * ServiceName (Version)}, e.g. MyServer (1.2.3) For services that run multiple instances, recommended user agents
      * are of the form: {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3).
