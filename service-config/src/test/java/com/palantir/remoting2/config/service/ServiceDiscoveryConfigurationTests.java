@@ -197,9 +197,11 @@ public final class ServiceDiscoveryConfigurationTests {
 
         assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
-        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedCamelCase, ServiceDiscoveryConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper()
+                .readValue(deserializedCamelCase, ServiceDiscoveryConfiguration.class))
                 .isEqualTo(serialized);
-        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedKebabCase, ServiceDiscoveryConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper()
+                .readValue(deserializedKebabCase, ServiceDiscoveryConfiguration.class))
                 .isEqualTo(serialized);
     }
 
@@ -213,9 +215,11 @@ public final class ServiceDiscoveryConfigurationTests {
 
         assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
-        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedCamelCase, ServiceDiscoveryConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper()
+                .readValue(deserializedCamelCase, ServiceDiscoveryConfiguration.class))
                 .isEqualTo(serialized);
-        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedKebabCase, ServiceDiscoveryConfiguration.class))
+        assertThat(ObjectMappers.newClientObjectMapper()
+                .readValue(deserializedKebabCase, ServiceDiscoveryConfiguration.class))
                 .isEqualTo(serialized);
     }
 
