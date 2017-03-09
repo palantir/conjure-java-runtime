@@ -6,6 +6,7 @@ dependencies {
     compile project(":extras:refresh-utils")
     compile project(":error-handling")
     compile project(":tracing-okhttp3")
+    compile project(":http2-agent")
     compile project(":http-clients-api")
     compile project(":service-config")
 

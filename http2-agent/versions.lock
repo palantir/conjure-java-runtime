@@ -1,0 +1,18 @@
+{
+    "compileClasspath": {
+        "com.ea.agentloader:ea-agent-loader": {
+            "locked": "1.0.2"
+        },
+        "org.mortbay.jetty.alpn:jetty-alpn-agent": {
+            "locked": "2.0.6"
+        }
+    },
+    "runtime": {
+        "com.ea.agentloader:ea-agent-loader": {
+            "locked": "1.0.2"
+        },
+        "org.mortbay.jetty.alpn:jetty-alpn-agent": {
+            "locked": "2.0.6"
+        }
+    }
+}
