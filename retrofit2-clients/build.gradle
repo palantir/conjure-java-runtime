@@ -27,7 +27,6 @@ dependencies {
     testCompile "org.assertj:assertj-core"
 
     processor "org.immutables:value"
-    compile "org.immutables:value"
 }
 
 configurations.all {

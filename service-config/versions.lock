@@ -41,12 +41,6 @@
         "com.palantir.tokens:auth-tokens": {
             "locked": "1.0.0"
         },
-        "org.immutables:value": {
-            "locked": "2.3.10",
-            "transitive": [
-                "com.palantir.remoting2:ssl-config"
-            ]
-        },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
@@ -95,12 +89,6 @@
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "1.0.0"
-        },
-        "org.immutables:value": {
-            "locked": "2.3.10",
-            "transitive": [
-                "com.palantir.remoting2:ssl-config"
-            ]
         },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",

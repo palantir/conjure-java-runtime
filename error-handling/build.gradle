@@ -18,5 +18,4 @@ dependencies {
     testCompile "junit:junit"
 
     processor "org.immutables:value"
-    compile "org.immutables:value"
 }

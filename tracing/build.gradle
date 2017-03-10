@@ -19,5 +19,4 @@ dependencies {
     testCompile "io.zipkin.java:zipkin"
 
     processor "org.immutables:value"
-    compile "org.immutables:value"
 }

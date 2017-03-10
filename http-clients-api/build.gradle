@@ -10,5 +10,4 @@ dependencies {
     testCompile "org.mockito:mockito-core"
 
     processor "org.immutables:value"
-    compile "org.immutables:value"
 }
