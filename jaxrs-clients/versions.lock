@@ -180,16 +180,6 @@
                 "com.palantir.remoting2:error-handling"
             ]
         },
-        "org.immutables:value": {
-            "locked": "2.3.10",
-            "transitive": [
-                "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:http-clients-api",
-                "com.palantir.remoting2:service-config",
-                "com.palantir.remoting2:ssl-config",
-                "com.palantir.remoting2:tracing"
-            ]
-        },
         "org.jvnet:animal-sniffer-annotation": {
             "locked": "1.0",
             "transitive": [
@@ -391,16 +381,6 @@
             "locked": "2.0.1",
             "transitive": [
                 "com.palantir.remoting2:error-handling"
-            ]
-        },
-        "org.immutables:value": {
-            "locked": "2.3.10",
-            "transitive": [
-                "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:http-clients-api",
-                "com.palantir.remoting2:service-config",
-                "com.palantir.remoting2:ssl-config",
-                "com.palantir.remoting2:tracing"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
