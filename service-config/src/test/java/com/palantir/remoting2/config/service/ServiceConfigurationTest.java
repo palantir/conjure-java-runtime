@@ -41,12 +41,14 @@ public final class ServiceConfigurationTest {
                 + "{\"trustStorePath\":\"truststore.jks\",\"trustStoreType\":\"JKS\",\"keyStorePath\":null,"
                 + "\"keyStorePassword\":null,\"keyStoreType\":\"JKS\",\"keyStoreKeyAlias\":null},"
                 + "\"connectTimeout\":\"1 day\",\"readTimeout\":\"1 day\",\"writeTimeout\":\"1 day\","
+                + "\"enableGcmCipherSuites\":null,"
                 + "\"uris\":[\"uri1\"],\"proxyConfiguration\":{\"hostAndPort\":\"host:80\",\"credentials\":null}}";
         String deserializedKebabCase = "{\"api-token\":\"bearerToken\",\"security\":"
                 + "{\"trust-store-path\":\"truststore.jks\",\"trust-store-type\":\"JKS\",\"key-store-path\":null,"
                 + "\"key-store-password\":null,\"key-store-type\":\"JKS\",\"key-store-key-alias\":null},"
                 + "\"connect-timeout\":\"1 day\",\"read-timeout\":\"1 day\",\"write-timeout\":\"1 day\","
-                + "\"uris\":[\"uri1\"],\"proxy-configuration\":{\"host-and-port\":\"host:80\",\"credentials\":null}}";
+                + "\"uris\":[\"uri1\"],\"proxy-configuration\":{\"host-and-port\":\"host:80\",\"credentials\":null},"
+                + "\"enable-gcm-cipher-suites\":null}";
 
         assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
@@ -60,9 +62,11 @@ public final class ServiceConfigurationTest {
     public void serDe_optional() throws Exception {
         ServiceConfiguration serialized = ServiceConfiguration.builder().build();
         String deserializedCamelCase = "{\"apiToken\":null,\"security\":null,\"connectTimeout\":null,"
-                + "\"readTimeout\":null,\"writeTimeout\":null,\"uris\":[],\"proxyConfiguration\":null}";
+                + "\"readTimeout\":null,\"writeTimeout\":null,\"enableGcmCipherSuites\":null,"
+                + "\"uris\":[],\"proxyConfiguration\":null}";
         String deserializedKebabCase = "{\"api-token\":null,\"security\":null,\"connect-timeout\":null,"
-                + "\"read-timeout\":null,\"write-timeout\":null,\"uris\":[],\"proxy-configuration\":null}";
+                + "\"read-timeout\":null,\"write-timeout\":null,\"enable-gcm-cipher-suites\":null,"
+                + "\"uris\":[],\"proxy-configuration\":null}";
 
         assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);

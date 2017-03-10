@@ -78,7 +78,7 @@ public abstract class ServiceDiscoveryConfiguration {
     public abstract Optional<Duration> defaultReadTimeout();
 
     /**
-     * Default enablement of gcm cipher suites.
+     * Default enablement of gcm cipher suites, defaults to false.
      */
     @JsonProperty("enableGcmCipherSuites")
     public abstract Optional<Boolean> defaultEnableGcmCipherSuites();

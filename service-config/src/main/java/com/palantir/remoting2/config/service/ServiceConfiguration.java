@@ -58,7 +58,7 @@ public abstract class ServiceConfiguration {
     public abstract Optional<Duration> writeTimeout();
 
     /**
-     * Enable slower, but more standard cipher suite support.
+     * Enable slower, but more standard cipher suite support, defaults to false.
      */
     public abstract Optional<Boolean> enableGcmCipherSuites();
 
