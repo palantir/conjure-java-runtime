@@ -79,6 +79,7 @@ public abstract class ClientConfig {
         clientConfig.readTimeout(serviceConfig.readTimeout().orElse(READ_TIMEOUT));
         clientConfig.writeTimeout(serviceConfig.writeTimeout().orElse(WRITE_TIMEOUT));
         clientConfig.proxy(serviceConfig.proxyConfiguration());
+        clientConfig.enableGcmCipherSuites(serviceConfig.enableGcmCipherSuites().orElse(false));
 
         return clientConfig.build();
     }

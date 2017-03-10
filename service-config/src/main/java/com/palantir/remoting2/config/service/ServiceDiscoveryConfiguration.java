@@ -78,6 +78,12 @@ public abstract class ServiceDiscoveryConfiguration {
     public abstract Optional<Duration> defaultReadTimeout();
 
     /**
+     * Default enablement of gcm cipher suites.
+     */
+    @JsonProperty("enableGcmCipherSuites")
+    public abstract Optional<Boolean> defaultEnableGcmCipherSuites();
+
+    /**
      * A map of {@code serviceName}s as the keys and their respective {@link ServiceConfiguration}s as the values.
      */
     @Lazy
@@ -106,6 +112,7 @@ public abstract class ServiceDiscoveryConfiguration {
                 .proxyConfiguration(orElse(conf.proxyConfiguration(), defaultProxyConfiguration()))
                 .connectTimeout(orElse(conf.connectTimeout(), defaultConnectTimeout()))
                 .readTimeout(orElse(conf.readTimeout(), defaultReadTimeout()))
+                .enableGcmCipherSuites(orElse(conf.enableGcmCipherSuites(), defaultEnableGcmCipherSuites()))
                 .uris(conf.uris())
                 .build();
     }
@@ -216,6 +223,11 @@ public abstract class ServiceDiscoveryConfiguration {
         @JsonProperty("read-timeout")
         Builder defaultReadTimeoutKebabCase(Optional<Duration> defaultReadTimeout) {
             return defaultReadTimeout(defaultReadTimeout);
+        }
+
+        @JsonProperty("enable-gcm-cipher-suites")
+        Builder defaultEnableGcmCipherSuitesKebabCase(Optional<Boolean> defaultEnableGcmCipherSuites) {
+            return defaultEnableGcmCipherSuites(defaultEnableGcmCipherSuites);
         }
     }
 }
