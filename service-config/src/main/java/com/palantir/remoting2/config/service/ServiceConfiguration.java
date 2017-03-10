@@ -58,6 +58,11 @@ public abstract class ServiceConfiguration {
     public abstract Optional<Duration> writeTimeout();
 
     /**
+     * Enable slower, but more standard cipher suite support, defaults to false.
+     */
+    public abstract Optional<Boolean> enableGcmCipherSuites();
+
+    /**
      * A list of service URIs.
      */
     public abstract List<String> uris();
@@ -104,6 +109,11 @@ public abstract class ServiceConfiguration {
         @JsonProperty("proxy-configuration")
         Builder proxyConfigurationKebabCase(Optional<ProxyConfiguration> proxyConfiguration) {
             return proxyConfiguration(proxyConfiguration);
+        }
+
+        @JsonProperty("enable-gcm-cipher-suites")
+        Builder enableGcmCipherSuitesKebabCase(Optional<Boolean> enableGcmCipherSuites) {
+            return enableGcmCipherSuites(enableGcmCipherSuites);
         }
     }
 }
