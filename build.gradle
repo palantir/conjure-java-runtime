@@ -86,4 +86,10 @@ subprojects {
         minHeapSize = "512m"
         maxHeapSize = "512m"
     }
+
+    configurations.errorprone {
+        resolutionStrategy {
+            force 'com.google.guava:guava:21.0'
+        }
+    }
 }

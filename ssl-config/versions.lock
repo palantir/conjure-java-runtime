@@ -16,7 +16,7 @@
             "locked": "2.6.7"
         },
         "com.google.guava:guava": {
-            "locked": "21.0"
+            "locked": "18.0"
         }
     },
     "runtime": {
@@ -36,7 +36,7 @@
             "locked": "2.6.7"
         },
         "com.google.guava:guava": {
-            "locked": "21.0"
+            "locked": "18.0"
         }
     }
 }
