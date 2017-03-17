@@ -51,6 +51,12 @@ public final class HttpRemotingJerseyFeature implements Feature {
         context.register(GuavaOptionalParamConverterProvider.class);
         context.register(Java8OptionalMessageBodyWriter.class);
         context.register(Java8OptionalParamConverterProvider.class);
+        context.register(Java8OptionalIntMessageBodyWriter.class);
+        context.register(Java8OptionalIntParamConverterProvider.class);
+        context.register(Java8OptionalDoubleMessageBodyWriter.class);
+        context.register(Java8OptionalDoubleParamConverterProvider.class);
+        context.register(Java8OptionalLongMessageBodyWriter.class);
+        context.register(Java8OptionalLongParamConverterProvider.class);
 
         // Tracing
         context.register(new TraceEnrichingFilter());

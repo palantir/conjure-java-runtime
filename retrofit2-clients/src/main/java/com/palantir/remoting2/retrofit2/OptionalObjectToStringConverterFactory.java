@@ -45,9 +45,15 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
                 .findAny();
 
         if (pathQueryAnnotation.isPresent()) {
-            TypeToken typeToken = TypeToken.of(type);
+            TypeToken<?> typeToken = TypeToken.of(type);
             if (typeToken.getRawType() == java.util.Optional.class) {
                 return Java8OptionalStringConverter.INSTANCE;
+            } else if (typeToken.getRawType() == java.util.OptionalInt.class) {
+                return Java8OptionalIntStringConverter.INSTANCE;
+            } else if (typeToken.getRawType() == java.util.OptionalDouble.class) {
+                return Java8OptionalDoubleStringConverter.INSTANCE;
+            } else if (typeToken.getRawType() == java.util.OptionalLong.class) {
+                return Java8OptionalLongStringConverter.INSTANCE;
             } else if (typeToken.getRawType() == com.google.common.base.Optional.class) {
                 return GuavaOptionalStringConverter.INSTANCE;
             }
@@ -62,6 +68,33 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
         @Override
         public String convert(java.util.Optional<?> value) throws IOException {
             return value.map(Object::toString).orElse("");
+        }
+    }
+
+    enum Java8OptionalIntStringConverter implements Converter<java.util.OptionalInt, String> {
+        INSTANCE;
+
+        @Override
+        public String convert(java.util.OptionalInt value) throws IOException {
+            return value.isPresent() ? Integer.toString(value.getAsInt()) : "";
+        }
+    }
+
+    enum Java8OptionalDoubleStringConverter implements Converter<java.util.OptionalDouble, String> {
+        INSTANCE;
+
+        @Override
+        public String convert(java.util.OptionalDouble value) throws IOException {
+            return value.isPresent() ? Double.toString(value.getAsDouble()) : "";
+        }
+    }
+
+    enum Java8OptionalLongStringConverter implements Converter<java.util.OptionalLong, String> {
+        INSTANCE;
+
+        @Override
+        public String convert(java.util.OptionalLong value) throws IOException {
+            return value.isPresent() ? Long.toString(value.getAsLong()) : "";
         }
     }
 

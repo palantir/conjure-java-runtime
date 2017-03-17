@@ -20,7 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.remoting2.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalDoubleStringConverter;
+import com.palantir.remoting2.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalIntStringConverter;
+import com.palantir.remoting2.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalLongStringConverter;
 import java.lang.annotation.Annotation;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import javax.annotation.Nonnull;
 import org.junit.Test;
 import retrofit2.http.Path;
@@ -41,6 +47,27 @@ public final class OptionalObjectToStringConverterFactoryTest {
         assertThat(factory.stringConverter(java.util.Optional.class, createAnnotations(Query.class), null)).isNotNull();
         assertThat(factory.stringConverter(java.util.Optional.class, createAnnotations(Nonnull.class), null)).isNull();
 
+        assertThat(factory.stringConverter(java.util.OptionalInt.class, createAnnotations(Path.class), null))
+                .isNotNull();
+        assertThat(factory.stringConverter(java.util.OptionalInt.class, createAnnotations(Query.class), null))
+                .isNotNull();
+        assertThat(factory.stringConverter(java.util.OptionalInt.class, createAnnotations(Nonnull.class), null))
+                .isNull();
+
+        assertThat(factory.stringConverter(java.util.OptionalDouble.class, createAnnotations(Path.class), null))
+                .isNotNull();
+        assertThat(factory.stringConverter(java.util.OptionalDouble.class, createAnnotations(Query.class), null))
+                .isNotNull();
+        assertThat(factory.stringConverter(java.util.OptionalDouble.class, createAnnotations(Nonnull.class), null))
+                .isNull();
+
+        assertThat(factory.stringConverter(java.util.OptionalLong.class, createAnnotations(Path.class), null))
+                .isNotNull();
+        assertThat(factory.stringConverter(java.util.OptionalLong.class, createAnnotations(Query.class), null))
+                .isNotNull();
+        assertThat(factory.stringConverter(java.util.OptionalLong.class, createAnnotations(Nonnull.class), null))
+                .isNull();
+
         // Guava
         assertThat(factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Path.class), null))
                 .isNotNull();
@@ -48,7 +75,7 @@ public final class OptionalObjectToStringConverterFactoryTest {
                 .isNotNull();
         assertThat(
                 factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Nonnull.class), null))
-                .isNull();
+                        .isNull();
     }
 
     @Test
@@ -57,6 +84,26 @@ public final class OptionalObjectToStringConverterFactoryTest {
         assertThat(guavaConverter.convert(guavaOptional(null))).isEqualTo("");
         assertThat(java8Converter.convert(java8Optional("foo"))).isEqualTo("foo");
         assertThat(java8Converter.convert(java8Optional(null))).isEqualTo("");
+    }
+
+    @Test
+    public void testUnwrapsJava8OptionalInt() throws Exception {
+        assertThat(Java8OptionalIntStringConverter.INSTANCE.convert(OptionalInt.of(12345))).isEqualTo("12345");
+        assertThat(Java8OptionalIntStringConverter.INSTANCE.convert(OptionalInt.empty())).isEqualTo("");
+    }
+
+    @Test
+    public void testUnwrapsJava8OptionalDouble() throws Exception {
+        assertThat(Java8OptionalDoubleStringConverter.INSTANCE.convert(
+                OptionalDouble.of(12345.678))).isEqualTo("12345.678");
+        assertThat(Java8OptionalDoubleStringConverter.INSTANCE.convert(OptionalDouble.empty())).isEqualTo("");
+    }
+
+    @Test
+    public void testUnwrapsJava8OptionalLong() throws Exception {
+        assertThat(Java8OptionalLongStringConverter.INSTANCE.convert(
+                OptionalLong.of(1234567890123L))).isEqualTo("1234567890123");
+        assertThat(Java8OptionalLongStringConverter.INSTANCE.convert(OptionalLong.empty())).isEqualTo("");
     }
 
     @Test
@@ -72,7 +119,6 @@ public final class OptionalObjectToStringConverterFactoryTest {
     }
 
     private static <T> java.util.Optional<T> java8Optional(T value) {
-
         return java.util.Optional.ofNullable(value);
     }
 
