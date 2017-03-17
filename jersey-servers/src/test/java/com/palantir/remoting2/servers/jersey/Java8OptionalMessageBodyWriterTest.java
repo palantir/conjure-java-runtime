@@ -21,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.codahale.metrics.MetricRegistry;
 import io.dropwizard.jersey.DropwizardResourceConfig;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -50,11 +53,35 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
                 .queryParam("id", "woo").request()
                 .get(String.class))
                 .isEqualTo("woo");
+
+        assertThat(target("/optional-return/int")
+                .queryParam("id", "123").request()
+                .get(String.class))
+                .isEqualTo("123");
+
+        assertThat(target("/optional-return/long")
+                .queryParam("id", "1234567890123").request()
+                .get(String.class))
+                .isEqualTo("1234567890123");
+
+        assertThat(target("/optional-return/double")
+                .queryParam("id", "123.456").request()
+                .get(String.class))
+                .isEqualTo("123.456");
     }
 
     @Test
     public void absentOptionalsThrowANotFound() throws Exception {
         Response response = target("/optional-return/").request().get();
+        assertThat(response.getStatus()).isEqualTo(204);
+
+        response = target("/optional-return/int").request().get();
+        assertThat(response.getStatus()).isEqualTo(204);
+
+        response = target("/optional-return/long").request().get();
+        assertThat(response.getStatus()).isEqualTo(204);
+
+        response = target("/optional-return/double").request().get();
         assertThat(response.getStatus()).isEqualTo(204);
     }
 
@@ -70,5 +97,25 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
         public Optional<String> showWithFormParam(@FormParam("id") String id) {
             return Optional.ofNullable(id);
         }
+
+        @Path("int")
+        @GET
+        public OptionalInt showOptIntWithQueryParam(@QueryParam("id") Integer id) {
+            return id != null ? OptionalInt.of(id) : OptionalInt.empty();
+        }
+
+        @Path("long")
+        @GET
+        public OptionalLong showOptLongWithQueryParam(@QueryParam("id") Long id) {
+            return id != null ? OptionalLong.of(id) : OptionalLong.empty();
+        }
+
+
+        @Path("double")
+        @GET
+        public OptionalDouble showOptDoubleWithQueryParam(@QueryParam("id") Double id) {
+            return id != null ? OptionalDouble.of(id) : OptionalDouble.empty();
+        }
+
     }
 }
