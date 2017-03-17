@@ -21,6 +21,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -67,6 +70,30 @@ public final class JaxRsClientJava8OptionalHandlingTest {
         @GET
         @Path("foo")
         String header(@HeaderParam("opt") Optional<String> opt, @HeaderParam("req") String req);
+
+        @GET
+        @Path("foo/int")
+        String queryInt(@QueryParam("opt") OptionalInt opt, @QueryParam("req") String req);
+
+        @GET
+        @Path("foo/int")
+        String headerInt(@HeaderParam("opt") OptionalInt opt, @HeaderParam("req") String req);
+
+        @GET
+        @Path("foo/double")
+        String queryDouble(@QueryParam("opt") OptionalDouble opt, @QueryParam("req") String req);
+
+        @GET
+        @Path("foo/double")
+        String headerDouble(@HeaderParam("opt") OptionalDouble opt, @HeaderParam("req") String req);
+
+        @GET
+        @Path("foo/long")
+        String queryLong(@QueryParam("opt") OptionalLong opt, @QueryParam("req") String req);
+
+        @GET
+        @Path("foo/long")
+        String headerLong(@HeaderParam("opt") OptionalLong opt, @HeaderParam("req") String req);
     }
 
     @Test
@@ -90,28 +117,28 @@ public final class JaxRsClientJava8OptionalHandlingTest {
 
     @Test
     public void testAbsentQuery() throws Exception {
-        proxy.query(Optional.<String>empty(), "str2");
+        proxy.query(Optional.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getRequestLine(), is("GET /foo?req=str2 HTTP/1.1"));
     }
 
     @Test
     public void testEmptyStringQuery() throws Exception {
-        proxy.query(Optional.<String>of(""), "str2");
+        proxy.query(Optional.of(""), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=&req=str2 HTTP/1.1"));
     }
 
     @Test
     public void testStringQuery() throws Exception {
-        proxy.query(Optional.<String>of("str"), "str2");
+        proxy.query(Optional.of("str"), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=str&req=str2 HTTP/1.1"));
     }
 
     @Test
     public void testAbsentHeader() throws Exception {
-        proxy.header(Optional.<String>empty(), "str2");
+        proxy.header(Optional.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getHeader("opt"), is(""));
         assertThat(takeRequest.getHeader("req"), is("str2"));
@@ -119,7 +146,7 @@ public final class JaxRsClientJava8OptionalHandlingTest {
 
     @Test
     public void testEmptyStringHeader() throws Exception {
-        proxy.header(Optional.<String>of(""), "str2");
+        proxy.header(Optional.of(""), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getHeader("opt"), is(""));
         assertThat(takeRequest.getHeader("req"), is("str2"));
@@ -127,9 +154,99 @@ public final class JaxRsClientJava8OptionalHandlingTest {
 
     @Test
     public void testStringHeader() throws Exception {
-        proxy.header(Optional.<String>of("str"), "str2");
+        proxy.header(Optional.of("str"), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getHeader("opt"), is("str"));
+        assertThat(takeRequest.getHeader("req"), is("str2"));
+    }
+
+    @Test
+    public void testAbsentIntQuery() throws Exception {
+        proxy.queryInt(OptionalInt.empty(), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getRequestLine(), is("GET /foo/int?req=str2 HTTP/1.1"));
+    }
+
+    @Test
+    public void testIntQuery() throws Exception {
+        proxy.queryInt(OptionalInt.of(1234), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getRequestLine(), is("GET /foo/int?opt=1234&req=str2 HTTP/1.1"));
+    }
+
+    @Test
+    public void testAbsentIntHeader() throws Exception {
+        proxy.headerInt(OptionalInt.empty(), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getHeader("opt"), is(""));
+        assertThat(takeRequest.getHeader("req"), is("str2"));
+    }
+
+    @Test
+    public void testIntHeader() throws Exception {
+        proxy.headerInt(OptionalInt.of(1234), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getHeader("opt"), is("1234"));
+        assertThat(takeRequest.getHeader("req"), is("str2"));
+    }
+
+    @Test
+    public void testAbsentDoubleQuery() throws Exception {
+        proxy.queryDouble(OptionalDouble.empty(), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getRequestLine(), is("GET /foo/double?req=str2 HTTP/1.1"));
+    }
+
+    @Test
+    public void testDoubleQuery() throws Exception {
+        proxy.queryDouble(OptionalDouble.of(1234.567), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getRequestLine(), is("GET /foo/double?opt=1234.567&req=str2 HTTP/1.1"));
+    }
+
+    @Test
+    public void testAbsentDoubleHeader() throws Exception {
+        proxy.headerDouble(OptionalDouble.empty(), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getHeader("opt"), is(""));
+        assertThat(takeRequest.getHeader("req"), is("str2"));
+    }
+
+    @Test
+    public void testDoubleHeader() throws Exception {
+        proxy.headerDouble(OptionalDouble.of(1234.567), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getHeader("opt"), is("1234.567"));
+        assertThat(takeRequest.getHeader("req"), is("str2"));
+    }
+
+    @Test
+    public void testAbsentLongQuery() throws Exception {
+        proxy.queryLong(OptionalLong.empty(), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getRequestLine(), is("GET /foo/long?req=str2 HTTP/1.1"));
+    }
+
+    @Test
+    public void testLongQuery() throws Exception {
+        proxy.queryLong(OptionalLong.of(12345678901234L), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getRequestLine(), is("GET /foo/long?opt=12345678901234&req=str2 HTTP/1.1"));
+    }
+
+    @Test
+    public void testAbsentLongHeader() throws Exception {
+        proxy.headerLong(OptionalLong.empty(), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getHeader("opt"), is(""));
+        assertThat(takeRequest.getHeader("req"), is("str2"));
+    }
+
+    @Test
+    public void testLongHeader() throws Exception {
+        proxy.headerLong(OptionalLong.of(12345678901234L), "str2");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getHeader("opt"), is("12345678901234"));
         assertThat(takeRequest.getHeader("req"), is("str2"));
     }
 
