@@ -29,18 +29,23 @@ dependencies {
     testCompile "org.hamcrest:hamcrest-all"
 
     // Keep in sync with the dependencies excluded from shadowJar.
+    shadow project(":extras:jackson-support")
+    shadow project(":extras:refresh-utils")
+    shadow project(":http-clients-api")
+    shadow project(":http2-agent")
+    shadow project(":tracing")
+    shadow project(":tracing-okhttp3")
     shadow project(':error-handling')
     shadow project(':service-config')
     shadow project(':ssl-config')
-    shadow project(":tracing")
-    shadow project(":tracing-okhttp3")
-    shadow "javax.ws.rs:javax.ws.rs-api"
     shadow "com.fasterxml.jackson.core:jackson-databind"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-guava"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
     shadow "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     shadow "com.google.guava:guava"
+    shadow "com.palantir.tokens:auth-tokens"
     shadow "com.squareup.okhttp3:okhttp"
+    shadow "javax.ws.rs:javax.ws.rs-api"
     shadow "org.slf4j:slf4j-api"
 }
 
@@ -50,8 +55,15 @@ shadowJar {
     relocate('zipkin', 'httpremoting.shaded.zipkin')
     relocate('org.joda.time', 'httpremoting.shaded.org.joda.time')
     relocate('okio', 'httpremoting.shaded.okio')
+    relocate('com.ea.agentloader', 'httpremoting.shaded.com.ea.agentloader')
+    relocate('org.mortbay.jetty.alpn.agent', 'httpremoting.shaded.org.mortbay.jetty.alpn.agent')
+    relocate('org.jvnet.animal_sniffer', 'httpremoting.shaded.org.jvnet.animal_sniffer')
     dependencies {
         exclude(project(':error-handling'))
+        exclude(project(':extras:jackson-support'))
+        exclude(project(':extras:refresh-utils'))
+        exclude(project(':http-clients-api'))
+        exclude(project(':http2-agent'))
         exclude(project(':service-config'))
         exclude(project(':ssl-config'))
         exclude(project(':tracing'))
@@ -61,6 +73,7 @@ shadowJar {
         exclude(dependency { it.moduleGroup.contains("com.google.guava") })
         exclude(dependency { it.moduleGroup.contains("com.squareup.okhttp3") })
         exclude(dependency { it.moduleGroup.contains("org.slf4j") })
+        exclude(dependency { it.moduleGroup.contains("com.palantir.tokens") })
     }
     classifier = ''
 }
