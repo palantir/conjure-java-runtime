@@ -86,12 +86,12 @@ public final class MultiServerRetryInterceptor implements Interceptor {
     }
 
     private Request redirectRequest(Request request, String redirectToUri) {
-        String requestUri = request.url().toString();
+        HttpUrl requestUrl = request.url();
 
         String matchingUri = null;
         // Find which server from `uris` is used in the current request, then ...
         for (String uri : uris) {
-            if (requestUri.startsWith(uri)) {
+            if (doServersMatch(requestUrl, HttpUrl.parse(uri))) {
                 matchingUri = uri;
                 break;
             }
@@ -100,16 +100,26 @@ public final class MultiServerRetryInterceptor implements Interceptor {
         if (matchingUri == null) {
             throw new IllegalStateException(String.format("Unrecognized server URI in the request %s. "
                             + "Supported servers are %s. Did you use different server URI for the initial request?",
-                    requestUri, uris));
+                    requestUrl, uris));
         }
 
         // ... replace it with the URI of the server to redirect to.
-        String newRequestUrl = requestUri.replaceFirst(matchingUri, redirectToUri);
+        String newRequestUrl = requestUrl.toString().replaceFirst(matchingUri, redirectToUri);
         return request.newBuilder()
                 .url(HttpUrl.parse(newRequestUrl))
                 // Request.this.tag field by default points to request itself if it was not set in RequestBuilder.
                 // We don't want to reference old request in new one - that is why we need to reset tag to null.
                 .tag(request.tag().equals(request) ? null : request.tag())
                 .build();
+    }
+
+    private boolean doServersMatch(HttpUrl serverUri, HttpUrl server) {
+        String serverUriFqdn = String.format("%s://%s:%s", serverUri.scheme(), serverUri.host(), serverUri.port());
+        String serverUriPath = serverUri.encodedPath();
+
+        String serverFqdn = String.format("%s://%s:%s", server.scheme(), server.host(), server.port());
+        String serverPath = server.encodedPath();
+
+        return serverUriFqdn.equalsIgnoreCase(serverFqdn) && serverUriPath.startsWith(serverPath);
     }
 }

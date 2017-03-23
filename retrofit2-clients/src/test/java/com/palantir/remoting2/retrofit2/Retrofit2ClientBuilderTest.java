@@ -71,4 +71,31 @@ public final class Retrofit2ClientBuilderTest {
             }
         }
     }
+
+    @Test
+    public void testCaseInsensitiveHostNames_workWithEquivalentUrls() throws Exception {
+        TestService service = Retrofit2Client.builder().build(
+                TestService.class,
+                "agent",
+                String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())
+        );
+        server.enqueue(new MockResponse().setBody("\"server\""));
+        service.getRelative().execute();
+    }
+
+    @Test
+    public void testCaseSensitivePathNames_doesNotWorkWithNonEquivalentUrls() throws Exception {
+        TestService service = Retrofit2Client.builder().build(
+                TestService.class,
+                "agent",
+                String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())
+        );
+        try {
+            service.getAbsoluteApiTitleCase().execute();
+            fail();
+        } catch (IllegalStateException e) {
+            assertThat(e.getMessage(), startsWith(
+                    "Unrecognized server URI in the request http://localhost:" + server.getPort() + "/Api."));
+        }
+    }
 }
