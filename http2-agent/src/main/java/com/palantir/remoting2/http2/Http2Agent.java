@@ -12,7 +12,7 @@ import org.mortbay.jetty.alpn.agent.Premain;
 public final class Http2Agent {
     private Http2Agent() {}
 
-    private static volatile boolean hasBeenInstalled = false;
+    private static boolean hasBeenInstalled = false;
 
     /**
      * Installs the jetty-alpn-agent dynamically.
@@ -20,17 +20,13 @@ public final class Http2Agent {
      * This method protects itself from multiple invocations so may be called in multiple places, but will only
      * ever invoke the installation once.
      */
-    public static void install() {
+    public static synchronized void install() {
         if (hasBeenInstalled) {
             return;
         }
 
-        synchronized (Http2Agent.class) {
-            if (!hasBeenInstalled) {
-                AgentLoader.loadAgentClass(Http2Agent.class.getName(), "");
-                hasBeenInstalled = true;
-            }
-        }
+        AgentLoader.loadAgentClass(Http2Agent.class.getName(), "");
+        hasBeenInstalled = true;
     }
 
     /** Agent entry-point. */
