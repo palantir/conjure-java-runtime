@@ -26,6 +26,9 @@ import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -71,6 +74,62 @@ public final class Java8OptionalTest {
         assertThat(response.getStatus(), is(Status.NO_CONTENT.getStatusCode()));
     }
 
+    @Test
+    public void testQueryParam_optionalPresent() throws NoSuchMethodException, SecurityException {
+        Response response = target.path("optional/string").queryParam("value", "val").request().get();
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+        assertThat(response.readEntity(String.class), is("val"));
+    }
+
+    @Test
+    public void testQueryParam_optionalEmpty() {
+        Response response = target.path("optional/string").request().get();
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+        assertThat(response.readEntity(String.class), is("default"));
+    }
+
+    @Test
+    public void testQueryParam_optionalIntPresent() throws NoSuchMethodException, SecurityException {
+        Response response = target.path("optional/int").queryParam("value", "10").request().get();
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+        assertThat(response.readEntity(String.class), is("10"));
+    }
+
+    @Test
+    public void testQueryParam_optionalIntEmpty() {
+        Response response = target.path("optional/int").request().get();
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+        assertThat(response.readEntity(String.class), is("0"));
+    }
+
+    @Test
+    public void testQueryParam_optionalDoublePresent() throws NoSuchMethodException, SecurityException {
+        Response response = target.path("optional/double").queryParam("value", "1.5").request().get();
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+        assertThat(response.readEntity(String.class), is("1.5"));
+    }
+
+    @Test
+    public void testQueryParam_optionalDoubleEmpty() {
+        Response response = target.path("optional/double").request().get();
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+        assertThat(response.readEntity(String.class), is("0.0"));
+    }
+
+    @Test
+    public void testQueryParam_optionalLongPresent() throws NoSuchMethodException, SecurityException {
+        Response response = target.path("optional/long").queryParam("value", "100").request().get();
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+        assertThat(response.readEntity(String.class), is("100"));
+    }
+
+    @Test
+    public void testQueryParam_optionalLongEmpty() {
+        Response response = target.path("optional/long").request().get();
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+        assertThat(response.readEntity(String.class), is("0"));
+    }
+
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
@@ -88,6 +147,26 @@ public final class Java8OptionalTest {
                 return Optional.of(value + value);
             }
         }
+
+        @Override
+        public String getWithOptionalQueryParam(Optional<String> string) {
+            return string.orElse("default");
+        }
+
+        @Override
+        public int getWithOptionalIntQueryParam(OptionalInt value) {
+            return value.orElse(0);
+        }
+
+        @Override
+        public double getWithOptionalDoubleQueryParam(OptionalDouble value) {
+            return value.orElse(0.0);
+        }
+
+        @Override
+        public long getWithOptionalLongQueryParam(OptionalLong value) {
+            return value.orElse(0L);
+        }
     }
 
     @Path("/")
@@ -97,5 +176,21 @@ public final class Java8OptionalTest {
         @GET
         @Path("/optional")
         Optional<String> getOptional(@QueryParam("value") @Nullable String value);
+
+        @GET
+        @Path("/optional/string")
+        String getWithOptionalQueryParam(@QueryParam("value") Optional<String> string);
+
+        @GET
+        @Path("/optional/int")
+        int getWithOptionalIntQueryParam(@QueryParam("value") OptionalInt value);
+
+        @GET
+        @Path("/optional/double")
+        double getWithOptionalDoubleQueryParam(@QueryParam("value") OptionalDouble value);
+
+        @GET
+        @Path("/optional/long")
+        long getWithOptionalLongQueryParam(@QueryParam("value") OptionalLong value);
     }
 }
