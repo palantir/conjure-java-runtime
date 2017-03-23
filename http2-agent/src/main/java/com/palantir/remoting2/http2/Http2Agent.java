@@ -6,14 +6,13 @@ package com.palantir.remoting2.http2;
 
 import com.ea.agentloader.AgentLoader;
 import java.lang.instrument.Instrumentation;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.mortbay.jetty.alpn.agent.Premain;
 
 /** A very simple wrapper around the jetty-alpn-agent for dynamic loading. */
 public final class Http2Agent {
     private Http2Agent() {}
 
-    private static final AtomicBoolean installed = new AtomicBoolean();
+    private static volatile boolean hasBeenInstalled = false;
 
     /**
      * Installs the jetty-alpn-agent dynamically.
@@ -22,8 +21,15 @@ public final class Http2Agent {
      * ever invoke the installation once.
      */
     public static void install() {
-        if (installed.compareAndSet(false, true)) {
-            AgentLoader.loadAgentClass(Http2Agent.class.getName(), "");
+        if (hasBeenInstalled) {
+            return;
+        }
+
+        synchronized (Http2Agent.class) {
+            if (!hasBeenInstalled) {
+                AgentLoader.loadAgentClass(Http2Agent.class.getName(), "");
+                hasBeenInstalled = true;
+            }
         }
     }
 
