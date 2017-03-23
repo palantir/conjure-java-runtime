@@ -34,9 +34,24 @@ public final class UserAgents {
      * package containing the given class. The default value for both properties is {@code DEFAULT_VALUE}.
      */
     public static String fromClass(Class<?> clazz) {
-        Package classPackage = clazz.getPackage();
-        String userAgent = Optional.ofNullable(classPackage.getImplementationTitle()).orElse(DEFAULT_VALUE);
-        String version = Optional.ofNullable(classPackage.getImplementationVersion()).orElse(DEFAULT_VALUE);
+        String userAgent = implementationTitle(clazz).orElse(DEFAULT_VALUE);
+        String version = implementationVersion(clazz).orElse(DEFAULT_VALUE);
         return getUserAgent(userAgent, version);
+    }
+
+    /**
+     * Returns true if a User-Agent can be determined using the method in {@link UserAgents#fromClass(Class)}
+     * without resorting to defaults.
+     */
+    public static boolean canDetectUserAgent(Class<?> clazz) {
+        return implementationTitle(clazz).isPresent() && implementationVersion(clazz).isPresent();
+    }
+
+    private static Optional<String> implementationTitle(Class<?> clazz) {
+        return Optional.ofNullable(clazz.getPackage().getImplementationTitle());
+    }
+
+    private static Optional<String> implementationVersion(Class<?> clazz) {
+        return Optional.ofNullable(clazz.getPackage().getImplementationVersion());
     }
 }

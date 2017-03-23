@@ -34,4 +34,14 @@ public final class UserAgentsTest {
     public void testGetUserAgent_fromExternalVersionTestJar() throws IOException {
         assertThat(UserAgents.fromClass(VersionTest.class), is("test-name (test-version)"));
     }
+
+    @Test
+    public void testCanDetectUserAgent_fromExternalVersionTestJar() {
+        assertThat(UserAgents.canDetectUserAgent(VersionTest.class), is(true));
+    }
+
+    @Test
+    public void testCanDetectUserAgent_thisClass() {
+        assertThat(UserAgents.canDetectUserAgent(this.getClass()), is(false));
+    }
 }
