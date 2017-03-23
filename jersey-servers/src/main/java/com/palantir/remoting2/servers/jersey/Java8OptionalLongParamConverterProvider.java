@@ -23,7 +23,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.OptionalDouble;
 import java.util.OptionalLong;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
@@ -37,7 +36,7 @@ public final class Java8OptionalLongParamConverterProvider implements ParamConve
     @SuppressWarnings("unchecked")
     public <T> ParamConverter<T> getConverter(final Class<T> rawType, final Type genericType,
                                               final Annotation[] annotations) {
-        return OptionalDouble.class.equals(rawType) ? (ParamConverter<T>) paramConverter : null;
+        return OptionalLong.class.equals(rawType) ? (ParamConverter<T>) paramConverter : null;
     }
 
     public static final class OptionalLongParamConverter implements ParamConverter<OptionalLong> {
