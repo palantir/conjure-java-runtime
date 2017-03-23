@@ -55,7 +55,7 @@ public final class UserAgents {
 
         Preconditions.checkArgument(userAgent.isPresent(), "Implementation-Title missing from the manifest of %s",
                 clazz);
-        Preconditions.checkArgument(userAgent.isPresent(), "Implementation-Version missing from the manifest of %s",
+        Preconditions.checkArgument(version.isPresent(), "Implementation-Version missing from the manifest of %s",
                 clazz);
 
         return getUserAgent(userAgent.get(), version.get());
