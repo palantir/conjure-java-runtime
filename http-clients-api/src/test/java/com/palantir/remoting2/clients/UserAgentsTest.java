@@ -21,9 +21,16 @@ import static org.junit.Assert.assertThat;
 
 import com.palantir.VersionTest;
 import java.io.IOException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public final class UserAgentsTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
+
+    private static final String EXPECTED_VERSION = "test-name (test-version)";
 
     @Test
     public void testGetUserAgent_format() {
@@ -31,17 +38,23 @@ public final class UserAgentsTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testGetUserAgent_fromExternalVersionTestJar() throws IOException {
-        assertThat(UserAgents.fromClass(VersionTest.class), is("test-name (test-version)"));
+        assertThat(UserAgents.fromClass(VersionTest.class), is(EXPECTED_VERSION));
     }
 
     @Test
-    public void testCanDetectUserAgent_fromExternalVersionTestJar() {
-        assertThat(UserAgents.canDetectUserAgent(VersionTest.class), is(true));
+    public void testGetUserAgentStrict_fromExternalVersionTestJar() {
+        assertThat(UserAgents.fromClassStrict(VersionTest.class), is(EXPECTED_VERSION));
     }
 
     @Test
-    public void testCanDetectUserAgent_thisClass() {
-        assertThat(UserAgents.canDetectUserAgent(this.getClass()), is(false));
+    public void testGetUserAgentStrict_fromThisClass() {
+        String expectedMessage = "Implementation-Title missing from the manifest of class "
+                + this.getClass().getCanonicalName();
+        thrown.expectMessage(expectedMessage);
+        thrown.expect(IllegalArgumentException.class);
+
+        UserAgents.fromClassStrict(this.getClass());
     }
 }

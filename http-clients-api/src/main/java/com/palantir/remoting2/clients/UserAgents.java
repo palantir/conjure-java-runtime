@@ -16,6 +16,7 @@
 
 package com.palantir.remoting2.clients;
 
+import com.google.common.base.Preconditions;
 import java.util.Optional;
 
 public final class UserAgents {
@@ -32,7 +33,10 @@ public final class UserAgents {
      * Constructs a user agent from the {@code Implementation-Title} and {@code Implementation-Version} of the package
      * of the provided class. Typically, the title and version are extracted from {@code MANIFEST.MF} entries of the Jar
      * package containing the given class. The default value for both properties is {@code DEFAULT_VALUE}.
+     *
+     * @deprecated use {@link UserAgents#fromClassStrict(Class)}
      */
+    @Deprecated
     public static String fromClass(Class<?> clazz) {
         String userAgent = implementationTitle(clazz).orElse(DEFAULT_VALUE);
         String version = implementationVersion(clazz).orElse(DEFAULT_VALUE);
@@ -40,11 +44,21 @@ public final class UserAgents {
     }
 
     /**
-     * Returns true if a User-Agent can be determined using the method in {@link UserAgents#fromClass(Class)}
-     * without resorting to defaults.
+     * Constructs a user agent from the {@code Implementation-Title} and {@code Implementation-Version} of the package
+     * of the provided class. The title and version are extracted from {@code MANIFEST.MF} entries of the Jar.
+     *
+     * @throws IllegalArgumentException if either the version or the title cannot be extracted from {@code MANIFEST.MF}.
      */
-    public static boolean canDetectUserAgent(Class<?> clazz) {
-        return implementationTitle(clazz).isPresent() && implementationVersion(clazz).isPresent();
+    public static String fromClassStrict(Class<?> clazz) {
+        Optional<String> userAgent = implementationTitle(clazz);
+        Optional<String> version = implementationVersion(clazz);
+
+        Preconditions.checkArgument(userAgent.isPresent(), "Implementation-Title missing from the manifest of %s",
+                clazz);
+        Preconditions.checkArgument(version.isPresent(), "Implementation-Version missing from the manifest of %s",
+                clazz);
+
+        return getUserAgent(userAgent.get(), version.get());
     }
 
     private static Optional<String> implementationTitle(Class<?> clazz) {
