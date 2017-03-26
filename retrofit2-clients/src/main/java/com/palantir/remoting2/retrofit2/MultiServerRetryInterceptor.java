@@ -27,6 +27,7 @@ import java.net.UnknownHostException;
 import java.net.UnknownServiceException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -39,6 +40,11 @@ public final class MultiServerRetryInterceptor implements Interceptor {
     private static final Logger logger = LoggerFactory.getLogger(MultiServerRetryInterceptor.class);
 
     private final List<String> uris;
+
+    private static final Comparator<HttpUrl> FQDN_COMPARATOR =
+            Comparator.comparing(HttpUrl::scheme)
+                    .thenComparing(HttpUrl::host)
+                    .thenComparing(HttpUrl::port);
 
     private MultiServerRetryInterceptor(List<String> uris) {
         this.uris = ImmutableList.copyOf(uris);
@@ -113,13 +119,8 @@ public final class MultiServerRetryInterceptor implements Interceptor {
                 .build();
     }
 
-    private boolean doServersMatch(HttpUrl serverUri, HttpUrl server) {
-        String serverUriFqdn = String.format("%s://%s:%s", serverUri.scheme(), serverUri.host(), serverUri.port());
-        String serverUriPath = serverUri.encodedPath();
-
-        String serverFqdn = String.format("%s://%s:%s", server.scheme(), server.host(), server.port());
-        String serverPath = server.encodedPath();
-
-        return serverUriFqdn.equalsIgnoreCase(serverFqdn) && serverUriPath.startsWith(serverPath);
+    private boolean doServersMatch(HttpUrl fullUrl, HttpUrl prefixUrl) {
+        return FQDN_COMPARATOR.compare(fullUrl, prefixUrl) == 0
+                        && fullUrl.encodedPath().startsWith(prefixUrl.encodedPath());
     }
 }
