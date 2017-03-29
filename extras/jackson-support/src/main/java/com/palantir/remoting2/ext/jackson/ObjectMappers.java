@@ -40,7 +40,7 @@ public final class ObjectMappers {
     }
 
     /**
-     * Returns a default ObjectMapper with settings adjusted for use in servers.
+     * Returns a default ObjectMapper with settings adjusted for use in clients.
      * <p>
      * Settings:
      * <ul>
