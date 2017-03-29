@@ -16,16 +16,13 @@
 
 package com.palantir.remoting2.jaxrs.feignimpl;
 
-import static feign.Util.checkNotNull;
-import static java.util.Locale.US;
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting2.errors.SerializableErrorToExceptionConverter;
 import feign.Response;
 import feign.RetryableException;
+import feign.Util;
 import feign.codec.ErrorDecoder;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +31,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public enum FeignSerializableErrorErrorDecoder implements ErrorDecoder {
     INSTANCE;
@@ -80,7 +79,7 @@ public enum FeignSerializableErrorErrorDecoder implements ErrorDecoder {
 
         static final DateFormat
                 RFC822_FORMAT =
-                new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", US);
+                new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US);
         private final DateFormat rfc822Format;
 
         RetryAfterDecoder() {
@@ -88,7 +87,7 @@ public enum FeignSerializableErrorErrorDecoder implements ErrorDecoder {
         }
 
         RetryAfterDecoder(DateFormat rfc822Format) {
-            this.rfc822Format = checkNotNull(rfc822Format, "rfc822Format");
+            this.rfc822Format = Util.checkNotNull(rfc822Format, "rfc822Format");
         }
 
         protected long currentTimeMillis() {
@@ -106,7 +105,7 @@ public enum FeignSerializableErrorErrorDecoder implements ErrorDecoder {
                 return null;
             }
             if (retryAfter.matches("^[0-9]+$")) {
-                long deltaMillis = SECONDS.toMillis(Long.parseLong(retryAfter));
+                long deltaMillis = TimeUnit.SECONDS.toMillis(Long.parseLong(retryAfter));
                 return new Date(currentTimeMillis() + deltaMillis);
             }
             synchronized (rfc822Format) {
