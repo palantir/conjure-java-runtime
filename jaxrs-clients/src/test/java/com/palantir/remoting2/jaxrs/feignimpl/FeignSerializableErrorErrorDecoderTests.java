@@ -21,7 +21,9 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import feign.Response;
+import feign.RetryableException;
 import java.util.Collection;
 import java.util.Collections;
 import javax.ws.rs.core.HttpHeaders;
@@ -49,6 +51,31 @@ public final class FeignSerializableErrorErrorDecoderTests {
         Response response = Response.create(400, "reason", ImmutableMap.<String, Collection<String>>of(), "errorbody",
                 feign.Util.UTF_8);
         String expectedMessage = "Error 400. Reason: reason. Body:\nerrorbody";
+        checkExceptionAndMessage(response, expectedMessage);
+    }
+
+    @Test
+    public void testRetryAfter() {
+        Response response = Response.create(
+                503,
+                "reason",
+                ImmutableMap.of(HttpHeaders.RETRY_AFTER, ImmutableSet.of("0")),
+                "errorbody",
+                feign.Util.UTF_8);
+        Exception exception = decoder.decode("ignored", response);
+        assertThat(exception, is(instanceOf(RetryableException.class)));
+    }
+
+    @Test
+    public void testInvalidRetryAfter() {
+        Response response = Response.create(
+                503,
+                "reason",
+                ImmutableMap.of(HttpHeaders.RETRY_AFTER, ImmutableSet.of("abc")),
+                "errorbody",
+                feign.Util.UTF_8);
+        Exception exception = decoder.decode("ignored", response);
+        String expectedMessage = "Error 503. Reason: reason. Body:\nerrorbody";
         checkExceptionAndMessage(response, expectedMessage);
     }
 
