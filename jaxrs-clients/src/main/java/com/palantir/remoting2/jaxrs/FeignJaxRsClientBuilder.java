@@ -61,10 +61,6 @@ import okhttp3.TlsVersion;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
-    static {
-        Http2Agent.install();
-    }
-
     private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
     private final ClientConfig config;

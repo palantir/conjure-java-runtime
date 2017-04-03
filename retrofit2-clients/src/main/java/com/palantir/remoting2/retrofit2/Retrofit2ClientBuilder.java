@@ -42,10 +42,6 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder extends ClientBuilder {
 
-    static {
-        Http2Agent.install();
-    }
-
     private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
     private final ClientConfig config;
