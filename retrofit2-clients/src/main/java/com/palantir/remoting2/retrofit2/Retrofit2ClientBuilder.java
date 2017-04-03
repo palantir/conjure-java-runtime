@@ -28,7 +28,6 @@ import com.palantir.remoting2.config.service.BasicCredentials;
 import com.palantir.remoting2.config.service.ProxyConfiguration;
 import com.palantir.remoting2.config.ssl.TrustContext;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
-import com.palantir.remoting2.http2.Http2Agent;
 import com.palantir.remoting2.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;

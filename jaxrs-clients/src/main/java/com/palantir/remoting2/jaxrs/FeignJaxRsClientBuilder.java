@@ -27,7 +27,6 @@ import com.palantir.remoting2.config.service.BasicCredentials;
 import com.palantir.remoting2.config.service.ProxyConfiguration;
 import com.palantir.remoting2.config.ssl.TrustContext;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
-import com.palantir.remoting2.http2.Http2Agent;
 import com.palantir.remoting2.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting2.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting2.jaxrs.feignimpl.GuavaOptionalAwareContract;
