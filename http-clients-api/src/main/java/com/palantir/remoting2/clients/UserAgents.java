@@ -34,13 +34,23 @@ public final class UserAgents {
      * of the provided class. Typically, the title and version are extracted from {@code MANIFEST.MF} entries of the Jar
      * package containing the given class. The default value for both properties is {@code DEFAULT_VALUE}.
      *
-     * @deprecated use {@link UserAgents#fromClassStrict(Class)}
+     * @deprecated use {@link #fromClass(Class, String, String)}
      */
     @Deprecated
     public static String fromClass(Class<?> clazz) {
-        String userAgent = implementationTitle(clazz).orElse(DEFAULT_VALUE);
-        String version = implementationVersion(clazz).orElse(DEFAULT_VALUE);
-        return getUserAgent(userAgent, version);
+        return fromClass(clazz, DEFAULT_VALUE, DEFAULT_VALUE);
+    }
+
+    /**
+     * Constructs a user agent from the {@code Implementation-Title} and {@code Implementation-Version} of the package
+     * of the provided class or uses provided {@code fallbackName} and {@code fallbackVersion} if these are missing.
+     * The title and version are extracted from {@code MANIFEST.MF} entries of the Jar.
+     */
+    public static String fromClass(Class<?> clazz, String fallbackName, String fallbackVersion) {
+        Optional<String> userAgent = implementationTitle(clazz);
+        Optional<String> version = implementationVersion(clazz);
+
+        return getUserAgent(userAgent.orElse(fallbackName), version.orElse(fallbackVersion));
     }
 
     /**
@@ -48,7 +58,9 @@ public final class UserAgents {
      * of the provided class. The title and version are extracted from {@code MANIFEST.MF} entries of the Jar.
      *
      * @throws IllegalArgumentException if either the version or the title cannot be extracted from {@code MANIFEST.MF}.
+     * @deprecated use {@link #fromClass(Class, String, String)}
      */
+    @Deprecated
     public static String fromClassStrict(Class<?> clazz) {
         Optional<String> userAgent = implementationTitle(clazz);
         Optional<String> version = implementationVersion(clazz);
