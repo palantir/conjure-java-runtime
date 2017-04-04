@@ -7,7 +7,6 @@ dependencies {
     compile project(":extras:jackson-support")
     compile project(":extras:refresh-utils")
     compile project(":error-handling")
-    compile project(":http2-agent")
     compile project(":http-clients-api")
     compile project(":service-config")
     compile project(":tracing-okhttp3")
