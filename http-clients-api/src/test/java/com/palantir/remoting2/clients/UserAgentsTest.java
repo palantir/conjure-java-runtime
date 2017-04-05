@@ -44,10 +44,22 @@ public final class UserAgentsTest {
     }
 
     @Test
+    public void testGetUserAgentLiberal_fromExternalVersionTestJar() {
+        assertThat(UserAgents.fromClass(VersionTest.class, "fail", "fail"), is(EXPECTED_VERSION));
+    }
+
+    @Test
+    public void testGetUserAgentLiberal_fromThisClass() {
+        assertThat(UserAgents.fromClass(this.getClass(), "pass-name", "pass-version"), is("pass-name (pass-version)"));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
     public void testGetUserAgentStrict_fromExternalVersionTestJar() {
         assertThat(UserAgents.fromClassStrict(VersionTest.class), is(EXPECTED_VERSION));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testGetUserAgentStrict_fromThisClass() {
         String expectedMessage = "Implementation-Title missing from the manifest of class "
