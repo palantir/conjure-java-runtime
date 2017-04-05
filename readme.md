@@ -223,8 +223,9 @@ http-remoting makes the following opinionated customizations to the standard Dro
 #### Object serialization/deserialization
 
 All parameters and return values of `application/json` endpoints are serialized/deserialized to/from JSON using a
-Jackson `ObjectMapper` with `GuavaModule`, `Jdk7Module` and `Jdk8Module`. Servers must not expose parameters or return values that
-cannot be handled by this object mapper.
+Jackson `ObjectMapper` with `GuavaModule`, `ShimJdk7Module` (same as Jackson’s `Jdk7Module`, but avoids Jackson 2.6
+requirement) and `Jdk8Module`. Servers must not expose parameters or return values that cannot be handled by this object
+mapper.
 
 #### Error propagation
 The `HttpRemotingJerseyFeature` routine installs exception mappers for `IllegalArgumentException`,
