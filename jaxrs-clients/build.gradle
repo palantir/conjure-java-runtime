@@ -6,7 +6,6 @@ dependencies {
     compile project(":extras:refresh-utils")
     compile project(":error-handling")
     compile project(":tracing-okhttp3")
-    compile project(":http2-agent")
     compile project(":http-clients-api")
     compile project(":service-config")
 
@@ -32,7 +31,6 @@ dependencies {
     shadow project(":extras:jackson-support")
     shadow project(":extras:refresh-utils")
     shadow project(":http-clients-api")
-    shadow project(":http2-agent")
     shadow project(":tracing")
     shadow project(":tracing-okhttp3")
     shadow project(':error-handling')
@@ -61,7 +59,6 @@ shadowJar {
         exclude(project(':extras:jackson-support'))
         exclude(project(':extras:refresh-utils'))
         exclude(project(':http-clients-api'))
-        exclude(project(':http2-agent'))
         exclude(project(':service-config'))
         exclude(project(':ssl-config'))
         exclude(project(':tracing'))
