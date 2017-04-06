@@ -69,8 +69,6 @@ shadowJar {
         exclude(dependency { it.moduleGroup.contains("com.squareup.okhttp3") })
         exclude(dependency { it.moduleGroup.contains("org.slf4j") })
         exclude(dependency { it.moduleGroup.contains("com.palantir.tokens") })
-        exclude(dependency { it.moduleGroup.contains("com.ea.agentloader") })
-        exclude(dependency { it.moduleGroup.contains("org.mortbay.jetty.alpn") })
     }
     classifier = ''
 }
