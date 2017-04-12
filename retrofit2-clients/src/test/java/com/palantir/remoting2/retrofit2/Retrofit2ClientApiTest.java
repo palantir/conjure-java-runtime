@@ -59,7 +59,7 @@ public final class Retrofit2ClientApiTest {
         assertThat(service.getGuavaOptionalString(guavaOptional("p"), guavaEmptyOptional()).execute().body())
             .isEqualTo(guavaOptional("pong"));
         assertThat(server.takeRequest().getPath())
-            .isEqualTo("/getGuavaOptionalString/p/?queryString=q");
+            .isEqualTo("/getGuavaOptionalString/p/");
     }
 
     @Test
