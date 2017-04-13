@@ -138,4 +138,30 @@ public final class GuavaOptionalAwareDecoderTest {
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
         assertThat(service.getGuavaComplexType(value), is(value));
     }
+
+    @Test
+    public void testCborResponse() {
+        GuavaOptionalComplexType value = new GuavaOptionalComplexType(
+                Optional.of(
+                        new GuavaOptionalComplexType(
+                                Optional.<GuavaOptionalComplexType>absent(),
+                                Optional.<String>absent(),
+                                Paths.get("bar"))),
+                Optional.of("baz"),
+                Paths.get("foo"));
+        assertThat(service.getCborResponse(value), is(value));
+    }
+
+    @Test
+    public void testCborRequest() {
+        GuavaOptionalComplexType value = new GuavaOptionalComplexType(
+                Optional.of(
+                        new GuavaOptionalComplexType(
+                                Optional.<GuavaOptionalComplexType>absent(),
+                                Optional.<String>absent(),
+                                Paths.get("bar"))),
+                Optional.of("baz"),
+                Paths.get("foo"));
+        assertThat(service.postCborRequest(value), is(value));
+    }
 }
