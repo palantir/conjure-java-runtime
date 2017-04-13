@@ -20,11 +20,15 @@ package com.palantir.remoting2.retrofit2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Optional;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+import okio.Buffer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -68,6 +72,28 @@ public final class Retrofit2ClientApiTest {
         server.enqueue(new MockResponse().setBody(dateString));
         assertThat(service.getComplexJava8Type(java8Optional(date)).execute().body()).isEqualTo(java8Optional(date));
         assertThat(server.takeRequest().getBody().readUtf8()).isEqualTo(dateString);
+    }
+
+    @Test
+    public void testCborReturnValues() throws IOException {
+        LocalDate date = LocalDate.of(2001, 2, 3);
+        byte[] bytes = ObjectMappers.newCborServerObjectMapper().writeValueAsBytes(Optional.of(date));
+        try (Buffer buffer = new Buffer()) {
+            buffer.write(bytes);
+            server.enqueue(new MockResponse().setBody(buffer).addHeader("Content-Type", "application/cbor"));
+            assertThat(service.getComplexCborType().execute().body()).isEqualTo(java8Optional(date));
+        }
+    }
+
+    @Test
+    public void testCborRequests() throws IOException, InterruptedException {
+        LocalDate date = LocalDate.of(2001, 2, 3);
+
+        server.enqueue(new MockResponse());
+        service.makeCborRequest(date).execute();
+        RecordedRequest request = server.takeRequest();
+        assertThat(request.getBody().readByteArray())
+            .isEqualTo(ObjectMappers.newCborClientObjectMapper().writeValueAsBytes(date));
     }
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {

@@ -61,7 +61,9 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(sanitizedUris.get(0))
-                .addConverterFactory(JacksonConverterFactory.create(OBJECT_MAPPER))
+                .addConverterFactory(new CborConverterFactory(
+                        JacksonConverterFactory.create(OBJECT_MAPPER),
+                        ObjectMappers.newCborClientObjectMapper()))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
                 .build();
         return retrofit.create(serviceClass);
