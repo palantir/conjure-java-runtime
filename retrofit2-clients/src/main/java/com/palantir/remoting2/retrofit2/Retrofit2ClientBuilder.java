@@ -41,6 +41,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder extends ClientBuilder {
 
+    private static final ObjectMapper CBOR_OBJECT_MAPPER = ObjectMappers.newCborClientObjectMapper();
     private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
     private final ClientConfig config;
@@ -63,7 +64,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
                 .baseUrl(sanitizedUris.get(0))
                 .addConverterFactory(new CborConverterFactory(
                         JacksonConverterFactory.create(OBJECT_MAPPER),
-                        ObjectMappers.newCborClientObjectMapper()))
+                        CBOR_OBJECT_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
                 .build();
         return retrofit.create(serviceClass);
