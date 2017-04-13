@@ -23,7 +23,7 @@ import retrofit2.http.Headers;
 
 public final class CborConverterFactory extends Converter.Factory {
 
-    private static final MediaType MEDIA_TYPE = MediaType.parse("application/cbor");
+    private static final MediaType CBOR_MIME_TYPE = MediaType.parse("application/cbor");
 
     private final Factory delegate;
     private final ObjectMapper cborObjectMapper;
@@ -68,7 +68,7 @@ public final class CborConverterFactory extends Converter.Factory {
 
                     String headerValue = header.substring(index + 1).trim();
                     MediaType mediaType = MediaType.parse(headerValue);
-                    if (Objects.equals(mediaType, MEDIA_TYPE)) {
+                    if (Objects.equals(mediaType, CBOR_MIME_TYPE)) {
                         return true;
                     }
                 }
@@ -89,7 +89,7 @@ public final class CborConverterFactory extends Converter.Factory {
         @Override
         public RequestBody convert(T value) throws IOException {
             byte[] bytes = cborObjectWriter.writeValueAsBytes(value);
-            return RequestBody.create(MEDIA_TYPE, bytes);
+            return RequestBody.create(CBOR_MIME_TYPE, bytes);
         }
     }
 
@@ -105,7 +105,7 @@ public final class CborConverterFactory extends Converter.Factory {
 
         @Override
         public T convert(ResponseBody value) throws IOException {
-            if (value.contentType() == null || !value.contentType().equals(MEDIA_TYPE)) {
+            if (value.contentType() == null || !value.contentType().equals(CBOR_MIME_TYPE)) {
                 return delegate.convert(value);
             }
 
