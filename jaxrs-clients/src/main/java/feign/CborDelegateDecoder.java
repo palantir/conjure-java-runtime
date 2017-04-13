@@ -11,9 +11,8 @@ import com.google.common.net.HttpHeaders;
 import com.palantir.remoting2.jaxrs.feignimpl.HeaderAccessUtils;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
@@ -38,19 +37,20 @@ public final class CborDelegateDecoder implements Decoder {
 
         if (contentTypes.size() == 1
                 && Iterables.getOnlyElement(contentTypes, "").startsWith(CborDelegateEncoder.MIME_TYPE)) {
-            InputStream inputStream = response.body().asInputStream();
-            if (!inputStream.markSupported()) {
-                inputStream = new BufferedInputStream(inputStream, 1);
-            }
 
-            // Read the first byte to see if we have any data
-            inputStream.mark(1);
-            if (inputStream.read() == -1) {
-                return null; // Eagerly returning null avoids "No content to map due to end-of-input"
+            // some sillyness to test whether the input stram is empty
+            // if it's empty, we want to return null rather than having jackson throw
+            int pushbackBufferSize = 1;
+            PushbackInputStream pushbackInputStream = new PushbackInputStream(
+                    response.body().asInputStream(), pushbackBufferSize);
+            int firstByte = pushbackInputStream.read();
+            if (firstByte == -1) {
+                return null; // we don't have any data in the stream
             }
+            // put the byte back
+            pushbackInputStream.unread(firstByte);
 
-            inputStream.reset();
-            return cborObjectMapper.readValue(inputStream, cborObjectMapper.constructType(type));
+            return cborObjectMapper.readValue(pushbackInputStream, cborObjectMapper.constructType(type));
 
         } else {
             return delegate.decode(response, type);
