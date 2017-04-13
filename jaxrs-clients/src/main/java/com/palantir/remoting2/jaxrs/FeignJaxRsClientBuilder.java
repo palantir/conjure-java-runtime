@@ -35,6 +35,8 @@ import com.palantir.remoting2.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting2.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting2.jaxrs.feignimpl.UserAgentInterceptor;
 import com.palantir.remoting2.tracing.okhttp3.OkhttpTraceInterceptor;
+import feign.CborDelegateDecoder;
+import feign.CborDelegateEncoder;
 import feign.Contract;
 import feign.Feign;
 import feign.GuavaOptionalAwareDecoder;
@@ -60,7 +62,8 @@ import okhttp3.TlsVersion;
 
 public final class FeignJaxRsClientBuilder extends ClientBuilder {
 
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
+    private static final ObjectMapper JSON_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
+    private static final ObjectMapper CBOR_OBJECT_MAPPER = ObjectMappers.newCborClientObjectMapper();
 
     private final ClientConfig config;
 
@@ -75,8 +78,13 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
         FailoverFeignTarget<T> target = createTarget(serviceClass, uris);
         return Feign.builder()
                 .contract(createContract())
-                .encoder(new InputStreamDelegateEncoder(new TextDelegateEncoder(new JacksonEncoder(OBJECT_MAPPER))))
-                .decoder(createDecoder(OBJECT_MAPPER))
+                .encoder(
+                        new InputStreamDelegateEncoder(
+                                new TextDelegateEncoder(
+                                        new CborDelegateEncoder(
+                                                CBOR_OBJECT_MAPPER,
+                                                new JacksonEncoder(JSON_OBJECT_MAPPER)))))
+                .decoder(createDecoder(JSON_OBJECT_MAPPER, CBOR_OBJECT_MAPPER))
                 .errorDecoder(FeignSerializableErrorErrorDecoder.INSTANCE)
                 .client(target.wrapClient(createOkHttpClient()))
                 .retryer(target)
@@ -104,9 +112,14 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
                 (int) config.readTimeout().toMilliseconds());
     }
 
-    private static Decoder createDecoder(ObjectMapper objectMapper) {
-        return new Java8OptionalAwareDecoder(new GuavaOptionalAwareDecoder(
-                new InputStreamDelegateDecoder(new TextDelegateDecoder(new JacksonDecoder(objectMapper)))));
+    private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
+        return new Java8OptionalAwareDecoder(
+                new GuavaOptionalAwareDecoder(
+                        new InputStreamDelegateDecoder(
+                                new TextDelegateDecoder(
+                                        new CborDelegateDecoder(
+                                                cborObjectMapper,
+                                                new JacksonDecoder(objectMapper))))));
     }
 
     private feign.Client createOkHttpClient() {

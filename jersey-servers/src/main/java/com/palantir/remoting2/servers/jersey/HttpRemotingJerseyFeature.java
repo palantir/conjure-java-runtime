@@ -16,6 +16,8 @@
 
 package com.palantir.remoting2.servers.jersey;
 
+import com.fasterxml.jackson.jaxrs.cbor.JacksonCBORProvider;
+import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 
@@ -45,6 +47,9 @@ public final class HttpRemotingJerseyFeature implements Feature {
         context.register(new RuntimeExceptionMapper(propagateStackTraces));
         context.register(new WebApplicationExceptionMapper(propagateStackTraces));
         context.register(new RemoteExceptionMapper());
+
+        // Cbor handling
+        context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));
 
         // Optional handling
         context.register(GuavaOptionalMessageBodyWriter.class);

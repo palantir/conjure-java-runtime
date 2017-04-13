@@ -140,6 +140,16 @@ public class GuavaTestServer extends Application<Configuration> {
         public GuavaOptionalComplexType getGuavaComplexType(GuavaOptionalComplexType complexType) {
             return complexType;
         }
+
+        @Override
+        public GuavaOptionalComplexType getCborResponse(GuavaOptionalComplexType complexType) {
+            return complexType;
+        }
+
+        @Override
+        public GuavaOptionalComplexType postCborRequest(GuavaOptionalComplexType complexType) {
+            return complexType;
+        }
     }
 
     @Path("/")
@@ -219,6 +229,19 @@ public class GuavaTestServer extends Application<Configuration> {
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         GuavaOptionalComplexType getGuavaComplexType(GuavaOptionalComplexType complexType);
+
+        @POST
+        @Path("/cborResponseJsonRequest")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces("application/cbor")
+        GuavaOptionalComplexType getCborResponse(GuavaOptionalComplexType complexType);
+
+        @POST
+        @Path("/cborRequestJsonResponse")
+        @Consumes("application/cbor")
+        @Produces(MediaType.APPLICATION_JSON)
+        GuavaOptionalComplexType postCborRequest(GuavaOptionalComplexType complexType);
+
     }
 
 }
