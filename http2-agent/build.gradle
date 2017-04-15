@@ -3,6 +3,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 dependencies {
     compile 'com.ea.agentloader:ea-agent-loader'
     compile 'org.mortbay.jetty.alpn:jetty-alpn-agent'
+    compile 'org.slf4j:slf4j-api'
 
     testCompile 'com.squareup.okhttp3:okhttp'
     testCompile 'junit:junit'

@@ -7,10 +7,14 @@ package com.palantir.remoting2.http2;
 import com.ea.agentloader.AgentLoader;
 import java.lang.instrument.Instrumentation;
 import org.mortbay.jetty.alpn.agent.Premain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** A very simple wrapper around the jetty-alpn-agent for dynamic loading. */
 public final class Http2Agent {
     private Http2Agent() {}
+
+    private static final Logger logger = LoggerFactory.getLogger(Http2Agent.class);
 
     private static boolean hasBeenInstalled = false;
 
@@ -25,8 +29,12 @@ public final class Http2Agent {
             return;
         }
 
-        AgentLoader.loadAgentClass(Http2Agent.class.getName(), "");
-        hasBeenInstalled = true;
+        try {
+            AgentLoader.loadAgentClass(Http2Agent.class.getName(), "");
+            hasBeenInstalled = true;
+        } catch (Exception e) {
+            logger.error("Unable to dynamically install jetty-alpn-agent via ea-agent-loader, proceeding anyway...", e);
+        }
     }
 
     /** Agent entry-point. */
