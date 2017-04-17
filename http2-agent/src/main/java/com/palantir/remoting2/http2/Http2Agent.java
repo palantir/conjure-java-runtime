@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public final class Http2Agent {
     private Http2Agent() {}
 
-    private static final Logger logger = LoggerFactory.getLogger(Http2Agent.class);
+    private static final Logger log = LoggerFactory.getLogger(Http2Agent.class);
 
     private static boolean hasBeenInstalled = false;
 
@@ -33,7 +33,7 @@ public final class Http2Agent {
             AgentLoader.loadAgentClass(Http2Agent.class.getName(), "");
             hasBeenInstalled = true;
         } catch (Exception e) {
-            logger.error("Unable to dynamically install jetty-alpn-agent via ea-agent-loader, proceeding anyway...", e);
+            log.warn("Unable to dynamically install jetty-alpn-agent via ea-agent-loader, proceeding anyway...", e);
         }
     }
 
