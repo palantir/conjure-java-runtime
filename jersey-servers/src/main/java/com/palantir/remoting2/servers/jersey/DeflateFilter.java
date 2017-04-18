@@ -17,23 +17,23 @@
 package com.palantir.remoting2.servers.jersey;
 
 import com.google.common.net.HttpHeaders;
-import com.jcraft.jzlib.GZIPOutputStream;
+import com.jcraft.jzlib.DeflaterOutputStream;
 import java.io.IOException;
 import java.util.List;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 
-public final class GzipFilter implements ContainerResponseFilter {
+public final class DeflateFilter implements ContainerResponseFilter {
 
-    private static final String GZIP = "gzip";
+    private static final String DEFLATE = "deflate";
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        if (acceptsGzipEncoding(requestContext) && !alreadyEncoded(responseContext)) {
-            responseContext.getHeaders().add(HttpHeaders.CONTENT_ENCODING, GZIP);
-            responseContext.setEntityStream(new GZIPOutputStream(responseContext.getEntityStream()));
+        if (acceptsDeflateEncoding(requestContext) && !alreadyEncoded(responseContext)) {
+            responseContext.getHeaders().add(HttpHeaders.CONTENT_ENCODING, DEFLATE);
+            responseContext.setEntityStream(new DeflaterOutputStream(responseContext.getEntityStream()));
         }
     }
 
@@ -42,9 +42,9 @@ public final class GzipFilter implements ContainerResponseFilter {
         return encodings != null && encodings.size() > 0;
     }
 
-    private static boolean acceptsGzipEncoding(ContainerRequestContext request) {
+    private static boolean acceptsDeflateEncoding(ContainerRequestContext request) {
         List<String> encodings = request.getHeaders().get(HttpHeaders.ACCEPT_ENCODING);
-        return encodings != null && encodings.contains(GZIP);
+        return encodings != null && encodings.contains(DEFLATE);
     }
 
 }

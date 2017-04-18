@@ -25,7 +25,7 @@ import static org.junit.Assert.assertThat;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.google.common.net.HttpHeaders;
-import com.jcraft.jzlib.GZIPInputStream;
+import com.jcraft.jzlib.InflaterInputStream;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -51,35 +51,35 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public final class GzipFilterTest {
+public final class DeflateFilterTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> GZIP_APP =
-            new DropwizardAppRule<>(GzipTestServer.class, "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(TestServer.class, "src/test/resources/test-server.yml");
 
-    private WebTarget gzip_target;
+    private WebTarget target;
 
     @Before
     public void before() {
-        String endpointUri = "http://localhost:" + GZIP_APP.getLocalPort();
+        String endpointUri = "http://localhost:" + APP.getLocalPort();
         JerseyClientBuilder builder = new JerseyClientBuilder();
         Client client = builder.build();
-        gzip_target = client.target(endpointUri);
+        target = client.target(endpointUri);
     }
 
     @Test
-    public void testGzip() throws NoSuchMethodException, SecurityException, IOException {
-        Response response = baseRequest(gzip_target).header(HttpHeaders.ACCEPT_ENCODING, "gzip").get();
+    public void testDeflate() throws NoSuchMethodException, SecurityException, IOException {
+        Response response = baseRequest(target).header(HttpHeaders.ACCEPT_ENCODING, "deflate").get();
         byte[] entity = ByteStreams.toByteArray((InputStream) response.getEntity());
 
-        assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("gzip"));
+        assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("deflate"));
         assertThat(toString(toStream(entity)), is(not("val")));
-        assertThat(toString(new GZIPInputStream(toStream(entity))), is("val"));
+        assertThat(toString(new InflaterInputStream(toStream(entity))), is("val"));
     }
 
     @Test
-    public void testNoGzipHeader() throws NoSuchMethodException, SecurityException {
-        Response response = baseRequest(gzip_target).get();
+    public void testNoDeflateHeader() throws NoSuchMethodException, SecurityException {
+        Response response = baseRequest(target).get();
 
         assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is(nullValue()));
         assertThat(response.readEntity(String.class), is("val"));
@@ -97,16 +97,16 @@ public final class GzipFilterTest {
         return new ByteArrayInputStream(bytes);
     }
 
-    public static class GzipTestServer extends Application<Configuration> {
+    public static class TestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
-            env.jersey().register(new GzipFilter());
-            env.jersey().register(new GzipTestResource());
+            env.jersey().register(new DeflateFilter());
+            env.jersey().register(new TestResource());
         }
     }
 
-    public static final class GzipTestResource implements OptionalTestService {
+    public static final class TestResource implements OptionalTestService {
         @Override
         public String get(@Nullable String value) {
             return value;
