@@ -32,7 +32,7 @@ import javax.ws.rs.core.MultivaluedMap;
 public final class CompressionFilter implements ContainerResponseFilter {
 
     // List of encodings ordered by compression preference
-    private static final List<Encoding> ENCODINGS = ImmutableList.of(
+    private static final ImmutableList<Encoding> ENCODINGS = ImmutableList.of(
             new Encoding("deflate", wrap(DeflaterOutputStream::new)),
             new Encoding("gzip", wrap(GZIPOutputStream::new)));
 
@@ -75,6 +75,7 @@ public final class CompressionFilter implements ContainerResponseFilter {
         };
     }
 
+    @SuppressWarnings("AbbreviationAsWordInName")
     interface IOFunction<T, R> {
         R apply(T val) throws IOException;
     }
