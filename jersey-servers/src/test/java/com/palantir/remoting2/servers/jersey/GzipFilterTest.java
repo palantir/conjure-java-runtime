@@ -29,7 +29,6 @@ import com.jcraft.jzlib.GZIPInputStream;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -56,31 +55,16 @@ public final class GzipFilterTest {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> GZIP_APP =
-            new DropwizardAppRule<>(GzipTestServer.class, "src/test/resources/test-server.yml",
-                    ConfigOverride.config("server.gzip.enabled", "false"),
-                    ConfigOverride.config("server.applicationConnectors[0].port", "61828"),
-                    ConfigOverride.config("server.adminConnectors[0].port", "61829"));
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> NO_GZIP_APP =
-            new DropwizardAppRule<>(NoGzipTestServer.class, "src/test/resources/test-server.yml",
-                    ConfigOverride.config("server.gzip.enabled", "false"),
-                    ConfigOverride.config("server.applicationConnectors[0].port", "61830"),
-                    ConfigOverride.config("server.adminConnectors[0].port", "61831"));
+            new DropwizardAppRule<>(GzipTestServer.class, "src/test/resources/test-server.yml");
 
     private WebTarget gzip_target;
-    private WebTarget no_gzip_target;
 
     @Before
     public void before() {
-        gzip_target = getClient(GZIP_APP.getLocalPort());
-        no_gzip_target = getClient(NO_GZIP_APP.getLocalPort());
-    }
-
-    private WebTarget getClient(int localPort) {
-        String endpointUri = "http://localhost:" + localPort;
+        String endpointUri = "http://localhost:" + GZIP_APP.getLocalPort();
         JerseyClientBuilder builder = new JerseyClientBuilder();
         Client client = builder.build();
-        return client.target(endpointUri);
+        gzip_target = client.target(endpointUri);
     }
 
     @Test
@@ -101,14 +85,6 @@ public final class GzipFilterTest {
         assertThat(response.readEntity(String.class), is("val"));
     }
 
-    @Test
-    public void testNoGzipWhenNoFilterRegistered() throws NoSuchMethodException, SecurityException, IOException {
-        Response response = baseRequest(no_gzip_target).header(HttpHeaders.ACCEPT_ENCODING, "gzip").get();
-
-        assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is(nullValue()));
-        assertThat(response.readEntity(String.class), is("val"));
-    }
-
     private static Invocation.Builder baseRequest(WebTarget target) {
         return target.path("path").queryParam("value", "val").request();
     }
@@ -124,16 +100,8 @@ public final class GzipFilterTest {
     public static class GzipTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
+            env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
             env.jersey().register(new GzipFilter());
-            env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
-            env.jersey().register(new GzipTestResource());
-        }
-    }
-
-    public static class NoGzipTestServer extends Application<Configuration> {
-        @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
             env.jersey().register(new GzipTestResource());
         }
     }
