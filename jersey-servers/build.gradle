@@ -6,6 +6,7 @@ dependencies {
     compile project(":tracing")
 
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
+    compile "com.jcraft:jzlib"
     compile "org.glassfish.jersey.core:jersey-server"
 
     testCompile project(":ssl-config")
