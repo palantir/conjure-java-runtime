@@ -87,7 +87,7 @@ public final class CompressionFilterTest {
     }
 
     @Test
-    public void testPreferDeflateOverGzip() throws NoSuchMethodException, SecurityException, IOException {
+    public void testPreferDeflateOverGzip() throws IOException {
         MultivaluedHashMap<String, Object> headers = new MultivaluedHashMap<>();
         headers.putSingle(HttpHeaders.ACCEPT_ENCODING, "gzip");
         headers.putSingle(HttpHeaders.ACCEPT_ENCODING, "deflate");
