@@ -18,13 +18,13 @@ package com.palantir.remoting2.servers.jersey;
 
 
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
 import com.google.common.net.HttpHeaders;
+import com.jcraft.jzlib.GZIPInputStream;
 import com.jcraft.jzlib.InflaterInputStream;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -45,13 +45,14 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public final class DeflateFilterTest {
+public final class CompressionFilterTest {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP =
@@ -68,19 +69,40 @@ public final class DeflateFilterTest {
     }
 
     @Test
-    public void testDeflate() throws NoSuchMethodException, SecurityException, IOException {
+    public void testDeflate() throws IOException {
         Response response = baseRequest(target).header(HttpHeaders.ACCEPT_ENCODING, "deflate").get();
-        byte[] entity = ByteStreams.toByteArray((InputStream) response.getEntity());
 
+        assertThat(response.getHeaderString(HttpHeaders.VARY), is(HttpHeaders.ACCEPT_ENCODING));
         assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("deflate"));
-        assertThat(toString(toStream(entity)), is(not("val")));
-        assertThat(toString(new InflaterInputStream(toStream(entity))), is("val"));
+        assertThat(toString(new InflaterInputStream(toStream(response))), is("val"));
     }
 
     @Test
-    public void testNoDeflateHeader() throws NoSuchMethodException, SecurityException {
+    public void testGzip() throws IOException {
+        Response response = baseRequest(target).header(HttpHeaders.ACCEPT_ENCODING, "gzip").get();
+
+        assertThat(response.getHeaderString(HttpHeaders.VARY), is(HttpHeaders.ACCEPT_ENCODING));
+        assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("gzip"));
+        assertThat(toString(new GZIPInputStream(toStream(response))), is("val"));
+    }
+
+    @Test
+    public void testPreferDeflateOverGzip() throws NoSuchMethodException, SecurityException, IOException {
+        MultivaluedHashMap<String, Object> headers = new MultivaluedHashMap<>();
+        headers.putSingle(HttpHeaders.ACCEPT_ENCODING, "gzip");
+        headers.putSingle(HttpHeaders.ACCEPT_ENCODING, "deflate");
+        Response response = baseRequest(target).headers(headers).get();
+
+        assertThat(response.getHeaderString(HttpHeaders.VARY), is(HttpHeaders.ACCEPT_ENCODING));
+        assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("deflate"));
+        assertThat(toString(new InflaterInputStream(toStream(response))), is("val"));
+    }
+
+    @Test
+    public void testNoCompression() {
         Response response = baseRequest(target).get();
 
+        assertThat(response.getHeaderString(HttpHeaders.VARY), is(nullValue()));
         assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is(nullValue()));
         assertThat(response.readEntity(String.class), is("val"));
     }
@@ -89,19 +111,27 @@ public final class DeflateFilterTest {
         return target.path("path").queryParam("value", "val").request();
     }
 
-    private static String toString(InputStream is) throws IOException {
-        return CharStreams.toString(new InputStreamReader(is, StandardCharsets.UTF_8));
+    private static String toString(InputStream is) {
+        try {
+            return CharStreams.toString(new InputStreamReader(is, StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private static InputStream toStream(byte[] bytes) {
-        return new ByteArrayInputStream(bytes);
+    private static InputStream toStream(Response response) {
+        try {
+            return new ByteArrayInputStream(ByteStreams.toByteArray((InputStream) response.getEntity()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static class TestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
-            env.jersey().register(new DeflateFilter());
+            env.jersey().register(new CompressionFilter());
             env.jersey().register(new TestResource());
         }
     }
