@@ -74,6 +74,13 @@ public final class SerializableErrorErrorDecoderTests {
     }
 
     @Test
+    public void testExceptionWithoutMessage() {
+        Exception exception = encodeAndDecode(new NullPointerException());
+        assertThat(exception, is(instanceOf(RemoteException.class)));
+        assertThat(exception.getMessage(), is("null"));
+    }
+
+    @Test
     public void testCauseInException() {
         Exception exception = encodeAndDecode(new IllegalArgumentException("msg", new IllegalStateException("msg2")));
         assertThat(exception, is(instanceOf(RemoteException.class)));

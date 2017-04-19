@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -101,7 +102,7 @@ public abstract class SerializableError implements Serializable {
                 .collect(Collectors.toList());
 
         return ImmutableSerializableError.builder()
-                .message(throwable.getMessage())
+                .message(Objects.toString(throwable.getMessage()))
                 .errorName(throwable.getClass().getName())
                 .stackTrace(stackTrace)
                 .suppressed(suppressed)
