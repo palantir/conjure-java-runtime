@@ -24,8 +24,10 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.immutables.value.Value;
 
@@ -58,6 +60,11 @@ public abstract class SerializableError implements Serializable {
     @Nullable
     public abstract List<SerializableStackTraceElement> getStackTrace();
 
+    @Nullable
+    public abstract SerializableError getCause();
+
+    public abstract List<SerializableError> getSuppressed();
+
     /** Constructs a new error whose error name is the fully-qualified name of the given class. */
     public static SerializableError of(String message, Class<? extends Exception> exceptionClass) {
         return ImmutableSerializableError.builder()
@@ -74,14 +81,45 @@ public abstract class SerializableError implements Serializable {
                 .build();
     }
 
+    /** Constructs a new error which built from the Throwable. This includes all causes and suppressed exceptions. */
+    public static SerializableError of(Throwable throwable) {
+        List<SerializableStackTraceElement> stackTrace = Arrays.stream(throwable.getStackTrace())
+                .map(stackTraceElement -> SerializableStackTraceElement.builder()
+                        .className(stackTraceElement.getClassName())
+                        .methodName(stackTraceElement.getMethodName())
+                        .fileName(Optional.ofNullable(stackTraceElement.getFileName()))
+                        .lineNumber(stackTraceElement.getLineNumber())
+                        .build())
+                .collect(Collectors.toList());
+
+        SerializableError cause = Optional.ofNullable(throwable.getCause())
+                .map(SerializableError::of)
+                .orElse(null);
+
+        List<SerializableError> suppressed = Arrays.stream(throwable.getSuppressed())
+                .map(SerializableError::of)
+                .collect(Collectors.toList());
+
+        return ImmutableSerializableError.builder()
+                .message(throwable.getMessage())
+                .errorName(throwable.getClass().getName())
+                .stackTrace(stackTrace)
+                .suppressed(suppressed)
+                .cause(cause)
+                .build();
+    }
+
     /**
      * Constructs a new error whose error name is the fully-qualified name of the given class, and with the given
      * stack trace.
+     *
+     * @deprecated Use {@link #of(Throwable)} instead.
      */
+    @Deprecated
     public static SerializableError of(
-            String message, Class<? extends Exception> exceptionClass,
-            @Nullable final List<StackTraceElement> stackTrace) {
-
+            String message,
+            Class<? extends Exception> exceptionClass,
+            @Nullable List<StackTraceElement> stackTrace) {
         List<SerializableStackTraceElement> serializableStackTrace = null;
         if (stackTrace != null) {
             // take copy because transformed list doesn't serialize well (Jackson bug?)

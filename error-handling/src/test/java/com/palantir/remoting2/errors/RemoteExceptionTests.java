@@ -18,8 +18,6 @@ package com.palantir.remoting2.errors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.collect.ImmutableList;
-import java.util.List;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.Test;
 
@@ -27,18 +25,10 @@ public final class RemoteExceptionTests {
 
     @Test
     public void testJavaSerialization() {
-        SerializableError error = SerializableError.of(
-                "message", IllegalArgumentException.class, toList(Thread.currentThread().getStackTrace()));
+        SerializableError error = SerializableError.of(new IllegalArgumentException("message"));
         RemoteException expected = new RemoteException(error, 500);
         RemoteException actual = SerializationUtils.deserialize(SerializationUtils.serialize(expected));
         assertThat(expected).isEqualToComparingFieldByField(actual);
     }
 
-    private static List<StackTraceElement> toList(StackTraceElement[] elements) {
-        ImmutableList.Builder<StackTraceElement> list = ImmutableList.builder();
-        for (StackTraceElement element : elements) {
-            list.add(element);
-        }
-        return list.build();
-    }
 }
