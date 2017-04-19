@@ -29,27 +29,47 @@ import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.MultivaluedMap;
 
+/**
+ * Compresses responses based on the Accept-Encoding header in the request.
+ */
 public final class CompressionFilter implements ContainerResponseFilter {
 
-    // List of encodings ordered by compression preference
-    private static final ImmutableList<Encoding> ENCODINGS = ImmutableList.of(
-            new Encoding("deflate", wrap(DeflaterOutputStream::new)),
-            new Encoding("gzip", wrap(GZIPOutputStream::new)));
+    /**
+     * Supported encodings. Prefer gzip over deflate as Jetty does.
+     * TODO(jellis): support qvalues in Accept-Encoding header params to determine preferred ordering.
+     */
+    enum Encoding {
+        GZIP("gzip", wrap(GZIPOutputStream::new)),
+        DEFLATE("deflate", wrap(DeflaterOutputStream::new));
+
+        private final String encoding;
+        private final Function<OutputStream, OutputStream> compressor;
+
+        Encoding(String encoding, Function<OutputStream, OutputStream> compressor) {
+            this.encoding = encoding;
+            this.compressor = compressor;
+        }
+    }
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        if (!alreadyEncoded(responseContext)) {
-            for (Encoding encoding : ENCODINGS) {
-                if (acceptsEncoding(requestContext, encoding.encoding)) {
-                    MultivaluedMap<String, Object> headers = responseContext.getHeaders();
+        if (alreadyEncoded(responseContext)) {
+            return;
+        }
 
-                    // Set 'Vary: Accept-Encoding' so intermediate caches differentiate between differently
-                    // encoded responses
-                    headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT_ENCODING);
-                    headers.add(HttpHeaders.CONTENT_ENCODING, encoding.encoding);
-                    responseContext.setEntityStream(encoding.compressor.apply(responseContext.getEntityStream()));
-                }
+        List<String> acceptedEncodings = acceptedEncodings(requestContext);
+
+        for (Encoding encoding : Encoding.values()) {
+            if (acceptedEncodings.contains(encoding.encoding)) {
+                MultivaluedMap<String, Object> headers = responseContext.getHeaders();
+
+                // Set 'Vary: Accept-Encoding' so intermediate caches differentiate between differently
+                // encoded responses
+                headers.add(HttpHeaders.VARY, HttpHeaders.ACCEPT_ENCODING);
+                headers.add(HttpHeaders.CONTENT_ENCODING, encoding.encoding);
+                responseContext.setEntityStream(encoding.compressor.apply(responseContext.getEntityStream()));
+                return;
             }
         }
     }
@@ -59,9 +79,24 @@ public final class CompressionFilter implements ContainerResponseFilter {
         return encodings != null && encodings.size() > 0;
     }
 
-    private static boolean acceptsEncoding(ContainerRequestContext request, String encoding) {
-        List<String> encodings = request.getHeaders().get(HttpHeaders.ACCEPT_ENCODING);
-        return encodings != null && encodings.contains(encoding);
+    private static List<String> acceptedEncodings(ContainerRequestContext request) {
+        ImmutableList.Builder<String> builder = ImmutableList.builder();
+        List<String> headerLines = request.getHeaders().get(HttpHeaders.ACCEPT_ENCODING);
+
+        if (headerLines == null) {
+            return builder.build();
+        }
+
+        // Single line looks like `deflate, gzip;q=1.0, *;q=0.5`
+        // See section 14.3: https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
+        // TODO(jellis): don't ignore qvalues
+        for (String line : headerLines) {
+            for (String acceptedEncoding : line.split(",")) {
+                builder.add(acceptedEncoding.split(";")[0]);
+            }
+        }
+
+        return builder.build();
     }
 
     // Wrap functions that throw IOExceptions
@@ -78,16 +113,6 @@ public final class CompressionFilter implements ContainerResponseFilter {
     @SuppressWarnings("AbbreviationAsWordInName")
     interface IOFunction<T, R> {
         R apply(T val) throws IOException;
-    }
-
-    static class Encoding {
-        private final String encoding;
-        private final Function<OutputStream, OutputStream> compressor;
-
-        Encoding(String encoding, Function<OutputStream, OutputStream> compressor) {
-            this.encoding = encoding;
-            this.compressor = compressor;
-        }
     }
 
 }

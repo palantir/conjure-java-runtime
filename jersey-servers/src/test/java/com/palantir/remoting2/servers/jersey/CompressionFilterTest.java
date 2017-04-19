@@ -45,7 +45,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
@@ -70,7 +69,7 @@ public final class CompressionFilterTest {
 
     @Test
     public void testDeflate() throws IOException {
-        Response response = baseRequest(target).header(HttpHeaders.ACCEPT_ENCODING, "deflate").get();
+        Response response = baseRequest(target).acceptEncoding("deflate").get();
 
         assertThat(response.getHeaderString(HttpHeaders.VARY), is(HttpHeaders.ACCEPT_ENCODING));
         assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("deflate"));
@@ -79,7 +78,7 @@ public final class CompressionFilterTest {
 
     @Test
     public void testGzip() throws IOException {
-        Response response = baseRequest(target).header(HttpHeaders.ACCEPT_ENCODING, "gzip").get();
+        Response response = baseRequest(target).acceptEncoding("gzip").get();
 
         assertThat(response.getHeaderString(HttpHeaders.VARY), is(HttpHeaders.ACCEPT_ENCODING));
         assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("gzip"));
@@ -87,15 +86,22 @@ public final class CompressionFilterTest {
     }
 
     @Test
-    public void testPreferDeflateOverGzip() throws IOException {
-        MultivaluedHashMap<String, Object> headers = new MultivaluedHashMap<>();
-        headers.putSingle(HttpHeaders.ACCEPT_ENCODING, "gzip");
-        headers.putSingle(HttpHeaders.ACCEPT_ENCODING, "deflate");
-        Response response = baseRequest(target).headers(headers).get();
+    public void testPreferGzipOverDeflate() throws IOException {
+        Response response = baseRequest(target).acceptEncoding("deflate", "gzip").get();
 
         assertThat(response.getHeaderString(HttpHeaders.VARY), is(HttpHeaders.ACCEPT_ENCODING));
-        assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("deflate"));
-        assertThat(toString(new InflaterInputStream(toStream(response))), is("val"));
+        assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("gzip"));
+        assertThat(toString(new GZIPInputStream(toStream(response))), is("val"));
+    }
+
+    // TODO(jellis): support qvalues
+    @Test
+    public void testIgnoresQvalues() throws IOException {
+        Response response = baseRequest(target).acceptEncoding("gzip;q=0.8").get();
+
+        assertThat(response.getHeaderString(HttpHeaders.VARY), is(HttpHeaders.ACCEPT_ENCODING));
+        assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("gzip"));
+        assertThat(toString(new GZIPInputStream(toStream(response))), is("val"));
     }
 
     @Test
