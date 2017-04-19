@@ -61,9 +61,11 @@ public abstract class SerializableError implements Serializable {
     @Nullable
     public abstract List<SerializableStackTraceElement> getStackTrace();
 
+    /** Refer to {@link Throwable#getCause()}. */
     @Nullable
     public abstract SerializableError getCause();
 
+    /** Refer to {@link Throwable#getSuppressed()}. */
     public abstract List<SerializableError> getSuppressed();
 
     /** Constructs a new error whose error name is the fully-qualified name of the given class. */
