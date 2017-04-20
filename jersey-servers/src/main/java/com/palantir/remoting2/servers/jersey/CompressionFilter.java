@@ -16,6 +16,9 @@
 
 package com.palantir.remoting2.servers.jersey;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
 import com.jcraft.jzlib.DeflaterOutputStream;
@@ -31,6 +34,10 @@ import javax.ws.rs.core.MultivaluedMap;
 
 /**
  * Compresses responses based on the Accept-Encoding header in the request.
+ * <p>
+ * This is an alternative compression filter implementation that uses jzlib for compression rather than the java
+ * standard library due to performance issues observed on high core machines:
+ * https://bugs.openjdk.java.net/browse/JDK-8179001
  */
 public final class CompressionFilter implements ContainerResponseFilter {
 
@@ -51,6 +58,19 @@ public final class CompressionFilter implements ContainerResponseFilter {
         }
     }
 
+    private final LoadingCache<List<String>, List<String>> parsedHeaders;
+
+    public CompressionFilter() {
+        parsedHeaders = CacheBuilder.newBuilder()
+                .maximumSize(100)
+                .build(new CacheLoader<List<String>, List<String>>() {
+                    @Override
+                    public List<String> load(List<String> headerLines) throws Exception {
+                        return acceptedEncodings(headerLines);
+                    }
+                });
+    }
+
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
@@ -58,8 +78,12 @@ public final class CompressionFilter implements ContainerResponseFilter {
             return;
         }
 
-        List<String> acceptedEncodings = acceptedEncodings(requestContext);
+        List<String> headerLines = requestContext.getHeaders().get(HttpHeaders.ACCEPT_ENCODING);
+        if (headerLines == null) {
+            return;
+        }
 
+        List<String> acceptedEncodings = parsedHeaders.getUnchecked(headerLines);
         for (Encoding encoding : Encoding.values()) {
             if (acceptedEncodings.contains(encoding.encoding)) {
                 MultivaluedMap<String, Object> headers = responseContext.getHeaders();
@@ -79,13 +103,8 @@ public final class CompressionFilter implements ContainerResponseFilter {
         return encodings != null && encodings.size() > 0;
     }
 
-    private static List<String> acceptedEncodings(ContainerRequestContext request) {
+    private static List<String> acceptedEncodings(List<String> headerLines) {
         ImmutableList.Builder<String> builder = ImmutableList.builder();
-        List<String> headerLines = request.getHeaders().get(HttpHeaders.ACCEPT_ENCODING);
-
-        if (headerLines == null) {
-            return builder.build();
-        }
 
         // Single line looks like `deflate, gzip;q=1.0, *;q=0.5`
         // See section 14.3: https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
