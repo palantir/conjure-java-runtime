@@ -32,10 +32,14 @@ import javax.ws.rs.core.Response;
  * A {@link ContainerRequestFilter} that limits the number of requests per second based on a feature {@code T} of the
  * {@link ContainerRequestContext}. A rate of no more than {@code maxRequestsPerSecond} will be allowed for each unique
  * feature.
+ * <p>
+ * The features of type {@code T} will be used a cache keys and therefore must be immutable and implement hashCode and
+ * equals properly.
  */
 public final class RequestRateLimiter<T> implements ContainerRequestFilter {
 
     private static final int DEFAULT_MAX_FEATURES = 100_000;
+
     private final Function<ContainerRequestContext, Optional<T>> requestFeatureFunc;
     private final LoadingCache<T, RateLimiter> limiters;
 
