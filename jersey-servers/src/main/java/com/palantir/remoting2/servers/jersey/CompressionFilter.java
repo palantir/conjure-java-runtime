@@ -20,7 +20,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
+import com.google.common.net.MediaType;
 import com.jcraft.jzlib.DeflaterOutputStream;
 import com.jcraft.jzlib.GZIPOutputStream;
 import java.io.IOException;
@@ -41,22 +43,10 @@ import javax.ws.rs.core.MultivaluedMap;
  */
 public final class CompressionFilter implements ContainerResponseFilter {
 
-    /**
-     * Supported encodings. Prefer gzip over deflate as Jetty does.
-     * TODO(jellis): support qvalues in Accept-Encoding header params to determine preferred ordering.
-     */
-    enum Encoding {
-        GZIP("gzip", wrap(GZIPOutputStream::new)),
-        DEFLATE("deflate", wrap(DeflaterOutputStream::new));
-
-        private final String encoding;
-        private final Function<OutputStream, OutputStream> compressor;
-
-        Encoding(String encoding, Function<OutputStream, OutputStream> compressor) {
-            this.encoding = encoding;
-            this.compressor = compressor;
-        }
-    }
+    private static final ImmutableSet<MediaType> UNCOMPRESSIBLE = ImmutableSet.of(
+            MediaType.ANY_AUDIO_TYPE,
+            MediaType.ANY_IMAGE_TYPE,
+            MediaType.ANY_VIDEO_TYPE);
 
     private final LoadingCache<List<String>, List<String>> parsedHeaders;
     private final int minCompressionBytes;
@@ -80,7 +70,7 @@ public final class CompressionFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        if (responseTooSmall(responseContext) || alreadyEncoded(responseContext)) {
+        if (responseTooSmall(responseContext) || alreadyEncoded(responseContext) || isUncompressable(responseContext)) {
             return;
         }
 
@@ -114,6 +104,11 @@ public final class CompressionFilter implements ContainerResponseFilter {
         return encodings != null && encodings.size() > 0;
     }
 
+    private static boolean isUncompressable(ContainerResponseContext response) {
+        MediaType mediaType = MediaType.parse(response.getMediaType().toString());
+        return UNCOMPRESSIBLE.stream().anyMatch(mediaType::is);
+    }
+
     private static List<String> acceptedEncodings(List<String> headerLines) {
         ImmutableList.Builder<String> builder = ImmutableList.builder();
 
@@ -127,6 +122,23 @@ public final class CompressionFilter implements ContainerResponseFilter {
         }
 
         return builder.build();
+    }
+
+    /**
+     * Supported encodings. Prefer gzip over deflate as Jetty does.
+     * TODO(jellis): support qvalues in Accept-Encoding header params to determine preferred ordering.
+     */
+    enum Encoding {
+        GZIP("gzip", wrap(GZIPOutputStream::new)),
+        DEFLATE("deflate", wrap(DeflaterOutputStream::new));
+
+        private final String encoding;
+        private final Function<OutputStream, OutputStream> compressor;
+
+        Encoding(String encoding, Function<OutputStream, OutputStream> compressor) {
+            this.encoding = encoding;
+            this.compressor = compressor;
+        }
     }
 
     // Wrap functions that throw IOExceptions

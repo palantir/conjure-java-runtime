@@ -115,12 +115,21 @@ public final class CompressionFilterTest {
     }
 
     @Test
-    public void testNoCompression() {
+    public void testNoCompressionWithoutHeader() {
         Response response = baseRequest(target).get();
 
         assertThat(response.getHeaderString(HttpHeaders.VARY), is(nullValue()));
         assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is(nullValue()));
         assertThat(response.readEntity(String.class), is("val"));
+    }
+
+    @Test
+    public void testNoCompressionForUncompressableResponse() {
+        Response response = target.path("uncompressible").request().get();
+
+        assertThat(response.getHeaderString(HttpHeaders.VARY), is(nullValue()));
+        assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is(nullValue()));
+        assertThat(response.readEntity(String.class), is("value"));
     }
 
     private static Invocation.Builder baseRequest(WebTarget target) {
@@ -161,6 +170,11 @@ public final class CompressionFilterTest {
         public String get(@Nullable String value) {
             return value;
         }
+
+        @Override
+        public String getUncompressible() {
+            return "value";
+        }
     }
 
     @Path("/")
@@ -170,6 +184,12 @@ public final class CompressionFilterTest {
         @GET
         @Path("/path")
         String get(@QueryParam("value") @Nullable String value);
+
+        @GET
+        @Path("/uncompressible")
+        @Produces("audio/audio")
+        String getUncompressible();
+
     }
 
 }
