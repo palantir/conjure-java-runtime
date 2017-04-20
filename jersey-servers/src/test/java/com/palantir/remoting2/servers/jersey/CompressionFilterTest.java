@@ -94,6 +94,16 @@ public final class CompressionFilterTest {
         assertThat(toString(new GZIPInputStream(toStream(response))), is("val"));
     }
 
+    // TODO(jellis): minimum size does nothing because Content-Length header is not set
+    @Test
+    public void testResponseTooSmall() throws IOException {
+        Response response = baseRequest(target, "a").acceptEncoding("gzip").get();
+
+        assertThat(response.getHeaderString(HttpHeaders.VARY), is(HttpHeaders.ACCEPT_ENCODING));
+        assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("gzip"));
+        assertThat(toString(new GZIPInputStream(toStream(response))), is("a"));
+    }
+
     // TODO(jellis): support qvalues
     @Test
     public void testIgnoresQvalues() throws IOException {
@@ -114,7 +124,11 @@ public final class CompressionFilterTest {
     }
 
     private static Invocation.Builder baseRequest(WebTarget target) {
-        return target.path("path").queryParam("value", "val").request();
+        return baseRequest(target, "val");
+    }
+
+    private static Invocation.Builder baseRequest(WebTarget target, String response) {
+        return target.path("path").queryParam("value", response).request();
     }
 
     private static String toString(InputStream is) {
@@ -137,7 +151,7 @@ public final class CompressionFilterTest {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
-            env.jersey().register(new CompressionFilter());
+            env.jersey().register(new CompressionFilter(3));
             env.jersey().register(new TestResource());
         }
     }

@@ -59,9 +59,15 @@ public final class CompressionFilter implements ContainerResponseFilter {
     }
 
     private final LoadingCache<List<String>, List<String>> parsedHeaders;
+    private final int minCompressionBytes;
 
     public CompressionFilter() {
-        parsedHeaders = CacheBuilder.newBuilder()
+        this(0);
+    }
+
+    public CompressionFilter(int minCompressionBytes) {
+        this.minCompressionBytes = minCompressionBytes;
+        this.parsedHeaders = CacheBuilder.newBuilder()
                 .maximumSize(100)
                 .build(new CacheLoader<List<String>, List<String>>() {
                     @Override
@@ -74,7 +80,7 @@ public final class CompressionFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        if (alreadyEncoded(responseContext)) {
+        if (responseTooSmall(responseContext) || alreadyEncoded(responseContext)) {
             return;
         }
 
@@ -96,6 +102,11 @@ public final class CompressionFilter implements ContainerResponseFilter {
                 return;
             }
         }
+    }
+
+    private boolean responseTooSmall(ContainerResponseContext response) {
+        int length = response.getLength();
+        return length != -1 && length < minCompressionBytes;
     }
 
     private static boolean alreadyEncoded(ContainerResponseContext response) {
