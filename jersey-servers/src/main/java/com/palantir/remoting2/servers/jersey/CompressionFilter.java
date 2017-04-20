@@ -70,7 +70,7 @@ public final class CompressionFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        if (responseTooSmall(responseContext) || alreadyEncoded(responseContext) || isUncompressable(responseContext)) {
+        if (isTooSmall(responseContext) || isEncoded(responseContext) || isUncompressable(responseContext)) {
             return;
         }
 
@@ -94,12 +94,12 @@ public final class CompressionFilter implements ContainerResponseFilter {
         }
     }
 
-    private boolean responseTooSmall(ContainerResponseContext response) {
+    private boolean isTooSmall(ContainerResponseContext response) {
         int length = response.getLength();
         return length != -1 && length < minCompressionBytes;
     }
 
-    private static boolean alreadyEncoded(ContainerResponseContext response) {
+    private static boolean isEncoded(ContainerResponseContext response) {
         List<Object> encodings = response.getHeaders().get(HttpHeaders.CONTENT_ENCODING);
         return encodings != null && encodings.size() > 0;
     }
