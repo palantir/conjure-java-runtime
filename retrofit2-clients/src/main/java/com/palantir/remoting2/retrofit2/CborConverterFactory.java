@@ -35,6 +35,8 @@ public final class CborConverterFactory extends Converter.Factory {
 
     @Override
     public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
+        // given we don't know how to convert the response until we check the Content-Type, we construct a delegate
+        // converter for when the response is not application/cbor.
         Converter<ResponseBody, ?> delegateConverter = delegate.responseBodyConverter(type, annotations, retrofit);
         JavaType javaType = cborObjectMapper.getTypeFactory().constructType(type);
         ObjectReader objectReader = cborObjectMapper.readerFor(javaType);

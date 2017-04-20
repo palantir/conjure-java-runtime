@@ -16,7 +16,16 @@ import java.io.PushbackInputStream;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
-
+/**
+ * Currently this checks the Content-Type of the response on every request.
+ *
+ * In the cases where we know the Content-Type of the response at compile time,
+ * i.e. when the only Accepts header is application/cbor, this is unnecessary work.
+ *
+ * Ideally we'll codegen a client which handles the content-type switching where necessary
+ * (multiple possible response Content-Types from the server) and does not do the checking
+ * where this is known at compile time.
+ */
 public final class CborDelegateDecoder implements Decoder {
 
     private final ObjectMapper cborObjectMapper;
