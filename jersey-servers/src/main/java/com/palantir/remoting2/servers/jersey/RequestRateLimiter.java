@@ -23,6 +23,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.util.concurrent.RateLimiter;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -54,6 +55,7 @@ public final class RequestRateLimiter<T> implements ContainerRequestFilter {
         this.requestFeatureFunc = requestFeatureFunc;
         this.limiters = CacheBuilder.newBuilder()
                 .maximumSize(maxUniqueFeatures)
+                .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build(new CacheLoader<T, RateLimiter>() {
                     @Override
                     public RateLimiter load(T key) throws Exception {
