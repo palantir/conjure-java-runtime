@@ -52,6 +52,13 @@ public final class FeignSerializableErrorErrorDecoderTests {
         checkExceptionAndMessage(response, expectedMessage);
     }
 
+    @Test
+    public void testNoResponseBody() {
+        Response response = Response.create(400, "reason", ImmutableMap.of(), null, 0);
+        String expectedMessage = "400 reason";
+        checkExceptionAndMessage(response, expectedMessage);
+    }
+
     private void checkExceptionAndMessage(Response response, String expectedMessage) {
         Exception decode = decoder.decode("ignored", response);
         assertThat(decode, is(instanceOf(RuntimeException.class)));

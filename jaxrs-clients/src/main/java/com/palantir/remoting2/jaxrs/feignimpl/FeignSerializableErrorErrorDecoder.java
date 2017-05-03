@@ -36,9 +36,12 @@ public enum FeignSerializableErrorErrorDecoder implements ErrorDecoder {
             contentTypes = ImmutableSet.of();
         }
 
-        InputStream body;
+        InputStream body = null;
         try {
-            body = response.body().asInputStream();
+            Response.Body responseBody = response.body();
+            if (responseBody != null) {
+                body = responseBody.asInputStream();
+            }
         } catch (IOException e) {
             return new RuntimeException("Cannot get input stream from response: " + e.getMessage(), e);
         }
