@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.jsontype.NamedType;
 import java.util.Collections;
 import org.junit.Test;
 
-public class DiscoverableSubtypeResolverTest {
+public final class DiscoverableSubtypeResolverTest {
     private static final Class<Discoverable> ROOT_CLASS = Discoverable.class;
 
     @Test
