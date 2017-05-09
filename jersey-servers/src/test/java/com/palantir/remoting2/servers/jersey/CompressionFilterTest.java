@@ -115,6 +115,15 @@ public final class CompressionFilterTest {
     }
 
     @Test
+    public void testHandleWhitespace() throws IOException {
+        Response response = baseRequest(target).acceptEncoding("deflate, gzip").get();
+
+        assertThat(response.getHeaderString(HttpHeaders.VARY), is(HttpHeaders.ACCEPT_ENCODING));
+        assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is("gzip"));
+        assertThat(toString(new GZIPInputStream(toStream(response))), is("val"));
+    }
+
+    @Test
     public void testNoCompressionWithoutHeader() {
         Response response = baseRequest(target).get();
 

@@ -117,7 +117,8 @@ public final class CompressionFilter implements ContainerResponseFilter {
         // TODO(jellis): don't ignore qvalues
         for (String line : headerLines) {
             for (String acceptedEncoding : line.split(",")) {
-                builder.add(acceptedEncoding.split(";")[0]);
+                String rawEncoding = acceptedEncoding.split(";")[0];
+                builder.add(rawEncoding.trim());
             }
         }
 
