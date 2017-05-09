@@ -36,7 +36,7 @@ public class DiscoverableSubtypeResolver extends StdSubtypeResolver {
     }
 
     public DiscoverableSubtypeResolver(Class<?> rootClass) {
-        this(new MetaInfBasedFinder(), rootClass);
+        this(new MetaInfBasedSubtypeFinder(), rootClass);
     }
 
     public DiscoverableSubtypeResolver(SubtypeFinder subtypeFinder, Class<?> rootClass) {

@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,13 +34,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Loads subclasses based on information found in files within the {@code META-INF/services} folder of a jar.
  */
-public final class MetaInfBasedFinder implements SubtypeFinder {
+public final class MetaInfBasedSubtypeFinder implements SubtypeFinder {
     private static final String META_INF_SERVICES = "META-INF/services/";
-    private Logger log = LoggerFactory.getLogger(MetaInfBasedFinder.class);
+    private Logger log = LoggerFactory.getLogger(MetaInfBasedSubtypeFinder.class);
 
     /**
      * {@inheritDoc}.
      */
+    @Override
     public Set<Class<?>> findSubtypes(Class<?> clazz) {
         Set<Class<?>> subtypes = new HashSet<>();
         Queue<Class<?>> toBeProcessed = new LinkedList<>();
@@ -49,7 +51,7 @@ public final class MetaInfBasedFinder implements SubtypeFinder {
         while (!toBeProcessed.isEmpty()) {
             Class<?> curClazz = toBeProcessed.poll();
 
-            findDirectSubTypes(curClazz)
+            findDirectSubTypes(curClazz).stream()
                     .filter(subtype -> !subtypes.contains(subtype))
                     .forEach(subtype -> {
                         subtypes.add(subtype);
@@ -60,12 +62,13 @@ public final class MetaInfBasedFinder implements SubtypeFinder {
         return subtypes;
     }
 
-    private Stream<Class<?>> findDirectSubTypes(Class<?> clazz) {
+    private Set<Class<?>> findDirectSubTypes(Class<?> clazz) {
         return subTypeInfoFilesFor(clazz).stream()
-                .flatMap(this::loadClassesFromInfoFile);
+                .flatMap(infoFile -> loadClassesFromInfoFile(infoFile).stream())
+                .collect(Collectors.toSet());
     }
 
-    private Stream<? extends Class<?>> loadClassesFromInfoFile(URL infoFileUrl) {
+    private Set<? extends Class<?>> loadClassesFromInfoFile(URL infoFileUrl) {
         try (Stream<String> lines = Files.lines(Paths.get(infoFileUrl.getPath()))) {
             return lines.flatMap(fullyQualifiedSubclassName -> {
                 try {
@@ -74,10 +77,10 @@ public final class MetaInfBasedFinder implements SubtypeFinder {
                     log.info("Unable to load class {}", fullyQualifiedSubclassName);
                     return Stream.empty();
                 }
-            });
+            }).collect(Collectors.toSet());
         } catch (IOException e) {
             log.warn("Error while reading subtype list from: {}", infoFileUrl, e);
-            return Stream.empty();
+            return Collections.emptySet();
         }
     }
 
