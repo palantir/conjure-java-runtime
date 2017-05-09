@@ -16,6 +16,8 @@
 
 package com.palantir.remoting2.ext.jackson.discoverable;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+
 /**
  * Entry-point for Jackson subtype discovery. Top-level interfaces that need to be available to the object mapper.
  * A custom {@link com.fasterxml.jackson.databind.jsontype.SubtypeResolver SubtypeResolver} will look for entries in
@@ -39,8 +41,7 @@ package com.palantir.remoting2.ext.jackson.discoverable;
  * the META-INF/services files at compile time.
  *
  * {@code Discoverable} and {@code @AutoService} allow a developer not to have to provide
- * {@link com.fasterxml.jackson.annotation.JsonSubTypes @JsonSubTypes} enumerating all the implementations of an
- * interface.
+ * {@link JsonSubTypes @JsonSubTypes} enumerating all the implementations of an interface.
  *
  * <p>
  * Example:
