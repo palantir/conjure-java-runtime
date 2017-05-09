@@ -21,8 +21,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,17 +33,36 @@ import org.slf4j.LoggerFactory;
 /**
  * Loads subclasses based on information found in files within the {@code META-INF/services} folder of a jar.
  */
-public final class MetaInfBasedDiscoverer implements SubtypeDiscoverer {
+public final class MetaInfBasedFinder implements SubtypeFinder {
     private static final String META_INF_SERVICES = "META-INF/services/";
-    private Logger log = LoggerFactory.getLogger(MetaInfBasedDiscoverer.class);
+    private Logger log = LoggerFactory.getLogger(MetaInfBasedFinder.class);
 
     /**
      * {@inheritDoc}.
      */
-    public List<Class<?>> discoverSubtypes(Class<?> clazz) {
+    public Set<Class<?>> findSubtypes(Class<?> clazz) {
+        Set<Class<?>> subtypes = new HashSet<>();
+        Queue<Class<?>> toBeProcessed = new LinkedList<>();
+
+        toBeProcessed.offer(clazz);
+
+        while (!toBeProcessed.isEmpty()) {
+            Class<?> curClazz = toBeProcessed.poll();
+
+            findDirectSubTypes(curClazz)
+                    .filter(subtype -> !subtypes.contains(subtype))
+                    .forEach(subtype -> {
+                        subtypes.add(subtype);
+                        toBeProcessed.offer(subtype);
+                    });
+        }
+
+        return subtypes;
+    }
+
+    private Stream<Class<?>> findDirectSubTypes(Class<?> clazz) {
         return subTypeInfoFilesFor(clazz).stream()
-                .flatMap(this::loadClassesFromInfoFile)
-                .collect(Collectors.toList());
+                .flatMap(this::loadClassesFromInfoFile);
     }
 
     private Stream<? extends Class<?>> loadClassesFromInfoFile(URL infoFileUrl) {
