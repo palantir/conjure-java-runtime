@@ -17,7 +17,6 @@
 package com.palantir.remoting2.ext.jackson.discoverable;
 
 import com.fasterxml.jackson.databind.jsontype.impl.StdSubtypeResolver;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -32,7 +31,6 @@ import java.util.Set;
  */
 @SuppressWarnings("WeakerAccess") // Allows users of this library to customize the behavior
 public final class DiscoverableSubtypeResolver extends StdSubtypeResolver {
-    private final Set<Class<?>> discoveredTypes;
 
     public DiscoverableSubtypeResolver() {
         this(Discoverable.class);
@@ -43,7 +41,7 @@ public final class DiscoverableSubtypeResolver extends StdSubtypeResolver {
     }
 
     public DiscoverableSubtypeResolver(SubtypeDiscoverer discoverer, Class<?> rootClass) {
-        discoveredTypes = Collections.unmodifiableSet(discoverSubTypes(discoverer, rootClass));
+        discoverSubTypes(discoverer, rootClass).forEach(this::registerSubtypes);
     }
 
     private Set<Class<?>> discoverSubTypes(SubtypeDiscoverer discoverer, Class<?> rootClass) {
