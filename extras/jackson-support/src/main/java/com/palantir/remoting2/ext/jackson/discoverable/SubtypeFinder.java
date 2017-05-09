@@ -16,20 +16,18 @@
 
 package com.palantir.remoting2.ext.jackson.discoverable;
 
-import java.util.List;
+import java.util.Set;
 
 /**
- * This component is responsible for discovering the Jackson-serializable direct subclasses of a given class/interface.
- * By immediate subclasses we mean subclasses that explicitly extend/implement the given class/interface, for example,
- * if A extends B, B extends C, B is a direct subclass of A, while C is not.
+ * This component is responsible for discovering the Jackson-serializable subclasses of a given type.
  */
 @FunctionalInterface
-public interface SubtypeDiscoverer {
+public interface SubtypeFinder {
 
     /**
-     * Finds all the Jackson-serializable direct subclasses of a given class.
+     * Finds all the Jackson-serializable subtypes of a given class.
      *
-     * @param superClass The class for which to find the direct subclasses
+     * @param superClass The class for which to find the subtypes
      */
-    List<Class<?>> discoverSubtypes(Class<?> superClass);
+    Set<Class<?>> findSubtypes(Class<?> superClass);
 }

@@ -16,51 +16,35 @@
 
 package com.palantir.remoting2.ext.jackson.discoverable;
 
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.jsontype.impl.StdSubtypeResolver;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.Collections;
 import java.util.Set;
 
 /**
  * A custom resolver that will register with an ObjectMapper all the classes in the hierarchy starting from the provided
  * root class ({@link Discoverable} by default).
  * <p>
- * NOTE: The way subclasses are discovered depends on the provided {@link SubtypeDiscoverer}. The default one will only
+ * NOTE: The way subclasses are discovered depends on the provided {@link SubtypeFinder}. The default one will only
  *       load subclasses that can be found within files in the {@code META-INF/services} folder in a jar.
  */
 @SuppressWarnings("WeakerAccess") // Allows users of this library to customize the behavior
-public final class DiscoverableSubtypeResolver extends StdSubtypeResolver {
+public class DiscoverableSubtypeResolver extends StdSubtypeResolver {
 
     public DiscoverableSubtypeResolver() {
         this(Discoverable.class);
     }
 
     public DiscoverableSubtypeResolver(Class<?> rootClass) {
-        this(new MetaInfBasedDiscoverer(), rootClass);
+        this(new MetaInfBasedFinder(), rootClass);
     }
 
-    public DiscoverableSubtypeResolver(SubtypeDiscoverer discoverer, Class<?> rootClass) {
-        discoverSubTypes(discoverer, rootClass).forEach(this::registerSubtypes);
+    public DiscoverableSubtypeResolver(SubtypeFinder subtypeFinder, Class<?> rootClass) {
+        subtypeFinder.findSubtypes(rootClass)
+                .forEach(this::registerSubtypes);
     }
 
-    private Set<Class<?>> discoverSubTypes(SubtypeDiscoverer discoverer, Class<?> rootClass) {
-        Set<Class<?>> discovered = new HashSet<>();
-        Queue<Class<?>> toBeProcessed = new LinkedList<>();
-
-        toBeProcessed.offer(rootClass);
-
-        while (!toBeProcessed.isEmpty()) {
-            Class<?> clazz = toBeProcessed.poll();
-
-            discoverer.discoverSubtypes(clazz).stream()
-                    .filter(subtype -> !discovered.contains(subtype))
-                    .forEach(subtype -> {
-                        discovered.add(subtype);
-                        toBeProcessed.offer(subtype);
-                    });
-        }
-
-        return discovered;
+    public final Set<NamedType> registeredSubtypes() {
+        return Collections.unmodifiableSet(_registeredSubtypes);
     }
 }
