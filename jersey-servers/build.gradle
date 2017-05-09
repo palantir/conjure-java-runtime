@@ -5,6 +5,7 @@ dependencies {
     compile project(":error-handling")
     compile project(":tracing")
 
+    compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.jcraft:jzlib"
     compile "org.glassfish.jersey.core:jersey-server"

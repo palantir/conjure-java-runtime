@@ -10,10 +10,14 @@
             "locked": "2.6.7",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
+                "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor",
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
-                "com.fasterxml.jackson.module:jackson-module-afterburner"
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider",
+                "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.fasterxml.jackson.module:jackson-module-jaxb-annotations"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
@@ -22,10 +26,20 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.fasterxml.jackson.module:jackson-module-jaxb-annotations",
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
+            "locked": "2.6.7",
+            "transitive": [
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider",
+                "com.palantir.remoting2:jackson-support"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
@@ -50,12 +64,27 @@
                 "com.palantir.remoting2:jackson-support"
             ]
         },
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base": {
+            "locked": "2.6.7",
+            "transitive": [
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
+            ]
+        },
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider": {
+            "locked": "2.6.7"
+        },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.7",
             "transitive": [
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.module:jackson-module-jaxb-annotations": {
+            "locked": "2.6.7",
+            "transitive": [
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
             ]
         },
         "com.google.code.findbugs:jsr305": {
@@ -221,10 +250,14 @@
             "locked": "2.6.7",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
+                "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor",
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
-                "com.fasterxml.jackson.module:jackson-module-afterburner"
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider",
+                "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.fasterxml.jackson.module:jackson-module-jaxb-annotations"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
@@ -233,10 +266,20 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.fasterxml.jackson.module:jackson-module-jaxb-annotations",
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
+            "locked": "2.6.7",
+            "transitive": [
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider",
+                "com.palantir.remoting2:jackson-support"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
@@ -261,12 +304,27 @@
                 "com.palantir.remoting2:jackson-support"
             ]
         },
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base": {
+            "locked": "2.6.7",
+            "transitive": [
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
+            ]
+        },
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider": {
+            "locked": "2.6.7"
+        },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.7",
             "transitive": [
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.module:jackson-module-jaxb-annotations": {
+            "locked": "2.6.7",
+            "transitive": [
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
             ]
         },
         "com.google.code.findbugs:jsr305": {
