@@ -27,7 +27,7 @@ import java.util.UUID;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-public final class DefaultServiceExceptionTests {
+public final class ServiceExceptionTests {
 
     @Test
     public void testLogMessage() {
@@ -54,7 +54,7 @@ public final class DefaultServiceExceptionTests {
 
         String expectedMessage = "arg1=foo, arg2=2, arg3=null";
 
-        DefaultServiceException ex = new DefaultServiceException(messageTemplate, args);
+        ServiceException ex = new ServiceException(messageTemplate, args);
 
         assertThat(ex.getMessage()).isEqualTo(expectedMessage);
     }
@@ -62,7 +62,7 @@ public final class DefaultServiceExceptionTests {
     @Test
     public void testExceptionCause() {
         Throwable cause = new RuntimeException("foo");
-        ServiceException ex = new DefaultServiceException(cause, "");
+        AbstractServiceException ex = new ServiceException(cause, "");
 
         assertThat(ex.getCause()).isEqualTo(cause);
     }
@@ -70,28 +70,28 @@ public final class DefaultServiceExceptionTests {
     @Test
     public void testStatus() {
         int status = 399;
-        ServiceException ex = new DefaultServiceException(status, "");
+        AbstractServiceException ex = new ServiceException(status, "");
 
         assertThat(ex.getStatus()).isEqualTo(status);
     }
 
     @Test
     public void testDefaultStatus() {
-        ServiceException ex = new DefaultServiceException("");
+        AbstractServiceException ex = new ServiceException("");
 
         assertThat(ex.getStatus()).isEqualTo(500);
     }
 
     @Test
     public void testErrorIdsAreUnique() {
-        UUID errorId1 = UUID.fromString(new DefaultServiceException("").getErrorId());
-        UUID errorId2 = UUID.fromString(new DefaultServiceException("").getErrorId());
+        UUID errorId1 = UUID.fromString(new ServiceException("").getErrorId());
+        UUID errorId2 = UUID.fromString(new ServiceException("").getErrorId());
 
         assertThat(errorId1).isNotEqualTo(errorId2);
     }
 
     private void assertLogMessageIsCorrect(String messageTemplate, Param... args) {
-        DefaultServiceException ex = new DefaultServiceException(messageTemplate, args);
+        ServiceException ex = new ServiceException(messageTemplate, args);
 
         String expectedMessageFormat = "Error handling request {}: " + messageTemplate;
 

@@ -19,8 +19,8 @@ package com.palantir.remoting2.servers.jersey;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.palantir.remoting2.errors.AbstractServiceException;
 import com.palantir.remoting2.errors.SerializableError;
-import com.palantir.remoting2.errors.ServiceException;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -28,14 +28,14 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> {
+final class ServiceExceptionMapper implements ExceptionMapper<AbstractServiceException> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
 
     static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     @Override
-    public Response toResponse(ServiceException exception) {
+    public Response toResponse(AbstractServiceException exception) {
         exception.logTo(log);
 
         int status = exception.getStatus();

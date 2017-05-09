@@ -16,34 +16,56 @@
 
 package com.palantir.remoting2.errors;
 
-import java.util.UUID;
 import javax.annotation.Nullable;
-import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 
-/**
- * A base class for defining customized exceptions.
- */
-public abstract class ServiceException extends RuntimeException {
+public class ServiceException extends AbstractServiceException {
 
-    private final String errorId = UUID.randomUUID().toString();
+    private static final int DEFAULT_STATUS = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
 
-    protected ServiceException(String message, @Nullable Throwable cause) {
-        super(message, cause);
+    private final ServiceExceptionLogger exceptionLogger;
+    private final int status;
+
+    public ServiceException(String messageFormat, Param<?>... messageArgs) {
+        this(DEFAULT_STATUS, messageFormat,  messageArgs);
     }
 
-    /** Logs this exception. This method is called by the corresponding {@link ExceptionMapper}. */
-    public abstract void logTo(Logger log);
+    public ServiceException(Throwable cause, String messageFormat, Param<?>... messageArgs) {
+        this(DEFAULT_STATUS, cause, messageFormat,  messageArgs);
+    }
 
-    /** The error that should be returned to the remote client. */
-    public abstract SerializableError getError();
+    public ServiceException(int status, String messageFormat, Param<?>... messageArgs) {
+        this(status, null, messageFormat,  messageArgs);
+    }
 
-    /** The status code for the response. */
-    public abstract int getStatus();
+    public ServiceException(int status, @Nullable Throwable cause, String messageFormat,
+            Param<?>... messageArgs) {
+        super(ServiceExceptionLogger.format(messageFormat, messageArgs), cause);
 
-    /** A unique identifier for this error. */
-    public final String getErrorId() {
-        return errorId;
+        this.status = status;
+        this.exceptionLogger = new ServiceExceptionLogger(messageFormat, messageArgs, this);
+    }
+
+    @Override
+    public final void logTo(Logger log) {
+        exceptionLogger.logTo(log);
+    }
+
+    /**
+     * Subclasses may override this method to return custom errors to the remote caller.
+     */
+    @SuppressWarnings("checkstyle:designforextension")
+    @Override
+    public final SerializableError getError() {
+        return SerializableError.of(
+                "Refer to the server logs with this errorId: " + getErrorId(),
+                this.getClass());
+    }
+
+    @Override
+    public final int getStatus() {
+        return status;
     }
 
 }

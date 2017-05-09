@@ -28,7 +28,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.remoting2.errors.SerializableError;
-import com.palantir.remoting2.errors.ServiceException;
+import com.palantir.remoting2.errors.AbstractServiceException;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -42,7 +42,7 @@ public final class ServiceExceptionMapperTest {
 
     private static final int STATUS = 499;
 
-    private final ServiceException exception = mock(ServiceException.class);
+    private final AbstractServiceException exception = mock(AbstractServiceException.class);
     private final ServiceExceptionMapper mapper = new ServiceExceptionMapper();
 
     @Before

@@ -25,13 +25,13 @@ final class ServiceExceptionLogger {
 
     private final String messageFormat;
     private final Param<?>[] messageArgs;
-    private final ServiceException exception;
+    private final AbstractServiceException exception;
 
     public static String format(String messageFormat, Param<?>[] messageArgs) {
         return MessageFormatter.arrayFormat(messageFormat, messageArgs).getMessage();
     }
 
-    ServiceExceptionLogger(String messageFormat, Param<?>[] messageArgs, ServiceException exception) {
+    ServiceExceptionLogger(String messageFormat, Param<?>[] messageArgs, AbstractServiceException exception) {
         this.messageFormat = messageFormat;
         this.messageArgs = messageArgs;
         this.exception = exception;
