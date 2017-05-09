@@ -73,7 +73,10 @@
             "locked": "2.0.1"
         },
         "org.slf4j:slf4j-api": {
-            "locked": "1.7.12"
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.remoting2:jackson-support"
+            ]
         }
     },
     "runtime": {
@@ -150,7 +153,10 @@
             "locked": "2.0.1"
         },
         "org.slf4j:slf4j-api": {
-            "locked": "1.7.12"
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.remoting2:jackson-support"
+            ]
         }
     }
 }
