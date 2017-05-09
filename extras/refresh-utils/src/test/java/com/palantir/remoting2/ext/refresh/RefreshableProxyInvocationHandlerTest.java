@@ -17,6 +17,7 @@
 package com.palantir.remoting2.ext.refresh;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -97,24 +98,19 @@ public final class RefreshableProxyInvocationHandlerTest {
         Mockito.verifyNoMoreInteractions(delegate1, delegate2, supplier);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testUnwrapsItes() {
-        ThrowingExceptionClass object = new ThrowingExceptionClass();
-        Refreshable<ThrowingExceptionClass> refreshable = Refreshable.of(object);
+    @Test
+    public void testUnwrapsInvocationTargetExceptions() {
+        Callable throwingCallable = () -> {
+            throw new IllegalStateException("Whoops");
+        };
+        Refreshable<Callable> refreshable = Refreshable.of(throwingCallable);
 
-
-        RefreshableProxyInvocationHandler<ThrowingExceptionClass, Callable> handler =
-                RefreshableProxyInvocationHandler.create(refreshable, (tec) -> object);
-
+        RefreshableProxyInvocationHandler<Callable, Callable> handler =
+                RefreshableProxyInvocationHandler.create(refreshable, (tec) -> throwingCallable);
         Callable proxy = Reflection.newProxy(Callable.class, handler);
 
-        proxy.call();
-    }
-
-    private static class ThrowingExceptionClass implements Callable {
-        @Override
-        public void call() {
-            throw new IllegalStateException("Whoops!");
-        }
+        assertThatThrownBy(proxy::call)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Whoops");
     }
 }
