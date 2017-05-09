@@ -96,4 +96,25 @@ public final class RefreshableProxyInvocationHandlerTest {
         verify(delegate2, times(2)).call();
         Mockito.verifyNoMoreInteractions(delegate1, delegate2, supplier);
     }
+
+    @Test(expected = IllegalStateException.class)
+    public void testUnwrapsItes() {
+        ThrowingExceptionClass object = new ThrowingExceptionClass();
+        Refreshable<ThrowingExceptionClass> refreshable = Refreshable.of(object);
+
+
+        RefreshableProxyInvocationHandler<ThrowingExceptionClass, Callable> handler =
+                RefreshableProxyInvocationHandler.create(refreshable, (tec) -> object);
+
+        Callable proxy = Reflection.newProxy(Callable.class, handler);
+
+        proxy.call();
+    }
+
+    private static class ThrowingExceptionClass implements Callable {
+        @Override
+        public void call() {
+            throw new IllegalStateException("Whoops!");
+        }
+    }
 }
