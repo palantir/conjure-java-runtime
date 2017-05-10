@@ -1,0 +1,61 @@
+/*
+ * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'com.github.johnrengelman.shadow'
+apply from: "${rootDir}/gradle/publish-shadow.gradle"
+
+dependencies {
+    compile project(":jaxrs-clients")
+    compile "com.fasterxml.jackson.module:jackson-module-scala_2.11"
+
+    // Keep in sync with the dependencies excluded from shadowJar.
+    shadow project(":jaxrs-clients")
+    shadow "com.fasterxml.jackson.module:jackson-module-scala_2.11"
+}
+
+shadowJar {
+    mergeServiceFiles()
+    relocate('feign', 'httpremoting.shaded.feign')
+    relocate('zipkin', 'httpremoting.shaded.zipkin')
+    relocate('org.joda.time', 'httpremoting.shaded.org.joda.time')
+    relocate('okio', 'httpremoting.shaded.okio')
+    relocate('org.jvnet.animal_sniffer', 'httpremoting.shaded.org.jvnet.animal_sniffer')
+    dependencies {
+        exclude(project(':jaxrs-clients'))
+        exclude(dependency { it.moduleGroup.contains("javax.ws.rs") })
+        exclude(dependency { it.moduleGroup.contains("com.fasterxml.jackson") })
+        exclude(dependency { it.moduleGroup.contains("com.google.guava") })
+        exclude(dependency { it.moduleGroup.contains("com.squareup.okhttp3") })
+        exclude(dependency { it.moduleGroup.contains("org.slf4j") })
+        exclude(dependency { it.moduleGroup.contains("com.palantir.tokens") })
+    }
+    classifier = ''
+}
+
+tasks.shadowJar {
+    from('licenses/') {
+        into 'META-INF/LICENSES'
+    }
+}
+
+task checkLicenseInformation(dependsOn: 'shadowJar') << {
+    def jar = zipTree(tasks.shadowJar.archivePath)
+    def licenseFiles = jar.matching { include 'META-INF/LICENSES/*' }
+    if (licenseFiles.files.size() != 5) {
+        throw new GradleException("Expected 5 META-INF/LICENSES/* files in shadowJar, found: " + licenseFiles.files)
+    }
+}
+check.dependsOn checkLicenseInformation
