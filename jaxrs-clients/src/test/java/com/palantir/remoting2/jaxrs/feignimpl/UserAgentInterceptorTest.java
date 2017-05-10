@@ -72,6 +72,27 @@ public final class UserAgentInterceptorTest {
         }
     }
 
+    @Test
+    public void testConsistencyWithRetrofitUserAgentInterceptor() throws Exception {
+        String illegalAgentString = "";
+        String expectedMessage = "User Agent must match pattern '[A-Za-z0-9()\\-#;/.,_\\s]+': ";
+
+        try {
+            UserAgentInterceptor.of(illegalAgentString);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), is(expectedMessage));
+        }
+
+        try {
+            com.palantir.remoting2.retrofit2.UserAgentInterceptor.of(illegalAgentString);
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e.getMessage(), is(expectedMessage));
+        }
+
+    }
+
     private static Map<String, Collection<String>> singletonHeaderMap(String key, String value) {
         return Collections.<String, Collection<String>>singletonMap(key, Arrays.asList(value));
     }

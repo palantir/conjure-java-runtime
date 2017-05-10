@@ -26,8 +26,8 @@ import okhttp3.Response;
 
 public final class UserAgentInterceptor implements Interceptor {
 
-    // keep in sync with corresponding pattern in UserAgentInterceptor.java in http-clients project
-    private static final Pattern VALID_USER_AGENT = Pattern.compile("[A-Za-z0-9()-/\\.,_\\s]+");
+    // keep in sync with corresponding pattern in UserAgentInterceptor.java in jaxrs-clients project
+    private static final Pattern VALID_USER_AGENT = Pattern.compile("[A-Za-z0-9()\\-#;/.,_\\s]+");
     private final String userAgent;
 
     private UserAgentInterceptor(String userAgent) {
