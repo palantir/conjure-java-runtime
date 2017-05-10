@@ -16,11 +16,12 @@
 
 package com.palantir.remoting2.errors;
 
+import java.io.Serializable;
 import java.util.Objects;
 import javax.annotation.Nullable;
 
 /** A wrapper around an argument used to build a formatted message. */
-public abstract class Param<T> {
+public abstract class Param<T> implements Serializable {
 
     private final String name;
     private final T value;

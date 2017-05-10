@@ -25,6 +25,7 @@ import com.palantir.remoting2.errors.SafeParam;
 import com.palantir.remoting2.errors.SerializableError;
 import com.palantir.remoting2.errors.ServiceException;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -73,14 +74,14 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
 
     @VisibleForTesting
     Object[] getLogMessageParams(ServiceException exception) {
-        Param<?>[] messageParams = exception.getMessageParams();
+        List<Param<?>> messageParams = exception.getMessageParams();
 
-        Object[] args = new Object[messageParams.length + 2];
+        Object[] args = new Object[messageParams.size() + 2];
 
         args[0] = SafeParam.of("errorId", exception.getErrorId());
 
-        for (int i = 0; i < messageParams.length; i++) {
-            args[i + 1] = messageParams[i];
+        for (int i = 0; i < messageParams.size(); i++) {
+            args[i + 1] = messageParams.get(i);
         }
 
         args[args.length - 1] = exception;

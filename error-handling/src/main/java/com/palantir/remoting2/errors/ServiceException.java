@@ -16,6 +16,8 @@
 
 package com.palantir.remoting2.errors;
 
+import com.google.common.collect.ImmutableList;
+import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import javax.ws.rs.core.Response;
@@ -27,7 +29,7 @@ public class ServiceException extends RuntimeException {
 
     private final String errorId = UUID.randomUUID().toString();
     private final String messageFormat;
-    private final Param<?>[] messageParams;
+    private final List<Param<?>> messageParams;
     private final int status;
 
     public ServiceException(String messageFormat, Param<?>... messageParams) {
@@ -48,7 +50,7 @@ public class ServiceException extends RuntimeException {
 
         this.status = status;
         this.messageFormat = messageFormat;
-        this.messageParams = messageParams;
+        this.messageParams = ImmutableList.copyOf(messageParams);
     }
 
     /** A unique identifier for this error. */
@@ -78,7 +80,7 @@ public class ServiceException extends RuntimeException {
     }
 
     /** The parameters for the exception message. */
-    public final Param<?>[] getMessageParams() {
+    public final List<Param<?>> getMessageParams() {
         return messageParams;
     }
 
