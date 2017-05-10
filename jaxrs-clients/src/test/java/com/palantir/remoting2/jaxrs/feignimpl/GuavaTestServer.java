@@ -113,6 +113,11 @@ public class GuavaTestServer extends Application<Configuration> {
         }
 
         @Override
+        public String getJsonString(String value) {
+            return value;
+        }
+
+        @Override
         public String getString(@Nullable String value) {
             return value;
         }
@@ -199,6 +204,12 @@ public class GuavaTestServer extends Application<Configuration> {
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         Optional<ImmutableMap<String, String>> getOptionalThrowsForbidden(@QueryParam("value") @Nullable String value);
+
+        @GET
+        @Path("/jsonString")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        String getJsonString(@QueryParam("value") @Nullable String value);
 
         @GET
         @Path("/string")

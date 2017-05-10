@@ -16,6 +16,7 @@
 
 package feign;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -75,6 +76,13 @@ public final class TextDelegateDecoderTest {
 
         assertEquals(decodedObject, "text response");
         verifyZeroInteractions(delegate);
+    }
+
+    @Test
+    public void testCannotReturnStringWithMediaTypeJson() throws Exception {
+        assertThatThrownBy(() -> service.getJsonString("foo"))
+                .isInstanceOf(FeignException.class)
+                .hasMessageStartingWith("Unrecognized token 'foo': was expecting 'null', 'true', 'false' or NaN");
     }
 
     @Test
