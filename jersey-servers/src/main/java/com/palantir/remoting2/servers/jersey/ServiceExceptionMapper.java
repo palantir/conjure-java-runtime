@@ -19,8 +19,11 @@ package com.palantir.remoting2.servers.jersey;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.palantir.remoting2.errors.AbstractServiceException;
+import com.google.common.annotations.VisibleForTesting;
+import com.palantir.remoting2.errors.Param;
+import com.palantir.remoting2.errors.SafeParam;
 import com.palantir.remoting2.errors.SerializableError;
+import com.palantir.remoting2.errors.ServiceException;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -28,15 +31,17 @@ import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class ServiceExceptionMapper implements ExceptionMapper<AbstractServiceException> {
+final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> {
 
-    private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(ServiceExceptionMapper.class);
 
-    static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    private static final String ERROR_MESSAGE_PREFIX_FORMAT = "Error handling request {}: ";
+    private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT);
 
     @Override
-    public Response toResponse(AbstractServiceException exception) {
-        exception.logTo(log);
+    public Response toResponse(ServiceException exception) {
+        logException(exception);
 
         int status = exception.getStatus();
         Response.ResponseBuilder builder = Response.status(status);
@@ -55,6 +60,32 @@ final class ServiceExceptionMapper implements ExceptionMapper<AbstractServiceExc
         }
 
         return builder.build();
+    }
+
+    private void logException(ServiceException exception) {
+        log.warn(getLogMessageFormat(exception), getLogMessageParams(exception));
+    }
+
+    @VisibleForTesting
+    String getLogMessageFormat(ServiceException exception) {
+        return ERROR_MESSAGE_PREFIX_FORMAT + exception.getMessageFormat();
+    }
+
+    @VisibleForTesting
+    Object[] getLogMessageParams(ServiceException exception) {
+        Param<?>[] messageParams = exception.getMessageParams();
+
+        Object[] args = new Object[messageParams.length + 2];
+
+        args[0] = SafeParam.of("errorId", exception.getErrorId());
+
+        for (int i = 0; i < messageParams.length; i++) {
+            args[i + 1] = messageParams[i];
+        }
+
+        args[args.length - 1] = exception;
+
+        return args;
     }
 
 }

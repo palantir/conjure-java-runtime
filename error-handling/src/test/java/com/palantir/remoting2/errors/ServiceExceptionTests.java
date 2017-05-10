@@ -17,32 +17,11 @@
 package com.palantir.remoting2.errors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import com.google.common.collect.Lists;
-import java.util.List;
 import java.util.UUID;
 import org.junit.Test;
-import org.slf4j.Logger;
 
 public final class ServiceExceptionTests {
-
-    @Test
-    public void testLogMessage() {
-        String messageTemplate = "arg1={}, arg2={}";
-        Param<?>[] args = {
-                SafeParam.of("arg1", "foo"),
-                UnsafeParam.of("arg2", "bar")};
-
-        assertLogMessageIsCorrect(messageTemplate, args);
-    }
-
-    @Test
-    public void testLogMessageWithNoParams() {
-        assertLogMessageIsCorrect("error");
-    }
 
     @Test
     public void testExceptionMessage() {
@@ -60,9 +39,27 @@ public final class ServiceExceptionTests {
     }
 
     @Test
+    public void testDefaultSerializableError() {
+        ServiceException ex = new ServiceException("foo");
+        SerializableError expected = SerializableError.of(
+                "Refer to the server logs with this errorId: " + ex.getErrorId(),
+                ServiceException.class);
+        assertThat(ex.getError()).isEqualTo(expected);
+    }
+
+    @Test
+    public void testDefaultSerializableErrorWithSubclass() {
+        CustomServiceException ex = new CustomServiceException("foo");
+        SerializableError expected = SerializableError.of(
+                "Refer to the server logs with this errorId: " + ex.getErrorId(),
+                CustomServiceException.class);
+        assertThat(ex.getError()).isEqualTo(expected);
+    }
+
+    @Test
     public void testExceptionCause() {
         Throwable cause = new RuntimeException("foo");
-        AbstractServiceException ex = new ServiceException(cause, "");
+        ServiceException ex = new ServiceException(cause, "");
 
         assertThat(ex.getCause()).isEqualTo(cause);
     }
@@ -70,14 +67,14 @@ public final class ServiceExceptionTests {
     @Test
     public void testStatus() {
         int status = 399;
-        AbstractServiceException ex = new ServiceException(status, "");
+        ServiceException ex = new ServiceException(status, "");
 
         assertThat(ex.getStatus()).isEqualTo(status);
     }
 
     @Test
     public void testDefaultStatus() {
-        AbstractServiceException ex = new ServiceException("");
+        ServiceException ex = new ServiceException("");
 
         assertThat(ex.getStatus()).isEqualTo(500);
     }
@@ -90,21 +87,12 @@ public final class ServiceExceptionTests {
         assertThat(errorId1).isNotEqualTo(errorId2);
     }
 
-    private void assertLogMessageIsCorrect(String messageTemplate, Param... args) {
-        ServiceException ex = new ServiceException(messageTemplate, args);
+    private static class CustomServiceException extends ServiceException {
 
-        String expectedMessageFormat = "Error handling request {}: " + messageTemplate;
+        CustomServiceException(String messageFormat, Param<?>... messageParams) {
+            super(messageFormat, messageParams);
+        }
 
-        List<Object> expectedArgs = Lists.newArrayList();
-        expectedArgs.add(SafeParam.of("errorId", ex.getErrorId()));
-        expectedArgs.addAll(Lists.newArrayList(args));
-        expectedArgs.add(ex);
-
-        Logger log = mock(Logger.class);
-        ex.logTo(log);
-
-        verify(log).warn(expectedMessageFormat, expectedArgs.toArray());
-        verifyNoMoreInteractions(log);
     }
 
 }

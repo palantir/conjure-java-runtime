@@ -18,51 +18,49 @@ package com.palantir.remoting2.servers.jersey;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.palantir.remoting2.errors.SerializableError;
-import com.palantir.remoting2.errors.AbstractServiceException;
+import com.google.common.collect.Lists;
+import com.palantir.remoting2.errors.Param;
+import com.palantir.remoting2.errors.SafeParam;
+import com.palantir.remoting2.errors.ServiceException;
+import com.palantir.remoting2.errors.UnsafeParam;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.junit.Before;
 import org.junit.Test;
 
 public final class ServiceExceptionMapperTest {
 
-    private static final SerializableError ERROR = SerializableError.of("foo", "bar");
-    private static final String SERIALIZED_ERROR = serialize(ERROR);
-
     private static final int STATUS = 499;
 
-    private final AbstractServiceException exception = mock(AbstractServiceException.class);
+    private ServiceException exception = new ServiceException(STATUS, "foo");
     private final ServiceExceptionMapper mapper = new ServiceExceptionMapper();
-
-    @Before
-    public void before() {
-        when(exception.getError()).thenReturn(ERROR);
-        when(exception.getStatus()).thenReturn(STATUS);
-    }
 
     @Test
     public void testResponse() {
         Response response = mapper.toResponse(exception);
         assertThat(response.getStatus(), is(STATUS));
         assertThat(response.getMediaType().toString(), is(MediaType.APPLICATION_JSON));
-        assertThat(response.getEntity().toString(), is(SERIALIZED_ERROR));
+        assertThat(response.getEntity().toString(), is(serialize(exception.getError())));
     }
 
     @Test
-    public void testInvokesLog() {
-        mapper.toResponse(exception);
-        verify(exception, times(1)).logTo(any());
+    public void testLogMessage() {
+        String messageTemplate = "arg1={}, arg2={}";
+        Param<?>[] args = {
+                SafeParam.of("arg1", "foo"),
+                UnsafeParam.of("arg2", "bar")};
+
+        assertLogMessageIsCorrect(messageTemplate, args);
+    }
+
+    @Test
+    public void testLogMessageWithNoParams() {
+        assertLogMessageIsCorrect("error");
     }
 
     private static String serialize(Object obj) {
@@ -74,5 +72,19 @@ public final class ServiceExceptionMapperTest {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void assertLogMessageIsCorrect(String messageFormat, Param... params) {
+        ServiceException ex = new ServiceException(messageFormat, params);
+
+        String expectedMessageFormat = "Error handling request {}: " + messageFormat;
+
+        List<Object> expectedParams = Lists.newArrayList();
+        expectedParams.add(SafeParam.of("errorId", ex.getErrorId()));
+        expectedParams.addAll(Lists.newArrayList(params));
+        expectedParams.add(ex);
+
+        assertThat(mapper.getLogMessageFormat(ex), is(expectedMessageFormat));
+        assertThat(mapper.getLogMessageParams(ex), is(expectedParams.toArray()));
     }
 }
