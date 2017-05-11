@@ -22,6 +22,7 @@ dependencies {
     compile "com.netflix.feign:feign-slf4j"
 
     testCompile project(":jersey-servers")
+    testCompile project(":retrofit2-clients")
     testCompile "com.squareup.okhttp3:mockwebserver"
     testCompile "io.dropwizard:dropwizard-testing"
     testCompile "junit:junit"
