@@ -18,17 +18,21 @@ package com.palantir.remoting2.tracing;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * A sampler that returns true at a rate approximately equivalent to the one specified. The specified rate should be
+ * between 0 and 1 (inclusive).
+ */
 public final class RandomSampler implements TraceSampler {
 
+    private static final ThreadLocalRandom random = ThreadLocalRandom.current();
+
     private final float rate;
-    private final Random random;
 
     public RandomSampler(float rate) {
-        checkArgument(rate > 0 && rate < 1, "rate should be between 0 and 1: was %s", rate);
+        checkArgument(rate >= 0 && rate <= 1, "rate should be between 0 and 1: was %s", rate);
         this.rate = rate;
-        this.random = new Random();
     }
 
     @Override
