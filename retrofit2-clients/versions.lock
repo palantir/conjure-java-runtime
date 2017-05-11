@@ -125,7 +125,7 @@
             "project": true
         },
         "com.palantir.tokens:auth-tokens": {
-            "locked": "1.0.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.remoting2:service-config"
             ]
@@ -293,7 +293,7 @@
             "project": true
         },
         "com.palantir.tokens:auth-tokens": {
-            "locked": "1.0.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.remoting2:service-config"
             ]
