@@ -39,11 +39,11 @@ public abstract class AsyncSpanObserver implements SpanObserver {
     private final AtomicInteger numInflights = new AtomicInteger(0); // number of non-completed observations
     private final int maxInflights;
 
-    AsyncSpanObserver(ExecutorService executorService) {
+    protected AsyncSpanObserver(ExecutorService executorService) {
         this(executorService, DEFAULT_MAX_INFLIGHTS);
     }
 
-    AsyncSpanObserver(ExecutorService executorService, int maxInflights) {
+    protected AsyncSpanObserver(ExecutorService executorService, int maxInflights) {
         this.executorService = MoreExecutors.listeningDecorator(executorService);
         this.maxInflights = maxInflights;
     }
