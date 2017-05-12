@@ -26,8 +26,6 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class RandomSampler implements TraceSampler {
 
-    private static final ThreadLocalRandom random = ThreadLocalRandom.current();
-
     private final float rate;
 
     public RandomSampler(float rate) {
@@ -37,7 +35,7 @@ public final class RandomSampler implements TraceSampler {
 
     @Override
     public boolean sample() {
-        return random.nextFloat() < rate;
+        return ThreadLocalRandom.current().nextFloat() < rate;
     }
 
 }
