@@ -24,7 +24,7 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 
 // Taken from http://stackoverflow.com/questions/9481865/getting-the-ip-address-of-the-current-machine-using-java
-enum InetAddressSupplier implements Supplier<InetAddress> {
+public enum InetAddressSupplier implements Supplier<InetAddress> {
     INSTANCE;
 
     @Override

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A {@link SpanObserver} whose observations are executed on a supplied {@link ExecutorService}.
  */
-abstract class AsyncSpanObserver implements SpanObserver {
+public abstract class AsyncSpanObserver implements SpanObserver {
 
     private static final Logger log = LoggerFactory.getLogger(AsyncSpanObserver.class);
     private static final int DEFAULT_MAX_INFLIGHTS = 10_000;
@@ -52,7 +52,7 @@ abstract class AsyncSpanObserver implements SpanObserver {
     public abstract void doConsume(Span span);
 
     @Override
-    public void consume(final Span span) {
+    public final void consume(final Span span) {
         if (numInflights.incrementAndGet() <= maxInflights) {
             ListenableFuture<Span> future = executorService.submit(() -> {
                 doConsume(span);
