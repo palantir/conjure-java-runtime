@@ -78,7 +78,6 @@ public final class Tracer {
         return span;
     }
 
-
     /**
      * Like {@link #startSpan(String)}, but opens a span of the explicitly given {@link SpanType span type}.
      */
@@ -110,6 +109,20 @@ public final class Tracer {
     }
 
     /**
+     * Adds metadata to the current span. If no span is currently open, does nothing.
+     */
+    public static void addSpanMetadata(Map<String, String> metadata) {
+        Optional<OpenSpan> maybeOpenSpan = currentTrace.get().pop();
+        if (maybeOpenSpan.isPresent()) {
+            OpenSpan updatedSpan = OpenSpan.builder()
+                    .from(maybeOpenSpan.get())
+                    .putAllMetadata(metadata)
+                    .build();
+            currentTrace.get().push(updatedSpan);
+        }
+    }
+
+    /**
      * Completes and returns the current span (if it exists) and notifies all {@link #observers subscribers} about the
      * completed span.
      */
@@ -127,6 +140,7 @@ public final class Tracer {
                     .operation(openSpan.getOperation())
                     .startTimeMicroSeconds(openSpan.getStartTimeMicroSeconds())
                     .durationNanoSeconds(System.nanoTime() - openSpan.getStartClockNanoSeconds())
+                    .putAllMetadata(openSpan.getMetadata())
                     .build();
 
             // Notify subscribers iff trace is observable

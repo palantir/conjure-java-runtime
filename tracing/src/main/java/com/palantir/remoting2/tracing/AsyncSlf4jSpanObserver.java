@@ -28,6 +28,7 @@ import java.net.InetAddress;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,7 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
         abstract long getTimestamp();
         abstract long getDuration();
         abstract List<ZipkinCompatAnnotation> annotations();
+        abstract List<ZipkinCompatBinaryAnnotation> binaryAnnotations();
 
         static ZipkinCompatSpan fromSpan(Span span, ZipkinCompatEndpoint endpoint) {
             return ImmutableZipkinCompatSpan.builder()
@@ -64,6 +66,7 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
                     .timestamp(span.getStartTimeMicroSeconds())
                     .duration(nanoToMicro(span.getDurationNanoSeconds()))  // Zipkin-durations are micro-seconds, round
                     .addAllAnnotations(spanTypeToZipkinAnnotations(span, endpoint))
+                    .addAllBinaryAnnotations(spanMetadataToZipkinBinaryAnnotations(span, endpoint))
                     .build();
         }
 
@@ -95,6 +98,13 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
             return annotations;
         }
 
+        private static Iterable<? extends ZipkinCompatBinaryAnnotation> spanMetadataToZipkinBinaryAnnotations(
+                Span span, ZipkinCompatEndpoint endpoint) {
+            return span.getMetadata().entrySet().stream()
+                    .map(entry -> ZipkinCompatBinaryAnnotation.of(entry.getKey(), entry.getValue(), endpoint))
+                    .collect(Collectors.toList());
+        }
+
         static long nanoToMicro(long nano) {
             return (nano + 1000) / 1000L;
         }
@@ -119,6 +129,24 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
         static ZipkinCompatAnnotation of(long timestamp, String value, ZipkinCompatEndpoint endpoint) {
             return ImmutableZipkinCompatAnnotation.builder()
                     .timestamp(timestamp)
+                    .value(value)
+                    .endpoint(endpoint)
+                    .build();
+        }
+    }
+
+    @JsonSerialize(as = ImmutableZipkinCompatBinaryAnnotation.class)
+    @Value.Immutable
+    @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
+    abstract static class ZipkinCompatBinaryAnnotation {
+
+        abstract String key();
+        abstract String value();
+        abstract ZipkinCompatEndpoint endpoint();
+
+        static ZipkinCompatBinaryAnnotation of(String key, String value, ZipkinCompatEndpoint endpoint) {
+            return ImmutableZipkinCompatBinaryAnnotation.builder()
+                    .key(key)
                     .value(value)
                     .endpoint(endpoint)
                     .build();

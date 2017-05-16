@@ -16,6 +16,7 @@
 
 package com.palantir.remoting2.tracing;
 
+import java.util.Map;
 import java.util.Optional;
 import org.immutables.value.Value;
 
@@ -60,6 +61,12 @@ public abstract class OpenSpan {
 
     /** Indicates the {@link SpanType} of this span, e.g., a server-side vs. client-side vs local span. */
     public abstract SpanType type();
+
+    /**
+     * Returns a map of custom key-value metadata with which spans will be annotated. For example, a "userId" key
+     * could be added to associate spans with the requesting user.
+     */
+    public abstract Map<String, String> getMetadata();
 
     /**
      * Indicates if this trace state was sampled

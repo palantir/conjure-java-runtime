@@ -43,6 +43,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
@@ -165,6 +166,20 @@ public final class TraceEnrichingFilterTest {
         TraceEnrichingFilter.INSTANCE.filter(request);
         assertThat(MDC.get(TraceEnrichingFilter.MDC_KEY).length(), is(16));
         verify(request).setProperty(eq("com.palantir.remoting2.traceId"), anyString());
+    }
+
+    @Test
+    public void testFilter_setsAuthHeaderIfPresent() throws Exception {
+        String testToken = "eyJhbGciOiJFUzI1NiJ9"
+                + ".eyJzdWIiOiJpMHRxekpxOFFPNjlWcTdmdFVBS2p3PT0iLCJqdGkiOiJ0VnpZSGlVU1NmYW95Y3pUNk5DRXhRPT0ifQ"
+                + ".PQIYnHeJmkH-DkBDbPqd9aVNg2b1cmMk6qRgJj1c88R_P0AGsCLQNjOh6AuoY3dVxemhnsb2FDtPh4GO4KgaJg";
+        String testUserId = "8b4b6acc-9abc-40ee-bd56-aedfb5400a8f";
+        target.path("/trace").request()
+                .header(TraceHttpHeaders.TRACE_ID, "")
+                .header(HttpHeaders.AUTHORIZATION, testToken).get();
+        verify(observer).consume(spanCaptor.capture());
+        Span span = spanCaptor.getValue();
+        assertThat(span.getMetadata().get("userId"), is(testUserId));
     }
 
     public static class TracingTestServer extends Application<Configuration> {

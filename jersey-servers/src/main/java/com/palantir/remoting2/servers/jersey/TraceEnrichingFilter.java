@@ -17,17 +17,22 @@
 package com.palantir.remoting2.servers.jersey;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting2.tracing.Span;
 import com.palantir.remoting2.tracing.SpanType;
 import com.palantir.remoting2.tracing.TraceHttpHeaders;
 import com.palantir.remoting2.tracing.Tracer;
 import com.palantir.remoting2.tracing.Tracers;
+import com.palantir.tokens.auth.AuthHeader;
+import com.palantir.tokens.auth.BearerToken;
+import com.palantir.tokens.auth.UnverifiedJsonWebToken;
 import java.io.IOException;
 import java.util.Optional;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.MDC;
@@ -35,6 +40,7 @@ import org.slf4j.MDC;
 @Provider
 public final class TraceEnrichingFilter implements ContainerRequestFilter, ContainerResponseFilter {
     public static final TraceEnrichingFilter INSTANCE = new TraceEnrichingFilter();
+    public static final String USER_ID_METADATA_KEY = "userId";
 
     /** The key under which trace ids are inserted into SLF4J {@link org.slf4j.MDC MDCs}. */
     static final String MDC_KEY = "traceId";
@@ -61,6 +67,7 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
                 Tracer.startSpan(operation, spanId, SpanType.SERVER_INCOMING);
             }
         }
+        addUserIdMetadataToSpan(requestContext);
 
         // Give SLF4J appenders access to the trace id
         // TODO(rfink) We should use putCloseable; when and how can we remove it though? There is no filter chain.
@@ -89,6 +96,26 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
             return Optional.empty();
         } else {
             return Optional.of(header.equals("1"));
+        }
+    }
+
+    private static void addUserIdMetadataToSpan(ContainerRequestContext requestContext) {
+        Optional<String> userId = getUserIdFromAuthHeader(requestContext);
+        if (userId.isPresent()) {
+            Tracer.addSpanMetadata(ImmutableMap.of(USER_ID_METADATA_KEY, userId.get()));
+        }
+    }
+
+    private static Optional<String> getUserIdFromAuthHeader(ContainerRequestContext requestContext) {
+        String authHeaderString = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
+        if (authHeaderString == null) {
+            return Optional.empty();
+        } else {
+            AuthHeader authHeader = AuthHeader.valueOf(authHeaderString);
+            BearerToken bearerToken = authHeader.getBearerToken();
+            UnverifiedJsonWebToken token = UnverifiedJsonWebToken.of(bearerToken);
+            String userId = token.getUnverifiedUserId();
+            return Optional.of(userId);
         }
     }
 }
