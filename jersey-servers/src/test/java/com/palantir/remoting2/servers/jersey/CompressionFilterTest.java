@@ -31,6 +31,7 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -147,7 +148,7 @@ public final class CompressionFilterTest {
 
     private static String toString(InputStream is) {
         try {
-            return new String(ByteStreams.toByteArray(is));
+            return new String(ByteStreams.toByteArray(is), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
