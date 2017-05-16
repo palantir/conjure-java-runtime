@@ -22,7 +22,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.io.ByteStreams;
-import com.google.common.io.CharStreams;
 import com.google.common.net.HttpHeaders;
 import com.jcraft.jzlib.GZIPInputStream;
 import com.jcraft.jzlib.InflaterInputStream;
@@ -30,10 +29,8 @@ import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
@@ -151,18 +148,14 @@ public final class CompressionFilterTest {
 
     private static String toString(InputStream is) {
         try {
-            return CharStreams.toString(new InputStreamReader(is, StandardCharsets.UTF_8));
+            return new String(ByteStreams.toByteArray(is), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private static InputStream toStream(Response response) {
-        try {
-            return new ByteArrayInputStream(ByteStreams.toByteArray((InputStream) response.getEntity()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return (InputStream) response.getEntity();
     }
 
     public static class TestServer extends Application<Configuration> {
