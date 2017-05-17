@@ -193,9 +193,9 @@ public final class AsyncSlf4jSpanObserverTest {
     @Test
     public void testSpanMetadataConvertsToZipkinBinaryAnnotations() {
         Map<String, String> spanMetadata = ImmutableMap.of(
-            "key1", "value1",
-            "key2", "value2",
-            "key3", "value3");
+                "key1", "value1",
+                "key2", "value2",
+                "key3", "value3");
         Span span = Span.builder()
                 .traceId("")
                 .spanId("")
