@@ -18,6 +18,7 @@ package com.palantir.remoting2.tracing;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -109,24 +110,21 @@ public final class Tracer {
     }
 
     /**
-     * Adds metadata to the current span. If no span is currently open, does nothing.
-     */
-    public static void addSpanMetadata(Map<String, String> metadata) {
-        Optional<OpenSpan> maybeOpenSpan = currentTrace.get().pop();
-        if (maybeOpenSpan.isPresent()) {
-            OpenSpan updatedSpan = OpenSpan.builder()
-                    .from(maybeOpenSpan.get())
-                    .putAllMetadata(metadata)
-                    .build();
-            currentTrace.get().push(updatedSpan);
-        }
-    }
-
-    /**
      * Completes and returns the current span (if it exists) and notifies all {@link #observers subscribers} about the
      * completed span.
      */
     public static Optional<Span> completeSpan() {
+        return completeSpanInternal(Collections.emptyMap());
+    }
+
+    /**
+     * Equivalent to {@link completeSpan()} but also adds metadata to the current span being completed.
+     */
+    public static Optional<Span> completeSpanWithMetadata(Map<String, String> metadata) {
+        return completeSpanInternal(metadata);
+    }
+
+    private static Optional<Span> completeSpanInternal(Map<String, String> metadata) {
         Optional<OpenSpan> maybeOpenSpan = currentTrace.get().pop();
         if (!maybeOpenSpan.isPresent()) {
             return Optional.empty();
@@ -140,7 +138,7 @@ public final class Tracer {
                     .operation(openSpan.getOperation())
                     .startTimeMicroSeconds(openSpan.getStartTimeMicroSeconds())
                     .durationNanoSeconds(System.nanoTime() - openSpan.getStartClockNanoSeconds())
-                    .putAllMetadata(openSpan.getMetadata())
+                    .putAllMetadata(metadata)
                     .build();
 
             // Notify subscribers iff trace is observable

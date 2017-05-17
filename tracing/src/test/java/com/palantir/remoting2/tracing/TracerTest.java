@@ -18,11 +18,14 @@ package com.palantir.remoting2.tracing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
@@ -190,6 +193,22 @@ public final class TracerTest {
         // Default is LOCAL
         Tracer.startSpan("1");
         assertThat(Tracer.completeSpan().get().type()).isEqualTo(SpanType.LOCAL);
+    }
+
+    @Test
+    public void testCompleteSpanWithMetadataIncludesMetadata() {
+        Map<String, String> metadata = ImmutableMap.of(
+                "key1", "value1",
+                "key2", "value2");
+        Tracer.startSpan("operation");
+        Optional<Span> maybeSpan = Tracer.completeSpanWithMetadata(metadata);
+        assertTrue(maybeSpan.isPresent());
+        assertThat(maybeSpan.get().getMetadata()).isEqualTo(metadata);
+    }
+
+    @Test
+    public void testCompleteSpanWithoutMetadataHasNoMetadata() {
+        assertTrue(startAndCompleteSpan().getMetadata().isEmpty());
     }
 
     private static Span startAndCompleteSpan() {
