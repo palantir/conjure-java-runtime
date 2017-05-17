@@ -23,16 +23,13 @@ import com.palantir.remoting2.tracing.SpanType;
 import com.palantir.remoting2.tracing.TraceHttpHeaders;
 import com.palantir.remoting2.tracing.Tracer;
 import com.palantir.remoting2.tracing.Tracers;
-import com.palantir.tokens.auth.AuthHeader;
-import com.palantir.tokens.auth.BearerToken;
-import com.palantir.tokens.auth.UnverifiedJsonWebToken;
+import com.palantir.tokens.auth.http.BearerTokenLoggingFilter;
 import java.io.IOException;
 import java.util.Optional;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.MDC;
@@ -40,7 +37,6 @@ import org.slf4j.MDC;
 @Provider
 public final class TraceEnrichingFilter implements ContainerRequestFilter, ContainerResponseFilter {
     public static final TraceEnrichingFilter INSTANCE = new TraceEnrichingFilter();
-    public static final String USER_ID_METADATA_KEY = "userId";
 
     /** The key under which trace ids are inserted into SLF4J {@link org.slf4j.MDC MDCs}. */
     static final String MDC_KEY = "traceId";
@@ -100,22 +96,21 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
     }
 
     private static void addUserIdMetadataToSpan(ContainerRequestContext requestContext) {
-        Optional<String> userId = getUserIdFromAuthHeader(requestContext);
+        Optional<String> userId = tryGetUnverifiedUserId(requestContext);
         if (userId.isPresent()) {
-            Tracer.addSpanMetadata(ImmutableMap.of(USER_ID_METADATA_KEY, userId.get()));
+            Tracer.addSpanMetadata(ImmutableMap.of(BearerTokenLoggingFilter.USER_ID_KEY, userId.get()));
         }
     }
 
-    private static Optional<String> getUserIdFromAuthHeader(ContainerRequestContext requestContext) {
-        String authHeaderString = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-        if (authHeaderString == null) {
-            return Optional.empty();
-        } else {
-            AuthHeader authHeader = AuthHeader.valueOf(authHeaderString);
-            BearerToken bearerToken = authHeader.getBearerToken();
-            UnverifiedJsonWebToken token = UnverifiedJsonWebToken.of(bearerToken);
-            String userId = token.getUnverifiedUserId();
+    private static Optional<String> tryGetUnverifiedUserId(ContainerRequestContext requestContext) {
+        String userIdKey = BearerTokenLoggingFilter.getRequestPropertyKey(BearerTokenLoggingFilter.USER_ID_KEY);
+        Object maybeUserId = requestContext.getProperty(userIdKey);
+        if (maybeUserId != null && maybeUserId instanceof String) {
+            String userId = (String) maybeUserId;
             return Optional.of(userId);
+        } else {
+            return Optional.empty();
         }
     }
+
 }

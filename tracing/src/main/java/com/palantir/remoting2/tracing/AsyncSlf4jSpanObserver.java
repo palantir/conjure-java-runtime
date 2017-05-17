@@ -26,9 +26,9 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,9 +100,11 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
 
         private static Iterable<? extends ZipkinCompatBinaryAnnotation> spanMetadataToZipkinBinaryAnnotations(
                 Span span, ZipkinCompatEndpoint endpoint) {
-            return span.getMetadata().entrySet().stream()
-                    .map(entry -> ZipkinCompatBinaryAnnotation.of(entry.getKey(), entry.getValue(), endpoint))
-                    .collect(Collectors.toList());
+            List<ZipkinCompatBinaryAnnotation> binaryAnnotations = Lists.newArrayList();
+            for (Map.Entry<String, String> entry : span.getMetadata().entrySet()) {
+                binaryAnnotations.add(ZipkinCompatBinaryAnnotation.of(entry.getKey(), entry.getValue(), endpoint));
+            }
+            return binaryAnnotations;
         }
 
         static long nanoToMicro(long nano) {
