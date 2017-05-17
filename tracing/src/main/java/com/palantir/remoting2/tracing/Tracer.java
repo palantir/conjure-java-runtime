@@ -118,7 +118,7 @@ public final class Tracer {
     }
 
     /**
-     * Equivalent to {@link completeSpan()} but also adds metadata to the current span being completed.
+     * Like {@link #completeSpan()}, but adds {@code metadata} to the current span being completed.
      */
     public static Optional<Span> completeSpanWithMetadata(Map<String, String> metadata) {
         return completeSpanInternal(metadata);
