@@ -19,7 +19,6 @@ package com.palantir.remoting2.servers.jersey;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -44,9 +43,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import org.glassfish.jersey.client.JerseyClientBuilder;
@@ -73,8 +70,6 @@ public final class TraceEnrichingFilterTest {
     private SpanObserver observer;
     @Mock
     private ContainerRequestContext request;
-    @Mock
-    private ContainerResponseContext response;
     @Mock
     private UriInfo uriInfo;
 
@@ -170,32 +165,6 @@ public final class TraceEnrichingFilterTest {
         TraceEnrichingFilter.INSTANCE.filter(request);
         assertThat(MDC.get(TraceEnrichingFilter.MDC_KEY).length(), is(16));
         verify(request).setProperty(eq("com.palantir.remoting2.traceId"), anyString());
-    }
-
-    @Test
-    public void testFilter_setsUserIdIfPresent() throws Exception {
-        String userIdKey = "com.palantir.tokens.auth.userId";
-        String testUserId = "8b4b6acc-9abc-40ee-bd56-aedfb5400a8f";
-
-        when(request.getProperty(userIdKey)).thenReturn(testUserId);
-        when(response.getHeaders()).thenReturn(new MultivaluedHashMap());
-        TraceEnrichingFilter.INSTANCE.filter(request);
-        TraceEnrichingFilter.INSTANCE.filter(request, response);
-        verify(observer).consume(spanCaptor.capture());
-        Span span = spanCaptor.getValue();
-        assertThat(span.getMetadata().get("userId"), is(testUserId));
-    }
-
-    @Test
-    public void testFilter_doesNotSetUserIdWhenMissing() throws Exception {
-        String userIdKey = "com.palantir.tokens.auth.userId";
-        when(request.getProperty(userIdKey)).thenReturn(null);
-        when(response.getHeaders()).thenReturn(new MultivaluedHashMap());
-        TraceEnrichingFilter.INSTANCE.filter(request);
-        TraceEnrichingFilter.INSTANCE.filter(request, response);
-        verify(observer).consume(spanCaptor.capture());
-        Span span = spanCaptor.getValue();
-        assertFalse(span.getMetadata().containsKey("userId"));
     }
 
     public static class TracingTestServer extends Application<Configuration> {

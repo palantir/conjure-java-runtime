@@ -8,7 +8,6 @@ dependencies {
     compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.jcraft:jzlib"
-    compile "com.palantir.tokens:auth-tokens-filter"
     compile "org.glassfish.jersey.core:jersey-server"
 
     testCompile project(":ssl-config")

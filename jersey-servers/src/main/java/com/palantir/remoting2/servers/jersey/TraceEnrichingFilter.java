@@ -17,13 +17,11 @@
 package com.palantir.remoting2.servers.jersey;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting2.tracing.Span;
 import com.palantir.remoting2.tracing.SpanType;
 import com.palantir.remoting2.tracing.TraceHttpHeaders;
 import com.palantir.remoting2.tracing.Tracer;
 import com.palantir.remoting2.tracing.Tracers;
-import com.palantir.tokens.auth.http.BearerTokenLoggingFilter;
 import java.io.IOException;
 import java.util.Optional;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -63,7 +61,6 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
                 Tracer.startSpan(operation, spanId, SpanType.SERVER_INCOMING);
             }
         }
-        addUserIdMetadataToSpan(requestContext);
 
         // Give SLF4J appenders access to the trace id
         // TODO(rfink) We should use putCloseable; when and how can we remove it though? There is no filter chain.
@@ -94,23 +91,4 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
             return Optional.of(header.equals("1"));
         }
     }
-
-    private static void addUserIdMetadataToSpan(ContainerRequestContext requestContext) {
-        Optional<String> userId = tryGetUnverifiedUserId(requestContext);
-        if (userId.isPresent()) {
-            Tracer.addSpanMetadata(ImmutableMap.of(BearerTokenLoggingFilter.USER_ID_KEY, userId.get()));
-        }
-    }
-
-    private static Optional<String> tryGetUnverifiedUserId(ContainerRequestContext requestContext) {
-        String userIdKey = BearerTokenLoggingFilter.getRequestPropertyKey(BearerTokenLoggingFilter.USER_ID_KEY);
-        Object maybeUserId = requestContext.getProperty(userIdKey);
-        if (maybeUserId instanceof String) {
-            String userId = (String) maybeUserId;
-            return Optional.of(userId);
-        } else {
-            return Optional.empty();
-        }
-    }
-
 }

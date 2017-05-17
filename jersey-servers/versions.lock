@@ -32,8 +32,7 @@
                 "com.fasterxml.jackson.module:jackson-module-jaxb-annotations",
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
-                "com.palantir.remoting2:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.remoting2:tracing"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -48,8 +47,7 @@
             "transitive": [
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
-                "com.palantir.remoting2:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.remoting2:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
@@ -100,8 +98,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.remoting2:tracing"
             ]
         },
         "com.jcraft:jzlib": {
@@ -119,9 +116,6 @@
         },
         "com.palantir.remoting2:tracing": {
             "project": true
-        },
-        "com.palantir.tokens:auth-tokens": {
-            "locked": "1.0.0"
         },
         "javax.annotation:javax.annotation-api": {
             "locked": "1.2",
@@ -241,8 +235,7 @@
             "locked": "1.7.12",
             "transitive": [
                 "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.remoting2:tracing"
             ]
         }
     },
@@ -279,8 +272,7 @@
                 "com.fasterxml.jackson.module:jackson-module-jaxb-annotations",
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
-                "com.palantir.remoting2:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.remoting2:tracing"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -295,8 +287,7 @@
             "transitive": [
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
-                "com.palantir.remoting2:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.remoting2:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
@@ -347,8 +338,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.remoting2:tracing"
             ]
         },
         "com.jcraft:jzlib": {
@@ -366,9 +356,6 @@
         },
         "com.palantir.remoting2:tracing": {
             "project": true
-        },
-        "com.palantir.tokens:auth-tokens": {
-            "locked": "1.0.0"
         },
         "javax.annotation:javax.annotation-api": {
             "locked": "1.2",
@@ -488,8 +475,7 @@
             "locked": "1.7.12",
             "transitive": [
                 "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.remoting2:tracing"
             ]
         }
     }
