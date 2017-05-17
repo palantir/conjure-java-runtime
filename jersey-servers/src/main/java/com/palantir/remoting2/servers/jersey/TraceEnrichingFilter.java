@@ -105,7 +105,7 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
     private static Optional<String> tryGetUnverifiedUserId(ContainerRequestContext requestContext) {
         String userIdKey = BearerTokenLoggingFilter.getRequestPropertyKey(BearerTokenLoggingFilter.USER_ID_KEY);
         Object maybeUserId = requestContext.getProperty(userIdKey);
-        if (maybeUserId != null && maybeUserId instanceof String) {
+        if (maybeUserId instanceof String) {
             String userId = (String) maybeUserId;
             return Optional.of(userId);
         } else {
