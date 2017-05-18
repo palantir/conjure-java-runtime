@@ -18,6 +18,7 @@ package com.palantir.remoting2.tracing;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -78,7 +79,6 @@ public final class Tracer {
         return span;
     }
 
-
     /**
      * Like {@link #startSpan(String)}, but opens a span of the explicitly given {@link SpanType span type}.
      */
@@ -114,6 +114,17 @@ public final class Tracer {
      * completed span.
      */
     public static Optional<Span> completeSpan() {
+        return completeSpanInternal(Collections.emptyMap());
+    }
+
+    /**
+     * Like {@link #completeSpan()}, but adds {@code metadata} to the current span being completed.
+     */
+    public static Optional<Span> completeSpan(Map<String, String> metadata) {
+        return completeSpanInternal(metadata);
+    }
+
+    private static Optional<Span> completeSpanInternal(Map<String, String> metadata) {
         Optional<OpenSpan> maybeOpenSpan = currentTrace.get().pop();
         if (!maybeOpenSpan.isPresent()) {
             return Optional.empty();
@@ -127,6 +138,7 @@ public final class Tracer {
                     .operation(openSpan.getOperation())
                     .startTimeMicroSeconds(openSpan.getStartTimeMicroSeconds())
                     .durationNanoSeconds(System.nanoTime() - openSpan.getStartClockNanoSeconds())
+                    .putAllMetadata(metadata)
                     .build();
 
             // Notify subscribers iff trace is observable

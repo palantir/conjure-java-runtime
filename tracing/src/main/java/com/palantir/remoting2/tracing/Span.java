@@ -18,6 +18,7 @@ package com.palantir.remoting2.tracing;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.util.Map;
 import java.util.Optional;
 import org.immutables.value.Value;
 
@@ -37,6 +38,11 @@ public abstract class Span {
     public abstract String getOperation();
     public abstract long getStartTimeMicroSeconds();
     public abstract long getDurationNanoSeconds();
+    /**
+     * Returns a map of custom key-value metadata with which spans will be annotated. For example, a "userId" key
+     * could be added to associate spans with the requesting user.
+     */
+    public abstract Map<String, String> getMetadata();
 
     public static Builder builder() {
         return new Builder();
