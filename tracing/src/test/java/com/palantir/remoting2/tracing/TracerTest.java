@@ -201,7 +201,7 @@ public final class TracerTest {
                 "key1", "value1",
                 "key2", "value2");
         Tracer.startSpan("operation");
-        Optional<Span> maybeSpan = Tracer.completeSpanWithMetadata(metadata);
+        Optional<Span> maybeSpan = Tracer.completeSpan(metadata);
         assertTrue(maybeSpan.isPresent());
         assertThat(maybeSpan.get().getMetadata()).isEqualTo(metadata);
     }
