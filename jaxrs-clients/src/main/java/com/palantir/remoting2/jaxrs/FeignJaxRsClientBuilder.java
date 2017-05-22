@@ -164,13 +164,17 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private static ImmutableList<ConnectionSpec> createConnectionSpecs(boolean enableGcmCipherSuites) {
-        return ImmutableList.of(
-            new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                    .tlsVersions(TlsVersion.TLS_1_2)
-                    .cipherSuites(enableGcmCipherSuites
-                            ? CipherSuites.allCipherSuites()
-                            : CipherSuites.fastCipherSuites())
-                    .build(),
-            ConnectionSpec.CLEARTEXT);
+        ConnectionSpec.Builder encryptedSpecs = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                .tlsVersions(TlsVersion.TLS_1_2)
+                .cipherSuites(enableGcmCipherSuites
+                        ? CipherSuites.allCipherSuites()
+                        : CipherSuites.fastCipherSuites());
+
+        // Works around https://github.com/square/okhttp/issues/3173 until OkHttp 3.7 upgrade
+        if ("IBM J9 VM".equals(System.getProperty("java.vm.name"))) {
+            encryptedSpecs.allEnabledCipherSuites();
+        }
+
+        return ImmutableList.of(encryptedSpecs.build(), ConnectionSpec.CLEARTEXT);
     }
 }
