@@ -1,6 +1,12 @@
 apply plugin: 'com.github.johnrengelman.shadow'
 apply from: "${rootDir}/gradle/publish-shadow.gradle"
 
+dependencyLock {
+    includeTransitives = true
+    lockFile = 'versions.lock'
+    configurationNames = ['runtime', 'compileClasspath', 'shadow']
+}
+
 dependencies {
     compile project(":extras:jackson-support")
     compile project(":extras:refresh-utils")
