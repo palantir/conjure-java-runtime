@@ -152,14 +152,14 @@
             ]
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.4.1",
+            "locked": "3.8.0",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
                 "com.palantir.remoting2:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
-            "locked": "1.9.0",
+            "locked": "1.13.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]
@@ -339,14 +339,14 @@
             ]
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.4.1",
+            "locked": "3.8.0",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
                 "com.palantir.remoting2:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
-            "locked": "1.9.0",
+            "locked": "1.13.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]
