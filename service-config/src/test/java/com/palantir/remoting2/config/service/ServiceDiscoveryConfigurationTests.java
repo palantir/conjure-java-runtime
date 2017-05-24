@@ -186,7 +186,7 @@ public final class ServiceDiscoveryConfigurationTests {
                 + "{\"service\":{\"apiToken\":null,\"security\":null,\"connectTimeout\":null,\"readTimeout\":null,"
                 + "\"writeTimeout\":null,\"enableGcmCipherSuites\":null,\"uris\":[\"uri\"],"
                 + "\"proxyConfiguration\":null}},\"proxyConfiguration\":"
-                + "{\"hostAndPort\":\"host:80\",\"credentials\":null,\"direct\":null},\"connectTimeout\":\"1 day\","
+                + "{\"hostAndPort\":\"host:80\",\"credentials\":null,\"type\":\"http\"},\"connectTimeout\":\"1 day\","
                 + "\"readTimeout\":\"1 day\",\"enableGcmCipherSuites\":null}";
         String deserializedKebabCase = "{\"api-token\":\"bearerToken\",\"security\":"
                 + "{\"trust-store-path\":\"truststore.jks\",\"trust-store-type\":\"JKS\",\"key-store-path\":null,"

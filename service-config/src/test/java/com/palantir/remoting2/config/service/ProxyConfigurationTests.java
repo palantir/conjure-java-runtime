@@ -64,10 +64,10 @@ public final class ProxyConfigurationTests {
     @Test
     public void serDe() throws Exception {
         ProxyConfiguration serialized = ProxyConfiguration.of("host:80", BasicCredentials.of("username", "password"));
-        String deserializedCamelCase =
-                "{\"hostAndPort\":\"host:80\",\"credentials\":{\"username\":\"username\",\"password\":\"password\"},\"direct\":null}";
-        String deserializedKebabCase =
-                "{\"host-and-port\":\"host:80\",\"credentials\":{\"username\":\"username\",\"password\":\"password\"}, \"direct\": null}";
+        String deserializedCamelCase = "{\"hostAndPort\":\"host:80\",\"credentials\":{\"username\":\"username\","
+                + "\"password\":\"password\"},\"type\":\"http\"}";
+        String deserializedKebabCase = "{\"host-and-port\":\"host:80\",\"credentials\":{\"username\":\"username\","
+                + "\"password\":\"password\"},\"type\":\"http\"}";
 
         assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
