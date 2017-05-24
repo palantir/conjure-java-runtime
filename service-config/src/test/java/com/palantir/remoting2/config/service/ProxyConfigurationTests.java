@@ -54,12 +54,28 @@ public final class ProxyConfigurationTests {
     }
 
     @Test
+    public void testDeserializationDirect() throws Exception {
+        URL resource = Resources.getResource("configs/proxy-config-direct.yml");
+        ProxyConfiguration config = mapper.readValue(resource, ProxyConfiguration.class);
+        assertEquals(config, ProxyConfiguration.direct());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDirectProxyWithHostAndPort() {
+        new ProxyConfiguration.Builder()
+                .hostAndPort("squid:3128")
+                .type(ProxyConfiguration.Type.direct)
+                .build();
+    }
+
+    @Test
     public void testToProxy() {
         ProxyConfiguration proxyConfiguration = ProxyConfiguration.of("squid:3128");
 
         Proxy expected = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("squid", 3128));
         assertEquals(expected, proxyConfiguration.toProxy());
     }
+
 
     @Test
     public void serDe() throws Exception {

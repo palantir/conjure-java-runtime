@@ -94,6 +94,10 @@ public abstract class ProxyConfiguration {
         return new ProxyConfiguration.Builder().hostAndPort(hostAndPort).credentials(credentials).build();
     }
 
+    public static ProxyConfiguration direct() {
+        return new ProxyConfiguration.Builder().type(Type.direct).build();
+    }
+
     // TODO(jnewman): #317 - remove kebab-case methods when Jackson 2.7 is picked up
     static final class Builder extends ImmutableProxyConfiguration.Builder {
 
