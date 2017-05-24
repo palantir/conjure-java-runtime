@@ -54,7 +54,8 @@ public abstract class ProxyConfiguration {
 
         if (hostAndPort().isPresent()) {
             HostAndPort host = HostAndPort.fromString(hostAndPort().get());
-            Preconditions.checkArgument(host.hasPort(), "Given hostname does not contain a port number: " + host);
+            Preconditions.checkArgument(host.hasPort(),
+                    "Given hostname does not contain a port number: " + host);
         }
     }
 
