@@ -18,6 +18,7 @@ package com.palantir.remoting2.retrofit2;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableList;
@@ -31,6 +32,7 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import javax.ws.rs.core.MediaType;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -129,7 +131,8 @@ public final class Retrofit2ClientApiTest {
 
         try {
             future.join();
-        } catch (RuntimeException e) {
+            fail();
+        } catch (CompletionException e) {
             assertThat(e.getCause()).isInstanceOf(RemoteException.class);
             assertThat(((RemoteException) e.getCause()).getRemoteException()).isEqualTo(error);
         }
