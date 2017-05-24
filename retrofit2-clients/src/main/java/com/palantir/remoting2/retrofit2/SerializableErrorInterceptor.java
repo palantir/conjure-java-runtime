@@ -23,11 +23,19 @@ import java.util.Collection;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
-public enum SerializableErrorInterceptor implements Interceptor {
-    INSTANCE;
+public final class SerializableErrorInterceptor implements Interceptor {
+    private final AsyncCallTracker asyncCallTracker;
+
+    SerializableErrorInterceptor(AsyncCallTracker asyncCallTracker) {
+        this.asyncCallTracker = asyncCallTracker;
+    }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
+        if (asyncCallTracker.isAsyncRequest(chain.request())) {
+            return chain.proceed(chain.request());
+        }
+
         Response response = chain.proceed(chain.request());
         if (!response.isSuccessful()) {
             Collection<String> contentTypes = response.headers("Content-Type");

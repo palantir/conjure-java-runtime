@@ -57,15 +57,18 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
     @Override
     public <T> T build(Class<T> serviceClass, String userAgent, List<String> uris) {
         Preconditions.checkArgument(!uris.isEmpty());
+        DefaultAsyncCallTracker tracker = new DefaultAsyncCallTracker();
         List<String> sanitizedUris = addTrailingSlashes(uris);
-        okhttp3.OkHttpClient client = createOkHttpClient(userAgent, sanitizedUris);
+        okhttp3.OkHttpClient client = createOkHttpClient(userAgent, sanitizedUris, tracker);
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(sanitizedUris.get(0))
+                .callFactory(new UniqueTagCallFactory(client))
                 .addConverterFactory(new CborConverterFactory(
                         JacksonConverterFactory.create(OBJECT_MAPPER),
                         CBOR_OBJECT_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
+                .addCallAdapterFactory(AsyncSerializableErrorCallAdapterFactory.create(tracker))
                 .build();
         return retrofit.create(serviceClass);
     }
@@ -74,7 +77,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         return Lists.transform(uris, input -> input.charAt(input.length() - 1) == '/' ? input : input + "/");
     }
 
-    private OkHttpClient createOkHttpClient(String userAgent, List<String> uris) {
+    private OkHttpClient createOkHttpClient(String userAgent, List<String> uris, DefaultAsyncCallTracker tracker) {
 
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
@@ -113,7 +116,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
 
         client.addInterceptor(MultiServerRetryInterceptor.create(uris));
         client.addInterceptor(UserAgentInterceptor.of(userAgent));
-        client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
+        client.addInterceptor(new SerializableErrorInterceptor(tracker));
 
         // cipher setup
         client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
