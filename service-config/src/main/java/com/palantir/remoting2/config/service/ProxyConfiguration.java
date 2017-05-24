@@ -35,8 +35,19 @@ import org.immutables.value.Value.Style;
 @JsonSerialize(as = ImmutableProxyConfiguration.class)
 @Style(visibility = Style.ImplementationVisibility.PACKAGE, builder = "new")
 public abstract class ProxyConfiguration {
+
     enum Type {
-        direct, http;
+
+        /**
+         * Use a direct connection. This option will bypass any JVM-level configured proxy settings.
+         */
+        direct,
+
+        /**
+         * Use an http-proxy specified by {@link ProxyConfiguration#hostAndPort()}  and (optionally)
+         * {@link ProxyConfiguration#credentials()}.
+         */
+        http;
     }
 
     /**
@@ -58,11 +69,18 @@ public abstract class ProxyConfiguration {
 
     @Value.Check
     protected final void check() {
-        if (hostAndPort().isPresent()) {
-            Preconditions.checkArgument(type() == Type.http, "host-and-port only valid for http proxies");
-            HostAndPort host = HostAndPort.fromString(hostAndPort().get());
-            Preconditions.checkArgument(host.hasPort(),
-                    "Given hostname does not contain a port number: " + host);
+        switch (type()) {
+            case http:
+                HostAndPort host = HostAndPort.fromString(hostAndPort().get());
+                Preconditions.checkArgument(host.hasPort(),
+                        "Given hostname does not contain a port number: " + host);
+                break;
+            case direct:
+                Preconditions.checkArgument(!hostAndPort().isPresent() && !credentials().isPresent(),
+                        "Neither credential nor host-and-port may be configured for direct proxies");
+                break;
+            default:
+                throw new IllegalStateException("Unrecognized case; this is a library bug");
         }
 
         if (credentials().isPresent()) {
