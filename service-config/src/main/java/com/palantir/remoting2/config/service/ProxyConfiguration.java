@@ -35,30 +35,39 @@ import org.immutables.value.Value.Style;
 @JsonSerialize(as = ImmutableProxyConfiguration.class)
 @Style(visibility = Style.ImplementationVisibility.PACKAGE, builder = "new")
 public abstract class ProxyConfiguration {
-
     /**
      * The hostname and port of the HTTP/HTTPS Proxy. Recognized formats include those recognized by {@link
      * com.google.common.net.HostAndPort}, for instance {@code foo.com:80}, {@code 192.168.3.100:8080}, etc.
      */
-    public abstract String hostAndPort();
+    public abstract Optional<String> hostAndPort();
 
     /**
      * Credentials if the proxy needs authentication.
      */
     public abstract Optional<BasicCredentials> credentials();
 
+    public abstract Optional<Boolean> direct();
+
     @Value.Check
     protected final void check() {
-        HostAndPort host = HostAndPort.fromString(hostAndPort());
-        Preconditions.checkArgument(host.hasPort(), "Given hostname does not contain a port number: " + host);
+        Preconditions.checkArgument(direct().isPresent() || hostAndPort().isPresent(), "proxy configuration must either be direct or configured with host-and-port");
+
+        if (hostAndPort().isPresent()) {
+            HostAndPort host = HostAndPort.fromString(hostAndPort().get());
+            Preconditions.checkArgument(host.hasPort(), "Given hostname does not contain a port number: " + host);
+        }
     }
 
     @Lazy
     @SuppressWarnings("checkstyle:designforextension")
     @JsonIgnore
     public Proxy toProxy() {
-        HostAndPort hostAndPort = HostAndPort.fromString(hostAndPort());
-        return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort()));
+        if (hostAndPort().isPresent()) {
+            HostAndPort hostAndPort = HostAndPort.fromString(hostAndPort().get());
+            return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort()));
+        } else {
+            return Proxy.NO_PROXY;
+        }
     }
 
     public static ProxyConfiguration of(String hostAndPort) {
