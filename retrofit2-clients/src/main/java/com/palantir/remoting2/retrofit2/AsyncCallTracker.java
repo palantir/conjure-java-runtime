@@ -41,6 +41,10 @@ import retrofit2.Call;
  *
  * There are currently two tests for correctness here; one tests that a non-async call throws correctly, the other
  * tests that an async call throws correctly.
+ *
+ * Note that it must be ensured that {@link #isAsyncRequest(Request)} is called exactly once for each call to
+ * {@link #registerAsyncCall(Call)}, and implementors must take care to ensure that they don't introduce
+ * memory leaks.
  */
 public interface AsyncCallTracker {
     <T> void registerAsyncCall(Call<T> call);

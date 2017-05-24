@@ -16,14 +16,14 @@
 
 package com.palantir.remoting2.retrofit2;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import okhttp3.Request;
 import retrofit2.Call;
 
 public final class DefaultAsyncCallTracker implements AsyncCallTracker {
-    private final Set<UUID> asyncCalls = new HashSet<>();
+    private final Set<UUID> asyncCalls = ConcurrentHashMap.newKeySet();
 
     @Override
     public <T> void registerAsyncCall(Call<T> call) {
