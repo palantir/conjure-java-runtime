@@ -19,6 +19,29 @@ package com.palantir.remoting2.retrofit2;
 import okhttp3.Request;
 import retrofit2.Call;
 
+/**
+ * The mechanism (as of 2.5.0) that http-remoting uses in order to throw a RemoteException on failure
+ * relies on throwing in the OkHttp interceptor {@link com.palantir.remoting2.retrofit2.SerializableErrorInterceptor}.
+ * This bubbles up the stack until it reaches the caller.
+ *
+ * Unfortunately, this doesn't work when using the Retrofit async features; the exception is thrown in a different
+ * thread and the callback never runs.
+ *
+ * Furthermore, Retrofit provides no obvious plugin point where one can switch this kind of behaviour on a per request
+ * basis. Ideally we'd get rid of the {@link Call} returning methods since the
+ * {@link java.util.concurrent.CompletableFuture} methods entirely supercede; but this would be a breaking API change.
+ *
+ * So, we have this interface. The intended use is that a {@link Call}'s request, if it is to be run in an async
+ * fashion, is tagged with a {@link java.util.UUID} and passed to {@link #registerAsyncCall(Call)}.
+ *
+ * The interceptor will call {@link #isAsyncRequest(Request)}, which will return true iff it was registered in this
+ * way. In this case, the interceptor is a no-op.
+ *
+ * The {@link AsyncSerializableErrorCallAdapterFactory} then handles filling the exception into the response.
+ *
+ * There are currently two tests for correctness here; one tests that a non-async call throws correctly, the other
+ * tests that an async call throws correctly.
+ */
 public interface AsyncCallTracker {
     <T> void registerAsyncCall(Call<T> call);
     boolean isAsyncRequest(Request request);
