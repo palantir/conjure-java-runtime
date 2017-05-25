@@ -88,7 +88,7 @@ public abstract class ProxyConfiguration {
         switch (type()) {
             case HTTP:
                 Preconditions.checkArgument(maybeHostAndPort().isPresent(), "host-and-port must be "
-                        + "configured for an http proxy");
+                        + "configured for an HTTP proxy");
                 HostAndPort host = HostAndPort.fromString(maybeHostAndPort().get());
                 Preconditions.checkArgument(host.hasPort(),
                         "Given hostname does not contain a port number: " + host);
