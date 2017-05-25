@@ -17,6 +17,7 @@
 package com.palantir.remoting2.retrofit2;
 
 import java.time.LocalDate;
+import java.util.concurrent.CompletableFuture;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -64,4 +65,6 @@ public interface TestService {
     @Headers("Content-Type: application/cbor")
     Call<Void> makeCborRequest(@Body LocalDate localDate);
 
+    @POST("makeFutureRequest")
+    CompletableFuture<String> makeFutureRequest();
 }

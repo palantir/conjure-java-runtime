@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
+import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
 import retrofit2.Retrofit;
@@ -62,10 +63,12 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(sanitizedUris.get(0))
+                .callFactory(new AsyncCallTagCallFactory(client))
                 .addConverterFactory(new CborConverterFactory(
                         JacksonConverterFactory.create(OBJECT_MAPPER),
                         CBOR_OBJECT_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
+                .addCallAdapterFactory(AsyncSerializableErrorCallAdapterFactory.INSTANCE)
                 .build();
         return retrofit.create(serviceClass);
     }
@@ -75,7 +78,6 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
     }
 
     private OkHttpClient createOkHttpClient(String userAgent, List<String> uris) {
-
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // SSL
@@ -120,6 +122,13 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
 
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
         client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
+
+        Dispatcher dispatcher = new Dispatcher();
+
+        dispatcher.setMaxRequests(256);
+        dispatcher.setMaxRequestsPerHost(256);
+
+        client.dispatcher(dispatcher);
 
         return client.build();
     }

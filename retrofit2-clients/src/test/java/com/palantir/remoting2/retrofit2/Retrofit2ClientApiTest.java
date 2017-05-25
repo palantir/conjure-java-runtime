@@ -18,12 +18,22 @@ package com.palantir.remoting2.retrofit2;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableList;
+import com.google.common.net.HttpHeaders;
+import com.palantir.remoting2.errors.RemoteException;
+import com.palantir.remoting2.errors.SerializableError;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import javax.ws.rs.core.MediaType;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -94,6 +104,38 @@ public final class Retrofit2ClientApiTest {
         RecordedRequest request = server.takeRequest();
         assertThat(request.getBody().readByteArray())
             .isEqualTo(ObjectMappers.newCborClientObjectMapper().writeValueAsBytes(date));
+    }
+
+    @Test
+    public void makeFutureRequest() {
+        String value = "value";
+        server.enqueue(new MockResponse().setBody("\"" + value + "\""));
+        CompletableFuture<String> future = service.makeFutureRequest();
+        assertThat(future.join()).isEqualTo("value");
+    }
+
+    @Test
+    public void makeFutureRequestError() throws JsonProcessingException {
+        NoSuchElementException exception = new NoSuchElementException("msg");
+        SerializableError error = SerializableError.of(
+                exception.getMessage(),
+                exception.getClass(),
+                Arrays.asList(exception.getStackTrace()));
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(error)));
+
+        CompletableFuture<String> future = service.makeFutureRequest();
+
+        try {
+            future.join();
+            fail();
+        } catch (CompletionException e) {
+            assertThat(e.getCause()).isInstanceOf(RemoteException.class);
+            assertThat(((RemoteException) e.getCause()).getRemoteException()).isEqualTo(error);
+        }
     }
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {
