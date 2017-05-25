@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
+import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
 import retrofit2.Retrofit;
@@ -123,6 +124,13 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
 
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
         client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
+
+        Dispatcher dispatcher = new Dispatcher();
+
+        dispatcher.setMaxRequests(256);
+        dispatcher.setMaxRequestsPerHost(256);
+
+        client.dispatcher(dispatcher);
 
         return client.build();
     }
