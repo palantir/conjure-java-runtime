@@ -21,7 +21,7 @@
  * - Made code style comply with Palantir checkstyle.
  * - Removed the ResponseCallAdapter
  * - Made the BodyCallAdapter create RemoteExceptions.
- * - Made the BodyCallAdapter tell the AsyncCallTracker that this is an async call.
+ * - Made the BodyCallAdapter tell the AsyncCallTag that this is an async call.
  */
 package com.palantir.remoting2.retrofit2;
 
