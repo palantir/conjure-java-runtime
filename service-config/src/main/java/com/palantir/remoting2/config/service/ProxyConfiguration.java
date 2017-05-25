@@ -61,9 +61,9 @@ public abstract class ProxyConfiguration {
      * @deprecated Use maybeHostAndPort().
      */
     @Deprecated
-    @Value.Derived
     @SuppressWarnings("checkstyle:designforextension")
     @JsonIgnore
+    @Lazy
     public String hostAndPort() {
         Preconditions.checkState(maybeHostAndPort().isPresent(), "hostAndPort was not configured");
         return maybeHostAndPort().get();
