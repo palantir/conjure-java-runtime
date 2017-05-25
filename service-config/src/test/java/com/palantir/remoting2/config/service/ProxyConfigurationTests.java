@@ -64,7 +64,7 @@ public final class ProxyConfigurationTests {
     public void testDirectProxyWithHostAndPort() {
         new ProxyConfiguration.Builder()
                 .maybeHostAndPort("squid:3128")
-                .type(ProxyConfiguration.Type.direct)
+                .type(ProxyConfiguration.Type.DIRECT)
                 .build();
     }
 
@@ -81,9 +81,9 @@ public final class ProxyConfigurationTests {
     public void serDe() throws Exception {
         ProxyConfiguration serialized = ProxyConfiguration.of("host:80", BasicCredentials.of("username", "password"));
         String deserializedCamelCase = "{\"hostAndPort\":\"host:80\",\"credentials\":{\"username\":\"username\","
-                + "\"password\":\"password\"},\"type\":\"http\"}";
+                + "\"password\":\"password\"},\"type\":\"HTTP\"}";
         String deserializedKebabCase = "{\"host-and-port\":\"host:80\",\"credentials\":{\"username\":\"username\","
-                + "\"password\":\"password\"},\"type\":\"http\"}";
+                + "\"password\":\"password\"},\"type\":\"HTTP\"}";
 
         assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);

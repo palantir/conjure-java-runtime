@@ -41,13 +41,13 @@ public abstract class ProxyConfiguration {
         /**
          * Use a direct connection. This option will bypass any JVM-level configured proxy settings.
          */
-        direct,
+        DIRECT,
 
         /**
          * Use an http-proxy specified by {@link ProxyConfiguration#hostAndPort()}  and (optionally)
          * {@link ProxyConfiguration#credentials()}.
          */
-        http;
+        HTTP;
     }
 
     /**
@@ -75,34 +75,34 @@ public abstract class ProxyConfiguration {
     public abstract Optional<BasicCredentials> credentials();
 
     /**
-     * The type of Proxy.  Defaults to {@link Type#http}.
+     * The type of Proxy.  Defaults to {@link Type#HTTP}.
      */
     @Value.Default
     @SuppressWarnings("checkstyle:designforextension")
     public Type type() {
-        return Type.http;
+        return Type.HTTP;
     }
 
     @Value.Check
     protected final void check() {
         switch (type()) {
-            case http:
+            case HTTP:
                 Preconditions.checkArgument(maybeHostAndPort().isPresent(), "host-and-port must be "
                         + "configured for an http proxy");
                 HostAndPort host = HostAndPort.fromString(maybeHostAndPort().get());
                 Preconditions.checkArgument(host.hasPort(),
                         "Given hostname does not contain a port number: " + host);
                 break;
-            case direct:
+            case DIRECT:
                 Preconditions.checkArgument(!maybeHostAndPort().isPresent() && !credentials().isPresent(),
-                        "Neither credential nor host-and-port may be configured for direct proxies");
+                        "Neither credential nor host-and-port may be configured for DIRECT proxies");
                 break;
             default:
                 throw new IllegalStateException("Unrecognized case; this is a library bug");
         }
 
         if (credentials().isPresent()) {
-            Preconditions.checkArgument(type() == Type.http, "credentials only valid for http proxies");
+            Preconditions.checkArgument(type() == Type.HTTP, "credentials only valid for http proxies");
         }
     }
 
@@ -111,11 +111,11 @@ public abstract class ProxyConfiguration {
     @JsonIgnore
     public Proxy toProxy() {
         switch (type()) {
-            case http:
+            case HTTP:
                 HostAndPort hostAndPort = HostAndPort.fromString(maybeHostAndPort().get());
                 InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort());
                 return new Proxy(Proxy.Type.HTTP, addr);
-            case direct:
+            case DIRECT:
                 return Proxy.NO_PROXY;
             default:
                 throw new IllegalStateException("unrecognized proxy type; this is a library error");
@@ -131,7 +131,7 @@ public abstract class ProxyConfiguration {
     }
 
     public static ProxyConfiguration direct() {
-        return new ProxyConfiguration.Builder().type(Type.direct).build();
+        return new ProxyConfiguration.Builder().type(Type.DIRECT).build();
     }
 
     // TODO(jnewman): #317 - remove kebab-case methods when Jackson 2.7 is picked up

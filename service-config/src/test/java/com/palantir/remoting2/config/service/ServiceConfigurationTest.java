@@ -43,7 +43,7 @@ public final class ServiceConfigurationTest {
                 + "\"connectTimeout\":\"1 day\",\"readTimeout\":\"1 day\",\"writeTimeout\":\"1 day\","
                 + "\"enableGcmCipherSuites\":null,"
                 + "\"uris\":[\"uri1\"],\"proxyConfiguration\":{\"hostAndPort\":\"host:80\",\"credentials\":null,"
-                + "\"type\":\"http\"}}";
+                + "\"type\":\"HTTP\"}}";
         String deserializedKebabCase = "{\"api-token\":\"bearerToken\",\"security\":"
                 + "{\"trust-store-path\":\"truststore.jks\",\"trust-store-type\":\"JKS\",\"key-store-path\":null,"
                 + "\"key-store-password\":null,\"key-store-type\":\"JKS\",\"key-store-key-alias\":null},"
