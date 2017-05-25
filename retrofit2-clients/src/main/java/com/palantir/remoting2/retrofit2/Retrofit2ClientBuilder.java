@@ -58,18 +58,17 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
     @Override
     public <T> T build(Class<T> serviceClass, String userAgent, List<String> uris) {
         Preconditions.checkArgument(!uris.isEmpty());
-        DefaultAsyncCallTracker tracker = new DefaultAsyncCallTracker();
         List<String> sanitizedUris = addTrailingSlashes(uris);
-        okhttp3.OkHttpClient client = createOkHttpClient(userAgent, sanitizedUris, tracker);
+        okhttp3.OkHttpClient client = createOkHttpClient(userAgent, sanitizedUris);
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(sanitizedUris.get(0))
-                .callFactory(new UniqueTagCallFactory(client))
+                .callFactory(new AsyncCallTagCallFactory(client))
                 .addConverterFactory(new CborConverterFactory(
                         JacksonConverterFactory.create(OBJECT_MAPPER),
                         CBOR_OBJECT_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
-                .addCallAdapterFactory(AsyncSerializableErrorCallAdapterFactory.create(tracker))
+                .addCallAdapterFactory(AsyncSerializableErrorCallAdapterFactory.INSTANCE)
                 .build();
         return retrofit.create(serviceClass);
     }
@@ -78,8 +77,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
         return Lists.transform(uris, input -> input.charAt(input.length() - 1) == '/' ? input : input + "/");
     }
 
-    private OkHttpClient createOkHttpClient(String userAgent, List<String> uris, DefaultAsyncCallTracker tracker) {
-
+    private OkHttpClient createOkHttpClient(String userAgent, List<String> uris) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // SSL
@@ -117,7 +115,7 @@ public final class Retrofit2ClientBuilder extends ClientBuilder {
 
         client.addInterceptor(MultiServerRetryInterceptor.create(uris));
         client.addInterceptor(UserAgentInterceptor.of(userAgent));
-        client.addInterceptor(new SerializableErrorInterceptor(tracker));
+        client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
 
         // cipher setup
         client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));

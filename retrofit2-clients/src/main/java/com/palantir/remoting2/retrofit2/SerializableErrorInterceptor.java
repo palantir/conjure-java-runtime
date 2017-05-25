@@ -23,16 +23,12 @@ import java.util.Collection;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
-public final class SerializableErrorInterceptor implements Interceptor {
-    private final AsyncCallTracker asyncCallTracker;
-
-    SerializableErrorInterceptor(AsyncCallTracker asyncCallTracker) {
-        this.asyncCallTracker = asyncCallTracker;
-    }
+public enum SerializableErrorInterceptor implements Interceptor {
+    INSTANCE;
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        if (asyncCallTracker.isAsyncRequest(chain.request())) {
+        if (((AsyncCallTag) chain.request().tag()).isAsyncCall()) {
             return chain.proceed(chain.request());
         }
 

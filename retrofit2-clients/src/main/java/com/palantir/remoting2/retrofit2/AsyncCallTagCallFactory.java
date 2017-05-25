@@ -16,19 +16,18 @@
 
 package com.palantir.remoting2.retrofit2;
 
-import java.util.UUID;
 import okhttp3.Call;
 import okhttp3.Request;
 
-public final class UniqueTagCallFactory implements Call.Factory {
+public final class AsyncCallTagCallFactory implements Call.Factory {
     private final Call.Factory delegate;
 
-    UniqueTagCallFactory(Call.Factory delegate) {
+    AsyncCallTagCallFactory(Call.Factory delegate) {
         this.delegate = delegate;
     }
 
     @Override
     public Call newCall(Request request) {
-        return delegate.newCall(request.newBuilder().tag(UUID.randomUUID()).build());
+        return delegate.newCall(request.newBuilder().tag(new AsyncCallTag()).build());
     }
 }

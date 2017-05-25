@@ -39,15 +39,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory {
-    private final AsyncCallTracker asyncCallTracker;
+    static final AsyncSerializableErrorCallAdapterFactory INSTANCE = new AsyncSerializableErrorCallAdapterFactory();
 
-    static AsyncSerializableErrorCallAdapterFactory create(AsyncCallTracker asyncCallTracker) {
-        return new AsyncSerializableErrorCallAdapterFactory(asyncCallTracker);
-    }
-
-    private AsyncSerializableErrorCallAdapterFactory(AsyncCallTracker asyncCallTracker) {
-        this.asyncCallTracker = asyncCallTracker;
-    }
+    private AsyncSerializableErrorCallAdapterFactory() {}
 
     @Override
     public CallAdapter<?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
@@ -62,18 +56,16 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
 
         if (getRawType(innerType) != Response.class) {
             // Generic type is not Response<T>. Use it for body-only adapter.
-            return new BodyCallAdapter(asyncCallTracker, innerType);
+            return new BodyCallAdapter(innerType);
         }
 
         return null;
     }
 
     private static class BodyCallAdapter implements CallAdapter<CompletableFuture<?>> {
-        private final AsyncCallTracker asyncCallTracker;
         private final Type responseType;
 
-        BodyCallAdapter(AsyncCallTracker asyncCallTracker, Type responseType) {
-            this.asyncCallTracker = asyncCallTracker;
+        BodyCallAdapter(Type responseType) {
             this.responseType = responseType;
         }
 
@@ -82,7 +74,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
         }
 
         @Override public <R> CompletableFuture<R> adapt(final Call<R> call) {
-            asyncCallTracker.registerAsyncCall(call);
+            ((AsyncCallTag) call.request().tag()).setCallAsync();
 
             final CompletableFuture<R> future = new CompletableFuture<R>() {
                 @Override public boolean cancel(boolean mayInterruptIfRunning) {

@@ -49,7 +49,9 @@ import org.mockito.MockitoAnnotations;
 public final class SerializableErrorInterceptorTest {
 
     private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
-    private static final Request REQUEST = new Request.Builder().url("http://url").build();
+
+    private final AsyncCallTag tag = new AsyncCallTag();
+    private final Request request = new Request.Builder().url("http://url").tag(tag).build();
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -57,39 +59,33 @@ public final class SerializableErrorInterceptorTest {
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    @Mock private AsyncCallTracker asyncCallTracker;
-
     private TestService service;
     @Mock
     private Interceptor.Chain chain;
 
-    private SerializableErrorInterceptor interceptor;
-
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
-        when(chain.request()).thenReturn(REQUEST);
-        when(asyncCallTracker.isAsyncRequest(any())).thenReturn(false);
+        when(chain.request()).thenReturn(request);
         service = Retrofit2Client.builder().build(TestService.class, "agent", "http://localhost:" + server.getPort());
-        interceptor = new SerializableErrorInterceptor(asyncCallTracker);
     }
 
     @Test
     public void doesNothingIfAsyncCall() throws IOException {
-        when(asyncCallTracker.isAsyncRequest(any())).thenReturn(true);
-        Response response = responseWithCode(REQUEST, 400);
+        tag.setCallAsync();
+        Response response = responseWithCode(request, 400);
         when(chain.proceed(any(Request.class))).thenReturn(response);
-        assertThat(interceptor.intercept(chain), is(response));
+        assertThat(SerializableErrorInterceptor.INSTANCE.intercept(chain), is(response));
     }
 
     @Test
     public void testThrowsIfHttpCodeIsNot2xx() throws Exception {
         for (int code : ImmutableList.of(300, 400, 404, 500)) {
-            Response response = responseWithCode(REQUEST, code);
+            Response response = responseWithCode(request, code);
             when(chain.proceed(any(Request.class))).thenReturn(response);
 
             try {
-                interceptor.intercept(chain);
+                SerializableErrorInterceptor.INSTANCE.intercept(chain);
                 fail();
             } catch (RuntimeException e) {
                 assertThat(e.getMessage(), containsString("Error " + code));
@@ -99,10 +95,10 @@ public final class SerializableErrorInterceptorTest {
 
     @Test
     public void testInterceptorLogic_isIdentityOperationIfHttpCodeIs200() throws Exception {
-        Response response = responseWithCode(REQUEST, 200);
+        Response response = responseWithCode(request, 200);
         when(chain.proceed(any(Request.class))).thenReturn(response);
 
-        assertThat(interceptor.intercept(chain), is(response));
+        assertThat(SerializableErrorInterceptor.INSTANCE.intercept(chain), is(response));
     }
 
     @Test
