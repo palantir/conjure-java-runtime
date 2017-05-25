@@ -74,6 +74,9 @@ public abstract class ProxyConfiguration {
      */
     public abstract Optional<BasicCredentials> credentials();
 
+    /**
+     * The type of Proxy.  Defaults to {@link Type#http}.
+     */
     @Value.Default
     @SuppressWarnings("checkstyle:designforextension")
     public Type type() {
@@ -84,6 +87,8 @@ public abstract class ProxyConfiguration {
     protected final void check() {
         switch (type()) {
             case http:
+                Preconditions.checkArgument(maybeHostAndPort().isPresent(), "host-and-port must be "
+                        + "configured for an http proxy");
                 HostAndPort host = HostAndPort.fromString(maybeHostAndPort().get());
                 Preconditions.checkArgument(host.hasPort(),
                         "Given hostname does not contain a port number: " + host);

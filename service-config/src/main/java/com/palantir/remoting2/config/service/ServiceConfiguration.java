@@ -68,7 +68,7 @@ public abstract class ServiceConfiguration {
     public abstract List<String> uris();
 
     /**
-     * Proxy configuration for connecting to the service.
+     * Proxy configuration for connecting to the service. If absent, uses system proxy configuration.
      */
     public abstract Optional<ProxyConfiguration> proxyConfiguration();
 
