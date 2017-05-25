@@ -54,6 +54,21 @@ public final class ProxyConfigurationTests {
     }
 
     @Test
+    public void testDeserializationDirect() throws Exception {
+        URL resource = Resources.getResource("configs/proxy-config-direct.yml");
+        ProxyConfiguration config = mapper.readValue(resource, ProxyConfiguration.class);
+        assertEquals(config, ProxyConfiguration.direct());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testDirectProxyWithHostAndPort() {
+        new ProxyConfiguration.Builder()
+                .maybeHostAndPort("squid:3128")
+                .type(ProxyConfiguration.Type.DIRECT)
+                .build();
+    }
+
+    @Test
     public void testToProxy() {
         ProxyConfiguration proxyConfiguration = ProxyConfiguration.of("squid:3128");
 
@@ -61,13 +76,14 @@ public final class ProxyConfigurationTests {
         assertEquals(expected, proxyConfiguration.toProxy());
     }
 
+
     @Test
     public void serDe() throws Exception {
         ProxyConfiguration serialized = ProxyConfiguration.of("host:80", BasicCredentials.of("username", "password"));
-        String deserializedCamelCase =
-                "{\"hostAndPort\":\"host:80\",\"credentials\":{\"username\":\"username\",\"password\":\"password\"}}";
-        String deserializedKebabCase =
-                "{\"host-and-port\":\"host:80\",\"credentials\":{\"username\":\"username\",\"password\":\"password\"}}";
+        String deserializedCamelCase = "{\"hostAndPort\":\"host:80\",\"credentials\":{\"username\":\"username\","
+                + "\"password\":\"password\"},\"type\":\"HTTP\"}";
+        String deserializedKebabCase = "{\"host-and-port\":\"host:80\",\"credentials\":{\"username\":\"username\","
+                + "\"password\":\"password\"},\"type\":\"HTTP\"}";
 
         assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
