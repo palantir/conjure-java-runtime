@@ -54,7 +54,20 @@ public abstract class ProxyConfiguration {
      * The hostname and port of the HTTP/HTTPS Proxy. Recognized formats include those recognized by {@link
      * com.google.common.net.HostAndPort}, for instance {@code foo.com:80}, {@code 192.168.3.100:8080}, etc.
      */
-    public abstract Optional<String> hostAndPort();
+    @JsonProperty("hostAndPort")
+    public abstract Optional<String> maybeHostAndPort();
+
+    /**
+     * @deprecated Use maybeHostAndPort().
+     */
+    @Deprecated
+    @Value.Derived
+    @SuppressWarnings("checkstyle:designforextension")
+    @JsonIgnore
+    public String hostAndPort() {
+        Preconditions.checkState(maybeHostAndPort().isPresent(), "hostAndPort was not configured");
+        return maybeHostAndPort().get();
+    }
 
     /**
      * Credentials if the proxy needs authentication.
@@ -71,12 +84,12 @@ public abstract class ProxyConfiguration {
     protected final void check() {
         switch (type()) {
             case http:
-                HostAndPort host = HostAndPort.fromString(hostAndPort().get());
+                HostAndPort host = HostAndPort.fromString(maybeHostAndPort().get());
                 Preconditions.checkArgument(host.hasPort(),
                         "Given hostname does not contain a port number: " + host);
                 break;
             case direct:
-                Preconditions.checkArgument(!hostAndPort().isPresent() && !credentials().isPresent(),
+                Preconditions.checkArgument(!maybeHostAndPort().isPresent() && !credentials().isPresent(),
                         "Neither credential nor host-and-port may be configured for direct proxies");
                 break;
             default:
@@ -94,7 +107,7 @@ public abstract class ProxyConfiguration {
     public Proxy toProxy() {
         switch (type()) {
             case http:
-                HostAndPort hostAndPort = HostAndPort.fromString(hostAndPort().get());
+                HostAndPort hostAndPort = HostAndPort.fromString(maybeHostAndPort().get());
                 InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort());
                 return new Proxy(Proxy.Type.HTTP, addr);
             case direct:
@@ -105,11 +118,11 @@ public abstract class ProxyConfiguration {
     }
 
     public static ProxyConfiguration of(String hostAndPort) {
-        return new ProxyConfiguration.Builder().hostAndPort(hostAndPort).build();
+        return new ProxyConfiguration.Builder().maybeHostAndPort(hostAndPort).build();
     }
 
     public static ProxyConfiguration of(String hostAndPort, BasicCredentials credentials) {
-        return new ProxyConfiguration.Builder().hostAndPort(hostAndPort).credentials(credentials).build();
+        return new ProxyConfiguration.Builder().maybeHostAndPort(hostAndPort).credentials(credentials).build();
     }
 
     public static ProxyConfiguration direct() {
@@ -121,7 +134,7 @@ public abstract class ProxyConfiguration {
 
         @JsonProperty("host-and-port")
         Builder hostAndPortKebabCase(String hostAndPort) {
-            return hostAndPort(hostAndPort);
+            return maybeHostAndPort(hostAndPort);
         }
     }
 }

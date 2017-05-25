@@ -63,7 +63,7 @@ public final class ProxyConfigurationTests {
     @Test(expected = IllegalArgumentException.class)
     public void testDirectProxyWithHostAndPort() {
         new ProxyConfiguration.Builder()
-                .hostAndPort("squid:3128")
+                .maybeHostAndPort("squid:3128")
                 .type(ProxyConfiguration.Type.direct)
                 .build();
     }
