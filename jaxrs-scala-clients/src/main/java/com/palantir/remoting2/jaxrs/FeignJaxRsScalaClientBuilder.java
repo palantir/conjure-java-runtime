@@ -17,17 +17,12 @@
 package com.palantir.remoting2.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.module.scala.DefaultScalaModule;
-import com.fasterxml.jackson.module.scala.introspect.ScalaAnnotationIntrospector$;
 import com.palantir.remoting2.clients.ClientConfig;
-import com.palantir.remoting2.ext.jackson.ObjectMappers;
 
 public final class FeignJaxRsScalaClientBuilder extends AbstractFeignJaxRsClientBuilder {
 
-    private static final ObjectMapper JSON_OBJECT_MAPPER = withScalaSupport(ObjectMappers.newClientObjectMapper());
-    private static final ObjectMapper CBOR_OBJECT_MAPPER = withScalaSupport(ObjectMappers.newCborClientObjectMapper());
+    private static final ObjectMapper JSON_OBJECT_MAPPER = ScalaObjectMappers.newClientObjectMapper();
+    private static final ObjectMapper CBOR_OBJECT_MAPPER = ScalaObjectMappers.newCborClientObjectMapper();
 
     FeignJaxRsScalaClientBuilder(ClientConfig config) {
         super(config);
@@ -41,14 +36,5 @@ public final class FeignJaxRsScalaClientBuilder extends AbstractFeignJaxRsClient
     @Override
     protected ObjectMapper getCborObjectMapper() {
         return CBOR_OBJECT_MAPPER;
-    }
-
-    private static ObjectMapper withScalaSupport(ObjectMapper objectMapper) {
-        objectMapper
-                .registerModule(new DefaultScalaModule())
-                .setAnnotationIntrospector(new AnnotationIntrospectorPair(
-                        ScalaAnnotationIntrospector$.MODULE$, new JacksonAnnotationIntrospector()));
-
-        return objectMapper;
     }
 }
