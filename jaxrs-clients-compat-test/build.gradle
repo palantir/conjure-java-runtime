@@ -3,8 +3,6 @@ dependencies {
     testCompile project(':http-clients-api')
     testCompile project(":service-config")
 
-    testCompile project(":extras:jackson-support")
-
     // Versions incompatible with jaxrs-clients's shaded internals.
     // Note that this only works correctly in Gradle, not in Eclipse/IntelliJ.
     testCompile "com.netflix.feign:feign-okhttp:8.10.0"
