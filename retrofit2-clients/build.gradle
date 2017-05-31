@@ -27,3 +27,9 @@ dependencies {
 
     processor "org.immutables:value"
 }
+
+configurations.all {
+    resolutionStrategy {
+        force "com.squareup.okhttp3:okhttp:3.4.1"
+    }
+}
