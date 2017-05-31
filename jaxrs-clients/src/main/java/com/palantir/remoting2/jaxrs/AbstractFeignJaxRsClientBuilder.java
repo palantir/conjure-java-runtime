@@ -59,6 +59,9 @@ import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.TlsVersion;
 
+/**
+ * Not meant to be implemented outside of this library.
+ */
 abstract class AbstractFeignJaxRsClientBuilder extends ClientBuilder {
 
     private final ClientConfig config;
