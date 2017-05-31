@@ -2,6 +2,11 @@ apply plugin: 'org.inferred.processors'
 
 apply from: "${rootDir}/gradle/publish.gradle"
 
+repositories {
+    maven { url "http://palantir.bintray.com/releases" }
+}
+
+
 dependencies {
     compile project(":extras:jackson-support")
     compile "com.fasterxml.jackson.core:jackson-databind"
@@ -10,6 +15,7 @@ dependencies {
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.google.code.findbugs:jsr305"
     compile "com.google.guava:guava"
+    compile "com.palantir.safe-logging:safe-logging"
     compile "javax.ws.rs:javax.ws.rs-api"
     compile "org.slf4j:slf4j-api"
 

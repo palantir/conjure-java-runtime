@@ -19,13 +19,9 @@ package com.palantir.remoting2.servers.jersey;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.annotations.VisibleForTesting;
-import com.palantir.remoting2.errors.Param;
-import com.palantir.remoting2.errors.SafeParam;
 import com.palantir.remoting2.errors.SerializableError;
 import com.palantir.remoting2.errors.ServiceException;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
-import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -36,13 +32,12 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
 
     private static final Logger log = LoggerFactory.getLogger(ServiceExceptionMapper.class);
 
-    private static final String ERROR_MESSAGE_PREFIX_FORMAT = "Error handling request {}: ";
     private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
 
     @Override
     public Response toResponse(ServiceException exception) {
-        logException(exception);
+        log.info("Error handling request {}", exception.getErrorId(), exception);
 
         int status = exception.getStatus();
         Response.ResponseBuilder builder = Response.status(status);
@@ -61,32 +56,6 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
         }
 
         return builder.build();
-    }
-
-    private void logException(ServiceException exception) {
-        log.warn(getLogMessageFormat(exception), getLogMessageParams(exception));
-    }
-
-    @VisibleForTesting
-    String getLogMessageFormat(ServiceException exception) {
-        return ERROR_MESSAGE_PREFIX_FORMAT + exception.getMessageFormat();
-    }
-
-    @VisibleForTesting
-    Object[] getLogMessageParams(ServiceException exception) {
-        List<Param<?>> messageParams = exception.getMessageParams();
-
-        Object[] args = new Object[messageParams.size() + 2];
-
-        args[0] = SafeParam.of("errorId", exception.getErrorId());
-
-        for (int i = 0; i < messageParams.size(); i++) {
-            args[i + 1] = messageParams.get(i);
-        }
-
-        args[args.length - 1] = exception;
-
-        return args;
     }
 
 }

@@ -16,41 +16,48 @@
 
 package com.palantir.remoting2.errors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
+import com.palantir.logsafe.Arg;
+import com.palantir.logsafe.SafeLoggable;
+import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import javax.ws.rs.core.Response;
-import org.slf4j.helpers.MessageFormatter;
 
-public class ServiceException extends RuntimeException {
+public class ServiceException extends RuntimeException implements SafeLoggable {
 
     private static final int DEFAULT_STATUS = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
 
+    private static final ObjectMapper MAPPER = ObjectMappers.newServerObjectMapper();
+
     private final String errorId = UUID.randomUUID().toString();
-    private final String messageFormat;
-    private final List<Param<?>> messageParams;
+    private final String message;
+    private final List<Arg<?>> args;
     private final int status;
 
-    public ServiceException(String messageFormat, Param<?>... messageParams) {
+    public ServiceException(String messageFormat, Arg<?>... messageParams) {
         this(DEFAULT_STATUS, messageFormat,  messageParams);
     }
 
-    public ServiceException(Throwable cause, String messageFormat, Param<?>... messageParams) {
+    public ServiceException(Throwable cause, String messageFormat, Arg<?>... messageParams) {
         this(DEFAULT_STATUS, cause, messageFormat,  messageParams);
     }
 
-    public ServiceException(int status, String messageFormat, Param<?>... messageParams) {
+    public ServiceException(int status, String messageFormat, Arg<?>... messageParams) {
         this(status, null, messageFormat,  messageParams);
     }
 
-    public ServiceException(int status, @Nullable Throwable cause, String messageFormat,
-            Param<?>... messageParams) {
-        super(formatMessage(messageFormat, messageParams), cause);
+    public ServiceException(int status, @Nullable Throwable cause, String message,
+            Arg<?>... args) {
+        super(formatMessage(message, args), cause);
 
         this.status = status;
-        this.messageFormat = messageFormat;
-        this.messageParams = ImmutableList.copyOf(messageParams);
+        this.message = message;
+        this.args = ImmutableList.copyOf(args);
     }
 
     /** A unique identifier for this error. */
@@ -74,18 +81,34 @@ public class ServiceException extends RuntimeException {
         return status;
     }
 
-    /** The format of the exception message. */
+    @Override
     public final String getMessageFormat() {
-        return messageFormat;
+        return message;
     }
 
-    /** The parameters for the exception message. */
-    public final List<Param<?>> getMessageParams() {
-        return messageParams;
+    @Override
+    public final List<Arg<?>> getMessageArgs() {
+        return args;
     }
 
-    protected static final String formatMessage(String messageFormat, Param<?>... params) {
-        return MessageFormatter.arrayFormat(messageFormat, params).getMessage();
+    protected static final String formatMessage(String message, Arg<?>... args) {
+        if (args.length == 0) {
+            return message;
+        }
+
+        String[] stringifiedArgs = Arrays.stream(args)
+                .map(arg -> String.format("%s=%s", arg.getName(), toJson(arg.getValue())))
+                .toArray(String[]::new);
+
+        return String.format("%s {%s}", message, String.join(", ", stringifiedArgs));
+    }
+
+    private static String toJson(Object value) {
+        try {
+            return MAPPER.writeValueAsString(value);
+        } catch (IOException e) {
+            return "<error serializing>";
+        }
     }
 
 }

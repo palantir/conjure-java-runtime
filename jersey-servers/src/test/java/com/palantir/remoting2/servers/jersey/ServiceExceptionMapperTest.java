@@ -22,13 +22,8 @@ import static org.junit.Assert.assertThat;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.collect.Lists;
-import com.palantir.remoting2.errors.Param;
-import com.palantir.remoting2.errors.SafeParam;
 import com.palantir.remoting2.errors.ServiceException;
-import com.palantir.remoting2.errors.UnsafeParam;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
-import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.junit.Test;
@@ -48,22 +43,7 @@ public final class ServiceExceptionMapperTest {
         assertThat(response.getEntity().toString(), is(serialize(exception.getError())));
     }
 
-    @Test
-    public void testLogMessage() {
-        String messageTemplate = "arg1={}, arg2={}";
-        Param<?>[] args = {
-                SafeParam.of("arg1", "foo"),
-                UnsafeParam.of("arg2", "bar")};
-
-        assertLogMessageIsCorrect(messageTemplate, args);
-    }
-
-    @Test
-    public void testLogMessageWithNoParams() {
-        assertLogMessageIsCorrect("error");
-    }
-
-    private static String serialize(Object obj) {
+    static String serialize(Object obj) {
         ObjectMapper mapper = ObjectMappers.newClientObjectMapper()
                 .enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -72,19 +52,5 @@ public final class ServiceExceptionMapperTest {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private void assertLogMessageIsCorrect(String messageFormat, Param... params) {
-        ServiceException ex = new ServiceException(messageFormat, params);
-
-        String expectedMessageFormat = "Error handling request {}: " + messageFormat;
-
-        List<Object> expectedParams = Lists.newArrayList();
-        expectedParams.add(SafeParam.of("errorId", ex.getErrorId()));
-        expectedParams.addAll(Lists.newArrayList(params));
-        expectedParams.add(ex);
-
-        assertThat(mapper.getLogMessageFormat(ex), is(expectedMessageFormat));
-        assertThat(mapper.getLogMessageParams(ex), is(expectedParams.toArray()));
     }
 }

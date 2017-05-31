@@ -18,6 +18,9 @@ package com.palantir.remoting2.errors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.palantir.logsafe.Arg;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
 import java.util.UUID;
 import org.junit.Test;
 
@@ -25,15 +28,40 @@ public final class ServiceExceptionTests {
 
     @Test
     public void testExceptionMessage() {
-        String messageTemplate = "arg1={}, arg2={}, arg3={}";
-        Param<?>[] args = {
-                SafeParam.of("arg1", "foo"),
-                UnsafeParam.of("arg2", 2),
-                UnsafeParam.of("arg3", null)};
+        String message = "a message";
+        Arg<?>[] args = {
+                SafeArg.of("arg1", "foo"),
+                UnsafeArg.of("arg2", 2),
+                UnsafeArg.of("arg3", null)};
 
-        String expectedMessage = "arg1=foo, arg2=2, arg3=null";
+        String expectedMessage = "a message {arg1=\"foo\", arg2=2, arg3=null}";
 
-        ServiceException ex = new ServiceException(messageTemplate, args);
+        ServiceException ex = new ServiceException(message, args);
+
+        assertThat(ex.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void testExceptionMessageWithDuplicateKeys() {
+        String message = "a message";
+        Arg<?>[] args = {
+                SafeArg.of("arg1", "foo"),
+                SafeArg.of("arg1", 2)};
+
+        String expectedMessage = "a message {arg1=\"foo\", arg1=2}";
+
+        ServiceException ex = new ServiceException(message, args);
+
+        assertThat(ex.getMessage()).isEqualTo(expectedMessage);
+    }
+
+    @Test
+    public void testExceptionMessageWithNoArgs() {
+        String message = "a message";
+
+        String expectedMessage = "a message";
+
+        ServiceException ex = new ServiceException(message);
 
         assertThat(ex.getMessage()).isEqualTo(expectedMessage);
     }
@@ -89,7 +117,7 @@ public final class ServiceExceptionTests {
 
     private static class CustomServiceException extends ServiceException {
 
-        CustomServiceException(String messageFormat, Param<?>... messageParams) {
+        CustomServiceException(String messageFormat, Arg<?>... messageParams) {
             super(messageFormat, messageParams);
         }
 
