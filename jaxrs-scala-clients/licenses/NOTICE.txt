@@ -1,0 +1,12 @@
+The following licenses apply to this library:
+- CDDL 1.0 (https://opensource.org/licenses/cddl1.php)
+- CDDL 1.1 or GPL 2.0 with Classpath Exception (https://glassfish.java.net/public/CDDL+GPL_1_1.html)
+- MIT (https://opensource.org/licenses/mit-license.php)
+- Apache 2.0 (https://www.apache.org/licenses/LICENSE-2.0)
+Further note that:
+- org.jvnet:animal-sniffer-annotation (http://www.mojohaus.org/animal-sniffer/animal-sniffer-annotations/) is distributed only under CDDL 1.0.
+- Palantir Technologies Inc. elects to include javax.ws.rs:javax.ws.rs-api in this distribution under the CDDL license.
+- javax.ws.rs:javax.ws.rs-api (https://jax-rs-spec.java.net/) is distributed only under CDDL 1.1.
+- org.slf4j:jcl-over-slf4j and org.slf4j:slf4j-api are distributed under the MIT License.
+- The rest of the contents of this file are subject to the terms of Apache License, Version 2.0.
+A copy of the licenses can be found in this directory.
