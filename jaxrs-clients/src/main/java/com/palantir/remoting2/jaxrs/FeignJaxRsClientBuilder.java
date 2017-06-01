@@ -164,13 +164,17 @@ public final class FeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private static ImmutableList<ConnectionSpec> createConnectionSpecs(boolean enableGcmCipherSuites) {
-        return ImmutableList.of(
-            new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                    .tlsVersions(TlsVersion.TLS_1_2)
-                    .cipherSuites(enableGcmCipherSuites
-                            ? CipherSuites.allCipherSuites()
-                            : CipherSuites.fastCipherSuites())
-                    .build(),
-            ConnectionSpec.CLEARTEXT);
+        ConnectionSpec.Builder encryptedSpecs = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                .tlsVersions(TlsVersion.TLS_1_2)
+                .cipherSuites(enableGcmCipherSuites
+                        ? CipherSuites.allCipherSuites()
+                        : CipherSuites.fastCipherSuites());
+
+        // https://github.com/palantir/http-remoting/issues/431
+        if ("IBM J9 VM".equals(System.getProperty("java.vm.name"))) {
+            encryptedSpecs.allEnabledCipherSuites();
+        }
+
+        return ImmutableList.of(encryptedSpecs.build(), ConnectionSpec.CLEARTEXT);
     }
 }
