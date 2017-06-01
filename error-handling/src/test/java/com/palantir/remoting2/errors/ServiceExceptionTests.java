@@ -117,8 +117,8 @@ public final class ServiceExceptionTests {
 
     private static class CustomServiceException extends ServiceException {
 
-        CustomServiceException(String messageFormat, Arg<?>... messageParams) {
-            super(messageFormat, messageParams);
+        CustomServiceException(String message, Arg<?>... args) {
+            super(message, args);
         }
 
     }

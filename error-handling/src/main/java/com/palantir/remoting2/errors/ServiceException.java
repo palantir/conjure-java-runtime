@@ -39,16 +39,16 @@ public class ServiceException extends RuntimeException implements SafeLoggable {
     private final List<Arg<?>> args;
     private final int status;
 
-    public ServiceException(String messageFormat, Arg<?>... messageParams) {
-        this(DEFAULT_STATUS, messageFormat,  messageParams);
+    public ServiceException(String message, Arg<?>... args) {
+        this(DEFAULT_STATUS, message,  args);
     }
 
-    public ServiceException(Throwable cause, String messageFormat, Arg<?>... messageParams) {
-        this(DEFAULT_STATUS, cause, messageFormat,  messageParams);
+    public ServiceException(Throwable cause, String message, Arg<?>... args) {
+        this(DEFAULT_STATUS, cause, message,  args);
     }
 
-    public ServiceException(int status, String messageFormat, Arg<?>... messageParams) {
-        this(status, null, messageFormat,  messageParams);
+    public ServiceException(int status, String message, Arg<?>... args) {
+        this(status, null, message,  args);
     }
 
     public ServiceException(int status, @Nullable Throwable cause, String message,
@@ -69,7 +69,6 @@ public class ServiceException extends RuntimeException implements SafeLoggable {
      * The error that should be returned to the remote client. Subclasses may override this method to return custom
      * errors.
      */
-    @SuppressWarnings("checkstyle:designforextension")
     public final SerializableError getError() {
         return SerializableError.of(
                 "Refer to the server logs with this errorId: " + getErrorId(),
@@ -82,12 +81,12 @@ public class ServiceException extends RuntimeException implements SafeLoggable {
     }
 
     @Override
-    public final String getMessageFormat() {
+    public final String getMessage() {
         return message;
     }
 
     @Override
-    public final List<Arg<?>> getMessageArgs() {
+    public final List<Arg<?>> getArgs() {
         return args;
     }
 
