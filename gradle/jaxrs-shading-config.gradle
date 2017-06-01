@@ -1,5 +1,4 @@
 apply plugin: 'com.github.johnrengelman.shadow'
-apply from: "${rootDir}/gradle/publish-shadow.gradle"
 
 dependencyLock {
     includeTransitives = true

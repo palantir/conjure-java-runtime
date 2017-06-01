@@ -1,14 +1,6 @@
-apply from: "${rootDir}/gradle/jaxrs-shading-config.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
-    compile project(":jaxrs-clients")
+    compile project(path: ":jaxrs-clients", configuration: "shadow")
     compile "com.fasterxml.jackson.module:jackson-module-scala_2.11"
-}
-
-shadowJar {
-    dependencies {
-        exclude(project(':jaxrs-clients'))
-        exclude(dependency { it.moduleGroup.contains("org.scala-lang") })
-        exclude(dependency { it.moduleGroup.contains("com.thoughtworks.paranamer") })
-    }
 }
