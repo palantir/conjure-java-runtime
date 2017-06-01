@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,13 @@ package com.palantir.remoting2.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.remoting2.clients.ClientConfig;
-import com.palantir.remoting2.ext.jackson.ObjectMappers;
 
-public final class FeignJaxRsClientBuilder extends AbstractFeignJaxRsClientBuilder {
+public final class FeignJaxRsScalaClientBuilder extends AbstractFeignJaxRsClientBuilder {
 
-    private static final ObjectMapper JSON_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
-    private static final ObjectMapper CBOR_OBJECT_MAPPER = ObjectMappers.newCborClientObjectMapper();
+    private static final ObjectMapper JSON_OBJECT_MAPPER = ScalaObjectMappers.newClientObjectMapper();
+    private static final ObjectMapper CBOR_OBJECT_MAPPER = ScalaObjectMappers.newCborClientObjectMapper();
 
-    FeignJaxRsClientBuilder(ClientConfig config) {
+    FeignJaxRsScalaClientBuilder(ClientConfig config) {
         super(config);
     }
 
