@@ -37,25 +37,25 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
 
     @Override
     public Response toResponse(ServiceException exception) {
-        log.info("Error handling request {}", exception.getErrorId(), exception);
-
-        int status = exception.getStatus();
-        Response.ResponseBuilder builder = Response.status(status);
+        log.error("Error handling request {}", exception.getErrorId(), exception);
 
         try {
             SerializableError error = exception.getError();
-            builder.type(MediaType.APPLICATION_JSON);
             String json = MAPPER.writeValueAsString(error);
-            builder.entity(json);
+
+            return Response.status(exception.getStatus())
+                    .type(MediaType.APPLICATION_JSON)
+                    .entity(json)
+                    .build();
         } catch (RuntimeException | JsonProcessingException e) {
             log.warn("Unable to translate exception to json for request {}", exception.getErrorId(), e);
 
-            builder = Response.status(status);
-            builder.type(MediaType.TEXT_PLAIN);
-            builder.entity("Refer to the server logs with this errorId: " + exception.getErrorId());
+            return Response.status(exception.getStatus())
+                    .type(MediaType.TEXT_PLAIN)
+                    .entity("Refer to the server logs with this errorId: " + exception.getErrorId())
+                    .build();
         }
 
-        return builder.build();
     }
 
 }

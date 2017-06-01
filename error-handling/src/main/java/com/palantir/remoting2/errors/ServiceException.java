@@ -22,7 +22,6 @@ import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeLoggable;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
@@ -69,7 +68,8 @@ public class ServiceException extends RuntimeException implements SafeLoggable {
      * The error that should be returned to the remote client. Subclasses may override this method to return custom
      * errors.
      */
-    public final SerializableError getError() {
+    @SuppressWarnings("checkstyle:designforextension")
+    public SerializableError getError() {
         return SerializableError.of(
                 "Refer to the server logs with this errorId: " + getErrorId(),
                 this.getClass());
@@ -95,11 +95,19 @@ public class ServiceException extends RuntimeException implements SafeLoggable {
             return message;
         }
 
-        String[] stringifiedArgs = Arrays.stream(args)
-                .map(arg -> String.format("%s=%s", arg.getName(), toJson(arg.getValue())))
-                .toArray(String[]::new);
+        StringBuilder builder = new StringBuilder();
+        builder.append(message).append(" {");
+        for (int i = 0; i < args.length; i++) {
+            if (i > 0) {
+                builder.append(", ");
+            }
 
-        return String.format("%s {%s}", message, String.join(", ", stringifiedArgs));
+            Arg<?> arg = args[i];
+            builder.append(arg.getName()).append("=").append(toJson(arg.getValue()));
+        }
+        builder.append("}");
+
+        return builder.toString();
     }
 
     private static String toJson(Object value) {

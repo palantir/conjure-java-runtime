@@ -35,7 +35,6 @@ public final class ServiceExceptionTests {
                 UnsafeArg.of("arg3", null)};
 
         String expectedMessage = "a message {arg1=\"foo\", arg2=2, arg3=null}";
-
         ServiceException ex = new ServiceException(message, args);
 
         assertThat(ex.getMessage()).isEqualTo(expectedMessage);
@@ -49,7 +48,6 @@ public final class ServiceExceptionTests {
                 SafeArg.of("arg1", 2)};
 
         String expectedMessage = "a message {arg1=\"foo\", arg1=2}";
-
         ServiceException ex = new ServiceException(message, args);
 
         assertThat(ex.getMessage()).isEqualTo(expectedMessage);
@@ -58,9 +56,7 @@ public final class ServiceExceptionTests {
     @Test
     public void testExceptionMessageWithNoArgs() {
         String message = "a message";
-
         String expectedMessage = "a message";
-
         ServiceException ex = new ServiceException(message);
 
         assertThat(ex.getMessage()).isEqualTo(expectedMessage);
@@ -72,6 +68,7 @@ public final class ServiceExceptionTests {
         SerializableError expected = SerializableError.of(
                 "Refer to the server logs with this errorId: " + ex.getErrorId(),
                 ServiceException.class);
+
         assertThat(ex.getError()).isEqualTo(expected);
     }
 
@@ -81,6 +78,7 @@ public final class ServiceExceptionTests {
         SerializableError expected = SerializableError.of(
                 "Refer to the server logs with this errorId: " + ex.getErrorId(),
                 CustomServiceException.class);
+
         assertThat(ex.getError()).isEqualTo(expected);
     }
 
