@@ -28,12 +28,14 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.MDC;
 
 public final class TracersTest {
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
+        MDC.clear();
     }
 
     @Test
@@ -145,6 +147,7 @@ public final class TracersTest {
             public Void call() throws Exception {
                 assertThat(Tracer.getTraceId()).isEqualTo(expectedTraceId);
                 assertThat(getCurrentFullTrace()).isEqualTo(expectedTrace);
+                assertThat(MDC.get(Tracers.MDC_KEY)).isEqualTo(expectedTraceId);
                 return null;
             }
         };
@@ -158,6 +161,7 @@ public final class TracersTest {
             public void run() {
                 assertThat(Tracer.getTraceId()).isEqualTo(expectedTraceId);
                 assertThat(getCurrentFullTrace()).isEqualTo(expectedTrace);
+                assertThat(MDC.get(Tracers.MDC_KEY)).isEqualTo(expectedTraceId);
             }
         };
     }
