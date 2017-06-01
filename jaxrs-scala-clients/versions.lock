@@ -196,14 +196,14 @@
             ]
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.8.0",
+            "locked": "3.4.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
                 "com.palantir.remoting2:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
-            "locked": "1.13.0",
+            "locked": "1.9.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]
@@ -448,14 +448,14 @@
             ]
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.8.0",
+            "locked": "3.4.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
                 "com.palantir.remoting2:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
-            "locked": "1.13.0",
+            "locked": "1.9.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]
@@ -619,12 +619,30 @@
             ]
         },
         "com.palantir.remoting2:tracing": {
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting2:tracing-okhttp3"
+            ]
+        },
+        "com.palantir.remoting2:tracing-okhttp3": {
             "project": true
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "1.0.0",
             "transitive": [
                 "com.palantir.remoting2:service-config"
+            ]
+        },
+        "com.squareup.okhttp3:okhttp": {
+            "locked": "3.4.1",
+            "transitive": [
+                "com.palantir.remoting2:tracing-okhttp3"
+            ]
+        },
+        "com.squareup.okio:okio": {
+            "locked": "1.9.0",
+            "transitive": [
+                "com.squareup.okhttp3:okhttp"
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
