@@ -18,14 +18,8 @@ package com.palantir.remoting2.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.net.HttpHeaders;
-import com.palantir.remoting2.clients.CipherSuites;
 import com.palantir.remoting2.clients.ClientBuilder;
 import com.palantir.remoting2.clients.ClientConfig;
-import com.palantir.remoting2.config.service.BasicCredentials;
-import com.palantir.remoting2.config.service.ProxyConfiguration;
-import com.palantir.remoting2.config.ssl.TrustContext;
 import com.palantir.remoting2.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting2.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting2.jaxrs.feignimpl.GuavaOptionalAwareContract;
@@ -33,7 +27,6 @@ import com.palantir.remoting2.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting2.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting2.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting2.jaxrs.feignimpl.UserAgentInterceptor;
-import com.palantir.remoting2.tracing.okhttp3.OkhttpTraceInterceptor;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
 import feign.Contract;
@@ -53,11 +46,6 @@ import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import okhttp3.ConnectionPool;
-import okhttp3.ConnectionSpec;
-import okhttp3.Credentials;
-import okhttp3.TlsVersion;
 
 /**
  * Not meant to be implemented outside of this library.
@@ -129,54 +117,6 @@ abstract class AbstractFeignJaxRsClientBuilder extends ClientBuilder {
     }
 
     private feign.Client createOkHttpClient() {
-        okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
-
-        // SSL
-        if (config.trustContext().isPresent()) {
-            TrustContext context = config.trustContext().get();
-            client.sslSocketFactory(context.sslSocketFactory(), context.x509TrustManager());
-        }
-
-        // tracing
-        client.interceptors().add(OkhttpTraceInterceptor.INSTANCE);
-
-        // timeouts
-        // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
-        // with its own default otherwise. Feign does not provide a mechanism for write timeouts. We thus need to set
-        // write timeouts here and connect&read timeouts on FeignBuilder.
-        client.writeTimeout(config.writeTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
-
-        // Set up HTTP proxy configuration
-        if (config.proxy().isPresent()) {
-            ProxyConfiguration proxy = config.proxy().get();
-            client.proxy(proxy.toProxy());
-
-            if (proxy.credentials().isPresent()) {
-                BasicCredentials basicCreds = proxy.credentials().get();
-                final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
-                client.proxyAuthenticator((route, response) -> response.request().newBuilder()
-                        .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
-                        .build());
-            }
-        }
-
-        // cipher setup
-        client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
-
-        // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
-        client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
-
-        return new OkHttpClient(client.build());
-    }
-
-    private static ImmutableList<ConnectionSpec> createConnectionSpecs(boolean enableGcmCipherSuites) {
-        return ImmutableList.of(
-                new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                        .tlsVersions(TlsVersion.TLS_1_2)
-                        .cipherSuites(enableGcmCipherSuites
-                                ? CipherSuites.allCipherSuites()
-                                : CipherSuites.fastCipherSuites())
-                        .build(),
-                ConnectionSpec.CLEARTEXT);
+        return new OkHttpClient(OkHttpClients.createClient(config));
     }
 }
