@@ -36,7 +36,7 @@ import org.immutables.value.Value.Style;
 @Style(visibility = Style.ImplementationVisibility.PACKAGE, builder = "new")
 public abstract class ProxyConfiguration {
 
-    enum Type {
+    public enum Type {
 
         /**
          * Use a direct connection. This option will bypass any JVM-level configured proxy settings.
