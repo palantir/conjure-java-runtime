@@ -9,6 +9,7 @@ dependencies {
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.jcraft:jzlib"
     compile "org.glassfish.jersey.core:jersey-server"
+    compile "com.palantir.safe-logging:safe-logging"
 
     testCompile project(":ssl-config")
     testCompile "io.dropwizard:dropwizard-testing"
