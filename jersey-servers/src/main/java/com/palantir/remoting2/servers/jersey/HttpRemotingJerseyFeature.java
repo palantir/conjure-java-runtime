@@ -63,6 +63,10 @@ public final class HttpRemotingJerseyFeature implements Feature {
         context.register(Java8OptionalLongMessageBodyWriter.class);
         context.register(Java8OptionalLongParamConverterProvider.class);
 
+        // DateTime
+        context.register(InstantParamConverterProvider.class);
+        context.register(ZonedDateTimeParamConverterProvider.class);
+
         // Tracing
         context.register(new TraceEnrichingFilter());
 
