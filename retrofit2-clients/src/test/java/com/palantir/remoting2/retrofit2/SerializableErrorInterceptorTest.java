@@ -134,6 +134,7 @@ public final class SerializableErrorInterceptorTest {
                 .request(request)
                 .protocol(Protocol.HTTP_1_1)
                 .code(code)
+                .message("unused")
                 .build();
     }
 }
