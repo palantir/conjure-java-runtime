@@ -1,5 +1,4 @@
-apply from: "${rootDir}/gradle/jaxrs-shading-config.gradle"
-apply from: "${rootDir}/gradle/publish-shadow.gradle"
+apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":extras:jackson-support")
