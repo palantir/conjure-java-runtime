@@ -28,6 +28,10 @@ public enum SerializableErrorInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
+        if (((AsyncCallTag) chain.request().tag()).isAsyncCall()) {
+            return chain.proceed(chain.request());
+        }
+
         Response response = chain.proceed(chain.request());
         if (!response.isSuccessful()) {
             Collection<String> contentTypes = response.headers("Content-Type");

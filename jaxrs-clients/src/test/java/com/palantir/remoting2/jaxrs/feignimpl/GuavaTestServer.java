@@ -113,6 +113,11 @@ public class GuavaTestServer extends Application<Configuration> {
         }
 
         @Override
+        public String getJsonString(String value) {
+            return value;
+        }
+
+        @Override
         public String getString(@Nullable String value) {
             return value;
         }
@@ -138,6 +143,16 @@ public class GuavaTestServer extends Application<Configuration> {
 
         @Override
         public GuavaOptionalComplexType getGuavaComplexType(GuavaOptionalComplexType complexType) {
+            return complexType;
+        }
+
+        @Override
+        public GuavaOptionalComplexType getCborResponse(GuavaOptionalComplexType complexType) {
+            return complexType;
+        }
+
+        @Override
+        public GuavaOptionalComplexType postCborRequest(GuavaOptionalComplexType complexType) {
             return complexType;
         }
     }
@@ -191,6 +206,12 @@ public class GuavaTestServer extends Application<Configuration> {
         Optional<ImmutableMap<String, String>> getOptionalThrowsForbidden(@QueryParam("value") @Nullable String value);
 
         @GET
+        @Path("/jsonString")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        String getJsonString(@QueryParam("value") @Nullable String value);
+
+        @GET
         @Path("/string")
         @Consumes(MediaType.TEXT_PLAIN)
         @Produces(MediaType.TEXT_PLAIN)
@@ -219,6 +240,19 @@ public class GuavaTestServer extends Application<Configuration> {
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         GuavaOptionalComplexType getGuavaComplexType(GuavaOptionalComplexType complexType);
+
+        @POST
+        @Path("/cborResponseJsonRequest")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces("application/cbor")
+        GuavaOptionalComplexType getCborResponse(GuavaOptionalComplexType complexType);
+
+        @POST
+        @Path("/cborRequestJsonResponse")
+        @Consumes("application/cbor")
+        @Produces(MediaType.APPLICATION_JSON)
+        GuavaOptionalComplexType postCborRequest(GuavaOptionalComplexType complexType);
+
     }
 
 }

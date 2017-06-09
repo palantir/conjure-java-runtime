@@ -21,9 +21,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
+import org.slf4j.MDC;
 
 /** Utility methods for making {@link ExecutorService} and {@link Runnable} instances tracing-aware. */
 public final class Tracers {
+    /** The key under which trace ids are inserted into SLF4J {@link org.slf4j.MDC MDCs}. */
+    static final String MDC_KEY = "traceId";
+
     private Tracers() {}
 
     /** Returns a random ID suitable for span and trace IDs. */
@@ -96,11 +100,14 @@ public final class Tracers {
         @Override
         public V call() throws Exception {
             Trace originalTrace = Tracer.copyTrace();
+            String originalMdcTraceIdValue = MDC.get(MDC_KEY);
             Tracer.setTrace(trace);
+            MDC.put(MDC_KEY, trace.getTraceId());
             try {
                 return delegate.call();
             } finally {
                 Tracer.setTrace(originalTrace);
+                MDC.put(MDC_KEY, originalMdcTraceIdValue);
             }
         }
     }
@@ -121,11 +128,14 @@ public final class Tracers {
         @Override
         public void run() {
             Trace originalTrace = Tracer.copyTrace();
+            String originalMdcTraceIdValue = MDC.get(MDC_KEY);
             Tracer.setTrace(trace);
+            MDC.put(MDC_KEY, trace.getTraceId());
             try {
                 delegate.run();
             } finally {
                 Tracer.setTrace(originalTrace);
+                MDC.put(MDC_KEY, originalMdcTraceIdValue);
             }
         }
     }

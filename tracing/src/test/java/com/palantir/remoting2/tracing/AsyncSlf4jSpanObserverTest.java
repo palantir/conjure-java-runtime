@@ -27,10 +27,13 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+import com.google.common.collect.ImmutableMap;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.jmock.lib.concurrent.DeterministicScheduler;
 import org.junit.After;
 import org.junit.Before;
@@ -41,6 +44,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.slf4j.LoggerFactory;
 import zipkin.Annotation;
+import zipkin.BinaryAnnotation;
 import zipkin.Codec;
 import zipkin.Endpoint;
 
@@ -134,6 +138,7 @@ public final class AsyncSlf4jSpanObserverTest {
                 .startTimeMicroSeconds(43L)
                 .durationNanoSeconds(43001L) // will round up to 44 microseconds
                 .type(SpanType.CLIENT_OUTGOING)
+                .putAllMetadata(ImmutableMap.of("userId", "1"))
                 .build();
         zipkin.Span zipkinSpan = zipkin.Span.builder()
                 .traceId(42L)
@@ -144,6 +149,7 @@ public final class AsyncSlf4jSpanObserverTest {
                 .duration(44L)  // micro-seconds, rounded up
                 .addAnnotation(Annotation.create(43L, "cs", Endpoint.create("service", 2)))
                 .addAnnotation(Annotation.create(87L, "cr", Endpoint.create("service", 2)))
+                .addBinaryAnnotation(BinaryAnnotation.create("userId", "1", Endpoint.create("service", 2)))
                 .build();
         String expectedString = new String(Codec.JSON.writeSpan(zipkinSpan), StandardCharsets.UTF_8);
         AsyncSlf4jSpanObserver.ZipkinCompatEndpoint actualEndpoint = ImmutableZipkinCompatEndpoint.builder()
@@ -184,6 +190,29 @@ public final class AsyncSlf4jSpanObserverTest {
         assertThat(AsyncSlf4jSpanObserver.ZipkinCompatSpan.nanoToMicro(2000)).isEqualTo(3);
     }
 
+    @Test
+    public void testSpanMetadataConvertsToZipkinBinaryAnnotations() {
+        Map<String, String> spanMetadata = ImmutableMap.of(
+                "key1", "value1",
+                "key2", "value2",
+                "key3", "value3");
+        Span span = Span.builder()
+                .traceId("")
+                .spanId("")
+                .operation("")
+                .startTimeMicroSeconds(1L)
+                .durationNanoSeconds(2L)
+                .type(SpanType.SERVER_INCOMING)
+                .putAllMetadata(spanMetadata)
+                .build();
+        AsyncSlf4jSpanObserver.ZipkinCompatSpan zipkinCompatSpan = AsyncSlf4jSpanObserver.ZipkinCompatSpan.fromSpan(
+                span, DUMMY_ENDPOINT);
+        Map<String, String> annotationMap = zipkinCompatSpan.binaryAnnotations().stream().collect(Collectors.toMap(
+                annotation -> annotation.key(),
+                annotation -> annotation.value()));
+        assertThat(annotationMap).isEqualTo(spanMetadata);
+    }
+
     private static AsyncSlf4jSpanObserver.ZipkinCompatSpan zipkinSpan(long start, long duration, SpanType type) {
         Span span = Span.builder()
                 .traceId("")
@@ -199,4 +228,5 @@ public final class AsyncSlf4jSpanObserverTest {
     private static AsyncSlf4jSpanObserver.ZipkinCompatAnnotation annotation(String value, long timestamp) {
         return AsyncSlf4jSpanObserver.ZipkinCompatAnnotation.of(timestamp, value, DUMMY_ENDPOINT);
     }
+
 }

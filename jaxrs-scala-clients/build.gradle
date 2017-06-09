@@ -1,0 +1,6 @@
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile project(path: ":jaxrs-clients", configuration: "shadow")
+    compile "com.fasterxml.jackson.module:jackson-module-scala_2.11"
+}

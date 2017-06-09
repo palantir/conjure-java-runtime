@@ -36,37 +36,102 @@ import org.immutables.value.Value.Style;
 @Style(visibility = Style.ImplementationVisibility.PACKAGE, builder = "new")
 public abstract class ProxyConfiguration {
 
+    enum Type {
+
+        /**
+         * Use a direct connection. This option will bypass any JVM-level configured proxy settings.
+         */
+        DIRECT,
+
+        /**
+         * Use an http-proxy specified by {@link ProxyConfiguration#hostAndPort()}  and (optionally)
+         * {@link ProxyConfiguration#credentials()}.
+         */
+        HTTP;
+    }
+
     /**
      * The hostname and port of the HTTP/HTTPS Proxy. Recognized formats include those recognized by {@link
      * com.google.common.net.HostAndPort}, for instance {@code foo.com:80}, {@code 192.168.3.100:8080}, etc.
      */
-    public abstract String hostAndPort();
+    @JsonProperty("hostAndPort")
+    public abstract Optional<String> maybeHostAndPort();
+
+    /**
+     * @deprecated Use maybeHostAndPort().
+     */
+    @Deprecated
+    @SuppressWarnings("checkstyle:designforextension")
+    @JsonIgnore
+    @Lazy
+    public String hostAndPort() {
+        Preconditions.checkState(maybeHostAndPort().isPresent(), "hostAndPort was not configured");
+        return maybeHostAndPort().get();
+    }
 
     /**
      * Credentials if the proxy needs authentication.
      */
     public abstract Optional<BasicCredentials> credentials();
 
+    /**
+     * The type of Proxy.  Defaults to {@link Type#HTTP}.
+     */
+    @Value.Default
+    @SuppressWarnings("checkstyle:designforextension")
+    public Type type() {
+        return Type.HTTP;
+    }
+
     @Value.Check
     protected final void check() {
-        HostAndPort host = HostAndPort.fromString(hostAndPort());
-        Preconditions.checkArgument(host.hasPort(), "Given hostname does not contain a port number: " + host);
+        switch (type()) {
+            case HTTP:
+                Preconditions.checkArgument(maybeHostAndPort().isPresent(), "host-and-port must be "
+                        + "configured for an HTTP proxy");
+                HostAndPort host = HostAndPort.fromString(maybeHostAndPort().get());
+                Preconditions.checkArgument(host.hasPort(),
+                        "Given hostname does not contain a port number: " + host);
+                break;
+            case DIRECT:
+                Preconditions.checkArgument(!maybeHostAndPort().isPresent() && !credentials().isPresent(),
+                        "Neither credential nor host-and-port may be configured for DIRECT proxies");
+                break;
+            default:
+                throw new IllegalStateException("Unrecognized case; this is a library bug");
+        }
+
+        if (credentials().isPresent()) {
+            Preconditions.checkArgument(type() == Type.HTTP, "credentials only valid for http proxies");
+        }
     }
 
     @Lazy
     @SuppressWarnings("checkstyle:designforextension")
     @JsonIgnore
     public Proxy toProxy() {
-        HostAndPort hostAndPort = HostAndPort.fromString(hostAndPort());
-        return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort()));
+        switch (type()) {
+            case HTTP:
+                HostAndPort hostAndPort = HostAndPort.fromString(maybeHostAndPort().get());
+                InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort());
+                return new Proxy(Proxy.Type.HTTP, addr);
+            case DIRECT:
+                return Proxy.NO_PROXY;
+            default:
+                throw new IllegalStateException("unrecognized proxy type; this is a library error");
+        }
     }
 
     public static ProxyConfiguration of(String hostAndPort) {
-        return new ProxyConfiguration.Builder().hostAndPort(hostAndPort).build();
+        return new ProxyConfiguration.Builder().maybeHostAndPort(hostAndPort).build();
     }
 
     public static ProxyConfiguration of(String hostAndPort, BasicCredentials credentials) {
-        return new ProxyConfiguration.Builder().hostAndPort(hostAndPort).credentials(credentials).build();
+        return new ProxyConfiguration.Builder().maybeHostAndPort(hostAndPort).credentials(credentials).build();
+    }
+
+    public static ProxyConfiguration direct() {
+        return new ProxyConfiguration.Builder().type(Type.DIRECT).build();
     }
 
     // TODO(jnewman): #317 - remove kebab-case methods when Jackson 2.7 is picked up
@@ -74,7 +139,7 @@ public abstract class ProxyConfiguration {
 
         @JsonProperty("host-and-port")
         Builder hostAndPortKebabCase(String hostAndPort) {
-            return hostAndPort(hostAndPort);
+            return maybeHostAndPort(hostAndPort);
         }
     }
 }

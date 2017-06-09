@@ -17,9 +17,11 @@
 package com.palantir.remoting2.retrofit2;
 
 import java.time.LocalDate;
+import java.util.concurrent.CompletableFuture;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -54,4 +56,15 @@ public interface TestService {
 
     @GET("/Api")
     Call<String> getAbsoluteApiTitleCase();
+
+    @GET("getComplexCborType")
+    @Headers("Accepts: application/cbor")
+    Call<java.util.Optional<LocalDate>> getComplexCborType();
+
+    @POST("makeCborRequest")
+    @Headers("Content-Type: application/cbor")
+    Call<Void> makeCborRequest(@Body LocalDate localDate);
+
+    @POST("makeFutureRequest")
+    CompletableFuture<String> makeFutureRequest();
 }
