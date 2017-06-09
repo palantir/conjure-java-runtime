@@ -10,6 +10,7 @@ dependencies {
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.google.code.findbugs:jsr305"
     compile "com.google.guava:guava"
+    compile "com.palantir.safe-logging:safe-logging"
     compile "javax.ws.rs:javax.ws.rs-api"
     compile "org.slf4j:slf4j-api"
 

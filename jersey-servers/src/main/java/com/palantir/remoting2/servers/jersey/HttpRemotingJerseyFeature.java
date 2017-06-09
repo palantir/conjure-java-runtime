@@ -47,6 +47,7 @@ public final class HttpRemotingJerseyFeature implements Feature {
         context.register(new RuntimeExceptionMapper(propagateStackTraces));
         context.register(new WebApplicationExceptionMapper(propagateStackTraces));
         context.register(new RemoteExceptionMapper());
+        context.register(new ServiceExceptionMapper());
 
         // Cbor handling
         context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));
