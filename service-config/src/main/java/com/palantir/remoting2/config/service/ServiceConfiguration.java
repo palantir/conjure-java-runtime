@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.palantir.remoting2.config.ssl.SslConfiguration;
-import com.palantir.tokens.auth.BearerToken;
+import com.palantir.tokens2.auth.BearerToken;
 import java.util.List;
 import java.util.Optional;
 import org.immutables.value.Value.Immutable;

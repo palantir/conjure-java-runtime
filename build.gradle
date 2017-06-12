@@ -49,6 +49,7 @@ subprojects {
 
     repositories {
         jcenter()
+        maven { url "http://palantir.bintray.com/releases" }
     }
 
     sourceCompatibility = 1.8

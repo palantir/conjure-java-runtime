@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.base.Preconditions;
 import com.palantir.remoting2.config.ssl.SslConfiguration;
-import com.palantir.tokens.auth.BearerToken;
+import com.palantir.tokens2.auth.BearerToken;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
