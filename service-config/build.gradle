@@ -5,7 +5,7 @@ apply from: "$rootDir/gradle/publish.gradle"
 dependencies {
     compile project(":ssl-config")
 
-    compile "com.palantir.tokens:auth-tokens"
+    compile "com.palantir.tokens2:auth-tokens"
 
     testCompile project(":extras:jackson-support")
     testCompile("com.netflix.feign:feign-jaxrs") {

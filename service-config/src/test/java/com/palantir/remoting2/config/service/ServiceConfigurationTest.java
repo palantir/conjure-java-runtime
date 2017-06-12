@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.remoting2.config.ssl.SslConfiguration;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
-import com.palantir.tokens.auth.BearerToken;
+import com.palantir.tokens2.auth.BearerToken;
 import java.nio.file.Paths;
 import org.junit.Test;
 

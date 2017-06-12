@@ -32,7 +32,7 @@ import com.google.common.io.Resources;
 import com.palantir.remoting2.config.ssl.SslConfiguration;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import com.palantir.remoting2.ext.jackson.ShimJdk7Module;
-import com.palantir.tokens.auth.BearerToken;
+import com.palantir.tokens2.auth.BearerToken;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
