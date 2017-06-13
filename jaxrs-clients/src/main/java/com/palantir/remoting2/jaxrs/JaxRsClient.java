@@ -66,7 +66,8 @@ public final class JaxRsClient {
     public static javax.ws.rs.client.ClientBuilder jaxrsBuilder(ServiceConfiguration serviceConfig) {
         ClientConfig config = ClientConfig.fromServiceConfig(serviceConfig);
         JerseyClientBuilder clientBuilder = new JerseyClientBuilder();
-        clientBuilder.register(new JacksonJaxbJsonProvider(ObjectMappers.newClientObjectMapper(), JacksonJaxbJsonProvider.BASIC_ANNOTATIONS));
+        clientBuilder.register(new JacksonJaxbJsonProvider(ObjectMappers.newClientObjectMapper(),
+                JacksonJaxbJsonProvider.BASIC_ANNOTATIONS));
         clientBuilder.property(CommonProperties.FEATURE_AUTO_DISCOVERY_DISABLE, Boolean.TRUE);
 
         if (serviceConfig.security().isPresent()) {

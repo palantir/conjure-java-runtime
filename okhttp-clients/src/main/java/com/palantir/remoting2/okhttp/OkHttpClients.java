@@ -2,7 +2,7 @@
  * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
  */
 
-package com.palantir.remoting2.jaxrs;
+package com.palantir.remoting2.okhttp;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
@@ -20,12 +20,14 @@ import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
 
-public class OkHttpClients {
+public final class OkHttpClients {
     private OkHttpClients() {}
 
     public static OkHttpClient createClient(ServiceConfiguration serviceConfig) {
         ClientConfig config = ClientConfig.fromServiceConfig(serviceConfig);
-        return createClient(config);
+        OkHttpClient.Builder client = createClient(config).newBuilder();
+        client.addInterceptor(MultiServerRetryInterceptor.create(serviceConfig.uris()));
+        return client.build();
     }
 
     public static OkHttpClient createClient(ClientConfig config) {
@@ -41,9 +43,6 @@ public class OkHttpClients {
         client.interceptors().add(OkhttpTraceInterceptor.INSTANCE);
 
         // timeouts
-        // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
-        // with its own default otherwise. Feign does not provide a mechanism for write timeouts. We thus need to set
-        // write timeouts here and connect&read timeouts on FeignBuilder.
         client.writeTimeout(config.writeTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
         client.connectTimeout(config.connectTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
         client.readTimeout(config.readTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
@@ -67,6 +66,11 @@ public class OkHttpClients {
 
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
         client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
+
+        // retry configuration
+        if (config.maxNumRetries() > 1) {
+            client.addInterceptor(new RetryInterceptor(config.maxNumRetries()));
+        }
 
         return client.build();
     }

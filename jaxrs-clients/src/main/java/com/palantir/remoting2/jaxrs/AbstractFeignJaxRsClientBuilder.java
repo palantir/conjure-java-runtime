@@ -27,6 +27,7 @@ import com.palantir.remoting2.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting2.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting2.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting2.jaxrs.feignimpl.UserAgentInterceptor;
+import com.palantir.remoting2.okhttp.OkHttpClients;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
 import feign.Contract;
