@@ -21,6 +21,8 @@ dependencies {
     compile "javax.ws.rs:javax.ws.rs-api"
     compile "org.slf4j:slf4j-api"
     compile "com.netflix.feign:feign-slf4j"
+    compile "org.glassfish.jersey.core:jersey-client"
+    compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider"
 
     testCompile project(":jersey-servers")
     testCompile project(":retrofit2-clients")
