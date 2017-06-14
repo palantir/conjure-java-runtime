@@ -14,7 +14,10 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
-                "com.fasterxml.jackson.module:jackson-module-afterburner"
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider",
+                "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.fasterxml.jackson.module:jackson-module-jaxb-annotations"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
@@ -23,7 +26,10 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.fasterxml.jackson.module:jackson-module-jaxb-annotations",
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
@@ -61,12 +67,27 @@
                 "com.palantir.remoting2:jackson-support"
             ]
         },
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base": {
+            "locked": "2.6.7",
+            "transitive": [
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider"
+            ]
+        },
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider": {
+            "locked": "2.6.7"
+        },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.7",
             "transitive": [
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.module:jackson-module-jaxb-annotations": {
+            "locked": "2.6.7",
+            "transitive": [
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider"
             ]
         },
         "com.google.code.findbugs:jsr305": {
@@ -112,7 +133,10 @@
             "project": true
         },
         "com.palantir.remoting2:http-clients-api": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting2:okhttp-clients"
+            ]
         },
         "com.palantir.remoting2:jackson-support": {
             "project": true,
@@ -120,6 +144,9 @@
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:tracing"
             ]
+        },
+        "com.palantir.remoting2:okhttp-clients": {
+            "project": true
         },
         "com.palantir.remoting2:refresh-utils": {
             "project": true
@@ -143,7 +170,10 @@
             ]
         },
         "com.palantir.remoting2:tracing-okhttp3": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting2:okhttp-clients"
+            ]
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "1.0.0",
@@ -164,10 +194,89 @@
                 "com.squareup.okhttp3:okhttp"
             ]
         },
+        "javax.annotation:javax.annotation-api": {
+            "locked": "1.2",
+            "transitive": [
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "javax.inject:javax.inject": {
+            "locked": "1",
+            "transitive": [
+                "org.glassfish.hk2:hk2-api",
+                "org.glassfish.hk2:hk2-utils"
+            ]
+        },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.remoting2:error-handling"
+                "com.palantir.remoting2:error-handling",
+                "org.glassfish.jersey.core:jersey-client",
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.hk2.external:aopalliance-repackaged": {
+            "locked": "2.4.0-b34",
+            "transitive": [
+                "org.glassfish.hk2:hk2-api",
+                "org.glassfish.hk2:hk2-locator"
+            ]
+        },
+        "org.glassfish.hk2.external:javax.inject": {
+            "locked": "2.4.0-b34",
+            "transitive": [
+                "org.glassfish.hk2:hk2-locator",
+                "org.glassfish.jersey.core:jersey-client",
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.hk2:hk2-api": {
+            "locked": "2.4.0-b34",
+            "transitive": [
+                "org.glassfish.hk2:hk2-locator",
+                "org.glassfish.jersey.core:jersey-client",
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.hk2:hk2-locator": {
+            "locked": "2.4.0-b34",
+            "transitive": [
+                "org.glassfish.jersey.core:jersey-client",
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.hk2:hk2-utils": {
+            "locked": "2.4.0-b34",
+            "transitive": [
+                "org.glassfish.hk2:hk2-api",
+                "org.glassfish.hk2:hk2-locator"
+            ]
+        },
+        "org.glassfish.hk2:osgi-resource-locator": {
+            "locked": "1.0.1",
+            "transitive": [
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.jersey.bundles.repackaged:jersey-guava": {
+            "locked": "2.22.2",
+            "transitive": [
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.jersey.core:jersey-client": {
+            "locked": "2.22.2"
+        },
+        "org.glassfish.jersey.core:jersey-common": {
+            "locked": "2.22.2",
+            "transitive": [
+                "org.glassfish.jersey.core:jersey-client"
+            ]
+        },
+        "org.javassist:javassist": {
+            "locked": "3.18.1-GA",
+            "transitive": [
+                "org.glassfish.hk2:hk2-locator"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
@@ -181,6 +290,7 @@
             "transitive": [
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:okhttp-clients",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
@@ -201,7 +311,10 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
-                "com.fasterxml.jackson.module:jackson-module-afterburner"
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider",
+                "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.fasterxml.jackson.module:jackson-module-jaxb-annotations"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
@@ -210,7 +323,10 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base",
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.fasterxml.jackson.module:jackson-module-jaxb-annotations",
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
@@ -248,12 +364,27 @@
                 "com.palantir.remoting2:jackson-support"
             ]
         },
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-base": {
+            "locked": "2.6.7",
+            "transitive": [
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider"
+            ]
+        },
+        "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider": {
+            "locked": "2.6.7"
+        },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.7",
             "transitive": [
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
+            ]
+        },
+        "com.fasterxml.jackson.module:jackson-module-jaxb-annotations": {
+            "locked": "2.6.7",
+            "transitive": [
+                "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider"
             ]
         },
         "com.google.code.findbugs:jsr305": {
@@ -299,7 +430,10 @@
             "project": true
         },
         "com.palantir.remoting2:http-clients-api": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting2:okhttp-clients"
+            ]
         },
         "com.palantir.remoting2:jackson-support": {
             "project": true,
@@ -307,6 +441,9 @@
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:tracing"
             ]
+        },
+        "com.palantir.remoting2:okhttp-clients": {
+            "project": true
         },
         "com.palantir.remoting2:refresh-utils": {
             "project": true
@@ -330,7 +467,10 @@
             ]
         },
         "com.palantir.remoting2:tracing-okhttp3": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting2:okhttp-clients"
+            ]
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "1.0.0",
@@ -351,10 +491,89 @@
                 "com.squareup.okhttp3:okhttp"
             ]
         },
+        "javax.annotation:javax.annotation-api": {
+            "locked": "1.2",
+            "transitive": [
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "javax.inject:javax.inject": {
+            "locked": "1",
+            "transitive": [
+                "org.glassfish.hk2:hk2-api",
+                "org.glassfish.hk2:hk2-utils"
+            ]
+        },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.remoting2:error-handling"
+                "com.palantir.remoting2:error-handling",
+                "org.glassfish.jersey.core:jersey-client",
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.hk2.external:aopalliance-repackaged": {
+            "locked": "2.4.0-b34",
+            "transitive": [
+                "org.glassfish.hk2:hk2-api",
+                "org.glassfish.hk2:hk2-locator"
+            ]
+        },
+        "org.glassfish.hk2.external:javax.inject": {
+            "locked": "2.4.0-b34",
+            "transitive": [
+                "org.glassfish.hk2:hk2-locator",
+                "org.glassfish.jersey.core:jersey-client",
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.hk2:hk2-api": {
+            "locked": "2.4.0-b34",
+            "transitive": [
+                "org.glassfish.hk2:hk2-locator",
+                "org.glassfish.jersey.core:jersey-client",
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.hk2:hk2-locator": {
+            "locked": "2.4.0-b34",
+            "transitive": [
+                "org.glassfish.jersey.core:jersey-client",
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.hk2:hk2-utils": {
+            "locked": "2.4.0-b34",
+            "transitive": [
+                "org.glassfish.hk2:hk2-api",
+                "org.glassfish.hk2:hk2-locator"
+            ]
+        },
+        "org.glassfish.hk2:osgi-resource-locator": {
+            "locked": "1.0.1",
+            "transitive": [
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.jersey.bundles.repackaged:jersey-guava": {
+            "locked": "2.22.2",
+            "transitive": [
+                "org.glassfish.jersey.core:jersey-common"
+            ]
+        },
+        "org.glassfish.jersey.core:jersey-client": {
+            "locked": "2.22.2"
+        },
+        "org.glassfish.jersey.core:jersey-common": {
+            "locked": "2.22.2",
+            "transitive": [
+                "org.glassfish.jersey.core:jersey-client"
+            ]
+        },
+        "org.javassist:javassist": {
+            "locked": "3.18.1-GA",
+            "transitive": [
+                "org.glassfish.hk2:hk2-locator"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
@@ -368,6 +587,7 @@
             "transitive": [
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting2:okhttp-clients",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
