@@ -53,9 +53,13 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
     public final Response toResponse(T exception) {
         String exceptionMessage = Objects.toString(exception.getMessage());
         String errorId = UUID.randomUUID().toString();
-        log.error("Error handling request {}", SafeArg.of("errorId", errorId), exception);
-
         StatusType status = this.getStatus(exception);
+        if (status.getFamily().equals(Response.Status.Family.CLIENT_ERROR)) {
+            log.info("Error handling request {}", SafeArg.of("errorId", errorId), exception);
+        } else {
+            log.error("Error handling request {}", SafeArg.of("errorId", errorId), exception);
+        }
+
         ResponseBuilder builder = Response.status(status);
         try {
             final SerializableError error;
