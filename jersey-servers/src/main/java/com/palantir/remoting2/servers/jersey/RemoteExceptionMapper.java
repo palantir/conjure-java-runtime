@@ -30,6 +30,22 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This {@link ExceptionMapper} is used when forwarding an exception from a remote server back to a calling client.
+ *
+ * In the following call stack, where a browser calls a server A which calls another server B:
+ *
+ * caller/browser -> [server A] -> [server B]
+ *
+ * this is the exception mapper used in Server A. When code in B throws an exception, the {@link JsonExceptionMapper}
+ * maps that exception to a JSON response with appropriate HTTP status code and returns it to server A over HTTP.
+ * That response is then processed by a {@link com.palantir.remoting2.errors.SerializableErrorToExceptionConverter} and
+ * thrown as a {@link RemoteException} at the call point in server A.  If server A does not catch this exception and
+ * it raises up the call stack back into Jersey, execution enters this {@link RemoteExceptionMapper}.
+ *
+ * To preserve debuggability, the exception and HTTP status code from B's exception are logged at WARN level and
+ * returned back to the caller/browser.
+ */
 @Provider
 final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
@@ -41,18 +57,11 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
         Status status = Status.fromStatusCode(exception.getStatus());
 
-        // Log responses that indicate client error (4xx) at higher level than server error (5xx)
-        if (Status.Family.CLIENT_ERROR.equals(status.getFamily())) {
-            log.error("Received response status code {} from server handling request. errorId: {}",
-                    SafeArg.of("statusCode", status.getStatusCode()),
-                    SafeArg.of("errorId", errorId),
-                    exception);
-        } else {
-            log.warn("Received response status code {} from server handling request. errorId: {}",
-                    SafeArg.of("statusCode", status.getStatusCode()),
-                    SafeArg.of("errorId", errorId),
-                    exception);
-        }
+        // log at WARN instead of ERROR because although this indicates an issue in a remote server, it is not
+        log.warn("Forwarding response and status code {} from remote server back to caller. errorId: {}",
+                SafeArg.of("statusCode", status.getStatusCode()),
+                SafeArg.of("errorId", errorId),
+                exception);
 
         SerializableError error = exception.getRemoteException();
         ResponseBuilder builder = Response.status(status);
@@ -61,7 +70,8 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
             String json = JsonExceptionMapper.MAPPER.writeValueAsString(error);
             builder.entity(json);
         } catch (RuntimeException | JsonProcessingException e) {
-            log.warn("Unable to translate exception to json for request {}", SafeArg.of("errorId", errorId), e);
+            log.warn("Unable to translate exception to json for request. errorId: {}",
+                    SafeArg.of("errorId", errorId), e);
             // simply write out the exception message
             builder = Response.status(status);
             builder.type(MediaType.TEXT_PLAIN);
