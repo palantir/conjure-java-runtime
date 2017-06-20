@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.TestBase;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.util.List;
@@ -30,7 +31,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public final class QueryMapUsingServerWithoutContextTests {
+public final class QueryMapUsingServerWithoutContextTests extends TestBase {
 
     /**
      * Creates a {@link QueryMapTestServer.WithoutContext} Dropwizard server.
@@ -48,7 +49,8 @@ public final class QueryMapUsingServerWithoutContextTests {
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.builder().build(QueryMapTestServer.TestClientService.class, "agent", endpointUri);
+        service = JaxRsClient.create(QueryMapTestServer.TestClientService.class, "agent",
+                createTestConfig(endpointUri));
     }
 
     @Test
@@ -62,19 +64,19 @@ public final class QueryMapUsingServerWithoutContextTests {
         // TestService.MAP_PARAM_NAME query parameter is processed
         assertThat(
                 service.getUsingParamMap(queryMap),
-                is((Map<String, String>) ImmutableMap.of(QueryMapTestServer.TestService.MAP_PARAM_NAME, "namedVal 1")));
+                is(ImmutableMap.of(QueryMapTestServer.TestService.MAP_PARAM_NAME, "namedVal 1")));
     }
 
     @Test
     public void testGetUsingParamMapWithString() {
         assertThat(
                 service.getUsingParamMap("fooVal"),
-                is((Map<String, String>) ImmutableMap.of(QueryMapTestServer.TestService.MAP_PARAM_NAME, "fooVal")));
+                is(ImmutableMap.of(QueryMapTestServer.TestService.MAP_PARAM_NAME, "fooVal")));
     }
 
     @Test
     public void testGetUsingParamListWithQueryMap() {
-        Map<String, List<String>> queryMap = ImmutableMap.<String, List<String>>of(
+        Map<String, List<String>> queryMap = ImmutableMap.of(
                 QueryMapTestServer.TestService.LIST_PARAM_NAME, ImmutableList.of("list val 1", "list val 2"),
                 "fooParam", ImmutableList.of("foo value"),
                 QueryMapTestServer.TestService.MAP_PARAM_NAME, ImmutableList.of("bar value"));
@@ -84,7 +86,7 @@ public final class QueryMapUsingServerWithoutContextTests {
         // TestService.LIST_PARAM_NAME query parameter are processed
         assertThat(
                 service.getUsingParamList(queryMap),
-                is((Map<String, List<String>>) ImmutableMap.<String, List<String>>of(
+                is(ImmutableMap.<String, List<String>>of(
                         QueryMapTestServer.TestService.LIST_PARAM_NAME, ImmutableList.of("list val 1", "list val 2"))));
     }
 

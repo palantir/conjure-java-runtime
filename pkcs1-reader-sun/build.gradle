@@ -1,7 +1,7 @@
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
-    compile project(":ssl-config")
+    compile project(":keystores")
 
     testCompile "junit:junit"
     testCompile "org.hamcrest:hamcrest-all"

@@ -17,7 +17,7 @@
 package com.palantir.remoting2.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.palantir.remoting2.clients.ClientConfig;
+import com.palantir.remoting2.clients.ClientConfiguration;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 
 public final class FeignJaxRsClientBuilder extends AbstractFeignJaxRsClientBuilder {
@@ -25,7 +25,7 @@ public final class FeignJaxRsClientBuilder extends AbstractFeignJaxRsClientBuild
     private static final ObjectMapper JSON_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
     private static final ObjectMapper CBOR_OBJECT_MAPPER = ObjectMappers.newCborClientObjectMapper();
 
-    FeignJaxRsClientBuilder(ClientConfig config) {
+    FeignJaxRsClientBuilder(ClientConfiguration config) {
         super(config);
     }
 

@@ -17,14 +17,14 @@
 package com.palantir.remoting2.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.palantir.remoting2.clients.ClientConfig;
+import com.palantir.remoting2.clients.ClientConfiguration;
 
 public final class FeignJaxRsScalaClientBuilder extends AbstractFeignJaxRsClientBuilder {
 
     private static final ObjectMapper JSON_OBJECT_MAPPER = ScalaObjectMappers.newClientObjectMapper();
     private static final ObjectMapper CBOR_OBJECT_MAPPER = ScalaObjectMappers.newCborClientObjectMapper();
 
-    FeignJaxRsScalaClientBuilder(ClientConfig config) {
+    FeignJaxRsScalaClientBuilder(ClientConfiguration config) {
         super(config);
     }
 

@@ -20,16 +20,24 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting2.clients.ClientConfig;
-import com.palantir.remoting2.config.service.BasicCredentials;
-import com.palantir.remoting2.config.service.ProxyConfiguration;
+import com.google.common.collect.ImmutableList;
+import com.palantir.remoting.api.config.service.BasicCredentials;
+import com.palantir.remoting2.clients.ClientConfiguration;
+import com.palantir.remoting2.clients.ImmutableClientConfiguration;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.SocketAddress;
+import java.net.URI;
+import java.util.List;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class Retrofit2ClientProxyTest {
+public final class Retrofit2ClientProxyTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -41,13 +49,13 @@ public final class Retrofit2ClientProxyTest {
         server.enqueue(new MockResponse().setBody("\"server\""));
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        TestService directService = Retrofit2Client.builder().build(
-                TestService.class, "agent", "http://localhost:" + server.getPort());
-        ClientConfig clientConfig = ClientConfig.builder()
-                .proxy(ProxyConfiguration.of("localhost:" + proxyServer.getPort()))
+        TestService directService = Retrofit2Client.create(
+                TestService.class, "agent", createTestConfig("http://localhost:" + server.getPort()));
+        ClientConfiguration proxiedConfig = ImmutableClientConfiguration.builder()
+                .from(createTestConfig("http://localhost:" + server.getPort()))
+                .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .build();
-        TestService proxiedService = Retrofit2Client.builder(clientConfig).build(
-                TestService.class, "agent", "http://localhost:" + server.getPort());
+        TestService proxiedService = Retrofit2Client.create(TestService.class, "agent", proxiedConfig);
 
         assertThat(directService.get().execute().body(), is("server"));
         assertThat(proxiedService.get().execute().body(), is("proxyServer"));
@@ -60,18 +68,30 @@ public final class Retrofit2ClientProxyTest {
         proxyServer.enqueue(new MockResponse().setResponseCode(407)); // indicates authenticated proxy
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        ClientConfig clientConfig = ClientConfig.builder()
-                .proxy(ProxyConfiguration.of(
-                        "localhost:" + proxyServer.getPort(), BasicCredentials.of("fakeUser", "fakePassword")))
+        ClientConfiguration proxiedConfig = ImmutableClientConfiguration.builder()
+                .from(createTestConfig("http://localhost:" + server.getPort()))
+                .proxy(createProxySelector("localhost", proxyServer.getPort()))
+                .proxyCredentials(BasicCredentials.of("fakeUser", "fakePassword"))
                 .build();
-
-        TestService proxiedService = Retrofit2Client.builder(clientConfig).build(
-                TestService.class, "agent", "http://localhost:" + server.getPort());
+        TestService proxiedService = Retrofit2Client.create(TestService.class, "agent", proxiedConfig);
 
         assertThat(proxiedService.get().execute().body(), is("proxyServer"));
         RecordedRequest firstRequest = proxyServer.takeRequest();
         assertNull(firstRequest.getHeader("Proxy-Authorization"));
         RecordedRequest secondRequest = proxyServer.takeRequest();
         assertThat(secondRequest.getHeader("Proxy-Authorization"), is("Basic ZmFrZVVzZXI6ZmFrZVBhc3N3b3Jk"));
+    }
+
+    private static ProxySelector createProxySelector(String host, int port) {
+        return new ProxySelector() {
+            @Override
+            public List<Proxy> select(URI uri) {
+                InetSocketAddress addr = new InetSocketAddress(host, port);
+                return ImmutableList.of(new Proxy(Proxy.Type.HTTP, addr));
+            }
+
+            @Override
+            public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {}
+        };
     }
 }

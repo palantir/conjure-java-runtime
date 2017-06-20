@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.common.collect.ImmutableList;
 import feign.RetryableException;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -31,7 +30,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 
-public final class JaxRsClientFailoverTest {
+public final class JaxRsClientFailoverTest extends TestBase {
 
     @Rule
     public final MockWebServer server1 = new MockWebServer();
@@ -43,8 +42,8 @@ public final class JaxRsClientFailoverTest {
         server1.shutdown();
         server2.enqueue(new MockResponse().setBody("\"foo\""));
 
-        Service proxy = JaxRsClient.builder().build(Service.class, "agent",
-                ImmutableList.of(
+        Service proxy = JaxRsClient.create(Service.class, "agent",
+                createTestConfig(
                         "http://localhost:" + server1.getPort(),
                         "http://localhost:" + server2.getPort()));
         assertThat(proxy.get(), is("foo"));
@@ -52,8 +51,8 @@ public final class JaxRsClientFailoverTest {
 
     @Test
     public void testConsecutiveCalls() throws Exception {
-        Service proxy = JaxRsClient.builder().build(Service.class, "agent",
-                ImmutableList.of(
+        Service proxy = JaxRsClient.create(Service.class, "agent",
+                createTestConfig(
                         "http://localhost:" + server1.getPort(),
                         "http://localhost:" + server2.getPort()));
 
@@ -79,8 +78,8 @@ public final class JaxRsClientFailoverTest {
     public void testFailoverOnDnsFailure() throws Exception {
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        Service proxy = JaxRsClient.builder().build(Service.class, "agent",
-                ImmutableList.of(
+        Service proxy = JaxRsClient.create(Service.class, "agent",
+                createTestConfig(
                         "http://foo-bar-bogus-host.unresolvable:80",
                         "http://localhost:" + server1.getPort()));
         assertThat(proxy.get(), is("foo"));

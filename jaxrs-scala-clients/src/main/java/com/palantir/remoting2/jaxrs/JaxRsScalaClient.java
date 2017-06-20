@@ -17,9 +17,7 @@
 package com.palantir.remoting2.jaxrs;
 
 import com.google.common.reflect.Reflection;
-import com.palantir.remoting2.clients.ClientBuilder;
-import com.palantir.remoting2.clients.ClientConfig;
-import com.palantir.remoting2.config.service.ServiceConfiguration;
+import com.palantir.remoting2.clients.ClientConfiguration;
 import com.palantir.remoting2.ext.refresh.Refreshable;
 import com.palantir.remoting2.ext.refresh.RefreshableProxyInvocationHandler;
 
@@ -30,44 +28,18 @@ public final class JaxRsScalaClient {
 
     private JaxRsScalaClient() {}
 
-    /**
-     * Creates a {@code T client} for the given service configuration. The HTTP {@code User-Agent} header of every
-     * request is set to the given non-empty {@code userAgent} string. Recommended user agents are of the form: {@code
-     * ServiceName (Version)}, e.g. MyServer (1.2.3) For services that run multiple instances, recommended user agents
-     * are of the form: {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3).
-     */
-    public static <T> T create(Class<T> serviceClass, String userAgent, ServiceConfiguration serviceConfig) {
-        ClientConfig config = ClientConfig.fromServiceConfig(serviceConfig);
-        return new FeignJaxRsScalaClientBuilder(config).build(serviceClass, userAgent, serviceConfig.uris());
+    /** See {@link JaxRsClient}. */
+    public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration serviceConfig) {
+        return new FeignJaxRsClientBuilder(serviceConfig).build(serviceClass, userAgent);
     }
 
-    /**
-     * Similar to {@link #create(Class, String, ServiceConfiguration)}, but creates a mutable client that updates its
-     * configuration transparently whenever the given {@link Refreshable refreshable} {@link ServiceConfiguration}
-     * changes.
-     */
+    /** See {@link JaxRsClient}. */
     public static <T> T create(
             Class<T> serviceClass,
             String userAgent,
-            Refreshable<ServiceConfiguration> serviceConfig) {
+            Refreshable<ClientConfiguration> serviceConfig) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 serviceConfig,
                 serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration)));
-    }
-
-    /**
-     * Creates a builder for clients for a JAX-RS-specified service that attempts to connect to the given URIs with
-     * round-robin fail-over.
-     */
-    public static ClientBuilder builder() {
-        return new FeignJaxRsScalaClientBuilder(ClientConfig.builder().build());
-    }
-
-    /**
-     * Creates a builder for clients for a JAX-RS-specified service that attempts to connect to the given URIs with
-     * round-robin fail-over, based on the given client configuration.
-     */
-    public static ClientBuilder builder(ClientConfig config) {
-        return new FeignJaxRsScalaClientBuilder(config);
     }
 }

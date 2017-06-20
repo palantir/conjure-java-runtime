@@ -18,7 +18,8 @@ package com.palantir.remoting2.jaxrs.feignimpl;
 
 import static org.junit.Assert.assertEquals;
 
-import com.palantir.remoting2.config.service.ServiceDiscoveryConfiguration;
+import com.palantir.remoting.api.config.service.ServiceConfigurationFactory;
+import com.palantir.remoting2.clients.ClientConfigurations;
 import com.palantir.remoting2.jaxrs.JaxRsClient;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.junit.Rule;
@@ -33,15 +34,15 @@ public final class ServiceConfigTest {
 
     @Test
     public void testResource() {
-        ServiceDiscoveryConfiguration discoveryConfiguration =
-                rule.getConfiguration().getServiceDiscoveryConfiguration();
+        ServiceConfigurationFactory factory =
+                ServiceConfigurationFactory.of(rule.getConfiguration().getServiceDiscoveryConfiguration());
 
         ServiceConfigTestServer.HelloService helloClient = JaxRsClient.create(
-                ServiceConfigTestServer.HelloService.class, "agent", discoveryConfiguration.getServices().get("hello"));
+                ServiceConfigTestServer.HelloService.class, "agent", ClientConfigurations.of(factory.get("hello")));
         ServiceConfigTestServer.GoodbyeService goodbyeClient = JaxRsClient.create(
                 ServiceConfigTestServer.GoodbyeService.class,
                 "agent",
-                discoveryConfiguration.getServices().get("goodbye"));
+                ClientConfigurations.of(factory.get("goodbye")));
 
         assertEquals("Hello world!", helloClient.sayHello());
         assertEquals("Goodbye world!", goodbyeClient.sayGoodBye());

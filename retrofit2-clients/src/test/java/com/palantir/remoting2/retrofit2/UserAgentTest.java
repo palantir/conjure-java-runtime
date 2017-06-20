@@ -40,7 +40,7 @@ import org.mockito.Matchers;
 import retrofit2.Call;
 import retrofit2.http.GET;
 
-public final class UserAgentTest {
+public final class UserAgentTest extends TestBase {
 
     private static final String USER_AGENT = "TestSuite/1 (0.0.0)";
     private static final UserAgentInterceptor userAgentInterceptor = UserAgentInterceptor.of(USER_AGENT);
@@ -78,8 +78,8 @@ public final class UserAgentTest {
 
     @Test
     public void testUserAgent_defaultHeaderIsSent() throws InterruptedException, IOException {
-        TestService service =
-                Retrofit2Client.builder().build(TestService.class, USER_AGENT, "http://localhost:" + server.getPort());
+        TestService service = Retrofit2Client.create(TestService.class, USER_AGENT,
+                createTestConfig("http://localhost:" + server.getPort()));
         service.get().execute();
 
         RecordedRequest capturedRequest = server.takeRequest();
@@ -90,7 +90,7 @@ public final class UserAgentTest {
     public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()\\-#;/.,_\\s]+': !@"));
-        Retrofit2Client.builder().build(TestService.class, "!@", "http://localhost:" + server.getPort());
+        Retrofit2Client.create(TestService.class, "!@", createTestConfig("http://localhost:" + server.getPort()));
     }
 
     private static Response responseWithCode(Request request, int code) {

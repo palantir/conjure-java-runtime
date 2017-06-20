@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.TestBase;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -31,7 +32,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class TextEncoderTest {
+public final class TextEncoderTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -40,7 +41,8 @@ public final class TextEncoderTest {
 
     @Before
     public void before() {
-        service = JaxRsClient.builder().build(TextEncoderService.class, "agent", "http://localhost:" + server.getPort());
+        service = JaxRsClient.create(TextEncoderService.class, "agent",
+                createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("{}"));
     }
 

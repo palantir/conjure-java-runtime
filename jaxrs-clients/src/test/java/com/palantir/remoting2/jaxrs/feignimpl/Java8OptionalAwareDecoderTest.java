@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting2.errors.RemoteException;
 import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.TestBase;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
@@ -34,7 +35,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public final class Java8OptionalAwareDecoderTest {
+public final class Java8OptionalAwareDecoderTest extends TestBase {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(Java8TestServer.class,
@@ -48,8 +49,7 @@ public final class Java8OptionalAwareDecoderTest {
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.builder()
-                .build(Java8TestServer.TestService.class, "agent", endpointUri);
+        service = JaxRsClient.create(Java8TestServer.TestService.class, "agent", createTestConfig(endpointUri));
     }
 
     @Test

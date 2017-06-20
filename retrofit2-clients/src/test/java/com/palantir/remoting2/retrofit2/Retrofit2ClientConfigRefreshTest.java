@@ -18,16 +18,15 @@ package com.palantir.remoting2.retrofit2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.palantir.remoting2.config.service.ServiceConfiguration;
+import com.palantir.remoting2.clients.ClientConfiguration;
 import com.palantir.remoting2.ext.refresh.Refreshable;
-import java.util.Optional;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;
 import org.junit.Test;
 
 
-public final class Retrofit2ClientConfigRefreshTest {
+public final class Retrofit2ClientConfigRefreshTest extends TestBase {
 
     @Rule
     public final MockWebServer server1 = new MockWebServer();
@@ -37,12 +36,10 @@ public final class Retrofit2ClientConfigRefreshTest {
     @Test
     public void testConfigRefresh() throws Exception {
 
-        ServiceConfiguration config1 =
-                ServiceConfiguration.of("http://localhost:" + server1.getPort(), Optional.empty());
-        ServiceConfiguration config2 =
-                ServiceConfiguration.of("http://localhost:" + server2.getPort(), Optional.empty());
+        ClientConfiguration config1 = createTestConfig("http://localhost:" + server1.getPort());
+        ClientConfiguration config2 = createTestConfig("http://localhost:" + server2.getPort());
 
-        Refreshable<ServiceConfiguration> refreshableConfig = Refreshable.of(config1);
+        Refreshable<ClientConfiguration> refreshableConfig = Refreshable.of(config1);
         TestService proxy = Retrofit2Client.create(TestService.class, "agent", refreshableConfig);
 
         // Call 1

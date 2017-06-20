@@ -1,0 +1,50 @@
+apply plugin: 'org.inferred.processors'
+
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile "com.fasterxml.jackson.core:jackson-databind"
+    compile "com.google.guava:guava"
+    compile "com.palantir.remoting-api:ssl-config"
+
+    testCompile project(":extras:jackson-support")
+    testCompile("com.netflix.feign:feign-jaxrs") {
+        // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
+        exclude group: "javax.ws.rs", module: "jsr311-api"
+    }
+    testCompile "com.netflix.feign:feign-okhttp"
+    testCompile "org.hamcrest:hamcrest-all"
+    testCompile "io.dropwizard:dropwizard-core"
+    testCompile "io.dropwizard:dropwizard-testing"
+    testCompile "junit:junit"
+
+    processor "org.immutables:value"
+}
+
+task generateCerts(type:Exec) {
+  workingDir './src/test/resources'
+  commandLine './certSetup.sh', '-f'
+}
+
+task testBouncyCastle(type: Test) {
+    configureTestTask(it, 'bouncy-castle')
+}
+
+task testSun(type: Test) {
+    configureTestTask(it, 'sun')
+}
+
+[tasks.test, tasks.testBouncyCastle, tasks.testSun].each { it.dependsOn(generateCerts) }
+
+
+private void configureTestTask(Test test, String name) {
+    test.classpath = test.classpath + project(":pkcs1-reader-${name}").sourceSets.main.getOutput() +
+            project(":pkcs1-reader-${name}").sourceSets.main.runtimeClasspath
+
+    test.reports.junitXml.destination("${project.test.reports.junitXml.getDestination().absolutePath}-${name}")
+    test.reports.html.destination("${project.test.reports.html.getDestination().absolutePath}-${name}")
+
+    project.plugins.withType(JacocoPlugin) {
+        ((JacocoTaskExtension) test.jacoco).destinationFile = project.file("${project.getBuildDir()}/jacoco/${name}.exec")
+    }
+}

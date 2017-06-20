@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting2.errors.RemoteException;
 import com.palantir.remoting2.errors.SerializableError;
@@ -43,7 +42,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class Retrofit2ClientApiTest {
+public final class Retrofit2ClientApiTest extends TestBase {
     @Rule
     public final MockWebServer server = new MockWebServer();
 
@@ -53,7 +52,7 @@ public final class Retrofit2ClientApiTest {
     @Before
     public void before() {
         url = server.url("/");
-        service = Retrofit2Client.builder().build(TestService.class, "agent", ImmutableList.of(url.toString()));
+        service = Retrofit2Client.create(TestService.class, "agent", createTestConfig(url.toString()));
     }
 
     @Test
@@ -103,7 +102,7 @@ public final class Retrofit2ClientApiTest {
         service.makeCborRequest(date).execute();
         RecordedRequest request = server.takeRequest();
         assertThat(request.getBody().readByteArray())
-            .isEqualTo(ObjectMappers.newCborClientObjectMapper().writeValueAsBytes(date));
+                .isEqualTo(ObjectMappers.newCborClientObjectMapper().writeValueAsBytes(date));
     }
 
     @Test
