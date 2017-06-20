@@ -48,7 +48,7 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
                     SafeArg.of("errorId", errorId),
                     exception);
         } else {
-            log.info("Received response status code {} from server handling request. errorId: {}",
+            log.warn("Received response status code {} from server handling request. errorId: {}",
                     SafeArg.of("statusCode", status.getStatusCode()),
                     SafeArg.of("errorId", errorId),
                     exception);
