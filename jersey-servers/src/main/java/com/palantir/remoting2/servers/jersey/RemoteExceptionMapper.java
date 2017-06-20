@@ -53,14 +53,11 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
     @Override
     public Response toResponse(RemoteException exception) {
-        String errorId = UUID.randomUUID().toString();
-
         Status status = Status.fromStatusCode(exception.getStatus());
 
         // log at WARN instead of ERROR because although this indicates an issue in a remote server, it is not
-        log.warn("Forwarding response and status code {} from remote server back to caller. errorId: {}",
+        log.warn("Forwarding response and status code {} from remote server back to caller",
                 SafeArg.of("statusCode", status.getStatusCode()),
-                SafeArg.of("errorId", errorId),
                 exception);
 
         SerializableError error = exception.getRemoteException();
@@ -70,8 +67,7 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
             String json = JsonExceptionMapper.MAPPER.writeValueAsString(error);
             builder.entity(json);
         } catch (RuntimeException | JsonProcessingException e) {
-            log.warn("Unable to translate exception to json for request. errorId: {}",
-                    SafeArg.of("errorId", errorId), e);
+            log.warn("Unable to translate exception to json for request", e);
             // simply write out the exception message
             builder = Response.status(status);
             builder.type(MediaType.TEXT_PLAIN);
