@@ -41,7 +41,7 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
         Status status = Status.fromStatusCode(exception.getStatus());
 
-        // here in the client, log responses that indicate client error (4xx) at higher level than server error (5xx)
+        // Log responses that indicate client error (4xx) at higher level than server error (5xx)
         if (Status.Family.CLIENT_ERROR.equals(status.getFamily())) {
             log.error("Received response status code {} from server handling request. errorId: {}",
                     SafeArg.of("statusCode", status.getStatusCode()),
