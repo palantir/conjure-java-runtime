@@ -36,6 +36,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Writes out exceptions as serialized {@link SerializableError}s with {@link MediaType#APPLICATION_JSON JSON media
  * type}.
+ *
+ * Consider this call stack, where a caller/browser calls a remote method in a server:
+ *
+ * caller/browser -> [server]
+ *
+ * When code in the server throws an {@link Exception} that reaches Jersey, this {@link ExceptionMapper} converts that
+ * exception into an HTTP {@link Response} for return to the caller/browser.
  */
 abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapper<T> {
 
