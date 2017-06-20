@@ -54,6 +54,7 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
     public Response toResponse(RemoteException exception) {
         Status status = Status.fromStatusCode(exception.getStatus());
 
+        // TODO(rfink): Propagate errorId across service boundaries?
         // log at WARN instead of ERROR because although this indicates an issue in a remote server, it is not
         log.warn("Forwarding response and status code {} from remote server back to caller",
                 SafeArg.of("statusCode", status.getStatusCode()),
