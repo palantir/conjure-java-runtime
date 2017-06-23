@@ -17,7 +17,6 @@
 package com.palantir.remoting2.clients;
 
 import com.palantir.remoting.api.config.service.BasicCredentials;
-import com.palantir.remoting.api.config.service.PartialServiceConfiguration;
 import com.palantir.remoting.api.config.service.ServiceConfiguration;
 import java.net.ProxySelector;
 import java.time.Duration;
@@ -35,25 +34,25 @@ import org.immutables.value.Value;
 @ImmutablesStyle
 public interface ClientConfiguration {
 
-    /** See {@link PartialServiceConfiguration#security}. */
+    /** See {@link com.palantir.remoting.api.config.service.PartialServiceConfiguration#security}. */
     SSLSocketFactory sslSocketFactory();
 
-    /** See {@link PartialServiceConfiguration#security}. */
+    /** See {@link com.palantir.remoting.api.config.service.PartialServiceConfiguration#security}. */
     X509TrustManager trustManager();
 
-    /** See {@link PartialServiceConfiguration#uris}. */
+    /** See {@link com.palantir.remoting.api.config.service.PartialServiceConfiguration#uris}. */
     List<String> uris();
 
-    /** See {@link PartialServiceConfiguration#connectTimeout}. */
+    /** See {@link com.palantir.remoting.api.config.service.PartialServiceConfiguration#connectTimeout}. */
     Duration connectTimeout();
 
-    /** See {@link PartialServiceConfiguration#readTimeout}. */
+    /** See {@link com.palantir.remoting.api.config.service.PartialServiceConfiguration#readTimeout}. */
     Duration readTimeout();
 
-    /** See {@link PartialServiceConfiguration#writeTimeout}. */
+    /** See {@link com.palantir.remoting.api.config.service.PartialServiceConfiguration#writeTimeout}. */
     Duration writeTimeout();
 
-    /** See {@link PartialServiceConfiguration#enableGcmCipherSuites}. */
+    /** See {@link com.palantir.remoting.api.config.service.PartialServiceConfiguration#enableGcmCipherSuites}. */
     boolean enableGcmCipherSuites();
 
     /** The proxy to use for the HTTP connection. */
