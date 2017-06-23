@@ -23,6 +23,7 @@ import com.palantir.remoting2.clients.ClientConfigurations;
 import com.palantir.remoting2.config.ssl.SslSocketFactories;
 import java.nio.file.Paths;
 
+// TODO(rfink): Use static utility class instead?
 public abstract class TestBase {
 
     protected final ClientConfiguration createTestConfig(String... uri) {

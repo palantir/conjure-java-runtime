@@ -17,7 +17,6 @@
 package com.palantir.remoting2.jaxrs;
 
 import com.google.common.reflect.Reflection;
-import com.palantir.remoting.api.config.service.ServiceConfiguration;
 import com.palantir.remoting2.clients.ClientConfiguration;
 import com.palantir.remoting2.ext.refresh.Refreshable;
 import com.palantir.remoting2.ext.refresh.RefreshableProxyInvocationHandler;
@@ -35,21 +34,21 @@ public final class JaxRsClient {
      * ServiceName (Version)}, e.g. MyServer (1.2.3) For services that run multiple instances, recommended user agents
      * are of the form: {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3).
      */
-    public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration serviceConfig) {
-        return new FeignJaxRsClientBuilder(serviceConfig).build(serviceClass, userAgent);
+    public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration config) {
+        return new FeignJaxRsClientBuilder(config).build(serviceClass, userAgent);
     }
 
     /**
      * Similar to {@link #create(Class, String, ClientConfiguration)}, but creates a mutable client that updates its
-     * configuration transparently whenever the given {@link Refreshable refreshable} {@link ServiceConfiguration}
+     * configuration transparently whenever the given {@link Refreshable refreshable} {@link ClientConfiguration}
      * changes.
      */
     public static <T> T create(
             Class<T> serviceClass,
             String userAgent,
-            Refreshable<ClientConfiguration> serviceConfig) {
+            Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
-                serviceConfig,
+                config,
                 serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration)));
     }
 }

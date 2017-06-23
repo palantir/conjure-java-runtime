@@ -17,7 +17,6 @@
 package com.palantir.remoting2.retrofit2;
 
 import com.google.common.reflect.Reflection;
-import com.palantir.remoting.api.config.service.ServiceConfiguration;
 import com.palantir.remoting2.clients.ClientConfiguration;
 import com.palantir.remoting2.ext.refresh.Refreshable;
 import com.palantir.remoting2.ext.refresh.RefreshableProxyInvocationHandler;
@@ -41,15 +40,15 @@ public final class Retrofit2Client {
 
     /**
      * Similar to {@link #create(Class, String, ClientConfiguration)}, but creates a mutable client that updates its
-     * configuration transparently whenever the given {@link Refreshable refreshable} {@link ServiceConfiguration}
+     * configuration transparently whenever the given {@link Refreshable refreshable} {@link ClientConfiguration}
      * changes.
      */
     public static <T> T create(
             Class<T> serviceClass,
             String userAgent,
-            Refreshable<ClientConfiguration> serviceConfig) {
+            Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
-                serviceConfig,
+                config,
                 serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration)));
     }
 }

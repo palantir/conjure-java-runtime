@@ -94,7 +94,7 @@ public final class ClientConfigurations {
                 return fixedProxySelectorFor(Proxy.NO_PROXY);
             case HTTP:
                 HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig.get().hostAndPort()
-                        .orElseThrow(() -> new IllegalStateException(
+                        .orElseThrow(() -> new IllegalArgumentException(
                                 "Expected to find proxy hostAndPort configuration for HTTP proxy")));
                 InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort());
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, addr));

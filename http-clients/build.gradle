@@ -3,7 +3,6 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":keystores")
-    compile "com.google.guava:guava"
     compile "com.palantir.remoting-api:service-config"
 
     testCompile "junit:junit"

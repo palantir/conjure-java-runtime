@@ -29,17 +29,17 @@ public final class JaxRsScalaClient {
     private JaxRsScalaClient() {}
 
     /** See {@link JaxRsClient}. */
-    public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration serviceConfig) {
-        return new FeignJaxRsClientBuilder(serviceConfig).build(serviceClass, userAgent);
+    public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration config) {
+        return new FeignJaxRsClientBuilder(config).build(serviceClass, userAgent);
     }
 
     /** See {@link JaxRsClient}. */
     public static <T> T create(
             Class<T> serviceClass,
             String userAgent,
-            Refreshable<ClientConfiguration> serviceConfig) {
+            Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
-                serviceConfig,
+                config,
                 serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration)));
     }
 }
