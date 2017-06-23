@@ -110,8 +110,8 @@ abstract class AbstractFeignJaxRsClientBuilder {
 
     private Request.Options createRequestOptions() {
         return new Request.Options(
-                (int) config.connectTimeout().toMillis(),
-                (int) config.readTimeout().toMillis());
+                Math.toIntExact(config.connectTimeout().toMillis()),
+                Math.toIntExact(config.readTimeout().toMillis()));
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
