@@ -13,10 +13,16 @@
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.6.7"
+            "locked": "2.6.7",
+            "transitive": [
+                "com.palantir.remoting-api:ssl-config"
+            ]
         },
         "com.google.guava:guava": {
             "locked": "18.0"
+        },
+        "com.palantir.remoting-api:ssl-config": {
+            "locked": "0.0.3"
         }
     },
     "runtime": {
@@ -33,10 +39,16 @@
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.6.7"
+            "locked": "2.6.7",
+            "transitive": [
+                "com.palantir.remoting-api:ssl-config"
+            ]
         },
         "com.google.guava:guava": {
             "locked": "18.0"
+        },
+        "com.palantir.remoting-api:ssl-config": {
+            "locked": "0.0.3"
         }
     }
 }
