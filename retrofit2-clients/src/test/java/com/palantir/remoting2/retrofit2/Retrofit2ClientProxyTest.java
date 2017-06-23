@@ -23,7 +23,6 @@ import static org.junit.Assert.assertThat;
 import com.google.common.collect.ImmutableList;
 import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.remoting2.clients.ClientConfiguration;
-import com.palantir.remoting2.clients.ImmutableClientConfiguration;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -51,7 +50,7 @@ public final class Retrofit2ClientProxyTest extends TestBase {
 
         TestService directService = Retrofit2Client.create(
                 TestService.class, "agent", createTestConfig("http://localhost:" + server.getPort()));
-        ClientConfiguration proxiedConfig = ImmutableClientConfiguration.builder()
+        ClientConfiguration proxiedConfig = ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server.getPort()))
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .build();
@@ -68,7 +67,7 @@ public final class Retrofit2ClientProxyTest extends TestBase {
         proxyServer.enqueue(new MockResponse().setResponseCode(407)); // indicates authenticated proxy
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        ClientConfiguration proxiedConfig = ImmutableClientConfiguration.builder()
+        ClientConfiguration proxiedConfig = ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server.getPort()))
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .proxyCredentials(BasicCredentials.of("fakeUser", "fakePassword"))

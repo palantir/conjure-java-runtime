@@ -50,7 +50,7 @@ public final class ClientConfigurations {
      * empty/absent configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(ServiceConfiguration config) {
-        return ImmutableClientConfiguration.builder()
+        return ClientConfiguration.builder()
                 .sslSocketFactory(SslSocketFactories.createSslSocketFactory(config.security()))
                 .trustManager(SslSocketFactories.createX509TrustManager(config.security()))
                 .uris(config.uris())
@@ -70,7 +70,7 @@ public final class ClientConfigurations {
      */
     public static ClientConfiguration of(
             List<String> uris, SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
-        return ImmutableClientConfiguration.builder()
+        return ClientConfiguration.builder()
                 .sslSocketFactory(sslSocketFactory)
                 .trustManager(trustManager)
                 .uris(uris)

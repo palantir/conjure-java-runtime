@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.palantir.remoting2.clients.ClientConfiguration;
-import com.palantir.remoting2.clients.ImmutableClientConfiguration;
 import com.palantir.remoting2.servers.jersey.HttpRemotingJerseyFeature;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -58,7 +57,7 @@ public final class JaxRsClientConfigTest extends TestBase {
     @Test
     public void testRetries_notSupported() throws Exception {
         try {
-            ClientConfiguration config = ImmutableClientConfiguration.builder()
+            ClientConfiguration config = ClientConfiguration.builder()
                     .from(createTestConfig("uri"))
                     .maxNumRetries(1)
                     .build();

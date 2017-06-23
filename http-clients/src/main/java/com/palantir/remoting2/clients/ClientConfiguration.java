@@ -43,4 +43,10 @@ public interface ClientConfiguration {
     ProxySelector proxy();
     Optional<BasicCredentials> proxyCredentials();
     int maxNumRetries();
+
+    static Builder builder() {
+        return new Builder();
+    }
+
+    class Builder extends ImmutableClientConfiguration.Builder {}
 }
