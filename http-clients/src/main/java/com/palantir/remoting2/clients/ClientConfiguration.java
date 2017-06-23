@@ -17,6 +17,7 @@
 package com.palantir.remoting2.clients;
 
 import com.palantir.remoting.api.config.service.BasicCredentials;
+import com.palantir.remoting.api.config.service.PartialServiceConfiguration;
 import com.palantir.remoting.api.config.service.ServiceConfiguration;
 import java.net.ProxySelector;
 import java.time.Duration;
@@ -33,15 +34,35 @@ import org.immutables.value.Value;
 @Value.Immutable
 @ImmutablesStyle
 public interface ClientConfiguration {
+
+    /** See {@link PartialServiceConfiguration#security}. */
     SSLSocketFactory sslSocketFactory();
+
+    /** See {@link PartialServiceConfiguration#security}. */
     X509TrustManager trustManager();
+
+    /** See {@link PartialServiceConfiguration#uris}. */
     List<String> uris();
+
+    /** See {@link PartialServiceConfiguration#connectTimeout}. */
     Duration connectTimeout();
+
+    /** See {@link PartialServiceConfiguration#readTimeout}. */
     Duration readTimeout();
+
+    /** See {@link PartialServiceConfiguration#writeTimeout}. */
     Duration writeTimeout();
+
+    /** See {@link PartialServiceConfiguration#enableGcmCipherSuites}. */
     boolean enableGcmCipherSuites();
+
+    /** The proxy to use for the HTTP connection. */
     ProxySelector proxy();
+
+    /** The credentials to use for the proxy selected by {@link #proxy}. */
     Optional<BasicCredentials> proxyCredentials();
+
+    /** The maximum number of times a failed connection attempt is retried. */
     int maxNumRetries();
 
     static Builder builder() {
