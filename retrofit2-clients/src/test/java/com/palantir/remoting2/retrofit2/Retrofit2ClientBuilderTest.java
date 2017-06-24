@@ -28,7 +28,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class Retrofit2ClientBuilderTest {
+public final class Retrofit2ClientBuilderTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -45,7 +45,7 @@ public final class Retrofit2ClientBuilderTest {
 
     private void assertRequestUrlYieldsHttpPath(String basePath, String expectedQueryPath) throws Exception {
         HttpUrl url = server.url(basePath);
-        TestService service = Retrofit2Client.builder().build(TestService.class, "agent", url.toString());
+        TestService service = Retrofit2Client.create(TestService.class, "agent", createTestConfig(url.toString()));
 
         server.enqueue(new MockResponse().setBody("\"server\""));
         assertThat(service.get().execute().body(), is("server"));
@@ -61,7 +61,7 @@ public final class Retrofit2ClientBuilderTest {
     public void testAbsoluteRetrofitEndpoints_failRetryInterceptor() throws Exception {
         for (String basePath : ImmutableList.of("/api/", "/api", "api/", "api")) {
             HttpUrl url = server.url(basePath);
-            TestService service = Retrofit2Client.builder().build(TestService.class, "agent", url.toString());
+            TestService service = Retrofit2Client.create(TestService.class, "agent", createTestConfig(url.toString()));
             try {
                 service.getAbsolute().execute();
                 fail();
@@ -74,22 +74,20 @@ public final class Retrofit2ClientBuilderTest {
 
     @Test
     public void testCaseInsensitiveHostNames_workWithEquivalentUrls() throws Exception {
-        TestService service = Retrofit2Client.builder().build(
-                TestService.class,
-                "agent",
-                String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())
-        );
+        TestService service = Retrofit2Client.create(
+                TestService.class, "agent", createTestConfig(
+                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())
+                ));
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.getRelative().execute();
     }
 
     @Test
     public void testCaseSensitivePathNames_doesNotWorkWithNonEquivalentUrls() throws Exception {
-        TestService service = Retrofit2Client.builder().build(
-                TestService.class,
-                "agent",
-                String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())
-        );
+        TestService service = Retrofit2Client.create(
+                TestService.class, "agent", createTestConfig(
+                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())
+                ));
         try {
             service.getAbsoluteApiTitleCase().execute();
             fail();

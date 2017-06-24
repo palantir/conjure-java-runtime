@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.TestBase;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -38,7 +39,7 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class SlashEncodingContractTest {
+public final class SlashEncodingContractTest extends TestBase {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(SlashEncodingTestServer.class,
@@ -55,10 +56,10 @@ public final class SlashEncodingContractTest {
 
     @Before
     public void before() {
-        jerseyProxy = JaxRsClient.builder()
-                .build(FakeoInterface.class, "agent", "http://localhost:" + APP.getLocalPort());
-        inMemoryProxy = JaxRsClient.builder()
-                .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
+        jerseyProxy = JaxRsClient.create(FakeoInterface.class, "agent",
+                createTestConfig("http://localhost:" + APP.getLocalPort()));
+        inMemoryProxy = JaxRsClient.create(FakeoInterface.class, "agent",
+                createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
 

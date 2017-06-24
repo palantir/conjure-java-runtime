@@ -33,7 +33,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class JaxRsClientGuavaOptionalHandlingTest {
+public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -42,8 +42,8 @@ public final class JaxRsClientGuavaOptionalHandlingTest {
 
     @Before
     public void before() {
-        proxy = JaxRsClient.builder()
-                .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
+        proxy = JaxRsClient.create(FakeoInterface.class, "agent",
+                createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
 
@@ -72,7 +72,8 @@ public final class JaxRsClientGuavaOptionalHandlingTest {
     @Test
     public void testCannotDecorateInterfaceWithOptionalPathParam() {
         try {
-            JaxRsClient.builder().build(CannotDecorateInterface.class, "agent", "http://localhost:" + server.getPort());
+            JaxRsClient.create(CannotDecorateInterface.class, "agent",
+                    createTestConfig("http://localhost:" + server.getPort()));
             fail();
         } catch (RuntimeException e) {
             assertThat(e.getMessage(), is("Cannot use Guava Optionals with PathParams. (Class: com.palantir.remoting2"
@@ -90,7 +91,7 @@ public final class JaxRsClientGuavaOptionalHandlingTest {
 
     @Test
     public void testAbsentQuery() throws Exception {
-        proxy.query(Optional.<String>absent(), "str2");
+        proxy.query(Optional.absent(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getRequestLine(), is("GET /foo?req=str2 HTTP/1.1"));
     }

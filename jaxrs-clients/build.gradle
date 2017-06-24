@@ -1,12 +1,12 @@
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
+    compile project(":error-handling")
     compile project(":extras:jackson-support")
     compile project(":extras:refresh-utils")
-    compile project(":error-handling")
+    compile project(":http-clients")
+    compile project(":keystores")
     compile project(":tracing-okhttp3")
-    compile project(":http-clients-api")
-    compile project(":service-config")
 
     compile "com.google.code.findbugs:jsr305"
     compile "com.google.guava:guava"

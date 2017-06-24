@@ -20,19 +20,16 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting2.clients.ClientConfig;
-import com.palantir.remoting2.config.ssl.SslConfiguration;
-import com.palantir.remoting2.config.ssl.SslSocketFactories;
+import com.palantir.remoting2.clients.ClientConfiguration;
 import com.palantir.remoting2.servers.jersey.HttpRemotingJerseyFeature;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
-import java.nio.file.Paths;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public final class JaxRsClientConfigTest {
+public final class JaxRsClientConfigTest extends TestBase {
     @ClassRule
     public static final DropwizardAppRule<Configuration> ECHO_SERVER =
             new DropwizardAppRule<>(TestEchoServer.class, "src/test/resources/test-server-ssl.yml");
@@ -40,7 +37,7 @@ public final class JaxRsClientConfigTest {
     @Test
     public void testSslSocketFactory_cannotConnectWhenSocketFactoryIsNotSet() throws Exception {
         String endpointUri = "https://localhost:" + ECHO_SERVER.getLocalPort();
-        TestService service = JaxRsClient.builder().build(TestService.class, "agent", endpointUri);
+        TestService service = JaxRsClient.create(TestService.class, "agent", createTestConfig(endpointUri));
 
         try {
             service.echo("foo");
@@ -52,26 +49,22 @@ public final class JaxRsClientConfigTest {
 
     @Test
     public void testSslSocketFactory_canConnectWhenSocketFactoryIsSet() throws Exception {
-        TestService service = createProxy(ECHO_SERVER.getLocalPort(), "test");
+        String endpointUri = "https://localhost:" + ECHO_SERVER.getLocalPort();
+        TestService service = JaxRsClient.create(TestService.class, "agent", createTestConfig(endpointUri));
         assertThat(service.echo("foo"), is("foo"));
     }
 
     @Test
     public void testRetries_notSupported() throws Exception {
         try {
-            JaxRsClient.builder(ClientConfig.builder().maxNumRetries(1).build())
-                    .build(TestService.class, "agent", "uri");
+            ClientConfiguration config = ClientConfiguration.builder()
+                    .from(createTestConfig("uri"))
+                    .maxNumRetries(1)
+                    .build();
+            JaxRsClient.create(TestService.class, "agent", config);
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), is("Connection-level retries are not supported by JaxRsClient"));
         }
-    }
-
-    private static TestService createProxy(int port, String name) {
-        String endpointUri = "https://localhost:" + port;
-        SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
-        return JaxRsClient.builder(
-                ClientConfig.builder().trustContext(SslSocketFactories.createTrustContext(sslConfig)).build())
-                .build(TestService.class, name, endpointUri);
     }
 
     public static final class TestEchoServer extends Application<Configuration> {

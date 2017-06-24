@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
 import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.TestBase;
 import com.palantir.remoting2.jaxrs.feignimpl.GuavaTestServer;
 import feign.codec.Encoder;
 import io.dropwizard.Configuration;
@@ -36,7 +37,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public final class InputStreamDelegateEncoderTest {
+public final class InputStreamDelegateEncoderTest extends TestBase {
     @Mock
     private Encoder delegate;
 
@@ -55,7 +56,7 @@ public final class InputStreamDelegateEncoderTest {
         inputStreamDelegateEncoder = new InputStreamDelegateEncoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.builder().build(GuavaTestServer.TestService.class, "agent", endpointUri);
+        service = JaxRsClient.create(GuavaTestServer.TestService.class, "agent", createTestConfig(endpointUri));
     }
 
     @Test

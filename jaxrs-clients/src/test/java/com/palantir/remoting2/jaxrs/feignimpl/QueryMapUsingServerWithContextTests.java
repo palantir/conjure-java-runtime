@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.TestBase;
 import com.palantir.remoting2.jaxrs.feignimpl.QueryMapTestServer.TestService;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -31,7 +32,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public final class QueryMapUsingServerWithContextTests {
+public final class QueryMapUsingServerWithContextTests extends TestBase {
 
     /**
      * Creates a {@link QueryMapTestServer.WithContext} Dropwizard server.
@@ -48,8 +49,8 @@ public final class QueryMapUsingServerWithContextTests {
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-
-        service = JaxRsClient.builder().build(QueryMapTestServer.TestClientService.class, "agent", endpointUri);
+        service = JaxRsClient.create(QueryMapTestServer.TestClientService.class, "agent",
+                createTestConfig(endpointUri));
     }
 
     @Test
@@ -64,12 +65,12 @@ public final class QueryMapUsingServerWithContextTests {
     @Test
     public void testGetUsingParamMapWithString() {
         assertThat(service.getUsingParamMap("fooVal"),
-                is((Map<String, String>) ImmutableMap.of(TestService.MAP_PARAM_NAME, "fooVal")));
+                is(ImmutableMap.of(TestService.MAP_PARAM_NAME, "fooVal")));
     }
 
     @Test
     public void testGetUsingParamListWithQueryMap() {
-        Map<String, List<String>> queryMap = ImmutableMap.<String, List<String>>of(
+        Map<String, List<String>> queryMap = ImmutableMap.of(
                 "fooParam", ImmutableList.of("fooVal", "foo value 2", ""),
                 "barParam", ImmutableList.of("barVal"));
 
@@ -82,8 +83,7 @@ public final class QueryMapUsingServerWithContextTests {
 
         assertThat(
                 service.getUsingParamList(paramList),
-                is((Map<String, List<String>>) ImmutableMap.of(
-                        TestService.LIST_PARAM_NAME, paramList)));
+                is(ImmutableMap.of(TestService.LIST_PARAM_NAME, paramList)));
     }
 
 }

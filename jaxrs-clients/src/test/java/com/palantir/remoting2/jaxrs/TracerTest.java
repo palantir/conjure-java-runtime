@@ -31,7 +31,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class TracerTest {
+public final class TracerTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -41,7 +41,7 @@ public final class TracerTest {
     @Before
     public void before() {
         String uri = "http://localhost:" + server.getPort();
-        service = JaxRsClient.builder().build(TestService.class, "agent", uri);
+        service = JaxRsClient.create(TestService.class, "agent", createTestConfig(uri));
         server.enqueue(new MockResponse().setBody("\"server\""));
     }
 

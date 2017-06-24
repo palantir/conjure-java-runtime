@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.TestBase;
 import com.palantir.remoting2.jaxrs.feignimpl.GuavaTestServer;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
@@ -43,7 +44,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public final class TextDelegateDecoderTest {
+public final class TextDelegateDecoderTest extends TestBase {
     private static final String DELEGATE_RESPONSE = "delegate response";
 
     @ClassRule
@@ -65,7 +66,7 @@ public final class TextDelegateDecoderTest {
         textDelegateDecoder = new TextDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.builder().build(GuavaTestServer.TestService.class, "agent", endpointUri);
+        service = JaxRsClient.create(GuavaTestServer.TestService.class, "agent", createTestConfig(endpointUri));
     }
 
     @Test
