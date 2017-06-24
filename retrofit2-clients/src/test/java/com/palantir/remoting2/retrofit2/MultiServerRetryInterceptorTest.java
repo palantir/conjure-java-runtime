@@ -34,7 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public final class MultiServerRetryInterceptorTest {
+public final class MultiServerRetryInterceptorTest extends TestBase {
     @Rule
     public final MockWebServer serverA = new MockWebServer();
     @Rule
@@ -130,8 +130,8 @@ public final class MultiServerRetryInterceptorTest {
 
     @Test
     public void testRetrofit2ClientWithMultiServerRetryInterceptorRedirectToAvailableServer() throws IOException {
-        TestService service = Retrofit2Client.builder()
-                .build(TestService.class, "agent", ImmutableList.of(urlA.toString(), urlB.toString()));
+        TestService service = Retrofit2Client.create(
+                TestService.class, "agent", createTestConfig(urlA.toString(), urlB.toString()));
 
         serverA.shutdown();
         serverB.enqueue(new MockResponse().setBody("\"pong\""));

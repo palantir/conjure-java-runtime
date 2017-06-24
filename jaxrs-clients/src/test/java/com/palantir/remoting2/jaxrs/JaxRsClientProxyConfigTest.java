@@ -18,9 +18,16 @@ package com.palantir.remoting2.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.palantir.remoting2.clients.ClientConfig;
-import com.palantir.remoting2.config.service.BasicCredentials;
-import com.palantir.remoting2.config.service.ProxyConfiguration;
+import com.google.common.collect.ImmutableList;
+import com.palantir.remoting.api.config.service.BasicCredentials;
+import com.palantir.remoting2.clients.ClientConfiguration;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.SocketAddress;
+import java.net.URI;
+import java.util.List;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import okhttp3.mockwebserver.MockResponse;
@@ -29,7 +36,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class JaxRsClientProxyConfigTest {
+public final class JaxRsClientProxyConfigTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -41,11 +48,13 @@ public final class JaxRsClientProxyConfigTest {
         server.enqueue(new MockResponse().setBody("\"server\""));
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        FakeoInterface directService = JaxRsClient.builder()
-                .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
-        ProxyConfiguration proxyConfiguration = ProxyConfiguration.of("localhost:" + proxyServer.getPort());
-        FakeoInterface proxiedService = JaxRsClient.builder(ClientConfig.builder().proxy(proxyConfiguration).build())
-                .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
+        FakeoInterface directService = JaxRsClient.create(FakeoInterface.class, "agent",
+                createTestConfig("http://localhost:" + server.getPort()));
+        ClientConfiguration proxiedConfig = ClientConfiguration.builder()
+                .from(createTestConfig("http://localhost:" + server.getPort()))
+                .proxy(createProxySelector("localhost", proxyServer.getPort()))
+                .build();
+        FakeoInterface proxiedService = JaxRsClient.create(FakeoInterface.class, "agent", proxiedConfig);
 
         assertThat(directService.blah()).isEqualTo("server");
         assertThat(proxiedService.blah()).isEqualTo("proxyServer");
@@ -58,13 +67,14 @@ public final class JaxRsClientProxyConfigTest {
         proxyServer.enqueue(new MockResponse().setResponseCode(407)); // indicates authenticated proxy
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        ProxyConfiguration authProxyConfig = ProxyConfiguration.of(
-                "localhost:" + proxyServer.getPort(),
-                BasicCredentials.of("fakeUser", "fakePassword"));
-        FakeoInterface authClient = JaxRsClient.builder(ClientConfig.builder().proxy(authProxyConfig).build())
-                .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
+        ClientConfiguration proxiedConfig = ClientConfiguration.builder()
+                .from(createTestConfig("http://localhost:" + server.getPort()))
+                .proxy(createProxySelector("localhost", proxyServer.getPort()))
+                .proxyCredentials(BasicCredentials.of("fakeUser", "fakePassword"))
+                .build();
+        FakeoInterface proxiedService = JaxRsClient.create(FakeoInterface.class, "agent", proxiedConfig);
 
-        assertThat(authClient.blah()).isEqualTo("proxyServer");
+        assertThat(proxiedService.blah()).isEqualTo("proxyServer");
         RecordedRequest firstRequest = proxyServer.takeRequest();
         assertThat(firstRequest.getHeader("Proxy-Authorization")).isNull();
         RecordedRequest secondRequest = proxyServer.takeRequest();
@@ -75,5 +85,18 @@ public final class JaxRsClientProxyConfigTest {
     public interface FakeoInterface {
         @GET
         String blah();
+    }
+
+    private static ProxySelector createProxySelector(String host, int port) {
+        return new ProxySelector() {
+            @Override
+            public List<Proxy> select(URI uri) {
+                InetSocketAddress addr = new InetSocketAddress(host, port);
+                return ImmutableList.of(new Proxy(Proxy.Type.HTTP, addr));
+            }
+
+            @Override
+            public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {}
+        };
     }
 }

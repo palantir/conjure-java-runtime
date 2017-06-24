@@ -36,7 +36,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class JaxRsClientJava8OptionalHandlingTest {
+public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -45,8 +45,8 @@ public final class JaxRsClientJava8OptionalHandlingTest {
 
     @Before
     public void before() {
-        proxy = JaxRsClient.builder()
-                .build(FakeoInterface.class, "agent", "http://localhost:" + server.getPort());
+        proxy = JaxRsClient.create(FakeoInterface.class, "agent",
+                createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
 
@@ -99,7 +99,8 @@ public final class JaxRsClientJava8OptionalHandlingTest {
     @Test
     public void testCannotDecorateInterfaceWithOptionalPathParam() {
         try {
-            JaxRsClient.builder().build(CannotDecorateInterface.class, "agent", "http://localhost:" + server.getPort());
+            JaxRsClient.create(CannotDecorateInterface.class, "agent",
+                    createTestConfig("http://localhost:" + server.getPort()));
             fail();
         } catch (RuntimeException e) {
             assertThat(e.getMessage(), is("Cannot use Java8 Optionals with PathParams. (Class: com.palantir.remoting2."

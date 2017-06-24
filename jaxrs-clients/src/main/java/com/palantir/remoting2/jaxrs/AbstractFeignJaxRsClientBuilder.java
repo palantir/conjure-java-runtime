@@ -20,12 +20,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
+import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.remoting2.clients.CipherSuites;
-import com.palantir.remoting2.clients.ClientBuilder;
-import com.palantir.remoting2.clients.ClientConfig;
-import com.palantir.remoting2.config.service.BasicCredentials;
-import com.palantir.remoting2.config.service.ProxyConfiguration;
-import com.palantir.remoting2.config.ssl.TrustContext;
+import com.palantir.remoting2.clients.ClientConfiguration;
 import com.palantir.remoting2.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting2.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting2.jaxrs.feignimpl.GuavaOptionalAwareContract;
@@ -62,11 +59,11 @@ import okhttp3.TlsVersion;
 /**
  * Not meant to be implemented outside of this library.
  */
-abstract class AbstractFeignJaxRsClientBuilder extends ClientBuilder {
+abstract class AbstractFeignJaxRsClientBuilder {
 
-    private final ClientConfig config;
+    private final ClientConfiguration config;
 
-    AbstractFeignJaxRsClientBuilder(ClientConfig config) {
+    AbstractFeignJaxRsClientBuilder(ClientConfiguration config) {
         this.config = config;
         Preconditions.checkArgument(config.maxNumRetries() == 0,
                 "Connection-level retries are not supported by %s", JaxRsClient.class.getSimpleName());
@@ -76,9 +73,8 @@ abstract class AbstractFeignJaxRsClientBuilder extends ClientBuilder {
 
     protected abstract ObjectMapper getCborObjectMapper();
 
-    @Override
-    public final <T> T build(Class<T> serviceClass, String userAgent, List<String> uris) {
-        FailoverFeignTarget<T> target = createTarget(serviceClass, uris);
+    public final <T> T build(Class<T> serviceClass, String userAgent) {
+        FailoverFeignTarget<T> target = createTarget(serviceClass, config.uris());
         ObjectMapper objectMapper = getObjectMapper();
         ObjectMapper cborObjectMapper = getCborObjectMapper();
 
@@ -114,8 +110,8 @@ abstract class AbstractFeignJaxRsClientBuilder extends ClientBuilder {
 
     private Request.Options createRequestOptions() {
         return new Request.Options(
-                (int) config.connectTimeout().toMilliseconds(),
-                (int) config.readTimeout().toMilliseconds());
+                Math.toIntExact(config.connectTimeout().toMillis()),
+                Math.toIntExact(config.readTimeout().toMillis()));
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
@@ -132,10 +128,7 @@ abstract class AbstractFeignJaxRsClientBuilder extends ClientBuilder {
         okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
 
         // SSL
-        if (config.trustContext().isPresent()) {
-            TrustContext context = config.trustContext().get();
-            client.sslSocketFactory(context.sslSocketFactory(), context.x509TrustManager());
-        }
+        client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
 
         // tracing
         client.interceptors().add(OkhttpTraceInterceptor.INSTANCE);
@@ -144,20 +137,16 @@ abstract class AbstractFeignJaxRsClientBuilder extends ClientBuilder {
         // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
         // with its own default otherwise. Feign does not provide a mechanism for write timeouts. We thus need to set
         // write timeouts here and connect&read timeouts on FeignBuilder.
-        client.writeTimeout(config.writeTimeout().toMilliseconds(), TimeUnit.MILLISECONDS);
+        client.writeTimeout(config.writeTimeout().toMillis(), TimeUnit.MILLISECONDS);
 
-        // Set up HTTP proxy configuration
-        if (config.proxy().isPresent()) {
-            ProxyConfiguration proxy = config.proxy().get();
-            client.proxy(proxy.toProxy());
-
-            if (proxy.credentials().isPresent()) {
-                BasicCredentials basicCreds = proxy.credentials().get();
-                final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
-                client.proxyAuthenticator((route, response) -> response.request().newBuilder()
-                        .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
-                        .build());
-            }
+        // proxy
+        client.proxySelector(config.proxy());
+        if (config.proxyCredentials().isPresent()) {
+            BasicCredentials basicCreds = config.proxyCredentials().get();
+            final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
+            client.proxyAuthenticator((route, response) -> response.request().newBuilder()
+                    .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
+                    .build());
         }
 
         // cipher setup

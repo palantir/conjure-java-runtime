@@ -46,7 +46,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public final class SerializableErrorInterceptorTest {
+public final class SerializableErrorInterceptorTest extends TestBase {
 
     private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
 
@@ -67,7 +67,8 @@ public final class SerializableErrorInterceptorTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
         when(chain.request()).thenReturn(request);
-        service = Retrofit2Client.builder().build(TestService.class, "agent", "http://localhost:" + server.getPort());
+        service = Retrofit2Client.create(TestService.class, "agent",
+                createTestConfig("http://localhost:" + server.getPort()));
     }
 
     @Test

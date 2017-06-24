@@ -18,9 +18,8 @@ package com.palantir.remoting2.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.palantir.remoting2.config.service.ServiceConfiguration;
+import com.palantir.remoting2.clients.ClientConfiguration;
 import com.palantir.remoting2.ext.refresh.Refreshable;
-import java.util.Optional;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import okhttp3.mockwebserver.MockResponse;
@@ -29,7 +28,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 
-public final class JaxRsClientConfigRefreshTest {
+public final class JaxRsClientConfigRefreshTest extends TestBase {
 
     @Rule
     public final MockWebServer server1 = new MockWebServer();
@@ -39,12 +38,10 @@ public final class JaxRsClientConfigRefreshTest {
     @Test
     public void testConfigRefresh() throws Exception {
 
-        ServiceConfiguration config1 =
-                ServiceConfiguration.of("http://localhost:" + server1.getPort(), Optional.empty());
-        ServiceConfiguration config2 =
-                ServiceConfiguration.of("http://localhost:" + server2.getPort(), Optional.empty());
+        ClientConfiguration config1 = createTestConfig("http://localhost:" + server1.getPort());
+        ClientConfiguration config2 = createTestConfig("http://localhost:" + server2.getPort());
 
-        Refreshable<ServiceConfiguration> refreshableConfig = Refreshable.of(config1);
+        Refreshable<ClientConfiguration> refreshableConfig = Refreshable.of(config1);
         Service proxy = JaxRsClient.create(Service.class, "agent", refreshableConfig);
 
         // Call 1

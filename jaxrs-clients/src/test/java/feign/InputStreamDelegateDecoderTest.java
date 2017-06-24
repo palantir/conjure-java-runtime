@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.TestBase;
 import com.palantir.remoting2.jaxrs.feignimpl.GuavaTestServer;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
@@ -36,7 +37,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public final class InputStreamDelegateDecoderTest {
+public final class InputStreamDelegateDecoderTest extends TestBase {
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
             "src/test/resources/test-server.yml");
@@ -51,8 +52,7 @@ public final class InputStreamDelegateDecoderTest {
         inputStreamDelegateDecoder = new InputStreamDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.builder()
-                .build(GuavaTestServer.TestService.class, "agent", endpointUri);
+        service = JaxRsClient.create(GuavaTestServer.TestService.class, "agent", createTestConfig(endpointUri));
     }
 
     @Test

@@ -17,8 +17,8 @@
 package com.palantir.remoting2.jaxrs.feignimpl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.palantir.remoting2.config.service.ServiceConfiguration;
-import com.palantir.remoting2.config.service.ServiceDiscoveryConfiguration;
+import com.palantir.remoting.api.config.service.ServiceConfiguration;
+import com.palantir.remoting.api.config.service.ServicesConfigBlock;
 import io.dropwizard.Configuration;
 
 /**
@@ -30,13 +30,13 @@ public final class ServiceConfigTestAppConfig extends Configuration {
     private ServiceConfiguration authConfig;
 
     @JsonProperty("serviceDiscovery")
-    private ServiceDiscoveryConfiguration serviceDiscoveryConfig;
+    private ServicesConfigBlock serviceDiscoveryConfig;
 
     public ServiceConfiguration getAuthConfiguration() {
         return this.authConfig;
     }
 
-    public ServiceDiscoveryConfiguration getServiceDiscoveryConfiguration() {
+    public ServicesConfigBlock getServiceDiscoveryConfiguration() {
         return this.serviceDiscoveryConfig;
     }
 }

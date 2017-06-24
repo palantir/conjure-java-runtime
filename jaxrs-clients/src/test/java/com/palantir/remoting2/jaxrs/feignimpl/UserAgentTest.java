@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.TestBase;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import okhttp3.mockwebserver.MockResponse;
@@ -30,7 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public final class UserAgentTest {
+public final class UserAgentTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -51,7 +52,7 @@ public final class UserAgentTest {
 
     @Test
     public void testUserAgent_default() throws InterruptedException {
-        TestService service = JaxRsClient.builder().build(TestService.class, USER_AGENT, endpointUri);
+        TestService service = JaxRsClient.create(TestService.class, USER_AGENT, createTestConfig(endpointUri));
         service.get();
 
         RecordedRequest request = server.takeRequest();
@@ -62,7 +63,7 @@ public final class UserAgentTest {
     public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()\\-#;/.,_\\s]+': !@"));
-        JaxRsClient.builder().build(TestService.class, "!@", endpointUri);
+        JaxRsClient.create(TestService.class, "!@", createTestConfig(endpointUri));
     }
 
     @Path("/")

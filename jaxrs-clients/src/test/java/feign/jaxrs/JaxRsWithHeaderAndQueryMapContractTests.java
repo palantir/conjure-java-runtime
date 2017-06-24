@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting2.jaxrs.TestBase;
 import feign.Contract;
 import feign.HeaderMap;
 import feign.MethodMetadata;
@@ -41,7 +42,7 @@ import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class JaxRsWithHeaderAndQueryMapContractTests {
+public final class JaxRsWithHeaderAndQueryMapContractTests extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -80,8 +81,8 @@ public final class JaxRsWithHeaderAndQueryMapContractTests {
 
     @Test
     public void testJaxRsInterfaceWithHeaderMap() throws Exception {
-        HeaderMapTestInterface proxy = JaxRsClient.builder()
-                .build(HeaderMapTestInterface.class, "agent", "http://localhost:" + server.getPort());
+        HeaderMapTestInterface proxy = JaxRsClient.create(HeaderMapTestInterface.class, "agent",
+                createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse());
 
         proxy.header("alice", ImmutableMap.of("fooKey", "fooValue"));
@@ -125,8 +126,8 @@ public final class JaxRsWithHeaderAndQueryMapContractTests {
 
     @Test
     public void testJaxRsInterfaceWithQueryMap() throws Exception {
-        QueryMapTestInterface proxy = JaxRsClient.builder()
-                .build(QueryMapTestInterface.class, "agent", "http://localhost:" + server.getPort());
+        QueryMapTestInterface proxy = JaxRsClient.create(QueryMapTestInterface.class, "agent",
+                createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse());
 
         proxy.query("alice", ImmutableMap.of("fooKey", "fooValue"));

@@ -1,7 +1,7 @@
 apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
-    compile project(":ssl-config")
+    compile project(":keystores")
     compile "org.bouncycastle:bcpkix-jdk15on"
 
     testCompile "junit:junit"
