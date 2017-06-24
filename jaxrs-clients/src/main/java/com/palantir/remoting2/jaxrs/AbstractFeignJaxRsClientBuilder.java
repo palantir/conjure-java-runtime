@@ -46,7 +46,7 @@ import feign.TextDelegateEncoder;
 import feign.codec.Decoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
-import feign.jaxrs.JaxRsWithHeaderAndQueryMapContract;
+import feign.jaxrs.JAXRSContract;
 import feign.okhttp.OkHttpClient;
 import feign.slf4j.Slf4jLogger;
 import java.util.List;
@@ -105,7 +105,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
         return new SlashEncodingContract(
                 new Java8OptionalAwareContract(
                         new GuavaOptionalAwareContract(
-                                new JaxRsWithHeaderAndQueryMapContract())));
+                                new JAXRSContract())));
     }
 
     private Request.Options createRequestOptions() {
