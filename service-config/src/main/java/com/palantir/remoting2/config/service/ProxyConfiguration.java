@@ -79,6 +79,7 @@ public abstract class ProxyConfiguration {
      */
     @Value.Default
     @SuppressWarnings("checkstyle:designforextension")
+    @JsonProperty("type")
     public Type type() {
         return Type.HTTP;
     }
