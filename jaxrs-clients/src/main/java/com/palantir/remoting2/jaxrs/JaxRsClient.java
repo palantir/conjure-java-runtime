@@ -16,12 +16,20 @@
 
 package com.palantir.remoting2.jaxrs;
 
+import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import com.google.common.reflect.Reflection;
 import com.palantir.remoting2.clients.ClientBuilder;
 import com.palantir.remoting2.clients.ClientConfig;
+import com.palantir.remoting2.config.service.ProxyConfiguration;
+import com.palantir.remoting2.config.service.ProxyConfiguration.Type;
 import com.palantir.remoting2.config.service.ServiceConfiguration;
+import com.palantir.remoting2.config.ssl.SslSocketFactories;
+import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import com.palantir.remoting2.ext.refresh.Refreshable;
 import com.palantir.remoting2.ext.refresh.RefreshableProxyInvocationHandler;
+import org.glassfish.jersey.CommonProperties;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.JerseyClientBuilder;
 
 /**
  * Static factory methods for producing creating JAX-RS HTTP proxies.
@@ -53,6 +61,29 @@ public final class JaxRsClient {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 serviceConfig,
                 serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration)));
+    }
+
+    public static javax.ws.rs.client.ClientBuilder jaxrsBuilder(ServiceConfiguration serviceConfig) {
+        ClientConfig config = ClientConfig.fromServiceConfig(serviceConfig);
+        JerseyClientBuilder clientBuilder = new JerseyClientBuilder();
+        clientBuilder.register(new JacksonJaxbJsonProvider(ObjectMappers.newClientObjectMapper(),
+                JacksonJaxbJsonProvider.BASIC_ANNOTATIONS));
+        clientBuilder.property(CommonProperties.FEATURE_AUTO_DISCOVERY_DISABLE, Boolean.TRUE);
+
+        if (serviceConfig.security().isPresent()) {
+            clientBuilder.sslContext(SslSocketFactories.createSslContext(serviceConfig.security().get()));
+        }
+        clientBuilder.property(ClientProperties.CONNECT_TIMEOUT, config.connectTimeout().toMilliseconds());
+        clientBuilder.property(ClientProperties.READ_TIMEOUT, config.writeTimeout().toMilliseconds());
+        if (config.proxy().isPresent() && config.proxy().get().type() == Type.HTTP) {
+            ProxyConfiguration proxy = config.proxy().get();
+            clientBuilder.property(ClientProperties.PROXY_URI, proxy.maybeHostAndPort().get());
+            if (proxy.credentials().isPresent()) {
+                clientBuilder.property(ClientProperties.PROXY_USERNAME, proxy.credentials().get().username());
+                clientBuilder.property(ClientProperties.PROXY_PASSWORD, proxy.credentials().get().password());
+            }
+        }
+        return clientBuilder;
     }
 
     /**

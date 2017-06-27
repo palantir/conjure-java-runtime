@@ -1,0 +1,8 @@
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile project(":tracing-okhttp3")
+    compile project(":http-clients-api")
+
+    compile "org.slf4j:slf4j-api"
+}

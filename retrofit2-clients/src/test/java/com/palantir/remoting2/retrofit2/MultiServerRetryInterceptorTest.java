@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.remoting2.okhttp.MultiServerRetryInterceptor;
 import java.io.IOException;
 import okhttp3.Call;
 import okhttp3.HttpUrl;

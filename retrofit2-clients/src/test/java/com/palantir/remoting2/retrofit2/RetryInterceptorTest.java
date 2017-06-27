@@ -25,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.palantir.remoting2.okhttp.RetryInterceptor;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;

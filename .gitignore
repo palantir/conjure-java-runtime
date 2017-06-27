@@ -25,3 +25,5 @@ generated_src/
 
 # Mac
 .DS_Store
+
+.gitignore

@@ -24,12 +24,10 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:ssl-config",
                 "com.palantir.remoting2:tracing",
-                "com.palantir.tokens:auth-tokens",
-                "com.squareup.retrofit2:converter-jackson"
+                "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -41,7 +39,6 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
@@ -50,7 +47,6 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
             ]
@@ -64,50 +60,27 @@
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
-            ]
-        },
-        "com.google.code.findbugs:jsr305": {
-            "locked": "3.0.0",
-            "transitive": [
-                "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:refresh-utils"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:refresh-utils",
                 "com.palantir.remoting2:ssl-config",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
-        "com.palantir.remoting2:error-handling": {
-            "project": true
-        },
         "com.palantir.remoting2:http-clients-api": {
-            "project": true,
-            "transitive": [
-                "com.palantir.remoting2:okhttp-clients"
-            ]
+            "project": true
         },
         "com.palantir.remoting2:jackson-support": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:tracing"
             ]
-        },
-        "com.palantir.remoting2:okhttp-clients": {
-            "project": true
-        },
-        "com.palantir.remoting2:refresh-utils": {
-            "project": true
         },
         "com.palantir.remoting2:service-config": {
             "project": true,
@@ -128,10 +101,7 @@
             ]
         },
         "com.palantir.remoting2:tracing-okhttp3": {
-            "project": true,
-            "transitive": [
-                "com.palantir.remoting2:okhttp-clients"
-            ]
+            "project": true
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "1.0.0",
@@ -142,8 +112,7 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
-                "com.palantir.remoting2:tracing-okhttp3",
-                "com.squareup.retrofit2:retrofit"
+                "com.palantir.remoting2:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
@@ -152,26 +121,9 @@
                 "com.squareup.okhttp3:okhttp"
             ]
         },
-        "com.squareup.retrofit2:converter-jackson": {
-            "locked": "2.1.0"
-        },
-        "com.squareup.retrofit2:retrofit": {
-            "locked": "2.1.0",
-            "transitive": [
-                "com.squareup.retrofit2:converter-jackson"
-            ]
-        },
-        "javax.ws.rs:javax.ws.rs-api": {
-            "locked": "2.0.1",
-            "transitive": [
-                "com.palantir.remoting2:error-handling"
-            ]
-        },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:okhttp-clients",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
@@ -202,12 +154,10 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:ssl-config",
                 "com.palantir.remoting2:tracing",
-                "com.palantir.tokens:auth-tokens",
-                "com.squareup.retrofit2:converter-jackson"
+                "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -219,7 +169,6 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
@@ -228,7 +177,6 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
             ]
@@ -242,50 +190,27 @@
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
-            ]
-        },
-        "com.google.code.findbugs:jsr305": {
-            "locked": "3.0.0",
-            "transitive": [
-                "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:refresh-utils"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:refresh-utils",
                 "com.palantir.remoting2:ssl-config",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
-        "com.palantir.remoting2:error-handling": {
-            "project": true
-        },
         "com.palantir.remoting2:http-clients-api": {
-            "project": true,
-            "transitive": [
-                "com.palantir.remoting2:okhttp-clients"
-            ]
+            "project": true
         },
         "com.palantir.remoting2:jackson-support": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:tracing"
             ]
-        },
-        "com.palantir.remoting2:okhttp-clients": {
-            "project": true
-        },
-        "com.palantir.remoting2:refresh-utils": {
-            "project": true
         },
         "com.palantir.remoting2:service-config": {
             "project": true,
@@ -306,10 +231,7 @@
             ]
         },
         "com.palantir.remoting2:tracing-okhttp3": {
-            "project": true,
-            "transitive": [
-                "com.palantir.remoting2:okhttp-clients"
-            ]
+            "project": true
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "1.0.0",
@@ -320,8 +242,7 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.4.1",
             "transitive": [
-                "com.palantir.remoting2:tracing-okhttp3",
-                "com.squareup.retrofit2:retrofit"
+                "com.palantir.remoting2:tracing-okhttp3"
             ]
         },
         "com.squareup.okio:okio": {
@@ -330,26 +251,9 @@
                 "com.squareup.okhttp3:okhttp"
             ]
         },
-        "com.squareup.retrofit2:converter-jackson": {
-            "locked": "2.1.0"
-        },
-        "com.squareup.retrofit2:retrofit": {
-            "locked": "2.1.0",
-            "transitive": [
-                "com.squareup.retrofit2:converter-jackson"
-            ]
-        },
-        "javax.ws.rs:javax.ws.rs-api": {
-            "locked": "2.0.1",
-            "transitive": [
-                "com.palantir.remoting2:error-handling"
-            ]
-        },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
-                "com.palantir.remoting2:okhttp-clients",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]

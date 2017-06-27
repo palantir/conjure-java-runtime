@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.retrofit2;
+package com.palantir.remoting2.okhttp;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;

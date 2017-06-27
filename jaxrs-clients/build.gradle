@@ -7,6 +7,7 @@ dependencies {
     compile project(":error-handling")
     compile project(":tracing-okhttp3")
     compile project(":http-clients-api")
+    compile project(":okhttp-clients")
     compile project(":service-config")
 
     compile "com.google.code.findbugs:jsr305"
@@ -20,6 +21,8 @@ dependencies {
     compile "javax.ws.rs:javax.ws.rs-api"
     compile "org.slf4j:slf4j-api"
     compile "com.netflix.feign:feign-slf4j"
+    compile "org.glassfish.jersey.core:jersey-client"
+    compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider"
 
     testCompile project(":jersey-servers")
     testCompile project(":retrofit2-clients")
