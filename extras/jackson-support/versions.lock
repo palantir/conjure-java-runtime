@@ -46,6 +46,9 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava"
             ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12"
         }
     },
     "runtime": {
@@ -95,6 +98,9 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava"
             ]
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12"
         }
     }
 }

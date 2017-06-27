@@ -24,6 +24,7 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import com.palantir.remoting2.ext.jackson.discoverable.DiscoverableSubtypeResolver;
 
 public final class ObjectMappers {
 
@@ -75,7 +76,9 @@ public final class ObjectMappers {
      * </ul>
      */
     public static ObjectMapper newServerObjectMapper() {
-        return withDefaultModules(new ObjectMapper())
+        ObjectMapper mapperWithDefaultModules = withDefaultModules(new ObjectMapper());
+
+        return withDiscoverableSubtypeResolver(mapperWithDefaultModules)
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
@@ -117,5 +120,9 @@ public final class ObjectMappers {
                 .disable(DeserializationFeature.WRAP_EXCEPTIONS)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
+    }
+
+    public static ObjectMapper withDiscoverableSubtypeResolver(ObjectMapper mapper) {
+        return mapper.setSubtypeResolver(new DiscoverableSubtypeResolver());
     }
 }

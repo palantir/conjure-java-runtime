@@ -89,6 +89,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
             ]
         }
@@ -183,6 +184,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
             ]
         }
