@@ -68,6 +68,12 @@ public final class Retrofit2ClientApiTest {
         assertThat(service.getJava8OptionalString(java8Optional("p"), java8Optional("q")).execute().body())
                 .isEqualTo(java8Optional("pong"));
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalString/p/?queryString=q");
+
+        server.enqueue(new MockResponse().setBody("\"pong\""));
+        assertThat(service.getGuavaOptionalString(guavaOptional("p"), guavaEmptyOptional()).execute().body())
+            .isEqualTo(guavaOptional("pong"));
+        assertThat(server.takeRequest().getPath())
+            .isEqualTo("/getGuavaOptionalString/p/");
     }
 
     @Test
@@ -140,6 +146,10 @@ public final class Retrofit2ClientApiTest {
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {
         return com.google.common.base.Optional.of(value);
+    }
+
+    private static <T> com.google.common.base.Optional<T> guavaEmptyOptional() {
+        return com.google.common.base.Optional.absent();
     }
 
     private static <T> java.util.Optional<T> java8Optional(T value) {

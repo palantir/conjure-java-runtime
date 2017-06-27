@@ -29,7 +29,7 @@ import retrofit2.http.Query;
 
 /**
  * A retrofit2 {@link Converter} that converts {@code Optional<?>} retrofit {@link Path} and {@link Query} parameters
- * into the string representation of the wrapped object, or the empty string if the optional is empty. Handles both
+ * into the string representation of the wrapped object, or null if the optional is empty. Handles both
  * {@link java.util.Optional Java8 Optional} and {@link com.google.common.base.Optional Guava Optional}.
  */
 public final class OptionalObjectToStringConverterFactory extends Converter.Factory {
@@ -46,20 +46,42 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
 
         if (pathQueryAnnotation.isPresent()) {
             TypeToken<?> typeToken = TypeToken.of(type);
-            if (typeToken.getRawType() == java.util.Optional.class) {
-                return Java8OptionalStringConverter.INSTANCE;
-            } else if (typeToken.getRawType() == java.util.OptionalInt.class) {
-                return Java8OptionalIntStringConverter.INSTANCE;
-            } else if (typeToken.getRawType() == java.util.OptionalDouble.class) {
-                return Java8OptionalDoubleStringConverter.INSTANCE;
-            } else if (typeToken.getRawType() == java.util.OptionalLong.class) {
-                return Java8OptionalLongStringConverter.INSTANCE;
-            } else if (typeToken.getRawType() == com.google.common.base.Optional.class) {
-                return GuavaOptionalStringConverter.INSTANCE;
-            }
+
+            Optional<Converter<?, String>> converter = getNullableConverterForRawType(typeToken.getRawType())
+                    .map(conv -> {
+                        if (pathQueryAnnotation.get() == Path.class) {
+                            // for paths, we want to turn null -> empty string
+                            @SuppressWarnings("unchecked")
+                            Converter<Object, String> castConverter = (Converter<Object, String>) conv;
+                            return (val) -> Optional.ofNullable(castConverter.convert(val)).orElse("");
+                        } else {
+                            return conv;
+                        }
+                    });
+
+            return converter.orElse(null);
         }
 
         return null;
+    }
+
+    /**
+     * Optionally returns a converter which returns null when the value is not present.
+     */
+    private static Optional<Converter<?, String>> getNullableConverterForRawType(Class<?> rawType) {
+        if (rawType == java.util.Optional.class) {
+            return Optional.of(Java8OptionalStringConverter.INSTANCE);
+        } else if (rawType == java.util.OptionalInt.class) {
+            return Optional.of(Java8OptionalIntStringConverter.INSTANCE);
+        } else if (rawType == java.util.OptionalDouble.class) {
+            return Optional.of(Java8OptionalDoubleStringConverter.INSTANCE);
+        } else if (rawType == java.util.OptionalLong.class) {
+            return Optional.of(Java8OptionalLongStringConverter.INSTANCE);
+        } else if (rawType == com.google.common.base.Optional.class) {
+            return Optional.of(GuavaOptionalStringConverter.INSTANCE);
+        } else {
+            return Optional.empty();
+        }
     }
 
     enum Java8OptionalStringConverter implements Converter<java.util.Optional<?>, String> {
@@ -67,7 +89,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
 
         @Override
         public String convert(java.util.Optional<?> value) throws IOException {
-            return value.map(Object::toString).orElse("");
+            return value.map(Object::toString).orElse(null);
         }
     }
 
@@ -76,7 +98,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
 
         @Override
         public String convert(java.util.OptionalInt value) throws IOException {
-            return value.isPresent() ? Integer.toString(value.getAsInt()) : "";
+            return value.isPresent() ? Integer.toString(value.getAsInt()) : null;
         }
     }
 
@@ -85,7 +107,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
 
         @Override
         public String convert(java.util.OptionalDouble value) throws IOException {
-            return value.isPresent() ? Double.toString(value.getAsDouble()) : "";
+            return value.isPresent() ? Double.toString(value.getAsDouble()) : null;
         }
     }
 
@@ -94,7 +116,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
 
         @Override
         public String convert(java.util.OptionalLong value) throws IOException {
-            return value.isPresent() ? Long.toString(value.getAsLong()) : "";
+            return value.isPresent() ? Long.toString(value.getAsLong()) : null;
         }
     }
 
@@ -103,7 +125,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
 
         @Override
         public String convert(com.google.common.base.Optional<?> value) throws IOException {
-            return value.transform(Object::toString).or("");
+            return value.transform(Object::toString).orNull();
         }
     }
 }

@@ -81,29 +81,29 @@ public final class OptionalObjectToStringConverterFactoryTest {
     @Test
     public void testUnwrapsJava8Optional() throws Exception {
         assertThat(guavaConverter.convert(guavaOptional("foo"))).isEqualTo("foo");
-        assertThat(guavaConverter.convert(guavaOptional(null))).isEqualTo("");
+        assertThat(guavaConverter.convert(guavaOptional(null))).isEqualTo(null);
         assertThat(java8Converter.convert(java8Optional("foo"))).isEqualTo("foo");
-        assertThat(java8Converter.convert(java8Optional(null))).isEqualTo("");
+        assertThat(java8Converter.convert(java8Optional(null))).isEqualTo(null);
     }
 
     @Test
     public void testUnwrapsJava8OptionalInt() throws Exception {
         assertThat(Java8OptionalIntStringConverter.INSTANCE.convert(OptionalInt.of(12345))).isEqualTo("12345");
-        assertThat(Java8OptionalIntStringConverter.INSTANCE.convert(OptionalInt.empty())).isEqualTo("");
+        assertThat(Java8OptionalIntStringConverter.INSTANCE.convert(OptionalInt.empty())).isEqualTo(null);
     }
 
     @Test
     public void testUnwrapsJava8OptionalDouble() throws Exception {
         assertThat(Java8OptionalDoubleStringConverter.INSTANCE.convert(
                 OptionalDouble.of(12345.678))).isEqualTo("12345.678");
-        assertThat(Java8OptionalDoubleStringConverter.INSTANCE.convert(OptionalDouble.empty())).isEqualTo("");
+        assertThat(Java8OptionalDoubleStringConverter.INSTANCE.convert(OptionalDouble.empty())).isEqualTo(null);
     }
 
     @Test
     public void testUnwrapsJava8OptionalLong() throws Exception {
         assertThat(Java8OptionalLongStringConverter.INSTANCE.convert(
                 OptionalLong.of(1234567890123L))).isEqualTo("1234567890123");
-        assertThat(Java8OptionalLongStringConverter.INSTANCE.convert(OptionalLong.empty())).isEqualTo("");
+        assertThat(Java8OptionalLongStringConverter.INSTANCE.convert(OptionalLong.empty())).isEqualTo(null);
     }
 
     @Test
