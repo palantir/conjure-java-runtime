@@ -16,6 +16,7 @@
 
 package com.palantir.remoting2.errors;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -23,7 +24,7 @@ import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Iterables;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -73,6 +74,37 @@ public final class SerializableErrorErrorDecoderTests {
     }
 
     @Test
+    public void testExceptionWithoutMessage() {
+        Exception exception = encodeAndDecode(new NullPointerException());
+        assertThat(exception, is(instanceOf(RemoteException.class)));
+        assertThat(exception.getMessage(), is("null"));
+    }
+
+    @Test
+    public void testCauseInException() {
+        Exception exception = encodeAndDecode(new IllegalArgumentException("msg", new IllegalStateException("msg2")));
+        assertThat(exception, is(instanceOf(RemoteException.class)));
+
+        SerializableError remoteException = ((RemoteException) exception).getRemoteException();
+        assertThat(remoteException.getMessage(), is("msg"));
+        assertThat(remoteException.getCause().getMessage(), is("msg2"));
+    }
+
+    @Test
+    public void testSuppressedInException() {
+        Exception inputException = new IllegalArgumentException("msg");
+        inputException.addSuppressed(new IllegalStateException("msg2"));
+        Exception exception = encodeAndDecode(inputException);
+
+        assertThat(exception, is(instanceOf(RemoteException.class)));
+
+        SerializableError remoteException = ((RemoteException) exception).getRemoteException();
+        assertThat(remoteException.getMessage(), is("msg"));
+        assertThat(remoteException.getSuppressed(), hasSize(1));
+        assertThat(Iterables.getOnlyElement(remoteException.getSuppressed()).getMessage(), is("msg2"));
+    }
+
+    @Test
     public void testTextPlainException() {
         Exception decode = decode(MediaType.TEXT_PLAIN, STATUS_42, "errorbody");
         assertThat(decode, is(instanceOf(RuntimeException.class)));
@@ -114,8 +146,7 @@ public final class SerializableErrorErrorDecoderTests {
 
     @Test
     public void testRemoteExceptionCarriesSerializedError() throws IOException {
-        Object error = SerializableError.of("msg", IllegalArgumentException.class,
-                Lists.newArrayList(new RuntimeException().getStackTrace()));
+        Object error = SerializableError.of(new IllegalArgumentException("msg"));
         String json = OBJECT_MAPPER.writeValueAsString(error);
         RemoteException decode = (RemoteException) decode(MediaType.APPLICATION_JSON, STATUS_42, json);
 
@@ -131,8 +162,7 @@ public final class SerializableErrorErrorDecoderTests {
 
     @Test
     public void testRemoteException_stackTraceSerializationIsCompatibleWithJavaStackTrace() throws IOException {
-        SerializableError error = SerializableError.of("msg", IllegalArgumentException.class,
-                Lists.newArrayList(new RuntimeException().getStackTrace()));
+        SerializableError error = SerializableError.of(new IllegalArgumentException("msg"));
         String json = OBJECT_MAPPER.writeValueAsString(error);
         RemoteException decode = (RemoteException) decode(MediaType.APPLICATION_JSON, STATUS_42, json);
 
@@ -156,7 +186,7 @@ public final class SerializableErrorErrorDecoderTests {
     }
 
     private static Exception encodeAndDecode(Exception exception) {
-        Object error = SerializableError.of(exception.getMessage(), exception.getClass(), null);
+        Object error = SerializableError.of(exception);
         String json;
         try {
             json = OBJECT_MAPPER.writeValueAsString(error);

@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting2.errors.SerializableError;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
@@ -71,12 +70,11 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
         try {
             final SerializableError error;
             if (includeStackTrace) {
-                StackTraceElement[] stackTrace = exception.getStackTrace();
-                error = SerializableError.of(exceptionMessage, exception.getClass(),
-                        Arrays.asList(stackTrace));
+                error = SerializableError.of(exception);
             } else {
-                error = SerializableError.of("Refer to the server logs with this errorId: "
-                        + errorId, exception.getClass());
+                error = SerializableError.of(
+                        "Refer to the server logs with this errorId: " + errorId,
+                        exception.getClass());
             }
             builder.type(MediaType.APPLICATION_JSON);
             String json = MAPPER.writeValueAsString(error);
