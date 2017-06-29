@@ -18,7 +18,6 @@ package com.palantir.remoting2.servers.jersey;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import javax.ws.rs.WebApplicationException;
@@ -29,26 +28,14 @@ public final class WebApplicationExceptionMapperTest {
 
     private static final Response.Status STATUS = Response.Status.EXPECTATION_FAILED;
 
-    private final WebApplicationExceptionMapper mapper = new WebApplicationExceptionMapper(true);
-    private final WebApplicationExceptionMapper noStacktraceMapper = new WebApplicationExceptionMapper(false);
+    private final WebApplicationExceptionMapper mapper = new WebApplicationExceptionMapper();
 
     @Test
-    public void test_withStacktrace() {
+    public void testSanity() {
         Response response = mapper.toResponse(new WebApplicationException(STATUS));
         assertThat(response.getStatus(), is(STATUS.getStatusCode()));
-        assertThat(response.getEntity().toString(), containsString(STATUS.getReasonPhrase()));
+        assertThat(response.getEntity().toString(), containsString("Refer to the server logs with this errorId:"));
         assertThat(response.getEntity().toString(),
                 containsString("javax.ws.rs.WebApplicationException"));
-        assertThat(response.getEntity().toString(), containsString("\"methodName\" : \"test"));
-    }
-
-    @Test
-    public void test_withoutStacktrace() {
-        Response response = noStacktraceMapper.toResponse(new WebApplicationException(STATUS));
-        assertThat(response.getStatus(), is(STATUS.getStatusCode()));
-        assertThat(response.getEntity().toString(), not(containsString(STATUS.getReasonPhrase())));
-        assertThat(response.getEntity().toString(),
-                containsString("javax.ws.rs.WebApplicationException"));
-        assertThat(response.getEntity().toString(), not(containsString("\"methodName\" : \"test")));
     }
 }

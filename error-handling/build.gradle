@@ -4,17 +4,13 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":extras:jackson-support")
-    compile "com.fasterxml.jackson.core:jackson-databind"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-guava"
-    compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
-    compile "com.fasterxml.jackson.module:jackson-module-afterburner"
-    compile "com.google.code.findbugs:jsr305"
     compile "com.google.guava:guava"
+    compile "com.palantir.remoting-api:errors"
     compile "javax.ws.rs:javax.ws.rs-api"
     compile "org.slf4j:slf4j-api"
 
     testCompile "io.dropwizard:dropwizard-testing"
-    testCompile "org.hamcrest:hamcrest-all"
+    testCompile "org.assertj:assertj-core"
     testCompile "junit:junit"
 
     processor "org.immutables:value"

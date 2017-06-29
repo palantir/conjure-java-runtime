@@ -116,7 +116,7 @@ public final class TracerTest {
     public static class TracingTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
+            env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
             env.jersey().register(new TracingTestResource());
         }
     }

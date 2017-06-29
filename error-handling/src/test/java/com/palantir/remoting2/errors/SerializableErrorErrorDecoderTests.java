@@ -16,17 +16,17 @@
 
 package com.palantir.remoting2.errors;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.remoting.api.errors.ErrorType;
+import com.palantir.remoting.api.errors.RemoteException;
+import com.palantir.remoting.api.errors.SerializableError;
+import com.palantir.remoting.api.errors.ServiceException;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -44,7 +44,7 @@ public final class SerializableErrorErrorDecoderTests {
 
     private static final String message = "hello";
     private static final int STATUS_42 = 42;
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newServerObjectMapper();
 
     @Test
     public void testWebApplicationExceptions() {
@@ -54,95 +54,79 @@ public final class SerializableErrorErrorDecoderTests {
     }
 
     @Test
+    public void testServiceException() throws Exception {
+        ServiceException originalException =
+                new ServiceException(ErrorType.FAILED_PRECONDITION, SafeArg.of("key", "value"));
+
+        SerializableError error = SerializableError.forException(originalException);
+        String json = OBJECT_MAPPER.writeValueAsString(error);
+        RemoteException exception = (RemoteException) decode(MediaType.APPLICATION_JSON, json, 400);
+        assertThat(exception.getCause()).isNull();
+        assertThat(exception.getStatus()).isEqualTo(400);
+        assertThat(exception.getError().errorCode()).isEqualTo(ErrorType.FAILED_PRECONDITION.code().name());
+        assertThat(exception.getError().errorName()).isEqualTo(ErrorType.FAILED_PRECONDITION.code().name());
+        assertThat(exception.getMessage())
+                .isEqualTo("RemoteException: " + ErrorType.FAILED_PRECONDITION.code().name());
+    }
+
+    @Test
     public void testNotAuthorizedException() throws Exception {
         NotAuthorizedException originalException =
                 new NotAuthorizedException(message, Response.status(Status.UNAUTHORIZED).build());
 
         RemoteException exception = (RemoteException) encodeAndDecode(originalException);
-        assertThat(exception.getCause(), is(nullValue()));
-        assertThat(exception.getStatus(), is(Status.UNAUTHORIZED.getStatusCode()));
-        assertThat(exception.getRemoteException().getErrorName(), is(NotAuthorizedException.class.getName()));
-        assertThat(exception.getMessage(), is(message));
+        assertThat(exception.getCause()).isNull();
+        assertThat(exception.getStatus()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
+        assertThat(exception.getError().errorCode()).isEqualTo(NotAuthorizedException.class.getName());
+        assertThat(exception.getError().errorName()).isEqualTo("hello");
+        assertThat(exception.getMessage())
+                .isEqualTo("RemoteException: javax.ws.rs.NotAuthorizedException (" + message + ")");
     }
 
     @Test
     public void testSpecificException() {
         Exception exception = encodeAndDecode(new IllegalArgumentException("msg"));
-        assertThat(exception, is(instanceOf(RemoteException.class)));
-        assertThat(exception.getMessage(), is("msg"));
+        assertThat(exception).isInstanceOf(RemoteException.class);
+        assertThat(exception.getMessage()).isEqualTo("RemoteException: java.lang.IllegalArgumentException (msg)");
     }
 
     @Test
     public void testTextPlainException() {
         Exception decode = decode(MediaType.TEXT_PLAIN, STATUS_42, "errorbody");
-        assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is("Error 42. Reason: reason. Body:\nerrorbody"));
+        assertThat(decode).isInstanceOf(RuntimeException.class);
+        assertThat(decode.getMessage()).isEqualTo("Error 42. Body:\nerrorbody");
     }
 
     @Test
     public void testTextHtmlException() {
         Exception decode = decode(MediaType.TEXT_HTML, STATUS_42, "errorbody");
-        assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is("Error 42. Reason: reason. Body:\nerrorbody"));
+        assertThat(decode).isInstanceOf(RuntimeException.class);
+        assertThat(decode.getMessage()).isEqualTo("Error 42. Body:\nerrorbody");
     }
 
     @Test
     public void testNonTextException() {
         Exception decode = decode(MediaType.MULTIPART_FORM_DATA, STATUS_42, "errorbody");
-        assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(),
-                is("Error 42. Reason: reason. Body:\nerrorbody"));
+        assertThat(decode).isInstanceOf(RuntimeException.class);
+        assertThat(decode.getMessage()).isEqualTo("Error 42. Body:\nerrorbody");
     }
 
     @Test
     public void testExceptionInErrorParsing() {
         Exception decode = decode(MediaType.APPLICATION_JSON, STATUS_42, "notjsonifiable!");
-        assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is(
-                "Error 42. Reason: reason. Failed to parse error body and deserialize exception: "
+        assertThat(decode).isInstanceOf(RuntimeException.class);
+        assertThat(decode.getMessage()).isEqualTo(
+                "Error 42. Failed to parse error body and deserialize exception: "
                         + "Unrecognized token 'notjsonifiable': was expecting 'null', 'true', 'false' or NaN\n "
                         + "at [Source: notjsonifiable!; line: 1, column: 15]. Body:\n"
-                        + "notjsonifiable!"));
+                        + "notjsonifiable!");
     }
 
     @Test
     public void testNullBody() {
         Exception decode = decode(MediaType.APPLICATION_JSON, STATUS_42, null);
-        assertThat(decode, is(instanceOf(RuntimeException.class)));
-        assertThat(decode.getMessage(), is("42 reason"));
-    }
-
-    @Test
-    public void testRemoteExceptionCarriesSerializedError() throws IOException {
-        Object error = SerializableError.of("msg", IllegalArgumentException.class,
-                Lists.newArrayList(new RuntimeException().getStackTrace()));
-        String json = OBJECT_MAPPER.writeValueAsString(error);
-        RemoteException decode = (RemoteException) decode(MediaType.APPLICATION_JSON, STATUS_42, json);
-
-        assertThat(decode.getMessage(), is("msg"));
-        assertThat(decode.getStatus(), is(STATUS_42));
-        assertThat(decode.getStackTrace()[0].getMethodName(), is("getException"));
-        assertThat(decode.getCause(), is(nullValue()));
-        assertThat(decode.getRemoteException().getErrorName(), is(IllegalArgumentException.class.getName()));
-        assertThat(decode.getRemoteException().getMessage(), is("msg"));
-        assertThat(decode.getRemoteException().getStackTrace().get(0).getMethodName().get(),
-                is("testRemoteExceptionCarriesSerializedError"));
-    }
-
-    @Test
-    public void testRemoteException_stackTraceSerializationIsCompatibleWithJavaStackTrace() throws IOException {
-        SerializableError error = SerializableError.of("msg", IllegalArgumentException.class,
-                Lists.newArrayList(new RuntimeException().getStackTrace()));
-        String json = OBJECT_MAPPER.writeValueAsString(error);
-        RemoteException decode = (RemoteException) decode(MediaType.APPLICATION_JSON, STATUS_42, json);
-
-        SerializableStackTraceElement element = decode.getRemoteException().getStackTrace().get(0);
-        StackTraceElement stackTrace = OBJECT_MAPPER.readValue(OBJECT_MAPPER.writeValueAsBytes(element),
-                StackTraceElement.class);
-        assertThat(stackTrace.getMethodName(), is(element.getMethodName().get()));
-        assertThat(stackTrace.getClassName(), is(element.getClassName().get()));
-        assertThat(stackTrace.getFileName(), is(element.getFileName().get()));
-        assertThat(stackTrace.getLineNumber(), is(element.getLineNumber().get()));
+        assertThat(decode).isInstanceOf(RuntimeException.class);
+        assertThat(decode.getMessage()).isEqualTo("42");
     }
 
     @Test
@@ -156,7 +140,10 @@ public final class SerializableErrorErrorDecoderTests {
     }
 
     private static Exception encodeAndDecode(Exception exception) {
-        Object error = SerializableError.of(exception.getMessage(), exception.getClass(), null);
+        Object error = SerializableError.builder()
+                .errorCode(exception.getClass().getName())
+                .errorName(exception.getMessage())
+                .build();
         String json;
         try {
             json = OBJECT_MAPPER.writeValueAsString(error);
@@ -174,13 +161,12 @@ public final class SerializableErrorErrorDecoderTests {
         return SerializableErrorToExceptionConverter.getException(
                 Collections.singletonList(contentType),
                 status,
-                "reason",
                 body == null ? null : new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
     }
 
     private static Exception decode(String contentType, @CheckForNull String body, int status) {
         return SerializableErrorToExceptionConverter.getException(Collections.singletonList(contentType), status,
-                "reason", body == null ? null : new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
+                body == null ? null : new ByteArrayInputStream(body.getBytes(StandardCharsets.UTF_8)));
     }
 
     private static void testEncodingAndDecodingWebException(Class<? extends WebApplicationException> exceptionClass,
@@ -194,10 +180,11 @@ public final class SerializableErrorErrorDecoderTests {
         }
 
         RemoteException exception = (RemoteException) encodeAndDecode(exceptionToProcess);
-        assertThat(exception.getCause(), is(nullValue()));
-        assertThat(exception.getStatus(), is(status.getStatusCode()));
-        assertThat(exception.getRemoteException().getErrorName(), is(exceptionClass.getName()));
-        assertThat(exception.getMessage(), is(message));
+        assertThat(exception.getCause()).isNull();
+        assertThat(exception.getStatus()).isEqualTo(status.getStatusCode());
+        assertThat(exception.getError().errorCode()).isEqualTo(exceptionClass.getName());
+        assertThat(exception.getMessage())
+                .isEqualTo("RemoteException: " + exceptionClass.getName() + " (" + message + ")");
     }
 
 }

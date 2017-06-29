@@ -22,7 +22,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting2.errors.RemoteException;
+import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting2.jaxrs.JaxRsClient;
 import com.palantir.remoting2.jaxrs.TestBase;
 import io.dropwizard.Configuration;
@@ -70,8 +70,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
             service.getThrowsNotFound(null);
             fail();
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("Not found"));
-            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.NotFoundException"));
+            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotFoundException"));
+            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotFoundException"));
         }
     }
 
@@ -81,8 +81,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
             service.getThrowsNotAuthorized(null);
             fail();
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("Unauthorized"));
-            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.NotAuthorizedException"));
+            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotAuthorizedException"));
+            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotAuthorizedException"));
         }
     }
 
@@ -92,8 +92,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
             service.getOptionalThrowsNotAuthorized(null);
             fail();
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("Unauthorized"));
-            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.NotAuthorizedException"));
+            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotAuthorizedException"));
+            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotAuthorizedException"));
         }
     }
 
@@ -103,8 +103,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
             service.getThrowsForbidden(null);
             fail();
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("Forbidden"));
-            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.ForbiddenException"));
+            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.ForbiddenException "));
+            assertThat(e.getError().errorCode(), is("javax.ws.rs.ForbiddenException"));
         }
     }
 
@@ -114,8 +114,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
             service.getOptionalThrowsForbidden(null);
             fail();
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("Forbidden"));
-            assertThat(e.getRemoteException().getErrorName(), is("javax.ws.rs.ForbiddenException"));
+            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.ForbiddenException "));
+            assertThat(e.getError().errorCode(), is("javax.ws.rs.ForbiddenException"));
         }
     }
 

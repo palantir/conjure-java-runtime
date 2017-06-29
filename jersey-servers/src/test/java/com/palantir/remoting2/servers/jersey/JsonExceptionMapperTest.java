@@ -36,10 +36,6 @@ public final class JsonExceptionMapperTest {
     private static final Response.Status STATUS = Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE;
 
     private static class TestJsonExceptionMapper extends JsonExceptionMapper<FooException> {
-        TestJsonExceptionMapper(boolean includeStackTrace) {
-            super(includeStackTrace);
-        }
-
         @Override
         protected StatusType getStatus(FooException exception) {
             return STATUS;
@@ -50,32 +46,28 @@ public final class JsonExceptionMapperTest {
         return new FooException(message);
     }
 
-    private final TestJsonExceptionMapper mapper = new TestJsonExceptionMapper(true);
-    private final TestJsonExceptionMapper noStacktraceMapper = new TestJsonExceptionMapper(false);
+    private final TestJsonExceptionMapper mapper = new TestJsonExceptionMapper();
 
     @Test
-    public void test_withStacktrace() {
+    public void testSanity() {
         Response response = mapper.toResponse(createException("foo"));
         assertThat(response.getStatus(), is(STATUS.getStatusCode()));
-        assertThat(response.getEntity().toString(), containsString("foo"));
         assertThat(response.getEntity().toString(),
                 containsString("JsonExceptionMapperTest$FooException"));
-        assertThat(response.getEntity().toString(), containsString("\"methodName\" : \"createException\""));
     }
 
     @Test
-    public void test_withoutStacktrace() {
-        Response response = noStacktraceMapper.toResponse(createException("foo"));
-        assertThat(response.getStatus(), is(STATUS.getStatusCode()));
-        assertThat(response.getEntity().toString(), not(containsString("foo")));
-        assertThat(response.getEntity().toString(),
-                containsString("JsonExceptionMapperTest$FooException"));
-        assertThat(response.getEntity().toString(), not(containsString("\"methodName\" : \"createException\"")));
+    public void testDoesNotPropagateExceptionMessage() {
+        Response response = mapper.toResponse(createException("foo exception message"));
+        assertThat(response.getEntity().toString(), not(containsString("foo exception message")));
     }
 
     @Test
     public void test_noMessage() {
-        Response response = new RuntimeExceptionMapper(true).toResponse(new NullPointerException());
-        assertThat(response.getEntity().toString(), containsString("test_noMessage"));
+        Response response = new RuntimeExceptionMapper().toResponse(new NullPointerException());
+        assertThat(response.getEntity().toString(),
+                containsString("\"errorCode\" : \"java.lang.NullPointerException\""));
+        assertThat(response.getEntity().toString(),
+                containsString("\"exceptionClass\" : \"java.lang.NullPointerException\""));
     }
 }

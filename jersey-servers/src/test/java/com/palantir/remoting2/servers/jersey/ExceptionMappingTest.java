@@ -20,8 +20,8 @@ package com.palantir.remoting2.servers.jersey;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting2.errors.RemoteException;
-import com.palantir.remoting2.errors.SerializableError;
+import com.palantir.remoting.api.errors.RemoteException;
+import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -100,14 +100,14 @@ public final class ExceptionMappingTest {
         assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
         SerializableError error = ObjectMappers.newClientObjectMapper().readValue(
                 response.readEntity(InputStream.class), SerializableError.class);
-        assertThat(error.getErrorName(), is("errName"));
+        assertThat(error.errorCode(), is("errorCode"));
+        assertThat(error.errorName(), is("errorName"));
     }
 
     public static class ExceptionMappersTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(
-                    HttpRemotingJerseyFeature.with(HttpRemotingJerseyFeature.StacktracePropagation.PROPAGATE));
+            env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
             env.jersey().register(new ExceptionTestResource());
         }
     }
@@ -135,7 +135,8 @@ public final class ExceptionMappingTest {
 
         @Override
         public String throwRemoteException() {
-            throw new RemoteException(SerializableError.of("msg", "errName"), REMOTE_EXCEPTION_STATUS_CODE);
+            throw new RemoteException(SerializableError.builder().errorCode("errorCode").errorName("errorName").build(),
+                    REMOTE_EXCEPTION_STATUS_CODE);
         }
     }
 

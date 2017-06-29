@@ -34,13 +34,13 @@ public final class FeignSerializableErrorErrorDecoderTests {
 
     @Test
     public void testSanity() {
-        String expectedMessage = "Error 400. Reason: reason. Body:\nerrorbody";
+        String expectedMessage = "Error 400. Body:\nerrorbody";
         checkExceptionAndMessage(getResponse(HttpHeaders.CONTENT_TYPE), expectedMessage);
     }
 
     @Test
     public void testSanityWithArbitraryHeaderCapitalization() {
-        String expectedMessage = "Error 400. Reason: reason. Body:\nerrorbody";
+        String expectedMessage = "Error 400. Body:\nerrorbody";
         checkExceptionAndMessage(getResponse("ConteNT-TYPE"), expectedMessage);
     }
 
@@ -48,14 +48,14 @@ public final class FeignSerializableErrorErrorDecoderTests {
     public void testNoContentType() {
         Response response = Response.create(400, "reason", ImmutableMap.<String, Collection<String>>of(), "errorbody",
                 feign.Util.UTF_8);
-        String expectedMessage = "Error 400. Reason: reason. Body:\nerrorbody";
+        String expectedMessage = "Error 400. Body:\nerrorbody";
         checkExceptionAndMessage(response, expectedMessage);
     }
 
     @Test
     public void testNoResponseBody() {
         Response response = Response.create(400, "reason", ImmutableMap.of(), null, 0);
-        String expectedMessage = "400 reason";
+        String expectedMessage = "400";
         checkExceptionAndMessage(response, expectedMessage);
     }
 

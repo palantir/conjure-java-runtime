@@ -23,10 +23,6 @@ import javax.ws.rs.ext.Provider;
 @Provider
 final class WebApplicationExceptionMapper extends JsonExceptionMapper<WebApplicationException> {
 
-    WebApplicationExceptionMapper(boolean includeStackTrace) {
-        super(includeStackTrace);
-    }
-
     @Override
     protected StatusType getStatus(WebApplicationException exception) {
         return exception.getResponse().getStatusInfo();

@@ -20,9 +20,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.remoting2.errors.SerializableError;
+import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
@@ -34,13 +33,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Writes out exceptions as serialized {@link SerializableError}s with {@link MediaType#APPLICATION_JSON JSON media
- * type}.
- *
+ * Writes out generic exceptions as serialized {@link SerializableError}s with {@link MediaType#APPLICATION_JSON JSON
+ * media type}. Never forwards the exception message.
+ * <p>
  * Consider this call stack, where a caller/browser calls a remote method in a server:
- *
+ * <p>
  * caller/browser -> [server]
- *
+ * <p>
  * When code in the server throws an {@link Exception} that reaches Jersey, this {@link ExceptionMapper} converts that
  * exception into an HTTP {@link Response} for return to the caller/browser.
  */
@@ -50,15 +49,8 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
 
     static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
-    private final boolean includeStackTrace;
-
-    JsonExceptionMapper(boolean includeStackTrace) {
-        this.includeStackTrace = includeStackTrace;
-    }
-
     @Override
     public final Response toResponse(T exception) {
-        String exceptionMessage = Objects.toString(exception.getMessage());
         String errorId = UUID.randomUUID().toString();
         StatusType status = this.getStatus(exception);
         if (status.getFamily().equals(Response.Status.Family.CLIENT_ERROR)) {
@@ -69,15 +61,11 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
 
         ResponseBuilder builder = Response.status(status);
         try {
-            final SerializableError error;
-            if (includeStackTrace) {
-                StackTraceElement[] stackTrace = exception.getStackTrace();
-                error = SerializableError.of(exceptionMessage, exception.getClass(),
-                        Arrays.asList(stackTrace));
-            } else {
-                error = SerializableError.of("Refer to the server logs with this errorId: "
-                        + errorId, exception.getClass());
-            }
+            SerializableError error = SerializableError.builder()
+                    .errorCode(exception.getClass().getName())
+                    .errorName("Refer to the server logs with this errorId: " + errorId)
+                    .putParameters("errorId", errorId)
+                    .build();
             builder.type(MediaType.APPLICATION_JSON);
             String json = MAPPER.writeValueAsString(error);
             builder.entity(json);
@@ -86,7 +74,7 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
             // simply write out the exception message
             builder = Response.status(status);
             builder.type(MediaType.TEXT_PLAIN);
-            builder.entity(exceptionMessage);
+            builder.entity(Objects.toString(exception.getMessage()));
         }
         return builder.build();
     }
