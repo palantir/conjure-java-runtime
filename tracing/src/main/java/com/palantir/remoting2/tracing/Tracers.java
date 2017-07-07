@@ -26,7 +26,7 @@ import org.slf4j.MDC;
 /** Utility methods for making {@link ExecutorService} and {@link Runnable} instances tracing-aware. */
 public final class Tracers {
     /** The key under which trace ids are inserted into SLF4J {@link org.slf4j.MDC MDCs}. */
-    static final String MDC_KEY = "traceId";
+    public static final String MDC_KEY = "traceId";
 
     private Tracers() {}
 
