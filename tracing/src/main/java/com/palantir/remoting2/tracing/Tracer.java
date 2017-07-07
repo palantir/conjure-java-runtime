@@ -40,7 +40,7 @@ public final class Tracer {
     private static final ThreadLocal<Trace> currentTrace = new ThreadLocal<Trace>() {
         @Override
         protected Trace initialValue() {
-            return new Trace(sampler.sample(), Tracers.randomId());
+            return createTrace(Optional.empty(), Tracers.randomId());
         }
     };
 
@@ -51,14 +51,23 @@ public final class Tracer {
     private static TraceSampler sampler = AlwaysSampler.INSTANCE;
 
     /**
+     * Creates a new trace, but does not set it as the current trace. The new trace is {@link
+     * Trace#isObservable observable} iff the given flag is true, or, iff {@code isObservable} is absent,
+     * if the {@link #setSampler configured sampler} returns true.
+     */
+    public static Trace createTrace(Optional<Boolean> isObservable, String traceId) {
+        validateId(traceId, "traceId must be non-empty: %s");
+        boolean observable = isObservable.orElse(sampler.sample());
+        return new Trace(observable, traceId);
+    }
+
+    /**
      * Initializes the current thread's trace, erasing any previously accrued open spans. The new trace is {@link
      * Trace#isObservable observable} iff the given flag is true, or, iff {@code isObservable} is absent, if the {@link
      * #setSampler configured sampler} returns true.
      */
     public static void initTrace(Optional<Boolean> isObservable, String traceId) {
-        validateId(traceId, "traceId must be non-empty: %s");
-        boolean observable = isObservable.orElse(sampler.sample());
-        currentTrace.set(new Trace(observable, traceId));
+        currentTrace.set(createTrace(isObservable, traceId));
     }
 
     /**

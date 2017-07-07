@@ -78,6 +78,20 @@ public final class Tracers {
         return new TracingAwareRunnable(delegate);
     }
 
+    public static <T> T withTrace(Trace trace, Callable<T> callable) throws Exception {
+        Trace originalTrace = Tracer.copyTrace();
+        String originalMdcTraceIdValue = MDC.get(TRACE_ID_KEY);
+
+        Tracer.setTrace(trace);
+        MDC.put(TRACE_ID_KEY, trace.getTraceId());
+        try {
+            return callable.call();
+        } finally {
+            Tracer.setTrace(originalTrace);
+            MDC.put(TRACE_ID_KEY, originalMdcTraceIdValue);
+        }
+    }
+
     /**
      * Wraps a given callable such that its execution operates with the {@link Trace thread-local Trace} of the thread
      * that constructs the {@link TracingAwareCallable} instance rather than the thread that executes the callable.
@@ -99,16 +113,7 @@ public final class Tracers {
 
         @Override
         public V call() throws Exception {
-            Trace originalTrace = Tracer.copyTrace();
-            String originalMdcTraceIdValue = MDC.get(TRACE_ID_KEY);
-            Tracer.setTrace(trace);
-            MDC.put(TRACE_ID_KEY, trace.getTraceId());
-            try {
-                return delegate.call();
-            } finally {
-                Tracer.setTrace(originalTrace);
-                MDC.put(TRACE_ID_KEY, originalMdcTraceIdValue);
-            }
+            return withTrace(trace, delegate);
         }
     }
 
