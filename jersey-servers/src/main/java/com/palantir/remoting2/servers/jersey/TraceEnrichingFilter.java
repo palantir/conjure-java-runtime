@@ -61,7 +61,7 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
 
         // Give SLF4J appenders access to the trace id
         // TODO(rfink) We should use putCloseable; when and how can we remove it though? There is no filter chain.
-        MDC.put(Tracers.MDC_KEY, Tracer.getTraceId());
+        MDC.put(Tracers.TRACE_ID_KEY, Tracer.getTraceId());
 
         // Give asynchronous downstream handlers access to the trace id
         requestContext.setProperty("com.palantir.remoting2.traceId", Tracer.getTraceId());

@@ -26,7 +26,7 @@ import org.slf4j.MDC;
 /** Utility methods for making {@link ExecutorService} and {@link Runnable} instances tracing-aware. */
 public final class Tracers {
     /** The key under which trace ids are inserted into SLF4J {@link org.slf4j.MDC MDCs}. */
-    public static final String MDC_KEY = "traceId";
+    public static final String TRACE_ID_KEY = "traceId";
 
     private Tracers() {}
 
@@ -100,14 +100,14 @@ public final class Tracers {
         @Override
         public V call() throws Exception {
             Trace originalTrace = Tracer.copyTrace();
-            String originalMdcTraceIdValue = MDC.get(MDC_KEY);
+            String originalMdcTraceIdValue = MDC.get(TRACE_ID_KEY);
             Tracer.setTrace(trace);
-            MDC.put(MDC_KEY, trace.getTraceId());
+            MDC.put(TRACE_ID_KEY, trace.getTraceId());
             try {
                 return delegate.call();
             } finally {
                 Tracer.setTrace(originalTrace);
-                MDC.put(MDC_KEY, originalMdcTraceIdValue);
+                MDC.put(TRACE_ID_KEY, originalMdcTraceIdValue);
             }
         }
     }
@@ -128,14 +128,14 @@ public final class Tracers {
         @Override
         public void run() {
             Trace originalTrace = Tracer.copyTrace();
-            String originalMdcTraceIdValue = MDC.get(MDC_KEY);
+            String originalMdcTraceIdValue = MDC.get(TRACE_ID_KEY);
             Tracer.setTrace(trace);
-            MDC.put(MDC_KEY, trace.getTraceId());
+            MDC.put(TRACE_ID_KEY, trace.getTraceId());
             try {
                 delegate.run();
             } finally {
                 Tracer.setTrace(originalTrace);
-                MDC.put(MDC_KEY, originalMdcTraceIdValue);
+                MDC.put(TRACE_ID_KEY, originalMdcTraceIdValue);
             }
         }
     }
