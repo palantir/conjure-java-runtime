@@ -147,7 +147,7 @@ public final class TracersTest {
             public Void call() throws Exception {
                 assertThat(Tracer.getTraceId()).isEqualTo(expectedTraceId);
                 assertThat(getCurrentFullTrace()).isEqualTo(expectedTrace);
-                assertThat(MDC.get(Tracers.MDC_KEY)).isEqualTo(expectedTraceId);
+                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(expectedTraceId);
                 return null;
             }
         };
@@ -161,7 +161,7 @@ public final class TracersTest {
             public void run() {
                 assertThat(Tracer.getTraceId()).isEqualTo(expectedTraceId);
                 assertThat(getCurrentFullTrace()).isEqualTo(expectedTrace);
-                assertThat(MDC.get(Tracers.MDC_KEY)).isEqualTo(expectedTraceId);
+                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(expectedTraceId);
             }
         };
     }
