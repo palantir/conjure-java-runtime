@@ -198,7 +198,7 @@ public final class Tracer {
         return currentTrace.get().getTraceId();
     }
 
-    /** Clears the current trace id and (a copy of) it. */
+    /** Clears the current trace id and returns (a copy of) it. */
     public static Trace getAndClearTrace() {
         Trace trace = currentTrace.get();
         currentTrace.remove();
