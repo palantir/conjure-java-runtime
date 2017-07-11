@@ -33,7 +33,7 @@ final class Trace {
     private final String traceId;
 
     private Trace(ArrayDeque<OpenSpan> stack, boolean isObservable, String traceId) {
-        checkArgument(traceId.isEmpty(), "traceId must be non-empty");
+        checkArgument(!traceId.isEmpty(), "traceId must be non-empty");
 
         this.stack = stack;
         this.isObservable = isObservable;
