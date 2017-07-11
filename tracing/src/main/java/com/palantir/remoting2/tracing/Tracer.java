@@ -55,7 +55,7 @@ public final class Tracer {
      * Trace#isObservable observable} iff the given flag is true, or, iff {@code isObservable} is absent,
      * if the {@link #setSampler configured sampler} returns true.
      */
-    public static Trace createTrace(Optional<Boolean> isObservable, String traceId) {
+    /*package*/ static Trace createTrace(Optional<Boolean> isObservable, String traceId) {
         validateId(traceId, "traceId must be non-empty: %s");
         boolean observable = isObservable.orElse(sampler.sample());
         return new Trace(observable, traceId);
