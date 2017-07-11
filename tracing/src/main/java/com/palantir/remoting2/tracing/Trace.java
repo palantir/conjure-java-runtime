@@ -16,6 +16,8 @@
 
 package com.palantir.remoting2.tracing;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
@@ -31,6 +33,8 @@ final class Trace {
     private final String traceId;
 
     private Trace(ArrayDeque<OpenSpan> stack, boolean isObservable, String traceId) {
+        checkArgument(traceId.isEmpty(), "traceId must be non-empty");
+
         this.stack = stack;
         this.isObservable = isObservable;
         this.traceId = traceId;
@@ -65,7 +69,7 @@ final class Trace {
     }
 
     /**
-     * The globally unique identifier for this call trace.
+     * The globally unique non-empty identifier for this call trace.
      */
     String getTraceId() {
         return traceId;

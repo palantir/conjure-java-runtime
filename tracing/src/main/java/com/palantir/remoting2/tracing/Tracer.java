@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * The singleton entry point for handling Zipkin-style traces and spans. Provides functionality for starting and
@@ -55,7 +56,7 @@ public final class Tracer {
      * Trace#isObservable observable} iff the given flag is true, or, iff {@code isObservable} is absent,
      * if the {@link #setSampler configured sampler} returns true.
      */
-    /*package*/ static Trace createTrace(Optional<Boolean> isObservable, String traceId) {
+    private static Trace createTrace(Optional<Boolean> isObservable, String traceId) {
         validateId(traceId, "traceId must be non-empty: %s");
         boolean observable = isObservable.orElse(sampler.sample());
         return new Trace(observable, traceId);
@@ -195,6 +196,13 @@ public final class Tracer {
         return currentTrace.get().getTraceId();
     }
 
+    /** Clears the current trace id and (a copy of) it. */
+    public static Trace getAndClearTrace() {
+        Trace trace = currentTrace.get();
+        currentTrace.remove();
+        return trace;
+    }
+
     /**
      * True iff the spans of this thread's trace are to be observed by {@link SpanObserver span obververs} upon
      * {@link Tracer#completeSpan span completion}.
@@ -213,6 +221,9 @@ public final class Tracer {
      */
     static void setTrace(Trace trace) {
         currentTrace.set(trace);
+
+        // Give SLF4J appenders access to the trace id
+        MDC.put(Tracers.TRACE_ID_KEY, trace.getTraceId());
     }
 
     private static String validateId(String id, String messageTemplate) {
