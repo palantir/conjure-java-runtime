@@ -17,6 +17,7 @@
 package com.palantir.remoting2.tracing;
 
 import com.google.common.base.Strings;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -78,7 +79,12 @@ public final class Tracers {
         return new TracingAwareRunnable(delegate);
     }
 
-    public static <T> T withTrace(Trace trace, Callable<T> callable) throws Exception {
+    public static <V> Callable<V> wrapWithoutTrace(Callable<V> delegate) {
+        Trace trace = Tracer.createTrace(Optional.empty(), Tracers.randomId());
+        return () -> withTrace(trace, delegate);
+    }
+
+    private static <T> T withTrace(Trace trace, Callable<T> callable) throws Exception {
         Trace originalTrace = Tracer.copyTrace();
         String originalMdcTraceIdValue = MDC.get(TRACE_ID_KEY);
 
