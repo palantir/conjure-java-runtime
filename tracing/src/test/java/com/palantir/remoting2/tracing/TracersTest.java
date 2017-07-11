@@ -17,6 +17,7 @@
 package com.palantir.remoting2.tracing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.Lists;
 import java.util.List;
@@ -154,6 +155,19 @@ public final class TracersTest {
 
         assertThat(traceIdBeforeConstruction)
             .isEqualTo(traceIdAfterCalls);
+    }
+
+    @Test
+    public void testWrapCallableWithNewTrace_traceStateRestoredWhenThrows() throws Exception {
+        String traceIdBeforeConstruction = Tracer.getTraceId();
+
+        Callable<String> wrappedCallable = Tracers.wrapWithNewTrace(() -> {
+            throw new IllegalStateException();
+        });
+
+        assertThatThrownBy(() -> wrappedCallable.call()).isInstanceOf(IllegalStateException.class);
+
+        assertThat(Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);
     }
 
     @Test
