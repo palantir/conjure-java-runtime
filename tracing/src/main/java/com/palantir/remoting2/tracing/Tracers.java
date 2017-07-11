@@ -84,25 +84,19 @@ public final class Tracers {
      * construction or any trace already set on the thread used to execute the callable. Each execution of the callable
      * will have a fresh trace.
      */
-    public static <V> Callable<V> wrapWithoutTrace(Callable<V> delegate) {
-        return () -> runWithoutTrace(delegate);
-    }
+    public static <V> Callable<V> wrapWithNewTrace(Callable<V> delegate) {
+        return () -> {
+            // clear the existing trace and keep it around for restoration when we're done
+            Trace originalTrace = Tracer.getAndClearTrace();
 
-    /**
-     * Runs the given callable after firstly clearing the current trace. The current
-     * trace is restored after running the callable.
-     */
-    private static <T> T runWithoutTrace(Callable<T> callable) throws Exception {
-        // clear the existing trace and keep it around for restoration when we're done
-        Trace originalTrace = Tracer.getAndClearTrace();
-
-        try {
-            Tracer.initTrace(Optional.empty(), Tracers.randomId());
-            return callable.call();
-        } finally {
-            // restore the trace
-            Tracer.setTrace(originalTrace);
-        }
+            try {
+                Tracer.initTrace(Optional.empty(), Tracers.randomId());
+                return delegate.call();
+            } finally {
+                // restore the trace
+                Tracer.setTrace(originalTrace);
+            }
+        };
     }
 
 

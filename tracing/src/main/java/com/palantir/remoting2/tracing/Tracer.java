@@ -41,7 +41,9 @@ public final class Tracer {
     private static final ThreadLocal<Trace> currentTrace = new ThreadLocal<Trace>() {
         @Override
         protected Trace initialValue() {
-            return createTrace(Optional.empty(), Tracers.randomId());
+            Trace trace = createTrace(Optional.empty(), Tracers.randomId());
+            MDC.put(Tracers.TRACE_ID_KEY, trace.getTraceId());
+            return trace;
         }
     };
 
@@ -68,7 +70,7 @@ public final class Tracer {
      * #setSampler configured sampler} returns true.
      */
     public static void initTrace(Optional<Boolean> isObservable, String traceId) {
-        currentTrace.set(createTrace(isObservable, traceId));
+        setTrace(createTrace(isObservable, traceId));
     }
 
     /**
@@ -200,6 +202,7 @@ public final class Tracer {
     public static Trace getAndClearTrace() {
         Trace trace = currentTrace.get();
         currentTrace.remove();
+        MDC.remove(Tracers.TRACE_ID_KEY);
         return trace;
     }
 
