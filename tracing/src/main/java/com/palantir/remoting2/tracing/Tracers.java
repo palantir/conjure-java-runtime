@@ -79,6 +79,11 @@ public final class Tracers {
         return new TracingAwareRunnable(delegate);
     }
 
+    /**
+     * Wraps the given {@link Callable} such that it creates a fresh {@link Trace tracing state} for its execution.
+     * That is, the trace during its {@link Callable#call() execution} is entirely separate from the trace at
+     * construction or any trace already set on the thread used to execute the callable.
+     */
     public static <V> Callable<V> wrapWithoutTrace(Callable<V> delegate) {
         Trace trace = Tracer.createTrace(Optional.empty(), Tracers.randomId());
         return () -> withTrace(trace, delegate);
