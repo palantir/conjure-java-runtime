@@ -131,6 +131,32 @@ public final class TracersTest {
     }
 
     @Test
+    public void testWrapCallableWithNewTrace_traceStateInsideCallableIsIsolated() throws Exception {
+        String traceIdBeforeConstruction = Tracer.getTraceId();
+
+        Callable<String> wrappedCallable = Tracers.wrapWithNewTrace(() -> {
+            return Tracer.getTraceId();
+        });
+
+        String traceIdFirstCall = wrappedCallable.call();
+        String traceIdSecondCall = wrappedCallable.call();
+
+        String traceIdAfterCalls = Tracer.getTraceId();
+
+        assertThat(traceIdFirstCall)
+            .isNotEqualTo(traceIdBeforeConstruction)
+            .isNotEqualTo(traceIdAfterCalls)
+            .isNotEqualTo(traceIdSecondCall);
+
+        assertThat(traceIdSecondCall)
+            .isNotEqualTo(traceIdBeforeConstruction)
+            .isNotEqualTo(traceIdAfterCalls);
+
+        assertThat(traceIdBeforeConstruction)
+            .isEqualTo(traceIdAfterCalls);
+    }
+
+    @Test
     public void testTraceIdGeneration() throws Exception {
         assertThat(Tracers.randomId()).hasSize(16); // fails with p=1/16 if generated string is not padded
         assertThat(Tracers.longToPaddedHex(0)).isEqualTo("0000000000000000");
