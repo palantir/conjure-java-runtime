@@ -17,11 +17,11 @@
 package com.palantir.remoting2.tracing;
 
 import com.google.common.base.Strings;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
-import org.slf4j.MDC;
 
 /** Utility methods for making {@link ExecutorService} and {@link Runnable} instances tracing-aware. */
 public final class Tracers {
@@ -79,6 +79,28 @@ public final class Tracers {
     }
 
     /**
+     * Wraps the given {@link Callable} such that it creates a fresh {@link Trace tracing state} for its execution.
+     * That is, the trace during its {@link Callable#call() execution} is entirely separate from the trace at
+     * construction or any trace already set on the thread used to execute the callable. Each execution of the callable
+     * will have a fresh trace.
+     */
+    public static <V> Callable<V> wrapWithNewTrace(Callable<V> delegate) {
+        return () -> {
+            // clear the existing trace and keep it around for restoration when we're done
+            Trace originalTrace = Tracer.getAndClearTrace();
+
+            try {
+                Tracer.initTrace(Optional.empty(), Tracers.randomId());
+                return delegate.call();
+            } finally {
+                // restore the trace
+                Tracer.setTrace(originalTrace);
+            }
+        };
+    }
+
+
+    /**
      * Wraps a given callable such that its execution operates with the {@link Trace thread-local Trace} of the thread
      * that constructs the {@link TracingAwareCallable} instance rather than the thread that executes the callable.
      * <p>
@@ -100,14 +122,11 @@ public final class Tracers {
         @Override
         public V call() throws Exception {
             Trace originalTrace = Tracer.copyTrace();
-            String originalMdcTraceIdValue = MDC.get(TRACE_ID_KEY);
             Tracer.setTrace(trace);
-            MDC.put(TRACE_ID_KEY, trace.getTraceId());
             try {
                 return delegate.call();
             } finally {
                 Tracer.setTrace(originalTrace);
-                MDC.put(TRACE_ID_KEY, originalMdcTraceIdValue);
             }
         }
     }
@@ -128,14 +147,11 @@ public final class Tracers {
         @Override
         public void run() {
             Trace originalTrace = Tracer.copyTrace();
-            String originalMdcTraceIdValue = MDC.get(TRACE_ID_KEY);
             Tracer.setTrace(trace);
-            MDC.put(TRACE_ID_KEY, trace.getTraceId());
             try {
                 delegate.run();
             } finally {
                 Tracer.setTrace(originalTrace);
-                MDC.put(TRACE_ID_KEY, originalMdcTraceIdValue);
             }
         }
     }

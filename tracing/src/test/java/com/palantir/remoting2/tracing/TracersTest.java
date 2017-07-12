@@ -17,6 +17,7 @@
 package com.palantir.remoting2.tracing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.Lists;
 import java.util.List;
@@ -128,6 +129,45 @@ public final class TracersTest {
         });
         Tracer.startSpan("after-construction");
         runnable.call();
+    }
+
+    @Test
+    public void testWrapCallableWithNewTrace_traceStateInsideCallableIsIsolated() throws Exception {
+        String traceIdBeforeConstruction = Tracer.getTraceId();
+
+        Callable<String> wrappedCallable = Tracers.wrapWithNewTrace(() -> {
+            return Tracer.getTraceId();
+        });
+
+        String traceIdFirstCall = wrappedCallable.call();
+        String traceIdSecondCall = wrappedCallable.call();
+
+        String traceIdAfterCalls = Tracer.getTraceId();
+
+        assertThat(traceIdFirstCall)
+            .isNotEqualTo(traceIdBeforeConstruction)
+            .isNotEqualTo(traceIdAfterCalls)
+            .isNotEqualTo(traceIdSecondCall);
+
+        assertThat(traceIdSecondCall)
+            .isNotEqualTo(traceIdBeforeConstruction)
+            .isNotEqualTo(traceIdAfterCalls);
+
+        assertThat(traceIdBeforeConstruction)
+            .isEqualTo(traceIdAfterCalls);
+    }
+
+    @Test
+    public void testWrapCallableWithNewTrace_traceStateRestoredWhenThrows() throws Exception {
+        String traceIdBeforeConstruction = Tracer.getTraceId();
+
+        Callable<String> wrappedCallable = Tracers.wrapWithNewTrace(() -> {
+            throw new IllegalStateException();
+        });
+
+        assertThatThrownBy(() -> wrappedCallable.call()).isInstanceOf(IllegalStateException.class);
+
+        assertThat(Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);
     }
 
     @Test

@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.MDC;
 
 public final class TracerTest {
 
@@ -176,11 +177,12 @@ public final class TracerTest {
     }
 
     @Test
-    public void testSetTraceSetsCurrentTrace() throws Exception {
+    public void testSetTraceSetsCurrentTraceAndMdcTraceIdKey() throws Exception {
         Tracer.startSpan("operation");
         Tracer.setTrace(new Trace(true, "newTraceId"));
         assertThat(Tracer.getTraceId()).isEqualTo("newTraceId");
-        assertThat(Tracer.completeSpan().isPresent()).isFalse();
+        assertThat(Tracer.completeSpan()).isEmpty();
+        assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo("newTraceId");
     }
 
     @Test
@@ -209,6 +211,16 @@ public final class TracerTest {
     @Test
     public void testCompleteSpanWithoutMetadataHasNoMetadata() {
         assertTrue(startAndCompleteSpan().getMetadata().isEmpty());
+    }
+
+    @Test
+    public void testClearAndGetTraceClearsMdc() {
+        String startTrace = Tracer.getTraceId();
+        assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(startTrace);
+
+        Trace oldTrace = Tracer.getAndClearTrace();
+        assertThat(oldTrace.getTraceId()).isEqualTo(startTrace);
+        assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isNull(); // after clearing, it's empty
     }
 
     private static Span startAndCompleteSpan() {

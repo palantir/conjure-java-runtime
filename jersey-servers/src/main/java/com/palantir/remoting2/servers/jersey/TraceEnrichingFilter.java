@@ -30,7 +30,6 @@ import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
-import org.slf4j.MDC;
 
 @Provider
 public final class TraceEnrichingFilter implements ContainerRequestFilter, ContainerResponseFilter {
@@ -58,10 +57,6 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
                 Tracer.startSpan(operation, spanId, SpanType.SERVER_INCOMING);
             }
         }
-
-        // Give SLF4J appenders access to the trace id
-        // TODO(rfink) We should use putCloseable; when and how can we remove it though? There is no filter chain.
-        MDC.put(Tracers.TRACE_ID_KEY, Tracer.getTraceId());
 
         // Give asynchronous downstream handlers access to the trace id
         requestContext.setProperty("com.palantir.remoting2.traceId", Tracer.getTraceId());
