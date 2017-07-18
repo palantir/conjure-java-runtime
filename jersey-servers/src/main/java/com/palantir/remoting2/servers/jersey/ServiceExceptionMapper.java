@@ -46,24 +46,30 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
         int httpStatus = exception.getErrorType().httpErrorCode();
         if (Response.Status.Family.familyOf(httpStatus)
                 .equals(Response.Status.Family.CLIENT_ERROR)) {
-            log.info("Error handling request {}", SafeArg.of("errorId", exception.getErrorId()), exception);
+            log.info("Error handling request {}",
+                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), exception);
         } else {
-            log.error("Error handling request {}", SafeArg.of("errorId", exception.getErrorId()), exception);
+            log.error("Error handling request {}",
+                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), exception);
         }
 
         ResponseBuilder builder = Response.status(httpStatus);
         try {
-            SerializableError error = SerializableError.forException(exception);
+            // We explicitly set the message to a more UI- and backcompat-friendly string that includes the error ID.
+            SerializableError error = SerializableError.builder()
+                    .from(SerializableError.forException(exception))
+                    .message("Refer to the server logs with this errorInstanceId: " + exception.getErrorInstanceId())
+                    .build();
             builder.type(MediaType.APPLICATION_JSON);
             String json = MAPPER.writeValueAsString(error);
             builder.entity(json);
         } catch (RuntimeException | JsonProcessingException e) {
             log.warn("Unable to translate exception to json for request {}",
-                    SafeArg.of("errorId", exception.getErrorId()), e);
+                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), e);
             // simply write out the exception message
             builder.type(MediaType.TEXT_PLAIN);
-            builder.entity("Unable to translate exception to json. Refer to the server logs with this errorId: "
-                    + exception.getErrorId());
+            builder.entity("Unable to translate exception to json. Refer to the server logs with this errorInstanceId: "
+                    + exception.getErrorInstanceId());
         }
         return builder.build();
     }

@@ -34,7 +34,8 @@ public final class WebApplicationExceptionMapperTest {
     public void testSanity() {
         Response response = mapper.toResponse(new WebApplicationException(STATUS));
         assertThat(response.getStatus(), is(STATUS.getStatusCode()));
-        assertThat(response.getEntity().toString(), containsString("Refer to the server logs with this errorId:"));
+        assertThat(response.getEntity().toString(),
+                containsString("Refer to the server logs with this errorInstanceId:"));
         assertThat(response.getEntity().toString(),
                 containsString("javax.ws.rs.WebApplicationException"));
     }

@@ -50,31 +50,32 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
 
     @Override
     public final Response toResponse(T exception) {
-        String errorId = UUID.randomUUID().toString();
+        String errorInstanceId = UUID.randomUUID().toString();
         StatusType status = this.getStatus(exception);
         if (status.getFamily().equals(Response.Status.Family.CLIENT_ERROR)) {
-            log.info("Error handling request {}", SafeArg.of("errorId", errorId), exception);
+            log.info("Error handling request {}", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         } else {
-            log.error("Error handling request {}", SafeArg.of("errorId", errorId), exception);
+            log.error("Error handling request {}", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         }
 
         ResponseBuilder builder = Response.status(status);
         try {
             SerializableError error = SerializableError.builder()
                     .errorCode(exception.getClass().getName())
-                    .errorName("Refer to the server logs with this errorId: " + errorId)
-                    .putParameters("errorId", errorId)
+                    .errorName("Refer to the server logs with this errorInstanceId: " + errorInstanceId)
+                    .errorInstanceId(errorInstanceId)
                     .build();
             builder.type(MediaType.APPLICATION_JSON);
             String json = MAPPER.writeValueAsString(error);
             builder.entity(json);
         } catch (RuntimeException | JsonProcessingException e) {
-            log.warn("Unable to translate exception to json for request {}", SafeArg.of("errorId", errorId), e);
+            log.warn("Unable to translate exception to json for request {}",
+                    SafeArg.of("errorInstanceId", errorInstanceId), e);
             // simply write out the exception message
             builder = Response.status(status);
             builder.type(MediaType.TEXT_PLAIN);
-            builder.entity("Unable to translate exception to json. Refer to the server logs with this errorId: "
-                    + errorId);
+            builder.entity("Unable to translate exception to json. Refer to the server logs with this errorInstanceId: "
+                    + errorInstanceId);
         }
         return builder.build();
     }

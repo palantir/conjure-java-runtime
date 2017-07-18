@@ -71,7 +71,7 @@
             ]
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "0.0.5"
+            "locked": "0.0.8"
         },
         "com.palantir.remoting2:jackson-support": {
             "project": true
@@ -164,7 +164,7 @@
             ]
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "0.0.5"
+            "locked": "0.0.8"
         },
         "com.palantir.remoting2:jackson-support": {
             "project": true
