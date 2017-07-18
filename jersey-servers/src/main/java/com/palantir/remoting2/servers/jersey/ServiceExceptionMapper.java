@@ -23,7 +23,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting.api.errors.ServiceException;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
-import java.util.Objects;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -63,7 +62,8 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
                     SafeArg.of("errorId", exception.getErrorId()), e);
             // simply write out the exception message
             builder.type(MediaType.TEXT_PLAIN);
-            builder.entity(Objects.toString(exception.getMessage()));
+            builder.entity("Unable to translate exception to json. Refer to the server logs with this errorId: "
+                    + exception.getErrorId());
         }
         return builder.build();
     }
