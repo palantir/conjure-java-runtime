@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
-import java.util.Objects;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -74,7 +73,8 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
             // simply write out the exception message
             builder = Response.status(status);
             builder.type(MediaType.TEXT_PLAIN);
-            builder.entity(Objects.toString(exception.getMessage()));
+            builder.entity("Unable to translate exception to json. Refer to the server logs with this errorId: "
+                    + errorId);
         }
         return builder.build();
     }

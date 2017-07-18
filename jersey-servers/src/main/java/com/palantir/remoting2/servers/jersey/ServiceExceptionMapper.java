@@ -39,8 +39,8 @@ import org.slf4j.LoggerFactory;
 final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceExceptionMapper.class);
-
-    static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    private static final ObjectMapper MAPPER =
+            ObjectMappers.newServerObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     @Override
     public Response toResponse(ServiceException exception) {
@@ -62,7 +62,6 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
             log.warn("Unable to translate exception to json for request {}",
                     SafeArg.of("errorId", exception.getErrorId()), e);
             // simply write out the exception message
-            builder = Response.status(httpStatus);
             builder.type(MediaType.TEXT_PLAIN);
             builder.entity(Objects.toString(exception.getMessage()));
         }

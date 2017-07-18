@@ -37,6 +37,7 @@ public enum HttpRemotingJerseyFeature implements Feature {
         context.register(new RuntimeExceptionMapper());
         context.register(new WebApplicationExceptionMapper());
         context.register(new RemoteExceptionMapper());
+        context.register(new ServiceExceptionMapper());
 
         // Cbor handling
         context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));

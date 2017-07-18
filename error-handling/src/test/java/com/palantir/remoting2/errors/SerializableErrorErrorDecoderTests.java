@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.ErrorType;
 import com.palantir.remoting.api.errors.RemoteException;
@@ -44,7 +45,8 @@ public final class SerializableErrorErrorDecoderTests {
 
     private static final String message = "hello";
     private static final int STATUS_42 = 42;
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newServerObjectMapper();
+    private static final ObjectMapper CLIENT_MAPPER = ObjectMappers.newClientObjectMapper();
+    private static final ObjectMapper SERVER_MAPPER = ObjectMappers.newServerObjectMapper();
 
     @Test
     public void testWebApplicationExceptions() {
@@ -59,14 +61,14 @@ public final class SerializableErrorErrorDecoderTests {
                 new ServiceException(ErrorType.FAILED_PRECONDITION, SafeArg.of("key", "value"));
 
         SerializableError error = SerializableError.forException(originalException);
-        String json = OBJECT_MAPPER.writeValueAsString(error);
+        String json = SERVER_MAPPER.writeValueAsString(error);
         RemoteException exception = (RemoteException) decode(MediaType.APPLICATION_JSON, json, 400);
         assertThat(exception.getCause()).isNull();
         assertThat(exception.getStatus()).isEqualTo(400);
         assertThat(exception.getError().errorCode()).isEqualTo(ErrorType.FAILED_PRECONDITION.code().name());
-        assertThat(exception.getError().errorName()).isEqualTo(ErrorType.FAILED_PRECONDITION.code().name());
-        assertThat(exception.getMessage())
-                .isEqualTo("RemoteException: " + ErrorType.FAILED_PRECONDITION.code().name());
+        assertThat(exception.getError().errorName()).isEqualTo(ErrorType.FAILED_PRECONDITION.name());
+        assertThat(exception.getMessage()).isEqualTo("RemoteException: " + ErrorType.FAILED_PRECONDITION.code().name()
+                + " (" + ErrorType.FAILED_PRECONDITION.name() + ")");
     }
 
     @Test
@@ -78,7 +80,7 @@ public final class SerializableErrorErrorDecoderTests {
         assertThat(exception.getCause()).isNull();
         assertThat(exception.getStatus()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
         assertThat(exception.getError().errorCode()).isEqualTo(NotAuthorizedException.class.getName());
-        assertThat(exception.getError().errorName()).isEqualTo("hello");
+        assertThat(exception.getError().errorName()).isEqualTo(message);
         assertThat(exception.getMessage())
                 .isEqualTo("RemoteException: javax.ws.rs.NotAuthorizedException (" + message + ")");
     }
@@ -136,17 +138,18 @@ public final class SerializableErrorErrorDecoderTests {
         String error = "{\"message\": \"message\", \"exceptionClass\": \"exceptionClass\","
                 + "\"stackTrace\": [" + stackTrace + "], \"noSuchProperty\": \"foo\"}";
 
-        OBJECT_MAPPER.readValue(error, SerializableError.class);
+        CLIENT_MAPPER.readValue(error, SerializableError.class);
     }
 
     private static Exception encodeAndDecode(Exception exception) {
+        Preconditions.checkArgument(!(exception instanceof ServiceException), "Use SerializableError#forException");
         Object error = SerializableError.builder()
                 .errorCode(exception.getClass().getName())
                 .errorName(exception.getMessage())
                 .build();
         String json;
         try {
-            json = OBJECT_MAPPER.writeValueAsString(error);
+            json = SERVER_MAPPER.writeValueAsString(error);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
