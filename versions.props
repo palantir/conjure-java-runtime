@@ -20,6 +20,7 @@ javax.ws.rs:javax.ws.rs-api = 2.0.1
 junit:junit = 4.12
 org.assertj:assertj-core = 3.6.1
 org.bouncycastle:bcpkix-jdk15on = 1.54
+org.derive4j:* = 0.12.3
 org.glassfish.jersey.*:* = 2.22.2
 org.hamcrest:hamcrest-* = 1.3
 org.immutables:value = 2.3.10
