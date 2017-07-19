@@ -41,7 +41,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.junit.Test;
 
-public final class SerializableErrorErrorDecoderTests {
+public final class SerializableErrorToExceptionConverterTests {
 
     private static final String message = "hello";
     private static final int STATUS_42 = 42;

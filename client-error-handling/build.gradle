@@ -1,0 +1,14 @@
+apply plugin: "org.inferred.processors"
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile "com.palantir.remoting-api:errors"
+    compile "org.derive4j:derive4j-annotation"
+
+    testCompile "junit:junit"
+    testCompile "org.assertj:assertj-core"
+    testCompile "org.mockito:mockito-core"
+
+    processor "org.immutables:value"
+    processor "org.derive4j:derive4j:0.12.3"
+}

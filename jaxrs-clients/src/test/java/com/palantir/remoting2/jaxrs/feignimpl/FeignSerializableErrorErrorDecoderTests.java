@@ -29,7 +29,7 @@ import javax.ws.rs.core.MediaType;
 import org.junit.Test;
 
 public final class FeignSerializableErrorErrorDecoderTests {
-    // most tests are in SerializableErrorErrorDecoderTests
+    // most tests are in SerializableErrorToExceptionConverterTests
     private static final FeignSerializableErrorErrorDecoder decoder = FeignSerializableErrorErrorDecoder.INSTANCE;
 
     @Test

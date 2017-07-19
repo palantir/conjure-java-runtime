@@ -22,6 +22,7 @@ dependencies {
 
     testCompile project(":jersey-servers")
     testCompile project(":retrofit2-clients")
+    testCompile project(":client-error-handling")
     testCompile "com.squareup.okhttp3:mockwebserver"
     testCompile "io.dropwizard:dropwizard-testing"
     testCompile "junit:junit"

@@ -27,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * SerializableError#forException}). Also see {@link JsonExceptionMapper} for more information on the interplay of
  * Jersey and exception mappers.
  */
+@Provider
 final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceExceptionMapper.class);

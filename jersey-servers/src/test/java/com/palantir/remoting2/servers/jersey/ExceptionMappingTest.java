@@ -123,7 +123,7 @@ public final class ExceptionMappingTest {
     @Test
     public void testServiceException() throws NoSuchMethodException, SecurityException, IOException {
         Response response = target.path("throw-service-exception").request().get();
-        assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
+        assertThat(response.getStatus(), is(ErrorType.INVALID_ARGUMENT.httpErrorCode()));
         String body =
                 new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
 
