@@ -72,7 +72,7 @@ public abstract class OpenSpan {
      */
     public static Builder builder() {
         return new Builder()
-                // TODO(rfink) Use direct access to system microseconds when moving to Java8 / Java9
+                // TODO(rfink): Use direct access to system microseconds when moving to Java8 / Java9
                 .startTimeMicroSeconds(System.currentTimeMillis() * 1000)
                 .startClockNanoSeconds(System.nanoTime());
     }

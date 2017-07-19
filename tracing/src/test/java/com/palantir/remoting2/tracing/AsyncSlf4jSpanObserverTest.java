@@ -23,10 +23,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+// CHECKSTYLE:OFF
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
+// CHECKSTYLE:ON
 import com.google.common.collect.ImmutableMap;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
