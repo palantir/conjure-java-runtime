@@ -122,6 +122,7 @@ public final class OptionalObjectToStringConverterFactoryTest {
         return java.util.Optional.ofNullable(value);
     }
 
+    @SuppressWarnings("unchecked")
     private Annotation[] createAnnotations(Class... clazz) {
         Annotation[] annotations = new Annotation[clazz.length];
         for (int i = 0; i < clazz.length; ++i) {

@@ -22,31 +22,22 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 
 
-public final class HttpRemotingJerseyFeature implements Feature {
-    public static final HttpRemotingJerseyFeature DEFAULT = with(StacktracePropagation.DO_NOT_PROPAGATE);
-    private final boolean propagateStackTraces;
-
-    private HttpRemotingJerseyFeature(StacktracePropagation stacktracePropagation) {
-        this.propagateStackTraces = stacktracePropagation == StacktracePropagation.PROPAGATE;
-    }
-
-    public static HttpRemotingJerseyFeature with(StacktracePropagation stacktracePropagation) {
-        return new HttpRemotingJerseyFeature(stacktracePropagation);
-    }
+public enum HttpRemotingJerseyFeature implements Feature {
+    INSTANCE;
 
     /**
-     * Server-side stacktraces are serialized and transferred to the client iff {@code serializeStacktrace} is {@code
-     * true}. Configures a Jersey server w.r.t. http-remoting conventions: registers tracer filters and
+     * Configures a Jersey server w.r.t. http-remoting conventions: registers tracer filters and
      * exception mappers.
      */
     @Override
     public boolean configure(FeatureContext context) {
         // Exception mappers
-        context.register(new IllegalArgumentExceptionMapper(propagateStackTraces));
+        context.register(new IllegalArgumentExceptionMapper());
         context.register(new NoContentExceptionMapper());
-        context.register(new RuntimeExceptionMapper(propagateStackTraces));
-        context.register(new WebApplicationExceptionMapper(propagateStackTraces));
+        context.register(new RuntimeExceptionMapper());
+        context.register(new WebApplicationExceptionMapper());
         context.register(new RemoteExceptionMapper());
+        context.register(new ServiceExceptionMapper());
 
         // Cbor handling
         context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));
@@ -71,19 +62,5 @@ public final class HttpRemotingJerseyFeature implements Feature {
         context.register(new TraceEnrichingFilter());
 
         return true;
-    }
-
-    public enum StacktracePropagation {
-        /**
-         * The inverse of {@link #DO_NOT_PROPAGATE}. Note that this may leak sensitive information from servers to
-         * clients.
-         */
-        PROPAGATE,
-
-        /**
-         * Configures exception serializers to not include exception stacktraces in {@link
-         * com.palantir.remoting2.errors.SerializableError serialized errors}. This is the recommended setting.
-         */
-        DO_NOT_PROPAGATE
     }
 }

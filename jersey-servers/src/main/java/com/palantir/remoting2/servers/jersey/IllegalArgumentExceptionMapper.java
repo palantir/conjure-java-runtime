@@ -23,10 +23,6 @@ import javax.ws.rs.ext.Provider;
 @Provider
 final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalArgumentException> {
 
-    IllegalArgumentExceptionMapper(boolean includeStackTrace) {
-        super(includeStackTrace);
-    }
-
     @Override
     protected StatusType getStatus(IllegalArgumentException exception) {
         return Status.BAD_REQUEST;

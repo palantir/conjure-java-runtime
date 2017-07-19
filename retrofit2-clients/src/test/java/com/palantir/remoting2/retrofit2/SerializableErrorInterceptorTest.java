@@ -25,11 +25,10 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import com.palantir.remoting2.errors.RemoteException;
-import com.palantir.remoting2.errors.SerializableError;
+import com.palantir.remoting.api.errors.RemoteException;
+import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.io.IOException;
-import javax.xml.ws.WebServiceException;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
@@ -111,13 +110,13 @@ public final class SerializableErrorInterceptorTest extends TestBase {
         server.enqueue(mockResponse);
 
         expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Error 400. Reason: Client Error. Body:\nerrorbody");
+        expectedException.expectMessage("Error 400. Body:\nerrorbody");
         service.get().execute();
     }
 
     @Test
     public void testDeserialization_withContentTypeJson() throws InterruptedException, IOException {
-        SerializableError error = SerializableError.of("error message", WebServiceException.class);
+        SerializableError error = SerializableError.builder().errorCode("error code").errorName("error name").build();
         MockResponse mockResponse = new MockResponse()
                 .setBody(MAPPER.writeValueAsString(error))
                 .addHeader("Content-Type", "application/json")
@@ -125,7 +124,7 @@ public final class SerializableErrorInterceptorTest extends TestBase {
         server.enqueue(mockResponse);
 
         expectedException.expect(RemoteException.class);
-        expectedException.expectMessage("error message");
+        expectedException.expectMessage("error name");
         service.get().execute();
     }
 

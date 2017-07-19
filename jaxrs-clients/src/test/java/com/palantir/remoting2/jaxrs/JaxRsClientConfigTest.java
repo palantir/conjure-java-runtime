@@ -70,7 +70,7 @@ public final class JaxRsClientConfigTest extends TestBase {
     public static final class TestEchoServer extends Application<Configuration> {
         @Override
         public void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
+            env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
             env.jersey().register(new TestEchoResource());
         }
 

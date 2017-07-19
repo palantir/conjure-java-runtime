@@ -22,13 +22,11 @@ import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
-import com.palantir.remoting2.errors.RemoteException;
-import com.palantir.remoting2.errors.SerializableError;
+import com.palantir.remoting.api.errors.RemoteException;
+import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -115,11 +113,10 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void makeFutureRequestError() throws JsonProcessingException {
-        NoSuchElementException exception = new NoSuchElementException("msg");
-        SerializableError error = SerializableError.of(
-                exception.getMessage(),
-                exception.getClass(),
-                Arrays.asList(exception.getStackTrace()));
+        SerializableError error = SerializableError.builder()
+                .errorCode("errorCode")
+                .errorName("errorName")
+                .build();
 
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
@@ -133,7 +130,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
             fail();
         } catch (CompletionException e) {
             assertThat(e.getCause()).isInstanceOf(RemoteException.class);
-            assertThat(((RemoteException) e.getCause()).getRemoteException()).isEqualTo(error);
+            assertThat(((RemoteException) e.getCause()).getError()).isEqualTo(error);
         }
     }
 

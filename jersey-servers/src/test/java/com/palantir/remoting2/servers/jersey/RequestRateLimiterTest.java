@@ -18,7 +18,6 @@ package com.palantir.remoting2.servers.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +33,8 @@ import javax.ws.rs.core.Response;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public final class RequestRateLimiterTest {
 
@@ -41,17 +42,20 @@ public final class RequestRateLimiterTest {
     private static final long ALLOWED_DELAY = 1_000 / REQUESTS_PER_SECOND;
     private static final long NO_DELAY = 0;
 
+    @Mock
     private Function<ContainerRequestContext, Optional<String>> featureFunc;
     private ArgumentCaptor<Response> responseCaptor = ArgumentCaptor.forClass(Response.class);
+
+    @Mock
     private ContainerRequestContext request1;
+    @Mock
     private ContainerRequestContext request2;
+
     private RequestRateLimiter rateLimiter;
 
     @Before
     public void before() throws InterruptedException {
-        request1 = mock(ContainerRequestContext.class);
-        request2 = mock(ContainerRequestContext.class);
-        featureFunc = mock(Function.class);
+        MockitoAnnotations.initMocks(this);
         rateLimiter = RequestRateLimiter.create(REQUESTS_PER_SECOND, featureFunc);
 
         when(featureFunc.apply(request1)).thenReturn(Optional.of("1"));

@@ -45,7 +45,6 @@ public enum FeignSerializableErrorErrorDecoder implements ErrorDecoder {
         } catch (IOException e) {
             return new RuntimeException("Cannot get input stream from response: " + e.getMessage(), e);
         }
-        return SerializableErrorToExceptionConverter.getException(contentTypes, response.status(), response.reason(),
-                body);
+        return SerializableErrorToExceptionConverter.getException(contentTypes, response.status(), body);
     }
 }

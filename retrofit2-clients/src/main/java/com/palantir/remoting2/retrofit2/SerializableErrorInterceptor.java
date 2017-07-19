@@ -36,8 +36,7 @@ public enum SerializableErrorInterceptor implements Interceptor {
         if (!response.isSuccessful()) {
             Collection<String> contentTypes = response.headers("Content-Type");
             InputStream body = response.body().byteStream();
-            throw SerializableErrorToExceptionConverter.getException(
-                    contentTypes, response.code(), response.message(), body);
+            throw SerializableErrorToExceptionConverter.getException(contentTypes, response.code(), body);
         }
 
         return response;

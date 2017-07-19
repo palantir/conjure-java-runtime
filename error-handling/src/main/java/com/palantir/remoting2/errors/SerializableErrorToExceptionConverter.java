@@ -18,6 +18,8 @@ package com.palantir.remoting2.errors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
+import com.palantir.remoting.api.errors.RemoteException;
+import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,10 +47,10 @@ public final class SerializableErrorToExceptionConverter {
 
     private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
 
-    public static RuntimeException getException(Collection<String> contentTypes, int status, String reason,
+    public static RuntimeException getException(Collection<String> contentTypes, int status,
             @CheckForNull InputStream body) {
         if (body == null) {
-            return new RuntimeException(String.format("%s %s", status, reason));
+            return new RuntimeException(Integer.toString(status));
         }
 
         String bodyAsString = readBodyAsString(body);
@@ -58,13 +60,13 @@ public final class SerializableErrorToExceptionConverter {
                 return new RemoteException(serializableError, status);
             } catch (Exception e) {
                 String message = String.format(
-                        "Error %s. Reason: %s. Failed to parse error body and deserialize exception: %s. Body:%n%s",
-                        status, reason, e.getMessage(), bodyAsString);
+                        "Error %s. Failed to parse error body and deserialize exception: %s. Body:%n%s",
+                        status, e.getMessage(), bodyAsString);
                 log.warn("Failed to deserialize exception: {}", message, e);
                 return new RuntimeException(message);
             }
         } else {
-            return new RuntimeException(String.format("Error %s. Reason: %s. Body:%n%s", status, reason, bodyAsString));
+            return new RuntimeException(String.format("Error %s. Body:%n%s", status, bodyAsString));
         }
     }
 

@@ -29,8 +29,8 @@
                 "com.fasterxml.jackson.module:jackson-module-paranamer",
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11",
                 "com.netflix.feign:feign-jackson",
+                "com.palantir.remoting-api:errors",
                 "com.palantir.remoting-api:ssl-config",
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:keystores",
                 "com.palantir.remoting2:tracing",
@@ -46,7 +46,6 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
             ]
@@ -54,7 +53,6 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens2:auth-tokens"
@@ -69,7 +67,6 @@
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
             ]
@@ -86,7 +83,7 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting-api:errors",
                 "com.palantir.remoting2:jaxrs-clients",
                 "com.palantir.remoting2:refresh-utils"
             ]
@@ -136,14 +133,20 @@
                 "com.palantir.remoting2:jaxrs-clients"
             ]
         },
+        "com.palantir.remoting-api:errors": {
+            "locked": "0.0.8",
+            "transitive": [
+                "com.palantir.remoting2:error-handling"
+            ]
+        },
         "com.palantir.remoting-api:service-config": {
-            "locked": "0.0.3",
+            "locked": "0.0.8",
             "transitive": [
                 "com.palantir.remoting2:http-clients"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "0.0.3",
+            "locked": "0.0.8",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting2:keystores"
@@ -197,6 +200,12 @@
                 "com.palantir.remoting2:jaxrs-clients"
             ]
         },
+        "com.palantir.safe-logging:safe-logging": {
+            "locked": "0.1.3",
+            "transitive": [
+                "com.palantir.remoting-api:errors"
+            ]
+        },
         "com.palantir.tokens2:auth-tokens": {
             "locked": "2.0.1",
             "transitive": [
@@ -225,6 +234,7 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
+                "com.palantir.remoting-api:errors",
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jaxrs-clients"
             ]
@@ -289,8 +299,8 @@
                 "com.fasterxml.jackson.module:jackson-module-paranamer",
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11",
                 "com.netflix.feign:feign-jackson",
+                "com.palantir.remoting-api:errors",
                 "com.palantir.remoting-api:ssl-config",
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:keystores",
                 "com.palantir.remoting2:tracing",
@@ -306,7 +316,6 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
             ]
@@ -314,7 +323,6 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing",
                 "com.palantir.tokens2:auth-tokens"
@@ -329,7 +337,6 @@
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jackson-support",
                 "com.palantir.remoting2:tracing"
             ]
@@ -346,7 +353,7 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting2:error-handling",
+                "com.palantir.remoting-api:errors",
                 "com.palantir.remoting2:jaxrs-clients",
                 "com.palantir.remoting2:refresh-utils"
             ]
@@ -396,14 +403,20 @@
                 "com.palantir.remoting2:jaxrs-clients"
             ]
         },
+        "com.palantir.remoting-api:errors": {
+            "locked": "0.0.8",
+            "transitive": [
+                "com.palantir.remoting2:error-handling"
+            ]
+        },
         "com.palantir.remoting-api:service-config": {
-            "locked": "0.0.3",
+            "locked": "0.0.8",
             "transitive": [
                 "com.palantir.remoting2:http-clients"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "0.0.3",
+            "locked": "0.0.8",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting2:keystores"
@@ -457,6 +470,12 @@
                 "com.palantir.remoting2:jaxrs-clients"
             ]
         },
+        "com.palantir.safe-logging:safe-logging": {
+            "locked": "0.1.3",
+            "transitive": [
+                "com.palantir.remoting-api:errors"
+            ]
+        },
         "com.palantir.tokens2:auth-tokens": {
             "locked": "2.0.1",
             "transitive": [
@@ -485,6 +504,7 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
+                "com.palantir.remoting-api:errors",
                 "com.palantir.remoting2:error-handling",
                 "com.palantir.remoting2:jaxrs-clients"
             ]

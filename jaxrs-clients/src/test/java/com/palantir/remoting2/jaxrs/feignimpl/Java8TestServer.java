@@ -44,8 +44,7 @@ import javax.ws.rs.core.MediaType;
 public class Java8TestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
-        env.jersey().register(
-                HttpRemotingJerseyFeature.with(HttpRemotingJerseyFeature.StacktracePropagation.PROPAGATE));
+        env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
         env.jersey().register(new TestResource());
         env.getObjectMapper().registerModule(new Jdk8Module());
     }

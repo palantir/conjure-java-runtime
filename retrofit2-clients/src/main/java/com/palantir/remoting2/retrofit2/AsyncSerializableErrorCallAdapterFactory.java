@@ -95,7 +95,6 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
                         future.completeExceptionally(SerializableErrorToExceptionConverter.getException(
                                 contentTypes,
                                 response.code(),
-                                response.message(),
                                 body));
                     }
                 }

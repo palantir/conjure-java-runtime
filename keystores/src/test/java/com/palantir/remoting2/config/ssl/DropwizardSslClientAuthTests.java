@@ -30,6 +30,7 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.ConfigOverride;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -97,9 +98,10 @@ public final class DropwizardSslClientAuthTests {
 
     private static TestEchoService createTestService(SslConfiguration sslConfig) {
         SSLSocketFactory factory = SslSocketFactories.createSslSocketFactory(sslConfig);
+        X509TrustManager trustManager = SslSocketFactories.createX509TrustManager(sslConfig);
 
         String endpointUri = "https://localhost:" + APP.getLocalPort();
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().sslSocketFactory(factory).build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder().sslSocketFactory(factory, trustManager).build();
         return Feign.builder()
                 .client(new feign.okhttp.OkHttpClient(okHttpClient))
                 .contract(new JAXRSContract())
