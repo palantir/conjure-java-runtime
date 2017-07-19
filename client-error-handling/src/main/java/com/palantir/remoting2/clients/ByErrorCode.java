@@ -19,6 +19,10 @@ package com.palantir.remoting2.clients;
 import com.palantir.remoting.api.errors.RemoteException;
 import org.derive4j.Data;
 
+/**
+ * Handles {@link RemoteException}s based on the {@link com.palantir.remoting.api.errors.ErrorType} produced by a
+ * server. Use in conjunction with {@link RemoteExceptions#handleByErrorCode}.
+ */
 @Data
 public abstract class ByErrorCode {
 
