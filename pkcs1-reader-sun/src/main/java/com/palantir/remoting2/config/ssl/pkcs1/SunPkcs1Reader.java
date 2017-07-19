@@ -19,10 +19,8 @@ package com.palantir.remoting2.config.ssl.pkcs1;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.spec.RSAPrivateKeySpec;
-// CHECKSTYLE:OFF
 import sun.security.util.DerInputStream;
 import sun.security.util.DerValue;
-// CHECKSTYLE:ON
 
 public final class SunPkcs1Reader implements Pkcs1Reader {
 

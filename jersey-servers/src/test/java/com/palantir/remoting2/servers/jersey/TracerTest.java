@@ -21,11 +21,13 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
+// CHECKSTYLE:OFF
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
+// CHECKSTYLE:ON
 import com.palantir.remoting2.tracing.TraceHttpHeaders;
 import com.palantir.remoting2.tracing.Tracer;
 import io.dropwizard.Application;

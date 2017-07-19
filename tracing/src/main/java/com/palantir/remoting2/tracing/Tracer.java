@@ -230,7 +230,7 @@ public final class Tracer {
     }
 
     private static String validateId(String id, String messageTemplate) {
-        // TODO(rfink) Should we check the format?
+        // TODO(rfink): Should we check the format?
         Preconditions.checkArgument(id != null && !id.isEmpty(), messageTemplate, id);
         return id;
     }
