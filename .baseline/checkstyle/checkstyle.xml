@@ -80,6 +80,7 @@
             <message key="name.invalidPattern" value="Class type name ''{0}'' must match pattern ''{1}''."/>
         </module>
         <module name="CovariantEquals"/> <!-- Java Coding Guidelines: Override ``Object#equals`` consistently -->
+        <module name="DefaultComesLast"/> <!-- Java Style Guide: The default case is present -->
         <module name="EmptyBlock"> <!-- Java Style Guide: Empty blocks: documented -->
             <property name="option" value="TEXT"/>
         </module>
