@@ -43,7 +43,7 @@ public final class AuthHeaderParamConverterProvider implements ParamConverterPro
             try {
                 return AuthHeader.valueOf(value);
             } catch (IllegalArgumentException e) {
-                // rethrow as forbidden with 'Bearer' challenge
+                // rethrow as not authorized with 'Bearer' challenge
                 throw new NotAuthorizedException(e, "Bearer");
             }
         }
