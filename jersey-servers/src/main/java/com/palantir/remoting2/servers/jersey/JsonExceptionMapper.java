@@ -25,6 +25,8 @@ import com.palantir.remoting2.ext.jackson.ObjectMappers;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -88,6 +90,14 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
             builder.type(MediaType.TEXT_PLAIN);
             builder.entity(exceptionMessage);
         }
+
+        if (exception instanceof NotAuthorizedException) {
+            NotAuthorizedException notAuthorizedException = (NotAuthorizedException) exception;
+            for (Object challenge : notAuthorizedException.getChallenges()) {
+                builder.header(HttpHeaders.WWW_AUTHENTICATE, challenge);
+            }
+        }
+
         return builder.build();
     }
 
