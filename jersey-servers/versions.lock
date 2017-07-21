@@ -102,7 +102,7 @@
             "locked": "1.1.3"
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "0.0.8",
+            "locked": "1.0.0-rc1",
             "transitive": [
                 "com.palantir.remoting2:error-handling"
             ]
@@ -352,7 +352,7 @@
             "locked": "1.1.3"
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "0.0.8",
+            "locked": "1.0.0-rc1",
             "transitive": [
                 "com.palantir.remoting2:error-handling"
             ]
