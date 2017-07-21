@@ -107,19 +107,19 @@
             "locked": "8.17.0"
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "0.0.8",
+            "locked": "1.0.0-rc1",
             "transitive": [
                 "com.palantir.remoting2:error-handling"
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "0.0.8",
+            "locked": "1.0.0-rc1",
             "transitive": [
                 "com.palantir.remoting2:http-clients"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "0.0.8",
+            "locked": "1.0.0-rc1",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting2:keystores"
@@ -312,19 +312,19 @@
             "locked": "8.17.0"
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "0.0.8",
+            "locked": "1.0.0-rc1",
             "transitive": [
                 "com.palantir.remoting2:error-handling"
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "0.0.8",
+            "locked": "1.0.0-rc1",
             "transitive": [
                 "com.palantir.remoting2:http-clients"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "0.0.8",
+            "locked": "1.0.0-rc1",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting2:keystores"
