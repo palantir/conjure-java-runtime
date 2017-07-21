@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.config.ssl;
+package com.palantir.remoting3.config.ssl;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
-import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.io.IOException;
 import org.junit.Test;
 

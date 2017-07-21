@@ -19,7 +19,7 @@
  *
  */
 
-package com.palantir.remoting2.servers.jersey;
+package com.palantir.remoting3.servers.jersey;
 
 import com.google.common.base.Optional;
 import java.io.IOException;

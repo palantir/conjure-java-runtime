@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.errors;
+package com.palantir.remoting3.errors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,7 +26,7 @@ import com.palantir.remoting.api.errors.ErrorType;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting.api.errors.ServiceException;
-import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;

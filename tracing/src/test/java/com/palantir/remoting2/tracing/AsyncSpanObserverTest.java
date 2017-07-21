@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.tracing;
+package com.palantir.remoting3.tracing;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;

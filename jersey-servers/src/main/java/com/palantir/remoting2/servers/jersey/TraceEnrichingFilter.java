@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.servers.jersey;
+package com.palantir.remoting3.servers.jersey;
 
 import com.google.common.base.Strings;
-import com.palantir.remoting2.tracing.Span;
-import com.palantir.remoting2.tracing.SpanType;
-import com.palantir.remoting2.tracing.TraceHttpHeaders;
-import com.palantir.remoting2.tracing.Tracer;
-import com.palantir.remoting2.tracing.Tracers;
+import com.palantir.remoting3.tracing.Span;
+import com.palantir.remoting3.tracing.SpanType;
+import com.palantir.remoting3.tracing.TraceHttpHeaders;
+import com.palantir.remoting3.tracing.Tracer;
+import com.palantir.remoting3.tracing.Tracers;
 import java.io.IOException;
 import java.util.Optional;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -59,7 +59,7 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
         }
 
         // Give asynchronous downstream handlers access to the trace id
-        requestContext.setProperty("com.palantir.remoting2.traceId", Tracer.getTraceId());
+        requestContext.setProperty("com.palantir.remoting3.traceId", Tracer.getTraceId());
     }
 
     // Handles outgoing response

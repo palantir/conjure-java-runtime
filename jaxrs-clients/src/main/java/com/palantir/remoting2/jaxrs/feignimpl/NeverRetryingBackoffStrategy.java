@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs.feignimpl;
+package com.palantir.remoting3.jaxrs.feignimpl;
 
 /**
  * A {@link BackoffStrategy} that attempts the operation exactly once, i.e., returns false always.

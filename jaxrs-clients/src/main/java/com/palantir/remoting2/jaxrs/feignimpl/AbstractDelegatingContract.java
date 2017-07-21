@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs.feignimpl;
+package com.palantir.remoting3.jaxrs.feignimpl;
 
 import feign.Contract;
 import feign.Feign;

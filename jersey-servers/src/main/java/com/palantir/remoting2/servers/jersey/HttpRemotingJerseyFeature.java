@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.servers.jersey;
+package com.palantir.remoting3.servers.jersey;
 
 import com.fasterxml.jackson.jaxrs.cbor.JacksonCBORProvider;
-import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 

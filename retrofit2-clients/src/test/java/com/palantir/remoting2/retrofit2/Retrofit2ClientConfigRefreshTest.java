@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.retrofit2;
+package com.palantir.remoting3.retrofit2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.palantir.remoting2.clients.ClientConfiguration;
-import com.palantir.remoting2.ext.refresh.Refreshable;
+import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.ext.refresh.Refreshable;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;

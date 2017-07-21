@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs.feignimpl;
+package com.palantir.remoting3.jaxrs.feignimpl;
 
 /**
  * Defines a strategy for waiting in between successive retries of an operation that is subject to failure.

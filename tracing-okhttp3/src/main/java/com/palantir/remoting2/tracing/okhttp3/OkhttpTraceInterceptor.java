@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.tracing.okhttp3;
+package com.palantir.remoting3.tracing.okhttp3;
 
-import com.palantir.remoting2.tracing.OpenSpan;
-import com.palantir.remoting2.tracing.SpanType;
-import com.palantir.remoting2.tracing.TraceHttpHeaders;
-import com.palantir.remoting2.tracing.Tracer;
+import com.palantir.remoting3.tracing.OpenSpan;
+import com.palantir.remoting3.tracing.SpanType;
+import com.palantir.remoting3.tracing.TraceHttpHeaders;
+import com.palantir.remoting3.tracing.Tracer;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Request;

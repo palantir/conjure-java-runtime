@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs;
+package com.palantir.remoting3.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.config.service.BasicCredentials;
-import com.palantir.remoting2.clients.CipherSuites;
-import com.palantir.remoting2.clients.ClientConfiguration;
-import com.palantir.remoting2.jaxrs.feignimpl.FailoverFeignTarget;
-import com.palantir.remoting2.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
-import com.palantir.remoting2.jaxrs.feignimpl.GuavaOptionalAwareContract;
-import com.palantir.remoting2.jaxrs.feignimpl.Java8OptionalAwareContract;
-import com.palantir.remoting2.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
-import com.palantir.remoting2.jaxrs.feignimpl.SlashEncodingContract;
-import com.palantir.remoting2.jaxrs.feignimpl.UserAgentInterceptor;
-import com.palantir.remoting2.tracing.okhttp3.OkhttpTraceInterceptor;
+import com.palantir.remoting3.clients.CipherSuites;
+import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.jaxrs.feignimpl.FailoverFeignTarget;
+import com.palantir.remoting3.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
+import com.palantir.remoting3.jaxrs.feignimpl.GuavaOptionalAwareContract;
+import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
+import com.palantir.remoting3.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
+import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
+import com.palantir.remoting3.jaxrs.feignimpl.UserAgentInterceptor;
+import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
 import feign.Contract;

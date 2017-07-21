@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs;
+package com.palantir.remoting3.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.remoting.api.config.service.BasicCredentials;
-import com.palantir.remoting2.clients.ClientConfiguration;
+import com.palantir.remoting3.clients.ClientConfiguration;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;

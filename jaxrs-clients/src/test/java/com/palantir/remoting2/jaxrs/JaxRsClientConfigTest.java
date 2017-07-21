@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs;
+package com.palantir.remoting3.jaxrs;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting2.clients.ClientConfiguration;
-import com.palantir.remoting2.servers.jersey.HttpRemotingJerseyFeature;
+import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.servers.jersey.HttpRemotingJerseyFeature;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;

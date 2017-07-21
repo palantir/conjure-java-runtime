@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.tracing;
+package com.palantir.remoting3.tracing;
 
 /**
  * Represents the event receiver for span completion events. Implementations are invoked synchronously on the

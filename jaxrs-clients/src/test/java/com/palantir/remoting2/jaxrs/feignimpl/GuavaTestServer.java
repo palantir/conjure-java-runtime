@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs.feignimpl;
+package com.palantir.remoting3.jaxrs.feignimpl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting2.servers.jersey.HttpRemotingJerseyFeature;
+import com.palantir.remoting3.servers.jersey.HttpRemotingJerseyFeature;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;

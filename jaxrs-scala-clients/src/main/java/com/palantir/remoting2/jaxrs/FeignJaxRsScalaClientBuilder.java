@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs;
+package com.palantir.remoting3.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.palantir.remoting2.clients.ClientConfiguration;
+import com.palantir.remoting3.clients.ClientConfiguration;
 
 public final class FeignJaxRsScalaClientBuilder extends AbstractFeignJaxRsClientBuilder {
 

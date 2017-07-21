@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.errors;
+package com.palantir.remoting3.errors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
-import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

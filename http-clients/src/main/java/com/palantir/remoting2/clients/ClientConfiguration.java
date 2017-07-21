@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.clients;
+package com.palantir.remoting3.clients;
 
 import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.remoting.api.config.service.ServiceConfiguration;

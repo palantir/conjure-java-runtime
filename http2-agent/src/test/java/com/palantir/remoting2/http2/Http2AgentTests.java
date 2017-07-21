@@ -2,7 +2,7 @@
  * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
  */
 
-package com.palantir.remoting2.http2;
+package com.palantir.remoting3.http2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

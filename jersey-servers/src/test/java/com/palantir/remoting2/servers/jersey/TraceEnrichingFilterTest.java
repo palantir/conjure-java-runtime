@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.servers.jersey;
+package com.palantir.remoting3.servers.jersey;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -25,12 +25,12 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.palantir.remoting2.tracing.Span;
-import com.palantir.remoting2.tracing.SpanObserver;
-import com.palantir.remoting2.tracing.SpanType;
-import com.palantir.remoting2.tracing.TraceHttpHeaders;
-import com.palantir.remoting2.tracing.Tracer;
-import com.palantir.remoting2.tracing.Tracers;
+import com.palantir.remoting3.tracing.Span;
+import com.palantir.remoting3.tracing.SpanObserver;
+import com.palantir.remoting3.tracing.SpanType;
+import com.palantir.remoting3.tracing.TraceHttpHeaders;
+import com.palantir.remoting3.tracing.Tracer;
+import com.palantir.remoting3.tracing.Tracers;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -150,7 +150,7 @@ public final class TraceEnrichingFilterTest {
         when(request.getHeaderString(TraceHttpHeaders.TRACE_ID)).thenReturn("traceId");
         TraceEnrichingFilter.INSTANCE.filter(request);
         assertThat(MDC.get(Tracers.TRACE_ID_KEY), is("traceId"));
-        verify(request).setProperty("com.palantir.remoting2.traceId", "traceId");
+        verify(request).setProperty("com.palantir.remoting3.traceId", "traceId");
     }
 
     @Test
@@ -165,7 +165,7 @@ public final class TraceEnrichingFilterTest {
     public void testFilter_setsMdcIfTraceIdHeaderIsNotePresent() throws Exception {
         TraceEnrichingFilter.INSTANCE.filter(request);
         assertThat(MDC.get(Tracers.TRACE_ID_KEY).length(), is(16));
-        verify(request).setProperty(eq("com.palantir.remoting2.traceId"), anyString());
+        verify(request).setProperty(eq("com.palantir.remoting3.traceId"), anyString());
     }
 
     public static class TracingTestServer extends Application<Configuration> {

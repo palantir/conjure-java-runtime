@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.config.ssl;
+package com.palantir.remoting3.config.ssl;
 
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
-import com.palantir.remoting2.config.ssl.pkcs1.Pkcs1Reader;
+import com.palantir.remoting3.config.ssl.pkcs1.Pkcs1Reader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ServiceLoader;

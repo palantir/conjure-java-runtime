@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.retrofit2;
+package com.palantir.remoting3.retrofit2;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting2.tracing.OpenSpan;
-import com.palantir.remoting2.tracing.TraceHttpHeaders;
-import com.palantir.remoting2.tracing.Tracer;
+import com.palantir.remoting3.tracing.OpenSpan;
+import com.palantir.remoting3.tracing.TraceHttpHeaders;
+import com.palantir.remoting3.tracing.Tracer;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

@@ -17,7 +17,7 @@
  * Adapted from https://github.com/dropwizard/dropwizard/blob/master/dropwizard-jersey/src/main/java/io/dropwizard/jersey/optional/OptionalDoubleMessageBodyWriter.java
  */
 
-package com.palantir.remoting2.servers.jersey;
+package com.palantir.remoting3.servers.jersey;
 
 import java.io.IOException;
 import java.io.OutputStream;

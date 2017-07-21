@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.retrofit2;
+package com.palantir.remoting3.retrofit2;
 
 import java.io.IOException;
 import okhttp3.Interceptor;

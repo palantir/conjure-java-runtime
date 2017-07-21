@@ -2,7 +2,7 @@
  * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
  */
 
-package com.palantir.remoting2.http2;
+package com.palantir.remoting3.http2;
 
 import com.ea.agentloader.AgentLoader;
 import java.lang.instrument.Instrumentation;

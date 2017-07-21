@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.config.ssl;
+package com.palantir.remoting3.config.ssl;
 
 import com.google.common.base.Throwables;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;

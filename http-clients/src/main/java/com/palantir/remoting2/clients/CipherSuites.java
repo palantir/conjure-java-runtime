@@ -2,7 +2,7 @@
  * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
  */
 
-package com.palantir.remoting2.clients;
+package com.palantir.remoting3.clients;
 
 import com.google.common.collect.ImmutableList;
 

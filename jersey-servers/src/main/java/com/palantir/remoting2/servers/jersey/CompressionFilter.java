@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.servers.jersey;
+package com.palantir.remoting3.servers.jersey;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;

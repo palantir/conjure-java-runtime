@@ -34,7 +34,7 @@ dependencies {
 
 allprojects {
     version System.env.CIRCLE_TAG ?: gitVersion()
-    group 'com.palantir.remoting2'
+    group 'com.palantir.remoting3'
 
     apply plugin: 'com.palantir.configuration-resolver'
     apply plugin: 'nebula.dependency-recommender'

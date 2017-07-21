@@ -2,7 +2,7 @@
  * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
  */
 
-package com.palantir.remoting2.tracing;
+package com.palantir.remoting3.tracing;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

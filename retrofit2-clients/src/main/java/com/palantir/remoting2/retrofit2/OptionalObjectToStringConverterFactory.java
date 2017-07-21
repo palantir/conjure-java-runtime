@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.retrofit2;
+package com.palantir.remoting3.retrofit2;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;

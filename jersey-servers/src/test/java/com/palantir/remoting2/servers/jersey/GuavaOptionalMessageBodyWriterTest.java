@@ -16,7 +16,7 @@
  * Copied from Dropwizard on 2016-10-13. Source: https://github.com/dropwizard/dropwizard/blob/844b71047f6d70a2b507af416d7f1ad18d60b0dc/dropwizard-jersey/src/test/java/io/dropwizard/jersey/guava/OptionalMessageBodyWriterTest.java
  */
 
-package com.palantir.remoting2.servers.jersey;
+package com.palantir.remoting3.servers.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs.feignimpl;
+package com.palantir.remoting3.jaxrs.feignimpl;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
-import com.palantir.remoting2.errors.SerializableErrorToExceptionConverter;
+import com.palantir.remoting3.errors.SerializableErrorToExceptionConverter;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import java.io.IOException;

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs;
+package com.palantir.remoting3.jaxrs;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
-import com.palantir.remoting2.clients.ClientConfiguration;
-import com.palantir.remoting2.clients.ClientConfigurations;
-import com.palantir.remoting2.config.ssl.SslSocketFactories;
+import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.clients.ClientConfigurations;
+import com.palantir.remoting3.config.ssl.SslSocketFactories;
 import java.nio.file.Paths;
 
 // TODO(rfink): Use static utility class instead?

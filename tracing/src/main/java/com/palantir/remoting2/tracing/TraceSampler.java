@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.tracing;
+package com.palantir.remoting3.tracing;
 
 /**
  * Nullary predicate that returns true iff the trace under consideration should be presented to the configured {@link

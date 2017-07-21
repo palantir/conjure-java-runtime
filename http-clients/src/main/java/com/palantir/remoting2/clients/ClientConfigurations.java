@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.clients;
+package com.palantir.remoting3.clients;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HostAndPort;
 import com.palantir.remoting.api.config.service.ProxyConfiguration;
 import com.palantir.remoting.api.config.service.ServiceConfiguration;
-import com.palantir.remoting2.config.ssl.SslSocketFactories;
+import com.palantir.remoting3.config.ssl.SslSocketFactories;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.retrofit2;
+package com.palantir.remoting3.retrofit2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
@@ -22,10 +22,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.config.service.BasicCredentials;
-import com.palantir.remoting2.clients.CipherSuites;
-import com.palantir.remoting2.clients.ClientConfiguration;
-import com.palantir.remoting2.ext.jackson.ObjectMappers;
-import com.palantir.remoting2.tracing.okhttp3.OkhttpTraceInterceptor;
+import com.palantir.remoting3.clients.CipherSuites;
+import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
+import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import okhttp3.ConnectionPool;

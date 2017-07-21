@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.servers.jersey;
+package com.palantir.remoting3.servers.jersey;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.palantir.logsafe.SafeArg;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * this is the exception mapper used in Server A. When code in B throws an exception, the {@link JsonExceptionMapper}
  * maps that exception to a JSON response with appropriate HTTP status code and returns it to server A over HTTP.
- * That response is then processed by a {@link com.palantir.remoting2.errors.SerializableErrorToExceptionConverter} and
+ * That response is then processed by a {@link com.palantir.remoting3.errors.SerializableErrorToExceptionConverter} and
  * thrown as a {@link RemoteException} at the call point in server A.  If server A does not catch this exception and
  * it raises up the call stack back into Jersey, execution enters this {@link RemoteExceptionMapper}.
  * <p>

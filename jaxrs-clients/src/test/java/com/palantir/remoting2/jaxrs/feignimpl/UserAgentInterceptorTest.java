@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs.feignimpl;
+package com.palantir.remoting3.jaxrs.feignimpl;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -85,7 +85,7 @@ public final class UserAgentInterceptorTest {
         }
 
         try {
-            com.palantir.remoting2.retrofit2.UserAgentInterceptor.of(illegalAgentString);
+            com.palantir.remoting3.retrofit2.UserAgentInterceptor.of(illegalAgentString);
             fail();
         } catch (IllegalArgumentException e) {
             assertThat(e.getMessage(), is(expectedMessage));

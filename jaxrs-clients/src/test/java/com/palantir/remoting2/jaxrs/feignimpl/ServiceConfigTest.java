@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs.feignimpl;
+package com.palantir.remoting3.jaxrs.feignimpl;
 
 import static org.junit.Assert.assertEquals;
 
 import com.palantir.remoting.api.config.service.ServiceConfigurationFactory;
-import com.palantir.remoting2.clients.ClientConfigurations;
-import com.palantir.remoting2.jaxrs.JaxRsClient;
+import com.palantir.remoting3.clients.ClientConfigurations;
+import com.palantir.remoting3.jaxrs.JaxRsClient;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.junit.Rule;
 import org.junit.Test;

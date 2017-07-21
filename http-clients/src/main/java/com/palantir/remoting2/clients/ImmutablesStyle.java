@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.clients;
+package com.palantir.remoting3.clients;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

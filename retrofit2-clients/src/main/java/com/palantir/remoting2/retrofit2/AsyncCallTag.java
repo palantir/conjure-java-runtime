@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.retrofit2;
+package com.palantir.remoting3.retrofit2;
 
 import retrofit2.Call;
 
 /**
  * The mechanism (as of 2.5.0) that http-remoting uses in order to throw a RemoteException on failure
- * relies on throwing in the OkHttp interceptor {@link com.palantir.remoting2.retrofit2.SerializableErrorInterceptor}.
+ * relies on throwing in the OkHttp interceptor {@link com.palantir.remoting3.retrofit2.SerializableErrorInterceptor}.
  * This bubbles up the stack until it reaches the caller.
  *
  * Unfortunately, this doesn't work when using the Retrofit async features; the exception is thrown in a different

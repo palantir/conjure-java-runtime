@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.config.ssl;
+package com.palantir.remoting3.config.ssl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
-import com.palantir.remoting2.ext.jackson.ObjectMappers;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.nio.file.Paths;
 import org.junit.Test;
 

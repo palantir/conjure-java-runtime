@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.servers.jersey;
+package com.palantir.remoting3.servers.jersey;
 
 import javax.ws.rs.core.NoContentException;
 import javax.ws.rs.core.Response;

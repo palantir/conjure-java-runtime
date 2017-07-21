@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.config.ssl;
+package com.palantir.remoting3.config.ssl;
 
 import com.google.common.base.Throwables;
 import com.google.common.io.BaseEncoding;
-import com.palantir.remoting2.config.ssl.pkcs1.Pkcs1Readers;
+import com.palantir.remoting3.config.ssl.pkcs1.Pkcs1Readers;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;

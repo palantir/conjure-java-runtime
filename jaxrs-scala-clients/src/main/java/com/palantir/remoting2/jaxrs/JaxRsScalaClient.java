@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs;
+package com.palantir.remoting3.jaxrs;
 
 import com.google.common.reflect.Reflection;
-import com.palantir.remoting2.clients.ClientConfiguration;
-import com.palantir.remoting2.ext.refresh.Refreshable;
-import com.palantir.remoting2.ext.refresh.RefreshableProxyInvocationHandler;
+import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.ext.refresh.Refreshable;
+import com.palantir.remoting3.ext.refresh.RefreshableProxyInvocationHandler;
 
 /**
  * Variant of {@link JaxRsClient} with additional scala serialization support.

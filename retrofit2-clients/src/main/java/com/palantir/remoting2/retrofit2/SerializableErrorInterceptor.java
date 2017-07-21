@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.retrofit2;
+package com.palantir.remoting3.retrofit2;
 
-import com.palantir.remoting2.errors.SerializableErrorToExceptionConverter;
+import com.palantir.remoting3.errors.SerializableErrorToExceptionConverter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs.feignimpl;
+package com.palantir.remoting3.jaxrs.feignimpl;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting2.jaxrs.JaxRsClient;
-import com.palantir.remoting2.jaxrs.TestBase;
+import com.palantir.remoting3.jaxrs.JaxRsClient;
+import com.palantir.remoting3.jaxrs.TestBase;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;

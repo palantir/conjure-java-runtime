@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.ext.refresh;
+package com.palantir.remoting3.ext.refresh;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

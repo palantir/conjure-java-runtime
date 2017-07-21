@@ -16,22 +16,22 @@
             "locked": "2.6.7",
             "transitive": [
                 "com.palantir.remoting-api:ssl-config",
-                "com.palantir.remoting2:keystores"
+                "com.palantir.remoting3:keystores"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting2:keystores"
+                "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
             "locked": "1.0.0-rc1",
             "transitive": [
-                "com.palantir.remoting2:keystores"
+                "com.palantir.remoting3:keystores"
             ]
         },
-        "com.palantir.remoting2:keystores": {
+        "com.palantir.remoting3:keystores": {
             "project": true
         }
     },
@@ -52,22 +52,22 @@
             "locked": "2.6.7",
             "transitive": [
                 "com.palantir.remoting-api:ssl-config",
-                "com.palantir.remoting2:keystores"
+                "com.palantir.remoting3:keystores"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting2:keystores"
+                "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
             "locked": "1.0.0-rc1",
             "transitive": [
-                "com.palantir.remoting2:keystores"
+                "com.palantir.remoting3:keystores"
             ]
         },
-        "com.palantir.remoting2:keystores": {
+        "com.palantir.remoting3:keystores": {
             "project": true
         }
     }

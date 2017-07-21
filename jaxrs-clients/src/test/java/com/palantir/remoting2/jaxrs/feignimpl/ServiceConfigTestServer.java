@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs.feignimpl;
+package com.palantir.remoting3.jaxrs.feignimpl;
 
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import io.dropwizard.Application;

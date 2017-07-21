@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting2.jaxrs.feignimpl;
+package com.palantir.remoting3.jaxrs.feignimpl;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -23,8 +23,8 @@ import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting.api.errors.RemoteException;
-import com.palantir.remoting2.jaxrs.JaxRsClient;
-import com.palantir.remoting2.jaxrs.TestBase;
+import com.palantir.remoting3.jaxrs.JaxRsClient;
+import com.palantir.remoting3.jaxrs.TestBase;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;

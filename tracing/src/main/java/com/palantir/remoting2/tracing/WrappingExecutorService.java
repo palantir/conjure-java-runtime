@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.palantir.remoting2.tracing;
+package com.palantir.remoting3.tracing;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

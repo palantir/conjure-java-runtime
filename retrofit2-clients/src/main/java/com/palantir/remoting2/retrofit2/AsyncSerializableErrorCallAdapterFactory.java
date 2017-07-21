@@ -23,9 +23,9 @@
  * - Made the BodyCallAdapter create RemoteExceptions.
  * - Made the BodyCallAdapter tell the AsyncCallTag that this is an async call.
  */
-package com.palantir.remoting2.retrofit2;
+package com.palantir.remoting3.retrofit2;
 
-import com.palantir.remoting2.errors.SerializableErrorToExceptionConverter;
+import com.palantir.remoting3.errors.SerializableErrorToExceptionConverter;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
