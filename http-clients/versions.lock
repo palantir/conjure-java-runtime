@@ -18,7 +18,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.palantir.remoting-api:ssl-config",
-                "com.palantir.remoting2:keystores",
+                "com.palantir.remoting3:keystores",
                 "com.palantir.tokens2:auth-tokens"
             ]
         },
@@ -32,7 +32,7 @@
             "locked": "18.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
-                "com.palantir.remoting2:keystores"
+                "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:service-config": {
@@ -42,10 +42,10 @@
             "locked": "1.0.0-rc1",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
-                "com.palantir.remoting2:keystores"
+                "com.palantir.remoting3:keystores"
             ]
         },
-        "com.palantir.remoting2:keystores": {
+        "com.palantir.remoting3:keystores": {
             "project": true
         },
         "com.palantir.tokens2:auth-tokens": {
@@ -80,7 +80,7 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.palantir.remoting-api:ssl-config",
-                "com.palantir.remoting2:keystores",
+                "com.palantir.remoting3:keystores",
                 "com.palantir.tokens2:auth-tokens"
             ]
         },
@@ -94,7 +94,7 @@
             "locked": "18.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
-                "com.palantir.remoting2:keystores"
+                "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:service-config": {
@@ -104,10 +104,10 @@
             "locked": "1.0.0-rc1",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
-                "com.palantir.remoting2:keystores"
+                "com.palantir.remoting3:keystores"
             ]
         },
-        "com.palantir.remoting2:keystores": {
+        "com.palantir.remoting3:keystores": {
             "project": true
         },
         "com.palantir.tokens2:auth-tokens": {
