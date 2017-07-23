@@ -45,6 +45,13 @@ public class AuthHeaderTest {
     }
 
     @Test
+    public void testAbsentAuthheader() {
+        Response response = target.path("authHeader").request().get();
+        assertThat(response.getStatus(), is(Status.UNAUTHORIZED.getStatusCode()));
+        assertThat(response.getHeaderString(HttpHeaders.WWW_AUTHENTICATE), is("Bearer"));
+    }
+
+    @Test
     public void testInvalidAuthHeader() {
         Response response = target.path("authHeader")
                     .request()

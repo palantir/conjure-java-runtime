@@ -40,6 +40,10 @@ public final class AuthHeaderParamConverterProvider implements ParamConverterPro
     public static final class AuthHeaderParamConverter implements ParamConverter<AuthHeader> {
         @Override
         public AuthHeader fromString(final String value) {
+            if (value == null) {
+                throw new NotAuthorizedException("Bearer");
+            }
+
             try {
                 return AuthHeader.valueOf(value);
             } catch (IllegalArgumentException e) {
