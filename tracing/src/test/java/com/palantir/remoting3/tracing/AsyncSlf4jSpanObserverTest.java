@@ -23,13 +23,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-// CHECKSTYLE:OFF
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
-// CHECKSTYLE:ON
 import com.google.common.collect.ImmutableMap;
+import com.palantir.remoting.api.tracing.Span;
+import com.palantir.remoting.api.tracing.SpanType;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -49,6 +49,9 @@ import zipkin.Annotation;
 import zipkin.BinaryAnnotation;
 import zipkin.Codec;
 import zipkin.Endpoint;
+
+// CHECKSTYLE:OFF
+// CHECKSTYLE:ON
 
 public final class AsyncSlf4jSpanObserverTest {
 

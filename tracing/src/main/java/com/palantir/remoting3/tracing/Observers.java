@@ -16,6 +16,8 @@
 
 package com.palantir.remoting3.tracing;
 
+import com.palantir.remoting.api.tracing.Span;
+import com.palantir.remoting.api.tracing.SpanObserver;
 import java.util.concurrent.ExecutorService;
 
 public final class Observers {

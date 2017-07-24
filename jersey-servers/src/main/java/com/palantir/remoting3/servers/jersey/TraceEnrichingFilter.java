@@ -17,9 +17,9 @@
 package com.palantir.remoting3.servers.jersey;
 
 import com.google.common.base.Strings;
-import com.palantir.remoting3.tracing.Span;
-import com.palantir.remoting3.tracing.SpanType;
-import com.palantir.remoting3.tracing.TraceHttpHeaders;
+import com.palantir.remoting.api.tracing.Span;
+import com.palantir.remoting.api.tracing.SpanType;
+import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import com.palantir.remoting3.tracing.Tracer;
 import com.palantir.remoting3.tracing.Tracers;
 import java.io.IOException;

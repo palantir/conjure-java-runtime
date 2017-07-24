@@ -18,6 +18,8 @@ package com.palantir.remoting3.tracing;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.palantir.remoting.api.tracing.OpenSpan;
+import com.palantir.remoting.api.tracing.SpanObserver;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
@@ -61,8 +63,8 @@ final class Trace {
     }
 
     /**
-     * True iff the spans of this trace are to be observed by {@link SpanObserver span obververs} upon
-     * {@link Tracer#completeSpan span completion}.
+     * True iff the spans of this trace are to be observed by {@link SpanObserver span obververs} upon {@link
+     * Tracer#completeSpan span completion}.
      */
     boolean isObservable() {
         return isObservable;

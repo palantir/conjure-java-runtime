@@ -31,15 +31,14 @@
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.0.0-rc1"
+            "locked": "1.0.0-rc2"
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.0.0-rc1",
+            "locked": "1.0.0-rc2",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
@@ -93,15 +92,14 @@
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.0.0-rc1"
+            "locked": "1.0.0-rc2"
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.0.0-rc1",
+            "locked": "1.0.0-rc2",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
