@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.Lists;
+import com.palantir.remoting.api.tracing.OpenSpan;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -145,16 +146,16 @@ public final class TracersTest {
         String traceIdAfterCalls = Tracer.getTraceId();
 
         assertThat(traceIdFirstCall)
-            .isNotEqualTo(traceIdBeforeConstruction)
-            .isNotEqualTo(traceIdAfterCalls)
-            .isNotEqualTo(traceIdSecondCall);
+                .isNotEqualTo(traceIdBeforeConstruction)
+                .isNotEqualTo(traceIdAfterCalls)
+                .isNotEqualTo(traceIdSecondCall);
 
         assertThat(traceIdSecondCall)
-            .isNotEqualTo(traceIdBeforeConstruction)
-            .isNotEqualTo(traceIdAfterCalls);
+                .isNotEqualTo(traceIdBeforeConstruction)
+                .isNotEqualTo(traceIdAfterCalls);
 
         assertThat(traceIdBeforeConstruction)
-            .isEqualTo(traceIdAfterCalls);
+                .isEqualTo(traceIdAfterCalls);
     }
 
     @Test

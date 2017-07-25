@@ -18,8 +18,9 @@ package com.palantir.remoting3.tracing;
 
 /**
  * Nullary predicate that returns true iff the trace under consideration should be presented to the configured {@link
- * SpanObserver observers}. Implementations must be thread-safe. The sampler is invoked synchronously on the thread
- * calling into {@link Tracer} and must only do non-trivial work (e.g., at most drawing a random number).
+ * com.palantir.remoting.api.tracing.SpanObserver observers}. Implementations must be thread-safe. The sampler is
+ * invoked synchronously on the thread calling into {@link Tracer} and must only do non-trivial work (e.g., at most
+ * drawing a random number).
  */
 public interface TraceSampler {
     boolean sample();

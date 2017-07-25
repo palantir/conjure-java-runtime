@@ -20,8 +20,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting3.tracing.OpenSpan;
-import com.palantir.remoting3.tracing.TraceHttpHeaders;
+import com.palantir.remoting.api.tracing.OpenSpan;
+import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import com.palantir.remoting3.tracing.Tracer;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;

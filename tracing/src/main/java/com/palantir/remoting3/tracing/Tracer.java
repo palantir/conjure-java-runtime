@@ -18,6 +18,10 @@ package com.palantir.remoting3.tracing;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
+import com.palantir.remoting.api.tracing.OpenSpan;
+import com.palantir.remoting.api.tracing.Span;
+import com.palantir.remoting.api.tracing.SpanObserver;
+import com.palantir.remoting.api.tracing.SpanType;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -38,14 +42,11 @@ public final class Tracer {
     private Tracer() {}
 
     // Thread-safe since thread-local
-    private static final ThreadLocal<Trace> currentTrace = new ThreadLocal<Trace>() {
-        @Override
-        protected Trace initialValue() {
-            Trace trace = createTrace(Optional.empty(), Tracers.randomId());
-            MDC.put(Tracers.TRACE_ID_KEY, trace.getTraceId());
-            return trace;
-        }
-    };
+    private static final ThreadLocal<Trace> currentTrace = ThreadLocal.withInitial(() -> {
+        Trace trace = createTrace(Optional.empty(), Tracers.randomId());
+        MDC.put(Tracers.TRACE_ID_KEY, trace.getTraceId());
+        return trace;
+    });
 
     // Thread-safe Map implementation
     private static final Map<String, SpanObserver> observers = Maps.newConcurrentMap();
@@ -54,9 +55,9 @@ public final class Tracer {
     private static TraceSampler sampler = AlwaysSampler.INSTANCE;
 
     /**
-     * Creates a new trace, but does not set it as the current trace. The new trace is {@link
-     * Trace#isObservable observable} iff the given flag is true, or, iff {@code isObservable} is absent,
-     * if the {@link #setSampler configured sampler} returns true.
+     * Creates a new trace, but does not set it as the current trace. The new trace is {@link Trace#isObservable
+     * observable} iff the given flag is true, or, iff {@code isObservable} is absent, if the {@link #setSampler
+     * configured sampler} returns true.
      */
     private static Trace createTrace(Optional<Boolean> isObservable, String traceId) {
         validateId(traceId, "traceId must be non-empty: %s");
@@ -207,8 +208,8 @@ public final class Tracer {
     }
 
     /**
-     * True iff the spans of this thread's trace are to be observed by {@link SpanObserver span obververs} upon
-     * {@link Tracer#completeSpan span completion}.
+     * True iff the spans of this thread's trace are to be observed by {@link SpanObserver span obververs} upon {@link
+     * Tracer#completeSpan span completion}.
      */
     public static boolean isTraceObservable() {
         return currentTrace.get().isObservable();
@@ -220,7 +221,8 @@ public final class Tracer {
     }
 
     /**
-     * Sets the thread-local trace. Considered an internal API used only for propagating the trace state across threads.
+     * Sets the thread-local trace. Considered an internal API used only for propagating the trace state across
+     * threads.
      */
     static void setTrace(Trace trace) {
         currentTrace.set(trace);

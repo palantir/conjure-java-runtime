@@ -16,9 +16,9 @@
 
 package com.palantir.remoting3.tracing.okhttp3;
 
-import com.palantir.remoting3.tracing.OpenSpan;
-import com.palantir.remoting3.tracing.SpanType;
-import com.palantir.remoting3.tracing.TraceHttpHeaders;
+import com.palantir.remoting.api.tracing.OpenSpan;
+import com.palantir.remoting.api.tracing.SpanType;
+import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import com.palantir.remoting3.tracing.Tracer;
 import java.io.IOException;
 import okhttp3.Interceptor;

@@ -25,10 +25,10 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.palantir.remoting3.tracing.Span;
-import com.palantir.remoting3.tracing.SpanObserver;
-import com.palantir.remoting3.tracing.SpanType;
-import com.palantir.remoting3.tracing.TraceHttpHeaders;
+import com.palantir.remoting.api.tracing.Span;
+import com.palantir.remoting.api.tracing.SpanObserver;
+import com.palantir.remoting.api.tracing.SpanType;
+import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import com.palantir.remoting3.tracing.Tracer;
 import com.palantir.remoting3.tracing.Tracers;
 import io.dropwizard.Application;

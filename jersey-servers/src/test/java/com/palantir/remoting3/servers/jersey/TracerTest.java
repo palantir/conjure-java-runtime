@@ -28,7 +28,7 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 // CHECKSTYLE:ON
-import com.palantir.remoting3.tracing.TraceHttpHeaders;
+import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import com.palantir.remoting3.tracing.Tracer;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
