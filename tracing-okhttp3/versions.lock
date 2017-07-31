@@ -70,7 +70,7 @@
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.0.0-rc2",
+            "locked": "1.0.0-rc3",
             "transitive": [
                 "com.palantir.remoting3:tracing"
             ]
@@ -171,7 +171,7 @@
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.0.0-rc2",
+            "locked": "1.0.0-rc3",
             "transitive": [
                 "com.palantir.remoting3:tracing"
             ]

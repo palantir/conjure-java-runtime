@@ -16,15 +16,14 @@
 
 package com.palantir.remoting3.servers.jersey;
 
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response.StatusType;
+import com.palantir.remoting.api.errors.ErrorType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
 final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalArgumentException> {
 
     @Override
-    protected StatusType getStatus(IllegalArgumentException exception) {
-        return Status.BAD_REQUEST;
+    ErrorType getErrorType(Exception exception) {
+        return ErrorType.INVALID_ARGUMENT;
     }
 }
