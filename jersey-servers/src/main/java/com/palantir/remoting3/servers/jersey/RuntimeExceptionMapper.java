@@ -23,7 +23,7 @@ import javax.ws.rs.ext.Provider;
 final class RuntimeExceptionMapper extends JsonExceptionMapper<RuntimeException> {
 
     @Override
-    ErrorType getErrorType(Exception exception) {
+    ErrorType getErrorType(RuntimeException exception) {
         return ErrorType.INTERNAL;
     }
 }

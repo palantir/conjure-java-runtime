@@ -51,7 +51,7 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
     static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     /** Returns the {@link ErrorType} that this exception corresponds to. */
-    abstract ErrorType getErrorType(Exception exception);
+    abstract ErrorType getErrorType(T exception);
 
     @Override
     public final Response toResponse(T exception) {
