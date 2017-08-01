@@ -12,7 +12,7 @@ Core libraries:
 - jaxrs-clients: Clients for JAX-RS-defined service interfaces
 - retrofit2-clients: Clients for Retrofit-defined service interfaces
 - jersey-servers: Configuration library for Dropwizard/Jersey servers
-- [http-remoting-api](https://github.com/palantir/http-remoting-api): API classes for service configuration
+- [http-remoting-api](https://github.com/palantir/http-remoting-api): API classes for service configuration, tracing, and error propagation
 
 # Usage
 
@@ -149,7 +149,7 @@ MyService client = JaxRsClient.create(MyService.class, "my-agent", ClientConfigu
 ```
 
 
-## keystores and ssl-config (http-remoting)
+## keystores and ssl-config (http-remoting-api)
 
 Provides utilities for interacting with Java trust stores and key stores and acquiring `SSLSocketFactory` instances
 using those stores, as well as a configuration class for use in server configuration files.
@@ -235,12 +235,15 @@ mapper.
 
 
 #### Error propagation
-Servers should use the `ServiceException` class to propagate application-specific errors to its callers. Typically, 
-services define its error types as follows:
+Servers should use the `ServiceException` class to propagate application-specific errors to its callers. The
+`ServiceException` class exposes standard error codes that clients can handle in a well-defined manner; further,
+ServiceException implements [SafeLoggable](https://github.com/palantir/safe-logging) and thus allows logging
+infrastructure to handle "unsafe" and "safe" exception parameters appropriately. Typically, services define its error
+types as follows:
 
 ```
 public static final ErrorType DATASET_NOT_FOUND = 
-  ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "DatasetNotFound");
+  ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "MyApplication:DatasetNotFound");
 
 void someMethod(String datasetId) {
     if (!exists(datasetId)) {
@@ -253,14 +256,14 @@ void someMethod(String datasetId) {
 }
 ```
 
-The `HttpRemotingJerseyFeature` installs exception mappers for `ServiceException` The exception mapper sets the response
-media type to `application/json` and returns as response body a JSON representation of a `SerializableError` capturing
-the error code, error name, and error parameters. The resulting JSON response is:
+The `HttpRemotingJerseyFeature` installs exception mappers for `ServiceException`. The exception mapper sets the
+response media type to `application/json` and returns as response body a JSON representation of a `SerializableError`
+capturing the error code, error name, and error parameters. The resulting JSON response is:
 
 ```json
 {
   "errorCode": "INVALID_ARGUMENT",
-  "errorName": "DatasetNotFound",
+  "errorName": "MyApplication:DatasetNotFound",
   "errorInstanceId": "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
   "parameters" {
     "datasetId": "123abc",
@@ -276,7 +279,7 @@ deserialized server-side `SerializableError`. The error codes and names of the `
 try {
     service.someMethod();
 catch (RemoteExcetion e) {
-    if (e.getError().errorName().equals("DatasetNotFound")) {
+    if (e.getError().errorName().equals("MyApplication.DatasetNotFound")) {
         handleError(e.getError().parameters().get("datasetId"));
     } else {
         throw new RuntimeException("Failed to call someMethod()", e);
