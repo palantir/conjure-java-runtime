@@ -85,7 +85,7 @@
             "project": true
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.8.0"
+            "locked": "3.8.1"
         },
         "com.squareup.okio:okio": {
             "locked": "1.13.0",
@@ -186,7 +186,7 @@
             "project": true
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.8.0"
+            "locked": "3.8.1"
         },
         "com.squareup.okio:okio": {
             "locked": "1.13.0",

@@ -219,7 +219,7 @@
             ]
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.8.0",
+            "locked": "3.8.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
                 "com.palantir.remoting3:tracing-okhttp3"
@@ -495,7 +495,7 @@
             ]
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.8.0",
+            "locked": "3.8.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
                 "com.palantir.remoting3:tracing-okhttp3"
