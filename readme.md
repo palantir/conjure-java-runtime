@@ -291,11 +291,12 @@ Frontends receiving such errors should use a combination of error code, error na
 user friendly error information. For example, the above error could be surfaced as *"The requested dataset with id
 123abc could not be found"*.
 
-To support legacy server implementations, the `HttpRemotingJerseyFeature` also installs exception mappers for
+To support **legacy server implementations**, the `HttpRemotingJerseyFeature` also installs exception mappers for
 `IllegalArgumentException`, `NoContentException`, `RuntimeException` and `WebApplicationException`. The exceptions
 typically yield `SerializableError`s with `exceptionClass=errorCode=<exception classname>` and
 `message=errorName=<exception message>`. Clients should refrain from displaying the `message` or `errorName` fields to
-user directly.
+user directly. Services should prefer to throw `ServiceException`s instead of the above, since they are easier to
+consume for clients and support transmitting exception parameters in a safe way.
 
 
 #### Serialization of Optional and Nullable objects
