@@ -20,20 +20,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.remoting.api.errors.ErrorType;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Writes out generic exceptions as serialized {@link SerializableError}s with {@link MediaType#APPLICATION_JSON JSON
- * media type}. Never forwards the exception message.
+ * media type}. Never forwards the exception message. Subclasses provide an {@link ErrorType} that is used to populate
+ * the {@link SerializableError#errorCode} and {@link SerializableError#errorName()} fields as well as the HTTP response
+ * status code.
  * <p>
  * Consider this call stack, where a caller/browser calls a remote method in a server:
  * <p>
@@ -48,22 +50,39 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
 
     static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
+    /** Returns the {@link ErrorType} that this exception corresponds to. */
+    abstract ErrorType getErrorType(Exception exception);
+
     @Override
     public final Response toResponse(T exception) {
         String errorInstanceId = UUID.randomUUID().toString();
-        StatusType status = this.getStatus(exception);
-        if (status.getFamily().equals(Response.Status.Family.CLIENT_ERROR)) {
+        ErrorType errorType = getErrorType(exception);
+
+        Response.Status.Family family = Response.Status.Family.familyOf(errorType.httpErrorCode());
+        if (family == Response.Status.Family.CLIENT_ERROR) {
             log.info("Error handling request {}", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         } else {
             log.error("Error handling request {}", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         }
 
-        ResponseBuilder builder = Response.status(status);
+        return createResponse(errorType, errorInstanceId, exception.getClass().getName());
+    }
+
+    static Response createResponse(ErrorType errorType, String errorInstanceId, String exceptionClass) {
+        return createResponse(errorType.httpErrorCode(), errorType.code().name(), errorType.name(),
+                errorInstanceId, exceptionClass);
+    }
+
+    static Response createResponse(int httpErrorCode, String errorCode, String errorName, String errorInstanceId,
+            String exceptionClass) {
+        ResponseBuilder builder = Response.status(httpErrorCode);
         try {
             SerializableError error = SerializableError.builder()
-                    .errorCode(exception.getClass().getName())
-                    .errorName("Refer to the server logs with this errorInstanceId: " + errorInstanceId)
+                    .errorCode(errorCode)
+                    .errorName(errorName)
                     .errorInstanceId(errorInstanceId)
+                    .exceptionClass(exceptionClass)
+                    .message("Refer to the server logs with this errorInstanceId: " + errorInstanceId)
                     .build();
             builder.type(MediaType.APPLICATION_JSON);
             String json = MAPPER.writeValueAsString(error);
@@ -71,15 +90,11 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
         } catch (RuntimeException | JsonProcessingException e) {
             log.warn("Unable to translate exception to json for request {}",
                     SafeArg.of("errorInstanceId", errorInstanceId), e);
-            // simply write out the exception message
-            builder = Response.status(status);
+            builder = Response.status(httpErrorCode);
             builder.type(MediaType.TEXT_PLAIN);
             builder.entity("Unable to translate exception to json. Refer to the server logs with this errorInstanceId: "
                     + errorInstanceId);
         }
         return builder.build();
     }
-
-    abstract StatusType getStatus(T exception);
-
 }

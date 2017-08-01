@@ -16,58 +16,34 @@
 
 package com.palantir.remoting3.servers.jersey;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import com.palantir.remoting.api.errors.ErrorType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.StatusType;
 import org.junit.Test;
 
 public final class JsonExceptionMapperTest {
 
-    private static class FooException extends RuntimeException {
-        FooException(String message) {
-            super(message);
-        }
-    }
-
-    private static final Response.Status STATUS = Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE;
-
-    private static class TestJsonExceptionMapper extends JsonExceptionMapper<FooException> {
+    private final JsonExceptionMapper<RuntimeException> mapper = new JsonExceptionMapper<RuntimeException>() {
         @Override
-        protected StatusType getStatus(FooException exception) {
-            return STATUS;
+        ErrorType getErrorType(Exception exception) {
+            return ErrorType.INVALID_ARGUMENT;
         }
-    }
-
-    private FooException createException(String message) {
-        return new FooException(message);
-    }
-
-    private final TestJsonExceptionMapper mapper = new TestJsonExceptionMapper();
+    };
 
     @Test
-    public void testSanity() {
-        Response response = mapper.toResponse(createException("foo"));
-        assertThat(response.getStatus(), is(STATUS.getStatusCode()));
-        assertThat(response.getEntity().toString(),
-                containsString("JsonExceptionMapperTest$FooException"));
+    public void testExpectedSerializedError() {
+        Response response = mapper.toResponse(new NullPointerException("foo"));
+        assertThat(response.getEntity().toString()).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
+        assertThat(response.getEntity().toString()).contains("\"errorName\" : \"Default:InvalidArgument\"");
+        assertThat(response.getEntity().toString()).contains("\"exceptionClass\" : \"java.lang.NullPointerException\"");
+        assertThat(response.getEntity().toString())
+                .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
     }
 
     @Test
     public void testDoesNotPropagateExceptionMessage() {
-        Response response = mapper.toResponse(createException("foo exception message"));
-        assertThat(response.getEntity().toString(), not(containsString("foo exception message")));
-    }
-
-    @Test
-    public void test_noMessage() {
-        Response response = new RuntimeExceptionMapper().toResponse(new NullPointerException());
-        assertThat(response.getEntity().toString(),
-                containsString("\"errorCode\" : \"java.lang.NullPointerException\""));
-        assertThat(response.getEntity().toString(),
-                containsString("\"exceptionClass\" : \"java.lang.NullPointerException\""));
+        Response response = new RuntimeExceptionMapper().toResponse(new NullPointerException("secret"));
+        assertThat(response.getEntity().toString()).doesNotContain("secret");
     }
 }

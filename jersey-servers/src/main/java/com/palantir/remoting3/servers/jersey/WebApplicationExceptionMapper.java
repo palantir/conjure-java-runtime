@@ -16,15 +16,46 @@
 
 package com.palantir.remoting3.servers.jersey;
 
+import com.palantir.remoting.api.errors.ErrorType;
+import java.util.UUID;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.StatusType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.server.ParamException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+/**
+ * @deprecated Services should throw {@link com.palantir.remoting.api.errors.ServiceException}s instead.
+ */
 @Provider
-final class WebApplicationExceptionMapper extends JsonExceptionMapper<WebApplicationException> {
+@Deprecated
+final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
+
+    private static final Logger log = LoggerFactory.getLogger(WebApplicationExceptionMapper.class);
 
     @Override
-    protected StatusType getStatus(WebApplicationException exception) {
-        return exception.getResponse().getStatusInfo();
+    public Response toResponse(WebApplicationException exception) {
+        log.warn(this.getClass().getSimpleName() + " is deprecated. Servers should throw ServiceExceptions instead.");
+
+        String errorInstanceId = UUID.randomUUID().toString();
+        if (exception instanceof ForbiddenException) {
+            return JsonExceptionMapper.createResponse(
+                    ErrorType.PERMISSION_DENIED, errorInstanceId, exception.getClass().getName());
+        } else if (exception instanceof NotFoundException) {
+            return JsonExceptionMapper.createResponse(
+                    ErrorType.NOT_FOUND, errorInstanceId, exception.getClass().getName());
+        } else if (exception instanceof BadRequestException || exception instanceof ParamException) {
+            return JsonExceptionMapper.createResponse(
+                    ErrorType.INVALID_ARGUMENT, errorInstanceId, exception.getClass().getName());
+        } else {
+            return JsonExceptionMapper.createResponse(
+                    exception.getResponse().getStatus(), exception.getClass().getName(),
+                    exception.getClass().getSimpleName(), errorInstanceId, exception.getClass().getName());
+        }
     }
 }

@@ -61,8 +61,8 @@ public final class ExceptionMappingTest {
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP =
             new DropwizardAppRule<>(ExceptionMappersTestServer.class, "src/test/resources/test-server.yml");
-    private static final Response.Status SERVER_EXCEPTION_STATUS = Response.Status.SERVICE_UNAVAILABLE;
-    private static final Response.Status WEB_EXCEPTION_STATUS = Response.Status.EXPECTATION_FAILED;
+    private static final Response.Status SERVER_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
+    private static final Response.Status WEB_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
     private static final int REMOTE_EXCEPTION_STATUS_CODE = 400;
 
     private WebTarget target;

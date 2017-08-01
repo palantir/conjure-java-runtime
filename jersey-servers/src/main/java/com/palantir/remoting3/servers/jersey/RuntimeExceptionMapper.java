@@ -16,15 +16,14 @@
 
 package com.palantir.remoting3.servers.jersey;
 
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response.StatusType;
+import com.palantir.remoting.api.errors.ErrorType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
 final class RuntimeExceptionMapper extends JsonExceptionMapper<RuntimeException> {
 
     @Override
-    protected StatusType getStatus(RuntimeException exception) {
-        return Status.INTERNAL_SERVER_ERROR;
+    ErrorType getErrorType(Exception exception) {
+        return ErrorType.INTERNAL;
     }
 }

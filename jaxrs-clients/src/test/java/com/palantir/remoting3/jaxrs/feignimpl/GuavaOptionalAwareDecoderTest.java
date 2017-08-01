@@ -70,8 +70,8 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
             service.getThrowsNotFound(null);
             fail();
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotFoundException"));
-            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotFoundException"));
+            assertThat(e.getMessage(), containsString("RemoteException: NOT_FOUND (Default:NotFound)"));
+            assertThat(e.getError().errorCode(), is("NOT_FOUND"));
         }
     }
 
@@ -103,19 +103,19 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
             service.getThrowsForbidden(null);
             fail();
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.ForbiddenException"));
-            assertThat(e.getError().errorCode(), is("javax.ws.rs.ForbiddenException"));
+            assertThat(e.getMessage(), containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)"));
+            assertThat(e.getError().errorCode(), is("PERMISSION_DENIED"));
         }
     }
 
     @Test
-    public void testOptionalThrowsFordidden() {
+    public void testOptionalThrowsForbbbden() {
         try {
             service.getOptionalThrowsForbidden(null);
             fail();
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.ForbiddenException"));
-            assertThat(e.getError().errorCode(), is("javax.ws.rs.ForbiddenException"));
+            assertThat(e.getMessage(), containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)"));
+            assertThat(e.getError().errorCode(), is("PERMISSION_DENIED"));
         }
     }
 
