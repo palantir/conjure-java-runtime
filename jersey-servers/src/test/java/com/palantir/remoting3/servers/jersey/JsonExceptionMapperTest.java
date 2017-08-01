@@ -26,7 +26,7 @@ public final class JsonExceptionMapperTest {
 
     private final JsonExceptionMapper<RuntimeException> mapper = new JsonExceptionMapper<RuntimeException>() {
         @Override
-        ErrorType getErrorType(Exception exception) {
+        ErrorType getErrorType(RuntimeException exception) {
             return ErrorType.INVALID_ARGUMENT;
         }
     };
