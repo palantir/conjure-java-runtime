@@ -30,7 +30,7 @@ public final class JaxRsScalaClient {
 
     /** See {@link JaxRsClient}. */
     public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration config) {
-        return new FeignJaxRsClientBuilder(config).build(serviceClass, userAgent);
+        return new FeignJaxRsScalaClientBuilder(config).build(serviceClass, userAgent);
     }
 
     /** See {@link JaxRsClient}. */
