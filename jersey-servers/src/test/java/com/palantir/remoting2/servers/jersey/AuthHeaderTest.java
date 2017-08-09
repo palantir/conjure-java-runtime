@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-public class AuthHeaderTest {
+public final class AuthHeaderTest {
 
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(OptionalTestServer.class,
