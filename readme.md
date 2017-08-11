@@ -242,21 +242,25 @@ infrastructure to handle "unsafe" and "safe" exception parameters appropriately.
 types as follows:
 
 ```
-public static final ErrorType DATASET_NOT_FOUND = 
-  ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "MyApplication:DatasetNotFound");
+class Errors {
+  private static final ErrorType DATASET_NOT_FOUND =
+    ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "MyApplication:DatasetNotFound");
 
-void someMethod(String datasetId) {
-    if (!exists(datasetId)) {
-        // Note that only SafeArg parameters are sent to the caller in the resulting SerializableError.
-        throw new ServiceException(
-                DATASET_NOT_FOUND, 
-                SafeArg.of("datasetId", datasetId), 
-                UnsafeArg.of("sensitiveInfo", 42));
-    }
+  static ServiceException datasetNotFound(DatasetId datasetId, String userName) {
+    // Note that only SafeArg parameters are sent to the caller in the resulting SerializableError.
+    return new ServiceException(
+            DATASET_NOT_FOUND, SafeArg.of("datasetId", datasetId), UnsafeArg.of("userName", userName));
+  }
+}
+
+void someMethod(String datasetId, String userName) {
+  if (!exists(datasetId)) {
+    throw Errors.datasetNotFound(datasetId, userName);
+  }
 }
 ```
 
-The `HttpRemotingJerseyFeature` installs exception mappers for `ServiceException`. The exception mapper sets the
+The `HttpRemotingJerseyFeature` installs an exception mapper for `ServiceException`. The exception mapper sets the
 response media type to `application/json` and returns as response body a JSON representation of a `SerializableError`
 capturing the error code, error name, and error parameters. The resulting JSON response is:
 
@@ -265,7 +269,7 @@ capturing the error code, error name, and error parameters. The resulting JSON r
   "errorCode": "INVALID_ARGUMENT",
   "errorName": "MyApplication:DatasetNotFound",
   "errorInstanceId": "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
-  "parameters" {
+  "parameters": {
     "datasetId": "123abc",
   }
 }
@@ -279,7 +283,7 @@ deserialized server-side `SerializableError`. The error codes and names of the `
 try {
     service.someMethod();
 catch (RemoteExcetion e) {
-    if (e.getError().errorName().equals("MyApplication.DatasetNotFound")) {
+    if (e.getError().errorName().equals("MyApplication:DatasetNotFound")) {
         handleError(e.getError().parameters().get("datasetId"));
     } else {
         throw new RuntimeException("Failed to call someMethod()", e);
