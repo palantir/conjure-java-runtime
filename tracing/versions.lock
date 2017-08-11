@@ -65,7 +65,7 @@
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.0.0-rc3"
+            "locked": "1.0.0"
         },
         "com.palantir.remoting3:jackson-support": {
             "project": true
@@ -140,7 +140,7 @@
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.0.0-rc3"
+            "locked": "1.0.0"
         },
         "com.palantir.remoting3:jackson-support": {
             "project": true
