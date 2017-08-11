@@ -44,7 +44,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
     private AsyncSerializableErrorCallAdapterFactory() {}
 
     @Override
-    public CallAdapter<?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
+    public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
         if (getRawType(returnType) != CompletableFuture.class) {
             return null;
         }
@@ -62,22 +62,25 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
         return null;
     }
 
-    private static class BodyCallAdapter implements CallAdapter<CompletableFuture<?>> {
+    private static class BodyCallAdapter<R> implements CallAdapter<R, CompletableFuture<R>> {
         private final Type responseType;
 
         BodyCallAdapter(Type responseType) {
             this.responseType = responseType;
         }
 
-        @Override public Type responseType() {
+        @Override
+        public Type responseType() {
             return responseType;
         }
 
-        @Override public <R> CompletableFuture<R> adapt(final Call<R> call) {
+        @Override
+        public CompletableFuture<R> adapt(final Call<R> call) {
             ((AsyncCallTag) call.request().tag()).setCallAsync();
 
             final CompletableFuture<R> future = new CompletableFuture<R>() {
-                @Override public boolean cancel(boolean mayInterruptIfRunning) {
+                @Override
+                public boolean cancel(boolean mayInterruptIfRunning) {
                     if (mayInterruptIfRunning) {
                         call.cancel();
                     }
@@ -86,7 +89,8 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
             };
 
             call.enqueue(new Callback<R>() {
-                @Override public void onResponse(Call<R> call, Response<R> response) {
+                @Override
+                public void onResponse(Call<R> call, Response<R> response) {
                     if (response.isSuccessful()) {
                         future.complete(response.body());
                     } else {
@@ -99,7 +103,8 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
                     }
                 }
 
-                @Override public void onFailure(Call<R> call, Throwable throwable) {
+                @Override
+                public void onFailure(Call<R> call, Throwable throwable) {
                     future.completeExceptionally(throwable);
                 }
             });
