@@ -14,9 +14,6 @@
     <property name="charset" value="UTF-8"/>
     <property name="severity" value="error"/>
 
-    <module name="FileLength"> <!-- Java Style Guide: File length: 2000 lines -->
-        <property name="fileExtensions" value="java"/>
-    </module>
     <module name="FileTabCharacter"/> <!-- Java Style Guide: Whitespace characters -->
     <module name="NewlineAtEndOfFile"> <!-- Java Style Guide: Line ending: LF -->
         <property name="lineSeparator" value="lf"/>
@@ -47,6 +44,11 @@
     </module>
     <module name="SuppressWarningsFilter"/> <!-- baseline-gradle: README.md -->
     <module name="SuppressionCommentFilter"/> <!-- baseline-gradle: README.md -->
+    <module name="SuppressionCommentFilter">
+        <property name="offCommentFormat" value="CHECKSTYLE.OFF\: ([\w\|]+)"/>
+        <property name="onCommentFormat" value="CHECKSTYLE.ON\: ([\w\|]+)"/>
+        <property name="checkFormat" value="$1"/>
+    </module>
     <module name="TreeWalker">
         <module name="AbbreviationAsWordInName"> <!-- Java Style Guide: Camel case : defined -->
             <property name="ignoreFinal" value="false"/>
@@ -71,7 +73,7 @@
         </module>
         <module name="AvoidStarImport"/> <!-- Java Style Guide: No wildcard imports -->
         <module name="AvoidStaticImport"> <!-- Java Style Guide: No static imports -->
-            <property name="excludes" value="org.junit.Assert.*,org.junit.Assume.*,org.hamcrest.Matchers.*,org.mockito.Mockito.*,org.mockito.Matchers.*,org.assertj.core.api.Assertions.*,com.google.common.base.Preconditions.*,org.apache.commons.lang3.Validate.*,com.google.common.truth.Truth.*"/>
+            <property name="excludes" value="org.junit.Assert.*,org.junit.Assume.*,org.hamcrest.Matchers.*,org.mockito.ArgumentMatchers.*,org.mockito.Mockito.*,org.mockito.Matchers.*,org.assertj.core.api.Assertions.*,com.google.common.base.Preconditions.*,org.apache.commons.lang3.Validate.*,com.google.common.truth.Truth.*"/>
         </module>
         <module name="ClassTypeParameterName"> <!-- Java Style Guide: Type variable names -->
             <property name="format" value="(^[A-Z][0-9]?)$|([A-Z][a-zA-Z0-9]*[T]$)"/>
@@ -107,9 +109,21 @@
             <property name="setterCanReturnItsClass" value="true"/>
         </module>
         <module name="HideUtilityClassConstructor"/> <!-- Java Coding Guidelines: Private constructors -->
+        <module name="IllegalImport"> <!-- Java Coding Guidelines: Use JUnit 4-style test classes and assertions -->
+            <property name="illegalPkgs" value="junit.framework"/>
+            <message key="import.illegal" value="Use JUnit 4-style (org.junit.*) test classes and assertions instead of JUnit 3 (junit.framework.*)."/>
+        </module>
         <module name="IllegalImport"> <!-- Java Coding Guidelines: Import the canonical package -->
-            <property name="illegalPkgs" value="sun, org.elasticsearch.common.base, org.elasticsearch.common.joda, jersey.repackaged.com.google.common, com.google.api.client.repackaged, org.apache.hadoop.thirdparty.guava"/>
+            <property name="illegalPkgs" value="sun, org.elasticsearch.common.base, jersey.repackaged.com.google.common, com.google.api.client.repackaged, org.apache.hadoop.thirdparty.guava, com.clearspring.analytics.util, org.spark_project.guava"/>
             <message key="import.illegal" value="Must not import repackaged classes."/>
+        </module>
+        <module name="IllegalImport">
+            <property name="illegalPkgs" value="org.apache.commons.lang"/>
+            <message key="import.illegal" value="lang is deprecated, use lang3 instead."/>
+        </module>
+        <module name="IllegalImport">
+            <property name="illegalPkgs" value="org.apache.commons.math"/>
+            <message key="import.illegal" value="math is deprecated, use math3 instead."/>
         </module>
         <module name="IllegalImport">
             <property name="illegalPkgs" value="org.apache.log4j, org.apache.logging.log4j, java.util.logging, ch.qos.logback"/>
@@ -160,7 +174,6 @@
         </module>
         <module name="MethodParamPad"/> <!-- Java Style Guide: Horizontal whitespace -->
         <module name="MissingDeprecated"/> <!-- Java Coding Guide: Deprecate per annotation and Javadoc -->
-        <module name="MissingSwitchDefault"/> <!-- Java Style Guide: The default case is present -->
         <module name="ModifiedControlVariable"/> <!-- Java Coding Guide: For-loop control variables: never modified -->
         <module name="ModifierOrder"/> <!-- Java Style Guide: Modifiers -->
         <module name="MultipleVariableDeclarations"/> <!-- Java Style Guide: One variable per declaration -->
@@ -274,14 +287,6 @@
             <property name="format" value="\? extends Object\W"/>
             <property name="message" value="Use ? rather than ? extends Object."/>
         </module>
-        <module name="RegexpSinglelineJava"> <!-- Java Coding Guidelines: Libraries -->
-            <property name="format" value="^import org\.apache\.commons\.lang\."/>
-            <property name="message" value="lang is deprecated, use lang3 instead."/>
-        </module>
-        <module name="RegexpSinglelineJava"> <!-- Java Coding Guidelines: Libraries -->
-            <property name="format" value="^import org\.apache\.commons\.math\."/>
-            <property name="message" value="math is deprecated, use math3 instead."/>
-        </module>
         <module name="RegexpSinglelineJava">
             <property name="format" value="\bPreconditions\.check.*\{\}"/>
             <property name="message" value="Use printf-style formatting in Preconditions, not '{}' style formatting."/>
@@ -298,7 +303,7 @@
             <property name="ignoreComments" value="true"/>
         </module>
         <module name="RegexpSinglelineJava">
-            <property name="format" value="\bCharset.forName\(|\bCharsets\."/>
+            <property name="format" value="\bCharsets\."/>
             <property name="message" value="Use JDK StandardCharsets instead of alternatives."/>
         </module>
         <module name="RegexpSinglelineJava">
@@ -307,16 +312,27 @@
         </module>
         <module name="RegexpSinglelineJava">
             <property name="format" value="\bIOUtils\.toString\("/>
-            <property name="message" value="Prefer Guava''s {CharStreams,Files,Resources}.toString to avoid charset/stream closing issues."/>
+            <property name="message" value="Prefer Guava''s [CharStreams,Files,Resources].toString to avoid charset/stream closing issues."/>
         </module>
         <module name="RegexpSinglelineJava">
             <property name="format" value="static enum"/>
             <property name="message" value="Redundant ''static'' modifier."/>
         </module>
-        <module name="RightCurly"/> <!-- Java Style Guide: Nonempty blocks: K & R style -->
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="(\/\/TODO)|(\/\/ TODO:)|(\/\/ TODO\(\))|(\/\/ TODO\(.*\):[^ ])|(\/\/ TODO\(.*\)[^:])"/>
+            <property name="message" value="TODO format: // TODO(flastname): explanation"/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="(void setUp\(\))|(void setup\(\))|(void setupStatic\(\))|(void setUpStatic\(\))|(void beforeTest\(\))|(void teardown\(\))|(void tearDown\(\))|(void beforeStatic\(\))|(void afterStatic\(\))"/>
+            <property name="message" value="Test setup/teardown methods are called before(), beforeClass(), after(), afterClass(), but not setUp, teardown, etc."/>
+        </module>
+        <module name="RightCurly"> <!-- Java Style Guide: Nonempty blocks: K & R style -->
+            <property name="option" value="same"/>
+            <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_DO"/>
+        </module>
         <module name="RightCurly"> <!-- Java Style Guide: Nonempty blocks: K & R style -->
             <property name="option" value="alone"/>
-            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO, STATIC_INIT, INSTANCE_INIT"/>
+            <property name="tokens" value="CLASS_DEF, METHOD_DEF, CTOR_DEF, LITERAL_FOR, LITERAL_WHILE, STATIC_INIT, INSTANCE_INIT"/>
         </module>
         <module name="SeparatorWrap"> <!-- Java Style Guide: Where to break -->
             <property name="tokens" value="DOT"/>

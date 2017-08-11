@@ -10,7 +10,7 @@ buildscript {
         classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:4.4.0'
         classpath 'com.netflix.nebula:nebula-dependency-recommender:4.0.2'
         classpath 'com.netflix.nebula:nebula-publishing-plugin:4.9.1'
-        classpath 'com.palantir:gradle-baseline-java:0.9.2'
+        classpath 'com.palantir.baseline:gradle-baseline-java:0.14.0'
         classpath 'gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.2.0'
         classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.9'
     }
@@ -25,12 +25,16 @@ apply plugin: 'com.palantir.baseline-config' // provides baselineUpdateConfig ta
 apply plugin: 'com.palantir.baseline-idea'
 
 repositories {
-    jcenter() // needed for baselineUpdateConfig task
+    maven { url  "http://palantir.bintray.com/releases" }
+}
+
+dependencies {
+    baseline "com.palantir.baseline:gradle-baseline-java-config:0.14.0@zip"
 }
 
 allprojects {
     version System.env.CIRCLE_TAG ?: gitVersion()
-    group 'com.palantir.remoting2'
+    group 'com.palantir.remoting3'
 
     apply plugin: 'com.palantir.configuration-resolver'
     apply plugin: 'nebula.dependency-recommender'
@@ -49,6 +53,7 @@ subprojects {
 
     repositories {
         jcenter()
+        maven { url "http://palantir.bintray.com/releases" }
     }
 
     sourceCompatibility = 1.8

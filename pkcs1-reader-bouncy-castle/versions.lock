@@ -15,16 +15,23 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:ssl-config"
+                "com.palantir.remoting-api:ssl-config",
+                "com.palantir.remoting3:keystores"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting2:ssl-config"
+                "com.palantir.remoting3:keystores"
             ]
         },
-        "com.palantir.remoting2:ssl-config": {
+        "com.palantir.remoting-api:ssl-config": {
+            "locked": "1.0.0",
+            "transitive": [
+                "com.palantir.remoting3:keystores"
+            ]
+        },
+        "com.palantir.remoting3:keystores": {
             "project": true
         },
         "org.bouncycastle:bcpkix-jdk15on": {
@@ -53,16 +60,23 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.6.7",
             "transitive": [
-                "com.palantir.remoting2:ssl-config"
+                "com.palantir.remoting-api:ssl-config",
+                "com.palantir.remoting3:keystores"
             ]
         },
         "com.google.guava:guava": {
             "locked": "18.0",
             "transitive": [
-                "com.palantir.remoting2:ssl-config"
+                "com.palantir.remoting3:keystores"
             ]
         },
-        "com.palantir.remoting2:ssl-config": {
+        "com.palantir.remoting-api:ssl-config": {
+            "locked": "1.0.0",
+            "transitive": [
+                "com.palantir.remoting3:keystores"
+            ]
+        },
+        "com.palantir.remoting3:keystores": {
             "project": true
         },
         "org.bouncycastle:bcpkix-jdk15on": {

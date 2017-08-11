@@ -4,15 +4,12 @@ apply from: "${rootDir}/gradle/publish.gradle"
 apply from: "${rootDir}/gradle/publish-bom.gradle"
 
 dependencies {
+    compile project(":error-handling")
     compile project(":extras:jackson-support")
     compile project(":extras:refresh-utils")
-    compile project(":error-handling")
-    compile project(":http-clients-api")
-    compile project(":service-config")
+    compile project(":http-clients")
+    compile project(":keystores")
     compile project(":tracing-okhttp3")
-    // ssl-config is not used in this project, but we depend on it here in order to provide
-    // it transitively to users of retrofit-clients as a convenience.
-    runtime project(":ssl-config")
 
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.squareup.retrofit2:converter-jackson"
@@ -26,10 +23,4 @@ dependencies {
     testCompile "org.assertj:assertj-core"
 
     processor "org.immutables:value"
-}
-
-configurations.all {
-    resolutionStrategy {
-        force "com.squareup.okhttp3:okhttp:3.4.1"
-    }
 }

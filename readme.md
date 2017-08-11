@@ -8,11 +8,11 @@ on [Feign](https://github.com/OpenFeign/feign) or [Retrofit](http://square.githu
 service definitions as a server. Refer to the [API Contract](#api-contract) section for details on the contract between
 clients and servers. This library requires Java 8.
 
-
 Core libraries:
 - jaxrs-clients: Clients for JAX-RS-defined service interfaces
 - retrofit2-clients: Clients for Retrofit-defined service interfaces
 - jersey-servers: Configuration library for Dropwizard/Jersey servers
+- [http-remoting-api](https://github.com/palantir/http-remoting-api): API classes for service configuration, tracing, and error propagation
 
 # Usage
 
@@ -24,39 +24,41 @@ repositories {
 }
 
 dependencies {
-  compile "com.palantir.remoting2:jaxrs-clients:$version"
-  compile "com.palantir.remoting2:retrofit2-clients:$version"
-  compile "com.palantir.remoting2:jersey-servers:$version"
+  compile "com.palantir.remoting3:jaxrs-clients:$version"
+  compile "com.palantir.remoting3:retrofit2-clients:$version"
+  compile "com.palantir.remoting3:jersey-servers:$version"
   // optional support for PEM key store type using Bouncy Castle libraries:
-  //     compile "com.palantir.remoting2:pkcs1-reader-bouncy-castle:$version"
+  //     compile "com.palantir.remoting3:pkcs1-reader-bouncy-castle:$version"
   // optional support for PEM key store type using Sun libraries:
-  //     compile "com.palantir.remoting2:pkcs1-reader-sun:$version"
+  //     compile "com.palantir.remoting3:pkcs1-reader-sun:$version"
 }
 ```
 
 
 ## jaxrs-clients
-Provides the `JaxRsClient` factory for creating clients for JAX-RS services. Example:
+Provides the `JaxRsClient` factory for creating Feign-based clients for JAX-RS APIs. SSL configuration is mandatory for
+all clients, plain-text HTTP is not supported. Example:
+
 ```java
-MyService service = JaxRsClient.builder()
-    .build(MyService.class, "my user agent", "https://my-server/");
+SslConfiguration sslConfig = SslConfiguration.of(Paths.get("path/to/trustStore""));
+ClientConfiguration config = ClientConfigurations.of(
+        ImmutableList.copyOf("https://url-to-server:6789"),
+        SslSocketFactories.createSslSocketFactory(sslConfig),
+        SslSocketFactories.createX509TrustManager(sslConfig));
+MyService service = JaxRsClient.create(MyService.class, "my user agent", config);
 ```
-The client is implemented using Feign; however, the Feign dependency is hidden away from both the Java API and the
-classpath (via shadowing).
 
 The `JaxRsClient#create` factory comes in two flavours: one for creating immutable clients given a fixed
-`ServiceConfiguration`, and one for creating mutable clients whose configuration (e.g., server URLs, timeouts, SSL
-configuration, etc.) changes when the underlying `ServiceConfiguration` changes.
+`ClientConfiguration`, and one for creating mutable clients whose configuration (e.g., server URLs, timeouts, SSL
+configuration, etc.) changes when the underlying `ClientConfiguration` changes.
 
 ## retrofit2-clients
 Similar to `jaxrs-clients`, but generates clients using the Retrofit library. Example:
 
 ```java
-MyService service = Retrofit2Client.builder()
-    .build(MyService.class, "my user agent", "https://my-server/");
+ClientConfiguration config = ... as above... ;
+MyService service = Retrofit2Client.create(MyService.class, "my user agent", config);
 ```
-
-Similar to `JaxRsClient`, the `Retrofit2Client#create` factory can create mutable and immutable clients.
 
 ## jersey-servers
 Provides Dropwizard/Jersey exception mappers for translating common JAX-RS exceptions to appropriate HTTP error codes. A
@@ -108,7 +110,7 @@ The `tracing` library can be used independently of `jaxrs-clients` or `retrofit2
 ```groovy
 // build.gradle
 dependencies {
-  compile "com.palantir.remoting2:tracing:$version"
+  compile "com.palantir.remoting3:tracing:$version"
 }
 ```
 ```java
@@ -123,27 +125,31 @@ try {
 ```
 
 
-## service-config
+## service-config (http-remoting-api)
 Provides utilities for setting up service clients from file-based configuration. Example:
 
 ```yaml
 # config.yml
 services:
-  myService:  # the key used in `config.getServices().get("myService")` below
+  security:
+    # default truststore for all clients
+    trustStorePath: path/to/trustStore.jks
+  myService:  # the key used in `factory.get("myService")` below
     uris:
       - https://my-server/
-    security:
-      trustStorePath: path/to/trustStore.jks
+    # optionally set a myService-specific truststore
+    # security:
+    #   trustStorePath: path/to/trustStore.jks
 ```
 
 ```java
-ServiceDiscoveryConfiguration config = readFromYaml("path/to/config.yml");
-MyService service = JaxRsClient.create(
-    MyService.class, "my user agent", config.getServices().get("myService"));
+ServiceConfigBlock config = readFromYaml("config.yml");
+ServiceConfigurationFactory factory = ServiceConfigurationFactory.of(config);
+MyService client = JaxRsClient.create(MyService.class, "my-agent", ClientConfigurations.of(factory.get("myService")));
 ```
 
 
-## ssl-config
+## keystores and ssl-config (http-remoting-api)
 
 Provides utilities for interacting with Java trust stores and key stores and acquiring `SSLSocketFactory` instances
 using those stores, as well as a configuration class for use in server configuration files.
@@ -212,8 +218,8 @@ The `pkcs1-reader-sun` does not include any extra dependencies, but assumes the 
 available as part of most popular JVM implementations, including the Oracle and OpenJDK JVMs for
 Java 7 and Java 8.
 
-## error-handling
-Provides utilities for relaying Java exceptions across JVM boundaries by serializing exceptions as JSON POJOs.
+## errors (http-remoting-api)
+Provides utilities for relaying service errors across service boundaries (see below).
 
 
 # API Contract
@@ -227,28 +233,71 @@ Jackson `ObjectMapper` with `GuavaModule`, `ShimJdk7Module` (same as Jackson’s
 requirement) and `Jdk8Module`. Servers must not expose parameters or return values that cannot be handled by this object
 mapper.
 
-#### Error propagation
-The `HttpRemotingJerseyFeature` routine installs exception mappers for `IllegalArgumentException`,
-`NoContentException`, `RuntimeException` and `WebApplicationException`. The exception mapper sets the response media
-type to `application/json` and returns as response body a JSON representation of a `SerializableError` capturing the
-message, exception name, and optionally stacktrace of the exception. Both JaxRsClient and Retrofit2Client intercept
-non-successful HTTP responses and throw a `RemoteException` wrapping the deserialized server-side `SerializableError`.
-The error name of the `RemoteException` is defined by the service API and clients should switch&dispatch based on the
-error name. The `SerializableError` format is:
 
-```json
-{
-  "message": "A string explaning the error",
-  "exceptionClass": "applicationSpecificErrorName",
-  "stackTrace": [ {"methodName":"...","fileName":"...","lineNumber":...,"className":"...","nativeMethod":false, {...} ]
+#### Error propagation
+Servers should use the `ServiceException` class to propagate application-specific errors to its callers. The
+`ServiceException` class exposes standard error codes that clients can handle in a well-defined manner; further,
+ServiceException implements [SafeLoggable](https://github.com/palantir/safe-logging) and thus allows logging
+infrastructure to handle "unsafe" and "safe" exception parameters appropriately. Typically, services define its error
+types as follows:
+
+```
+public static final ErrorType DATASET_NOT_FOUND = 
+  ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "MyApplication:DatasetNotFound");
+
+void someMethod(String datasetId) {
+    if (!exists(datasetId)) {
+        // Note that only SafeArg parameters are sent to the caller in the resulting SerializableError.
+        throw new ServiceException(
+                DATASET_NOT_FOUND, 
+                SafeArg.of("datasetId", datasetId), 
+                UnsafeArg.of("sensitiveInfo", 42));
+    }
 }
 ```
 
-Note that the JSON field `exceptionClass` carries this name for historic and back-compatibility reasons and will be
-changed to `errorName` in a future version of this library. The optional `stackTrace` field contains a list of
-serialized Java `StackTraceElement` objects indicating the server-side stack trace at the time of the exception. A
-future version of http-remoting may replace the stack trace mechanism with a more OS-independent API for relaying stack
-traces.
+The `HttpRemotingJerseyFeature` installs exception mappers for `ServiceException`. The exception mapper sets the
+response media type to `application/json` and returns as response body a JSON representation of a `SerializableError`
+capturing the error code, error name, and error parameters. The resulting JSON response is:
+
+```json
+{
+  "errorCode": "INVALID_ARGUMENT",
+  "errorName": "MyApplication:DatasetNotFound",
+  "errorInstanceId": "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
+  "parameters" {
+    "datasetId": "123abc",
+  }
+}
+```
+
+Both JaxRsClient and Retrofit2Client intercept non-successful HTTP responses and throw a `RemoteException` wrapping the
+deserialized server-side `SerializableError`. The error codes and names of the `ServiceException` and
+`SerializableError` are defined by the service API, and clients should handle errors based on the error code and name:
+
+```
+try {
+    service.someMethod();
+catch (RemoteExcetion e) {
+    if (e.getError().errorName().equals("MyApplication.DatasetNotFound")) {
+        handleError(e.getError().parameters().get("datasetId"));
+    } else {
+        throw new RuntimeException("Failed to call someMethod()", e);
+    }
+}
+```
+
+Frontends receiving such errors should use a combination of error code, error name, and parameters to display localized,
+user friendly error information. For example, the above error could be surfaced as *"The requested dataset with id
+123abc could not be found"*.
+
+To support **legacy server implementations**, the `HttpRemotingJerseyFeature` also installs exception mappers for
+`IllegalArgumentException`, `NoContentException`, `RuntimeException` and `WebApplicationException`. The exceptions
+typically yield `SerializableError`s with `exceptionClass=errorCode=<exception classname>` and
+`message=errorName=<exception message>`. Clients should refrain from displaying the `message` or `errorName` fields to
+user directly. Services should prefer to throw `ServiceException`s instead of the above, since they are easier to
+consume for clients and support transmitting exception parameters in a safe way.
+
 
 #### Serialization of Optional and Nullable objects
 `@Nullable` or `Optional<?>` fields in complex types are serialized using the standard Jackson mechanism:
