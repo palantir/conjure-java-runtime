@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.collect.ImmutableList;
 import com.palantir.remoting.api.errors.QosException;
 import java.net.URL;
-import java.time.Duration;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import org.junit.Test;
@@ -31,19 +30,11 @@ public final class QosExceptionMapperTest {
     private static final ExceptionMapper<QosException> mapper = new QosExceptionMapper();
 
     @Test
-    public void testRetryNow() throws Exception {
-        QosException exception = QosException.retryNow();
-        Response response = mapper.toResponse(exception);
-        assertThat(response.getStatus()).isEqualTo(307);
-        assertThat(response.getHeaders()).isEmpty();
-    }
-
-    @Test
-    public void testRetryLater() throws Exception {
-        QosException exception = QosException.retryLater(Duration.ofMinutes(1));
+    public void testRetry() throws Exception {
+        QosException exception = QosException.retry();
         Response response = mapper.toResponse(exception);
         assertThat(response.getStatus()).isEqualTo(429);
-        assertThat(response.getHeaders()).containsEntry("Retry-After", ImmutableList.of("60"));
+        assertThat(response.getHeaders()).isEmpty();
     }
 
     @Test

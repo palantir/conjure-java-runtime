@@ -37,8 +37,9 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
@@ -78,8 +79,8 @@ public final class ExceptionMappingTest {
     }
 
     /**
-     * These tests confirm that {@link WebApplicationException}s are handled by the
-     * {@link WebApplicationExceptionMapper} rather than the {@link RuntimeExceptionMapper}
+     * These tests confirm that {@link WebApplicationException}s are handled by the {@link
+     * WebApplicationExceptionMapper} rather than the {@link RuntimeExceptionMapper}
      */
     @Test
     public void testForbiddenException() throws NoSuchMethodException, SecurityException {
@@ -145,10 +146,10 @@ public final class ExceptionMappingTest {
 
     @Test
     public void testQosException() throws Exception {
-        Response response = target.path("throw-qos-retry-in-1min-exception").request().get();
+        Response response = target.path("throw-qos-retry-foo-exception").request().get();
 
-        assertThat(response.getStatus(), is(429));
-        assertThat(response.getHeaderString("Retry-After"), is("60"));
+        assertThat(response.getStatus(), is(308));
+        assertThat(response.getHeaderString("Location"), is("http://foo"));
     }
 
     public static class ExceptionMappersTestServer extends Application<Configuration> {
@@ -195,8 +196,12 @@ public final class ExceptionMappingTest {
         }
 
         @Override
-        public String throwQosRetryInOneMinException() {
-            throw QosException.retryLater(Duration.ofMinutes(1));
+        public String throwQosRetryFooException() {
+            try {
+                throw QosException.retryOther(new URL("http://foo"));
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -229,7 +234,7 @@ public final class ExceptionMappingTest {
         String throwServiceException();
 
         @GET
-        @Path("/throw-qos-retry-in-1min-exception")
-        String throwQosRetryInOneMinException();
+        @Path("/throw-qos-retry-foo-exception")
+        String throwQosRetryFooException();
     }
 }

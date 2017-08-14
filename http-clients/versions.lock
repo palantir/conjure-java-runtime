@@ -35,10 +35,10 @@
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.0.0-rc5-1-g466169c"
+            "locked": "1.1.0-beta1"
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.0.0-rc5-1-g466169c",
+            "locked": "1.1.0-beta1",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
@@ -96,10 +96,10 @@
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.0.0-rc5-1-g466169c"
+            "locked": "1.1.0-beta1"
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.0.0-rc5-1-g466169c",
+            "locked": "1.1.0-beta1",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
