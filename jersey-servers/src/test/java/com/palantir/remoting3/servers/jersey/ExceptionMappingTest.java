@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.ErrorType;
+import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting.api.errors.ServiceException;
@@ -37,6 +38,7 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
@@ -141,6 +143,14 @@ public final class ExceptionMappingTest {
         assertThat(rawError.get("parameters"), equalTo(ImmutableMap.of("arg", "value")));
     }
 
+    @Test
+    public void testQosException() throws Exception {
+        Response response = target.path("throw-qos-retry-in-1min-exception").request().get();
+
+        assertThat(response.getStatus(), is(429));
+        assertThat(response.getHeaderString("Retry-After"), is("60"));
+    }
+
     public static class ExceptionMappersTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
@@ -183,6 +193,11 @@ public final class ExceptionMappingTest {
         public String throwServiceException() {
             throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("arg", "value"));
         }
+
+        @Override
+        public String throwQosRetryInOneMinException() {
+            throw QosException.retryLater(Duration.ofMinutes(1));
+        }
     }
 
     @Path("/")
@@ -212,5 +227,9 @@ public final class ExceptionMappingTest {
         @GET
         @Path("/throw-service-exception")
         String throwServiceException();
+
+        @GET
+        @Path("/throw-qos-retry-in-1min-exception")
+        String throwQosRetryInOneMinException();
     }
 }
