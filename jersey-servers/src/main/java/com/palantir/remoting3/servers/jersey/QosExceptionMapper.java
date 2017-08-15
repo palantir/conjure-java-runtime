@@ -27,10 +27,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An {@link ExceptionMapper} that turns http-remoting {@link QosException}s into appropriate HTTP error codes and
- * headers. Four different cases are distinguished: <ol> <li>Retry any node of this service immediately: HTTP 307
- * Temporary Redirect</li> <li>Retry any node of this service after a given backoff time: HTTP 429 Too Many Requests +
- * Retry-After header</li> <li>Retry a specific (other) node of this service immediately: HTTP 308 Permanent Redirect +
- * Location header</li> <li>Don't retry any node of this service: HTTP 503 Unavailable</li> </ol>
+ * headers. Three different cases are distinguished: <ol> <li>Retry any node of this service some time later: HTTP 429
+ * Too Many Requests</li> <li>Retry a specific (other) node of this service: HTTP 308 Permanent Redirect + Location
+ * header</li> <li>Don't retry any node of this service: HTTP 503 Unavailable</li> </ol>
  */
 @Provider
 final class QosExceptionMapper implements ExceptionMapper<QosException> {
