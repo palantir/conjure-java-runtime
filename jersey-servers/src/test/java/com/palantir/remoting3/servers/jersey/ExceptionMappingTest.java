@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.ErrorType;
+import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting.api.errors.ServiceException;
@@ -36,6 +37,8 @@ import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import javax.ws.rs.Consumes;
@@ -76,8 +79,8 @@ public final class ExceptionMappingTest {
     }
 
     /**
-     * These tests confirm that {@link WebApplicationException}s are handled by the
-     * {@link WebApplicationExceptionMapper} rather than the {@link RuntimeExceptionMapper}
+     * These tests confirm that {@link WebApplicationException}s are handled by the {@link
+     * WebApplicationExceptionMapper} rather than the {@link RuntimeExceptionMapper}
      */
     @Test
     public void testForbiddenException() throws NoSuchMethodException, SecurityException {
@@ -141,6 +144,14 @@ public final class ExceptionMappingTest {
         assertThat(rawError.get("parameters"), equalTo(ImmutableMap.of("arg", "value")));
     }
 
+    @Test
+    public void testQosException() throws Exception {
+        Response response = target.path("throw-qos-retry-foo-exception").request().get();
+
+        assertThat(response.getStatus(), is(308));
+        assertThat(response.getHeaderString("Location"), is("http://foo"));
+    }
+
     public static class ExceptionMappersTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
@@ -183,6 +194,15 @@ public final class ExceptionMappingTest {
         public String throwServiceException() {
             throw new ServiceException(ErrorType.INVALID_ARGUMENT, SafeArg.of("arg", "value"));
         }
+
+        @Override
+        public String throwQosRetryFooException() {
+            try {
+                throw QosException.retryOther(new URL("http://foo"));
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @Path("/")
@@ -212,5 +232,9 @@ public final class ExceptionMappingTest {
         @GET
         @Path("/throw-service-exception")
         String throwServiceException();
+
+        @GET
+        @Path("/throw-qos-retry-foo-exception")
+        String throwQosRetryFooException();
     }
 }

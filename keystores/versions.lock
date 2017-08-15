@@ -22,7 +22,7 @@
             "locked": "18.0"
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.0.0"
+            "locked": "1.1.0-beta1"
         }
     },
     "runtime": {
@@ -48,7 +48,7 @@
             "locked": "18.0"
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.0.0"
+            "locked": "1.1.0-beta1"
         }
     }
 }
