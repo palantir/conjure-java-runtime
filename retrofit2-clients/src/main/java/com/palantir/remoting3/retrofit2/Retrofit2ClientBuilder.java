@@ -25,8 +25,12 @@ import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
+import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
@@ -34,10 +38,12 @@ import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
+import okhttp3.internal.Util;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder {
+    private static final ExecutorService executorService = Tracers.wrap(new Dispatcher().executorService());
 
     private static final ObjectMapper CBOR_OBJECT_MAPPER = ObjectMappers.newCborClientObjectMapper();
     private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
@@ -108,12 +114,7 @@ public final class Retrofit2ClientBuilder {
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
         client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
 
-        Dispatcher dispatcher = new Dispatcher();
-
-        dispatcher.setMaxRequests(256);
-        dispatcher.setMaxRequestsPerHost(256);
-
-        client.dispatcher(dispatcher);
+        client.dispatcher(createDispatcher());
 
         return client.build();
     }
@@ -127,5 +128,14 @@ public final class Retrofit2ClientBuilder {
                                 : CipherSuites.fastCipherSuites())
                         .build(),
                 ConnectionSpec.CLEARTEXT);
+    }
+
+    private static Dispatcher createDispatcher() {
+        Dispatcher dispatcher = new Dispatcher(executorService);
+
+        dispatcher.setMaxRequests(256);
+        dispatcher.setMaxRequestsPerHost(256);
+
+        return dispatcher;
     }
 }
