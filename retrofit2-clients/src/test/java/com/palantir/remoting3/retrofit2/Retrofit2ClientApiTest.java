@@ -146,6 +146,17 @@ public final class Retrofit2ClientApiTest extends TestBase {
         }
     }
 
+    @Test
+    public void connectionFailureWithCompletableFuture() {
+        service = Retrofit2Client.create(TestService.class, "agent",
+                createTestConfig("https://invalid.service.dev"));
+        try {
+            service.makeFutureRequest().join();
+        } catch (CompletionException e) {
+            e.printStackTrace();
+        }
+    }
+
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {
         return com.google.common.base.Optional.of(value);
     }
