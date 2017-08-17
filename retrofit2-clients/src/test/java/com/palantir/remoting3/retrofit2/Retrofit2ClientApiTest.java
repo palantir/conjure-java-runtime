@@ -18,6 +18,7 @@ package com.palantir.remoting3.retrofit2;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -144,6 +145,14 @@ public final class Retrofit2ClientApiTest extends TestBase {
             assertThat(e.getCause()).isInstanceOf(RemoteException.class);
             assertThat(((RemoteException) e.getCause()).getError()).isEqualTo(error);
         }
+    }
+
+    @Test
+    public void connectionFailureWithCompletableFuture() {
+        service = Retrofit2Client.create(TestService.class, "agent",
+                createTestConfig("https://invalid.service.dev"));
+
+        assertThatExceptionOfType(CompletionException.class).isThrownBy(() -> service.makeFutureRequest().join());
     }
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {
