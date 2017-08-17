@@ -88,7 +88,7 @@ public final class MultiServerRetryInterceptor implements Interceptor {
                 logger.warn("Failed to send request to {}", request.url(), e);
             }
         }
-        throw new IllegalStateException("Could not connect to any of the following servers: " + urls + ". "
+        throw new IOException("Could not connect to any of the following servers: " + urls + ". "
                 + "Please check that the URIs are correct and servers are accessible.", lastException);
     }
 
