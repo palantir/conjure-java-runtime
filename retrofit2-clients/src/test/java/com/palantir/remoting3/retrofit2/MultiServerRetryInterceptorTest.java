@@ -115,7 +115,7 @@ public final class MultiServerRetryInterceptorTest extends TestBase {
     }
 
     @Test
-    public void testThrowIllegalStateExceptionWhenNoServerIsAvailable() throws IOException {
+    public void testThrowIoExceptionWhenNoServerIsAvailable() throws IOException {
         serverA.shutdown();
         serverB.shutdown();
 
@@ -124,7 +124,7 @@ public final class MultiServerRetryInterceptorTest extends TestBase {
                 .get()
                 .build();
 
-        expectedException.expect(IllegalStateException.class);
+        expectedException.expect(IOException.class);
         okHttpClient.newCall(request).execute();
     }
 
