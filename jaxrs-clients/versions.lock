@@ -31,7 +31,7 @@
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens2:auth-tokens"
+                "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -52,7 +52,7 @@
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens2:auth-tokens"
+                "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
@@ -107,26 +107,26 @@
             "locked": "8.17.0"
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "1.1.0-beta1",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.remoting3:error-handling"
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.1.0-beta1",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.remoting3:http-clients"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.1.0-beta1",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.1.0-beta1",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.remoting3:tracing"
             ]
@@ -168,8 +168,8 @@
                 "com.palantir.remoting-api:errors"
             ]
         },
-        "com.palantir.tokens2:auth-tokens": {
-            "locked": "2.0.1",
+        "com.palantir.tokens:auth-tokens": {
+            "locked": "3.0.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config"
             ]
@@ -206,7 +206,7 @@
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens2:auth-tokens"
+                "com.palantir.tokens:auth-tokens"
             ]
         }
     },
@@ -242,7 +242,7 @@
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens2:auth-tokens"
+                "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -263,7 +263,7 @@
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens2:auth-tokens"
+                "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
@@ -318,26 +318,26 @@
             "locked": "8.17.0"
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "1.1.0-beta1",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.remoting3:error-handling"
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.1.0-beta1",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.remoting3:http-clients"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.1.0-beta1",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.1.0-beta1",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.remoting3:tracing"
             ]
@@ -379,8 +379,8 @@
                 "com.palantir.remoting-api:errors"
             ]
         },
-        "com.palantir.tokens2:auth-tokens": {
-            "locked": "2.0.1",
+        "com.palantir.tokens:auth-tokens": {
+            "locked": "3.0.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config"
             ]
@@ -417,7 +417,7 @@
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens2:auth-tokens"
+                "com.palantir.tokens:auth-tokens"
             ]
         }
     }
