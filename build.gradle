@@ -25,7 +25,7 @@ apply plugin: 'com.palantir.baseline-config' // provides baselineUpdateConfig ta
 apply plugin: 'com.palantir.baseline-idea'
 
 repositories {
-    jcenter() // needed for baselineUpdateConfig task
+    maven { url  "http://palantir.bintray.com/releases" }
 }
 
 allprojects {
