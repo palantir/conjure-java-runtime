@@ -4,12 +4,12 @@ apply from: "${rootDir}/gradle/publish.gradle"
 apply from: "${rootDir}/gradle/publish-bom.gradle"
 
 dependencies {
-    compile project(":error-handling")
     compile project(":extras:jackson-support")
     compile project(":extras:refresh-utils")
     compile project(":http-clients")
     compile project(":keystores")
     compile project(":tracing-okhttp3")
+    compile project(":okhttp-clients")
 
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.squareup.retrofit2:converter-jackson"

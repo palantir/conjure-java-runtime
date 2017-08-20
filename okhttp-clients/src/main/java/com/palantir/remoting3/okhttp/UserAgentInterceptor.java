@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting3.retrofit2;
+package com.palantir.remoting3.okhttp;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
+import com.google.common.base.Preconditions;
 import java.io.IOException;
 import java.util.regex.Pattern;
 import okhttp3.Interceptor;
@@ -31,7 +30,7 @@ public final class UserAgentInterceptor implements Interceptor {
     private final String userAgent;
 
     private UserAgentInterceptor(String userAgent) {
-        checkArgument(VALID_USER_AGENT.matcher(userAgent).matches(),
+        Preconditions.checkArgument(VALID_USER_AGENT.matcher(userAgent).matches(),
                 "User Agent must match pattern '%s': %s", VALID_USER_AGENT, userAgent);
         this.userAgent = userAgent;
     }

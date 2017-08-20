@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting3.retrofit2;
+package com.palantir.remoting3.okhttp;
 
 import com.palantir.remoting3.errors.SerializableErrorToExceptionConverter;
 import java.io.IOException;

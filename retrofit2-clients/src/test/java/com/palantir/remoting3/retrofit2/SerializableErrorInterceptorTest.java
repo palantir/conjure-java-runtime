@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package com.palantir.remoting3.retrofit2;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -28,6 +26,8 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
+import com.palantir.remoting3.okhttp.AsyncCallTag;
+import com.palantir.remoting3.okhttp.SerializableErrorInterceptor;
 import java.io.IOException;
 import okhttp3.Headers;
 import okhttp3.Interceptor;
@@ -38,6 +38,7 @@ import okhttp3.internal.http.RealResponseBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okio.Buffer;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -75,7 +76,7 @@ public final class SerializableErrorInterceptorTest extends TestBase {
         tag.setCallAsync();
         Response response = responseWithCode(request, 400);
         when(chain.proceed(any(Request.class))).thenReturn(response);
-        assertThat(SerializableErrorInterceptor.INSTANCE.intercept(chain), is(response));
+        assertThat(SerializableErrorInterceptor.INSTANCE.intercept(chain), Matchers.is(response));
     }
 
     @Test
@@ -88,7 +89,7 @@ public final class SerializableErrorInterceptorTest extends TestBase {
                 SerializableErrorInterceptor.INSTANCE.intercept(chain);
                 fail();
             } catch (RuntimeException e) {
-                assertThat(e.getMessage(), containsString("Error " + code));
+                assertThat(e.getMessage(), Matchers.containsString("Error " + code));
             }
         }
     }
@@ -98,7 +99,7 @@ public final class SerializableErrorInterceptorTest extends TestBase {
         Response response = responseWithCode(request, 200);
         when(chain.proceed(any(Request.class))).thenReturn(response);
 
-        assertThat(SerializableErrorInterceptor.INSTANCE.intercept(chain), is(response));
+        assertThat(SerializableErrorInterceptor.INSTANCE.intercept(chain), Matchers.is(response));
     }
 
     @Test

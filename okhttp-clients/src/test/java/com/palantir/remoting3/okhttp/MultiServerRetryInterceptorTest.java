@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting3.retrofit2;
+package com.palantir.remoting3.okhttp;
 
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -34,7 +33,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public final class MultiServerRetryInterceptorTest extends TestBase {
+public final class MultiServerRetryInterceptorTest {
     @Rule
     public final MockWebServer serverA = new MockWebServer();
     @Rule
@@ -67,10 +66,10 @@ public final class MultiServerRetryInterceptorTest extends TestBase {
 
         Call call = okHttpClient.newCall(request);
 
-        assertThat(call.execute().body().string(), is("pong"));
+        assertThat(call.execute().body().string()).isEqualTo("pong");
 
         RecordedRequest recordedRequest = serverA.takeRequest();
-        assertThat(recordedRequest.getPath(), is("/api/ping"));
+        assertThat(recordedRequest.getPath()).isEqualTo("/api/ping");
     }
 
     @Test
@@ -86,10 +85,10 @@ public final class MultiServerRetryInterceptorTest extends TestBase {
 
         Call call = okHttpClient.newCall(request);
 
-        assertThat(call.execute().body().string(), is("pong"));
+        assertThat(call.execute().body().string()).isEqualTo("pong");
 
         RecordedRequest recordedRequest = serverB.takeRequest();
-        assertThat(recordedRequest.getPath(), is("/api/ping"));
+        assertThat(recordedRequest.getPath()).isEqualTo("/api/ping");
     }
 
     @Test
@@ -108,10 +107,10 @@ public final class MultiServerRetryInterceptorTest extends TestBase {
 
         serverB.enqueue(new MockResponse().setBody("pong"));
         Call call = okHttpClient.newCall(request);
-        assertThat(call.execute().body().string(), is("pong"));
+        assertThat(call.execute().body().string()).isEqualTo("pong");
 
         RecordedRequest recordedRequest = serverB.takeRequest();
-        assertThat(recordedRequest.getPath(), is("/api/ping"));
+        assertThat(recordedRequest.getPath()).isEqualTo("/api/ping");
     }
 
     @Test
@@ -126,16 +125,5 @@ public final class MultiServerRetryInterceptorTest extends TestBase {
 
         expectedException.expect(IOException.class);
         okHttpClient.newCall(request).execute();
-    }
-
-    @Test
-    public void testRetrofit2ClientWithMultiServerRetryInterceptorRedirectToAvailableServer() throws IOException {
-        TestService service = Retrofit2Client.create(
-                TestService.class, "agent", createTestConfig(urlA.toString(), urlB.toString()));
-
-        serverA.shutdown();
-        serverB.enqueue(new MockResponse().setBody("\"pong\""));
-
-        assertThat(service.get().execute().body(), is("pong"));
     }
 }

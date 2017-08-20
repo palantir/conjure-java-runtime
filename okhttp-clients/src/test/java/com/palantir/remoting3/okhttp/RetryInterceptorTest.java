@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting3.retrofit2;
+package com.palantir.remoting3.okhttp;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -58,7 +57,7 @@ public final class RetryInterceptorTest {
         when(chain.proceed(request)).thenReturn(responseSuccess);
         Response response = retryInterceptor.intercept(chain);
 
-        assertThat(response, is(responseSuccess));
+        assertThat(response).isEqualTo(responseSuccess);
 
         verify(chain).request();
         verify(chain).proceed(request);
@@ -73,7 +72,7 @@ public final class RetryInterceptorTest {
                 .thenReturn(responseSuccess);
         Response response = retryInterceptor.intercept(chain);
 
-        assertThat(response, is(responseSuccess));
+        assertThat(response).isEqualTo(responseSuccess);
 
         verify(chain).request();
         verify(chain, times(3)).proceed(request);
@@ -89,7 +88,7 @@ public final class RetryInterceptorTest {
                 .thenReturn(responseSuccess);
         Response response = retryInterceptor.intercept(chain);
 
-        assertThat(response, is(responseFail));
+        assertThat(response).isEqualTo(responseFail);
 
         verify(chain).request();
         verify(chain, times(3)).proceed(request);
@@ -101,7 +100,7 @@ public final class RetryInterceptorTest {
         when(chain.proceed(request)).thenReturn(responseFail);
         Response response = retryInterceptor.intercept(chain);
 
-        assertThat(response, is(responseFail));
+        assertThat(response).isEqualTo(responseFail);
 
         verify(chain).request();
         verify(chain, times(3)).proceed(request);
@@ -119,7 +118,7 @@ public final class RetryInterceptorTest {
             verify(chain).request();
             verify(chain, times(3)).proceed(request);
             verifyNoMoreInteractions(chain);
-            assertThat(e.getMessage(), is("connection error"));
+            assertThat(e.getMessage()).isEqualTo("connection error");
         }
     }
 
