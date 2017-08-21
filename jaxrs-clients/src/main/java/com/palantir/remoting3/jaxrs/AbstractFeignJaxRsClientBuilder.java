@@ -29,7 +29,7 @@ import com.palantir.remoting3.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
-import com.palantir.remoting3.jaxrs.feignimpl.UserAgentInterceptor;
+import com.palantir.remoting3.okhttp.UserAgentInterceptor;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
@@ -88,12 +88,11 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
                 .errorDecoder(FeignSerializableErrorErrorDecoder.INSTANCE)
-                .client(target.wrapClient(createOkHttpClient()))
+                .client(target.wrapClient(createOkHttpClient(userAgent)))
                 .retryer(target)
                 .options(createRequestOptions())
                 .logger(new Slf4jLogger(JaxRsClient.class))
                 .logLevel(Logger.Level.BASIC)
-                .requestInterceptor(UserAgentInterceptor.of(userAgent))
                 .target(target);
     }
 
@@ -124,7 +123,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 new JacksonDecoder(objectMapper))))));
     }
 
-    private feign.Client createOkHttpClient() {
+    private feign.Client createOkHttpClient(String userAgent) {
         okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
 
         // SSL
@@ -148,6 +147,9 @@ abstract class AbstractFeignJaxRsClientBuilder {
                     .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
                     .build());
         }
+
+        // User agent setup
+        client.addInterceptor(UserAgentInterceptor.of(userAgent));
 
         // cipher setup
         client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
