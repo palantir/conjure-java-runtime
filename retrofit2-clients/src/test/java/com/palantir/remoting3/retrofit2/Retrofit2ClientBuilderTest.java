@@ -22,16 +22,22 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
+import java.io.IOException;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public final class Retrofit2ClientBuilderTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void testRelativeRetrofitEndPoints_workWithArbitraryBaseUrlFormats() throws Exception {
@@ -95,5 +101,39 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
             assertThat(e.getMessage(), startsWith(
                     "Unrecognized server URI in the request http://localhost:" + server.getPort() + "/Api."));
         }
+    }
+
+    @Test
+    public void testRetrofit2ClientWithMultiServerRetryInterceptorRedirectToAvailableServer() throws IOException {
+        MockWebServer otherServer = new MockWebServer();
+        TestService service = Retrofit2Client.create(
+                TestService.class, "agent", createTestConfig(
+                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort()),
+                        String.format(
+                                "http://%s:%s/api/", otherServer.getHostName().toUpperCase(), otherServer.getPort()))
+        );
+
+        otherServer.enqueue(new MockResponse().setBody("\"pong\""));
+        assertThat(service.get().execute().body(), is("pong"));
+    }
+
+    @Test
+    public void testUserAgent_defaultHeaderIsSent() throws InterruptedException, IOException {
+        String userAgent = "TestSuite/1 (0.0.0)";
+        TestService service = Retrofit2Client.create(
+                TestService.class, userAgent, createTestConfig(
+                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
+        server.enqueue(new MockResponse().setBody("\"server\""));
+        service.get().execute();
+
+        RecordedRequest capturedRequest = server.takeRequest();
+        assertThat(capturedRequest.getHeader("User-Agent"), is(userAgent));
+    }
+
+    @Test
+    public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()\\-#;/.,_\\s]+': !@"));
+        Retrofit2Client.create(TestService.class, "!@", createTestConfig("http://localhost:" + server.getPort()));
     }
 }

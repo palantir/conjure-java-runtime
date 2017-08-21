@@ -26,6 +26,7 @@
 package com.palantir.remoting3.retrofit2;
 
 import com.palantir.remoting3.errors.SerializableErrorToExceptionConverter;
+import com.palantir.remoting3.okhttp.AsyncCallTag;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting3.retrofit2;
+package com.palantir.remoting3.okhttp;
 
 import okhttp3.Call;
 import okhttp3.Request;
@@ -22,7 +22,7 @@ import okhttp3.Request;
 public final class AsyncCallTagCallFactory implements Call.Factory {
     private final Call.Factory delegate;
 
-    AsyncCallTagCallFactory(Call.Factory delegate) {
+    public AsyncCallTagCallFactory(Call.Factory delegate) {
         this.delegate = delegate;
     }
 

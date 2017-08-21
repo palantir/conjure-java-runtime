@@ -1,0 +1,17 @@
+apply plugin: "org.inferred.processors"
+
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile project(':error-handling')
+    compile 'com.google.guava:guava'
+    compile 'com.squareup.okhttp3:okhttp'
+    compile 'org.slf4j:slf4j-api'
+
+    testCompile "com.squareup.okhttp3:mockwebserver"
+    testCompile "junit:junit"
+    testCompile "org.mockito:mockito-core"
+    testCompile "org.assertj:assertj-core"
+
+    processor "org.immutables:value"
+}
