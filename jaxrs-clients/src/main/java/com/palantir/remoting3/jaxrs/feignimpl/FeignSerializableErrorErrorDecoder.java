@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting3.errors.SerializableErrorToExceptionConverter;
 import feign.Response;
+import feign.RetryableException;
 import feign.codec.ErrorDecoder;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +31,10 @@ public enum FeignSerializableErrorErrorDecoder implements ErrorDecoder {
 
     @Override
     public Exception decode(String methodKey, Response response) {
+        if (response.status() == 307) {
+            return new RetryableException("Status was 307 indicating this call can be retried", null);
+        }
+
         Collection<String> contentTypes =
                 HeaderAccessUtils.caseInsensitiveGet(response.headers(), HttpHeaders.CONTENT_TYPE);
         if (contentTypes == null) {

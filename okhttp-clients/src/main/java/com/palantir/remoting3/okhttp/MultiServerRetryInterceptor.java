@@ -80,7 +80,11 @@ public final class MultiServerRetryInterceptor implements Interceptor {
             }
             request = redirectRequest(request, url);
             try {
-                return chain.proceed(request);
+                Response response = chain.proceed(request);
+                if (response.code() != 307) {
+                    // Status code 307 indicates request can be retried
+                    return response;
+                }
             } catch (SocketTimeoutException | UnknownHostException | HttpRetryException
                     | MalformedURLException | SocketException | UnknownServiceException e) {
                 lastException = e;

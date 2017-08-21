@@ -56,6 +56,21 @@ public final class MultiServerRetryInterceptorTest {
     }
 
     @Test
+    public void testFailoverOn307() throws Exception {
+        Request request = new Request.Builder()
+                .url(urlA.newBuilder().addPathSegment("ping").build())
+                .get()
+                .build();
+
+        serverA.enqueue(new MockResponse().setResponseCode(307));
+        serverB.enqueue(new MockResponse().setBody("pong"));
+
+        Call call = okHttpClient.newCall(request);
+
+        assertThat(call.execute().body().string()).isEqualTo("pong");
+    }
+
+    @Test
     public void testDoNotHitSecondServerWhenFirstServerIsAvailable() throws IOException, InterruptedException {
         Request request = new Request.Builder()
                 .url(urlA.newBuilder().addPathSegment("ping").build())
