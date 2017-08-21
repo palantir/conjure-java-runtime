@@ -38,6 +38,18 @@ public final class JaxRsClientFailoverTest extends TestBase {
     public final MockWebServer server2 = new MockWebServer();
 
     @Test
+    public void testFailoverOn307() throws Exception {
+        server1.enqueue(new MockResponse().setResponseCode(307));
+        server2.enqueue(new MockResponse().setBody("\"foo\""));
+
+        Service proxy = JaxRsClient.create(Service.class, "agent",
+                createTestConfig(
+                        "http://localhost:" + server1.getPort(),
+                        "http://localhost:" + server2.getPort()));
+        assertThat(proxy.get(), is("foo"));
+    }
+
+    @Test
     public void testFailover() throws Exception {
         server1.shutdown();
         server2.enqueue(new MockResponse().setBody("\"foo\""));
