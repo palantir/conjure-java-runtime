@@ -92,8 +92,14 @@
                 "com.palantir.remoting-api:errors"
             ]
         },
-        "com.squareup.okhttp3:okhttp": {
+        "com.squareup.okhttp3:logging-interceptor": {
             "locked": "3.8.1"
+        },
+        "com.squareup.okhttp3:okhttp": {
+            "locked": "3.8.1",
+            "transitive": [
+                "com.squareup.okhttp3:logging-interceptor"
+            ]
         },
         "com.squareup.okio:okio": {
             "locked": "1.13.0",
@@ -208,8 +214,14 @@
                 "com.palantir.remoting-api:errors"
             ]
         },
-        "com.squareup.okhttp3:okhttp": {
+        "com.squareup.okhttp3:logging-interceptor": {
             "locked": "3.8.1"
+        },
+        "com.squareup.okhttp3:okhttp": {
+            "locked": "3.8.1",
+            "transitive": [
+                "com.squareup.okhttp3:logging-interceptor"
+            ]
         },
         "com.squareup.okio:okio": {
             "locked": "1.13.0",
