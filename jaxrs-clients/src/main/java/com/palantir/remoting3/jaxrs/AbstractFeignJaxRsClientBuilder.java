@@ -92,7 +92,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                 .client(target.wrapClient(createOkHttpClient(userAgent)))
                 .retryer(target)
                 .options(createRequestOptions())
-                .logLevel(Logger.Level.NONE)
+                .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
                 .target(target);
     }
 
