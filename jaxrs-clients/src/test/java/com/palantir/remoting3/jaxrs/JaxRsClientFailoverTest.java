@@ -63,10 +63,10 @@ public final class JaxRsClientFailoverTest extends TestBase {
             proxy.get();
             fail();
         } catch (RetryableException e) {
-            assertThat(e.getMessage(), startsWith("Failed to connect"));
+            assertThat(e.getMessage(), startsWith("Could not connect to any of the following servers: "));
         }
 
-        // Subsequent call (with the same proxy instance) succeeds since Feign clones the retryer.
+        // Subsequent call (with the same proxy instance) succeeds.
         MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
         anotherServer1.start(server1.getPort());
         anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));

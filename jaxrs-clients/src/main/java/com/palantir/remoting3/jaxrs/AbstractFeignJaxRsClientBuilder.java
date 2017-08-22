@@ -23,12 +23,11 @@ import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
-import com.palantir.remoting3.jaxrs.feignimpl.FailoverFeignTarget;
 import com.palantir.remoting3.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting3.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
-import com.palantir.remoting3.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
+import com.palantir.remoting3.okhttp.MultiServerRetryInterceptor;
 import com.palantir.remoting3.okhttp.OkhttpSlf4jDebugLogger;
 import com.palantir.remoting3.okhttp.UserAgentInterceptor;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
@@ -63,11 +62,19 @@ import okhttp3.logging.HttpLoggingInterceptor;
 abstract class AbstractFeignJaxRsClientBuilder {
 
     private final ClientConfiguration config;
+    /**
+     * The primary URI used to bootstrap the Feign client; this is the URI used by Feign to create an OkHttp call. Note
+     * that the {@link MultiServerRetryInterceptor} replaces this URI with a random URI from the client configuration
+     * before making the request.
+     */
+    private final String primaryUri;
 
     AbstractFeignJaxRsClientBuilder(ClientConfiguration config) {
-        this.config = config;
         Preconditions.checkArgument(config.maxNumRetries() == 0,
                 "Connection-level retries are not supported by %s", JaxRsClient.class.getSimpleName());
+        Preconditions.checkArgument(!config.uris().isEmpty(), "Must provide at least one service URI");
+        this.config = config;
+        this.primaryUri = config.uris().get(0);
     }
 
     protected abstract ObjectMapper getObjectMapper();
@@ -75,7 +82,6 @@ abstract class AbstractFeignJaxRsClientBuilder {
     protected abstract ObjectMapper getCborObjectMapper();
 
     public final <T> T build(Class<T> serviceClass, String userAgent) {
-        FailoverFeignTarget<T> target = createTarget(serviceClass, config.uris());
         ObjectMapper objectMapper = getObjectMapper();
         ObjectMapper cborObjectMapper = getCborObjectMapper();
 
@@ -89,15 +95,10 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
                 .errorDecoder(FeignSerializableErrorErrorDecoder.INSTANCE)
-                .client(target.wrapClient(createOkHttpClient(userAgent)))
-                .retryer(target)
+                .client(createOkHttpClient(userAgent, config.uris()))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
-                .target(target);
-    }
-
-    private <T> FailoverFeignTarget<T> createTarget(Class<T> serviceClass, List<String> uris) {
-        return new FailoverFeignTarget<>(uris, serviceClass, NeverRetryingBackoffStrategy.INSTANCE);
+                .target(serviceClass, primaryUri);
     }
 
     private Contract createContract() {
@@ -123,14 +124,17 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 new JacksonDecoder(objectMapper))))));
     }
 
-    private feign.Client createOkHttpClient(String userAgent) {
+    private feign.Client createOkHttpClient(String userAgent, List<String> uris) {
         okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
 
+        // Retry-aware URLs
+        client.addInterceptor(MultiServerRetryInterceptor.create(uris, true));
+
         // tracing
-        client.interceptors().add(OkhttpTraceInterceptor.INSTANCE);
+        client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
 
         // timeouts
         // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
