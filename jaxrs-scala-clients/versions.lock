@@ -96,6 +96,7 @@
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:jaxrs-clients",
                 "com.palantir.remoting3:keystores",
+                "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:refresh-utils",
                 "com.palantir.remoting3:tracing"
             ]
@@ -161,7 +162,8 @@
         "com.palantir.remoting3:error-handling": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting3:jaxrs-clients"
+                "com.palantir.remoting3:jaxrs-clients",
+                "com.palantir.remoting3:okhttp-clients"
             ]
         },
         "com.palantir.remoting3:http-clients": {
@@ -185,6 +187,12 @@
             "project": true,
             "transitive": [
                 "com.palantir.remoting3:http-clients",
+                "com.palantir.remoting3:jaxrs-clients"
+            ]
+        },
+        "com.palantir.remoting3:okhttp-clients": {
+            "project": true,
+            "transitive": [
                 "com.palantir.remoting3:jaxrs-clients"
             ]
         },
@@ -222,6 +230,7 @@
             "locked": "3.8.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
+                "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing-okhttp3"
             ]
         },
@@ -270,6 +279,7 @@
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:jaxrs-clients",
+                "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
@@ -372,6 +382,7 @@
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:jaxrs-clients",
                 "com.palantir.remoting3:keystores",
+                "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:refresh-utils",
                 "com.palantir.remoting3:tracing"
             ]
@@ -437,7 +448,8 @@
         "com.palantir.remoting3:error-handling": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting3:jaxrs-clients"
+                "com.palantir.remoting3:jaxrs-clients",
+                "com.palantir.remoting3:okhttp-clients"
             ]
         },
         "com.palantir.remoting3:http-clients": {
@@ -461,6 +473,12 @@
             "project": true,
             "transitive": [
                 "com.palantir.remoting3:http-clients",
+                "com.palantir.remoting3:jaxrs-clients"
+            ]
+        },
+        "com.palantir.remoting3:okhttp-clients": {
+            "project": true,
+            "transitive": [
                 "com.palantir.remoting3:jaxrs-clients"
             ]
         },
@@ -498,6 +516,7 @@
             "locked": "3.8.1",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
+                "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing-okhttp3"
             ]
         },
@@ -546,6 +565,7 @@
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:jaxrs-clients",
+                "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
