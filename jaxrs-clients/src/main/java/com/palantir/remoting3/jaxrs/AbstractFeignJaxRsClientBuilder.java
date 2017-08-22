@@ -29,6 +29,7 @@ import com.palantir.remoting3.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.NeverRetryingBackoffStrategy;
 import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
+import com.palantir.remoting3.okhttp.OkhttpSlf4jDebugLogger;
 import com.palantir.remoting3.okhttp.UserAgentInterceptor;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import feign.CborDelegateDecoder;
@@ -48,13 +49,13 @@ import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JAXRSContract;
 import feign.okhttp.OkHttpClient;
-import feign.slf4j.Slf4jLogger;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.TlsVersion;
+import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
  * Not meant to be implemented outside of this library.
@@ -91,8 +92,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                 .client(target.wrapClient(createOkHttpClient(userAgent)))
                 .retryer(target)
                 .options(createRequestOptions())
-                .logger(new Slf4jLogger(JaxRsClient.class))
-                .logLevel(Logger.Level.BASIC)
+                .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
                 .target(target);
     }
 
@@ -156,6 +156,9 @@ abstract class AbstractFeignJaxRsClientBuilder {
 
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
         client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
+
+        // logging
+        client.addInterceptor(new HttpLoggingInterceptor(OkhttpSlf4jDebugLogger.INSTANCE));
 
         return new OkHttpClient(client.build());
     }

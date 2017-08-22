@@ -27,6 +27,7 @@ import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.okhttp.AsyncCallTagCallFactory;
 import com.palantir.remoting3.okhttp.MultiServerRetryInterceptor;
+import com.palantir.remoting3.okhttp.OkhttpSlf4jDebugLogger;
 import com.palantir.remoting3.okhttp.RetryInterceptor;
 import com.palantir.remoting3.okhttp.SerializableErrorInterceptor;
 import com.palantir.remoting3.okhttp.UserAgentInterceptor;
@@ -41,6 +42,7 @@ import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -117,6 +119,9 @@ public final class Retrofit2ClientBuilder {
         client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
 
         client.dispatcher(createDispatcher());
+
+        // logging
+        client.addInterceptor(new HttpLoggingInterceptor(OkhttpSlf4jDebugLogger.INSTANCE));
 
         return client.build();
     }

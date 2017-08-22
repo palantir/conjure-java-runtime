@@ -6,6 +6,7 @@ dependencies {
     compile project(':error-handling')
     compile 'com.google.guava:guava'
     compile 'com.squareup.okhttp3:okhttp'
+    compile 'com.squareup.okhttp3:logging-interceptor'
     compile 'org.slf4j:slf4j-api'
 
     testCompile "com.squareup.okhttp3:mockwebserver"
