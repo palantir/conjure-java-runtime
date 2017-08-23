@@ -18,19 +18,13 @@ package com.palantir.remoting3.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.net.HttpHeaders;
-import com.palantir.remoting.api.config.service.BasicCredentials;
-import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting3.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting3.okhttp.MultiServerRetryInterceptor;
-import com.palantir.remoting3.okhttp.OkhttpSlf4jDebugLogger;
-import com.palantir.remoting3.okhttp.UserAgentInterceptor;
-import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
+import com.palantir.remoting3.okhttp.OkHttpClients;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
 import feign.Contract;
@@ -49,13 +43,6 @@ import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JAXRSContract;
 import feign.okhttp.OkHttpClient;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import okhttp3.ConnectionPool;
-import okhttp3.ConnectionSpec;
-import okhttp3.Credentials;
-import okhttp3.TlsVersion;
-import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
  * Not meant to be implemented outside of this library.
@@ -96,7 +83,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
                 .errorDecoder(FeignSerializableErrorErrorDecoder.INSTANCE)
-                .client(createOkHttpClient(userAgent, config.uris()))
+                .client(new OkHttpClient(OkHttpClients.create(config, userAgent)))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
                 .retryer(new Retryer.Default(0, 0, 1))  // use OkHttp retry mechanism only
@@ -124,59 +111,5 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                         new CborDelegateDecoder(
                                                 cborObjectMapper,
                                                 new JacksonDecoder(objectMapper))))));
-    }
-
-    private feign.Client createOkHttpClient(String userAgent, List<String> uris) {
-        okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
-
-        // SSL
-        client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
-
-        // Retry-aware URLs
-        client.addInterceptor(MultiServerRetryInterceptor.create(uris, true));
-
-        // tracing
-        client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
-
-        // timeouts
-        // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
-        // with its own default otherwise. Feign does not provide a mechanism for write timeouts. We thus need to set
-        // write timeouts here and connect&read timeouts on FeignBuilder.
-        client.writeTimeout(config.writeTimeout().toMillis(), TimeUnit.MILLISECONDS);
-
-        // proxy
-        client.proxySelector(config.proxy());
-        if (config.proxyCredentials().isPresent()) {
-            BasicCredentials basicCreds = config.proxyCredentials().get();
-            final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
-            client.proxyAuthenticator((route, response) -> response.request().newBuilder()
-                    .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
-                    .build());
-        }
-
-        // User agent setup
-        client.addInterceptor(UserAgentInterceptor.of(userAgent));
-
-        // cipher setup
-        client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
-
-        // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
-        client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
-
-        // logging
-        client.addInterceptor(new HttpLoggingInterceptor(OkhttpSlf4jDebugLogger.INSTANCE));
-
-        return new OkHttpClient(client.build());
-    }
-
-    private static ImmutableList<ConnectionSpec> createConnectionSpecs(boolean enableGcmCipherSuites) {
-        return ImmutableList.of(
-                new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                        .tlsVersions(TlsVersion.TLS_1_2)
-                        .cipherSuites(enableGcmCipherSuites
-                                ? CipherSuites.allCipherSuites()
-                                : CipherSuites.fastCipherSuites())
-                        .build(),
-                ConnectionSpec.CLEARTEXT);
     }
 }
