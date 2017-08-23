@@ -42,23 +42,23 @@ import org.junit.Test;
 public final class SlashEncodingContractTest extends TestBase {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(SlashEncodingTestServer.class,
-            "src/test/resources/test-server.yml");
-    private static final FakeoInterface fakeoResource = mock(FakeoInterface.class);
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(Server.class, "src/test/resources/test-server.yml");
+    private static final Service resource = mock(Service.class);
     private static final String PATH_PARAM = "slash/path";
     private static final String QUERY_PARAM = "slash/query";
 
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    private FakeoInterface jerseyProxy;
-    private FakeoInterface inMemoryProxy;
+    private Service jerseyProxy;
+    private Service inMemoryProxy;
 
     @Before
     public void before() {
-        jerseyProxy = JaxRsClient.create(FakeoInterface.class, "agent",
+        jerseyProxy = JaxRsClient.create(Service.class, "agent",
                 createTestConfig("http://localhost:" + APP.getLocalPort()));
-        inMemoryProxy = JaxRsClient.create(FakeoInterface.class, "agent",
+        inMemoryProxy = JaxRsClient.create(Service.class, "agent",
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
@@ -66,7 +66,7 @@ public final class SlashEncodingContractTest extends TestBase {
     @Test
     public void testJerseyDeocodesPathAndQueryParams() {
         jerseyProxy.encoded(PATH_PARAM, QUERY_PARAM);
-        verify(fakeoResource).encoded(PATH_PARAM, QUERY_PARAM);
+        verify(resource).encoded(PATH_PARAM, QUERY_PARAM);
     }
 
     @Test
@@ -77,17 +77,16 @@ public final class SlashEncodingContractTest extends TestBase {
     }
 
     @Path("/")
-    public interface FakeoInterface {
+    public interface Service {
         @GET
         @Path("path/{path}")
         String encoded(@PathParam("path") String path, @QueryParam("query") String query);
     }
 
-    public static class SlashEncodingTestServer extends Application<Configuration> {
+    public static class Server extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(fakeoResource);
+            env.jersey().register(resource);
         }
     }
-
 }

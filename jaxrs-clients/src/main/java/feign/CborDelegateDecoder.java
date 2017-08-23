@@ -9,7 +9,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting3.jaxrs.feignimpl.HeaderAccessUtils;
-import feign.codec.DecodeException;
 import feign.codec.Decoder;
 import java.io.IOException;
 import java.io.PushbackInputStream;
@@ -18,13 +17,12 @@ import java.util.Collection;
 
 /**
  * Currently this checks the Content-Type of the response on every request.
- *
- * In the cases where we know the Content-Type of the response at compile time,
- * i.e. when the only Accepts header is application/cbor, this is unnecessary work.
- *
- * Ideally we'll codegen a client which handles the content-type switching where necessary
- * (multiple possible response Content-Types from the server) and does not do the checking
- * where this is known at compile time.
+ * <p>
+ * In the cases where we know the Content-Type of the response at compile time, i.e. when the only Accepts header is
+ * application/cbor, this is unnecessary work.
+ * <p>
+ * Ideally we'll codegen a client which handles the content-type switching where necessary (multiple possible response
+ * Content-Types from the server) and does not do the checking where this is known at compile time.
  */
 public final class CborDelegateDecoder implements Decoder {
 
@@ -37,7 +35,7 @@ public final class CborDelegateDecoder implements Decoder {
     }
 
     @Override
-    public Object decode(Response response, Type type) throws IOException, DecodeException, FeignException {
+    public Object decode(Response response, Type type) throws IOException, FeignException {
         Collection<String> contentTypes =
                 HeaderAccessUtils.caseInsensitiveGet(response.headers(), HttpHeaders.CONTENT_TYPE);
         if (contentTypes == null) {

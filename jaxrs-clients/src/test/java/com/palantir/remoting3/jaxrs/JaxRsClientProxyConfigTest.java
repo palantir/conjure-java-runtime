@@ -28,8 +28,6 @@ import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.util.List;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -48,16 +46,16 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\""));
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        FakeoInterface directService = JaxRsClient.create(FakeoInterface.class, "agent",
+        TestService directService = JaxRsClient.create(TestService.class, "agent",
                 createTestConfig("http://localhost:" + server.getPort()));
         ClientConfiguration proxiedConfig = ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server.getPort()))
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .build();
-        FakeoInterface proxiedService = JaxRsClient.create(FakeoInterface.class, "agent", proxiedConfig);
+        TestService proxiedService = JaxRsClient.create(TestService.class, "agent", proxiedConfig);
 
-        assertThat(directService.blah()).isEqualTo("server");
-        assertThat(proxiedService.blah()).isEqualTo("proxyServer");
+        assertThat(directService.string()).isEqualTo("server");
+        assertThat(proxiedService.string()).isEqualTo("proxyServer");
         RecordedRequest proxyRequest = proxyServer.takeRequest();
         assertThat(proxyRequest.getHeader("Host")).isEqualTo("localhost:" + server.getPort());
     }
@@ -72,19 +70,13 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .proxyCredentials(BasicCredentials.of("fakeUser", "fakePassword"))
                 .build();
-        FakeoInterface proxiedService = JaxRsClient.create(FakeoInterface.class, "agent", proxiedConfig);
+        TestService proxiedService = JaxRsClient.create(TestService.class, "agent", proxiedConfig);
 
-        assertThat(proxiedService.blah()).isEqualTo("proxyServer");
+        assertThat(proxiedService.string()).isEqualTo("proxyServer");
         RecordedRequest firstRequest = proxyServer.takeRequest();
         assertThat(firstRequest.getHeader("Proxy-Authorization")).isNull();
         RecordedRequest secondRequest = proxyServer.takeRequest();
         assertThat(secondRequest.getHeader("Proxy-Authorization")).isEqualTo("Basic ZmFrZVVzZXI6ZmFrZVBhc3N3b3Jk");
-    }
-
-    @Path("/fakeo")
-    public interface FakeoInterface {
-        @GET
-        String blah();
     }
 
     private static ProxySelector createProxySelector(String host, int port) {

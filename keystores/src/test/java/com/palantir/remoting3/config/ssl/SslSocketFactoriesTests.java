@@ -35,9 +35,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-/**
- * Tests for {@link SslSocketFactories}.
- */
 public final class SslSocketFactoriesTests {
 
     @Rule
