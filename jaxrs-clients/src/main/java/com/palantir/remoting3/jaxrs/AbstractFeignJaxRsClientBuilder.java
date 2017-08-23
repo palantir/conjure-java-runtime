@@ -41,6 +41,7 @@ import feign.InputStreamDelegateEncoder;
 import feign.Java8OptionalAwareDecoder;
 import feign.Logger;
 import feign.Request;
+import feign.Retryer;
 import feign.TextDelegateDecoder;
 import feign.TextDelegateEncoder;
 import feign.codec.Decoder;
@@ -98,6 +99,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                 .client(createOkHttpClient(userAgent, config.uris()))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
+                .retryer(new Retryer.Default(0, 0, 1))  // use OkHttp retry mechanism only
                 .target(serviceClass, primaryUri);
     }
 
