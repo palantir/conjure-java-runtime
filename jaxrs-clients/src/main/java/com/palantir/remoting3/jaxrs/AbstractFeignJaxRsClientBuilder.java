@@ -19,7 +19,6 @@ package com.palantir.remoting3.jaxrs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.palantir.remoting3.clients.ClientConfiguration;
-import com.palantir.remoting3.jaxrs.feignimpl.FeignSerializableErrorErrorDecoder;
 import com.palantir.remoting3.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
@@ -82,7 +81,6 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 cborObjectMapper,
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
-                .errorDecoder(FeignSerializableErrorErrorDecoder.INSTANCE)
                 .client(new OkHttpClient(OkHttpClients.create(config, userAgent)))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
