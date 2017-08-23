@@ -139,7 +139,10 @@
             ]
         },
         "com.palantir.remoting3:http-clients": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
+            ]
         },
         "com.palantir.remoting3:jackson-support": {
             "project": true,
@@ -167,7 +170,10 @@
             ]
         },
         "com.palantir.remoting3:tracing-okhttp3": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
+            ]
         },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "0.1.3",
@@ -366,7 +372,10 @@
             ]
         },
         "com.palantir.remoting3:http-clients": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
+            ]
         },
         "com.palantir.remoting3:jackson-support": {
             "project": true,
@@ -394,7 +403,10 @@
             ]
         },
         "com.palantir.remoting3:tracing-okhttp3": {
-            "project": true
+            "project": true,
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
+            ]
         },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "0.1.3",

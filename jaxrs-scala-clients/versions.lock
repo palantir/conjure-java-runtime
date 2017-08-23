@@ -169,7 +169,8 @@
         "com.palantir.remoting3:http-clients": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting3:jaxrs-clients"
+                "com.palantir.remoting3:jaxrs-clients",
+                "com.palantir.remoting3:okhttp-clients"
             ]
         },
         "com.palantir.remoting3:jackson-support": {
@@ -211,7 +212,8 @@
         "com.palantir.remoting3:tracing-okhttp3": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting3:jaxrs-clients"
+                "com.palantir.remoting3:jaxrs-clients",
+                "com.palantir.remoting3:okhttp-clients"
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
@@ -462,7 +464,8 @@
         "com.palantir.remoting3:http-clients": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting3:jaxrs-clients"
+                "com.palantir.remoting3:jaxrs-clients",
+                "com.palantir.remoting3:okhttp-clients"
             ]
         },
         "com.palantir.remoting3:jackson-support": {
@@ -504,7 +507,8 @@
         "com.palantir.remoting3:tracing-okhttp3": {
             "project": true,
             "transitive": [
-                "com.palantir.remoting3:jaxrs-clients"
+                "com.palantir.remoting3:jaxrs-clients",
+                "com.palantir.remoting3:okhttp-clients"
             ]
         },
         "com.palantir.safe-logging:safe-logging": {

@@ -4,6 +4,8 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(':error-handling')
+    compile project(':http-clients')
+    compile project(':tracing-okhttp3')
     compile 'com.google.guava:guava'
     compile 'com.squareup.okhttp3:okhttp'
     compile 'com.squareup.okhttp3:logging-interceptor'
