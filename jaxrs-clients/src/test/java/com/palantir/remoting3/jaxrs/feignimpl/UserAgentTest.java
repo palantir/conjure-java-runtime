@@ -21,8 +21,7 @@ import static org.junit.Assert.assertThat;
 
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import com.palantir.remoting3.jaxrs.TestBase;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
+import com.palantir.remoting3.jaxrs.TestService;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -33,6 +32,8 @@ import org.junit.rules.ExpectedException;
 
 public final class UserAgentTest extends TestBase {
 
+    private static final String USER_AGENT = "TestSuite/1 (0.0.0)";
+
     @Rule
     public final MockWebServer server = new MockWebServer();
 
@@ -41,19 +42,16 @@ public final class UserAgentTest extends TestBase {
 
     private String endpointUri;
 
-    private static final String USER_AGENT = "TestSuite/1 (0.0.0)";
-
     @Before
     public void before() {
         endpointUri = "http://localhost:" + server.getPort();
-
-        server.enqueue(new MockResponse().setBody("{}"));
+        server.enqueue(new MockResponse().setBody(""));
     }
 
     @Test
     public void testUserAgent_default() throws InterruptedException {
         TestService service = JaxRsClient.create(TestService.class, USER_AGENT, createTestConfig(endpointUri));
-        service.get();
+        service.string();
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader("User-Agent"), is(USER_AGENT));
@@ -64,11 +62,5 @@ public final class UserAgentTest extends TestBase {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()\\-#;/.,_\\s]+': !@"));
         JaxRsClient.create(TestService.class, "!@", createTestConfig(endpointUri));
-    }
-
-    @Path("/")
-    public interface TestService {
-        @GET
-        void get();
     }
 }

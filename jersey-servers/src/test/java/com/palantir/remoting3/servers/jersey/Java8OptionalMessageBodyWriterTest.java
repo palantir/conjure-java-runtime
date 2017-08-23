@@ -110,7 +110,6 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
             return id != null ? OptionalLong.of(id) : OptionalLong.empty();
         }
 
-
         @Path("double")
         @GET
         public OptionalDouble showOptDoubleWithQueryParam(@QueryParam("id") Double id) {

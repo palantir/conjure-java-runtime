@@ -49,7 +49,7 @@ public final class TracerTest extends TestBase {
     public void testClientIsInstrumentedWithTracer() throws InterruptedException, IOException {
         OpenSpan parentTrace = Tracer.startSpan("");
         String traceId = Tracer.getTraceId();
-        service.echo("foo");
+        service.string();
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));

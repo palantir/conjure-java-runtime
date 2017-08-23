@@ -22,8 +22,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import feign.RetryableException;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;
@@ -42,16 +40,16 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server1.shutdown();
         server2.enqueue(new MockResponse().setBody("\"foo\""));
 
-        Service proxy = JaxRsClient.create(Service.class, "agent",
+        TestService proxy = JaxRsClient.create(TestService.class, "agent",
                 createTestConfig(
                         "http://localhost:" + server1.getPort(),
                         "http://localhost:" + server2.getPort()));
-        assertThat(proxy.get(), is("foo"));
+        assertThat(proxy.string(), is("foo"));
     }
 
     @Test
     public void testConsecutiveCalls() throws Exception {
-        Service proxy = JaxRsClient.create(Service.class, "agent",
+        TestService proxy = JaxRsClient.create(TestService.class, "agent",
                 createTestConfig(
                         "http://localhost:" + server1.getPort(),
                         "http://localhost:" + server2.getPort()));
@@ -60,7 +58,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server1.shutdown();
         server2.shutdown();
         try {
-            proxy.get();
+            proxy.string();
             fail();
         } catch (RetryableException e) {
             assertThat(e.getMessage(), startsWith("Could not connect to any of the following servers: "));
@@ -70,7 +68,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
         MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
         anotherServer1.start(server1.getPort());
         anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
-        assertThat(proxy.get(), is("foo"));
+        assertThat(proxy.string(), is("foo"));
         anotherServer1.shutdown();
     }
 
@@ -78,17 +76,11 @@ public final class JaxRsClientFailoverTest extends TestBase {
     public void testFailoverOnDnsFailure() throws Exception {
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        Service proxy = JaxRsClient.create(Service.class, "agent",
+        TestService proxy = JaxRsClient.create(TestService.class, "agent",
                 createTestConfig(
                         "http://foo-bar-bogus-host.unresolvable:80",
                         "http://localhost:" + server1.getPort()));
-        assertThat(proxy.get(), is("foo"));
+        assertThat(proxy.string(), is("foo"));
         assertThat(server1.getRequestCount(), is(1));
-    }
-
-    @Path("/")
-    public interface Service {
-        @GET
-        String get();
     }
 }

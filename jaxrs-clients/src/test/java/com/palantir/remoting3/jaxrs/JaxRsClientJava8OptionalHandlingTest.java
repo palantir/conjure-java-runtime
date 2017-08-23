@@ -41,11 +41,11 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    private FakeoInterface proxy;
+    private Service proxy;
 
     @Before
     public void before() {
-        proxy = JaxRsClient.create(FakeoInterface.class, "agent",
+        proxy = JaxRsClient.create(Service.class, "agent",
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
@@ -58,7 +58,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     }
 
     @Path("/")
-    public interface FakeoInterface {
+    public interface Service {
         @GET
         @Path("foo/{req}")
         String path(@PathParam("req") String req);

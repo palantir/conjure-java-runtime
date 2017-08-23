@@ -25,8 +25,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
+import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -150,7 +152,10 @@ public final class Retrofit2ClientApiTest extends TestBase {
     @Test
     public void connectionFailureWithCompletableFuture() {
         service = Retrofit2Client.create(TestService.class, "agent",
-                createTestConfig("https://invalid.service.dev"));
+                ClientConfiguration.builder()
+                        .from(createTestConfig("https://invalid.service.dev"))
+                        .connectTimeout(Duration.ofMillis(10))
+                        .build());
 
         assertThatExceptionOfType(CompletionException.class).isThrownBy(() -> service.makeFutureRequest().join());
     }

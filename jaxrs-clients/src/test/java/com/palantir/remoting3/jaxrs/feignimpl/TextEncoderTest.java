@@ -37,18 +37,18 @@ public final class TextEncoderTest extends TestBase {
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    private TextEncoderService service;
+    private Service service;
 
     @Before
     public void before() {
-        service = JaxRsClient.create(TextEncoderService.class, "agent",
+        service = JaxRsClient.create(Service.class, "agent",
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("{}"));
     }
 
     @Test
-    public void testTextEncoder_doesNotEscapeAsJson() throws InterruptedException {
-        String testString = "{\"key\": \"value\"}";
+    public void testTextEncoder_doesNotPerformJsonEscapting() throws InterruptedException {
+        String testString = "\"string\"";
         service.post(testString);
 
         RecordedRequest request = server.takeRequest();
@@ -56,7 +56,7 @@ public final class TextEncoderTest extends TestBase {
     }
 
     @Path("/")
-    public interface TextEncoderService {
+    public interface Service {
         @POST
         @Consumes(MediaType.TEXT_PLAIN)
         Object post(String test);

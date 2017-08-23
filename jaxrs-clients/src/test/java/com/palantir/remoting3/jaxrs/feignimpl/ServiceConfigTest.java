@@ -18,9 +18,17 @@ package com.palantir.remoting3.jaxrs.feignimpl;
 
 import static org.junit.Assert.assertEquals;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.palantir.remoting.api.config.service.ServiceConfigurationFactory;
+import com.palantir.remoting.api.config.service.ServicesConfigBlock;
 import com.palantir.remoting3.clients.ClientConfigurations;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
+import com.palantir.remoting3.jaxrs.TestService;
+import io.dropwizard.Application;
+import io.dropwizard.Configuration;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,14 +45,49 @@ public final class ServiceConfigTest {
         ServiceConfigurationFactory factory =
                 ServiceConfigurationFactory.of(rule.getConfiguration().getServiceDiscoveryConfiguration());
 
-        ServiceConfigTestServer.HelloService helloClient = JaxRsClient.create(
-                ServiceConfigTestServer.HelloService.class, "agent", ClientConfigurations.of(factory.get("hello")));
-        ServiceConfigTestServer.GoodbyeService goodbyeClient = JaxRsClient.create(
-                ServiceConfigTestServer.GoodbyeService.class,
-                "agent",
-                ClientConfigurations.of(factory.get("goodbye")));
+        TestService full = JaxRsClient.create(
+                TestService.class, "agent", ClientConfigurations.of(factory.get("full")));
+        TestService minimal = JaxRsClient.create(
+                TestService.class, "agent", ClientConfigurations.of(factory.get("minimal")));
 
-        assertEquals("Hello world!", helloClient.sayHello());
-        assertEquals("Goodbye world!", goodbyeClient.sayGoodBye());
+        assertEquals("string", full.string());
+        assertEquals("string", minimal.string());
+    }
+
+    /**
+     * Configuration class for the {@link ServiceConfigTestServer}.
+     */
+    static final class ServiceConfigTestAppConfig extends Configuration {
+
+        @JsonProperty("serviceDiscovery")
+        private ServicesConfigBlock serviceDiscoveryConfig;
+
+        public ServicesConfigBlock getServiceDiscoveryConfiguration() {
+            return this.serviceDiscoveryConfig;
+        }
+    }
+
+    static final class ServiceConfigTestServer {
+
+        public static final class ServiceConfigTestApp extends Application<ServiceConfigTestAppConfig> {
+
+            @Override
+            public void initialize(Bootstrap<ServiceConfigTestAppConfig> bootstrap) {
+                bootstrap.getObjectMapper().registerModule(new Jdk8Module());
+            }
+
+            @Override
+            public void run(ServiceConfigTestAppConfig configuration, Environment environment) throws Exception {
+                environment.jersey().register(new Resource());
+            }
+
+            public static final class Resource implements TestService {
+
+                @Override
+                public String string() {
+                    return "string";
+                }
+            }
+        }
     }
 }

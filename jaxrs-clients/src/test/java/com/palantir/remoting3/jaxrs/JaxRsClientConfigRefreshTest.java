@@ -20,8 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.ext.refresh.Refreshable;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;
@@ -42,17 +40,17 @@ public final class JaxRsClientConfigRefreshTest extends TestBase {
         ClientConfiguration config2 = createTestConfig("http://localhost:" + server2.getPort());
 
         Refreshable<ClientConfiguration> refreshableConfig = Refreshable.of(config1);
-        Service proxy = JaxRsClient.create(Service.class, "agent", refreshableConfig);
+        TestService proxy = JaxRsClient.create(TestService.class, "agent", refreshableConfig);
 
         // Call 1
         server1.enqueue(new MockResponse().setBody("\"server1\""));
-        assertThat(proxy.call()).isEqualTo("server1");
+        assertThat(proxy.string()).isEqualTo("server1");
         assertThat(server1.getRequestCount()).isEqualTo(1);
         assertThat(server2.getRequestCount()).isEqualTo(0);
 
         // Call 2
         server1.enqueue(new MockResponse().setBody("\"server1\""));
-        assertThat(proxy.call()).isEqualTo("server1");
+        assertThat(proxy.string()).isEqualTo("server1");
         assertThat(server1.getRequestCount()).isEqualTo(2);
         assertThat(server2.getRequestCount()).isEqualTo(0);
 
@@ -61,20 +59,14 @@ public final class JaxRsClientConfigRefreshTest extends TestBase {
 
         // Call 3
         server2.enqueue(new MockResponse().setBody("\"server2\""));
-        assertThat(proxy.call()).isEqualTo("server2");
+        assertThat(proxy.string()).isEqualTo("server2");
         assertThat(server1.getRequestCount()).isEqualTo(2);
         assertThat(server2.getRequestCount()).isEqualTo(1);
 
         // Call 4
         server2.enqueue(new MockResponse().setBody("\"server2\""));
-        assertThat(proxy.call()).isEqualTo("server2");
+        assertThat(proxy.string()).isEqualTo("server2");
         assertThat(server1.getRequestCount()).isEqualTo(2);
         assertThat(server2.getRequestCount()).isEqualTo(2);
-    }
-
-    @Path("/")
-    public interface Service {
-        @GET
-        String call();
     }
 }
