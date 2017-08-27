@@ -34,7 +34,6 @@ public final class ClientConfigurationsTest {
 
     private static final ImmutableList<String> uris = ImmutableList.of("uri");
 
-
     @Test
     public void testFromServiceConfig_fillsInDefaults() {
         ServiceConfiguration serviceConfig = ServiceConfiguration.builder()

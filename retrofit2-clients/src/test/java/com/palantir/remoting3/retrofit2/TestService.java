@@ -50,12 +50,8 @@ public interface TestService {
     @GET("relative")
     Call<String> getRelative();
 
-    // Note: Retrofit2 will discard any baseUrl path when the endpoint path starts with "/"
     @GET("/absolute")
     Call<String> getAbsolute();
-
-    @GET("/Api")
-    Call<String> getAbsoluteApiTitleCase();
 
     @GET("getComplexCborType")
     @Headers("Accepts: application/cbor")

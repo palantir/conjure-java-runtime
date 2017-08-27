@@ -27,8 +27,8 @@ import javax.net.ssl.X509TrustManager;
 import org.immutables.value.Value;
 
 /**
- * A context-independent (i.e., does not depend on configuration files or on-disk entities like JKS
- * keystores) instantiation of a {@link ServiceConfiguration}.
+ * A context-independent (i.e., does not depend on configuration files or on-disk entities like JKS keystores)
+ * instantiation of a {@link ServiceConfiguration}.
  */
 @Value.Immutable
 @ImmutablesStyle
@@ -61,7 +61,7 @@ public interface ClientConfiguration {
     /** The credentials to use for the proxy selected by {@link #proxy}. */
     Optional<BasicCredentials> proxyCredentials();
 
-    /** The maximum number of times a failed connection attempt is retried. */
+    /** The maximum number of times a failed request is retried. */
     int maxNumRetries();
 
     static Builder builder() {

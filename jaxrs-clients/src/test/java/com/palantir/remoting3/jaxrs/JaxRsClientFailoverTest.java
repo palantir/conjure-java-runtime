@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.palantir.remoting3.clients.ClientConfiguration;
 import feign.RetryableException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -41,18 +42,23 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server2.enqueue(new MockResponse().setBody("\"foo\""));
 
         TestService proxy = JaxRsClient.create(TestService.class, "agent",
-                createTestConfig(
-                        "http://localhost:" + server1.getPort(),
-                        "http://localhost:" + server2.getPort()));
+                ClientConfiguration.builder()
+                        .from(createTestConfig(
+                                "http://localhost:" + server1.getPort(),
+                                "http://localhost:" + server2.getPort()))
+                        .maxNumRetries(1)
+                        .build());
         assertThat(proxy.string(), is("foo"));
     }
 
     @Test
     public void testConsecutiveCalls() throws Exception {
         TestService proxy = JaxRsClient.create(TestService.class, "agent",
-                createTestConfig(
-                        "http://localhost:" + server1.getPort(),
-                        "http://localhost:" + server2.getPort()));
+                ClientConfiguration.builder()
+                        .from(createTestConfig(
+                                "http://localhost:" + server1.getPort(),
+                                "http://localhost:" + server2.getPort()))
+                        .maxNumRetries(1).build());
 
         // Call fails when servers are down.
         server1.shutdown();
@@ -61,7 +67,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
             proxy.string();
             fail();
         } catch (RetryableException e) {
-            assertThat(e.getMessage(), startsWith("Could not connect to any of the following servers: "));
+            assertThat(e.getMessage(), startsWith("Could not connect to any of the configured URLs: "));
         }
 
         // Subsequent call (with the same proxy instance) succeeds.
@@ -77,9 +83,12 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
         TestService proxy = JaxRsClient.create(TestService.class, "agent",
-                createTestConfig(
-                        "http://foo-bar-bogus-host.unresolvable:80",
-                        "http://localhost:" + server1.getPort()));
+                ClientConfiguration.builder()
+                        .from(createTestConfig(
+                                "http://foo-bar-bogus-host.unresolvable:80",
+                                "http://localhost:" + server1.getPort()))
+                        .maxNumRetries(1)
+                        .build());
         assertThat(proxy.string(), is("foo"));
         assertThat(server1.getRequestCount(), is(1));
     }
