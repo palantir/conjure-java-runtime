@@ -43,8 +43,8 @@ public final class OkHttpClients {
     private OkHttpClients() {}
 
     /** Creates an OkHttp client from the given {@link ClientConfiguration}. */
-    public static OkHttpClient create(ClientConfiguration config, String userAgent) {
-        return builder(config, userAgent).build();
+    public static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
+        return builder(config, userAgent, serviceClass).build();
     }
 
     /**
@@ -52,7 +52,7 @@ public final class OkHttpClients {
      * <p>
      * TODO(rfink): This method should get removed as soon as Feign and Retrofit clients use the same OkHttp clients.
      */
-    public static OkHttpClient.Builder builder(ClientConfiguration config, String userAgent) {
+    public static OkHttpClient.Builder builder(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
         okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
 
         // error handling
@@ -85,7 +85,7 @@ public final class OkHttpClients {
         }
 
         // User agent setup
-        client.addInterceptor(UserAgentInterceptor.of(userAgent));
+        client.addInterceptor(UserAgentInterceptor.of(userAgent, serviceClass));
 
         // cipher setup
         client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));

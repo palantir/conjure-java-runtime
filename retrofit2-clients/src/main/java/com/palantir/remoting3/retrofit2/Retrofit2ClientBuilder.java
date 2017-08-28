@@ -43,7 +43,7 @@ public final class Retrofit2ClientBuilder {
 
     public <T> T build(Class<T> serviceClass, String userAgent) {
         List<String> sanitizedUris = addTrailingSlashes(config.uris());
-        okhttp3.OkHttpClient client = createOkHttpClient(userAgent, sanitizedUris);
+        okhttp3.OkHttpClient client = createOkHttpClient(userAgent, serviceClass);
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(sanitizedUris.get(0))
@@ -61,8 +61,8 @@ public final class Retrofit2ClientBuilder {
         return Lists.transform(uris, input -> input.charAt(input.length() - 1) == '/' ? input : input + "/");
     }
 
-    private OkHttpClient createOkHttpClient(String userAgent, List<String> uris) {
-        OkHttpClient.Builder client = OkHttpClients.builder(config, userAgent);
+    private OkHttpClient createOkHttpClient(String userAgent, Class<?> serviceClass) {
+        OkHttpClient.Builder client = OkHttpClients.builder(config, userAgent, serviceClass);
 
         // retry configuration
         // TODO(rfink): Consolidate this with the MultiServerRetry thing.

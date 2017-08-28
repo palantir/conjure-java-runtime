@@ -31,10 +31,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-public final class UserAgentTest {
+public final class UserAgentInterceptorTest {
 
     private static final String USER_AGENT = "TestSuite/1 (0.0.0)";
-    private static final UserAgentInterceptor interceptor = UserAgentInterceptor.of(USER_AGENT);
+    private static final UserAgentInterceptor interceptor =
+            UserAgentInterceptor.of(USER_AGENT, UserAgentInterceptor.class);
 
     @Rule
     public final MockWebServer server = new MockWebServer();
