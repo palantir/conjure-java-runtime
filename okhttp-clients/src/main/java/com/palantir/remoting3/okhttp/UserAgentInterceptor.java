@@ -38,18 +38,18 @@ public final class UserAgentInterceptor implements Interceptor {
         String version = getVersionString(serviceClass);
         this.userAgent = version.isEmpty()
                 ? userAgent
-                : String.format("%s (%s)", userAgent, version);
+                : userAgent + " (" + version + ")";
     }
 
     private String getVersionString(Class<?> serviceClass) {
         List<String> versions = new ArrayList<>(2);
+        String maybeServiceVersion = serviceClass.getPackage().getImplementationVersion();
+        if (maybeServiceVersion != null) {
+            versions.add("Service API " + serviceClass.getSimpleName() + " " + maybeServiceVersion);
+        }
         String maybeRemotingVersion = this.getClass().getPackage().getImplementationVersion();
         if (maybeRemotingVersion != null) {
             versions.add("http-remoting " + maybeRemotingVersion);
-        }
-        String maybeServiceVersion = serviceClass.getPackage().getImplementationVersion();
-        if (maybeServiceVersion != null) {
-            versions.add(String.format("Service API %s %s", serviceClass.getSimpleName(), maybeServiceVersion));
         }
         return Joiner.on(",").join(versions);
     }
