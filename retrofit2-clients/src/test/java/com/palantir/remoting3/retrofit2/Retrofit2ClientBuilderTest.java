@@ -127,7 +127,7 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         service.get().execute();
 
         RecordedRequest capturedRequest = server.takeRequest();
-        assertThat(capturedRequest.getHeader("User-Agent"), is(userAgent));
+        assertThat(capturedRequest.getHeader("User-Agent"), startsWith(userAgent));
     }
 
     @Test
