@@ -51,7 +51,7 @@ public final class UserAgentInterceptor implements Interceptor {
         if (maybeRemotingVersion != null) {
             versions.add("http-remoting " + maybeRemotingVersion);
         }
-        return Joiner.on(",").join(versions);
+        return Joiner.on(";").join(versions);
     }
 
     public static UserAgentInterceptor of(String userAgent, Class<?> serviceClass) {
