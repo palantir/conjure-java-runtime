@@ -81,7 +81,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 cborObjectMapper,
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
-                .client(new OkHttpClient(OkHttpClients.create(config, userAgent)))
+                .client(new OkHttpClient(OkHttpClients.create(config, userAgent, serviceClass)))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
                 .retryer(new Retryer.Default(0, 0, 1))  // use OkHttp retry mechanism only

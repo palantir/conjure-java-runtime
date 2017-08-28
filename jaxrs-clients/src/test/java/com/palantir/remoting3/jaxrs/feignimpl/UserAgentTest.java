@@ -17,6 +17,7 @@
 package com.palantir.remoting3.jaxrs.feignimpl;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
 import com.palantir.remoting3.jaxrs.JaxRsClient;
@@ -32,7 +33,7 @@ import org.junit.rules.ExpectedException;
 
 public final class UserAgentTest extends TestBase {
 
-    private static final String USER_AGENT = "TestSuite/1 (0.0.0)";
+    private static final String USER_AGENT = "TestSuite/1";
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -54,7 +55,7 @@ public final class UserAgentTest extends TestBase {
         service.string();
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getHeader("User-Agent"), is(USER_AGENT));
+        assertThat(request.getHeader("User-Agent"), startsWith(USER_AGENT));
     }
 
     @Test
