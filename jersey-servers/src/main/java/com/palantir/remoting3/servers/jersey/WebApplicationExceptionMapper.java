@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.servers.jersey;
 
+import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.ErrorType;
 import java.util.UUID;
 import javax.ws.rs.BadRequestException;
@@ -43,6 +44,13 @@ final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicat
         log.warn(this.getClass().getSimpleName() + " is deprecated. Servers should throw ServiceExceptions instead.");
 
         String errorInstanceId = UUID.randomUUID().toString();
+        Response.Status.Family family = Response.Status.Family.familyOf(exception.getResponse().getStatus());
+        if (family == Response.Status.Family.CLIENT_ERROR) {
+            log.info("Error handling request {}", SafeArg.of("errorInstanceId", errorInstanceId), exception);
+        } else {
+            log.error("Error handling request {}", SafeArg.of("errorInstanceId", errorInstanceId), exception);
+        }
+
         if (exception instanceof ForbiddenException) {
             return JsonExceptionMapper.createResponse(
                     ErrorType.PERMISSION_DENIED, errorInstanceId, exception.getClass().getName());
