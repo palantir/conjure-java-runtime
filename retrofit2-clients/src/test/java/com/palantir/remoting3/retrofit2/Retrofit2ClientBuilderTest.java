@@ -19,9 +19,8 @@ package com.palantir.remoting3.retrofit2;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
-import com.google.common.collect.ImmutableList;
+import com.palantir.remoting3.clients.ClientConfiguration;
 import java.io.IOException;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -40,7 +39,7 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void testRelativeRetrofitEndPoints_workWithArbitraryBaseUrlFormats() throws Exception {
+    public void testRelativeAndAbsoluteRetrofitEndPoints_workWithArbitraryBaseUrlFormats() throws Exception {
         assertRequestUrlYieldsHttpPath("/api/", "/api/%s");
         assertRequestUrlYieldsHttpPath("/api", "/api/%s");
         assertRequestUrlYieldsHttpPath("api/", "/api/%s");
@@ -60,59 +59,25 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\""));
         assertThat(service.getRelative().execute().body(), is("server"));
         assertThat(server.takeRequest().getPath(), is(String.format(expectedQueryPath, "relative")));
-    }
 
-    // See comment regarding Retrofit2 URL handling on TestService#getAbsolute()
-    @Test
-    public void testAbsoluteRetrofitEndpoints_failRetryInterceptor() throws Exception {
-        for (String basePath : ImmutableList.of("/api/", "/api", "api/", "api")) {
-            HttpUrl url = server.url(basePath);
-            TestService service = Retrofit2Client.create(TestService.class, "agent", createTestConfig(url.toString()));
-            try {
-                service.getAbsolute().execute();
-                fail();
-            } catch (IllegalStateException e) {
-                assertThat(e.getMessage(), startsWith(
-                        "Unrecognized server URI in the request http://localhost:" + server.getPort() + "/absolute."));
-            }
-        }
-    }
-
-    @Test
-    public void testCaseInsensitiveHostNames_workWithEquivalentUrls() throws Exception {
-        TestService service = Retrofit2Client.create(
-                TestService.class, "agent", createTestConfig(
-                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())
-                ));
         server.enqueue(new MockResponse().setBody("\"server\""));
-        service.getRelative().execute();
-    }
-
-    @Test
-    public void testCaseSensitivePathNames_doesNotWorkWithNonEquivalentUrls() throws Exception {
-        TestService service = Retrofit2Client.create(
-                TestService.class, "agent", createTestConfig(
-                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())
-                ));
-        try {
-            service.getAbsoluteApiTitleCase().execute();
-            fail();
-        } catch (IllegalStateException e) {
-            assertThat(e.getMessage(), startsWith(
-                    "Unrecognized server URI in the request http://localhost:" + server.getPort() + "/Api."));
-        }
+        assertThat(service.getAbsolute().execute().body(), is("server"));
+        assertThat(server.takeRequest().getPath(), is("/absolute"));
     }
 
     @Test
     public void testRetrofit2ClientWithMultiServerRetryInterceptorRedirectToAvailableServer() throws IOException {
         MockWebServer otherServer = new MockWebServer();
         TestService service = Retrofit2Client.create(
-                TestService.class, "agent", createTestConfig(
-                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort()),
-                        String.format(
-                                "http://%s:%s/api/", otherServer.getHostName().toUpperCase(), otherServer.getPort()))
-        );
+                TestService.class, "agent",
+                ClientConfiguration.builder()
+                        .from(createTestConfig(
+                                String.format("http://%s:%s/api/", server.getHostName(), server.getPort()),
+                                String.format("http://%s:%s/api/", otherServer.getHostName(), otherServer.getPort())))
+                        .maxNumRetries(1)
+                        .build());
 
+        server.shutdown();
         otherServer.enqueue(new MockResponse().setBody("\"pong\""));
         assertThat(service.get().execute().body(), is("pong"));
     }

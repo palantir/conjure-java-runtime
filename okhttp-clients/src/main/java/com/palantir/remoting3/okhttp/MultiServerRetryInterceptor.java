@@ -16,20 +16,10 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import java.io.IOException;
-import java.net.HttpRetryException;
-import java.net.MalformedURLException;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-import java.net.UnknownServiceException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -40,88 +30,54 @@ import org.slf4j.LoggerFactory;
 public final class MultiServerRetryInterceptor implements Interceptor {
     private static final Logger logger = LoggerFactory.getLogger(MultiServerRetryInterceptor.class);
 
-    private final List<HttpUrl> urls;
+    private final UrlSelector urls;
+    private final int maxNumRetries;
 
-    private static final Comparator<HttpUrl> FQDN_COMPARATOR =
-            Comparator.comparing(HttpUrl::scheme)
-                    .thenComparing(HttpUrl::host)
-                    .thenComparing(HttpUrl::port);
-
-    private MultiServerRetryInterceptor(List<String> uris) {
-        this.urls = ImmutableList.copyOf(uris.stream().map(HttpUrl::parse).collect(Collectors.toList()));
+    @VisibleForTesting
+    MultiServerRetryInterceptor(UrlSelector urls, int maxNumRetries) {
+        this.urls = urls;
+        this.maxNumRetries = maxNumRetries;
     }
 
-    public static MultiServerRetryInterceptor create(List<String> uris) {
-        return create(uris, true);
-    }
-
-    public static MultiServerRetryInterceptor create(List<String> uris, boolean randomize) {
+    public static MultiServerRetryInterceptor create(List<String> uris, int maxNumRetries) {
         Preconditions.checkArgument(!uris.isEmpty());
-
-        if (randomize) {
-            List<String> shuffledUris = new ArrayList<>(uris);
-            Collections.shuffle(shuffledUris);
-            return new MultiServerRetryInterceptor(shuffledUris);
-        }
-
-        return new MultiServerRetryInterceptor(uris);
+        return new MultiServerRetryInterceptor(UrlSelectorImpl.create(uris), maxNumRetries);
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        Request request = chain.request();
+        Exception lastException;
 
-        Exception lastException = null;
-        HttpUrl lastUrl = null;
+        // Try original request first.
+        try {
+            return chain.proceed(chain.request());
+        } catch (IOException e) {
+            lastException = e;
+            logger.warn("Failed to send request to {}", chain.request().url(), e);
+        }
 
-        for (HttpUrl url : urls) {
-            if (lastUrl != null) {
-                logger.warn("Redirecting request from {} to {}", lastUrl, url);
-            }
-            request = redirectRequest(request, url);
+        // If the original URL failed, retry according to the UrlSelector.
+        HttpUrl currentUrl = chain.request().url();
+        for (int i = 0; i < maxNumRetries; ++i) {
+            HttpUrl nextUrl = urls.redirectToNext(currentUrl).orElseThrow(() -> new IOException(
+                    "Failed to determine suitable target URL for request URL: " + chain.request().url()));
+            logger.debug("Redirecting request from {} to {}", currentUrl, nextUrl);
+            Request originalRequest = chain.request();
+            Request request = originalRequest.newBuilder()
+                    .url(nextUrl)
+                    // Request.this.tag field by default points to request itself if it was not set in RequestBuilder.
+                    // We don't want to reference old request in new one - that is why we need to reset tag to null.
+                    .tag(originalRequest.tag().equals(originalRequest) ? null : originalRequest.tag())
+                    .build();
             try {
                 return chain.proceed(request);
-            } catch (SocketTimeoutException | UnknownHostException | HttpRetryException
-                    | MalformedURLException | SocketException | UnknownServiceException e) {
+            } catch (IOException e) {
                 lastException = e;
-                lastUrl = url;
+                currentUrl = nextUrl;
                 logger.warn("Failed to send request to {}", request.url(), e);
             }
         }
-        throw new IOException("Could not connect to any of the following servers: " + urls + ". "
+        throw new IOException("Could not connect to any of the configured URLs: " + urls.getBaseUrls() + ". "
                 + "Please check that the URIs are correct and servers are accessible.", lastException);
-    }
-
-    private Request redirectRequest(Request request, HttpUrl redirectToUrl) {
-        HttpUrl requestUrl = request.url();
-
-        HttpUrl matchingUrl = null;
-        // Find which server from `uris` is used in the current request, then ...
-        for (HttpUrl url : urls) {
-            if (doServersMatch(requestUrl, url)) {
-                matchingUrl = url;
-                break;
-            }
-        }
-
-        if (matchingUrl == null) {
-            throw new IllegalStateException(String.format("Unrecognized server URI in the request %s. "
-                            + "Supported servers are %s. Did you use different server URI for the initial request?",
-                    requestUrl, urls));
-        }
-
-        // ... replace it with the URI of the server to redirect to.
-        String newRequestUrl = requestUrl.toString().replaceFirst(matchingUrl.toString(), redirectToUrl.toString());
-        return request.newBuilder()
-                .url(HttpUrl.parse(newRequestUrl))
-                // Request.this.tag field by default points to request itself if it was not set in RequestBuilder.
-                // We don't want to reference old request in new one - that is why we need to reset tag to null.
-                .tag(request.tag().equals(request) ? null : request.tag())
-                .build();
-    }
-
-    private boolean doServersMatch(HttpUrl fullUrl, HttpUrl prefixUrl) {
-        return FQDN_COMPARATOR.compare(fullUrl, prefixUrl) == 0
-                        && fullUrl.encodedPath().startsWith(prefixUrl.encodedPath());
     }
 }

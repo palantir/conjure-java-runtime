@@ -62,7 +62,7 @@ public final class OkHttpClients {
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
 
         // Retry-aware URLs
-        client.addInterceptor(MultiServerRetryInterceptor.create(config.uris(), true));
+        client.addInterceptor(MultiServerRetryInterceptor.create(config.uris(), config.maxNumRetries()));
 
         // tracing
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);

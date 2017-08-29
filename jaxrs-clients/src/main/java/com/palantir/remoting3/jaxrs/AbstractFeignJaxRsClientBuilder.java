@@ -52,13 +52,11 @@ abstract class AbstractFeignJaxRsClientBuilder {
     /**
      * The primary URI used to bootstrap the Feign client; this is the URI used by Feign to create an OkHttp call. Note
      * that the {@link MultiServerRetryInterceptor} replaces this URI with a random URI from the client configuration
-     * before making the request.
+     * when retrying a request.
      */
     private final String primaryUri;
 
     AbstractFeignJaxRsClientBuilder(ClientConfiguration config) {
-        Preconditions.checkArgument(config.maxNumRetries() == 0,
-                "Connection-level retries are not supported by %s", JaxRsClient.class.getSimpleName());
         Preconditions.checkArgument(!config.uris().isEmpty(), "Must provide at least one service URI");
         this.config = config;
         this.primaryUri = config.uris().get(0);

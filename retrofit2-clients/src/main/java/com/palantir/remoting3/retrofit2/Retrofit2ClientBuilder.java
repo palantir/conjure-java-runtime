@@ -18,14 +18,12 @@ package com.palantir.remoting3.retrofit2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.okhttp.AsyncCallTagCallFactory;
 import com.palantir.remoting3.okhttp.OkHttpClients;
 import com.palantir.remoting3.okhttp.RetryInterceptor;
 import com.palantir.remoting3.okhttp.SerializableErrorInterceptor;
-import java.util.List;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -42,11 +40,10 @@ public final class Retrofit2ClientBuilder {
     }
 
     public <T> T build(Class<T> serviceClass, String userAgent) {
-        List<String> sanitizedUris = addTrailingSlashes(config.uris());
         okhttp3.OkHttpClient client = createOkHttpClient(userAgent, serviceClass);
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl(sanitizedUris.get(0))
+                .baseUrl(addTrailingSlash(config.uris().get(0)))
                 .callFactory(new AsyncCallTagCallFactory(client))
                 .addConverterFactory(new CborConverterFactory(
                         JacksonConverterFactory.create(OBJECT_MAPPER),
@@ -57,8 +54,8 @@ public final class Retrofit2ClientBuilder {
         return retrofit.create(serviceClass);
     }
 
-    private static List<String> addTrailingSlashes(List<String> uris) {
-        return Lists.transform(uris, input -> input.charAt(input.length() - 1) == '/' ? input : input + "/");
+    private static String addTrailingSlash(String url) {
+        return url.charAt(url.length() - 1) == '/' ? url : url + "/";
     }
 
     private OkHttpClient createOkHttpClient(String userAgent, Class<?> serviceClass) {
