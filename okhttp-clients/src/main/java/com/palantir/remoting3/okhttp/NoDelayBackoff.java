@@ -16,20 +16,23 @@
 
 package com.palantir.remoting3.okhttp;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import java.time.Duration;
+import java.util.Optional;
 
-import okhttp3.Call;
-import org.junit.Test;
+final class NoDelayBackoff implements BackoffStrategy {
 
-public final class ForwardingCallTest {
+    private final int maxNumRetries;
+    private int numTimesRetried = 0;
 
-    @Test
-    public void testClone_returnsForwardingCall() throws Exception {
-        Call delegate = mock(Call.class);
-        ForwardingCall call = new ForwardingCall(delegate);
-        assertThat(call.clone()).isInstanceOf(ForwardingCall.class);
-        verify(delegate).clone();
+    NoDelayBackoff(int maxNumRetries) {
+        this.maxNumRetries = maxNumRetries;
+    }
+
+    @Override
+    public Optional<Duration> nextBackoff() {
+        numTimesRetried += 1;
+        return numTimesRetried <= maxNumRetries
+                ? Optional.of(Duration.ZERO)
+                : Optional.empty();
     }
 }

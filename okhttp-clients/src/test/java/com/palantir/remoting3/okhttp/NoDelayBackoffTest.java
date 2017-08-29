@@ -16,20 +16,19 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import java.util.List;
-import java.util.Set;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public abstract class TestBase {
+import java.time.Duration;
+import org.junit.Test;
 
-    @SafeVarargs
-    static <T> Set<T> set(T... items) {
-        return ImmutableSet.copyOf(items);
-    }
+public final class NoDelayBackoffTest {
 
-    @SafeVarargs
-    static <T> List<T> list(T... items) {
-        return ImmutableList.copyOf(items);
+    @Test
+    public void testSanity() throws Exception {
+        NoDelayBackoff backoff = new NoDelayBackoff(3);
+        assertThat(backoff.nextBackoff()).contains(Duration.ofMinutes(0));
+        assertThat(backoff.nextBackoff()).contains(Duration.ofMinutes(0));
+        assertThat(backoff.nextBackoff()).contains(Duration.ofMinutes(0));
+        assertThat(backoff.nextBackoff()).isEmpty();
     }
 }
