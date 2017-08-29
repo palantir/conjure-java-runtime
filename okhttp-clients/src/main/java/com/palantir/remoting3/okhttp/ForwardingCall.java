@@ -24,7 +24,7 @@ import okhttp3.Response;
 
 /** A forwarding/delegating {@link okhttp3.Call}. Sub-classes should override individual methods. */
 @SuppressWarnings({"checkstyle:noclone", "checkstyle:superclone"})
-class ForwardingCall implements Call {
+abstract class ForwardingCall implements Call {
 
     private final Call delegate;
 
@@ -63,7 +63,17 @@ class ForwardingCall implements Call {
     }
 
     @Override
-    public ForwardingCall clone() {
-        return new ForwardingCall(delegate.clone());
+    public Call clone() {
+        return doClone();
+    }
+
+    /**
+     * Subclasses must provide a clone implementation. It typically returns a new instance of a subclass of {@link
+     * ForwardingCall}.
+     */
+    abstract Call doClone();
+
+    protected Call getDelegate() {
+        return delegate;
     }
 }

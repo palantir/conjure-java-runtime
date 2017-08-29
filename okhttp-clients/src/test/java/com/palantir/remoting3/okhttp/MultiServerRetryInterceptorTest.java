@@ -36,7 +36,6 @@ import okhttp3.Dns;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
@@ -50,7 +49,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public final class MultiServerRetryInterceptorTest {
+public final class MultiServerRetryInterceptorTest extends TestBase {
 
     @Rule
     public final MockWebServer serverA = new MockWebServer();
@@ -146,14 +145,5 @@ public final class MultiServerRetryInterceptorTest {
 
         assertThat(serverA.getRequestCount()).isEqualTo(0);
         assertThat(serverB.getRequestCount()).isEqualTo(1);
-    }
-
-    private static Response responseWithCode(Request request, int code) {
-        return new Response.Builder()
-                .request(request)
-                .protocol(Protocol.HTTP_1_1)
-                .code(code)
-                .message("unused")
-                .build();
     }
 }

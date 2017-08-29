@@ -22,9 +22,6 @@ import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.okhttp.AsyncCallTagCallFactory;
 import com.palantir.remoting3.okhttp.OkHttpClients;
-import com.palantir.remoting3.okhttp.RetryInterceptor;
-import com.palantir.remoting3.okhttp.SerializableErrorInterceptor;
-import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -40,7 +37,7 @@ public final class Retrofit2ClientBuilder {
     }
 
     public <T> T build(Class<T> serviceClass, String userAgent) {
-        okhttp3.OkHttpClient client = createOkHttpClient(userAgent, serviceClass);
+        okhttp3.OkHttpClient client = OkHttpClients.create(config, userAgent, serviceClass);
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(addTrailingSlash(config.uris().get(0)))
@@ -58,18 +55,4 @@ public final class Retrofit2ClientBuilder {
         return url.charAt(url.length() - 1) == '/' ? url : url + "/";
     }
 
-    private OkHttpClient createOkHttpClient(String userAgent, Class<?> serviceClass) {
-        OkHttpClient.Builder client = OkHttpClients.builder(config, userAgent, serviceClass);
-
-        // retry configuration
-        // TODO(rfink): Consolidate this with the MultiServerRetry thing.
-        if (config.maxNumRetries() > 1) {
-            client.addInterceptor(new RetryInterceptor(config.maxNumRetries()));
-        }
-
-        // TODO(rfink): Can we use the interceptor to handle errors in Feign clients?
-        client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
-
-        return client.build();
-    }
 }
