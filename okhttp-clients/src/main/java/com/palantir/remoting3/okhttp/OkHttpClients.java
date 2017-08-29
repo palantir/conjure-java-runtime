@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.config.service.BasicCredentials;
@@ -25,11 +26,14 @@ import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.TlsVersion;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -44,7 +48,18 @@ public final class OkHttpClients {
 
     /** Creates an OkHttp client from the given {@link ClientConfiguration}. */
     public static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
-        return builder(config, userAgent, serviceClass).build();
+        return create(
+                config,
+                userAgent,
+                serviceClass,
+                // TODO(rfink): Implement and use jittery exponential backoff.
+                () -> new AsyncQosIoExceptionHandler(executorService, new NoDelayBackoff(config.maxNumRetries())));
+    }
+
+    @VisibleForTesting
+    static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass,
+            Supplier<QosIoExceptionHandler> handlerFactory) {
+        return new QosIoExceptionAwareOkhttpClient(builder(config, userAgent, serviceClass).build(), handlerFactory);
     }
 
     /**
@@ -57,6 +72,7 @@ public final class OkHttpClients {
 
         // error handling
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
+        client.addInterceptor(QosIoExceptionInterceptor.INSTANCE);
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
@@ -118,5 +134,27 @@ public final class OkHttpClients {
         dispatcher.setMaxRequests(256);
         dispatcher.setMaxRequestsPerHost(256);
         return dispatcher;
+    }
+
+    /**
+     * An OkHttp client that executes requests, catches all {@link QosIoException}s and passes them to the configured
+     * {@link QosIoExceptionHandler}.
+     * <p>
+     * See {@link QosIoExceptionHandler} for an end-to-end explanation of http-remoting specific client-side error
+     * handling.
+     */
+    private static final class QosIoExceptionAwareOkhttpClient extends ForwardingOkHttpClient {
+
+        private final Supplier<QosIoExceptionHandler> handlerFactory;
+
+        private QosIoExceptionAwareOkhttpClient(OkHttpClient delegate, Supplier<QosIoExceptionHandler> handlerFactory) {
+            super(delegate);
+            this.handlerFactory = handlerFactory;
+        }
+
+        @Override
+        public Call newCall(Request request) {
+            return new QosIoExceptionAwareCall(getDelegate().newCall(request), handlerFactory.get());
+        }
     }
 }
