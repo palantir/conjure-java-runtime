@@ -17,6 +17,7 @@
 package com.palantir.remoting3.retrofit2;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
 import com.palantir.remoting3.clients.ClientConfiguration;
