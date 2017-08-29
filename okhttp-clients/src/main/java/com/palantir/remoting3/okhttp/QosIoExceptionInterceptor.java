@@ -16,20 +16,20 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import okhttp3.Interceptor;
+import okhttp3.Response;
 
-public abstract class TestBase {
+public final class QosIoExceptionInterceptor implements Interceptor {
+    public static final QosIoExceptionInterceptor INSTANCE = new QosIoExceptionInterceptor();
 
-    @SafeVarargs
-    static <T> Set<T> set(T... items) {
-        return ImmutableSet.copyOf(items);
-    }
-
-    @SafeVarargs
-    static <T> List<T> list(T... items) {
-        return ImmutableList.copyOf(items);
+    @Override
+    public Response intercept(Chain chain) throws IOException {
+        Response response = chain.proceed(chain.request());
+        if (response.code() == 429) {
+            // TODO(rfink): Fill in details.
+            throw new QosIoException();
+        }
+        return response;
     }
 }
