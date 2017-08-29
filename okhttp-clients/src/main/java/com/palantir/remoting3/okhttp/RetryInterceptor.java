@@ -24,7 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Retrofit {@link Interceptor} that retries at most {@code maxNumTries} times.
+ * OkHttp {@link Interceptor} that retries at most {@code maxNumTries} times.
+ *
+ * TODO(rfink): Consolidate IOException retries with other retries?
  */
 public final class RetryInterceptor implements Interceptor {
 

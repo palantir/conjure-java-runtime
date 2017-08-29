@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.config.service.BasicCredentials;
@@ -23,13 +24,19 @@ import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.TlsVersion;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -44,7 +51,20 @@ public final class OkHttpClients {
 
     /** Creates an OkHttp client from the given {@link ClientConfiguration}. */
     public static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
-        return builder(config, userAgent, serviceClass).build();
+        QosIoExceptionHandler exceptionHandler = (call, exception) -> {
+            // TODO(rfink): Implement. For instance, in case of 429, schedule to execute the call again
+            // at a later time.
+            CompletableFuture<Response> futureResponse = new CompletableFuture<>();
+            futureResponse.completeExceptionally(exception);
+            return futureResponse;
+        };
+        return create(config, userAgent, serviceClass, exceptionHandler);
+    }
+
+    @VisibleForTesting
+    static OkHttpClient create(
+            ClientConfiguration config, String userAgent, Class<?> serviceClass, QosIoExceptionHandler handler) {
+        return new QosIoExceptionAwareOkhttpClient(builder(config, userAgent, serviceClass).build(), handler);
     }
 
     /**
@@ -57,6 +77,7 @@ public final class OkHttpClients {
 
         // error handling
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
+        client.addInterceptor(QosIoExceptionInterceptor.INSTANCE);
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
@@ -118,5 +139,35 @@ public final class OkHttpClients {
         dispatcher.setMaxRequests(256);
         dispatcher.setMaxRequestsPerHost(256);
         return dispatcher;
+    }
+
+    private static final class QosIoExceptionAwareOkhttpClient extends ForwardingOkHttpClient {
+
+        private final QosIoExceptionHandler handler;
+
+        private QosIoExceptionAwareOkhttpClient(OkHttpClient delegate, QosIoExceptionHandler handler) {
+            super(delegate);
+            this.handler = handler;
+        }
+
+        @Override
+        public Call newCall(Request request) {
+            Call call = getDelegate().newCall(request);
+            return new ForwardingCall(call) {
+                @Override
+                public Response execute() throws IOException {
+                    try {
+                        return super.execute();
+                    } catch (QosIoException e) {
+                        CompletableFuture<Response> futureResponse = handler.handle(call, e);
+                        try {
+                            return futureResponse.get();
+                        } catch (ExecutionException | InterruptedException executionException) {
+                            throw new IOException("Failed to execute request (interrupted?)", executionException);
+                        }
+                    }
+                }
+            };
+        }
     }
 }
