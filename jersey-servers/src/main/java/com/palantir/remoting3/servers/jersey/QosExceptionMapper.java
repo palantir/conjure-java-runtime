@@ -18,7 +18,7 @@ package com.palantir.remoting3.servers.jersey;
 
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.errors.QosException;
-import java.net.URL;
+import java.time.temporal.ChronoUnit;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -37,33 +37,29 @@ final class QosExceptionMapper implements ExceptionMapper<QosException> {
     private static final Logger log = LoggerFactory.getLogger(QosExceptionMapper.class);
 
     @Override
-    public Response toResponse(QosException exception) {
-        log.debug("Possible quality-of-service intervention", exception);
-        if (exception instanceof QosException.Retry) {
-            return retry();
-        } else if (exception instanceof QosException.RetryOther) {
-            QosException.RetryOther retry = (QosException.RetryOther) exception;
-            return retryOther(retry.getRedirectTo());
-        } else if (exception instanceof QosException.Unavailable) {
-            return unavailable();
-        } else {
-            throw new RuntimeException(
-                    "Internal error, unknown QosException subclass: " + exception.getClass().getSimpleName());
-        }
-    }
+    public Response toResponse(QosException qosException) {
+        log.debug("Possible quality-of-service intervention", qosException);
+        return qosException.accept(new QosException.Visitor<Response>() {
+            @Override
+            public Response visit(QosException.Throttle exception) {
+                Response.ResponseBuilder response = Response.status(429);
+                exception.getRetryAfter().ifPresent(duration ->
+                        response.header(HttpHeaders.RETRY_AFTER, Long.toString(duration.get(ChronoUnit.SECONDS))));
+                return response.build();
+            }
 
-    private Response retry() {
-        return Response.status(429).build();
-    }
+            @Override
+            public Response visit(QosException.RetryOther exception) {
+                return Response
+                        .status(308)
+                        .header(HttpHeaders.LOCATION, exception.getRedirectTo().toString())
+                        .build();
+            }
 
-    private Response retryOther(URL url) {
-        return Response
-                .status(308)
-                .header(HttpHeaders.LOCATION, url.toString())
-                .build();
-    }
-
-    private Response unavailable() {
-        return Response.status(503).build();
+            @Override
+            public Response visit(QosException.Unavailable exception) {
+                return Response.status(503).build();
+            }
+        });
     }
 }
