@@ -21,6 +21,7 @@ import com.palantir.remoting.api.errors.QosException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
@@ -64,7 +65,12 @@ final class QosIoExceptionInterceptor implements Interceptor {
     }
 
     private static IOException handle429(Response response) {
-        return new QosIoException(QosException.throttle(), response);
+        String duration = response.header(HttpHeaders.RETRY_AFTER);
+        if (duration == null) {
+            return new QosIoException(QosException.throttle(), response);
+        } else {
+            return new QosIoException(QosException.throttle(Duration.ofSeconds(Long.parseLong(duration))), response);
+        }
     }
 
     private static IOException handle503(Response response) {
