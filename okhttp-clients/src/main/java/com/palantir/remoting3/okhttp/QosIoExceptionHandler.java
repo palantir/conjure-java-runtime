@@ -19,7 +19,6 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.remoting.api.errors.QosException;
 import okhttp3.Call;
-import okhttp3.Interceptor;
 import okhttp3.Response;
 
 interface QosIoExceptionHandler {
@@ -28,22 +27,22 @@ interface QosIoExceptionHandler {
      * response. The future can either encapsulate the original exception, or the response to retrying the call at a
      * later time, or the exception thrown by a later retried execution.
      * <p>
-     * Note that vanilla OkHttp functionality does not cover what's needed here, for example: <ul> <li> OkHttp remoting
-     * doesn't have out-of-the-box support for re-locating complex reqests, cf. https://github.com/square/okhttp/issues/3111
-     * . </li> <li> OkHttp {@link Interceptor}s could wait-and-retry upon observing 429 or 503, but this would happen on
-     * the same thread. Since all http-remoting clients (in a JVM) share the same OkHttp thread pool, only a few backed
-     * up requests would have the potential to stall all outgoing RPC. The {@link QosIoExceptionHandler} approach taken
-     * here circumnavigates this pitful by re-scheduling call re-execution instead of performing thread-blocking sleep.
-     * </li> </ul>
-     * <p>
-     * <p>
-     * <p>
-     * The end-to-end flow for handling {@link QosException}s in an OkHttp client is as follows: <ul> <li> {@link
-     * QosIoExceptionInterceptor} detected HTTP status codes pertaining to server-side {@link QosException}s (e.g., 429
-     * for retry, 503 for unavailable, etc) and throws a corresponding {@link QosIoException}. </li> <li> A {@link
-     * OkHttpClients.QosIoExceptionAwareOkhttpClient} catches all {@link QosIoException}s and passes on to a configured
-     * {@link QosIoExceptionHandler}. </li> <li> The {@link QosIoExceptionHandler} decides to reschedule the request,
-     * throw the {@link QosIoException} to the calling user, redirect the request, etc. </li> </ul>
+     * The end-to-end flow for handling {@link QosException}s in an OkHttp client is as follows:
+     * <ul>
+     *     <li>
+     *         {@link QosIoExceptionInterceptor} detected HTTP status codes pertaining to server-side
+     *         {@link QosException}s (e.g., 429 for retry, 503 for unavailable, etc) and throws a corresponding
+     *         {@link QosIoException}.
+     *     </li>
+     *     <li>
+     *         A {@link OkHttpClients.QosIoExceptionAwareOkHttpClient} catches all {@link QosIoException}s and passes
+     *         on to a configured {@link QosIoExceptionHandler}.
+     *     </li>
+     *     <li>
+     *         The {@link QosIoExceptionHandler} decides to reschedule the request, throw the {@link QosIoException}
+     *         to the calling user, redirect the request, etc.
+     *     </li>
+     * </ul>
      */
     ListenableFuture<Response> handle(QosIoExceptionAwareCall call, QosIoException exception);
 }
