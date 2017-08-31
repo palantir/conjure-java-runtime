@@ -107,6 +107,22 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(server.getRequestCount()).isEqualTo(2 /* original plus one retries */);
     }
 
+    @Test
+    public void doesNotShareBackoffStateBetweenCalls() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setBody("pong"));
+        Call call = createRetryingClient(1).newCall(new Request.Builder().url(url).build());
+        assertThat(call.execute().body().string()).isEqualTo("pong");
+
+        // The following call would fail if OkHttpClients.create() constructed clients that share backoff state.
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setBody("pong"));
+        call = createRetryingClient(1).newCall(new Request.Builder().url(url).build());
+        assertThat(call.execute().body().string()).isEqualTo("pong");
+
+        assertThat(server.getRequestCount()).isEqualTo(4 /* two from each call */);
+    }
+
     private OkHttpClient createRetryingClient(int maxNumRetries) {
         return OkHttpClients.create(
                 ClientConfiguration.builder().from(createTestConfig(url)).maxNumRetries(maxNumRetries).build(),
