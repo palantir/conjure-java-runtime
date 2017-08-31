@@ -35,7 +35,7 @@ class QosIoException extends IOException {
     private final Response response;
 
     QosIoException(QosException qosException, Response response) {
-        super("Failed to complete the request due to a server-side QoS condition");
+        super("Failed to complete the request due to a server-side QoS condition: " + response.code());
         this.qosException = qosException;
         this.response = response;
     }

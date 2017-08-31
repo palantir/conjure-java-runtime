@@ -42,11 +42,13 @@ public final class QosIoExceptionAwareCall extends ForwardingCall {
             } catch (ExecutionException executionException) {
                 Throwable cause = executionException.getCause();
                 if (cause instanceof QosIoException) {
-                    throw (QosIoException) cause;
+                    QosIoException qosIoException = (QosIoException) cause;
+                    throw new QosIoException(qosIoException.getQosException(), qosIoException.getResponse());
                 } else {
                     throw new IOException("Failed to execute request", cause);
                 }
             } catch (InterruptedException interruptedException) {
+                Thread.currentThread().interrupt();
                 throw new IOException("Failed to execute request (interrupted?)", interruptedException);
             }
         }
