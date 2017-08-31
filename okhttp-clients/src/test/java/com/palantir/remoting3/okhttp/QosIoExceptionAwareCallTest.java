@@ -57,7 +57,7 @@ public final class QosIoExceptionAwareCallTest extends TestBase {
     @Test
     public void executionWithQosIoException_invokesHandler() throws Exception {
         QosIoExceptionAwareCall call = new QosIoExceptionAwareCall(delegate, handler);
-        QosIoException qosIoException = new QosIoException(QosException.unavailable());
+        QosIoException qosIoException = new QosIoException(QosException.unavailable(), null);
         when(delegate.execute()).thenThrow(qosIoException);
         when(handler.handle(any(), any())).thenReturn(Futures.immediateFuture(RESPONSE));
 

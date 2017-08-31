@@ -18,6 +18,7 @@ package com.palantir.remoting3.okhttp;
 
 import com.palantir.remoting.api.errors.QosException;
 import java.io.IOException;
+import okhttp3.Response;
 
 /**
  * An exception pertaining to http-remoting QoS situations, for example requests to re-schedule a remote request for a
@@ -31,13 +32,20 @@ import java.io.IOException;
 class QosIoException extends IOException {
 
     private final QosException qosException;
+    private final Response response;
 
-    QosIoException(QosException qosException) {
+    QosIoException(QosException qosException, Response response) {
         super("Failed to complete the request due to a server-side QoS condition");
         this.qosException = qosException;
+        this.response = response;
     }
 
     QosException getQosException() {
         return qosException;
+    }
+
+    /** The OkHttp response that gave rise to this exception. */
+    public Response getResponse() {
+        return response;
     }
 }

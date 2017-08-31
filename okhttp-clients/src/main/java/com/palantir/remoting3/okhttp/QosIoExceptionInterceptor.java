@@ -31,42 +31,43 @@ import okhttp3.Response;
  * See {@link QosIoExceptionHandler} for an end-to-end explanation of http-remoting specific client-side error
  * handling.
  */
-public final class QosIoExceptionInterceptor implements Interceptor {
-    public static final QosIoExceptionInterceptor INSTANCE = new QosIoExceptionInterceptor();
+final class QosIoExceptionInterceptor implements Interceptor {
+    static final QosIoExceptionInterceptor INSTANCE = new QosIoExceptionInterceptor();
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Response response = chain.proceed(chain.request());
         switch (response.code()) {
             case 308:
-                throw handle308(response.header(HttpHeaders.LOCATION));
+                throw handle308(response);
             case 429:
-                throw handle429();
+                throw handle429(response);
             case 503:
-                throw handle503();
+                throw handle503(response);
         }
 
         return response;
     }
 
-    private static IOException handle308(String locationHeader) {
+    private static IOException handle308(Response response) {
+        String locationHeader = response.header(HttpHeaders.LOCATION);
         if (locationHeader == null) {
             return new IOException("Retrieved HTTP status code 308 without Location header, cannot perform "
                     + "redirect. This appears to be a server-side protocol violation.");
         }
 
         try {
-            return new QosIoException(QosException.retryOther(new URL(locationHeader)));
+            return new QosIoException(QosException.retryOther(new URL(locationHeader)), response);
         } catch (MalformedURLException e) {
             return new IOException("Failed to parse redirect URL from 'Location' response header: " + locationHeader);
         }
     }
 
-    private static IOException handle429() {
-        return new QosIoException(QosException.throttle());
+    private static IOException handle429(Response response) {
+        return new QosIoException(QosException.throttle(), response);
     }
 
-    private static IOException handle503() {
-        return new QosIoException(QosException.unavailable());
+    private static IOException handle503(Response response) {
+        return new QosIoException(QosException.unavailable(), response);
     }
 }

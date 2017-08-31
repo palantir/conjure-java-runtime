@@ -26,8 +26,8 @@ import okhttp3.Call;
 import okhttp3.Response;
 
 /**
- * Inspects the {@link QosException} thrown by a {@link Call} execution and re-execution of the call on the configured
- * {@link ExecutorService}.
+ * Inspects the {@link QosException} thrown by a {@link Call} execution and -- depending on the type of {@link
+ * QosException} -- schedules a future execution of the call on the configured {@link ExecutorService}.
  */
 class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
 

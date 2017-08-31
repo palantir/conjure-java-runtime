@@ -59,7 +59,7 @@ public final class OkHttpClients {
     @VisibleForTesting
     static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass,
             Supplier<QosIoExceptionHandler> handlerFactory) {
-        return new QosIoExceptionAwareOkhttpClient(builder(config, userAgent, serviceClass).build(), handlerFactory);
+        return new QosIoExceptionAwareOkHttpClient(builder(config, userAgent, serviceClass).build(), handlerFactory);
     }
 
     /**
@@ -143,11 +143,11 @@ public final class OkHttpClients {
      * See {@link QosIoExceptionHandler} for an end-to-end explanation of http-remoting specific client-side error
      * handling.
      */
-    private static final class QosIoExceptionAwareOkhttpClient extends ForwardingOkHttpClient {
+    private static final class QosIoExceptionAwareOkHttpClient extends ForwardingOkHttpClient {
 
         private final Supplier<QosIoExceptionHandler> handlerFactory;
 
-        private QosIoExceptionAwareOkhttpClient(OkHttpClient delegate, Supplier<QosIoExceptionHandler> handlerFactory) {
+        private QosIoExceptionAwareOkHttpClient(OkHttpClient delegate, Supplier<QosIoExceptionHandler> handlerFactory) {
             super(delegate);
             this.handlerFactory = handlerFactory;
         }

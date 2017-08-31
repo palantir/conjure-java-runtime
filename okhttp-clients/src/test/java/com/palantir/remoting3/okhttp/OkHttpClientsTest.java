@@ -58,7 +58,7 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void interceptsAndHandlesQosIoExceptions_propagatesQosIoExceptions() throws Exception {
-        QosIoException qosIoException = new QosIoException(QosException.unavailable());
+        QosIoException qosIoException = new QosIoException(QosException.unavailable(), null);
         when(handler.handle(any(), any())).thenReturn(Futures.immediateFailedFuture(qosIoException));
         server.enqueue(new MockResponse().setResponseCode(503));
 
