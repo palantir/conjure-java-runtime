@@ -22,14 +22,13 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.Futures;
 import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Before;
@@ -48,14 +47,11 @@ public final class OkHttpClientsTest extends TestBase {
     @Mock
     private QosIoExceptionHandler handler;
 
-    private CompletableFuture<Response> future;
     private String url;
     private OkHttpClient mockHandlerClient;
 
     @Before
     public void before() {
-        future = new CompletableFuture<>();
-        when(handler.handle(any(), any())).thenReturn(future);
         url = "http://localhost:" + server.getPort();
         mockHandlerClient = OkHttpClients.create(createTestConfig(url), "test", OkHttpClientsTest.class, () -> handler);
     }
@@ -63,7 +59,7 @@ public final class OkHttpClientsTest extends TestBase {
     @Test
     public void interceptsAndHandlesQosIoExceptions_propagatesQosIoExceptions() throws Exception {
         QosIoException qosIoException = new QosIoException(QosException.unavailable());
-        future.completeExceptionally(qosIoException);
+        when(handler.handle(any(), any())).thenReturn(Futures.immediateFailedFuture(qosIoException));
         server.enqueue(new MockResponse().setResponseCode(503));
 
         Call call = mockHandlerClient.newCall(new Request.Builder().url(url).build());
@@ -76,7 +72,7 @@ public final class OkHttpClientsTest extends TestBase {
     @Test
     public void interceptsAndHandlesQosIoExceptions_wrapsRuntimeExceptionsAsIoExceptions() throws Exception {
         RuntimeException runtimeException = new RuntimeException("Foo");
-        future.completeExceptionally(runtimeException);
+        when(handler.handle(any(), any())).thenReturn(Futures.immediateFailedFuture(runtimeException));
         server.enqueue(new MockResponse().setResponseCode(503));
 
         Call call = mockHandlerClient.newCall(new Request.Builder().url(url).build());

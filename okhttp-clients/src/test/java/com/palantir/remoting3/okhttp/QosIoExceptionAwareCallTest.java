@@ -23,9 +23,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.Futures;
 import com.palantir.remoting.api.errors.QosException;
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -59,7 +59,7 @@ public final class QosIoExceptionAwareCallTest extends TestBase {
         QosIoExceptionAwareCall call = new QosIoExceptionAwareCall(delegate, handler);
         QosIoException qosIoException = new QosIoException(QosException.unavailable());
         when(delegate.execute()).thenThrow(qosIoException);
-        when(handler.handle(any(), any())).thenReturn(CompletableFuture.completedFuture(RESPONSE));
+        when(handler.handle(any(), any())).thenReturn(Futures.immediateFuture(RESPONSE));
 
         assertThat(call.execute()).isEqualTo(RESPONSE);
         verify(delegate).execute();

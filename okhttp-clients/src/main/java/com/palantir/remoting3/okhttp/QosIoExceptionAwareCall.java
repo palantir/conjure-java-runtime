@@ -16,8 +16,8 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import okhttp3.Call;
 import okhttp3.Response;
@@ -36,7 +36,7 @@ public final class QosIoExceptionAwareCall extends ForwardingCall {
         try {
             return super.execute();
         } catch (QosIoException e) {
-            CompletableFuture<Response> futureResponse = exceptionHandler.handle(this, e);
+            ListenableFuture<Response> futureResponse = exceptionHandler.handle(this, e);
             try {
                 return futureResponse.get();
             } catch (ExecutionException executionException) {

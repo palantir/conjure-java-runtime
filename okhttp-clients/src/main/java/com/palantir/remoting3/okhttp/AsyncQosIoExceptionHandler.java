@@ -16,9 +16,11 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.remoting.api.errors.QosException;
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import okhttp3.Call;
 import okhttp3.Response;
@@ -29,54 +31,38 @@ import okhttp3.Response;
  */
 class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
 
-    private final ExecutorService executorService;
+    private final ListeningExecutorService executorService;
     private final BackoffStrategy backoffStrategy;
 
     AsyncQosIoExceptionHandler(ExecutorService executorService, BackoffStrategy backoffStrategy) {
-        this.executorService = executorService;
+        this.executorService = MoreExecutors.listeningDecorator(executorService);
         this.backoffStrategy = backoffStrategy;
     }
 
     @Override
-    public CompletableFuture<Response> handle(QosIoExceptionAwareCall call, QosIoException qosIoException) {
-        return qosIoException.getQosException().accept(new QosException.Visitor<CompletableFuture<Response>>() {
+    public ListenableFuture<Response> handle(QosIoExceptionAwareCall call, QosIoException qosIoException) {
+        return qosIoException.getQosException().accept(new QosException.Visitor<ListenableFuture<Response>>() {
             @Override
-            public CompletableFuture<Response> visit(QosException.Throttle exception) {
+            public ListenableFuture<Response> visit(QosException.Throttle exception) {
                 // TODO(rfink): Implement.
-                CompletableFuture<Response> response = new CompletableFuture<>();
-                response.completeExceptionally(qosIoException);
-                return response;
+                return Futures.immediateFailedFuture(qosIoException);
             }
 
             @Override
-            public CompletableFuture<Response> visit(QosException.RetryOther exception) {
+            public ListenableFuture<Response> visit(QosException.RetryOther exception) {
                 // TODO(rfink): Implement.
-                CompletableFuture<Response> response = new CompletableFuture<>();
-                response.completeExceptionally(qosIoException);
-                return response;
+                return Futures.immediateFailedFuture(qosIoException);
             }
 
             @Override
-            public CompletableFuture<Response> visit(QosException.Unavailable exception) {
-                CompletableFuture<Response> response = new CompletableFuture<>();
+            public ListenableFuture<Response> visit(QosException.Unavailable exception) {
                 if (!backoffStrategy.nextBackoff().isPresent()) {
-                    response.completeExceptionally(qosIoException);
+                    return Futures.immediateFailedFuture(qosIoException);
                 } else {
                     // TODO(rfink): Use duration and schedule retry for later.
-                    executorService.execute(createRunnableFor(call, response));
+                    return executorService.submit(() -> call.clone().execute());
                 }
-                return response;
             }
         });
-    }
-
-    private Runnable createRunnableFor(Call call, CompletableFuture<Response> result) {
-        return () -> {
-            try {
-                result.complete(call.clone().execute());
-            } catch (IOException e) {
-                result.completeExceptionally(e);
-            }
-        };
     }
 }
