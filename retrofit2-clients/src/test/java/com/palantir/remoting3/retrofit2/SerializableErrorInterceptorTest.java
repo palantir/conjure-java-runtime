@@ -129,6 +129,14 @@ public final class SerializableErrorInterceptorTest extends TestBase {
         service.get().execute();
     }
 
+    @Test
+    public void testInterceptorLogic_isIdentityOperationIfHttpCodeIs101SwitchingProtocols() throws Exception {
+        Response response = responseWithCode(request, 101);
+        when(chain.proceed(any(Request.class))).thenReturn(response);
+
+        assertThat(SerializableErrorInterceptor.INSTANCE.intercept(chain), Matchers.is(response));
+    }
+
     private static Response responseWithCode(Request request, int code) {
         return new Response.Builder()
                 .body(new RealResponseBody(Headers.of(), new Buffer()))
