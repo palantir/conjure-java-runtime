@@ -37,5 +37,10 @@ public interface UrlSelector {
      */
     Optional<HttpUrl> redirectToNext(HttpUrl current);
 
+    /**
+     * Returns the base URLs that this UrlSelector matches against. Note that implementations should parse web socket
+     * (ws:// and ws:///) URLs as http (http:// and https:// respectively), in a similar to how {@link
+     * okhttp3.Request#url} does.
+     */
     List<HttpUrl> getBaseUrls();
 }

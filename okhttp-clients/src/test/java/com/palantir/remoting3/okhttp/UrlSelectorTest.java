@@ -19,8 +19,11 @@ package com.palantir.remoting3.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.google.common.collect.ImmutableList;
 import java.util.List;
+import java.util.Optional;
 import okhttp3.HttpUrl;
+import okhttp3.Request;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -121,6 +124,17 @@ public final class UrlSelectorTest extends TestBase {
         UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a"));
         HttpUrl current = HttpUrl.parse("http://bar/a/b/").resolve("foo");
         assertThat(selector.redirectToNext(current)).contains(HttpUrl.parse("http://foo/a/b/foo"));
+    }
+
+    @Test
+    public void testWorksWithWebSockets() throws Exception {
+        Request wsRequest = new Request.Builder()
+                .url("wss://foo/a")
+                .build();
+        UrlSelectorImpl selector = UrlSelectorImpl.create(ImmutableList.of("wss://foo/", "wss://bar/"));
+
+        // Silently replace web socket URLs with HTTP URLs. See https://github.com/square/okhttp/issues/1652.
+        assertThat(selector.redirectToNext(wsRequest.url())).isEqualTo(Optional.of(parse("https://bar/a")));
     }
 
     private static HttpUrl parse(String url) {

@@ -38,7 +38,7 @@ final class UrlSelectorImpl implements UrlSelector {
     static UrlSelectorImpl create(Collection<String> baseUrls) {
         ImmutableSet.Builder<HttpUrl> canonicalUrls = ImmutableSet.builder();
         baseUrls.forEach(url -> {
-            HttpUrl httpUrl = HttpUrl.parse(url);
+            HttpUrl httpUrl = HttpUrl.parse(switchWsToHttp(url));
             Preconditions.checkArgument(httpUrl != null, "Not a valid URL: %s", url);
             HttpUrl canonicalUrl = canonicalize(httpUrl);
             Preconditions.checkArgument(canonicalUrl.equals(httpUrl),
@@ -46,6 +46,17 @@ final class UrlSelectorImpl implements UrlSelector {
             canonicalUrls.add(canonicalUrl);
         });
         return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()));
+    }
+
+    private static String switchWsToHttp(String url) {
+        // Silently replace web socket URLs with HTTP URLs. See https://github.com/square/okhttp/issues/1652.
+        if (url.regionMatches(true, 0, "ws:", 0, 3)) {
+            return "http:" + url.substring(3);
+        } else if (url.regionMatches(true, 0, "wss:", 0, 4)) {
+            return "https:" + url.substring(4);
+        } else {
+            return url;
+        }
     }
 
     @Override
