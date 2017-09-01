@@ -37,7 +37,7 @@ public enum SerializableErrorInterceptor implements Interceptor {
         }
 
         Response response = chain.proceed(chain.request());
-        if (!response.isSuccessful()) {
+        if (!(response.isSuccessful() || response.code() == 101)) {
             Collection<String> contentTypes = response.headers("Content-Type");
             InputStream body = response.body().byteStream();
             throw SerializableErrorToExceptionConverter.getException(contentTypes, response.code(), body);
