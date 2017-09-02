@@ -41,7 +41,6 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofMinutes(10);
     private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(10);
     private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = false;
-    private static final int DEFAULT_MAX_NUM_RETRIES = 0;
 
     private ClientConfigurations() {}
 
@@ -60,13 +59,13 @@ public final class ClientConfigurations {
                 .enableGcmCipherSuites(config.enableGcmCipherSuites().orElse(DEFAULT_ENABLE_GCM_CIPHERS))
                 .proxy(createProxySelector(config.proxy()))
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
-                .maxNumRetries(DEFAULT_MAX_NUM_RETRIES)
+                .maxNumRetries(config.uris().size())
                 .build();
     }
 
     /**
-     * Creates a new {@link ClientConfiguration} instance from the given SSL configuration and URIs, filling in
-     * all other configuration with the defaults specified as constants in this class.
+     * Creates a new {@link ClientConfiguration} instance from the given SSL configuration and URIs, filling in all
+     * other configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(
             List<String> uris, SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
@@ -80,7 +79,7 @@ public final class ClientConfigurations {
                 .enableGcmCipherSuites(DEFAULT_ENABLE_GCM_CIPHERS)
                 .proxy(createProxySelector(Optional.empty()))
                 .proxyCredentials(Optional.empty())
-                .maxNumRetries(DEFAULT_MAX_NUM_RETRIES)
+                .maxNumRetries(uris.size())
                 .build();
     }
 
