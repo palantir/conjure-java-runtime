@@ -72,14 +72,22 @@ public final class QosIoExceptionAwareCall extends ForwardingCall {
                         public void onSuccess(@Nullable Response result) {
                             try {
                                 responseCallback.onResponse(call, result);
-                            } catch (IOException e1) {
-                                responseCallback.onFailure(call, e1);
+                            } catch (IOException ioException) {
+                                responseCallback.onFailure(call,
+                                        new IOException("Unexpected exception when notifying callback", ioException));
                             }
                         }
 
                         @Override
                         public void onFailure(Throwable throwable) {
-                            responseCallback.onFailure(call, new IOException("Failed to execute call", throwable));
+                            if (throwable instanceof QosIoException) {
+                                QosIoException qosIoException = (QosIoException) throwable;
+                                responseCallback.onFailure(call, new QosIoException(
+                                        qosIoException.getQosException(), qosIoException.getResponse()));
+                            } else {
+                                responseCallback.onFailure(
+                                        call, new IOException("Failed to execute request", throwable));
+                            }
                         }
                     });
                 } else {
