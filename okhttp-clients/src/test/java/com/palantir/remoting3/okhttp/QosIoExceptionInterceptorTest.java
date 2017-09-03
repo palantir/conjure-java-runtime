@@ -16,8 +16,8 @@
 
 package com.palantir.remoting3.okhttp;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.palantir.remoting.api.errors.QosException;
@@ -36,7 +36,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public final class QosIoExceptionInterceptorTest extends TestBase {
 
-    private static final Request REQUEST = new Request.Builder().url("http://foo").build();
+    private static final Request REQUEST = new Request.Builder().url("http://127.0.0.1").build();
     private static final Interceptor INTERCEPTOR = QosIoExceptionInterceptor.INSTANCE;
 
     @Mock
@@ -60,7 +60,7 @@ public final class QosIoExceptionInterceptorTest extends TestBase {
 
     @Test
     public void test308WithLocation() throws Exception {
-        URL url = new URL("http://foo");
+        URL url = new URL("http://127.0.0.1");
         Response response = responseWithCode(REQUEST, 308).newBuilder().header("Location", url.toString()).build();
         when(chain.proceed(REQUEST)).thenReturn(response);
 

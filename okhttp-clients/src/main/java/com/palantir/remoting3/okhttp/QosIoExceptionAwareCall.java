@@ -16,10 +16,14 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import javax.annotation.Nullable;
 import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.Response;
 
 public final class QosIoExceptionAwareCall extends ForwardingCall {
@@ -52,6 +56,43 @@ public final class QosIoExceptionAwareCall extends ForwardingCall {
                 throw new IOException("Failed to execute request (interrupted?)", interruptedException);
             }
         }
+    }
+
+    @Override
+    public void enqueue(Callback responseCallback) {
+        Callback qosAwareCallback = new Callback() {
+            @Override
+            public void onFailure(Call call, IOException ioException) {
+                if (ioException instanceof QosIoException) {
+                    // Let retry handler deal with the call and propagate its result to the responseCallback
+                    ListenableFuture<Response> response =
+                            exceptionHandler.handle(QosIoExceptionAwareCall.this, (QosIoException) ioException);
+                    Futures.addCallback(response, new FutureCallback<Response>() {
+                        @Override
+                        public void onSuccess(@Nullable Response result) {
+                            try {
+                                responseCallback.onResponse(call, result);
+                            } catch (IOException e1) {
+                                responseCallback.onFailure(call, e1);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable throwable) {
+                            responseCallback.onFailure(call, new IOException("Failed to execute call", throwable));
+                        }
+                    });
+                } else {
+                    responseCallback.onFailure(call, ioException);
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                responseCallback.onResponse(call, response);
+            }
+        };
+        super.enqueue(qosAwareCallback);
     }
 
     @Override

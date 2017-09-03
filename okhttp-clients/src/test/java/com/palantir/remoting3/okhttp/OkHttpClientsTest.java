@@ -26,9 +26,12 @@ import com.google.common.util.concurrent.Futures;
 import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Before;
@@ -40,6 +43,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class OkHttpClientsTest extends TestBase {
+
+    private static final Request REQUEST = new Request.Builder().url("http://127.0.0.1").build();
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -58,14 +63,17 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void interceptsAndHandlesQosIoExceptions_propagatesQosIoExceptions() throws Exception {
-        QosIoException qosIoException = new QosIoException(QosException.unavailable(), null);
+        QosIoException qosIoException = new QosIoException(QosException.unavailable(), responseWithCode(REQUEST, 503));
         when(handler.handle(any(), any())).thenReturn(Futures.immediateFailedFuture(qosIoException));
         server.enqueue(new MockResponse().setResponseCode(503));
 
         Call call = mockHandlerClient.newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(call::execute)
-                .hasMessage("Failed to complete the request due to a server-side QoS condition")
-                .isEqualTo(qosIoException);
+                .hasMessage("Failed to complete the request due to a server-side QoS condition: 503")
+                .isInstanceOfSatisfying(QosIoException.class, actualException -> {
+                    assertThat(actualException.getResponse()).isEqualTo(qosIoException.getResponse());
+                    assertThat(actualException.getQosException()).isEqualTo(qosIoException.getQosException());
+                });
         verify(handler).handle(any(), any());
     }
 
@@ -102,7 +110,7 @@ public final class OkHttpClientsTest extends TestBase {
 
         Call call = createRetryingClient(1).newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(call::execute)
-                .hasMessage("Failed to complete the request due to a server-side QoS condition")
+                .hasMessage("Failed to complete the request due to a server-side QoS condition: 503")
                 .isInstanceOf(QosIoException.class);
         assertThat(server.getRequestCount()).isEqualTo(2 /* original plus one retries */);
     }
@@ -123,6 +131,29 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(call.execute().body().string()).isEqualTo("pong");
 
         assertThat(server.getRequestCount()).isEqualTo(4 /* two from each call */);
+    }
+
+    @Test
+    public void interceptsAndHandlesQosIoExceptions_endToEnd_asyncCall() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setBody("pong"));
+
+        Call call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
+        CompletableFuture<String> future = new CompletableFuture<>();
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException ioException) {
+                future.completeExceptionally(ioException);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                future.complete(response.body().string());
+            }
+        });
+        assertThat(future.get()).isEqualTo("pong");
+        assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {
