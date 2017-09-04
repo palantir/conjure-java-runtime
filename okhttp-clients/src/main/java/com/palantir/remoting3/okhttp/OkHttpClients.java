@@ -25,6 +25,8 @@ import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import okhttp3.Call;
@@ -35,6 +37,7 @@ import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.TlsVersion;
+import okhttp3.internal.Util;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 public final class OkHttpClients {
@@ -43,6 +46,17 @@ public final class OkHttpClients {
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
      */
     private static final ExecutorService executorService = Tracers.wrap(new Dispatcher().executorService());
+
+    /**
+     * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
+     * internal thread pool and from the thread pool used by {@link #executorService}.
+     * <p>
+     * Note: In contrast to the {@link java.util.concurrent.ThreadPoolExecutor} used by OkHttp's {@link
+     * #executorService}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
+     * Javadoc.
+     */
+    private static final ScheduledExecutorService scheduledExecutorService = Tracers.wrap(
+            new ScheduledThreadPoolExecutor(5, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
 
     private OkHttpClients() {}
 
@@ -53,7 +67,8 @@ public final class OkHttpClients {
                 userAgent,
                 serviceClass,
                 // TODO(rfink): Implement and use jittery exponential backoff.
-                () -> new AsyncQosIoExceptionHandler(executorService, new NoDelayBackoff(config.maxNumRetries())));
+                () -> new AsyncQosIoExceptionHandler(
+                        scheduledExecutorService, new NoDelayBackoff(config.maxNumRetries())));
     }
 
     @VisibleForTesting

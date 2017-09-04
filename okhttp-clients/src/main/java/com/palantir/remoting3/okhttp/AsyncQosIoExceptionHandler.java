@@ -18,10 +18,14 @@ package com.palantir.remoting3.okhttp;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.remoting.api.errors.QosException;
+import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Response;
 
@@ -31,10 +35,10 @@ import okhttp3.Response;
  */
 class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
 
-    private final ListeningExecutorService executorService;
+    private final ListeningScheduledExecutorService executorService;
     private final BackoffStrategy backoffStrategy;
 
-    AsyncQosIoExceptionHandler(ExecutorService executorService, BackoffStrategy backoffStrategy) {
+    AsyncQosIoExceptionHandler(ScheduledExecutorService executorService, BackoffStrategy backoffStrategy) {
         this.executorService = MoreExecutors.listeningDecorator(executorService);
         this.backoffStrategy = backoffStrategy;
     }
@@ -44,8 +48,16 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
         return qosIoException.getQosException().accept(new QosException.Visitor<ListenableFuture<Response>>() {
             @Override
             public ListenableFuture<Response> visit(QosException.Throttle exception) {
-                // TODO(rfink): Implement.
-                return Futures.immediateFailedFuture(qosIoException);
+                Optional<Duration> backoff = exception.getRetryAfter().isPresent()
+                        ? exception.getRetryAfter()
+                        : backoffStrategy.nextBackoff();
+
+                if (!backoff.isPresent()) {
+                    return Futures.immediateFailedFuture(qosIoException);
+                } else {
+                    return executorService.schedule(
+                            () -> call.clone().execute(), backoff.get().toMillis(), TimeUnit.MILLISECONDS);
+                }
             }
 
             @Override
@@ -56,11 +68,12 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
 
             @Override
             public ListenableFuture<Response> visit(QosException.Unavailable exception) {
-                if (!backoffStrategy.nextBackoff().isPresent()) {
+                Optional<Duration> backoff = backoffStrategy.nextBackoff();
+                if (!backoff.isPresent()) {
                     return Futures.immediateFailedFuture(qosIoException);
                 } else {
-                    // TODO(rfink): Use duration and schedule retry for later.
-                    return executorService.submit(() -> call.clone().execute());
+                    return executorService.schedule(
+                            () -> call.clone().execute(), backoff.get().toMillis(), TimeUnit.MILLISECONDS);
                 }
             }
         });
