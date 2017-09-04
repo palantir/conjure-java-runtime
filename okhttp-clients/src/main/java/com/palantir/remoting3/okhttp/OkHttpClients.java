@@ -50,9 +50,13 @@ public final class OkHttpClients {
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
      * internal thread pool and from the thread pool used by {@link #executorService}.
+     * <p>
+     * Note: In contrast to the {@link java.util.concurrent.ThreadPoolExecutor} used by OkHttp's {@link
+     * #executorService}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
+     * Javadoc.
      */
     private static final ScheduledExecutorService scheduledExecutorService = Tracers.wrap(
-            new ScheduledThreadPoolExecutor(0, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
+            new ScheduledThreadPoolExecutor(5, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
 
     private OkHttpClients() {}
 
