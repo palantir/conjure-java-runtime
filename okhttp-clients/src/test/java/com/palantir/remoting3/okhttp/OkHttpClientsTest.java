@@ -30,6 +30,7 @@ import com.palantir.remoting3.clients.ClientConfiguration;
 import java.io.IOException;
 import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -169,7 +170,7 @@ public final class OkHttpClientsTest extends TestBase {
                 future.complete(response.body().string());
             }
         });
-        assertThat(future.get()).isEqualTo("pong");
+        assertThat(future.get(1, TimeUnit.SECONDS)).isEqualTo("pong");
         assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
 

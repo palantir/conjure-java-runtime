@@ -60,7 +60,7 @@ public final class QosIoExceptionInterceptorTest extends TestBase {
 
     @Test
     public void test308WithLocation() throws Exception {
-        URL url = new URL("http://127.0.0.1");
+        URL url = new URL("http://foo");
         Response response = responseWithCode(REQUEST, 308).newBuilder().header("Location", url.toString()).build();
         when(chain.proceed(REQUEST)).thenReturn(response);
 
