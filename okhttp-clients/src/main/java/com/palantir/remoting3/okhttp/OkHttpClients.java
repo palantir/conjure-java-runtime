@@ -57,28 +57,17 @@ public final class OkHttpClients {
     }
 
     @VisibleForTesting
-    static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass,
+    static QosIoExceptionAwareOkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass,
             Supplier<QosIoExceptionHandler> handlerFactory) {
-        return new QosIoExceptionAwareOkHttpClient(builder(config, userAgent, serviceClass).build(), handlerFactory);
-    }
+        OkHttpClient.Builder client = new OkHttpClient.Builder();
 
-    /**
-     * Link {@link #create}, but returns the pre-configured {@link OkHttpClient.Builder}.
-     * <p>
-     * TODO(rfink): This method should get removed as soon as Feign and Retrofit clients use the same OkHttp clients.
-     */
-    public static OkHttpClient.Builder builder(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
-        okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
-
-        // error handling
+        // Error handling, retry/failover, etc: the order of these matters.
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
         client.addInterceptor(QosIoExceptionInterceptor.INSTANCE);
+        client.addInterceptor(MultiServerRetryInterceptor.create(config.uris(), config.maxNumRetries()));
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
-
-        // Retry-aware URLs
-        client.addInterceptor(MultiServerRetryInterceptor.create(config.uris(), config.maxNumRetries()));
 
         // tracing
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
@@ -115,7 +104,7 @@ public final class OkHttpClients {
         // dispatcher with static executor service
         client.dispatcher(createDispatcher());
 
-        return client;
+        return new QosIoExceptionAwareOkHttpClient(client.build(), handlerFactory);
     }
 
     private static ImmutableList<ConnectionSpec> createConnectionSpecs(boolean enableGcmCipherSuites) {
