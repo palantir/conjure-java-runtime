@@ -48,18 +48,15 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
         return qosIoException.getQosException().accept(new QosException.Visitor<ListenableFuture<Response>>() {
             @Override
             public ListenableFuture<Response> visit(QosException.Throttle exception) {
-                Optional<Duration> duration = exception.getRetryAfter();
-                if (duration.isPresent()) {
-                    return executorService.schedule(
-                            () -> call.clone().execute(), duration.get().toMillis(), TimeUnit.MILLISECONDS);
+                Optional<Duration> backoff = exception.getRetryAfter().isPresent()
+                        ? exception.getRetryAfter()
+                        : backoffStrategy.nextBackoff();
+
+                if (!backoff.isPresent()) {
+                    return Futures.immediateFailedFuture(qosIoException);
                 } else {
-                    Optional<Duration> backoff = backoffStrategy.nextBackoff();
-                    if (!backoff.isPresent()) {
-                        return Futures.immediateFailedFuture(qosIoException);
-                    } else {
-                        return executorService.schedule(
-                                () -> call.clone().execute(), backoff.get().toMillis(), TimeUnit.MILLISECONDS);
-                    }
+                    return executorService.schedule(
+                            () -> call.clone().execute(), backoff.get().toMillis(), TimeUnit.MILLISECONDS);
                 }
             }
 
