@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.remoting.api.errors.QosException;
+import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
@@ -81,7 +82,7 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
         scheduler.tick(10, TimeUnit.SECONDS);
         verify(delegateCall).clone();
         assertThat(response.isDone()).isTrue();
-        assertThat(response.get()).isEqualTo(CLONED_RESPONSE);
+        assertThat(response.get(1, TimeUnit.SECONDS)).isEqualTo(CLONED_RESPONSE);
     }
 
     @Test
@@ -98,24 +99,25 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
         scheduler.tick(10, TimeUnit.SECONDS);
         verify(delegateCall).clone();
         assertThat(response.isDone()).isTrue();
-        assertThat(response.get()).isEqualTo(CLONED_RESPONSE);
+        assertThat(response.get(1, TimeUnit.SECONDS)).isEqualTo(CLONED_RESPONSE);
     }
 
     @Test
     public void testThrottle_withoutRetryAfter_failsIfBackoffIsEmpty() throws Exception {
         when(backoff.nextBackoff()).thenReturn(NO_BACKOFF);
         QosIoException exception = new QosIoException(QosException.throttle(), RESPONSE);
-        assertThatThrownBy(() -> handler.handle(call, exception).get())
+        assertThatThrownBy(() -> handler.handle(call, exception).get(1, TimeUnit.SECONDS))
                 .hasCause(exception);
         verifyNoMoreInteractions(delegateCall);
     }
 
     @Test
-    public void testRetry_throwsImmediately() throws Exception {
-        // TODO(rfink): Implement this.
+    public void testRetryOther_notHandled() throws Exception {
         QosIoException exception = new QosIoException(QosException.retryOther(new URL("http://foo")), RESPONSE);
-        assertThatThrownBy(() -> handler.handle(call, exception).get())
-                .hasCause(exception);
+        assertThatThrownBy(() -> handler.handle(call, exception).get(1, TimeUnit.SECONDS))
+                .hasMessage("java.io.IOException: Internal error, did not expect to handle "
+                        + "RetryOther exception in handler")
+                .hasCauseInstanceOf(IOException.class);
         verifyNoMoreInteractions(delegateCall);
     }
 
@@ -123,7 +125,7 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
     public void testUnavailable_doesNotScheduleWhenBackoffIsEmpty() throws Exception {
         when(backoff.nextBackoff()).thenReturn(NO_BACKOFF);
         QosIoException exception = new QosIoException(QosException.unavailable(), RESPONSE);
-        assertThatThrownBy(() -> handler.handle(call, exception).get())
+        assertThatThrownBy(() -> handler.handle(call, exception).get(1, TimeUnit.SECONDS))
                 .hasCause(exception);
         verifyNoMoreInteractions(delegateCall);
     }
@@ -142,6 +144,6 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
         scheduler.tick(10, TimeUnit.SECONDS);
         verify(delegateCall).clone();
         assertThat(response.isDone()).isTrue();
-        assertThat(response.get()).isEqualTo(CLONED_RESPONSE);
+        assertThat(response.get(1, TimeUnit.SECONDS)).isEqualTo(CLONED_RESPONSE);
     }
 }

@@ -98,8 +98,7 @@ public final class UrlSelectorTest extends TestBase {
     public void testRedirectTo_failsWhenRequestedBaseUrlPathIsNotPrefixOfCurrentPath() throws Exception {
         String url1 = "http://foo/a";
         String url2 = "https://bar:8080/a/b/c";
-        List<String> baseUrls = list(url2);
-        UrlSelectorImpl selector = UrlSelectorImpl.create(baseUrls);
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list(url1, url2));
 
         assertThat(selector.redirectTo(parse(url1), url2)).isEmpty();
     }

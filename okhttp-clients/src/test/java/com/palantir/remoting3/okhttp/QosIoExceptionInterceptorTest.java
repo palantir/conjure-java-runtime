@@ -21,8 +21,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import com.palantir.remoting.api.errors.QosException;
-import java.io.IOException;
-import java.net.URL;
 import java.time.Duration;
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -48,29 +46,11 @@ public final class QosIoExceptionInterceptorTest extends TestBase {
     }
 
     @Test
-    public void test308WithoutLocation() throws Exception {
+    public void test308_noExceptionThrown() throws Exception {
         Response response = responseWithCode(REQUEST, 308);
         when(chain.proceed(REQUEST)).thenReturn(response);
 
-        assertThatThrownBy(() -> INTERCEPTOR.intercept(chain))
-                .isInstanceOf(IOException.class)
-                .hasMessageStartingWith("Retrieved HTTP status code 308 without Location header, cannot perform "
-                        + "redirect. This appears to be a server-side protocol violation.");
-    }
-
-    @Test
-    public void test308WithLocation() throws Exception {
-        URL url = new URL("http://foo");
-        Response response = responseWithCode(REQUEST, 308).newBuilder().header("Location", url.toString()).build();
-        when(chain.proceed(REQUEST)).thenReturn(response);
-
-        assertThatThrownBy(() -> INTERCEPTOR.intercept(chain))
-                .isInstanceOfSatisfying(QosIoException.class, e -> {
-                    assertThat(e.getResponse()).isEqualTo(response);
-                    assertThat(e.getQosException()).isInstanceOfSatisfying(QosException.RetryOther.class,
-                            retryOtherException ->
-                                    assertThat(retryOtherException.getRedirectTo()).isEqualTo(url));
-                });
+        assertThat(INTERCEPTOR.intercept(chain)).isEqualTo(response);
     }
 
     @Test

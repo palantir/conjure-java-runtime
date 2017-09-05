@@ -19,8 +19,6 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.errors.QosException;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.Duration;
 import okhttp3.Interceptor;
 import okhttp3.Response;
@@ -39,8 +37,6 @@ final class QosIoExceptionInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Response response = chain.proceed(chain.request());
         switch (response.code()) {
-            case 308:
-                throw handle308(response);
             case 429:
                 throw handle429(response);
             case 503:
@@ -48,20 +44,6 @@ final class QosIoExceptionInterceptor implements Interceptor {
         }
 
         return response;
-    }
-
-    private static IOException handle308(Response response) {
-        String locationHeader = response.header(HttpHeaders.LOCATION);
-        if (locationHeader == null) {
-            return new IOException("Retrieved HTTP status code 308 without Location header, cannot perform "
-                    + "redirect. This appears to be a server-side protocol violation.");
-        }
-
-        try {
-            return new QosIoException(QosException.retryOther(new URL(locationHeader)), response);
-        } catch (MalformedURLException e) {
-            return new IOException("Failed to parse redirect URL from 'Location' response header: " + locationHeader);
-        }
     }
 
     private static IOException handle429(Response response) {
