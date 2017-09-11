@@ -25,13 +25,14 @@ import okhttp3.Response;
 
 /**
  * An OkHttp {@link Interceptor} that turns HTTP responses pertaining to http-remoting {@link QosException}s into {@link
- * QosIoException}s.
+ * QosIoException}s. Only exceptions that require delaying/throttling/postponing a request are handled by this
+ * interceptor.
  * <p>
  * See {@link QosIoExceptionHandler} for an end-to-end explanation of http-remoting specific client-side error
  * handling.
  */
-final class QosIoExceptionInterceptor implements Interceptor {
-    static final QosIoExceptionInterceptor INSTANCE = new QosIoExceptionInterceptor();
+final class QosRetryLaterInterceptor implements Interceptor {
+    static final QosRetryLaterInterceptor INSTANCE = new QosRetryLaterInterceptor();
 
     @Override
     public Response intercept(Chain chain) throws IOException {

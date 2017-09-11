@@ -80,7 +80,7 @@ public final class OkHttpClients {
 
         // Error handling, retry/failover, etc: the order of these matters.
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
-        client.addInterceptor(QosIoExceptionInterceptor.INSTANCE);
+        client.addInterceptor(QosRetryLaterInterceptor.INSTANCE);
         client.addInterceptor(new QosRetryOtherInterceptor(UrlSelectorImpl.create(config.uris())));
         // TODO(rfink): Use the same UrlSelector instance for both of these interceptors?
         client.addInterceptor(MultiServerRetryInterceptor.create(config.uris(), config.maxNumRetries()));
