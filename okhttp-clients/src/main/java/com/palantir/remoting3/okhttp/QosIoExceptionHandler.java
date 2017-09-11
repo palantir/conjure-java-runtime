@@ -46,7 +46,7 @@ interface QosIoExceptionHandler {
      * The end-to-end flow for handling {@link QosException}s in an OkHttp client is as follows:
      * <ul>
      *     <li>
-     *         {@link QosIoExceptionInterceptor} detected HTTP status codes pertaining to server-side
+     *         {@link QosRetryLaterInterceptor} detected HTTP status codes pertaining to server-side
      *         {@link QosException}s (e.g., 429 for retry, 503 for unavailable, etc) and throws a corresponding
      *         {@link QosIoException}.
      *     </li>
