@@ -63,7 +63,7 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
 
             @Override
             public ListenableFuture<Response> visit(QosException.RetryOther exception) {
-                // Redirects are handled in QosIoExceptionInterceptor.
+                // Redirects are handled in QosRetryLaterInterceptor.
                 return Futures.immediateFailedFuture(new IOException(
                         "Internal error, did not expect to handle RetryOther exception in handler", exception));
             }

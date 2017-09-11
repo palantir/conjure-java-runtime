@@ -32,10 +32,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public final class QosIoExceptionInterceptorTest extends TestBase {
+public final class QosRetryLaterInterceptorTest extends TestBase {
 
     private static final Request REQUEST = new Request.Builder().url("http://127.0.0.1").build();
-    private static final Interceptor INTERCEPTOR = QosIoExceptionInterceptor.INSTANCE;
+    private static final Interceptor INTERCEPTOR = QosRetryLaterInterceptor.INSTANCE;
 
     @Mock
     private Interceptor.Chain chain;
