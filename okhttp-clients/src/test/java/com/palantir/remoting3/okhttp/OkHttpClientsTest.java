@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.SharedMetricRegistries;
+import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting3.clients.ClientConfiguration;
@@ -52,16 +53,20 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
+    @Rule
+    public final MockWebServer server2 = new MockWebServer();
 
     @Mock
     private QosIoExceptionHandler handler;
 
     private String url;
+    private String url2;
     private OkHttpClient mockHandlerClient;
 
     @Before
     public void before() {
         url = "http://localhost:" + server.getPort();
+        url2 = "http://localhost:" + server2.getPort();
         mockHandlerClient = OkHttpClients.create(createTestConfig(url), "test", OkHttpClientsTest.class, () -> handler);
     }
 
@@ -172,6 +177,70 @@ public final class OkHttpClientsTest extends TestBase {
         });
         assertThat(future.get(1, TimeUnit.SECONDS)).isEqualTo("pong");
         assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
+    }
+
+    @Test
+    public void interceptsAndHandlesRetryOther_endToEnd_doesRedirectInfinitelyOften() throws Exception {
+        // QosRetryOtherInterceptor retries MAX=20 times
+        for (int i = 0; i < 21; ++i) {
+            server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url));
+        }
+
+        Call call = createRetryingClient(1).newCall(new Request.Builder().url(url).build());
+        assertThatThrownBy(call::execute)
+                .isInstanceOf(IOException.class)
+                .hasMessage("Exceeded the maximum number of allowed redirects for initial URL: %s/", url);
+        assertThat(server.getRequestCount()).isEqualTo(21);
+    }
+
+    @Test
+    public void interceptsAndHandlesRetryOther_endToEnd_redirectsToOtherUrl() throws Exception {
+        OkHttpClient client = OkHttpClients.create(
+                ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
+                "test", OkHttpClientsTest.class);
+        server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
+        server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+
+        Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThat(call.execute().body().string()).isEqualTo("foo");
+
+        assertThat(server.takeRequest().getPath()).isEqualTo("/foo?bar");
+        assertThat(server2.takeRequest().getPath()).isEqualTo("/foo?bar");
+    }
+
+    @Test
+    public void interceptsAndHandlesQos_endToEnd_canRetryLaterAndThenRedirect() throws Exception {
+        OkHttpClient client = OkHttpClients.create(
+                ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
+                "test", OkHttpClientsTest.class);
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
+        server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+
+        Call call = client.newCall(new Request.Builder().url(url).build());
+        assertThat(call.execute().body().string()).isEqualTo("foo");
+
+        assertThat(server.getRequestCount()).isEqualTo(2);
+        assertThat(server2.getRequestCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void interceptsAndHandlesQos_endToEnd_doesNotMemorizeRedirectUrl() throws Exception {
+        // TODO(rfink): #538 This is likely not the desired behavior: We should memorize the previous successful URL.
+        OkHttpClient client = OkHttpClients.create(
+                ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
+                "test", OkHttpClientsTest.class);
+
+        // First hits server,then 308 redirects to server2, then 503-retries, but against server and not server2.
+        server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+        server2.enqueue(new MockResponse().setResponseCode(503));
+
+        Call call = client.newCall(new Request.Builder().url(url).build());
+        assertThat(call.execute().body().string()).isEqualTo("foo");
+
+        assertThat(server.getRequestCount()).isEqualTo(2);
+        assertThat(server2.getRequestCount()).isEqualTo(1);
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {
