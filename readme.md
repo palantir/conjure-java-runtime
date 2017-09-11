@@ -353,7 +353,7 @@ supported for media type `application/json`.
 http-remoting servers can use the `QosException` class to advertise the following conditions:
 
 * `throttle`: Returns a `Throttle` exception indicating that the calling
-  client should throttle its requests  The client may retry against an arbitrary node of this service.
+  client should throttle its requests.  The client may retry against an arbitrary node of this service.
 * `retryOther`: Returns a `RetryOther` exception indicating that the calling client should retry against the
   given node of this service.
 * `unavailable`: An exception indicating that (this node of) this service is currently unavailable and the client
