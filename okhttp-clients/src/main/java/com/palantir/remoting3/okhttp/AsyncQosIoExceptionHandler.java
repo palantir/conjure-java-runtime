@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.remoting.api.errors.QosException;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -62,8 +63,9 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
 
             @Override
             public ListenableFuture<Response> visit(QosException.RetryOther exception) {
-                // TODO(rfink): Implement.
-                return Futures.immediateFailedFuture(qosIoException);
+                // Redirects are handled in QosIoExceptionInterceptor.
+                return Futures.immediateFailedFuture(new IOException(
+                        "Internal error, did not expect to handle RetryOther exception in handler", exception));
             }
 
             @Override
