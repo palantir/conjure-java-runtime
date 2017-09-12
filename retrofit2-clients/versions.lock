@@ -196,6 +196,12 @@
                 "com.squareup.retrofit2:converter-jackson"
             ]
         },
+        "io.dropwizard.metrics:metrics-core": {
+            "locked": "3.2.3",
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
+            ]
+        },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
@@ -209,7 +215,8 @@
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "io.dropwizard.metrics:metrics-core"
             ]
         }
     },
@@ -410,6 +417,12 @@
                 "com.squareup.retrofit2:converter-jackson"
             ]
         },
+        "io.dropwizard.metrics:metrics-core": {
+            "locked": "3.2.3",
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
+            ]
+        },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
@@ -423,7 +436,8 @@
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "io.dropwizard.metrics:metrics-core"
             ]
         }
     }
