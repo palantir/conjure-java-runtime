@@ -35,12 +35,12 @@ public final class InstrumentedInterceptor implements Interceptor {
     private final Meter other;
 
     public InstrumentedInterceptor(MetricRegistry registry, String name) {
-        informational = registry.meter(MetricRegistry.name(name, "response", "code", "1xx"));
-        successful    = registry.meter(MetricRegistry.name(name, "response", "code", "2xx"));
-        redirection   = registry.meter(MetricRegistry.name(name, "response", "code", "3xx"));
-        clientError   = registry.meter(MetricRegistry.name(name, "response", "code", "4xx"));
-        serverError   = registry.meter(MetricRegistry.name(name, "response", "code", "5xx"));
-        other         = registry.meter(MetricRegistry.name(name, "response", "code", "other"));
+        informational = registry.meter(MetricRegistry.name(name, "response", "family", "informational"));
+        successful    = registry.meter(MetricRegistry.name(name, "response", "family", "successful"));
+        redirection   = registry.meter(MetricRegistry.name(name, "response", "family", "redirection"));
+        clientError   = registry.meter(MetricRegistry.name(name, "response", "family", "client-error"));
+        serverError   = registry.meter(MetricRegistry.name(name, "response", "family", "server-error"));
+        other         = registry.meter(MetricRegistry.name(name, "response", "family", "other"));
     }
 
     @Override

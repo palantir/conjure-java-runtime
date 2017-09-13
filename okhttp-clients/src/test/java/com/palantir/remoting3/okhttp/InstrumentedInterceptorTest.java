@@ -19,8 +19,11 @@ package com.palantir.remoting3.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
+import java.util.Map;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
 import okhttp3.Request;
@@ -51,43 +54,24 @@ public final class InstrumentedInterceptorTest {
     }
 
     @Test
-    public void testInformational() throws IOException {
-        responseWithCode(100);
-        interceptor.intercept(chain);
+    public void testResponseFamilyMetrics() throws IOException {
+        Map<Integer, String> testCases = ImmutableMap.<Integer, String>builder()
+                .put(100, "informational")
+                .put(200, "successful")
+                .put(300, "redirection")
+                .put(400, "client-error")
+                .put(500, "server-error")
+                .build();
 
-        assertThat(registry.getMeters().get("client.response.code.1xx").getCount()).isEqualTo(1);
-    }
+        for (Map.Entry<Integer, String> testCase : testCases.entrySet()) {
+            Meter meter = registry.getMeters().get("client.response.family." + testCase.getValue());
+            assertThat(meter.getCount()).isZero();
 
-    @Test
-    public void testSuccessful() throws IOException {
-        responseWithCode(200);
-        interceptor.intercept(chain);
+            responseWithCode(testCase.getKey());
+            interceptor.intercept(chain);
 
-        assertThat(registry.getMeters().get("client.response.code.2xx").getCount()).isEqualTo(1);
-    }
-
-    @Test
-    public void testRedirect() throws IOException {
-        responseWithCode(300);
-        interceptor.intercept(chain);
-
-        assertThat(registry.getMeters().get("client.response.code.3xx").getCount()).isEqualTo(1);
-    }
-
-    @Test
-    public void testClientError() throws IOException {
-        responseWithCode(400);
-        interceptor.intercept(chain);
-
-        assertThat(registry.getMeters().get("client.response.code.4xx").getCount()).isEqualTo(1);
-    }
-
-    @Test
-    public void testServerError() throws IOException {
-        responseWithCode(500);
-        interceptor.intercept(chain);
-
-        assertThat(registry.getMeters().get("client.response.code.5xx").getCount()).isEqualTo(1);
+            assertThat(meter.getCount()).isEqualTo(1);
+        }
     }
 
     private void responseWithCode(int code) throws IOException {
