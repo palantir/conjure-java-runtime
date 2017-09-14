@@ -31,7 +31,6 @@ import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
-import okhttp3.logging.HttpLoggingInterceptor;
 
 public final class OkHttpClients {
 
@@ -92,9 +91,6 @@ public final class OkHttpClients {
 
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
         client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
-
-        // logging
-        client.addInterceptor(new HttpLoggingInterceptor(OkhttpSlf4jDebugLogger.INSTANCE));
 
         // dispatcher with static executor service
         client.dispatcher(createDispatcher());

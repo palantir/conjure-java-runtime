@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanObserver;
 import java.util.concurrent.ExecutorService;
@@ -75,7 +76,7 @@ public abstract class AsyncSpanObserver implements SpanObserver {
             });
         } else {
             log.trace("Failed to notify span observer since the maximum number of allowed concurrent observations was "
-                    + "exceeded: {}", maxInflights);
+                    + "exceeded: {}", SafeArg.of("maxInflights", maxInflights));
             numInflights.decrementAndGet();
         }
     }

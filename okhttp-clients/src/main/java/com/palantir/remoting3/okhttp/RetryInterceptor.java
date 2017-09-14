@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.palantir.logsafe.SafeArg;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -60,7 +61,7 @@ public final class RetryInterceptor implements Interceptor {
                 }
             }
             if (!successful) {
-                log.error("Request to url {} failed on attempt {}", request.url(), numTries);
+                log.error("Request to url {} failed on attempt {}", request.url(), SafeArg.of("numTries", numTries));
             }
         }
 
