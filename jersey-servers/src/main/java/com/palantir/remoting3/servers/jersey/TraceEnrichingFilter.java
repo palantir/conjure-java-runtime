@@ -28,17 +28,27 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.server.ExtendedUriInfo;
 
 @Provider
 public final class TraceEnrichingFilter implements ContainerRequestFilter, ContainerResponseFilter {
     public static final TraceEnrichingFilter INSTANCE = new TraceEnrichingFilter();
 
+    @Context
+    private ExtendedUriInfo uriInfo;
+
     // Handles incoming request
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        String operation = requestContext.getMethod() + " /" + requestContext.getUriInfo().getPath();
+        String path = Optional.ofNullable(uriInfo)
+                .flatMap(info -> Optional.ofNullable(info.getMatchedModelResource()))
+                .flatMap(resource -> Optional.ofNullable(resource.getPath()))
+                .orElse("(unknown)");
+
+        String operation = requestContext.getMethod() + " " + path;
         // The following strings are all nullable
         String traceId = requestContext.getHeaderString(TraceHttpHeaders.TRACE_ID);
         String spanId = requestContext.getHeaderString(TraceHttpHeaders.SPAN_ID);
