@@ -32,6 +32,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.ExtendedUriInfo;
+import org.glassfish.jersey.server.model.Resource;
 
 @Provider
 public final class TraceEnrichingFilter implements ContainerRequestFilter, ContainerResponseFilter {
@@ -44,8 +45,8 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         String path = Optional.ofNullable(uriInfo)
-                .flatMap(info -> Optional.ofNullable(info.getMatchedModelResource()))
-                .flatMap(resource -> Optional.ofNullable(resource.getPath()))
+                .map(ExtendedUriInfo::getMatchedModelResource)
+                .map(Resource::getPath)
                 .orElse("(unknown)");
 
         String operation = requestContext.getMethod() + " " + path;
