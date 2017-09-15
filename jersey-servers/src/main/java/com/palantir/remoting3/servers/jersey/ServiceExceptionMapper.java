@@ -46,10 +46,10 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
         int httpStatus = exception.getErrorType().httpErrorCode();
         if (Response.Status.Family.familyOf(httpStatus)
                 .equals(Response.Status.Family.CLIENT_ERROR)) {
-            log.info("Error handling request {}",
+            log.info("Error handling request",
                     SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), exception);
         } else {
-            log.error("Error handling request {}",
+            log.error("Error handling request",
                     SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), exception);
         }
 
@@ -64,7 +64,7 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
             String json = MAPPER.writeValueAsString(error);
             builder.entity(json);
         } catch (RuntimeException | JsonProcessingException e) {
-            log.warn("Unable to translate exception to json for request {}",
+            log.warn("Unable to translate exception to json",
                     SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), e);
             // simply write out the exception message
             builder.type(MediaType.TEXT_PLAIN);

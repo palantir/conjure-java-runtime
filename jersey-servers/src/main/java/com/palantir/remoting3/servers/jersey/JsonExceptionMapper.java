@@ -60,9 +60,9 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
 
         Response.Status.Family family = Response.Status.Family.familyOf(errorType.httpErrorCode());
         if (family == Response.Status.Family.CLIENT_ERROR) {
-            log.info("Error handling request {}", SafeArg.of("errorInstanceId", errorInstanceId), exception);
+            log.info("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         } else {
-            log.error("Error handling request {}", SafeArg.of("errorInstanceId", errorInstanceId), exception);
+            log.error("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         }
 
         return createResponse(errorType, errorInstanceId, exception.getClass().getName());
@@ -88,7 +88,7 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
             String json = MAPPER.writeValueAsString(error);
             builder.entity(json);
         } catch (RuntimeException | JsonProcessingException e) {
-            log.warn("Unable to translate exception to json for request {}",
+            log.warn("Unable to translate exception to json",
                     SafeArg.of("errorInstanceId", errorInstanceId), e);
             builder = Response.status(httpErrorCode);
             builder.type(MediaType.TEXT_PLAIN);

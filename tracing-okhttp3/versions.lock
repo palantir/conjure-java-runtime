@@ -84,6 +84,12 @@
         "com.palantir.remoting3:tracing": {
             "project": true
         },
+        "com.palantir.safe-logging:safe-logging": {
+            "locked": "0.1.3",
+            "transitive": [
+                "com.palantir.remoting3:tracing"
+            ]
+        },
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.8.1"
         },
@@ -184,6 +190,12 @@
         },
         "com.palantir.remoting3:tracing": {
             "project": true
+        },
+        "com.palantir.safe-logging:safe-logging": {
+            "locked": "0.1.3",
+            "transitive": [
+                "com.palantir.remoting3:tracing"
+            ]
         },
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.8.1"
