@@ -46,9 +46,9 @@ final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicat
         String errorInstanceId = UUID.randomUUID().toString();
         Response.Status.Family family = Response.Status.Family.familyOf(exception.getResponse().getStatus());
         if (family == Response.Status.Family.CLIENT_ERROR) {
-            log.info("Error handling request {}", SafeArg.of("errorInstanceId", errorInstanceId), exception);
+            log.info("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         } else {
-            log.error("Error handling request {}", SafeArg.of("errorInstanceId", errorInstanceId), exception);
+            log.error("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         }
 
         if (exception instanceof ForbiddenException) {

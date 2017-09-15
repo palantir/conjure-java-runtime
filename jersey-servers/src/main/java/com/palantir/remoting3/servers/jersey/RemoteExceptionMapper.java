@@ -55,7 +55,7 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
         Status status = Status.fromStatusCode(exception.getStatus());
 
         // log at WARN instead of ERROR because although this indicates an issue in a remote server, it is not
-        log.warn("Forwarding response and status code {} from remote server back to caller",
+        log.warn("Forwarding response and status code from remote server back to caller",
                 SafeArg.of("statusCode", status.getStatusCode()),
                 exception);
 
