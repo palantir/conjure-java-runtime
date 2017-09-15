@@ -58,10 +58,6 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\""));
         assertThat(service.getRelative().execute().body(), is("server"));
         assertThat(server.takeRequest().getPath(), is(String.format(expectedQueryPath, "relative")));
-
-        server.enqueue(new MockResponse().setBody("\"server\""));
-        assertThat(service.getAbsolute().execute().body(), is("server"));
-        assertThat(server.takeRequest().getPath(), is("/absolute"));
     }
 
     @Test

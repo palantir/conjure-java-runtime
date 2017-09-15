@@ -225,22 +225,21 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
-    public void interceptsAndHandlesQos_endToEnd_doesNotMemorizeRedirectUrl() throws Exception {
-        // TODO(rfink): #538 This is likely not the desired behavior: We should memorize the previous successful URL.
+    public void interceptsAndHandlesQos_endToEnd_memorizedCurrentUrlBetweenCalls() throws Exception {
         OkHttpClient client = OkHttpClients.create(
                 ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
                 "test", OkHttpClientsTest.class);
 
-        // First hits server,then 308 redirects to server2, then 503-retries, but against server and not server2.
+        // First hits server,then 308 redirects to server2, then retries, waits on 503, then retries server2 again.
         server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
-        server.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
         server2.enqueue(new MockResponse().setResponseCode(503));
+        server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
 
         Call call = client.newCall(new Request.Builder().url(url).build());
         assertThat(call.execute().body().string()).isEqualTo("foo");
 
-        assertThat(server.getRequestCount()).isEqualTo(2);
-        assertThat(server2.getRequestCount()).isEqualTo(1);
+        assertThat(server.getRequestCount()).isEqualTo(1);
+        assertThat(server2.getRequestCount()).isEqualTo(2);
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {
