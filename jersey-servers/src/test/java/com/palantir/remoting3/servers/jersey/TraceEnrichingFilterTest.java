@@ -126,6 +126,20 @@ public final class TraceEnrichingFilterTest {
     }
 
     @Test
+    public void testTraceState_doesNotIncludePathParams() {
+        Response response = target.path("/trace/no").request()
+                .header(TraceHttpHeaders.TRACE_ID, "traceId")
+                .header(TraceHttpHeaders.PARENT_SPAN_ID, "parentSpanId")
+                .header(TraceHttpHeaders.SPAN_ID, "spanId")
+                .get();
+        assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), is("traceId"));
+        assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID), is(nullValue()));
+        assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
+        verify(observer).consume(spanCaptor.capture());
+        assertThat(spanCaptor.getValue().getOperation(), is("GET /trace/{param}"));
+    }
+
+    @Test
     public void testTraceState_withoutRequestHeadersGeneratesValidTraceResponseHeaders() {
         Response response = target.path("/trace").request().get();
         assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), not(nullValue()));
@@ -182,6 +196,9 @@ public final class TraceEnrichingFilterTest {
 
         @Override
         public void postTraceOperation() {}
+
+        @Override
+        public void getTraceWithPathParam() {}
     }
 
     @Path("/")
@@ -195,5 +212,9 @@ public final class TraceEnrichingFilterTest {
         @POST
         @Path("/trace")
         void postTraceOperation();
+
+        @GET
+        @Path("/trace/{param}")
+        void getTraceWithPathParam();
     }
 }
