@@ -50,9 +50,6 @@ public interface TestService {
     @GET("relative")
     Call<String> getRelative();
 
-    @GET("/absolute")
-    Call<String> getAbsolute();
-
     @GET("getComplexCborType")
     @Headers("Accepts: application/cbor")
     Call<java.util.Optional<LocalDate>> getComplexCborType();

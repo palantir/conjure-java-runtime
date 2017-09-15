@@ -65,21 +65,27 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     private Optional<HttpUrl> redirectTo(HttpUrl current, HttpUrl redirectBaseUrl) {
-        return baseUrlFor(redirectBaseUrl).flatMap(baseUrl -> {
-            if (!isPathPrefixFor(baseUrl, current)) {
-                // The request redirectBaseUrl has a path that is not compatible with the path of the current URL
-                return Optional.empty();
-            } else {
-                return Optional.of(current.newBuilder()
-                        .scheme(baseUrl.scheme())
-                        .host(baseUrl.host())
-                        .port(baseUrl.port())
-                        .encodedPath(
-                                baseUrl.encodedPath()  // matching prefix
-                                        + current.encodedPath().substring(baseUrl.encodedPath().length()))
-                        .build());
-            }
-        });
+        Optional<Integer> baseUrlIndex = indexFor(redirectBaseUrl);
+        baseUrlIndex.ifPresent(currentUrl::set);
+
+        return baseUrlIndex
+                .map(baseUrls::get)
+                .flatMap(baseUrl -> {
+                    if (!isPathPrefixFor(baseUrl, current)) {
+                        // The requested redirectBaseUrl has a path that is not compatible with
+                        // the path of the current URL
+                        return Optional.empty();
+                    } else {
+                        return Optional.of(current.newBuilder()
+                                .scheme(baseUrl.scheme())
+                                .host(baseUrl.host())
+                                .port(baseUrl.port())
+                                .encodedPath(
+                                        baseUrl.encodedPath()  // matching prefix
+                                                + current.encodedPath().substring(baseUrl.encodedPath().length()))
+                                .build());
+                    }
+                });
     }
 
     @Override
@@ -88,11 +94,19 @@ final class UrlSelectorImpl implements UrlSelector {
         return redirectTo(current, baseUrls.get(index));
     }
 
-    private Optional<HttpUrl> baseUrlFor(HttpUrl url) {
+    @Override
+    public Optional<HttpUrl> redirectToCurrent(HttpUrl current) {
+        return redirectTo(current, baseUrls.get(currentUrl.get()));
+    }
+
+    private Optional<Integer> indexFor(HttpUrl url) {
         HttpUrl canonicalUrl = canonicalize(url);
-        return baseUrls.stream()
-                .filter(baseUrl -> isBaseUrlFor(baseUrl, canonicalUrl))
-                .findFirst();
+        for (int i = 0; i < baseUrls.size(); ++i) {
+            if (isBaseUrlFor(baseUrls.get(i), canonicalUrl)) {
+                return Optional.of(i);
+            }
+        }
+        return Optional.empty();
     }
 
     /**

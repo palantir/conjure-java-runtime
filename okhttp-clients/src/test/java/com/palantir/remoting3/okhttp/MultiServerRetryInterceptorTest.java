@@ -22,7 +22,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -77,7 +76,7 @@ public final class MultiServerRetryInterceptorTest extends TestBase {
         urlA = HttpUrl.parse("http://host-a:" + serverA.getPort() + "/api/");
         urlB = HttpUrl.parse("http://host-b:" + serverB.getPort() + "/api/");
         request = new Request.Builder().url(urlA).build();
-        interceptor = new MultiServerRetryInterceptor(urlSelector, 2);
+        interceptor = MultiServerRetryInterceptor.create(urlSelector, 2);
         okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(interceptor)
                 .dns(dns)
@@ -116,7 +115,7 @@ public final class MultiServerRetryInterceptorTest extends TestBase {
     @Test
     public void doesNotRetryWhenMaxNumRetriesIsZero() throws Exception {
         when(chain.proceed(any())).thenThrow(new IOException("0"));
-        interceptor = new MultiServerRetryInterceptor(urlSelector, 0);
+        interceptor = MultiServerRetryInterceptor.create(urlSelector, 0);
         assertThatThrownBy(() -> interceptor.intercept(chain))
                 .isInstanceOf(IOException.class)
                 .hasMessageStartingWith("Could not connect to any of the configured URLs:")
@@ -133,24 +132,6 @@ public final class MultiServerRetryInterceptorTest extends TestBase {
         verify(urlSelector, never()).redirectToNext(any());
         assertThat(serverA.getRequestCount()).isEqualTo(1);
         assertThat(serverB.getRequestCount()).isEqualTo(0);
-    }
-
-    @Test
-    public void testClient_doesNotMemorizeTargetUrlAcrossRequests() throws IOException, InterruptedException {
-        // TODO(rfink): #538 This is likely not the desired behavior: We should memorize the previous successful URL.
-        when(dns.lookup(urlA.host())).thenThrow(new UnknownHostException("Cannot resolve url"));
-        when(urlSelector.redirectToNext(any())).thenReturn(Optional.of(urlB));
-
-        serverB.enqueue(new MockResponse().setBody("pong"));
-        Call call = okHttpClient.newCall(request);
-        assertThat(call.execute().body().string()).isEqualTo("pong");
-
-        serverB.enqueue(new MockResponse().setBody("pong"));
-        call = okHttpClient.newCall(request);
-        assertThat(call.execute().body().string()).isEqualTo("pong");
-
-        verify(dns, times(2)).lookup(urlA.host());
-        verify(urlSelector, times(2)).redirectToNext(urlA);
     }
 
     @Test
