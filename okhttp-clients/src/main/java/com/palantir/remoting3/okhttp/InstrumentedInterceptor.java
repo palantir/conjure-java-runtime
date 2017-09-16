@@ -20,14 +20,17 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import java.io.IOException;
-import java.util.Optional;
 import okhttp3.Interceptor;
 import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Records metrics about the response codes of http requests.
  */
 public final class InstrumentedInterceptor implements Interceptor {
+
+    private static final Logger log = LoggerFactory.getLogger(InstrumentedInterceptor.class);
 
     private final Meter informational;
     private final Meter successful;
@@ -74,8 +77,12 @@ public final class InstrumentedInterceptor implements Interceptor {
     }
 
     static InstrumentedInterceptor withDefaultMetricRegistry(String name) {
-        MetricRegistry registry = Optional.ofNullable(SharedMetricRegistries.tryGetDefault())
-                .orElseGet(MetricRegistry::new);
-        return new InstrumentedInterceptor(registry, name);
+        MetricRegistry registry = SharedMetricRegistries.tryGetDefault();
+        if (registry != null) {
+            return new InstrumentedInterceptor(registry, name);
+        } else {
+            log.info("Response metrics will not be available because no MetricRegistry was found");
+            return new InstrumentedInterceptor(new MetricRegistry(), name);
+        }
     }
 }
