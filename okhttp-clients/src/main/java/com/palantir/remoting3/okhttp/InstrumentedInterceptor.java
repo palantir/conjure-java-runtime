@@ -18,7 +18,9 @@ package com.palantir.remoting3.okhttp;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.SharedMetricRegistries;
 import java.io.IOException;
+import java.util.Optional;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
@@ -34,7 +36,7 @@ public final class InstrumentedInterceptor implements Interceptor {
     private final Meter serverError;
     private final Meter other;
 
-    public InstrumentedInterceptor(MetricRegistry registry, String name) {
+    InstrumentedInterceptor(MetricRegistry registry, String name) {
         informational = registry.meter(MetricRegistry.name(name, "response", "family", "informational"));
         successful    = registry.meter(MetricRegistry.name(name, "response", "family", "successful"));
         redirection   = registry.meter(MetricRegistry.name(name, "response", "family", "redirection"));
@@ -69,5 +71,11 @@ public final class InstrumentedInterceptor implements Interceptor {
         }
 
         return response;
+    }
+
+    static InstrumentedInterceptor withDefaultMetricRegistry(String name) {
+        MetricRegistry registry = Optional.ofNullable(SharedMetricRegistries.tryGetDefault())
+                .orElseGet(MetricRegistry::new);
+        return new InstrumentedInterceptor(registry, name);
     }
 }

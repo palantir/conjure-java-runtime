@@ -61,6 +61,7 @@ public final class InstrumentedInterceptorTest {
                 .put(300, "redirection")
                 .put(400, "client-error")
                 .put(500, "server-error")
+                .put(600, "other")
                 .build();
 
         for (Map.Entry<Integer, String> testCase : testCases.entrySet()) {

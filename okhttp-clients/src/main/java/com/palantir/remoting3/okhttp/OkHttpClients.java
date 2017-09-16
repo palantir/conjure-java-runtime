@@ -55,6 +55,9 @@ public final class OkHttpClients {
     public static OkHttpClient.Builder builder(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
         okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
 
+        // response metrics
+        client.addNetworkInterceptor(InstrumentedInterceptor.withDefaultMetricRegistry(serviceClass.getName()));
+
         // error handling
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
 
