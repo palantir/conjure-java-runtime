@@ -64,6 +64,12 @@ public interface ClientConfiguration {
     /** The maximum number of times a failed request is retried. */
     int maxNumRetries();
 
+    /**
+     * The size of one backoff time slot for call retries. For example, an exponential backoff retry algorithm may
+     * choose a backoff time in {@code [0, backoffSlotSize * 2^c]} for the c-th retry.
+     */
+    Duration backoffSlotSize();
+
     static Builder builder() {
         return new Builder();
     }

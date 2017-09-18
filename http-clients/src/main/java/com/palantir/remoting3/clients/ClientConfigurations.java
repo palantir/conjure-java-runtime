@@ -40,6 +40,7 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(10);
     private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofMinutes(10);
     private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(10);
+    private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(500);
     private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = false;
 
     private ClientConfigurations() {}
@@ -59,7 +60,8 @@ public final class ClientConfigurations {
                 .enableGcmCipherSuites(config.enableGcmCipherSuites().orElse(DEFAULT_ENABLE_GCM_CIPHERS))
                 .proxy(createProxySelector(config.proxy()))
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
-                .maxNumRetries(config.uris().size())
+                .maxNumRetries(config.maxNumRetries().orElse(config.uris().size()))
+                .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
                 .build();
     }
 
@@ -80,6 +82,7 @@ public final class ClientConfigurations {
                 .proxy(createProxySelector(Optional.empty()))
                 .proxyCredentials(Optional.empty())
                 .maxNumRetries(uris.size())
+                .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
                 .build();
     }
 
