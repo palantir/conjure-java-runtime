@@ -21,6 +21,10 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.Random;
 
+/**
+ * Implements "exponential backoff with full jitter", suggesting a backoff duration chosen randomly from the interval
+ * {@code [0, backoffSlotSize * 2^c)} for the c-th retry for a maximum of {@link #maxNumRetries} retries.
+ */
 final class ExponentialBackoff implements BackoffStrategy {
 
     private final int maxNumRetries;
