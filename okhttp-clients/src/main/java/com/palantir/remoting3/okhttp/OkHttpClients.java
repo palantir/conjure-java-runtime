@@ -24,6 +24,7 @@ import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -66,9 +67,8 @@ public final class OkHttpClients {
                 config,
                 userAgent,
                 serviceClass,
-                // TODO(rfink): Implement and use jittery exponential backoff.
-                () -> new AsyncQosIoExceptionHandler(
-                        scheduledExecutorService, new NoDelayBackoff(config.maxNumRetries())));
+                () -> new AsyncQosIoExceptionHandler(scheduledExecutorService,
+                        new ExponentialBackoff(config.maxNumRetries(), config.backoffTimeSlot(), new Random())));
     }
 
     @VisibleForTesting

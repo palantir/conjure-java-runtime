@@ -158,7 +158,8 @@ public final class OkHttpClientsTest extends TestBase {
                 future.complete(response.body().string());
             }
         });
-        assertThat(future.get(1, TimeUnit.SECONDS)).isEqualTo("pong");
+        assertThat(future.get(500 * (2 + 4) /* ExponentialBackoff upper bound */, TimeUnit.MILLISECONDS))
+                .isEqualTo("pong");
         assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
 

@@ -16,23 +16,34 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.Random;
 
-final class NoDelayBackoff implements BackoffStrategy {
+final class ExponentialBackoff implements BackoffStrategy {
 
     private final int maxNumRetries;
-    private int numTimesRetried = 0;
+    private final Duration backoffSlotSize;
+    private final Random random;
 
-    NoDelayBackoff(int maxNumRetries) {
+    private int retryNumber = 0;
+
+    @VisibleForTesting
+    ExponentialBackoff(int maxNumRetries, Duration backoffSlotSize, Random random) {
         this.maxNumRetries = maxNumRetries;
+        this.backoffSlotSize = backoffSlotSize;
+        this.random = random;
     }
 
     @Override
     public Optional<Duration> nextBackoff() {
-        numTimesRetried += 1;
-        return numTimesRetried <= maxNumRetries
-                ? Optional.of(Duration.ZERO)
-                : Optional.empty();
+        retryNumber += 1;
+        if (retryNumber > maxNumRetries) {
+            return Optional.empty();
+        }
+
+        int upperBound = (int) Math.pow(2, retryNumber);
+        return Optional.of(backoffSlotSize.multipliedBy(random.nextInt(upperBound)));
     }
 }
