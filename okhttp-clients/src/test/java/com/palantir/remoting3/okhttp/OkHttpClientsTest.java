@@ -40,14 +40,14 @@ public final class OkHttpClientsTest {
                 ImmutableList.of("http://localhost"),
                 SslSocketFactories.createSslSocketFactory(sslConfig),
                 SslSocketFactories.createX509TrustManager(sslConfig));
-        OkHttpClients.create(conf, "test", OkHttpClients.class);
+        OkHttpClients.create(conf, "test", String.class);
 
         SortedMap<String, Meter> meters = SharedMetricRegistries.getDefault().getMeters();
 
-        assertThat(meters.get("com.palantir.remoting3.okhttp.OkHttpClients.response.family.informational")).isNotNull();
-        assertThat(meters.get("com.palantir.remoting3.okhttp.OkHttpClients.response.family.successful")).isNotNull();
-        assertThat(meters.get("com.palantir.remoting3.okhttp.OkHttpClients.response.family.redirection")).isNotNull();
-        assertThat(meters.get("com.palantir.remoting3.okhttp.OkHttpClients.response.family.client-error")).isNotNull();
-        assertThat(meters.get("com.palantir.remoting3.okhttp.OkHttpClients.response.family.server-error")).isNotNull();
+        assertThat(meters.get("java.lang.String.response.family.informational")).isNotNull();
+        assertThat(meters.get("java.lang.String.response.family.successful")).isNotNull();
+        assertThat(meters.get("java.lang.String.response.family.redirection")).isNotNull();
+        assertThat(meters.get("java.lang.String.response.family.client-error")).isNotNull();
+        assertThat(meters.get("java.lang.String.response.family.server-error")).isNotNull();
     }
 }
