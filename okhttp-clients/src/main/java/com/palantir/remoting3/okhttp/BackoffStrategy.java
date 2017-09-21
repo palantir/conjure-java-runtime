@@ -16,20 +16,16 @@
 
 package com.palantir.remoting3.okhttp;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import java.time.Duration;
+import java.util.Optional;
 
-import okhttp3.Call;
-import org.junit.Test;
-
-public final class ForwardingCallTest {
-
-    @Test
-    public void testClone_returnsForwardingCall() throws Exception {
-        Call delegate = mock(Call.class);
-        ForwardingCall call = new ForwardingCall(delegate);
-        assertThat(call.clone()).isInstanceOf(ForwardingCall.class);
-        verify(delegate).clone();
-    }
+/**
+ * Defines a strategy for waiting in between successive retries of an operation that is subject to failure.
+ */
+public interface BackoffStrategy {
+    /**
+     * Returns the next suggested backoff duration, or {@link Optional#empty} if the operation should not be retried
+     * again.
+     */
+    Optional<Duration> nextBackoff();
 }

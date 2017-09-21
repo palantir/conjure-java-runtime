@@ -18,8 +18,16 @@ package com.palantir.remoting3.okhttp;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.palantir.remoting.api.config.ssl.SslConfiguration;
+import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.clients.ClientConfigurations;
+import com.palantir.remoting3.config.ssl.SslSocketFactories;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public abstract class TestBase {
 
@@ -31,5 +39,22 @@ public abstract class TestBase {
     @SafeVarargs
     static <T> List<T> list(T... items) {
         return ImmutableList.copyOf(items);
+    }
+
+    protected final ClientConfiguration createTestConfig(String... uri) {
+        SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
+        return ClientConfigurations.of(
+                ImmutableList.copyOf(uri),
+                SslSocketFactories.createSslSocketFactory(sslConfig),
+                SslSocketFactories.createX509TrustManager(sslConfig));
+    }
+
+    protected static Response responseWithCode(Request request, int code) {
+        return new Response.Builder()
+                .request(request)
+                .protocol(Protocol.HTTP_1_1)
+                .code(code)
+                .message("unused")
+                .build();
     }
 }

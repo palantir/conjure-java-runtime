@@ -79,6 +79,16 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
+    public void testRedirectTo_updatesCurrentPointer() throws Exception {
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a", "http://bar/a"));
+        HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
+        String redirectTo = "http://bar/a";
+
+        assertThat(selector.redirectTo(current, redirectTo)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
     public void testRedirectTo_findsMatchesWithCaseInsensitiveHostNames() throws Exception {
         String baseUrl = "http://foo/a";
         UrlSelectorImpl selector = UrlSelectorImpl.create(list(baseUrl));
@@ -98,8 +108,7 @@ public final class UrlSelectorTest extends TestBase {
     public void testRedirectTo_failsWhenRequestedBaseUrlPathIsNotPrefixOfCurrentPath() throws Exception {
         String url1 = "http://foo/a";
         String url2 = "https://bar:8080/a/b/c";
-        List<String> baseUrls = list(url2);
-        UrlSelectorImpl selector = UrlSelectorImpl.create(baseUrls);
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list(url1, url2));
 
         assertThat(selector.redirectTo(parse(url1), url2)).isEmpty();
     }
@@ -120,10 +129,16 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testRedirectToNext() throws Exception {
-        UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a"));
-        HttpUrl current = HttpUrl.parse("http://bar/a/b/").resolve("foo");
-        assertThat(selector.redirectToNext(current)).contains(HttpUrl.parse("http://foo/a/b/foo"));
+    public void testRedirectToNext_updatesCurrentPointer() throws Exception {
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a", "http://bar/a"));
+        HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
+
+        assertThat(selector.redirectToNext(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNext(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
     }
 
     @Test

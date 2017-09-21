@@ -348,11 +348,33 @@ HTTP headers into all requests which get propagated by Jetty servers into subseq
 Endpoints returning plain strings should produce media type `text/plain`. Return type `Optional<String>` is only
 supported for media type `application/json`.
 
-#### Failover
-JaxRsClients and Retrofit2Clients can be configured to *retry* requests in case of failure. Note that JaxRsClients only
-retry connection-level errors; HTTP responses carrying a `RemoteException` do typically indicate a permanent error and
-do not trigger a retry.
+#### Quality of service: retry, failover, throttling
 
+http-remoting servers can use the `QosException` class to advertise the following conditions:
+
+* `throttle`: Returns a `Throttle` exception indicating that the calling
+  client should throttle its requests.  The client may retry against an arbitrary node of this service.
+* `retryOther`: Returns a `RetryOther` exception indicating that the calling client should retry against the
+  given node of this service.
+* `unavailable`: An exception indicating that (this node of) this service is currently unavailable and the client
+  may try again at a later time, possibly against a different node of this service.
+
+The `QosExceptions` have a stable mapping to HTTP status codes and response headers:
+* `throttle`: 429 Too Many Requests, plus optional `Retry-After` header
+* `retryOther`: 308 Permanent Redirect, plus `Location` header indicating the target host
+* `unavailable`: 503 Unavailable
+
+http-remoting clients (both Retrofit2 and JaxRs) handle the above error codes and take the appropriate action:
+* `throttle`: reschedule the request with a delay: either the indicated `Retry-After` period, or a configured
+  exponential backoff
+* `retryOther`: retry the request against the indicated service node; all request parameters and headers are maintained
+* `unavailable`: retry the same host after a configurable exponential delay
+
+Additionally, connection errors (e.g., `connection refused` or DNS errors) yield a retry against a different node of the
+service. Retries pick a target host by cycling through the list of URLs configured for a Service (see
+`ClientConfiguration#uris`). Note that the "current" URL is maintained across calls; for example, if a first call yields
+a `retryOther`/308 redirect, then any subsequent calls will be made against that URL. Similarly, if the first URL yields
+a DNS error and the retried call succeeds against the URL from the list, then subsequent calls are made aginst that URL.
 
 # License
 This repository is made available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).

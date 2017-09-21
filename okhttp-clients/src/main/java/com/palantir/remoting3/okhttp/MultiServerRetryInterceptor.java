@@ -16,10 +16,7 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import java.io.IOException;
-import java.util.List;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -33,15 +30,13 @@ public final class MultiServerRetryInterceptor implements Interceptor {
     private final UrlSelector urls;
     private final int maxNumRetries;
 
-    @VisibleForTesting
-    MultiServerRetryInterceptor(UrlSelector urls, int maxNumRetries) {
+    private MultiServerRetryInterceptor(UrlSelector urls, int maxNumRetries) {
         this.urls = urls;
         this.maxNumRetries = maxNumRetries;
     }
 
-    public static MultiServerRetryInterceptor create(List<String> uris, int maxNumRetries) {
-        Preconditions.checkArgument(!uris.isEmpty());
-        return new MultiServerRetryInterceptor(UrlSelectorImpl.create(uris), maxNumRetries);
+    public static MultiServerRetryInterceptor create(UrlSelector urls, int maxNumRetries) {
+        return new MultiServerRetryInterceptor(urls, maxNumRetries);
     }
 
     @Override
@@ -60,7 +55,8 @@ public final class MultiServerRetryInterceptor implements Interceptor {
         HttpUrl currentUrl = chain.request().url();
         for (int i = 0; i < maxNumRetries; ++i) {
             HttpUrl nextUrl = urls.redirectToNext(currentUrl).orElseThrow(() -> new IOException(
-                    "Failed to determine suitable target URL for request URL: " + chain.request().url()));
+                    "Failed to determine suitable target URL for request URL " + chain.request().url()
+                            + " amongst known base URLs: " + urls.getBaseUrls()));
             logger.debug("Redirecting request from {} to {}", currentUrl, nextUrl);
             Request originalRequest = chain.request();
             Request request = originalRequest.newBuilder()

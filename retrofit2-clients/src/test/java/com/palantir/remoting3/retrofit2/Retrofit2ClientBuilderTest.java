@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.remoting3.clients.ClientConfiguration;
 import java.io.IOException;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -59,27 +58,6 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\""));
         assertThat(service.getRelative().execute().body(), is("server"));
         assertThat(server.takeRequest().getPath(), is(String.format(expectedQueryPath, "relative")));
-
-        server.enqueue(new MockResponse().setBody("\"server\""));
-        assertThat(service.getAbsolute().execute().body(), is("server"));
-        assertThat(server.takeRequest().getPath(), is("/absolute"));
-    }
-
-    @Test
-    public void testRetrofit2ClientWithMultiServerRetryInterceptorRedirectToAvailableServer() throws IOException {
-        MockWebServer otherServer = new MockWebServer();
-        TestService service = Retrofit2Client.create(
-                TestService.class, "agent",
-                ClientConfiguration.builder()
-                        .from(createTestConfig(
-                                String.format("http://%s:%s/api/", server.getHostName(), server.getPort()),
-                                String.format("http://%s:%s/api/", otherServer.getHostName(), otherServer.getPort())))
-                        .maxNumRetries(1)
-                        .build());
-
-        server.shutdown();
-        otherServer.enqueue(new MockResponse().setBody("\"pong\""));
-        assertThat(service.get().execute().body(), is("pong"));
     }
 
     @Test

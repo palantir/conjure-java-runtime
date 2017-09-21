@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.config.service.BasicCredentials;
@@ -23,14 +24,21 @@ import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.TlsVersion;
+import okhttp3.internal.Util;
 
 public final class OkHttpClients {
 
@@ -39,32 +47,48 @@ public final class OkHttpClients {
      */
     private static final ExecutorService executorService = Tracers.wrap(new Dispatcher().executorService());
 
+    /**
+     * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
+     * internal thread pool and from the thread pool used by {@link #executorService}.
+     * <p>
+     * Note: In contrast to the {@link java.util.concurrent.ThreadPoolExecutor} used by OkHttp's {@link
+     * #executorService}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
+     * Javadoc.
+     */
+    private static final ScheduledExecutorService scheduledExecutorService = Tracers.wrap(
+            new ScheduledThreadPoolExecutor(5, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
+
     private OkHttpClients() {}
 
     /** Creates an OkHttp client from the given {@link ClientConfiguration}. */
     public static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
-        return builder(config, userAgent, serviceClass).build();
+        return create(
+                config,
+                userAgent,
+                serviceClass,
+                () -> new AsyncQosIoExceptionHandler(scheduledExecutorService,
+                        new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random())));
     }
 
-    /**
-     * Link {@link #create}, but returns the pre-configured {@link OkHttpClient.Builder}.
-     * <p>
-     * TODO(rfink): This method should get removed as soon as Feign and Retrofit clients use the same OkHttp clients.
-     */
-    public static OkHttpClient.Builder builder(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
-        okhttp3.OkHttpClient.Builder client = new okhttp3.OkHttpClient.Builder();
+    @VisibleForTesting
+    static QosIoExceptionAwareOkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass,
+            Supplier<QosIoExceptionHandler> handlerFactory) {
+        OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // response metrics
         client.addNetworkInterceptor(InstrumentedInterceptor.withDefaultMetricRegistry(serviceClass.getName()));
 
-        // error handling
+        // Error handling, retry/failover, etc: the order of these matters.
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
+        client.addInterceptor(QosRetryLaterInterceptor.INSTANCE);
+        UrlSelector urls = UrlSelectorImpl.create(config.uris());
+        client.addInterceptor(CurrentUrlInterceptor.create(urls));
+        client.addInterceptor(new QosRetryOtherInterceptor(urls));
+        client.addInterceptor(MultiServerRetryInterceptor.create(urls, config.maxNumRetries()));
+        client.followRedirects(false);  // We implement our own redirect logic.
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
-
-        // Retry-aware URLs
-        client.addInterceptor(MultiServerRetryInterceptor.create(config.uris(), config.maxNumRetries()));
 
         // tracing
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
@@ -98,7 +122,7 @@ public final class OkHttpClients {
         // dispatcher with static executor service
         client.dispatcher(createDispatcher());
 
-        return client;
+        return new QosIoExceptionAwareOkHttpClient(client.build(), handlerFactory);
     }
 
     private static ImmutableList<ConnectionSpec> createConnectionSpecs(boolean enableGcmCipherSuites) {
@@ -117,5 +141,27 @@ public final class OkHttpClients {
         dispatcher.setMaxRequests(256);
         dispatcher.setMaxRequestsPerHost(256);
         return dispatcher;
+    }
+
+    /**
+     * An OkHttp client that executes requests, catches all {@link QosIoException}s and passes them to the configured
+     * {@link QosIoExceptionHandler}.
+     * <p>
+     * See {@link QosIoExceptionHandler} for an end-to-end explanation of http-remoting specific client-side error
+     * handling.
+     */
+    private static final class QosIoExceptionAwareOkHttpClient extends ForwardingOkHttpClient {
+
+        private final Supplier<QosIoExceptionHandler> handlerFactory;
+
+        private QosIoExceptionAwareOkHttpClient(OkHttpClient delegate, Supplier<QosIoExceptionHandler> handlerFactory) {
+            super(delegate);
+            this.handlerFactory = handlerFactory;
+        }
+
+        @Override
+        public Call newCall(Request request) {
+            return new QosIoExceptionAwareCall(getDelegate().newCall(request), handlerFactory.get());
+        }
     }
 }

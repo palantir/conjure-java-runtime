@@ -36,7 +36,6 @@ import okhttp3.Dns;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
@@ -50,7 +49,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public final class MultiServerRetryInterceptorTest {
+public final class MultiServerRetryInterceptorTest extends TestBase {
 
     @Rule
     public final MockWebServer serverA = new MockWebServer();
@@ -77,7 +76,7 @@ public final class MultiServerRetryInterceptorTest {
         urlA = HttpUrl.parse("http://host-a:" + serverA.getPort() + "/api/");
         urlB = HttpUrl.parse("http://host-b:" + serverB.getPort() + "/api/");
         request = new Request.Builder().url(urlA).build();
-        interceptor = new MultiServerRetryInterceptor(urlSelector, 2);
+        interceptor = MultiServerRetryInterceptor.create(urlSelector, 2);
         okHttpClient = new OkHttpClient.Builder()
                 .addInterceptor(interceptor)
                 .dns(dns)
@@ -116,7 +115,7 @@ public final class MultiServerRetryInterceptorTest {
     @Test
     public void doesNotRetryWhenMaxNumRetriesIsZero() throws Exception {
         when(chain.proceed(any())).thenThrow(new IOException("0"));
-        interceptor = new MultiServerRetryInterceptor(urlSelector, 0);
+        interceptor = MultiServerRetryInterceptor.create(urlSelector, 0);
         assertThatThrownBy(() -> interceptor.intercept(chain))
                 .isInstanceOf(IOException.class)
                 .hasMessageStartingWith("Could not connect to any of the configured URLs:")
@@ -146,14 +145,5 @@ public final class MultiServerRetryInterceptorTest {
 
         assertThat(serverA.getRequestCount()).isEqualTo(0);
         assertThat(serverB.getRequestCount()).isEqualTo(1);
-    }
-
-    private static Response responseWithCode(Request request, int code) {
-        return new Response.Builder()
-                .request(request)
-                .protocol(Protocol.HTTP_1_1)
-                .code(code)
-                .message("unused")
-                .build();
     }
 }
