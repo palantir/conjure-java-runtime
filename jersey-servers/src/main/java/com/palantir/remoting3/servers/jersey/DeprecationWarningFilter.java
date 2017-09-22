@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.servers.jersey;
 
+import com.google.common.base.Strings;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -52,10 +53,11 @@ public final class DeprecationWarningFilter implements ContainerResponseFilter {
             .build(new CacheLoader<ResourceInfo, Boolean>() {
                 @Override
                 public Boolean load(ResourceInfo resourceInfo) throws Exception {
-
                     final Method method;
+                    final String methodName;
                     try {
                         method = resourceInfo.getResourceMethod();
+                        methodName = method.getName();
                     } catch (Throwable e) {
                         // Defensive default.
                         log.warn("Failed to determine resource method in filter invocation, "
@@ -68,7 +70,7 @@ public final class DeprecationWarningFilter implements ContainerResponseFilter {
                     } catch (Throwable e) {
                         // Defensive default.
                         log.warn("Failed to determine whether method is deprecated",
-                                SafeArg.of("method", method.getName()));
+                                SafeArg.of("methodName", Strings.nullToEmpty(methodName)));
                         return false;
                     }
                 }
