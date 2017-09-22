@@ -376,5 +376,8 @@ service. Retries pick a target host by cycling through the list of URLs configur
 a `retryOther`/308 redirect, then any subsequent calls will be made against that URL. Similarly, if the first URL yields
 a DNS error and the retried call succeeds against the URL from the list, then subsequent calls are made aginst that URL.
 
+The number of retries for `503` and connection errors can be configured via `ClientConfiguration#maxNumRetries` or
+`ServiceConfiguration#maxNumRetries`, defaulting to the number of URIs provided in `#uris`.
+
 # License
 This repository is made available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
