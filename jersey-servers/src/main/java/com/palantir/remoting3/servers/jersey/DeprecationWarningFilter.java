@@ -16,6 +16,9 @@
 
 package com.palantir.remoting3.servers.jersey;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.net.HttpHeaders;
 import com.palantir.logsafe.SafeArg;
 import java.io.IOException;
@@ -44,6 +47,22 @@ public final class DeprecationWarningFilter implements ContainerResponseFilter {
 
     private static final Logger log = LoggerFactory.getLogger(DeprecationWarningFilter.class);
 
+    private static final LoadingCache<Method, Boolean> isDeprecated = CacheBuilder.newBuilder()
+            .softValues()
+            .build(new CacheLoader<Method, Boolean>() {
+                @Override
+                public Boolean load(Method method) throws Exception {
+                    try {
+                        return hasAnnotationInHierarchy(method, Deprecated.class);
+                    } catch (Throwable e) {
+                        // Defensive default.
+                        log.warn("Failed to determine whether method is deprecated",
+                                SafeArg.of("method", method.getName()));
+                        return false;
+                    }
+                }
+            });
+
     private DeprecationWarningFilter() {}
 
     @Context
@@ -54,7 +73,7 @@ public final class DeprecationWarningFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        if (hasAnnotationInHierarchy(resourceInfo.getResourceMethod(), Deprecated.class)) {
+        if (isDeprecated.getUnchecked(resourceInfo.getResourceMethod())) {
             String path = Optional.ofNullable(uriInfo)
                     .map(ExtendedUriInfo::getMatchedModelResource)
                     .map(Resource::getPath)

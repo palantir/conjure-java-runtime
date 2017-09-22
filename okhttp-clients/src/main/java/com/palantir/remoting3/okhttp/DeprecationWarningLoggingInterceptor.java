@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Logs a warning whe an HTTP response contains an API deprecation warning header. */
-public final class DeprecationWarningLoggingInterceptor implements Interceptor {
+final class DeprecationWarningLoggingInterceptor implements Interceptor {
     private static final Logger log = LoggerFactory.getLogger(DeprecationWarningLoggingInterceptor.class);
 
     private final Class<?> serviceClass;
@@ -39,7 +39,7 @@ public final class DeprecationWarningLoggingInterceptor implements Interceptor {
     private static final Pattern VALID_DEPRECATION_WARNING =
             Pattern.compile(Pattern.quote("299 - \"Service API endpoint is deprecated: ") + "(.*)\"");
 
-    public DeprecationWarningLoggingInterceptor(Class<?> serviceClass) {
+    DeprecationWarningLoggingInterceptor(Class<?> serviceClass) {
         this.serviceClass = serviceClass;
     }
 

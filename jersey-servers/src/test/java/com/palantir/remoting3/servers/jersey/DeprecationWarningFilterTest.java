@@ -56,9 +56,9 @@ public final class DeprecationWarningFilterTest {
 
     @Test
     public void addsHeaderForDeprecatedEndpoints() {
-        Response response = target.path("/deprecated").request().get();
+        Response response = target.path("/deprecated/unsafe-arg").request().get();
         assertThat(response.getHeaderString(HttpHeaders.WARNING))
-                .isEqualTo("299 - \"Service API endpoint is deprecated: /deprecated\"");
+                .isEqualTo("299 - \"Service API endpoint is deprecated: /deprecated/{arg}\"");
 
         response = target.path("/deprecated-in-resource").request().get();
         assertThat(response.getHeaderString(HttpHeaders.WARNING))
@@ -81,7 +81,7 @@ public final class DeprecationWarningFilterTest {
 
     public static final class TestResource implements TestService {
         @Override
-        public void deprecated() {}
+        public void deprecated(String arg) {}
 
         /**
          * @deprecated foo
@@ -102,9 +102,9 @@ public final class DeprecationWarningFilterTest {
          * @deprecated foo
          */
         @GET
-        @Path("/deprecated")
+        @Path("/deprecated/{arg}")
         @Deprecated
-        void deprecated();
+        void deprecated(String arg);
 
         @GET
         @Path("/deprecated-in-resource")
