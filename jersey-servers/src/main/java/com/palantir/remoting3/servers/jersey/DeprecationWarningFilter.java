@@ -47,11 +47,22 @@ public final class DeprecationWarningFilter implements ContainerResponseFilter {
 
     private static final Logger log = LoggerFactory.getLogger(DeprecationWarningFilter.class);
 
-    private static final LoadingCache<Method, Boolean> isDeprecated = CacheBuilder.newBuilder()
+    private static final LoadingCache<ResourceInfo, Boolean> isDeprecated = CacheBuilder.newBuilder()
             .softValues()
-            .build(new CacheLoader<Method, Boolean>() {
+            .build(new CacheLoader<ResourceInfo, Boolean>() {
                 @Override
-                public Boolean load(Method method) throws Exception {
+                public Boolean load(ResourceInfo resourceInfo) throws Exception {
+
+                    final Method method;
+                    try {
+                        method = resourceInfo.getResourceMethod();
+                    } catch (Throwable e) {
+                        // Defensive default.
+                        log.warn("Failed to determine resource method in filter invocation, "
+                                + "assuming method is not deprecated");
+                        return false;
+                    }
+
                     try {
                         return hasAnnotationInHierarchy(method, Deprecated.class);
                     } catch (Throwable e) {
@@ -73,7 +84,7 @@ public final class DeprecationWarningFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        if (isDeprecated.getUnchecked(resourceInfo.getResourceMethod())) {
+        if (isDeprecated.getUnchecked(resourceInfo)) {
             String path = Optional.ofNullable(uriInfo)
                     .map(ExtendedUriInfo::getMatchedModelResource)
                     .map(Resource::getPath)
