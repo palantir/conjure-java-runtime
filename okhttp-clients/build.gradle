@@ -12,6 +12,7 @@ dependencies {
     compile 'io.dropwizard.metrics:metrics-core'
     compile 'org.slf4j:slf4j-api'
 
+    testCompile project(":jersey-servers")
     testCompile "com.squareup.okhttp3:mockwebserver"
     testCompile "junit:junit"
     testCompile "org.assertj:assertj-core"
