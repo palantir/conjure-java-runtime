@@ -17,11 +17,14 @@
 package com.palantir.remoting3.okhttp;
 
 import com.google.common.net.HttpHeaders;
+import com.palantir.logsafe.SafeArg;
 import java.io.IOException;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Intercepts HTTP 308 responses and retries the given request against the URL indicated in the response's {@code
@@ -29,7 +32,7 @@ import okhttp3.Response;
  * {@link okhttp3.internal.http.RetryAndFollowUpInterceptor} for inspiration.
  */
 class QosRetryOtherInterceptor implements Interceptor {
-
+    private static final Logger log = LoggerFactory.getLogger(QosRetryOtherInterceptor.class);
     private static final int MAX_NUM_REDIRECTS = 20;
 
     private final UrlSelector urls;
@@ -67,6 +70,9 @@ class QosRetryOtherInterceptor implements Interceptor {
                         .orElseThrow(() -> new IOException("Failed to determine valid redirect URL for Location "
                                 + "header '" + locationHeader + "' and base URLs " + urls.getBaseUrls()));
 
+                // Note: Do not SafeArg-log the redirectTo URL since it typically contains unsafe information
+                log.debug("Received 308 response, retrying host at advertised location",
+                        SafeArg.of("location", locationHeader));
                 currentRequest = currentRequest.newBuilder().url(redirectTo).build();
                 priorResponse = response;
                 numRedirects += 1;

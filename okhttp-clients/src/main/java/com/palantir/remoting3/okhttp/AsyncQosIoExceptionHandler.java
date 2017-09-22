@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.QosException;
 import java.io.IOException;
 import java.time.Duration;
@@ -29,12 +30,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Inspects the {@link QosException} thrown by a {@link Call} execution and -- depending on the type of {@link
  * QosException} -- schedules a future execution of the call on the configured {@link ExecutorService}.
  */
 class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(AsyncQosIoExceptionHandler.class);
 
     private final ListeningScheduledExecutorService executorService;
     private final BackoffStrategy backoffStrategy;
@@ -54,8 +59,10 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
                         : backoffStrategy.nextBackoff();
 
                 if (!backoff.isPresent()) {
+                    log.debug("No backoff advertised, failing call");
                     return Futures.immediateFailedFuture(qosIoException);
                 } else {
+                    log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()));
                     return executorService.schedule(
                             () -> call.clone().execute(), backoff.get().toMillis(), TimeUnit.MILLISECONDS);
                 }
@@ -72,8 +79,10 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
             public ListenableFuture<Response> visit(QosException.Unavailable exception) {
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
+                    log.debug("No backoff advertised, failing call");
                     return Futures.immediateFailedFuture(qosIoException);
                 } else {
+                    log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()));
                     return executorService.schedule(
                             () -> call.clone().execute(), backoff.get().toMillis(), TimeUnit.MILLISECONDS);
                 }

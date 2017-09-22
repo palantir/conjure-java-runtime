@@ -29,8 +29,6 @@ import org.junit.Test;
 
 public final class WebApplicationExceptionMapperTest {
 
-    private static final Response.Status STATUS = Response.Status.EXPECTATION_FAILED;
-
     private final WebApplicationExceptionMapper mapper = new WebApplicationExceptionMapper();
 
     @Test
