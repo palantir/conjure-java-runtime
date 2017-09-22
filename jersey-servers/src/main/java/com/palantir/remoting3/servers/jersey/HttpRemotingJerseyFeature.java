@@ -26,8 +26,7 @@ public enum HttpRemotingJerseyFeature implements Feature {
     INSTANCE;
 
     /**
-     * Configures a Jersey server w.r.t. http-remoting conventions: registers tracer filters and
-     * exception mappers.
+     * Configures a Jersey server w.r.t. http-remoting conventions: registers tracer filters and exception mappers.
      */
     @Override
     public boolean configure(FeatureContext context) {
@@ -61,6 +60,9 @@ public enum HttpRemotingJerseyFeature implements Feature {
 
         // Tracing
         context.register(new TraceEnrichingFilter());
+
+        // Deprecation logging
+        context.register(DeprecationWarningFilter.INSTANCE);
 
         return true;
     }
