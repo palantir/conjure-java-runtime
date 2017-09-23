@@ -16,16 +16,15 @@
 
 package com.palantir.remoting3.servers.jersey;
 
-import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import com.google.common.net.HttpHeaders;
 import com.palantir.logsafe.SafeArg;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -48,33 +47,9 @@ public final class DeprecationWarningFilter implements ContainerResponseFilter {
 
     private static final Logger log = LoggerFactory.getLogger(DeprecationWarningFilter.class);
 
-    private static final LoadingCache<ResourceInfo, Boolean> isDeprecated = CacheBuilder.newBuilder()
-            .softValues()
-            .build(new CacheLoader<ResourceInfo, Boolean>() {
-                @Override
-                public Boolean load(ResourceInfo resourceInfo) throws Exception {
-                    final Method method;
-                    final String methodName;
-                    try {
-                        method = resourceInfo.getResourceMethod();
-                        methodName = method.getName();
-                    } catch (Throwable e) {
-                        // Defensive default.
-                        log.warn("Failed to determine resource method in filter invocation, "
-                                + "assuming method is not deprecated");
-                        return false;
-                    }
-
-                    try {
-                        return hasAnnotationInHierarchy(method, Deprecated.class);
-                    } catch (Throwable e) {
-                        // Defensive default.
-                        log.warn("Failed to determine whether method is deprecated",
-                                SafeArg.of("methodName", Strings.nullToEmpty(methodName)));
-                        return false;
-                    }
-                }
-            });
+    private static final Cache<String, Boolean> deprecationCache = CacheBuilder.newBuilder()
+            .maximumSize(1000)
+            .build();
 
     private DeprecationWarningFilter() {}
 
@@ -86,21 +61,42 @@ public final class DeprecationWarningFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        if (isDeprecated.getUnchecked(resourceInfo)) {
-            String path = Optional.ofNullable(uriInfo)
-                    .map(ExtendedUriInfo::getMatchedModelResource)
-                    .map(Resource::getPath)
-                    .orElse("(unknown)");
+        try {
+            if (resourceInfo != null
+                    && resourceInfo.getResourceClass() != null
+                    && resourceInfo.getResourceMethod() != null) {
+                Method resourceMethod = resourceInfo.getResourceMethod();
+                String key = resourceInfo.getResourceClass().getCanonicalName() + "#" + resourceMethod.getName();
+                boolean isDeprecated = false;
+                try {
+                    isDeprecated = deprecationCache.get(key,
+                            () -> hasAnnotationInHierarchy(resourceMethod, Deprecated.class));
+                } catch (ExecutionException e) {
+                    log.warn("Failed to determine resource method in filter invocation, "
+                            + "assuming method is not deprecated");
+                }
 
-            log.warn("Client called deprecated API endpoint",
-                    SafeArg.of("class", resourceInfo.getResourceClass().getCanonicalName()),
-                    SafeArg.of("method", resourceInfo.getResourceMethod().getName()),
-                    SafeArg.of("path", path),
-                    SafeArg.of("userAgent", requestContext.getHeaderString(HttpHeaders.USER_AGENT)));
+                if (isDeprecated) {
+                    String path = Optional.ofNullable(uriInfo)
+                            .map(ExtendedUriInfo::getMatchedModelResource)
+                            .map(Resource::getPath)
+                            .orElse("(unknown)");
 
-            MultivaluedMap<String, Object> headers = responseContext.getHeaders();
-            // Warning header as per https://tools.ietf.org/html/rfc7234#section-5.5.7
-            headers.putSingle(HttpHeaders.WARNING, formatWarning(path));
+                    log.warn("Client called deprecated API endpoint",
+                            SafeArg.of("class", resourceInfo.getResourceClass().getCanonicalName()),
+                            SafeArg.of("method", resourceInfo.getResourceMethod().getName()),
+                            SafeArg.of("path", path),
+                            SafeArg.of("userAgent", requestContext.getHeaderString(HttpHeaders.USER_AGENT)));
+
+                    MultivaluedMap<String, Object> headers = responseContext.getHeaders();
+                    // Warning header as per https://tools.ietf.org/html/rfc7234#section-5.5.7
+                    headers.putSingle(HttpHeaders.WARNING, formatWarning(path));
+                }
+            }
+        } catch (Throwable e) {
+            // TODO(rfink): ResourceInfo#getResourceMethod sometimes throws. Why?
+            log.warn("Failed to determine resource method in filter invocation, "
+                    + "assuming method is not deprecated", e);
         }
     }
 
