@@ -72,7 +72,7 @@ public final class DeprecationWarningFilterTest {
     @Test
     public void doesNotAddHeaderForNonDeprecatedEndpoints() {
         Response response = target.path("/not-deprecated").request().get();
-        assertThat(response.getHeaderString(HttpHeaders.WARNING)).isNullOrEmpty();
+        assertThat(response.getHeaderString(HttpHeaders.WARNING)).isEqualTo("foo");
     }
 
     public static class TestServer extends Application<Configuration> {
