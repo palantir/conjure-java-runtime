@@ -26,9 +26,11 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.Produces;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.glassfish.jersey.client.JerseyClientBuilder;
@@ -57,23 +59,28 @@ public final class DeprecationWarningFilterTest {
     @Test
     public void addsHeaderForDeprecatedEndpoints() {
         Response response = target.path("/deprecated/unsafe-arg").request().get();
-        assertThat(response.getHeaderString(HttpHeaders.WARNING))
-                .isEqualTo("299 - \"Service API endpoint is deprecated: /deprecated/{arg}\"");
+        assertThat(response.getStringHeaders().get(HttpHeaders.WARNING))
+                .contains("299 - \"Service API endpoint is deprecated: /deprecated/{arg}\"")
+                .contains("foo");
 
         response = target.path("/deprecated-in-resource").request().get();
-        assertThat(response.getHeaderString(HttpHeaders.WARNING))
-                .isEqualTo("299 - \"Service API endpoint is deprecated: /deprecated-in-resource\"");
+        assertThat(response.getStringHeaders().get(HttpHeaders.WARNING))
+                .contains("299 - \"Service API endpoint is deprecated: /deprecated-in-resource\"")
+                .contains("foo");
     }
 
     @Test
     public void doesNotAddHeaderForNonDeprecatedEndpoints() {
         Response response = target.path("/not-deprecated").request().get();
-        assertThat(response.getHeaderString(HttpHeaders.WARNING)).isNullOrEmpty();
+        assertThat(response.getHeaderString(HttpHeaders.WARNING)).isEqualTo("foo");
     }
 
     public static class TestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
+            env.jersey().getResourceConfig().register((ContainerResponseFilter) (request, response) ->
+                    response.getHeaders().putSingle(HttpHeaders.WARNING, "foo"), Priorities.USER);
+
             env.jersey().register(DeprecationWarningFilter.INSTANCE);
             env.jersey().register(new TestResource());
         }
