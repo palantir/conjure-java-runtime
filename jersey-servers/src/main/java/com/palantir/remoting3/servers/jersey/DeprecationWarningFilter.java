@@ -25,6 +25,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -42,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * interfaces) is marked as {@link Deprecated}.
  */
 @Provider
+@Priority(Priorities.HEADER_DECORATOR)
 public final class DeprecationWarningFilter implements ContainerResponseFilter {
     public static final DeprecationWarningFilter INSTANCE = new DeprecationWarningFilter();
 
@@ -90,7 +93,7 @@ public final class DeprecationWarningFilter implements ContainerResponseFilter {
 
                     MultivaluedMap<String, Object> headers = responseContext.getHeaders();
                     // Warning header as per https://tools.ietf.org/html/rfc7234#section-5.5.7
-                    headers.putSingle(HttpHeaders.WARNING, formatWarning(path));
+                    headers.add(HttpHeaders.WARNING, formatWarning(path));
                 }
             }
         } catch (Throwable e) {
