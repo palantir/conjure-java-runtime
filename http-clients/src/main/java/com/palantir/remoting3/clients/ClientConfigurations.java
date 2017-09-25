@@ -86,7 +86,7 @@ public final class ClientConfigurations {
                 .build();
     }
 
-    private static ProxySelector createProxySelector(Optional<ProxyConfiguration> proxyConfig) {
+    public static ProxySelector createProxySelector(Optional<ProxyConfiguration> proxyConfig) {
         if (!proxyConfig.isPresent()) {
             return ProxySelector.getDefault();
         }
