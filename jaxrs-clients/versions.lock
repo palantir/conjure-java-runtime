@@ -108,26 +108,26 @@
             "locked": "8.17.0"
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "1.4.0-rc1",
+            "locked": "1.4.0",
             "transitive": [
                 "com.palantir.remoting3:error-handling"
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.4.0-rc1",
+            "locked": "1.4.0",
             "transitive": [
                 "com.palantir.remoting3:http-clients"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.4.0-rc1",
+            "locked": "1.4.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.4.0-rc1",
+            "locked": "1.4.0",
             "transitive": [
                 "com.palantir.remoting3:tracing"
             ]
@@ -349,26 +349,26 @@
             "locked": "8.17.0"
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "1.4.0-rc1",
+            "locked": "1.4.0",
             "transitive": [
                 "com.palantir.remoting3:error-handling"
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.4.0-rc1",
+            "locked": "1.4.0",
             "transitive": [
                 "com.palantir.remoting3:http-clients"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.4.0-rc1",
+            "locked": "1.4.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.4.0-rc1",
+            "locked": "1.4.0",
             "transitive": [
                 "com.palantir.remoting3:tracing"
             ]
