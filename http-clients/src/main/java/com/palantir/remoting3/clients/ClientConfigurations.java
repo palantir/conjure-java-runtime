@@ -86,6 +86,28 @@ public final class ClientConfigurations {
                 .build();
     }
 
+    /**
+     * Creates a new {@link ClientConfiguration} instance from the given SSL configuration, URIs and proxy
+     * configuration, filling in all other configuration with the defaults specified as constants in this class.
+     */
+    public static ClientConfiguration of(
+            List<String> uris, SSLSocketFactory sslSocketFactory, X509TrustManager trustManager,
+            Optional<ProxyConfiguration> proxyConfiguration) {
+        return ClientConfiguration.builder()
+                .sslSocketFactory(sslSocketFactory)
+                .trustManager(trustManager)
+                .uris(uris)
+                .connectTimeout(DEFAULT_CONNECT_TIMEOUT)
+                .readTimeout(DEFAULT_READ_TIMEOUT)
+                .writeTimeout(DEFAULT_WRITE_TIMEOUT)
+                .enableGcmCipherSuites(DEFAULT_ENABLE_GCM_CIPHERS)
+                .proxy(createProxySelector(proxyConfiguration))
+                .proxyCredentials(Optional.empty())
+                .maxNumRetries(uris.size())
+                .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
+                .build();
+    }
+
     public static ProxySelector createProxySelector(Optional<ProxyConfiguration> proxyConfig) {
         if (!proxyConfig.isPresent()) {
             return ProxySelector.getDefault();
