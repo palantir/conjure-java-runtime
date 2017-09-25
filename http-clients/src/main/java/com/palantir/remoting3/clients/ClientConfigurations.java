@@ -58,7 +58,7 @@ public final class ClientConfigurations {
                 .readTimeout(config.readTimeout().orElse(DEFAULT_READ_TIMEOUT))
                 .writeTimeout(config.writeTimeout().orElse(DEFAULT_WRITE_TIMEOUT))
                 .enableGcmCipherSuites(config.enableGcmCipherSuites().orElse(DEFAULT_ENABLE_GCM_CIPHERS))
-                .proxy(createProxySelector(config.proxy()))
+                .proxy(config.proxy().map(ClientConfigurations::createProxySelector).orElse(ProxySelector.getDefault()))
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
                 .maxNumRetries(config.maxNumRetries().orElse(config.uris().size()))
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
@@ -79,45 +79,19 @@ public final class ClientConfigurations {
                 .readTimeout(DEFAULT_READ_TIMEOUT)
                 .writeTimeout(DEFAULT_WRITE_TIMEOUT)
                 .enableGcmCipherSuites(DEFAULT_ENABLE_GCM_CIPHERS)
-                .proxy(createProxySelector(Optional.empty()))
+                .proxy(ProxySelector.getDefault())
                 .proxyCredentials(Optional.empty())
                 .maxNumRetries(uris.size())
                 .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
                 .build();
     }
 
-    /**
-     * Creates a new {@link ClientConfiguration} instance from the given SSL configuration, URIs and proxy
-     * configuration, filling in all other configuration with the defaults specified as constants in this class.
-     */
-    public static ClientConfiguration of(
-            List<String> uris, SSLSocketFactory sslSocketFactory, X509TrustManager trustManager,
-            Optional<ProxyConfiguration> proxyConfiguration) {
-        return ClientConfiguration.builder()
-                .sslSocketFactory(sslSocketFactory)
-                .trustManager(trustManager)
-                .uris(uris)
-                .connectTimeout(DEFAULT_CONNECT_TIMEOUT)
-                .readTimeout(DEFAULT_READ_TIMEOUT)
-                .writeTimeout(DEFAULT_WRITE_TIMEOUT)
-                .enableGcmCipherSuites(DEFAULT_ENABLE_GCM_CIPHERS)
-                .proxy(createProxySelector(proxyConfiguration))
-                .proxyCredentials(Optional.empty())
-                .maxNumRetries(uris.size())
-                .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
-                .build();
-    }
-
-    public static ProxySelector createProxySelector(Optional<ProxyConfiguration> proxyConfig) {
-        if (!proxyConfig.isPresent()) {
-            return ProxySelector.getDefault();
-        }
-
-        switch (proxyConfig.get().type()) {
+    public static ProxySelector createProxySelector(ProxyConfiguration proxyConfig) {
+        switch (proxyConfig.type()) {
             case DIRECT:
                 return fixedProxySelectorFor(Proxy.NO_PROXY);
             case HTTP:
-                HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig.get().hostAndPort()
+                HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig.hostAndPort()
                         .orElseThrow(() -> new IllegalArgumentException(
                                 "Expected to find proxy hostAndPort configuration for HTTP proxy")));
                 InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort());
