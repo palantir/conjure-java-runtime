@@ -282,7 +282,7 @@ deserialized server-side `SerializableError`. The error codes and names of the `
 ```
 try {
     service.someMethod();
-catch (RemoteExcetion e) {
+catch (RemoteException e) {
     if (e.getError().errorName().equals("MyApplication:DatasetNotFound")) {
         handleError(e.getError().parameters().get("datasetId"));
     } else {
