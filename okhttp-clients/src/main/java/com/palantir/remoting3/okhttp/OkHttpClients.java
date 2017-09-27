@@ -113,9 +113,6 @@ public final class OkHttpClients {
         // User agent setup
         client.addInterceptor(UserAgentInterceptor.of(userAgent, serviceClass));
 
-        // Deprecation logging
-        client.addInterceptor(new DeprecationWarningLoggingInterceptor(serviceClass));
-
         // cipher setup
         client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
 
