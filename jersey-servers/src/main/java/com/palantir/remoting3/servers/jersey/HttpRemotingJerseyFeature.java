@@ -61,9 +61,6 @@ public enum HttpRemotingJerseyFeature implements Feature {
         // Tracing
         context.register(new TraceEnrichingFilter());
 
-        // Deprecation logging
-        context.register(DeprecationWarningFilter.INSTANCE);
-
         return true;
     }
 }
