@@ -99,6 +99,23 @@ public final class Tracers {
         };
     }
 
+    /**
+     * Like {@link #wrapWithNewTrace(Callable)}, but for Runnables.
+     */
+    public static Runnable wrapWithNewTrace(Runnable delegate) {
+        return () -> {
+            // clear the existing trace and keep it around for restoration when we're done
+            Trace originalTrace = Tracer.getAndClearTrace();
+
+            try {
+                Tracer.initTrace(Optional.empty(), Tracers.randomId());
+                delegate.run();
+            } finally {
+                // restore the trace
+                Tracer.setTrace(originalTrace);
+            }
+        };
+    }
 
     /**
      * Wraps a given callable such that its execution operates with the {@link Trace thread-local Trace} of the thread
