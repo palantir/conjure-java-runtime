@@ -71,8 +71,7 @@ public final class OkHttpClientsTest extends TestBase {
                 createTestConfig(url),
                 "test",
                 OkHttpClientsTest.class,
-                () -> handler
-                /* deterministic URL order */);
+                () -> handler);
     }
 
     @Test
