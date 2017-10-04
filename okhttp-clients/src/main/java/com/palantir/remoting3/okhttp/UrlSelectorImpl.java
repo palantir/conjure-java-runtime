@@ -20,7 +20,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import okhttp3.HttpUrl;
@@ -35,9 +38,14 @@ final class UrlSelectorImpl implements UrlSelector {
         this.currentUrl = new AtomicInteger(0);
     }
 
-    static UrlSelectorImpl create(Collection<String> baseUrls) {
+    static UrlSelectorImpl create(Collection<String> baseUrls, boolean randomizeOrder) {
+        List<String> orderedUrls = new ArrayList<>(baseUrls);
+        if (randomizeOrder) {
+            Collections.shuffle(orderedUrls);
+        }
+
         ImmutableSet.Builder<HttpUrl> canonicalUrls = ImmutableSet.builder();
-        baseUrls.forEach(url -> {
+        orderedUrls.forEach(url -> {
             HttpUrl httpUrl = HttpUrl.parse(switchWsToHttp(url));
             Preconditions.checkArgument(httpUrl != null, "Not a valid URL: %s", url);
             HttpUrl canonicalUrl = canonicalize(httpUrl);

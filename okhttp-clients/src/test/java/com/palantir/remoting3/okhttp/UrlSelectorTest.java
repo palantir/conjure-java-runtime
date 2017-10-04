@@ -37,7 +37,7 @@ public final class UrlSelectorTest extends TestBase {
                 "user:pass@foo.com/path",
                 ""
         }) {
-            assertThatThrownBy(() -> UrlSelectorImpl.create(list(url)))
+            assertThatThrownBy(() -> UrlSelectorImpl.create(list(url), false))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("Not a valid URL: %s", url);
         }
@@ -46,7 +46,7 @@ public final class UrlSelectorTest extends TestBase {
                 "http://user:pass@foo.com/path",
                 "http://foo.com/path?bar",
                 }) {
-            assertThatThrownBy(() -> UrlSelectorImpl.create(list(url)))
+            assertThatThrownBy(() -> UrlSelectorImpl.create(list(url), false))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage(
                             "Base URLs must be 'canonical' and consist of schema, host, port, and path only: %s", url);
@@ -57,7 +57,7 @@ public final class UrlSelectorTest extends TestBase {
                 "http://foo.com:80/path",
                 "http://foo.com:8080",
                 }) {
-            UrlSelectorImpl.create(list(url));
+            UrlSelectorImpl.create(list(url), false);
         }
     }
 
@@ -66,7 +66,7 @@ public final class UrlSelectorTest extends TestBase {
         String url1 = "http://foo/a";
         String url2 = "https://bar:8080/a/b/c";
         List<String> baseUrls = list(url1, url2);
-        UrlSelectorImpl selector = UrlSelectorImpl.create(baseUrls);
+        UrlSelectorImpl selector = UrlSelectorImpl.create(baseUrls, false);
 
         // Redirect to self is OK.
         assertThat(selector.redirectTo(parse(url1), url1)).contains(parse(url1));
@@ -80,7 +80,7 @@ public final class UrlSelectorTest extends TestBase {
 
     @Test
     public void testRedirectTo_updatesCurrentPointer() throws Exception {
-        UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a", "http://bar/a"));
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a", "http://bar/a"), false);
         HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
         String redirectTo = "http://bar/a";
 
@@ -91,7 +91,7 @@ public final class UrlSelectorTest extends TestBase {
     @Test
     public void testRedirectTo_findsMatchesWithCaseInsensitiveHostNames() throws Exception {
         String baseUrl = "http://foo/a";
-        UrlSelectorImpl selector = UrlSelectorImpl.create(list(baseUrl));
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list(baseUrl), false);
 
         assertThat(selector.redirectTo(parse(baseUrl), "http://FOO/a")).contains(parse(baseUrl));
     }
@@ -99,7 +99,7 @@ public final class UrlSelectorTest extends TestBase {
     @Test
     public void testRedirectTo_doesNotFindMatchesForCaseSentitivePaths() throws Exception {
         String baseUrl = "http://foo/a";
-        UrlSelectorImpl selector = UrlSelectorImpl.create(list(baseUrl));
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list(baseUrl), false);
 
         assertThat(selector.redirectTo(parse(baseUrl), "http://foo/A")).isEmpty();
     }
@@ -108,7 +108,7 @@ public final class UrlSelectorTest extends TestBase {
     public void testRedirectTo_failsWhenRequestedBaseUrlPathIsNotPrefixOfCurrentPath() throws Exception {
         String url1 = "http://foo/a";
         String url2 = "https://bar:8080/a/b/c";
-        UrlSelectorImpl selector = UrlSelectorImpl.create(list(url1, url2));
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list(url1, url2), false);
 
         assertThat(selector.redirectTo(parse(url1), url2)).isEmpty();
     }
@@ -130,7 +130,7 @@ public final class UrlSelectorTest extends TestBase {
 
     @Test
     public void testRedirectToNext_updatesCurrentPointer() throws Exception {
-        UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a", "http://bar/a"));
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a", "http://bar/a"), false);
         HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
 
         assertThat(selector.redirectToNext(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
@@ -146,7 +146,7 @@ public final class UrlSelectorTest extends TestBase {
         Request wsRequest = new Request.Builder()
                 .url("wss://foo/a")
                 .build();
-        UrlSelectorImpl selector = UrlSelectorImpl.create(ImmutableList.of("wss://foo/", "wss://bar/"));
+        UrlSelectorImpl selector = UrlSelectorImpl.create(ImmutableList.of("wss://foo/", "wss://bar/"), false);
 
         // Silently replace web socket URLs with HTTP URLs. See https://github.com/square/okhttp/issues/1652.
         assertThat(selector.redirectToNext(wsRequest.url())).isEqualTo(Optional.of(parse("https://bar/a")));
