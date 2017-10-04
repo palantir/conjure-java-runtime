@@ -60,19 +60,36 @@ public final class OkHttpClients {
 
     private OkHttpClients() {}
 
-    /** Creates an OkHttp client from the given {@link ClientConfiguration}. */
+    /**
+     * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
+     * ClientConfiguration#uris URIs} are initialized in random order.
+     */
     public static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
-        return create(
-                config,
-                userAgent,
-                serviceClass,
-                () -> new AsyncQosIoExceptionHandler(scheduledExecutorService,
-                        new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random())));
+        return createInternal(
+                config, userAgent, serviceClass, createQosHandler(config), true /* randomize URL order */);
     }
 
     @VisibleForTesting
-    static QosIoExceptionAwareOkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass,
+    static QosIoExceptionAwareOkHttpClient withCustomQosHandler(
+            ClientConfiguration config, String userAgent, Class<?> serviceClass,
             Supplier<QosIoExceptionHandler> handlerFactory) {
+        return createInternal(config, userAgent, serviceClass, handlerFactory, true);
+    }
+
+    @VisibleForTesting
+    static QosIoExceptionAwareOkHttpClient withStableUris(
+            ClientConfiguration config, String userAgent, Class<?> serviceClass) {
+        return createInternal(config, userAgent, serviceClass, createQosHandler(config), false);
+    }
+
+    private static Supplier<QosIoExceptionHandler> createQosHandler(ClientConfiguration config) {
+        return () -> new AsyncQosIoExceptionHandler(scheduledExecutorService,
+                new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()));
+    }
+
+    private static QosIoExceptionAwareOkHttpClient createInternal(
+            ClientConfiguration config, String userAgent, Class<?> serviceClass,
+            Supplier<QosIoExceptionHandler> handlerFactory, boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // response metrics
@@ -81,7 +98,7 @@ public final class OkHttpClients {
         // Error handling, retry/failover, etc: the order of these matters.
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
         client.addInterceptor(QosRetryLaterInterceptor.INSTANCE);
-        UrlSelector urls = UrlSelectorImpl.create(config.uris(), true /* randomize order */);
+        UrlSelector urls = UrlSelectorImpl.create(config.uris(), randomizeUrlOrder);
         client.addInterceptor(CurrentUrlInterceptor.create(urls));
         client.addInterceptor(new QosRetryOtherInterceptor(urls));
         client.addInterceptor(MultiServerRetryInterceptor.create(urls, config.maxNumRetries()));

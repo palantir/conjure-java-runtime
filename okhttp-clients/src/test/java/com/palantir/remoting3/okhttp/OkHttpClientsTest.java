@@ -67,7 +67,12 @@ public final class OkHttpClientsTest extends TestBase {
     public void before() {
         url = "http://localhost:" + server.getPort();
         url2 = "http://localhost:" + server2.getPort();
-        mockHandlerClient = OkHttpClients.create(createTestConfig(url), "test", OkHttpClientsTest.class, () -> handler);
+        mockHandlerClient = OkHttpClients.withCustomQosHandler(
+                createTestConfig(url),
+                "test",
+                OkHttpClientsTest.class,
+                () -> handler
+                /* deterministic URL order */);
     }
 
     @Test
@@ -196,7 +201,7 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void interceptsAndHandlesRetryOther_endToEnd_redirectsToOtherUrl() throws Exception {
-        OkHttpClient client = OkHttpClients.create(
+        OkHttpClient client = OkHttpClients.withStableUris(
                 ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
                 "test", OkHttpClientsTest.class);
         server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
@@ -211,7 +216,7 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void interceptsAndHandlesQos_endToEnd_canRetryLaterAndThenRedirect() throws Exception {
-        OkHttpClient client = OkHttpClients.create(
+        OkHttpClient client = OkHttpClients.withStableUris(
                 ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
                 "test", OkHttpClientsTest.class);
         server.enqueue(new MockResponse().setResponseCode(503));
@@ -227,7 +232,7 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void interceptsAndHandlesQos_endToEnd_memorizedCurrentUrlBetweenCalls() throws Exception {
-        OkHttpClient client = OkHttpClients.create(
+        OkHttpClient client = OkHttpClients.withStableUris(
                 ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
                 "test", OkHttpClientsTest.class);
 
@@ -244,7 +249,7 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {
-        return OkHttpClients.create(
+        return OkHttpClients.withStableUris(
                 ClientConfiguration.builder().from(createTestConfig(url)).maxNumRetries(maxNumRetries).build(),
                 "test",
                 OkHttpClientsTest.class);
