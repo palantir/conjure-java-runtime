@@ -68,7 +68,7 @@ Dropwizard server is configured for http-remoting as follows:
 public class MyServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
-        env.jersey().register(HttpRemotingJerseyFeature.DEFAULT);
+        env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
         env.jersey().register(new MyResource());
     }
 }
