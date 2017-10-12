@@ -32,7 +32,7 @@ public enum OkhttpTraceInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
-        OpenSpan span = Tracer.startSpan(request.method() + " " + request.url(), SpanType.CLIENT_OUTGOING);
+        OpenSpan span = Tracer.startSpan("remote call to redacted url", SpanType.CLIENT_OUTGOING);
         Request.Builder tracedRequest = request.newBuilder()
                 .addHeader(TraceHttpHeaders.TRACE_ID, Tracer.getTraceId())
                 .addHeader(TraceHttpHeaders.SPAN_ID, span.getSpanId())
