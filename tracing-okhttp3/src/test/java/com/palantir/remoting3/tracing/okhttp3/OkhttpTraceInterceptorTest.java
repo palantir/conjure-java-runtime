@@ -145,7 +145,6 @@ public final class OkhttpTraceInterceptorTest {
         OkhttpTraceInterceptor.INSTANCE.intercept(chain);
         verify(observer).consume(spanCaptor.capture());
         Span okhttpSpan = spanCaptor.getValue();
-        assertThat(okhttpSpan.getOperation()).isEqualTo("GET http://localhost/");
         assertThat(okhttpSpan).isNotEqualTo(outerSpan);
     }
 
