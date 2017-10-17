@@ -33,12 +33,6 @@ public enum OkhttpTraceInterceptor implements Interceptor {
         Tracer.getEnrichmentHeaders().entrySet().stream().forEach(entrySet -> {
             tracedRequest.addHeader(entrySet.getKey(), entrySet.getValue());
         });
-        Response response;
-        try {
-            response = chain.proceed(tracedRequest.build());
-        } finally {
-            Tracer.completeSpan();
-        }
-        return response;
+        return chain.proceed(tracedRequest.build());
     }
 }
