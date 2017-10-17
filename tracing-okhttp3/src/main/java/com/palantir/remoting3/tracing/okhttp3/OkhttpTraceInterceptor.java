@@ -16,9 +16,6 @@
 
 package com.palantir.remoting3.tracing.okhttp3;
 
-import com.palantir.remoting.api.tracing.OpenSpan;
-import com.palantir.remoting.api.tracing.SpanType;
-import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import com.palantir.remoting3.tracing.Tracer;
 import java.io.IOException;
 import okhttp3.Interceptor;
@@ -32,22 +29,16 @@ public enum OkhttpTraceInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
-        OpenSpan span = Tracer.startSpan("remote call to redacted url", SpanType.CLIENT_OUTGOING);
-        Request.Builder tracedRequest = request.newBuilder()
-                .addHeader(TraceHttpHeaders.TRACE_ID, Tracer.getTraceId())
-                .addHeader(TraceHttpHeaders.SPAN_ID, span.getSpanId())
-                .addHeader(TraceHttpHeaders.IS_SAMPLED, Tracer.isTraceObservable() ? "1" : "0");
-        if (span.getParentSpanId().isPresent()) {
-            tracedRequest.header(TraceHttpHeaders.PARENT_SPAN_ID, span.getParentSpanId().get());
-        }
-
+        Request.Builder tracedRequest = request.newBuilder();
+        Tracer.getEnrichmentHeaders().entrySet().stream().forEach(entrySet -> {
+            tracedRequest.addHeader(entrySet.getKey(), entrySet.getValue());
+        });
         Response response;
         try {
             response = chain.proceed(tracedRequest.build());
         } finally {
             Tracer.completeSpan();
         }
-
         return response;
     }
 }

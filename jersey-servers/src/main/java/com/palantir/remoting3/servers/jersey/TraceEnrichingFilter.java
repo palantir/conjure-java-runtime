@@ -17,12 +17,14 @@
 package com.palantir.remoting3.servers.jersey;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanType;
 import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import com.palantir.remoting3.tracing.Tracer;
 import com.palantir.remoting3.tracing.Tracers;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -33,6 +35,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.ExtendedUriInfo;
 import org.glassfish.jersey.server.model.Resource;
+import org.glassfish.jersey.uri.UriTemplate;
 
 @Provider
 public final class TraceEnrichingFilter implements ContainerRequestFilter, ContainerResponseFilter {
@@ -49,7 +52,8 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
                 .map(Resource::getPath)
                 .orElse("(unknown)");
 
-        String operation = requestContext.getMethod() + " " + path;
+        String operation = requestContext.getMethod() + " "
+                + getParameterizedPath((ExtendedUriInfo) requestContext.getUriInfo());
         // The following strings are all nullable
         String traceId = requestContext.getHeaderString(TraceHttpHeaders.TRACE_ID);
         String spanId = requestContext.getHeaderString(TraceHttpHeaders.SPAN_ID);
@@ -94,4 +98,32 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
             return Optional.of(header.equals("1"));
         }
     }
+
+    public String getParameterizedPath(ExtendedUriInfo extendedUriInfo) {
+        List<UriTemplate> matchedTemplates = extendedUriInfo.getMatchedTemplates();
+        StringBuilder parameterizedPath = new StringBuilder();
+        for (UriTemplate matchedTemplate : Lists.reverse(matchedTemplates)) {
+            String stringTemplate = normalizeTemplate(matchedTemplate.getTemplate());
+            if (!stringTemplate.equals("/")) {
+                parameterizedPath.append(stringTemplate);
+            }
+        }
+        if (parameterizedPath.length() == 0) {
+            return "/";
+        }
+        return parameterizedPath.toString();
+    }
+
+    private static String normalizeTemplate(String rawTemplate) {
+        return addLeadingSlash(removeTrailingSlash(rawTemplate));
+    }
+
+    private static String addLeadingSlash(String rawTemplate) {
+        return rawTemplate.startsWith("/") ? rawTemplate : "/" + rawTemplate;
+    }
+
+    private static String removeTrailingSlash(String rawTemplate) {
+        return rawTemplate.endsWith("/") ? rawTemplate.substring(0, rawTemplate.length() - 1) : rawTemplate;
+    }
+
 }

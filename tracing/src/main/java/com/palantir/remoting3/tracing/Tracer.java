@@ -17,11 +17,13 @@
 package com.palantir.remoting3.tracing;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanObserver;
 import com.palantir.remoting.api.tracing.SpanType;
+import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -104,6 +106,21 @@ public final class Tracer {
      */
     public static OpenSpan startSpan(String operation) {
         return startSpanInternal(operation, SpanType.LOCAL);
+    }
+
+    public static Map<String, String> getEnrichmentHeaders() {
+        Optional<OpenSpan> currentOpenSpan = currentTrace.get().top();
+        Map<String, String> headersMap = Maps.newHashMap();
+        if (currentOpenSpan.isPresent()) {
+            OpenSpan span = currentOpenSpan.get();
+            headersMap.put(TraceHttpHeaders.TRACE_ID, Tracer.getTraceId());
+            headersMap.put(TraceHttpHeaders.SPAN_ID, span.getSpanId());
+            headersMap.put(TraceHttpHeaders.IS_SAMPLED, Tracer.isTraceObservable() ? "1" : "0");
+            if (span.getParentSpanId().isPresent()) {
+                headersMap.put(TraceHttpHeaders.PARENT_SPAN_ID, span.getParentSpanId().get());
+            }
+        }
+        return headersMap;
     }
 
     private static OpenSpan startSpanInternal(String operation, SpanType type) {
