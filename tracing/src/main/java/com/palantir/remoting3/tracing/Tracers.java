@@ -32,7 +32,10 @@ public final class Tracers {
 
     /** Returns a random ID suitable for span and trace IDs. */
     public static String randomId() {
-        return longToPaddedHex(ThreadLocalRandom.current().nextLong());
+        long signedLong = ThreadLocalRandom.current().nextLong();
+
+        // clear out sign bit
+        return longToPaddedHex(signedLong & Long.MAX_VALUE);
     }
 
     static String longToPaddedHex(long number) {
