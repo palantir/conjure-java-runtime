@@ -48,8 +48,16 @@ public final class TracerTest extends TestBase {
     @Test
     public void testClientIsInstrumentedWithTracer() throws InterruptedException, IOException {
         OpenSpan parentTrace = Tracer.startSpan("");
+
+        Tracer.subscribe(TracerTest.class.getName(), (span) -> {
+            // only span we expect to see in this test
+            assertThat(span.getOperation(), is("GET /string"));
+        });
+
         String traceId = Tracer.getTraceId();
         service.string();
+
+        Tracer.unsubscribe(TracerTest.class.getName());
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));

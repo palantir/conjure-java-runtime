@@ -17,7 +17,8 @@ public final class PathTemplateHeaderEnrichmentContract extends AbstractDelegati
 
     @Override
     protected void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
-        metadata.template().header(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER, metadata.template().url());
+        metadata.template().header(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER,
+                metadata.template().method() + " " + metadata.template().url());
     }
 
 }
