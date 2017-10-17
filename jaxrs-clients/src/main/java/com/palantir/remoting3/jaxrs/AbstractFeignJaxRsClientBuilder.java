@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
+import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
 import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting3.okhttp.MultiServerRetryInterceptor;
 import com.palantir.remoting3.okhttp.OkHttpClients;
@@ -87,10 +88,11 @@ abstract class AbstractFeignJaxRsClientBuilder {
     }
 
     private Contract createContract() {
-        return new SlashEncodingContract(
-                new Java8OptionalAwareContract(
-                        new GuavaOptionalAwareContract(
-                                new JAXRSContract())));
+        return new PathTemplateHeaderEnrichmentContract(
+                new SlashEncodingContract(
+                    new Java8OptionalAwareContract(
+                            new GuavaOptionalAwareContract(
+                                    new JAXRSContract()))));
     }
 
     private Request.Options createRequestOptions() {
