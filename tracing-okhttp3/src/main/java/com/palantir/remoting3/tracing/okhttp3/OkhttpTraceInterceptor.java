@@ -29,17 +29,17 @@ import okhttp3.Response;
 public enum OkhttpTraceInterceptor implements Interceptor {
     INSTANCE;
 
-    private static final String HTTP_REMOTING_HEADER = "hr-path-template";
+    public static final String PATH_TEMPLATE_HEADER = "hr-path-template";
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
 
         String spanName = "remote call to redacted url";
-        String httpRemotingPath = request.header(HTTP_REMOTING_HEADER);
+        String httpRemotingPath = request.header(PATH_TEMPLATE_HEADER);
         if (httpRemotingPath != null) {
             spanName = httpRemotingPath;
-            request = request.newBuilder().removeHeader(HTTP_REMOTING_HEADER).build();
+            request = request.newBuilder().removeHeader(PATH_TEMPLATE_HEADER).build();
         }
 
         OpenSpan span = Tracer.startSpan(spanName, SpanType.CLIENT_OUTGOING);
