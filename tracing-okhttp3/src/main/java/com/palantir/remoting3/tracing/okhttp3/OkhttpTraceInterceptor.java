@@ -29,6 +29,7 @@ import okhttp3.Response;
 public enum OkhttpTraceInterceptor implements Interceptor {
     INSTANCE;
 
+    /** The HTTP header used to communicate API endpoint names internally. Not considered public API. */
     public static final String PATH_TEMPLATE_HEADER = "hr-path-template";
 
     @Override
