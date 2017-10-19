@@ -36,7 +36,7 @@ public enum OkhttpTraceInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
 
-        String spanName = "remote call to redacted url";
+        String spanName = request.method();
         String httpRemotingPath = request.header(PATH_TEMPLATE_HEADER);
         if (httpRemotingPath != null) {
             spanName = httpRemotingPath;
