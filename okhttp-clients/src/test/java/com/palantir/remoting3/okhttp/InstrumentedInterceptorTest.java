@@ -21,9 +21,7 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
-import java.util.Map;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
 import okhttp3.Request;
@@ -37,7 +35,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public final class InstrumentedInterceptorTest {
 
-    private static final Request REQUEST = new Request.Builder().url("http://url").build();
+    private static final Request REQUEST_A = new Request.Builder().url("http://hostA").build();
+    private static final Request REQUEST_B = new Request.Builder().url("http://hostB").build();
 
     @Mock
     private Interceptor.Chain chain;
@@ -47,41 +46,33 @@ public final class InstrumentedInterceptorTest {
 
     @Before
     public void before() throws IOException {
-        when(chain.request()).thenReturn(REQUEST);
-
         registry = new MetricRegistry();
         interceptor = new InstrumentedInterceptor(registry, "client");
+
+        successfulRequest(REQUEST_A);
+        successfulRequest(REQUEST_B);
     }
 
     @Test
     public void testResponseFamilyMetrics() throws IOException {
-        Map<Integer, String> testCases = ImmutableMap.<Integer, String>builder()
-                .put(100, "informational")
-                .put(200, "successful")
-                .put(300, "redirection")
-                .put(400, "client-error")
-                .put(500, "server-error")
-                .put(600, "other")
-                .build();
+        interceptor.intercept(chain);
 
-        for (Map.Entry<Integer, String> testCase : testCases.entrySet()) {
-            Meter meter = registry.getMeters().get("client.response.family." + testCase.getValue());
-            assertThat(meter.getCount()).isZero();
+        Meter meter = registry.getMeters().get("client.response.family.successful");
+        assertThat(meter.getCount()).isEqualTo(1);
 
-            responseWithCode(testCase.getKey());
-            interceptor.intercept(chain);
-
-            assertThat(meter.getCount()).isEqualTo(1);
-        }
+        // TODO(jellis): check different meter once we add tags
+        interceptor.intercept(chain);
+        assertThat(meter.getCount()).isEqualTo(2);
     }
 
-    private void responseWithCode(int code) throws IOException {
+    private void successfulRequest(Request request) throws IOException {
         Response response = new Response.Builder()
-                .request(REQUEST)
+                .request(request)
                 .message("")
                 .protocol(Protocol.HTTP_1_1)
-                .code(code)
+                .code(200)
                 .build();
-        when(chain.proceed(REQUEST)).thenReturn(response);
+        when(chain.request()).thenReturn(request);
+        when(chain.proceed(request)).thenReturn(response);
     }
 }
