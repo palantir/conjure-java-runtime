@@ -18,9 +18,10 @@ package com.palantir.remoting3.okhttp;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
-import com.google.common.collect.Maps;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import java.io.IOException;
-import java.util.Map;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 import org.slf4j.Logger;
@@ -33,13 +34,17 @@ public final class InstrumentedInterceptor implements Interceptor {
 
     private static final Logger log = LoggerFactory.getLogger(InstrumentedInterceptor.class);
 
-    private final Map<String, HostMetrics> hostMetrics = Maps.newConcurrentMap();
-    private final MetricRegistry registry;
-    private final String name;
+    private final LoadingCache<String, HostMetrics> hostMetrics;
 
     InstrumentedInterceptor(MetricRegistry registry, String name) {
-        this.registry = registry;
-        this.name = name;
+        this.hostMetrics = CacheBuilder.newBuilder()
+                .maximumSize(1_000)
+                .build(new CacheLoader<String, HostMetrics>() {
+                    @Override
+                    public HostMetrics load(String hostName) throws Exception {
+                        return new HostMetrics(registry, name, hostName);
+                    }
+                });
     }
 
     @Override
@@ -47,8 +52,8 @@ public final class InstrumentedInterceptor implements Interceptor {
         Response response = chain.proceed(chain.request());
         String hostName = chain.request().url().host();
 
-        HostMetrics metrics = hostMetrics.computeIfAbsent(hostName, host -> new HostMetrics(registry, name, host));
-        metrics.update(response.code());
+        HostMetrics metrics = hostMetrics.getUnchecked(hostName);
+        metrics.record(response.code());
 
         return response;
     }

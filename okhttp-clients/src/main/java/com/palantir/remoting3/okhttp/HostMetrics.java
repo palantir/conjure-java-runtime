@@ -29,7 +29,7 @@ public final class HostMetrics {
     private final Meter other;
 
     public HostMetrics(MetricRegistry registry, String name, String hostName) {
-        // TODO(jellis): add hostName as a tag
+        // TODO(jellis): #581 add hostName as a tag
         informational = registry.meter(MetricRegistry.name(name, "response", "family", "informational"));
         successful    = registry.meter(MetricRegistry.name(name, "response", "family", "successful"));
         redirection   = registry.meter(MetricRegistry.name(name, "response", "family", "redirection"));
@@ -38,7 +38,7 @@ public final class HostMetrics {
         other         = registry.meter(MetricRegistry.name(name, "response", "family", "other"));
     }
 
-    public void update(int statusCode) {
+    public void record(int statusCode) {
         switch (javax.ws.rs.core.Response.Status.Family.familyOf(statusCode)) {
             case INFORMATIONAL:
                 informational.mark();

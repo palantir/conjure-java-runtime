@@ -51,7 +51,7 @@ public final class HostMetricsTest {
             Meter meter = registry.getMeters().get("serviceName.response.family." + testCase.getValue());
             assertThat(meter.getCount()).isZero();
 
-            hostMetrics.update(testCase.getKey());
+            hostMetrics.record(testCase.getKey());
 
             assertThat(meter.getCount()).isEqualTo(1);
         }
