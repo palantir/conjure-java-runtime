@@ -87,6 +87,11 @@ public final class ServiceConfigTest {
                 public String string() {
                     return "string";
                 }
+
+                @Override
+                public String param(String param) {
+                    return param;
+                }
             }
         }
     }
