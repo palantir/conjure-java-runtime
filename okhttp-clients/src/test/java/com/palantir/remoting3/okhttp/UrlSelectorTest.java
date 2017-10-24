@@ -49,7 +49,7 @@ public final class UrlSelectorTest extends TestBase {
             assertThatThrownBy(() -> UrlSelectorImpl.create(list(url), false))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage(
-                            "Base URLs must be 'canonical' and consist of schema, host, port, and path only: %s", url);
+                            "Base URLs must be 'headerFormat' and consist of schema, host, port, and path only: %s", url);
         }
 
         for (String url : new String[] {
