@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting3.okhttp.metrics.HostMetrics;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
