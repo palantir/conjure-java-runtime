@@ -29,7 +29,7 @@ public final class HostMetrics {
     private final Meter other;
 
     public HostMetrics(MetricRegistry registry, String name, String hostname) {
-        // TODO(jellis): #581 add hostName as a tag
+        // TODO(jellis): #581 add hostname as a tag
         informational = registry.meter(MetricRegistry.name(name, "response", "family", "informational"));
         successful    = registry.meter(MetricRegistry.name(name, "response", "family", "successful"));
         redirection   = registry.meter(MetricRegistry.name(name, "response", "family", "redirection"));

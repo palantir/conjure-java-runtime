@@ -33,7 +33,7 @@ public final class HostMetricsTest {
     @Before
     public void before() {
         registry = new MetricRegistry();
-        hostMetrics = new HostMetrics(registry, "serviceName", "hostName");
+        hostMetrics = new HostMetrics(registry, "serviceName", "hostname");
     }
 
     @Test
