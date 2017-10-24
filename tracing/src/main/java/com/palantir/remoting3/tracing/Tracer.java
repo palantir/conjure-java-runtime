@@ -208,8 +208,7 @@ public final class Tracer {
      * observer if it existed, or null otherwise.
      */
     public static synchronized SpanObserver unsubscribe(String name) {
-        Map<String, SpanObserver> newObservers = new HashMap<>(observers);
-        SpanObserver removedObserver = newObservers.remove(name);
+        SpanObserver removedObserver = observers.remove(name);
         computeObserversList();
         return removedObserver;
     }
