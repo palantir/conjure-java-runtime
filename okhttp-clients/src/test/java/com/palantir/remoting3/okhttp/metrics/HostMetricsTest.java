@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting3.okhttp;
+package com.palantir.remoting3.okhttp.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

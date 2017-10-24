@@ -28,6 +28,7 @@ public final class HostMetricsRegistryTest {
         MetricRegistry registry = new MetricRegistry();
         HostMetricsRegistry hostRegistry = new HostMetricsRegistry(registry, "service");
 
+        // TODO(jellis): check different meter when host is added as a tag
         assertThat(registry.getMeters().get("service.response.family.successful")).isNull();
         hostRegistry.record("host", 200);
         assertThat(registry.getMeters().get("service.response.family.successful").getCount()).isEqualTo(1);
