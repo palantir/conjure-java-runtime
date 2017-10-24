@@ -218,7 +218,6 @@ public final class TracersTest {
 
     @Test
     public void testTraceIdGeneration() throws Exception {
-        assertThat(Tracers.randomId()).hasSize(16); // fails with p=1/16 if generated string is not padded
         assertThat(Tracers.longToPaddedHex(0)).isEqualTo("0000000000000000");
         assertThat(Tracers.longToPaddedHex(42)).isEqualTo("000000000000002a");
         assertThat(Tracers.longToPaddedHex(-42)).isEqualTo("ffffffffffffffd6");

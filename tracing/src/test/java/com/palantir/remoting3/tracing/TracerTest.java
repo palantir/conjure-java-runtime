@@ -34,6 +34,8 @@ import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -47,6 +49,8 @@ public final class TracerTest {
     private SpanObserver observer2;
     @Mock
     private TraceSampler sampler;
+    @Captor
+    private ArgumentCaptor<Span> spanCaptor;
 
     @Before
     public void before() {
@@ -215,6 +219,28 @@ public final class TracerTest {
     @Test
     public void testCompleteSpanWithoutMetadataHasNoMetadata() {
         assertTrue(startAndCompleteSpan().getMetadata().isEmpty());
+    }
+
+    @Test
+    public void testFastCompleteSpan() {
+        Tracer.subscribe("1", observer1);
+        String operation = "operation";
+        Tracer.startSpan(operation);
+        Tracer.fastCompleteSpan();
+        verify(observer1).consume(spanCaptor.capture());
+        assertThat(spanCaptor.getValue().getOperation()).isEqualTo(operation);
+    }
+
+    @Test
+    public void testFastCompleteSpanWithMetadata() {
+        Tracer.subscribe("1", observer1);
+        Map<String, String> metadata = ImmutableMap.of("key", "value");
+        String operation = "operation";
+        Tracer.startSpan("operation");
+        Tracer.fastCompleteSpan(metadata);
+        verify(observer1).consume(spanCaptor.capture());
+        assertThat(spanCaptor.getValue().getOperation()).isEqualTo(operation);
+        assertThat(spanCaptor.getValue().getMetadata()).isEqualTo(metadata);
     }
 
     @Test

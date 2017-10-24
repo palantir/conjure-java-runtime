@@ -17,12 +17,16 @@
 package com.palantir.remoting3.tracing;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanObserver;
 import com.palantir.remoting.api.tracing.SpanType;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -48,8 +52,8 @@ public final class Tracer {
         return trace;
     });
 
-    // Thread-safe Map implementation
-    private static final Map<String, SpanObserver> observers = Maps.newConcurrentMap();
+    private static final Map<String, SpanObserver> observers = new HashMap<>();
+    private static List<SpanObserver> observersList = ImmutableList.of();
 
     // Thread-safe since stateless
     private static TraceSampler sampler = AlwaysSampler.INSTANCE;
@@ -123,23 +127,40 @@ public final class Tracer {
     }
 
     /**
+     * Completes the current span (if it exists) and notifies all {@link #observers subscribers} about the
+     * completed span.
+     *
+     * Does not construct the Span object if no subscriber will see it.
+     */
+    public static void fastCompleteSpan() {
+        completeSpanInternal(Collections.emptyMap(), false);
+    }
+
+    /**
+     * Like {@link #fastCompleteSpan()}, but adds {@code metadata} to the current span being completed.
+     */
+    public static void fastCompleteSpan(Map<String, String> metadata) {
+        completeSpanInternal(metadata, false);
+    }
+
+    /**
      * Completes and returns the current span (if it exists) and notifies all {@link #observers subscribers} about the
      * completed span.
      */
     public static Optional<Span> completeSpan() {
-        return completeSpanInternal(Collections.emptyMap());
+        return completeSpanInternal(Collections.emptyMap(), true);
     }
 
     /**
      * Like {@link #completeSpan()}, but adds {@code metadata} to the current span being completed.
      */
     public static Optional<Span> completeSpan(Map<String, String> metadata) {
-        return completeSpanInternal(metadata);
+        return completeSpanInternal(metadata, true);
     }
 
-    private static Optional<Span> completeSpanInternal(Map<String, String> metadata) {
+    private static Optional<Span> completeSpanInternal(Map<String, String> metadata, boolean mustConstructResult) {
         Optional<OpenSpan> maybeOpenSpan = currentTrace.get().pop();
-        if (!maybeOpenSpan.isPresent()) {
+        if (!maybeOpenSpan.isPresent() || (!mustConstructResult && !currentTrace.get().isObservable())) {
             return Optional.empty();
         } else {
             OpenSpan openSpan = maybeOpenSpan.get();
@@ -156,7 +177,7 @@ public final class Tracer {
 
             // Notify subscribers iff trace is observable
             if (currentTrace.get().isObservable()) {
-                for (SpanObserver observer : observers.values()) {
+                for (SpanObserver observer : observersList) {
                     observer.consume(span);
                 }
             }
@@ -171,22 +192,31 @@ public final class Tracer {
      * registered for the given name, then it gets overwritten by this call. Returns the observer previously associated
      * with the given name, or null if there is no such observer.
      */
-    public static SpanObserver subscribe(String name, SpanObserver observer) {
+    public static synchronized SpanObserver subscribe(String name, SpanObserver observer) {
         if (observers.containsKey(name)) {
             log.warn("Overwriting existing SpanObserver with name {} by new observer: {}", name, observer);
         }
         if (observers.size() >= 5) {
             log.warn("Five or more SpanObservers registered: {}", observers.keySet());
         }
-        return observers.put(name, observer);
+        SpanObserver currentValue = observers.put(name, observer);
+        computeObserversList();
+        return currentValue;
     }
 
     /**
      * The inverse of {@link #subscribe}: removes the observer registered for the given name. Returns the removed
      * observer if it existed, or null otherwise.
      */
-    public static SpanObserver unsubscribe(String name) {
-        return observers.remove(name);
+    public static synchronized SpanObserver unsubscribe(String name) {
+        Map<String, SpanObserver> newObservers = new HashMap<>(observers);
+        SpanObserver removedObserver = newObservers.remove(name);
+        computeObserversList();
+        return removedObserver;
+    }
+
+    private static void computeObserversList() {
+        observersList = ImmutableList.copyOf(observers.values());
     }
 
     /** Sets the sampler (for all threads). */
