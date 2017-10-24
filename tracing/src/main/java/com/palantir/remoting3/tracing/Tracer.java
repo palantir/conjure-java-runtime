@@ -132,14 +132,21 @@ public final class Tracer {
      * Does not construct the Span object if no subscriber will see it.
      */
     public static void fastCompleteSpan() {
-        completeSpanInternal(Collections.emptyMap(), false);
+        fastCompleteSpan(Collections.emptyMap());
     }
 
     /**
      * Like {@link #fastCompleteSpan()}, but adds {@code metadata} to the current span being completed.
      */
     public static void fastCompleteSpan(Map<String, String> metadata) {
-        completeSpanInternal(metadata, false);
+        popCurrentSpan()
+                .filter(openSpan -> currentTrace.get().isObservable())
+                .map(openSpan -> toSpan(openSpan, metadata))
+                .ifPresent(span -> {
+                    for (SpanObserver observer : observersList) {
+                        observer.consume(span);
+                    }
+                });
     }
 
     /**
@@ -147,42 +154,43 @@ public final class Tracer {
      * completed span.
      */
     public static Optional<Span> completeSpan() {
-        return completeSpanInternal(Collections.emptyMap(), true);
+        return completeSpan(Collections.emptyMap());
     }
 
     /**
      * Like {@link #completeSpan()}, but adds {@code metadata} to the current span being completed.
      */
     public static Optional<Span> completeSpan(Map<String, String> metadata) {
-        return completeSpanInternal(metadata, true);
-    }
+        Optional<Span> maybeSpan = popCurrentSpan()
+                .map(openSpan -> toSpan(openSpan, metadata));
 
-    private static Optional<Span> completeSpanInternal(Map<String, String> metadata, boolean mustConstructResult) {
-        Optional<OpenSpan> maybeOpenSpan = currentTrace.get().pop();
-        if (!maybeOpenSpan.isPresent() || (!mustConstructResult && !currentTrace.get().isObservable())) {
-            return Optional.empty();
-        } else {
-            OpenSpan openSpan = maybeOpenSpan.get();
-            Span span = Span.builder()
-                    .traceId(getTraceId())
-                    .spanId(openSpan.getSpanId())
-                    .type(openSpan.type())
-                    .parentSpanId(openSpan.getParentSpanId())
-                    .operation(openSpan.getOperation())
-                    .startTimeMicroSeconds(openSpan.getStartTimeMicroSeconds())
-                    .durationNanoSeconds(System.nanoTime() - openSpan.getStartClockNanoSeconds())
-                    .putAllMetadata(metadata)
-                    .build();
-
-            // Notify subscribers iff trace is observable
+        // Notify subscribers iff trace is observable
+        maybeSpan.ifPresent(span -> {
             if (currentTrace.get().isObservable()) {
                 for (SpanObserver observer : observersList) {
                     observer.consume(span);
                 }
             }
+        });
 
-            return Optional.of(span);
-        }
+        return maybeSpan;
+    }
+
+    private static Optional<OpenSpan> popCurrentSpan() {
+        return currentTrace.get().pop();
+    }
+
+    private static Span toSpan(OpenSpan openSpan, Map<String, String> metadata) {
+        return Span.builder()
+                .traceId(getTraceId())
+                .spanId(openSpan.getSpanId())
+                .type(openSpan.type())
+                .parentSpanId(openSpan.getParentSpanId())
+                .operation(openSpan.getOperation())
+                .startTimeMicroSeconds(openSpan.getStartTimeMicroSeconds())
+                .durationNanoSeconds(System.nanoTime() - openSpan.getStartClockNanoSeconds())
+                .putAllMetadata(metadata)
+                .build();
     }
 
     /**
