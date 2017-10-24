@@ -20,13 +20,21 @@ import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.palantir.logsafe.UnsafeArg;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class HostMetricsRegistry {
+
+    private static final Logger log = LoggerFactory.getLogger(HostMetricsRegistry.class);
+
     private final LoadingCache<String, HostMetrics> hostMetrics;
 
     public HostMetricsRegistry(MetricRegistry registry, String serviceName) {
         this.hostMetrics = CacheBuilder.newBuilder()
                 .maximumSize(1_000)
+                .expireAfterAccess(1, TimeUnit.DAYS)
                 .build(new CacheLoader<String, HostMetrics>() {
                     @Override
                     public HostMetrics load(String hostname) throws Exception {
@@ -36,6 +44,10 @@ public final class HostMetricsRegistry {
     }
 
     public void record(String hostname, int statusCode) {
-        hostMetrics.getUnchecked(hostname).record(statusCode);
+        try {
+            hostMetrics.getUnchecked(hostname).record(statusCode);
+        } catch (Exception e) {
+            log.warn("Unable to record metrics for host", UnsafeArg.of("hostname", hostname));
+        }
     }
 }
