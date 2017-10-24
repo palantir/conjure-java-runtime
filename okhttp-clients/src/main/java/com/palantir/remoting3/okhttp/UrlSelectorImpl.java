@@ -50,7 +50,7 @@ final class UrlSelectorImpl implements UrlSelector {
             Preconditions.checkArgument(httpUrl != null, "Not a valid URL: %s", url);
             HttpUrl canonicalUrl = canonicalize(httpUrl);
             Preconditions.checkArgument(canonicalUrl.equals(httpUrl),
-                    "Base URLs must be 'headerFormat' and consist of schema, host, port, and path only: %s", url);
+                    "Base URLs must be 'canonical' and consist of schema, host, port, and path only: %s", url);
             canonicalUrls.add(canonicalUrl);
         });
         return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()));
@@ -134,7 +134,7 @@ final class UrlSelectorImpl implements UrlSelector {
         return fullUrl.encodedPath().startsWith(baseUrl.encodedPath());
     }
 
-    /** Returns the "headerFormat" part of the given URL, consisting of schema, host, port, and path only. */
+    /** Returns the "canonical" part of the given URL, consisting of schema, host, port, and path only. */
     private static HttpUrl canonicalize(HttpUrl baseUrl) {
         return new HttpUrl.Builder()
                 .scheme(baseUrl.scheme())
