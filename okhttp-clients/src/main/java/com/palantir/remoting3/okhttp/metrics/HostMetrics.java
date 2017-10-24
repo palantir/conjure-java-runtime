@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting3.okhttp;
+package com.palantir.remoting3.okhttp.metrics;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
@@ -28,7 +28,7 @@ public final class HostMetrics {
     private final Meter serverError;
     private final Meter other;
 
-    public HostMetrics(MetricRegistry registry, String name, String hostName) {
+    public HostMetrics(MetricRegistry registry, String name, String hostname) {
         // TODO(jellis): #581 add hostName as a tag
         informational = registry.meter(MetricRegistry.name(name, "response", "family", "informational"));
         successful    = registry.meter(MetricRegistry.name(name, "response", "family", "successful"));

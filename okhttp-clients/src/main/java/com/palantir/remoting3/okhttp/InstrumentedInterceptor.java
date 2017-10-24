@@ -18,9 +18,7 @@ package com.palantir.remoting3.okhttp;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.palantir.remoting3.okhttp.metrics.HostMetricsRegistry;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;
@@ -34,37 +32,29 @@ public final class InstrumentedInterceptor implements Interceptor {
 
     private static final Logger log = LoggerFactory.getLogger(InstrumentedInterceptor.class);
 
-    private final LoadingCache<String, HostMetrics> hostMetrics;
+    private final HostMetricsRegistry hostMetrics;
 
-    InstrumentedInterceptor(MetricRegistry registry, String name) {
-        this.hostMetrics = CacheBuilder.newBuilder()
-                .maximumSize(1_000)
-                .build(new CacheLoader<String, HostMetrics>() {
-                    @Override
-                    public HostMetrics load(String hostName) throws Exception {
-                        return new HostMetrics(registry, name, hostName);
-                    }
-                });
+    InstrumentedInterceptor(MetricRegistry registry, String serviceName) {
+        this.hostMetrics = new HostMetricsRegistry(registry, serviceName);
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Response response = chain.proceed(chain.request());
-        String hostName = chain.request().url().host();
+        String hostname = chain.request().url().host();
 
-        HostMetrics metrics = hostMetrics.getUnchecked(hostName);
-        metrics.record(response.code());
+        hostMetrics.record(hostname, response.code());
 
         return response;
     }
 
-    static InstrumentedInterceptor withDefaultMetricRegistry(String name) {
+    static InstrumentedInterceptor withDefaultMetricRegistry(String serviceName) {
         MetricRegistry registry = SharedMetricRegistries.tryGetDefault();
         if (registry != null) {
-            return new InstrumentedInterceptor(registry, name);
+            return new InstrumentedInterceptor(registry, serviceName);
         } else {
             log.info("Response metrics will not be available because no MetricRegistry was found");
-            return new InstrumentedInterceptor(new MetricRegistry(), name);
+            return new InstrumentedInterceptor(new MetricRegistry(), serviceName);
         }
     }
 }
