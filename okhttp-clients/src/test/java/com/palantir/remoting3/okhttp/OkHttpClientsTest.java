@@ -75,9 +75,11 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
-    public void verifyResponseMetricsAreRegistered() {
+    public void verifyResponseMetricsAreRegistered() throws IOException {
         SharedMetricRegistries.setDefault("test");
-        createRetryingClient(1);
+
+        server.enqueue(new MockResponse().setBody("pong"));
+        createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();
 
         SortedMap<String, Meter> meters = SharedMetricRegistries.getDefault().getMeters();
         String className = OkHttpClientsTest.class.getCanonicalName();

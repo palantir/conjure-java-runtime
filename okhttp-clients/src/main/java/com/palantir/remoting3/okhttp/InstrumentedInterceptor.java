@@ -16,9 +16,9 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
+import com.palantir.remoting3.okhttp.metrics.HostMetricsRegistry;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;
@@ -32,57 +32,29 @@ public final class InstrumentedInterceptor implements Interceptor {
 
     private static final Logger log = LoggerFactory.getLogger(InstrumentedInterceptor.class);
 
-    private final Meter informational;
-    private final Meter successful;
-    private final Meter redirection;
-    private final Meter clientError;
-    private final Meter serverError;
-    private final Meter other;
+    private final HostMetricsRegistry hostMetrics;
 
-    InstrumentedInterceptor(MetricRegistry registry, String name) {
-        informational = registry.meter(MetricRegistry.name(name, "response", "family", "informational"));
-        successful    = registry.meter(MetricRegistry.name(name, "response", "family", "successful"));
-        redirection   = registry.meter(MetricRegistry.name(name, "response", "family", "redirection"));
-        clientError   = registry.meter(MetricRegistry.name(name, "response", "family", "client-error"));
-        serverError   = registry.meter(MetricRegistry.name(name, "response", "family", "server-error"));
-        other         = registry.meter(MetricRegistry.name(name, "response", "family", "other"));
+    InstrumentedInterceptor(MetricRegistry registry, String serviceName) {
+        this.hostMetrics = new HostMetricsRegistry(registry, serviceName);
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Response response = chain.proceed(chain.request());
+        String hostname = chain.request().url().host();
 
-        switch (javax.ws.rs.core.Response.Status.Family.familyOf(response.code())) {
-            case INFORMATIONAL:
-                informational.mark();
-                break;
-            case SUCCESSFUL:
-                successful.mark();
-                break;
-            case REDIRECTION:
-                redirection.mark();
-                break;
-            case CLIENT_ERROR:
-                clientError.mark();
-                break;
-            case SERVER_ERROR:
-                serverError.mark();
-                break;
-            case OTHER:
-                other.mark();
-                break;
-        }
+        hostMetrics.record(hostname, response.code());
 
         return response;
     }
 
-    static InstrumentedInterceptor withDefaultMetricRegistry(String name) {
+    static InstrumentedInterceptor withDefaultMetricRegistry(String serviceName) {
         MetricRegistry registry = SharedMetricRegistries.tryGetDefault();
         if (registry != null) {
-            return new InstrumentedInterceptor(registry, name);
+            return new InstrumentedInterceptor(registry, serviceName);
         } else {
             log.info("Response metrics will not be available because no MetricRegistry was found");
-            return new InstrumentedInterceptor(new MetricRegistry(), name);
+            return new InstrumentedInterceptor(new MetricRegistry(), serviceName);
         }
     }
 }
