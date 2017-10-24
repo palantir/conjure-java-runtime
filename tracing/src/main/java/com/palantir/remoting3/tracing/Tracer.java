@@ -50,11 +50,12 @@ public final class Tracer {
         return trace;
     });
 
+    // Only access in a class-synchronized fashion
     private static final Map<String, SpanObserver> observers = new HashMap<>();
-    private static List<SpanObserver> observersList = ImmutableList.of();
+    private static volatile List<SpanObserver> observersList = ImmutableList.of();
 
     // Thread-safe since stateless
-    private static TraceSampler sampler = AlwaysSampler.INSTANCE;
+    private static volatile TraceSampler sampler = AlwaysSampler.INSTANCE;
 
     /**
      * Creates a new trace, but does not set it as the current trace. The new trace is {@link Trace#isObservable
