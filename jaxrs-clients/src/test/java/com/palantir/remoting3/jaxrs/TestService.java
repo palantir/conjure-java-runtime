@@ -18,6 +18,7 @@ package com.palantir.remoting3.jaxrs;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -27,4 +28,9 @@ public interface TestService {
     @Path("/string")
     @Produces(MediaType.TEXT_PLAIN)
     String string();
+
+    @GET
+    @Path("/{param}")
+    @Produces(MediaType.TEXT_PLAIN)
+    String param(@PathParam("param") String param);
 }
