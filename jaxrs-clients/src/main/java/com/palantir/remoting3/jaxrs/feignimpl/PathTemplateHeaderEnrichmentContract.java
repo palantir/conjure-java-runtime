@@ -10,6 +10,8 @@ import feign.MethodMetadata;
 import java.lang.reflect.Method;
 
 public final class PathTemplateHeaderEnrichmentContract extends AbstractDelegatingContract {
+    public static final char OPEN_BRACE_REPLACEMENT = '\0';
+    public static final char CLOSE_BRACE_REPLACEMENT = '\1';
 
     public PathTemplateHeaderEnrichmentContract(Contract delegate) {
         super(delegate);
@@ -20,7 +22,7 @@ public final class PathTemplateHeaderEnrichmentContract extends AbstractDelegati
         metadata.template().header(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER,
                 metadata.template().method() + " "
                         + metadata.template().url()
-                            .replace('{', '[')
-                            .replace('}', ']'));
+                            .replace('{', OPEN_BRACE_REPLACEMENT)
+                            .replace('}', CLOSE_BRACE_REPLACEMENT));
     }
 }

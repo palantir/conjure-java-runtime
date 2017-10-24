@@ -51,7 +51,7 @@ public final class TracerTest extends TestBase {
 
         Tracer.subscribe(TracerTest.class.getName(), (span) -> {
             // only span we expect to see in this test
-            assertThat(span.getOperation(), is("GET /[param]"));
+            assertThat(span.getOperation(), is("GET /{param}"));
         });
 
         String traceId = Tracer.getTraceId();

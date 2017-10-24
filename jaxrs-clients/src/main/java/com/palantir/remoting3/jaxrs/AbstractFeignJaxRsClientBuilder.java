@@ -23,6 +23,7 @@ import com.palantir.remoting3.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
 import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
+import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderRewriter;
 import com.palantir.remoting3.okhttp.MultiServerRetryInterceptor;
 import com.palantir.remoting3.okhttp.OkHttpClients;
 import feign.CborDelegateDecoder;
@@ -80,6 +81,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 cborObjectMapper,
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
+                .requestInterceptor(PathTemplateHeaderRewriter.INSTANCE)
                 .client(new OkHttpClient(OkHttpClients.create(config, userAgent, serviceClass)))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
