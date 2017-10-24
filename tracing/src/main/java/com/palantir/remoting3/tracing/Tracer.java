@@ -52,6 +52,7 @@ public final class Tracer {
 
     // Only access in a class-synchronized fashion
     private static final Map<String, SpanObserver> observers = new HashMap<>();
+    // we want iterating through tracers to be very fast, and it's faster to iterate through a list than a Map.values()
     private static volatile List<SpanObserver> observersList = ImmutableList.of();
 
     // Thread-safe since stateless
@@ -142,11 +143,7 @@ public final class Tracer {
         popCurrentSpan()
                 .filter(openSpan -> currentTrace.get().isObservable())
                 .map(openSpan -> toSpan(openSpan, metadata))
-                .ifPresent(span -> {
-                    for (SpanObserver observer : observersList) {
-                        observer.consume(span);
-                    }
-                });
+                .ifPresent(Tracer::notifyObservers);
     }
 
     /**
@@ -167,13 +164,17 @@ public final class Tracer {
         // Notify subscribers iff trace is observable
         maybeSpan.ifPresent(span -> {
             if (currentTrace.get().isObservable()) {
-                for (SpanObserver observer : observersList) {
-                    observer.consume(span);
-                }
+                notifyObservers(span);
             }
         });
 
         return maybeSpan;
+    }
+
+    private static void notifyObservers(Span span) {
+        for (SpanObserver observer : observersList) {
+            observer.consume(span);
+        }
     }
 
     private static Optional<OpenSpan> popCurrentSpan() {

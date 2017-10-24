@@ -36,6 +36,11 @@ public final class Tracers {
         return longToPaddedHex(ThreadLocalRandom.current().nextLong());
     }
 
+    /**
+     * Convert a long to a big-endian hex string. Hand-coded implementation is more efficient than
+     * Strings.pad(Long.toHexString) because that code has to deal with mixed length longs, and then mixed length
+     * amounts of padding - we want to minimise the overhead of tracing.
+     */
     static String longToPaddedHex(long number) {
         char[] data = new char[16];
         data[0] = HEX_DIGITS[(int) ((number >> 60) & 0xF)];
