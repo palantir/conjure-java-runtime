@@ -16,16 +16,23 @@
 
 package com.palantir.remoting3.okhttp.metrics;
 
+import static com.google.common.base.Preconditions.checkState;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.tritium.tags.TaggedMetric;
 import java.util.Map;
+import java.util.Optional;
+import java.util.SortedMap;
 import org.junit.Before;
 import org.junit.Test;
 
 public final class HostMetricsTest {
+
+    private static final String SERVICE_NAME = "serviceName";
+    private static final String HOSTNAME = "hostname";
 
     private MetricRegistry registry;
     private HostMetrics hostMetrics;
@@ -33,7 +40,7 @@ public final class HostMetricsTest {
     @Before
     public void before() {
         registry = new MetricRegistry();
-        hostMetrics = new HostMetrics(registry, "serviceName", "hostname");
+        hostMetrics = new HostMetrics(registry, SERVICE_NAME, HOSTNAME);
     }
 
     @Test
@@ -48,7 +55,7 @@ public final class HostMetricsTest {
                 .build();
 
         for (Map.Entry<Integer, String> testCase : testCases.entrySet()) {
-            Meter meter = registry.getMeters().get("serviceName.response.family." + testCase.getValue());
+            Meter meter = getMeter(registry, SERVICE_NAME, HOSTNAME, testCase.getValue()).get();
             assertThat(meter.getCount()).isZero();
 
             hostMetrics.record(testCase.getKey());
@@ -56,4 +63,18 @@ public final class HostMetricsTest {
             assertThat(meter.getCount()).isEqualTo(1);
         }
     }
+
+    public static Optional<Meter> getMeter(
+            MetricRegistry registry, String serviceName, String hostname, String family) {
+        SortedMap<String, Meter> meters = registry.getMeters((name, metric) -> {
+            TaggedMetric taggedMetric = TaggedMetric.from(name);
+            return taggedMetric.name().equals(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
+                    && taggedMetric.tags().get(HostMetrics.SERVICE_NAME_TAG).equals(serviceName)
+                    && taggedMetric.tags().get(HostMetrics.HOSTNAME_TAG).equals(hostname)
+                    && taggedMetric.tags().get(HostMetrics.FAMILY_TAG).equals(family);
+        });
+        checkState(meters.entrySet().size() <= 1, "Found more than one meter with given properties");
+        return meters.values().stream().findFirst();
+    }
+
 }
