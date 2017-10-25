@@ -16,18 +16,15 @@
 
 package com.palantir.remoting3.okhttp.metrics;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.tritium.tags.TaggedMetric;
 import java.util.Map;
-import java.util.Optional;
-import java.util.SortedMap;
 
 public final class HostMetrics {
 
+    public static final String CLIENT_RESPONSE_METRIC_NAME = "client.response";
     public static final String SERVICE_NAME_TAG = "service-name";
     public static final String HOSTNAME_TAG = "hostname";
     public static final String FAMILY_TAG = "family";
@@ -54,20 +51,7 @@ public final class HostMetrics {
                 .put(HOSTNAME_TAG, hostname)
                 .put(FAMILY_TAG, family)
                 .build();
-        return TaggedMetric.toCanonicalName("client.response", tags);
-    }
-
-    public static Optional<Meter> getMeter(
-            MetricRegistry registry, String serviceName, String hostname, String family) {
-        SortedMap<String, Meter> meters = registry.getMeters((name, metric) -> {
-            TaggedMetric taggedMetric = TaggedMetric.from(name);
-            return taggedMetric.name().equals("client.response")
-                    && taggedMetric.tags().get(SERVICE_NAME_TAG).equals(serviceName)
-                    && taggedMetric.tags().get(HOSTNAME_TAG).equals(hostname)
-                    && taggedMetric.tags().get(FAMILY_TAG).equals(family);
-        });
-        checkState(meters.entrySet().size() <= 1, "Found more than one meter with given properties");
-        return meters.values().stream().findFirst();
+        return TaggedMetric.toCanonicalName(CLIENT_RESPONSE_METRIC_NAME, tags);
     }
 
     public void record(int statusCode) {

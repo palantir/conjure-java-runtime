@@ -28,8 +28,8 @@ public final class HostMetricsRegistryTest {
         MetricRegistry registry = new MetricRegistry();
         HostMetricsRegistry hostRegistry = new HostMetricsRegistry(registry, "service");
 
-        assertThat(HostMetrics.getMeter(registry, "service", "host", "successful")).isEmpty();
+        assertThat(HostMetricsTest.getMeter(registry, "service", "host", "successful")).isEmpty();
         hostRegistry.record("host", 200);
-        assertThat(HostMetrics.getMeter(registry, "service", "host", "successful").get().getCount()).isEqualTo(1);
+        assertThat(HostMetricsTest.getMeter(registry, "service", "host", "successful").get().getCount()).isEqualTo(1);
     }
 }

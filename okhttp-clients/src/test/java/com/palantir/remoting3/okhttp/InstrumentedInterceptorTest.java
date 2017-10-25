@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.palantir.remoting3.okhttp.metrics.HostMetrics;
+import com.palantir.remoting3.okhttp.metrics.HostMetricsTest;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
@@ -56,13 +56,13 @@ public final class InstrumentedInterceptorTest {
         successfulRequest(REQUEST_A);
         interceptor.intercept(chain);
 
-        Meter meterA = HostMetrics.getMeter(registry, "client", "hosta", "successful").get();
+        Meter meterA = HostMetricsTest.getMeter(registry, "client", "hosta", "successful").get();
         assertThat(meterA.getCount()).isEqualTo(1);
 
         successfulRequest(REQUEST_B);
         interceptor.intercept(chain);
 
-        Meter meterB = HostMetrics.getMeter(registry, "client", "hostb", "successful").get();
+        Meter meterB = HostMetricsTest.getMeter(registry, "client", "hostb", "successful").get();
         assertThat(meterB.getCount()).isEqualTo(1);
     }
 

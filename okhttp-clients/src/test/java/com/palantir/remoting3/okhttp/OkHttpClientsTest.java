@@ -28,7 +28,7 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting3.clients.ClientConfiguration;
-import com.palantir.remoting3.okhttp.metrics.HostMetrics;
+import com.palantir.remoting3.okhttp.metrics.HostMetricsTest;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -83,11 +83,11 @@ public final class OkHttpClientsTest extends TestBase {
 
         String className = OkHttpClientsTest.class.getCanonicalName();
         MetricRegistry registry = SharedMetricRegistries.getDefault();
-        assertThat(HostMetrics.getMeter(registry, className, "127.0.0.1", "informational")).isEmpty();
-        assertThat(HostMetrics.getMeter(registry, className, "127.0.0.1", "successful")).isEmpty();
-        assertThat(HostMetrics.getMeter(registry, className, "127.0.0.1", "redirection")).isEmpty();
-        assertThat(HostMetrics.getMeter(registry, className, "127.0.0.1", "client-error")).isEmpty();
-        assertThat(HostMetrics.getMeter(registry, className, "127.0.0.1", "server-error")).isEmpty();
+        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "informational")).isEmpty();
+        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "successful")).isEmpty();
+        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "redirection")).isEmpty();
+        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "client-error")).isEmpty();
+        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "server-error")).isEmpty();
     }
 
     @Test
