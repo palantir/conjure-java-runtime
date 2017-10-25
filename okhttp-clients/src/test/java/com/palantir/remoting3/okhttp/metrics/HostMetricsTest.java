@@ -27,13 +27,16 @@ import org.junit.Test;
 
 public final class HostMetricsTest {
 
+    private static final String SERVICE_NAME = "serviceName";
+    private static final String HOSTNAME = "hostname";
+
     private MetricRegistry registry;
     private HostMetrics hostMetrics;
 
     @Before
     public void before() {
         registry = new MetricRegistry();
-        hostMetrics = new HostMetrics(registry, "serviceName", "hostname");
+        hostMetrics = new HostMetrics(registry, SERVICE_NAME, HOSTNAME);
     }
 
     @Test
@@ -48,7 +51,7 @@ public final class HostMetricsTest {
                 .build();
 
         for (Map.Entry<Integer, String> testCase : testCases.entrySet()) {
-            Meter meter = registry.getMeters().get("serviceName.response.family." + testCase.getValue());
+            Meter meter = HostMetrics.getMeter(registry, SERVICE_NAME, HOSTNAME, testCase.getValue()).get();
             assertThat(meter.getCount()).isZero();
 
             hostMetrics.record(testCase.getKey());
@@ -56,4 +59,5 @@ public final class HostMetricsTest {
             assertThat(meter.getCount()).isEqualTo(1);
         }
     }
+
 }

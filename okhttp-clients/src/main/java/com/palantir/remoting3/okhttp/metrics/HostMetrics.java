@@ -16,10 +16,21 @@
 
 package com.palantir.remoting3.okhttp.metrics;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.collect.ImmutableMap;
+import com.palantir.tritium.tags.TaggedMetric;
+import java.util.Map;
+import java.util.Optional;
+import java.util.SortedMap;
 
 public final class HostMetrics {
+
+    private static final String SERVICE_NAME_KEY = "service-name";
+    private static final String HOSTNAME_KEY = "hostname";
+    private static final String FAMILY_KEY = "family";
 
     private final Meter informational;
     private final Meter successful;
@@ -28,14 +39,35 @@ public final class HostMetrics {
     private final Meter serverError;
     private final Meter other;
 
-    public HostMetrics(MetricRegistry registry, String name, String hostname) {
-        // TODO(jellis): #581 add hostname as a tag
-        informational = registry.meter(MetricRegistry.name(name, "response", "family", "informational"));
-        successful    = registry.meter(MetricRegistry.name(name, "response", "family", "successful"));
-        redirection   = registry.meter(MetricRegistry.name(name, "response", "family", "redirection"));
-        clientError   = registry.meter(MetricRegistry.name(name, "response", "family", "client-error"));
-        serverError   = registry.meter(MetricRegistry.name(name, "response", "family", "server-error"));
-        other         = registry.meter(MetricRegistry.name(name, "response", "family", "other"));
+    public HostMetrics(MetricRegistry registry, String serviceName, String hostname) {
+        informational = registry.meter(name(serviceName, hostname, "informational"));
+        successful    = registry.meter(name(serviceName, hostname, "successful"));
+        redirection   = registry.meter(name(serviceName, hostname, "redirection"));
+        clientError   = registry.meter(name(serviceName, hostname, "client-error"));
+        serverError   = registry.meter(name(serviceName, hostname, "server-error"));
+        other         = registry.meter(name(serviceName, hostname, "other"));
+    }
+
+    private static String name(String serviceName, String hostname, String family) {
+        Map<String, String> tags = ImmutableMap.<String, String>builder()
+                .put(SERVICE_NAME_KEY, serviceName)
+                .put(HOSTNAME_KEY, hostname)
+                .put(FAMILY_KEY, family)
+                .build();
+        return TaggedMetric.toCanonicalName("client.response", tags);
+    }
+
+    public static Optional<Meter> getMeter(
+            MetricRegistry registry, String serviceName, String hostname, String family) {
+        SortedMap<String, Meter> meters = registry.getMeters((name, metric) -> {
+            TaggedMetric taggedMetric = TaggedMetric.from(name);
+            return taggedMetric.name().equals("client.response")
+                    && taggedMetric.tags().get(SERVICE_NAME_KEY).equals(serviceName)
+                    && taggedMetric.tags().get(HOSTNAME_KEY).equals(hostname)
+                    && taggedMetric.tags().get(FAMILY_KEY).equals(family);
+        });
+        checkState(meters.entrySet().size() <= 1, "Found more than one meter with given properties");
+        return meters.values().stream().findFirst();
     }
 
     public void record(int statusCode) {
