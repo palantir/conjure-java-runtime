@@ -28,9 +28,9 @@ import java.util.SortedMap;
 
 public final class HostMetrics {
 
-    private static final String SERVICE_NAME_KEY = "service-name";
-    private static final String HOSTNAME_KEY = "hostname";
-    private static final String FAMILY_KEY = "family";
+    public static final String SERVICE_NAME_KEY = "service-name";
+    public static final String HOSTNAME_KEY = "hostname";
+    public static final String FAMILY_KEY = "family";
 
     private final Meter informational;
     private final Meter successful;
