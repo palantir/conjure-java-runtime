@@ -28,7 +28,7 @@ public final class UserAgentTest {
         UserAgent baseUserAgent = UserAgent.of("service", "instanceId", "1.0.0");
         assertThat(baseUserAgent.headerFormat()).isEqualTo("service/instanceId (1.0.0)");
 
-        UserAgent derivedAgent = baseUserAgent.append("remoting", "2.0.0");
+        UserAgent derivedAgent = UserAgent.append(baseUserAgent, "remoting", "2.0.0");
         assertThat(derivedAgent.headerFormat()).isEqualTo("service/instanceId (1.0.0), remoting (2.0.0)");
     }
 
@@ -37,7 +37,7 @@ public final class UserAgentTest {
         UserAgent baseUserAgent = UserAgent.of("service", "1.0.0");
         assertThat(baseUserAgent.headerFormat()).isEqualTo("service (1.0.0)");
 
-        UserAgent derivedAgent = baseUserAgent.append("remoting", "2.0.0");
+        UserAgent derivedAgent = UserAgent.append(baseUserAgent, "remoting", "2.0.0");
         assertThat(derivedAgent.headerFormat()).isEqualTo("service (1.0.0), remoting (2.0.0)");
     }
 

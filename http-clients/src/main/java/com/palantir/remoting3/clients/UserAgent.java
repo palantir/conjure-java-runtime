@@ -33,9 +33,10 @@ import org.immutables.value.Value;
 @Value.Immutable
 @ImmutablesStyle
 public interface UserAgent {
+
     List<Agent> agents();
 
-    @Value.Lazy
+    @Value.Derived
     default String headerFormat() {
         return Joiner.on(", ").join(Lists.transform(agents(), Agent::headerFormat));
     }
@@ -61,14 +62,13 @@ public interface UserAgent {
                 .build();
     }
 
-    @Value.Default
-    default UserAgent append(String serviceName, String version) {
+    static UserAgent append(UserAgent userAgent, String serviceName, String version) {
         Agent agent = ImmutableAgent.builder()
                 .serviceName(serviceName)
                 .version(version)
                 .build();
         return ImmutableUserAgent.builder()
-                .from(this)
+                .from(userAgent)
                 .addAgents(agent)
                 .build();
     }
@@ -78,7 +78,13 @@ public interface UserAgent {
     interface Agent {
         Pattern SERVICE_NAME_REGEX = Pattern.compile("([a-zA-Z][a-zA-Z0-9\\-]*)");
         Pattern INSTANCE_ID_REGEX = SERVICE_NAME_REGEX;
-        Pattern VERSION_REGEX = Pattern.compile("([0-9][a-z0-9\\-\\.]*)");
+        // See https://github.com/palantir/sls-packaging/blob/develop/sls-versions/src/main/java/com/palantir/slspackaging/versions/SlsProductVersions.java
+        Pattern[] ORDERABLE_VERSION = new Pattern[]{
+                Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+-g[a-f0-9]+$"),
+                Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+$"),
+                Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-rc[0-9]+$"),
+                Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-rc[0-9]+-[0-9]+-g[a-f0-9]+$")
+        };
 
         String serviceName();
         Optional<String> instanceId();
@@ -102,8 +108,16 @@ public interface UserAgent {
                 checkArgument(INSTANCE_ID_REGEX.matcher(instanceId().get()).matches(),
                         "Illegal instance id format: %s", instanceId().get());
             }
-            checkArgument(VERSION_REGEX.matcher(version()).matches(),
-                    "Illegal version format: %s", version());
+            checkArgument(isOrderableVersion(version()), "Illegal version format: %s", version());
+        }
+
+        static boolean isOrderableVersion(String version) {
+            for (Pattern p : ORDERABLE_VERSION) {
+                if (p.matcher(version).matches()) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
