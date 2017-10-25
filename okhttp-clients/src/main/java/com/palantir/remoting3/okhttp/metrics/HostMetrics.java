@@ -23,7 +23,7 @@ import com.palantir.tritium.tags.TaggedMetric;
 import java.util.Map;
 
 /**
- * Records metrics in the given {@link MetricRegistry} for calls to the given service on the given host.
+ * Records per-target-host HTTP response code metrics in a {@link MetricRegistry}.
  */
 public final class HostMetrics {
 
@@ -39,6 +39,7 @@ public final class HostMetrics {
     private final Meter serverError;
     private final Meter other;
 
+    /** Creates a metrics registry for calls from the given service to the given host. */
     public HostMetrics(MetricRegistry registry, String serviceName, String hostname) {
         informational = registry.meter(name(serviceName, hostname, "informational"));
         successful    = registry.meter(name(serviceName, hostname, "successful"));
@@ -57,6 +58,10 @@ public final class HostMetrics {
         return TaggedMetric.toCanonicalName(CLIENT_RESPONSE_METRIC_NAME, tags);
     }
 
+    /**
+      * Records that an HTTP call from the configured service to the configured host (see constructor)
+      * yielded the given HTTP status code.
+      */
     public void record(int statusCode) {
         switch (javax.ws.rs.core.Response.Status.Family.familyOf(statusCode)) {
             case INFORMATIONAL:
