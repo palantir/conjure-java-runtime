@@ -28,9 +28,9 @@ import java.util.SortedMap;
 
 public final class HostMetrics {
 
-    public static final String SERVICE_NAME_KEY = "service-name";
-    public static final String HOSTNAME_KEY = "hostname";
-    public static final String FAMILY_KEY = "family";
+    public static final String SERVICE_NAME_TAG = "service-name";
+    public static final String HOSTNAME_TAG = "hostname";
+    public static final String FAMILY_TAG = "family";
 
     private final Meter informational;
     private final Meter successful;
@@ -50,9 +50,9 @@ public final class HostMetrics {
 
     private static String name(String serviceName, String hostname, String family) {
         Map<String, String> tags = ImmutableMap.<String, String>builder()
-                .put(SERVICE_NAME_KEY, serviceName)
-                .put(HOSTNAME_KEY, hostname)
-                .put(FAMILY_KEY, family)
+                .put(SERVICE_NAME_TAG, serviceName)
+                .put(HOSTNAME_TAG, hostname)
+                .put(FAMILY_TAG, family)
                 .build();
         return TaggedMetric.toCanonicalName("client.response", tags);
     }
@@ -62,9 +62,9 @@ public final class HostMetrics {
         SortedMap<String, Meter> meters = registry.getMeters((name, metric) -> {
             TaggedMetric taggedMetric = TaggedMetric.from(name);
             return taggedMetric.name().equals("client.response")
-                    && taggedMetric.tags().get(SERVICE_NAME_KEY).equals(serviceName)
-                    && taggedMetric.tags().get(HOSTNAME_KEY).equals(hostname)
-                    && taggedMetric.tags().get(FAMILY_KEY).equals(family);
+                    && taggedMetric.tags().get(SERVICE_NAME_TAG).equals(serviceName)
+                    && taggedMetric.tags().get(HOSTNAME_TAG).equals(hostname)
+                    && taggedMetric.tags().get(FAMILY_TAG).equals(family);
         });
         checkState(meters.entrySet().size() <= 1, "Found more than one meter with given properties");
         return meters.values().stream().findFirst();
