@@ -22,6 +22,9 @@ import com.google.common.collect.ImmutableMap;
 import com.palantir.tritium.tags.TaggedMetric;
 import java.util.Map;
 
+/**
+ * Records metrics in the given {@link MetricRegistry} for calls to the given service on the given host.
+ */
 public final class HostMetrics {
 
     public static final String CLIENT_RESPONSE_METRIC_NAME = "client.response";
