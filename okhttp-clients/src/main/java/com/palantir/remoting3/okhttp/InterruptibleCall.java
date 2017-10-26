@@ -50,7 +50,7 @@ public final class InterruptibleCall extends ForwardingCall {
         } catch (InterruptedException e) {
             getDelegate().cancel();
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Thread was interrupted, cancelling call", e);
+            throw new IOException("Thread was interrupted, cancelling call", e);
         } catch (ExecutionException e) {
             throw (IOException) e.getCause();
         }
