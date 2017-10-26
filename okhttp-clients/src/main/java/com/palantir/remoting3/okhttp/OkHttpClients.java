@@ -178,7 +178,8 @@ public final class OkHttpClients {
 
         @Override
         public Call newCall(Request request) {
-            return new QosIoExceptionAwareCall(getDelegate().newCall(request), handlerFactory.get());
+            return new InterruptibleCall(
+                    new QosIoExceptionAwareCall(getDelegate().newCall(request), handlerFactory.get()));
         }
     }
 }
