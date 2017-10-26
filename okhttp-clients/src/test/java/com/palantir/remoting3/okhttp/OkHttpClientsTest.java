@@ -24,9 +24,12 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.SharedMetricRegistries;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.palantir.remoting.api.errors.QosException;
+import com.palantir.remoting.api.errors.RemoteException;
+import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import java.io.IOException;
 import java.time.Duration;
@@ -118,6 +121,7 @@ public final class OkHttpClientsTest extends TestBase {
         AtomicLong counter = new AtomicLong(maxRetries);
         QosIoExceptionHandler retryingHandler = new AsyncQosIoExceptionHandler(
                 Executors.newScheduledThreadPool(threadPoolSize),
+                Executors.newCachedThreadPool(),
                 () -> {
                     if (counter.decrementAndGet() <= 0) {
                         return Optional.empty();
@@ -137,6 +141,36 @@ public final class OkHttpClientsTest extends TestBase {
 
         Call call = client.newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(call::execute).isInstanceOf(QosIoException.class);
+    }
+
+    @Test
+    public void throwsProperRemoteExceptionAfterRetry() throws Exception {
+        QosIoExceptionHandler retryingHandler = new AsyncQosIoExceptionHandler(
+                Executors.newScheduledThreadPool(5),
+                Executors.newSingleThreadExecutor(),
+                () -> {
+                    return Optional.of(Duration.ofMillis(1));
+                });
+
+        // first we get a 503
+        server.enqueue(new MockResponse().setResponseCode(503));
+
+        // then we get a RemoteException
+        SerializableError error = SerializableError.builder().errorCode("error code").errorName("error name").build();
+        MockResponse mockResponse = new MockResponse()
+                .setBody(new ObjectMapper().writeValueAsString(error))
+                .addHeader("Content-Type", "application/json")
+                .setResponseCode(400);
+        server.enqueue(mockResponse);
+
+        OkHttpClient client = OkHttpClients.withCustomQosHandler(
+                createTestConfig(url),
+                "test",
+                OkHttpClientsTest.class,
+                () -> retryingHandler);
+
+        Call call = client.newCall(new Request.Builder().url(url).build());
+        assertThatThrownBy(call::execute).isInstanceOf(RemoteException.class);
     }
 
     @Test
