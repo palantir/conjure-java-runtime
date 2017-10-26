@@ -30,9 +30,7 @@ import okhttp3.Callback;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class InterruptibleCallTest {
     private final Call call = mock(Call.class);
