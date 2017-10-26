@@ -30,8 +30,12 @@ import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.okhttp.metrics.HostMetricsTest;
 import java.io.IOException;
+import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -104,6 +108,35 @@ public final class OkHttpClientsTest extends TestBase {
                     assertThat(actualException.getQosException()).isEqualTo(qosIoException.getQosException());
                 });
         verify(handler).handle(any(), any());
+    }
+
+    @Test
+    public void doesNotHangIfManyCallsResultInExceptions() throws Exception {
+        int maxRetries = 10;
+        int threadPoolSize = 5;
+
+        AtomicLong counter = new AtomicLong(maxRetries);
+        QosIoExceptionHandler retryingHandler = new AsyncQosIoExceptionHandler(
+                Executors.newScheduledThreadPool(threadPoolSize),
+                () -> {
+                    if (counter.decrementAndGet() <= 0) {
+                        return Optional.empty();
+                    }
+                    return Optional.of(Duration.ofMillis(1));
+                });
+
+        for (int i = 0; i <= maxRetries; i++) {
+            server.enqueue(new MockResponse().setResponseCode(503));
+        }
+
+        OkHttpClient client = OkHttpClients.withCustomQosHandler(
+                createTestConfig(url),
+                "test",
+                OkHttpClientsTest.class,
+                () -> retryingHandler);
+
+        Call call = client.newCall(new Request.Builder().url(url).build());
+        assertThatThrownBy(call::execute).isInstanceOf(QosIoException.class);
     }
 
     @Test
