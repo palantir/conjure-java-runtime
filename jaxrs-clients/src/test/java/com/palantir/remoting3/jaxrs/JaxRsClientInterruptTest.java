@@ -16,13 +16,13 @@
 
 package com.palantir.remoting3.jaxrs;
 
-import java.util.concurrent.CountDownLatch;
+import com.google.common.util.concurrent.Uninterruptibles;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
+import okhttp3.mockwebserver.SocketPolicy;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -32,16 +32,7 @@ public class JaxRsClientInterruptTest extends TestBase {
 
     @Test(timeout = 10_000)
     public void request_thread_should_join_when_interrupted_when_making_a_request() throws InterruptedException {
-        CountDownLatch expensiveCallStarted = new CountDownLatch(1);
-
-        server.setDispatcher(new Dispatcher() {
-            @Override
-            public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
-                expensiveCallStarted.countDown();
-                Thread.sleep(9999999999L);
-                return null;
-            }
-        });
+        server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE));
 
         InfiniteHangService infiniteHangService = JaxRsClient.create(InfiniteHangService.class, "foo",
                 createTestConfig("http://localhost:" + server.getPort()));
@@ -54,7 +45,8 @@ public class JaxRsClientInterruptTest extends TestBase {
 
         thread.start();
 
-        expensiveCallStarted.await();
+        // Wait some time before interrupting so the connection has hopefully been made
+        Uninterruptibles.sleepUninterruptibly(2, TimeUnit.SECONDS);
 
         System.out.println("Interrupting thread");
         thread.interrupt();

@@ -17,7 +17,6 @@
 package com.palantir.remoting3.okhttp;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -47,8 +46,6 @@ public final class MultiServerRetryInterceptor implements Interceptor {
         // Try original request first.
         try {
             return chain.proceed(chain.request());
-        } catch (InterruptedIOException e) {
-            throw e;
         } catch (IOException e) {
             lastException = e;
             logger.warn("Failed to send request to {}", chain.request().url(), e);
@@ -70,8 +67,6 @@ public final class MultiServerRetryInterceptor implements Interceptor {
                     .build();
             try {
                 return chain.proceed(request);
-            } catch (InterruptedIOException e) {
-                throw e;
             } catch (IOException e) {
                 lastException = e;
                 currentUrl = nextUrl;
