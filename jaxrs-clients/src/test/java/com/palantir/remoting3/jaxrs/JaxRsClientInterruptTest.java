@@ -26,7 +26,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Rule;
 import org.junit.Test;
 
-public class OkHttpClientInterruptTest extends TestBase {
+public class JaxRsClientInterruptTest extends TestBase {
     @Rule
     public final MockWebServer server = new MockWebServer();
 
