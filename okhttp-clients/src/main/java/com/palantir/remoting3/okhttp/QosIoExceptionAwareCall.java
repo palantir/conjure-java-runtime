@@ -19,6 +19,7 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.remoting.api.errors.RemoteException;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.Nullable;
@@ -48,6 +49,9 @@ public final class QosIoExceptionAwareCall extends ForwardingCall {
                 if (cause instanceof QosIoException) {
                     QosIoException qosIoException = (QosIoException) cause;
                     throw new QosIoException(qosIoException.getQosException(), qosIoException.getResponse());
+                } else if (cause instanceof RemoteException) {
+                    // TODO(jbaker): don't want to rethrow cause, but need to make changes to remoting-api.
+                    throw (RemoteException) cause;
                 } else {
                     throw new IOException("Failed to execute request", cause);
                 }

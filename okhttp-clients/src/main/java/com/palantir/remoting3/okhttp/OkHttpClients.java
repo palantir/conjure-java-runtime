@@ -83,7 +83,7 @@ public final class OkHttpClients {
     }
 
     private static Supplier<QosIoExceptionHandler> createQosHandler(ClientConfiguration config) {
-        return () -> new AsyncQosIoExceptionHandler(scheduledExecutorService,
+        return () -> new AsyncQosIoExceptionHandler(scheduledExecutorService, executorService,
                 new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()));
     }
 
