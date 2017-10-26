@@ -57,7 +57,7 @@ public final class QosIoExceptionAwareCall extends ForwardingCall {
             }
         }
     }
-    
+
     @Override
     public void enqueue(Callback responseCallback) {
         Callback qosAwareCallback = new Callback() {
