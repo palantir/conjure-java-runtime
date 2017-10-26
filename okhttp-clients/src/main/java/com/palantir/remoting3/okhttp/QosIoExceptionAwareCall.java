@@ -19,7 +19,6 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import com.palantir.remoting.api.errors.RemoteException;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
