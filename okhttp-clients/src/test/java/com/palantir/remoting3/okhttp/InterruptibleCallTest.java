@@ -16,15 +16,16 @@
 
 package com.palantir.remoting3.okhttp;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -60,6 +61,22 @@ public class InterruptibleCallTest {
 
         thread.join();
         verify(call).cancel();
+    }
+
+    @Test(timeout = 1_000)
+    public void when_execute_is_called_and_the_call_succeeds_the_response_should_be_returned() throws IOException {
+        Call mockCall = mock(Call.class);
+        Response mockResponse = someResponse();
+
+        doAnswer(invocation -> {
+            Callback callback = invocation.getArgumentAt(0, Callback.class);
+            callback.onResponse(mockCall, mockResponse);
+            return null;
+        }).when(call).enqueue(any());
+
+        Response response = interruptibleCall.execute();
+
+        assertThat(response).isEqualTo(mockResponse);
     }
 
     private Response someResponse() {
