@@ -58,6 +58,6 @@ public final class InterruptibleCall extends ForwardingCall {
 
     @Override
     Call doClone() {
-        return null;
+        return new InterruptibleCall(getDelegate().clone());
     }
 }
