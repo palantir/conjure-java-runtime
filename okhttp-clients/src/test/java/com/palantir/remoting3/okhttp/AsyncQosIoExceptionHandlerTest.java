@@ -25,12 +25,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.remoting.api.errors.QosException;
 import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -66,7 +66,7 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
     @Before
     public void before() throws Exception {
         scheduler = new DeterministicScheduler();
-        handler = new AsyncQosIoExceptionHandler(scheduler, Executors.newSingleThreadExecutor(), backoff);
+        handler = new AsyncQosIoExceptionHandler(scheduler, MoreExecutors.newDirectExecutorService(), backoff);
         call = new QosIoExceptionAwareCall(delegateCall, handler);
         when(call.clone()).thenReturn(clonedDelegateCall);
         when(delegateCall.execute()).thenReturn(RESPONSE);
