@@ -16,49 +16,34 @@
 
 package com.palantir.remoting3.okhttp;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class InterruptibleCallTest {
     private final Call call = mock(Call.class);
     private final InterruptibleCall interruptibleCall = new InterruptibleCall(call);
 
-    @Test
-    public void when_execute_is_called_it_should_execute_the_underlying_call() throws IOException {
-        interruptibleCall.execute();
-        verify(call).execute();
-        verifyNoMoreInteractions(call);
-    }
-
-    @Test(timeout = 10_000)
-    @Ignore
+    @Test(timeout = 1_000)
     public void when_execute_is_called_and_the_thread_interrupted_the_underlying_call_should_be_cancelled()
             throws IOException, InterruptedException {
 
-        CountDownLatch underlyingExecuteCalled = new CountDownLatch(1);
+        CountDownLatch underlyingEnqueueCalled = new CountDownLatch(1);
 
-        when(call.execute()).thenAnswer(invocation -> {
-            underlyingExecuteCalled.countDown();
-            Thread.sleep(9999999999L);
+        doAnswer(invocation -> {
+            underlyingEnqueueCalled.countDown();
             return null;
-        });
+        }).when(call).enqueue(any());
 
         Thread thread = new Thread(() -> {
             try {
@@ -70,7 +55,7 @@ public class InterruptibleCallTest {
 
         thread.start();
 
-        underlyingExecuteCalled.await();
+        underlyingEnqueueCalled.await();
         thread.interrupt();
 
         thread.join();
