@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.okhttp;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -24,13 +25,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.common.util.concurrent.Uninterruptibles;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.Protocol;
+import okhttp3.Request;
 import okhttp3.Response;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class InterruptibleCallTest {
@@ -45,6 +48,7 @@ public class InterruptibleCallTest {
     }
 
     @Test(timeout = 10_000)
+    @Ignore
     public void when_execute_is_called_and_the_thread_interrupted_the_underlying_call_should_be_cancelled()
             throws IOException, InterruptedException {
 
@@ -73,37 +77,44 @@ public class InterruptibleCallTest {
         verify(call).cancel();
     }
 
-    @Test
-    public void when_enqueue_is_called_and_the_thread_interrupted_the_underlying_call_should_be_cancelled()
-            throws InterruptedException {
-        CountDownLatch underlyingEnqueueCalled = new CountDownLatch(1);
+    @Test(timeout = 1_000)
+    public void when_enqueue_is_called_and_succeeds_the_returned_response_is_propagated() throws InterruptedException {
+        Response mockResponse = someResponse();
+        Call mockCall = mock(Call.class, "mockCall");
 
         doAnswer(invocation -> {
-            underlyingEnqueueCalled.countDown();
+            Callback callback = invocation.getArgumentAt(0, Callback.class);
+            callback.onResponse(mockCall, mockResponse);
             return null;
         }).when(call).enqueue(any());
 
-        Thread thread = new Thread(() -> {
-            interruptibleCall.enqueue(new Callback() {
-                @Override
-                public void onFailure(Call originalCall, IOException e) {
-                    fail("Call should be cancelled, not fail");
-                }
+        CountDownLatch assertionsRan = new CountDownLatch(1);
 
-                @Override
-                public void onResponse(Call originalCall, Response response) throws IOException {
-                    fail("Call should be cancelled, not get a response");
-                }
-            });
+        interruptibleCall.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call callbackCall, IOException ioException) {
+                fail("Should not fail");
+            }
+
+            @Override
+            public void onResponse(Call callbackCall, Response callbackResponse) throws IOException {
+                assertThat(callbackCall).isEqualTo(mockCall);
+                assertThat(callbackResponse).isEqualTo(mockResponse);
+                assertionsRan.countDown();
+            }
         });
 
-        thread.start();
+        assertionsRan.await();
+    }
 
-        underlyingEnqueueCalled.await();
-        thread.interrupt();
-
-        thread.join();
-
-        verify(call).cancel();
+    private Response someResponse() {
+        return new Response.Builder()
+                .request(new Request.Builder()
+                        .url("http://lol")
+                        .build())
+                .protocol(Protocol.HTTP_1_1)
+                .code(200)
+                .message("message")
+                .build();
     }
 }
