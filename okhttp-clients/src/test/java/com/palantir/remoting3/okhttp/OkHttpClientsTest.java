@@ -22,20 +22,16 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.okhttp.metrics.HostMetricsTest;
 import java.io.IOException;
-import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.IntStream;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -79,17 +75,19 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
-    public void verifyResponseMetricsAreRegistered() {
+    public void verifyResponseMetricsAreRegistered() throws IOException {
         SharedMetricRegistries.setDefault("test");
-        createRetryingClient(1);
 
-        SortedMap<String, Meter> meters = SharedMetricRegistries.getDefault().getMeters();
+        server.enqueue(new MockResponse().setBody("pong"));
+        createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();
+
         String className = OkHttpClientsTest.class.getCanonicalName();
-        assertThat(meters.get(className + ".response.family.informational")).isNotNull();
-        assertThat(meters.get(className + ".response.family.successful")).isNotNull();
-        assertThat(meters.get(className + ".response.family.redirection")).isNotNull();
-        assertThat(meters.get(className + ".response.family.client-error")).isNotNull();
-        assertThat(meters.get(className + ".response.family.server-error")).isNotNull();
+        MetricRegistry registry = SharedMetricRegistries.getDefault();
+        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "informational")).isEmpty();
+        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "successful")).isEmpty();
+        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "redirection")).isEmpty();
+        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "client-error")).isEmpty();
+        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "server-error")).isEmpty();
     }
 
     @Test
@@ -162,25 +160,6 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(call.execute().body().string()).isEqualTo("pong");
 
         assertThat(server.getRequestCount()).isEqualTo(4 /* two from each call */);
-    }
-
-    @Test
-    public void stressTest() throws InterruptedException {
-        IntStream.range(0, 10000).forEach(x -> server.enqueue(new MockResponse().setBodyDelay(1, TimeUnit.SECONDS).setResponseCode(503)));
-        OkHttpClient client = createRetryingClient(3);
-        ExecutorService executorService = Executors.newFixedThreadPool(100);
-        AtomicInteger counter = new AtomicInteger(0);
-        IntStream.range(0, 1000).forEach(x -> executorService.submit(() -> {
-            try {
-                client.newCall(new Request.Builder().url(url).build()).execute();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } finally {
-                System.out.println("!!!!!!" + counter.incrementAndGet());
-            }
-        }));
-        executorService.shutdown();
-        executorService.awaitTermination(60, TimeUnit.MINUTES);
     }
 
     @Test
