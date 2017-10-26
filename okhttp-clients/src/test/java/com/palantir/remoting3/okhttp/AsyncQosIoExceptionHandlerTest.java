@@ -18,6 +18,8 @@ package com.palantir.remoting3.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -30,6 +32,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jmock.lib.concurrent.DeterministicScheduler;
@@ -67,6 +70,11 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
         when(call.clone()).thenReturn(clonedDelegateCall);
         when(delegateCall.execute()).thenReturn(RESPONSE);
         when(clonedDelegateCall.execute()).thenReturn(CLONED_RESPONSE);
+        doAnswer(args -> {
+            Callback callback = args.getArgumentAt(0, Callback.class);
+            callback.onResponse(delegateCall, CLONED_RESPONSE);
+            return null;
+        }).when(clonedDelegateCall).enqueue(any());
     }
 
     @Test
