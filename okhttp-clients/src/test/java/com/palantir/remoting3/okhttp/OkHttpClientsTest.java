@@ -22,14 +22,14 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting3.clients.ClientConfiguration;
-import com.palantir.remoting3.okhttp.metrics.HostMetricsTest;
 import java.io.IOException;
+import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
@@ -81,13 +81,13 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setBody("pong"));
         createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();
 
+        SortedMap<String, Meter> meters = SharedMetricRegistries.getDefault().getMeters();
         String className = OkHttpClientsTest.class.getCanonicalName();
-        MetricRegistry registry = SharedMetricRegistries.getDefault();
-        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "informational")).isEmpty();
-        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "successful")).isEmpty();
-        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "redirection")).isEmpty();
-        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "client-error")).isEmpty();
-        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "server-error")).isEmpty();
+        assertThat(meters.get(className + ".response.family.informational")).isNotNull();
+        assertThat(meters.get(className + ".response.family.successful")).isNotNull();
+        assertThat(meters.get(className + ".response.family.redirection")).isNotNull();
+        assertThat(meters.get(className + ".response.family.client-error")).isNotNull();
+        assertThat(meters.get(className + ".response.family.server-error")).isNotNull();
     }
 
     @Test

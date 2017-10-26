@@ -7,7 +7,6 @@ dependencies {
     compile project(':http-clients')
     compile project(':tracing-okhttp3')
     compile 'com.google.guava:guava'
-    compile 'com.palantir.tritium:tritium-tags'
     compile 'com.squareup.okhttp3:logging-interceptor'
     compile 'com.squareup.okhttp3:okhttp'
     compile 'io.dropwizard.metrics:metrics-core'

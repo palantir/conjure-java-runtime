@@ -148,9 +148,6 @@
                 "com.palantir.remoting-api:service-config"
             ]
         },
-        "com.palantir.tritium:tritium-tags": {
-            "locked": "0.7.0-beta4"
-        },
         "com.squareup.okhttp3:logging-interceptor": {
             "locked": "3.8.1"
         },
@@ -335,9 +332,6 @@
             "transitive": [
                 "com.palantir.remoting-api:service-config"
             ]
-        },
-        "com.palantir.tritium:tritium-tags": {
-            "locked": "0.7.0-beta4"
         },
         "com.squareup.okhttp3:logging-interceptor": {
             "locked": "3.8.1"
