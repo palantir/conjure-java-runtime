@@ -16,12 +16,8 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.Response;
 
 public final class InterruptibleCall extends ForwardingCall {
@@ -33,40 +29,6 @@ public final class InterruptibleCall extends ForwardingCall {
     @Override
     public Response execute() throws IOException {
         return super.execute();
-    }
-
-    @Override
-    public void enqueue(Callback responseCallback) {
-        AtomicReference<Call> originalCall = new AtomicReference<>();
-        SettableFuture<Response> future = SettableFuture.create();
-
-        getDelegate().enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException ioException) {
-                future.setException(ioException);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                originalCall.set(call);
-                future.set(response);
-            }
-        });
-
-        try {
-            Response response = future.get();
-            try {
-                responseCallback.onResponse(originalCall.get(), response);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } catch (InterruptedException e) {
-            getDelegate().cancel();
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Thread was interrupted, call cancelled", e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Override

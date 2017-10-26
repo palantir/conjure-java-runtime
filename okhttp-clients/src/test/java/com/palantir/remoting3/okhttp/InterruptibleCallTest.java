@@ -77,36 +77,6 @@ public class InterruptibleCallTest {
         verify(call).cancel();
     }
 
-    @Test(timeout = 1_000)
-    public void when_enqueue_is_called_and_succeeds_the_returned_response_is_propagated() throws InterruptedException {
-        Response mockResponse = someResponse();
-        Call mockCall = mock(Call.class, "mockCall");
-
-        doAnswer(invocation -> {
-            Callback callback = invocation.getArgumentAt(0, Callback.class);
-            callback.onResponse(mockCall, mockResponse);
-            return null;
-        }).when(call).enqueue(any());
-
-        CountDownLatch assertionsRan = new CountDownLatch(1);
-
-        interruptibleCall.enqueue(new Callback() {
-            @Override
-            public void onFailure(Call callbackCall, IOException ioException) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onResponse(Call callbackCall, Response callbackResponse) throws IOException {
-                assertThat(callbackCall).isEqualTo(mockCall);
-                assertThat(callbackResponse).isEqualTo(mockResponse);
-                assertionsRan.countDown();
-            }
-        });
-
-        assertionsRan.await();
-    }
-
     private Response someResponse() {
         return new Response.Builder()
                 .request(new Request.Builder()
