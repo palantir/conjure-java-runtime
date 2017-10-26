@@ -17,6 +17,7 @@
 package com.palantir.remoting3.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -29,7 +30,9 @@ import okhttp3.Callback;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class InterruptibleCallTest {
     private final Call call = mock(Call.class);
@@ -77,6 +80,25 @@ public class InterruptibleCallTest {
         Response response = interruptibleCall.execute();
 
         assertThat(response).isEqualTo(mockResponse);
+    }
+
+    @Test(timeout = 1_000)
+    public void when_execute_is_called_and_the_call_fails_the_exception_should_be_thrown() throws IOException {
+        Call mockCall = mock(Call.class);
+        IOException exception = new IOException("something bad happened");
+
+        doAnswer(invocation -> {
+            Callback callback = invocation.getArgumentAt(0, Callback.class);
+            callback.onFailure(mockCall, exception);
+            return null;
+        }).when(call).enqueue(any());
+
+        try {
+            interruptibleCall.execute();
+            fail("Exception should be thrown");
+        } catch (IOException e) {
+            assertThat(e).isEqualTo(exception);
+        }
     }
 
     private Response someResponse() {

@@ -35,8 +35,8 @@ public final class InterruptibleCall extends ForwardingCall {
 
         getDelegate().enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
-
+            public void onFailure(Call call, IOException ioException) {
+                future.setException(ioException);
             }
 
             @Override
@@ -52,7 +52,7 @@ public final class InterruptibleCall extends ForwardingCall {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Thread was interrupted, cancelling call", e);
         } catch (ExecutionException e) {
-            throw new RuntimeException(e);
+            throw (IOException) e.getCause();
         }
     }
 
