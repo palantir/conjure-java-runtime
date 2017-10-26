@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.google.common.base.Preconditions;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -50,6 +51,8 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
             ScheduledExecutorService scheduledExecutorService,
             ExecutorService executorService,
             BackoffStrategy backoffStrategy) {
+        Preconditions.checkArgument(scheduledExecutorService != executorService,
+                "Almost certainly you want these to be different - need fixed pool vs cached.");
         this.scheduledExecutorService = MoreExecutors.listeningDecorator(scheduledExecutorService);
         this.executorService = MoreExecutors.listeningDecorator(executorService);
         this.backoffStrategy = backoffStrategy;
@@ -94,6 +97,7 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
         });
     }
 
+    // Have to schedule the retry on a different thread to avoid deadlocking a fixed size thread pool.
     private ListenableFuture<Response> retry(QosIoExceptionAwareCall call, Duration backoff) {
         ListenableFuture<ListenableFuture<Response>> result =
                 scheduledExecutorService.schedule(
