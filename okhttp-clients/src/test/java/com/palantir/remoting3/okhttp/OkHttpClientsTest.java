@@ -116,7 +116,8 @@ public final class OkHttpClientsTest extends TestBase {
         int threadPoolSize = 5;
 
         AtomicLong counter = new AtomicLong(maxRetries);
-        QosIoExceptionHandler handler = new AsyncQosIoExceptionHandler(Executors.newScheduledThreadPool(threadPoolSize),
+        QosIoExceptionHandler retryingHandler = new AsyncQosIoExceptionHandler(
+                Executors.newScheduledThreadPool(threadPoolSize),
                 () -> {
                     if (counter.decrementAndGet() <= 0) {
                         return Optional.empty();
@@ -132,7 +133,7 @@ public final class OkHttpClientsTest extends TestBase {
                 createTestConfig(url),
                 "test",
                 OkHttpClientsTest.class,
-                () -> handler);
+                () -> retryingHandler);
 
         Call call = client.newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(call::execute).isInstanceOf(QosIoException.class);
