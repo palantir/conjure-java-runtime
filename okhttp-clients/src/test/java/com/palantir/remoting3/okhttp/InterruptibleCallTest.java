@@ -69,11 +69,7 @@ public class InterruptibleCallTest {
         Call mockCall = mock(Call.class);
         Response mockResponse = someResponse();
 
-        doAnswer(invocation -> {
-            Callback callback = invocation.getArgumentAt(0, Callback.class);
-            callback.onResponse(mockCall, mockResponse);
-            return null;
-        }).when(call).enqueue(any());
+        whenEnqueued(callback -> callback.onResponse(mockCall, mockResponse));
 
         Response response = interruptibleCall.execute();
 
@@ -85,18 +81,22 @@ public class InterruptibleCallTest {
         Call mockCall = mock(Call.class);
         IOException exception = new IOException("something bad happened");
 
-        doAnswer(invocation -> {
-            Callback callback = invocation.getArgumentAt(0, Callback.class);
-            callback.onFailure(mockCall, exception);
-            return null;
-        }).when(call).enqueue(any());
+        whenEnqueued(callback -> callback.onFailure(mockCall, exception));
 
         try {
             interruptibleCall.execute();
-            fail("Exception should be thrown");
+            fail("Exception should have been thrown");
         } catch (IOException e) {
             assertThat(e).isEqualTo(exception);
         }
+    }
+
+    private void whenEnqueued(CheckedConsumer<Callback> callbackConsumer) {
+        doAnswer(invocation -> {
+            Callback callback = invocation.getArgumentAt(0, Callback.class);
+            callbackConsumer.accept(callback);
+            return null;
+        }).when(call).enqueue(any());
     }
 
     private Response someResponse() {
@@ -108,5 +108,9 @@ public class InterruptibleCallTest {
                 .code(200)
                 .message("message")
                 .build();
+    }
+
+    interface CheckedConsumer<T> {
+        void accept(T value) throws Exception;
     }
 }
