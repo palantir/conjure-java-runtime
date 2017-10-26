@@ -26,7 +26,6 @@ import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -84,7 +83,7 @@ public final class OkHttpClients {
     }
 
     private static Supplier<QosIoExceptionHandler> createQosHandler(ClientConfiguration config) {
-        return () -> new AsyncQosIoExceptionHandler(scheduledExecutorService, Executors.newSingleThreadExecutor(),
+        return () -> new AsyncQosIoExceptionHandler(scheduledExecutorService, executorService,
                 new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()));
     }
 

@@ -46,7 +46,8 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
     private final ListeningExecutorService executorService;
     private final BackoffStrategy backoffStrategy;
 
-    AsyncQosIoExceptionHandler(ScheduledExecutorService scheduledExecutorService,
+    AsyncQosIoExceptionHandler(
+            ScheduledExecutorService scheduledExecutorService,
             ExecutorService executorService,
             BackoffStrategy backoffStrategy) {
         this.scheduledExecutorService = MoreExecutors.listeningDecorator(scheduledExecutorService);
