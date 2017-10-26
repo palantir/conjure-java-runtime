@@ -95,8 +95,8 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
         executorService.schedule(() ->
                 call.clone().enqueue(new Callback() {
                     @Override
-                    public void onFailure(Call call, IOException e) {
-                        future.setException(e);
+                    public void onFailure(Call call, IOException ex) {
+                        future.setException(ex);
                     }
 
                     @Override
