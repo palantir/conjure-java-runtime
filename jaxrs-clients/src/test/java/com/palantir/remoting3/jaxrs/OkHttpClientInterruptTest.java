@@ -16,7 +16,6 @@
 
 package com.palantir.remoting3.jaxrs;
 
-import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -32,11 +31,14 @@ public class OkHttpClientInterruptTest extends TestBase {
     public final MockWebServer server = new MockWebServer();
 
     @Test(timeout = 10_000)
-    public void http_client_should_be_interruptible() throws InterruptedException {
+    public void request_thread_should_join_when_interrupted_when_making_a_request() throws InterruptedException {
+        CountDownLatch expensiveCallStarted = new CountDownLatch(1);
+
         server.setDispatcher(new Dispatcher() {
             @Override
             public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
-                Thread.sleep(Duration.ofDays(1).toMillis());
+                expensiveCallStarted.countDown();
+                Thread.sleep(9999999999L);
                 return null;
             }
         });
@@ -44,11 +46,8 @@ public class OkHttpClientInterruptTest extends TestBase {
         InfiniteHangService infiniteHangService = JaxRsClient.create(InfiniteHangService.class, "foo",
                 createTestConfig("http://localhost:" + server.getPort()));
 
-        CountDownLatch expensiveCallStarted = new CountDownLatch(1);
-
         Thread thread = new Thread(() -> {
             System.out.println("Starting expensive call");
-            expensiveCallStarted.countDown();
             infiniteHangService.hangForever();
             System.out.println("Finished call");
         });
@@ -61,13 +60,12 @@ public class OkHttpClientInterruptTest extends TestBase {
         thread.interrupt();
 
         thread.join();
-
     }
 
     @Path("/")
     public interface InfiniteHangService {
         @GET
-        @Path("foo")
+        @Path("hangForever")
         String hangForever();
     }
 }

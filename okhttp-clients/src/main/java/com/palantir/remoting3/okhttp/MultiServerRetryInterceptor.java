@@ -70,6 +70,8 @@ public final class MultiServerRetryInterceptor implements Interceptor {
                     .build();
             try {
                 return chain.proceed(request);
+            } catch (InterruptedIOException e) {
+                throw e;
             } catch (IOException e) {
                 lastException = e;
                 currentUrl = nextUrl;
