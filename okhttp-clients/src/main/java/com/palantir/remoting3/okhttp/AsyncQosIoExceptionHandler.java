@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.SettableFuture;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.QosException;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,8 +65,7 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
                     return Futures.immediateFailedFuture(qosIoException);
                 } else {
                     log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()));
-                    return executorService.schedule(
-                            () -> call.clone().execute(), backoff.get().toMillis(), TimeUnit.MILLISECONDS);
+                    return retryAsync(call, backoff.get());
                 }
             }
 
@@ -83,10 +84,27 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
                     return Futures.immediateFailedFuture(qosIoException);
                 } else {
                     log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()));
-                    return executorService.schedule(
-                            () -> call.clone().execute(), backoff.get().toMillis(), TimeUnit.MILLISECONDS);
+                    return retryAsync(call, backoff.get());
                 }
             }
         });
+    }
+
+    private ListenableFuture<Response> retryAsync(QosIoExceptionAwareCall call, Duration backoff) {
+        SettableFuture<Response> future = SettableFuture.create();
+        executorService.schedule(() ->
+                call.clone().enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        future.setException(e);
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        future.set(response);
+                    }
+
+                }), backoff.toMillis(), TimeUnit.MILLISECONDS);
+        return future;
     }
 }
