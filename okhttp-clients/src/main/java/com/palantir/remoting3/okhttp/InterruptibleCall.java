@@ -18,13 +18,13 @@ package com.palantir.remoting3.okhttp;
 
 import com.google.common.util.concurrent.SettableFuture;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.util.concurrent.ExecutionException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
 public final class InterruptibleCall extends ForwardingCall {
-
     public InterruptibleCall(Call delegate) {
         super(delegate);
     }
@@ -50,7 +50,7 @@ public final class InterruptibleCall extends ForwardingCall {
         } catch (InterruptedException e) {
             getDelegate().cancel();
             Thread.currentThread().interrupt();
-            throw new IOException("Thread was interrupted, cancelling call", e);
+            throw new InterruptedIOException("Thread was interrupted, cancelling call");
         } catch (ExecutionException e) {
             throw (IOException) e.getCause();
         }
