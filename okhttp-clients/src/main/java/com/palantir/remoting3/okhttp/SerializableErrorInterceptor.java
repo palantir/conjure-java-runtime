@@ -40,7 +40,9 @@ public enum SerializableErrorInterceptor implements Interceptor {
         if (!(response.isSuccessful() || response.code() == 101)) {
             Collection<String> contentTypes = response.headers("Content-Type");
             InputStream body = response.body().byteStream();
-            throw SerializableErrorToExceptionConverter.getException(contentTypes, response.code(), body);
+            RuntimeException runtimeException = SerializableErrorToExceptionConverter.getException(
+                    contentTypes, response.code(), body);
+            throw new RemoteIoException(runtimeException);
         }
 
         return response;
