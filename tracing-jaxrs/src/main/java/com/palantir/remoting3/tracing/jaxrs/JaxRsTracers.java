@@ -4,8 +4,8 @@
 
 package com.palantir.remoting3.tracing.jaxrs;
 
+import com.palantir.remoting3.tracing.DeferredTracer;
 import com.palantir.remoting3.tracing.Tracers;
-import com.palantir.remoting3.tracing.Tracers.DeferredTracer;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
