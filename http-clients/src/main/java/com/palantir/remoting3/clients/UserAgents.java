@@ -44,7 +44,6 @@ public final class UserAgents {
     private UserAgents() {}
 
     /** Returns the canonical string format for the given {@link UserAgent}. */
-    // TODO(rfink): Rethink the format: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent
     public static String format(UserAgent userAgent) {
         Map<String, String> primaryComments = userAgent.nodeId().isPresent()
                 ? ImmutableMap.of("nodeId", userAgent.nodeId().get())
