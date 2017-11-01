@@ -33,7 +33,7 @@ public final class UserAgents {
     private static final Joiner COMMA_JOINER = Joiner.on(", ");
     private static final Joiner.MapJoiner COLON_SEMICOLON_JOINER = Joiner.on(';').withKeyValueSeparator(":");
     private static final Pattern SERVICE_NAME_REGEX = Pattern.compile("([a-zA-Z][a-zA-Z0-9\\-]*)");
-    private static final Pattern INSTANCE_ID_REGEX = SERVICE_NAME_REGEX;
+    private static final Pattern NODE_ID_REGEX = SERVICE_NAME_REGEX;
     private static final Pattern[] ORDERABLE_VERSION = new Pattern[] {
             Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+-g[a-f0-9]+$"),
             Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+$"),
@@ -77,7 +77,7 @@ public final class UserAgents {
     }
 
     static boolean isValidNodeId(String instanceId) {
-        return INSTANCE_ID_REGEX.matcher(instanceId).matches();
+        return NODE_ID_REGEX.matcher(instanceId).matches();
     }
 
     static boolean isValidVersion(String version) {

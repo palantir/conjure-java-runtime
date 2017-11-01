@@ -25,8 +25,8 @@ public final class UserAgentTest {
 
     @Test
     public void testCorrectHeaderFormatWithNodeId() {
-        UserAgent baseUserAgent = UserAgent.of(UserAgent.Agent.of("service", "1.0.0"), "nodeId");
-        assertThat(UserAgents.format(baseUserAgent)).isEqualTo("service/1.0.0 (nodeId:nodeId)");
+        UserAgent baseUserAgent = UserAgent.of(UserAgent.Agent.of("service", "1.0.0"), "myNode");
+        assertThat(UserAgents.format(baseUserAgent)).isEqualTo("service/1.0.0 (nodeId:myNode)");
 
         UserAgent derivedAgent = baseUserAgent.addAgent(UserAgent.Agent.of("remoting", "2.0.0"));
         assertThat(UserAgents.format(derivedAgent)).isEqualTo("service/1.0.0 (nodeId:nodeId), remoting/2.0.0");
@@ -57,7 +57,7 @@ public final class UserAgentTest {
 
     @Test
     public void testInvalidVersion() {
-        assertThat(UserAgents.format(UserAgent.of(UserAgent.Agent.of("serviceName", "1 0 0"), "nodeId")))
-                .isEqualTo("serviceName/0.0.0 (nodeId:nodeId)");
+        assertThat(UserAgents.format(UserAgent.of(UserAgent.Agent.of("serviceName", "1 0 0"), "myNode")))
+                .isEqualTo("serviceName/0.0.0 (nodeId:myNode)");
     }
 }
