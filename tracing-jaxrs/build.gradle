@@ -1,0 +1,16 @@
+apply plugin: 'org.inferred.processors'
+
+apply from: "${rootDir}/gradle/publish.gradle"
+
+dependencies {
+    compile project(":tracing")
+    compile "javax.ws.rs:javax.ws.rs-api"
+
+    testCompile "ch.qos.logback:logback-classic"
+    testCompile "junit:junit"
+    testCompile "org.assertj:assertj-core"
+    testCompile "org.jmock:jmock"
+    testCompile "org.mockito:mockito-core"
+
+    processor "org.immutables:value"
+}

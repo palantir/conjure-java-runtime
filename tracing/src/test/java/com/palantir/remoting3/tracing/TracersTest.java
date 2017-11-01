@@ -105,7 +105,7 @@ public final class TracersTest {
     }
 
     @Test
-    public void testWrappingCallable_runnableTraceIsIsolated() throws Exception {
+    public void testWrappingCallable_callableTraceIsIsolated() throws Exception {
         Tracer.startSpan("outside");
         Callable<Void> runnable = Tracers.wrap(new Callable<Void>() {
             @Override
@@ -121,7 +121,7 @@ public final class TracersTest {
     @Test
     public void testWrappingCallable_traceStateIsCapturedAtConstructionTime() throws Exception {
         Tracer.startSpan("before-construction");
-        Callable<Void> runnable = Tracers.wrap(new Callable<Void>() {
+        Callable<Void> callable = Tracers.wrap(new Callable<Void>() {
             @Override
             public Void call() {
                 assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("before-construction");
@@ -129,7 +129,7 @@ public final class TracersTest {
             }
         });
         Tracer.startSpan("after-construction");
-        runnable.call();
+        callable.call();
     }
 
     @Test
@@ -172,7 +172,7 @@ public final class TracersTest {
     }
 
     @Test
-    public void testWrapRunnableWithNewTrace_traceStateInsideCallableIsIsolated() throws Exception {
+    public void testWrapRunnableWithNewTrace_traceStateInsideRunnableIsIsolated() throws Exception {
         String traceIdBeforeConstruction = Tracer.getTraceId();
 
         List<String> traceIds = Lists.newArrayList();

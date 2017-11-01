@@ -152,22 +152,16 @@ public final class Tracers {
      */
     private static class TracingAwareCallable<V> implements Callable<V> {
         private final Callable<V> delegate;
-        private final Trace trace;
+        private final DeferredTracer deferredTracer;
 
         TracingAwareCallable(Callable<V> delegate) {
             this.delegate = delegate;
-            this.trace = Tracer.copyTrace();
+            this.deferredTracer = new DeferredTracer();
         }
 
         @Override
         public V call() throws Exception {
-            Trace originalTrace = Tracer.copyTrace();
-            Tracer.setTrace(trace);
-            try {
-                return delegate.call();
-            } finally {
-                Tracer.setTrace(originalTrace);
-            }
+            return this.deferredTracer.withTrace(delegate::call);
         }
     }
 
@@ -177,22 +171,23 @@ public final class Tracers {
      */
     private static class TracingAwareRunnable implements Runnable {
         private final Runnable delegate;
-        private final Trace trace;
+        private DeferredTracer deferredTracer;
 
         TracingAwareRunnable(Runnable delegate) {
             this.delegate = delegate;
-            this.trace = Tracer.copyTrace();
+            this.deferredTracer = new DeferredTracer();
         }
 
         @Override
         public void run() {
-            Trace originalTrace = Tracer.copyTrace();
-            Tracer.setTrace(trace);
-            try {
+            deferredTracer.withTrace(() -> {
                 delegate.run();
-            } finally {
-                Tracer.setTrace(originalTrace);
-            }
+                return null;
+            });
         }
+    }
+
+    public interface ThrowingCallable<T, E extends Throwable> {
+        T call() throws E;
     }
 }
