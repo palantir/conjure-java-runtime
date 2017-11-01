@@ -40,7 +40,7 @@ public final class Retrofit2ClientConfigRefreshTest extends TestBase {
         ClientConfiguration config2 = createTestConfig("http://localhost:" + server2.getPort());
 
         Refreshable<ClientConfiguration> refreshableConfig = Refreshable.of(config1);
-        TestService proxy = Retrofit2Client.create(TestService.class, "agent", refreshableConfig);
+        TestService proxy = Retrofit2Client.create(TestService.class, AGENT, refreshableConfig);
 
         // Call 1
         server1.enqueue(new MockResponse().setBody("\"server1\""));

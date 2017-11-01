@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
+import com.palantir.remoting3.clients.UserAgents;
 import java.io.IOException;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -49,7 +50,7 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
 
     private void assertRequestUrlYieldsHttpPath(String basePath, String expectedQueryPath) throws Exception {
         HttpUrl url = server.url(basePath);
-        TestService service = Retrofit2Client.create(TestService.class, "agent", createTestConfig(url.toString()));
+        TestService service = Retrofit2Client.create(TestService.class, AGENT, createTestConfig(url.toString()));
 
         server.enqueue(new MockResponse().setBody("\"server\""));
         assertThat(service.get().execute().body(), is("server"));
@@ -62,15 +63,14 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
 
     @Test
     public void testUserAgent_defaultHeaderIsSent() throws InterruptedException, IOException {
-        String userAgent = "TestSuite/1 (0.0.0)";
         TestService service = Retrofit2Client.create(
-                TestService.class, userAgent, createTestConfig(
+                TestService.class, AGENT, createTestConfig(
                         String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.get().execute();
 
         RecordedRequest capturedRequest = server.takeRequest();
-        assertThat(capturedRequest.getHeader("User-Agent"), startsWith(userAgent));
+        assertThat(capturedRequest.getHeader("User-Agent"), startsWith(UserAgents.format(AGENT)));
     }
 
     @Test

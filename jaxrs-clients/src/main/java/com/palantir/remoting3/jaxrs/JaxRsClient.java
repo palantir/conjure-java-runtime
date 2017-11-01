@@ -50,7 +50,7 @@ public final class JaxRsClient {
     }
 
     /**
-     * Similar to {@link #create(Class, String, ClientConfiguration)}, but creates a mutable client that updates its
+     * Similar to {@link #create(Class, UserAgent, ClientConfiguration)}, but creates a mutable client that updates its
      * configuration transparently whenever the given {@link Refreshable refreshable} {@link ClientConfiguration}
      * changes.
      */

@@ -53,7 +53,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     @Before
     public void before() {
         url = server.url("/");
-        service = Retrofit2Client.create(TestService.class, "agent", createTestConfig(url.toString()));
+        service = Retrofit2Client.create(TestService.class, AGENT, createTestConfig(url.toString()));
     }
 
     @Test
@@ -151,7 +151,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void connectionFailureWithCompletableFuture() {
-        service = Retrofit2Client.create(TestService.class, "agent",
+        service = Retrofit2Client.create(TestService.class, AGENT,
                 ClientConfiguration.builder()
                         .from(createTestConfig("https://invalid.service.dev"))
                         .connectTimeout(Duration.ofMillis(10))
