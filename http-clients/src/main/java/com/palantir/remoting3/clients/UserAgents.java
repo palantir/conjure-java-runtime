@@ -100,6 +100,7 @@ public final class UserAgents {
         List<String> parts = COMMA_SPLITTER.splitToList(userAgent);
         if (parts.isEmpty()) {
             if (lenient) {
+                log.warn("Empty user agent, falling back to default/unknown agent");
                 return builder.primary(UserAgent.Agent.of("unknown", UserAgent.Agent.DEFAULT_VERSION)).build();
             } else {
                 throw new IllegalArgumentException("Empty user agents are not allowed: " + userAgent);
@@ -113,6 +114,7 @@ public final class UserAgents {
             builder.primary(primaryAgent.get());
         } else {
             if (lenient) {
+                log.warn("Malformed primary user agent", UnsafeArg.of("agent", parts.get(0)));
                 builder.primary(UserAgent.Agent.of("unknown", UserAgent.Agent.DEFAULT_VERSION));
             } else {
                 throw new IllegalArgumentException("Agent string was malformed: " + parts.get(0));
