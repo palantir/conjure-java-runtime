@@ -21,12 +21,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.Lists;
 import com.palantir.remoting.api.tracing.OpenSpan;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.StreamingOutput;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -105,7 +110,7 @@ public final class TracersTest {
     }
 
     @Test
-    public void testWrappingCallable_runnableTraceIsIsolated() throws Exception {
+    public void testWrappingCallable_callableTraceIsIsolated() throws Exception {
         Tracer.startSpan("outside");
         Callable<Void> runnable = Tracers.wrap(new Callable<Void>() {
             @Override
@@ -121,7 +126,7 @@ public final class TracersTest {
     @Test
     public void testWrappingCallable_traceStateIsCapturedAtConstructionTime() throws Exception {
         Tracer.startSpan("before-construction");
-        Callable<Void> runnable = Tracers.wrap(new Callable<Void>() {
+        Callable<Void> callable = Tracers.wrap(new Callable<Void>() {
             @Override
             public Void call() {
                 assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("before-construction");
@@ -129,7 +134,27 @@ public final class TracersTest {
             }
         });
         Tracer.startSpan("after-construction");
-        runnable.call();
+        callable.call();
+    }
+
+    @Test
+    public void testWrappingStreamingOutput_streamingOutputTraceIsIsolated() throws Exception {
+        Tracer.startSpan("outside");
+        StreamingOutput streamingOutput = Tracers.wrap((os) -> {
+            Tracer.startSpan("inside"); // never completed
+        });
+        streamingOutput.write(new ByteArrayOutputStream());
+        assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("outside");
+    }
+
+    @Test
+    public void testWrappingStreamingOutput_traceStateIsCapturedAtConstructionTime() throws Exception {
+        Tracer.startSpan("before-construction");
+        StreamingOutput streamingOutput = Tracers.wrap((os) -> {
+            assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("before-construction");
+        });
+        Tracer.startSpan("after-construction");
+        streamingOutput.write(new ByteArrayOutputStream());
     }
 
     @Test
@@ -172,7 +197,7 @@ public final class TracersTest {
     }
 
     @Test
-    public void testWrapRunnableWithNewTrace_traceStateInsideCallableIsIsolated() throws Exception {
+    public void testWrapRunnableWithNewTrace_traceStateInsideRunnableIsIsolated() throws Exception {
         String traceIdBeforeConstruction = Tracer.getTraceId();
 
         List<String> traceIds = Lists.newArrayList();
@@ -245,6 +270,20 @@ public final class TracersTest {
         return new Runnable() {
             @Override
             public void run() {
+                assertThat(Tracer.getTraceId()).isEqualTo(expectedTraceId);
+                assertThat(getCurrentFullTrace()).isEqualTo(expectedTrace);
+                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(expectedTraceId);
+            }
+        };
+    }
+
+    private static StreamingOutput traceExpectingStreamingOutput() {
+        final String expectedTraceId = Tracer.getTraceId();
+        final List<OpenSpan> expectedTrace = getCurrentFullTrace();
+
+        return new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
                 assertThat(Tracer.getTraceId()).isEqualTo(expectedTraceId);
                 assertThat(getCurrentFullTrace()).isEqualTo(expectedTrace);
                 assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(expectedTraceId);

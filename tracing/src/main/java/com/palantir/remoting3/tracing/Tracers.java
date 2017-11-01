@@ -16,11 +16,15 @@
 
 package com.palantir.remoting3.tracing;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.StreamingOutput;
 
 /** Utility methods for making {@link ExecutorService} and {@link Runnable} instances tracing-aware. */
 public final class Tracers {
@@ -99,6 +103,11 @@ public final class Tracers {
     /** Like {@link #wrap(Callable)}, but for Runnables. */
     public static Runnable wrap(Runnable delegate) {
         return new TracingAwareRunnable(delegate);
+    }
+
+    /** Like {@link #wrap(Callable)}, but for StreamingOutputs. */
+    public static StreamingOutput wrap(StreamingOutput delegate) {
+        return new TracingAwareStreamingOutput(delegate);
     }
 
     /**
@@ -190,6 +199,29 @@ public final class Tracers {
             Tracer.setTrace(trace);
             try {
                 delegate.run();
+            } finally {
+                Tracer.setTrace(originalTrace);
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private static class TracingAwareStreamingOutput implements StreamingOutput {
+
+        private final StreamingOutput delegate;
+        private final Trace trace;
+
+        TracingAwareStreamingOutput(StreamingOutput delegate) {
+            this.delegate = delegate;
+            this.trace = Tracer.copyTrace();
+        }
+
+        @Override
+        public void write(OutputStream output) throws IOException, WebApplicationException {
+            Trace originalTrace = Tracer.copyTrace();
+            Tracer.setTrace(trace);
+            try {
+                delegate.write(output);
             } finally {
                 Tracer.setTrace(originalTrace);
             }
