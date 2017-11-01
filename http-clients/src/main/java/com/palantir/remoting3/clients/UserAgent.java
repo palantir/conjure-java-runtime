@@ -31,59 +31,74 @@ import org.immutables.value.Value;
 @ImmutablesStyle
 public interface UserAgent {
 
-    String DEFAULT_VERSION = "0.0.0";
+    /** Identifies the node (e.g., IP address, container identifier, etc) on which this user agent was constructed. */
+    Optional<String> nodeId();
 
-    List<Agent> agents();
+    /** The primary user agent, typically the name/version of the service initiating an RPC call. */
+    Agent primary();
 
-    static UserAgent of(String serviceName, String instanceId, String version) {
-        Agent agent = ImmutableAgent.builder()
-                .serviceName(serviceName)
-                .instanceId(instanceId)
-                .version(UserAgents.isValidVersion(version) ? version : DEFAULT_VERSION)
-                .build();
+    /**
+     * A list of additional libraries that participate (client-side) in the RPC call, for instance RPC libraries, API
+     * JARs, etc.
+     */
+    List<Agent> informational();
+
+    /** Creates a new {@link UserAgent} with the given {@link #primary} agent and originating node id. */
+    static UserAgent of(Agent agent, String nodeId) {
         return ImmutableUserAgent.builder()
-                .addAgents(agent)
-                .build();
-    }
-
-    static UserAgent of(String serviceName, String version) {
-        Agent agent = ImmutableAgent.builder()
-                .serviceName(serviceName)
-                .version(UserAgents.isValidVersion(version) ? version : DEFAULT_VERSION)
-                .build();
-        return ImmutableUserAgent.builder()
-                .addAgents(agent)
+                .nodeId(nodeId)
+                .primary(agent)
                 .build();
     }
 
     /**
-     * Returns the {@link UserAgent} comprising all {@link UserAgent#agents} from the left and all {@link
-     * UserAgent#agents} from the right given {@link UserAgent}s.
+     * Like {@link #of(Agent, String)}, but with an empty/unknown node id. Users should generally prefer the version
+     * with explicit node in order to facilitate server-side client trackingb
      */
-    default UserAgent merge(UserAgent other) {
+    static UserAgent of(Agent agent) {
+        return ImmutableUserAgent.builder().primary(agent).build();
+    }
+
+    /**
+     * Returns a new {@link UserAgent} instance whose {@link #informational} agents are this instance's agents plus the
+     * given agent.
+     */
+    default UserAgent addAgent(Agent agent) {
         return ImmutableUserAgent.builder()
                 .from(this)
-                .addAllAgents(other.agents())
+                .addInformational(agent)
                 .build();
     }
 
+    @Value.Check
+    default void check() {
+        if (nodeId().isPresent()) {
+            checkArgument(UserAgents.isValidNodeId(nodeId().get()),
+                    "Illegal node id format: %s", nodeId().get());
+        }
+    }
+
+    /** Specifies an agent that participates (client-side) in an RPC call in terms of its name and version. */
     @Value.Immutable
     @ImmutablesStyle
     interface Agent {
-        String serviceName();
-        Optional<String> instanceId();
+        String DEFAULT_VERSION = "0.0.0";
+
+        String name();
         String version();
 
         @Value.Check
         default void check() {
-            checkArgument(UserAgents.isValidServiceName(serviceName()),
-                    "Illegal service name format: %s", serviceName());
-            if (instanceId().isPresent()) {
-                checkArgument(UserAgents.isValidInstance(instanceId().get()),
-                        "Illegal instance id format: %s", instanceId().get());
-            }
+            checkArgument(UserAgents.isValidLibraryName(name()), "Illegal agent name format: %s", name());
             // Should never hit the following.
             checkArgument(UserAgents.isValidVersion(version()), "Illegal version format: %s. This is a bug", version());
+        }
+
+        static Agent of(String name, String version) {
+            return ImmutableAgent.builder()
+                    .name(name)
+                    .version(UserAgents.isValidVersion(version) ? version : DEFAULT_VERSION)
+                    .build();
         }
     }
 }

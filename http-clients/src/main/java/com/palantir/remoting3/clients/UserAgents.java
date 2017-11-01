@@ -17,7 +17,10 @@
 package com.palantir.remoting3.clients;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,24 +42,26 @@ public final class UserAgents {
     private UserAgents() {}
 
     /** Returns the canonical string format for the given {@link UserAgent}. */
+    // TODO(rfink): Rethink the format: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent
     public static String format(UserAgent userAgent) {
-        return COMMA_JOINER.join(Lists.transform(userAgent.agents(), UserAgents::formatSingleAgent));
+        return COMMA_JOINER.join(
+                Iterables.concat(
+                        ImmutableList.of(formatSingleAgent(userAgent.primary(), userAgent.nodeId())),
+                        Lists.transform(userAgent.informational(), a -> formatSingleAgent(a, Optional.empty()))));
     }
 
-    private static String formatSingleAgent(UserAgent.Agent agent) {
-        StringBuilder builder = new StringBuilder(agent.serviceName());
-
-        agent.instanceId().ifPresent(id -> builder.append("/").append(id));
-
+    private static String formatSingleAgent(UserAgent.Agent agent, Optional<String> nodeId) {
+        StringBuilder builder = new StringBuilder(agent.name());
+        nodeId.ifPresent(id -> builder.append("/").append(id));
         builder.append(" (").append(agent.version()).append(")");
         return builder.toString();
     }
 
-    static boolean isValidServiceName(String serviceName) {
+    static boolean isValidLibraryName(String serviceName) {
         return SERVICE_NAME_REGEX.matcher(serviceName).matches();
     }
 
-    static boolean isValidInstance(String instanceId) {
+    static boolean isValidNodeId(String instanceId) {
         return INSTANCE_ID_REGEX.matcher(instanceId).matches();
     }
 
