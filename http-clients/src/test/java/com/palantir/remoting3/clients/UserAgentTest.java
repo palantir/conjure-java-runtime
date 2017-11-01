@@ -25,40 +25,39 @@ public final class UserAgentTest {
 
     @Test
     public void testCorrectHeaderFormatWithInstanceId() {
-        UserAgent baseUserAgent = UserAgent.of("service", "instanceId", "1.0.0");
-        assertThat(baseUserAgent.headerFormat()).isEqualTo("service/instanceId (1.0.0)");
+        UserAgent baseUserAgent = UserAgent.of(UserAgent.Agent.of("service", "1.0.0"), "instanceId");
+        assertThat(UserAgents.format(baseUserAgent)).isEqualTo("service/instanceId (1.0.0)");
 
-        UserAgent derivedAgent = UserAgent.append(baseUserAgent, "remoting", "2.0.0");
-        assertThat(derivedAgent.headerFormat()).isEqualTo("service/instanceId (1.0.0), remoting (2.0.0)");
+        UserAgent derivedAgent = baseUserAgent.addAgent(UserAgent.Agent.of("remoting", "2.0.0"));
+        assertThat(UserAgents.format(derivedAgent)).isEqualTo("service/instanceId (1.0.0), remoting (2.0.0)");
     }
 
     @Test
     public void testCorrectHeaderFormatWithoutInstanceId() {
-        UserAgent baseUserAgent = UserAgent.of("service", "1.0.0");
-        assertThat(baseUserAgent.headerFormat()).isEqualTo("service (1.0.0)");
+        UserAgent baseUserAgent = UserAgent.of(UserAgent.Agent.of("service", "1.0.0"));
+        assertThat(UserAgents.format(baseUserAgent)).isEqualTo("service (1.0.0)");
 
-        UserAgent derivedAgent = UserAgent.append(baseUserAgent, "remoting", "2.0.0");
-        assertThat(derivedAgent.headerFormat()).isEqualTo("service (1.0.0), remoting (2.0.0)");
+        UserAgent derivedAgent = baseUserAgent.addAgent(UserAgent.Agent.of("remoting", "2.0.0"));
+        assertThat(UserAgents.format(derivedAgent)).isEqualTo("service (1.0.0), remoting (2.0.0)");
     }
 
     @Test
     public void testInvalidServiceName() {
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> UserAgent.of("invalid service name", "instanceId", "1.0.0"))
-                .withMessage("Illegal service name format: invalid service name");
+                .isThrownBy(() -> UserAgent.Agent.of("invalid service name", "1.0.0"))
+                .withMessage("Illegal agent name format: invalid service name");
     }
 
     @Test
     public void testInvalidInstanceId() {
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> UserAgent.of("serviceName", "invalid instance id", "1.0.0"))
-                .withMessage("Illegal instance id format: invalid instance id");
+                .isThrownBy(() -> UserAgent.of(UserAgent.Agent.of("serviceName", "1.0.0"), "invalid instance id"))
+                .withMessage("Illegal node id format: invalid instance id");
     }
 
     @Test
     public void testInvalidVersion() {
-        assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> UserAgent.of("serviceName", "instanceId", "1 0 0"))
-                .withMessage("Illegal version format: 1 0 0");
+        assertThat(UserAgents.format(UserAgent.of(UserAgent.Agent.of("serviceName", "1 0 0"), "instanceId")))
+                .isEqualTo("serviceName/instanceId (0.0.0)");
     }
 }

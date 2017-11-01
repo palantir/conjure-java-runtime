@@ -18,11 +18,8 @@ package com.palantir.remoting3.clients;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import org.immutables.value.Value;
 
 /**
@@ -34,90 +31,74 @@ import org.immutables.value.Value;
 @ImmutablesStyle
 public interface UserAgent {
 
-    List<Agent> agents();
+    /** Identifies the node (e.g., IP address, container identifier, etc) on which this user agent was constructed. */
+    Optional<String> nodeId();
 
-    @Value.Derived
-    default String headerFormat() {
-        return Joiner.on(", ").join(Lists.transform(agents(), Agent::headerFormat));
-    }
+    /** The primary user agent, typically the name/version of the service initiating an RPC call. */
+    Agent primary();
 
-    static UserAgent of(String serviceName, String instanceId, String version) {
-        Agent agent = ImmutableAgent.builder()
-                .serviceName(serviceName)
-                .instanceId(instanceId)
-                .version(version)
-                .build();
+    /**
+     * A list of additional libraries that participate (client-side) in the RPC call, for instance RPC libraries, API
+     * JARs, etc.
+     */
+    List<Agent> informational();
+
+    /** Creates a new {@link UserAgent} with the given {@link #primary} agent and originating node id. */
+    static UserAgent of(Agent agent, String nodeId) {
         return ImmutableUserAgent.builder()
-                .addAgents(agent)
+                .nodeId(nodeId)
+                .primary(agent)
                 .build();
     }
 
-    static UserAgent of(String serviceName, String version) {
-        Agent agent = ImmutableAgent.builder()
-                .serviceName(serviceName)
-                .version(version)
-                .build();
+    /**
+     * Like {@link #of(Agent, String)}, but with an empty/unknown node id. Users should generally prefer the version
+     * with explicit node in order to facilitate server-side client trackingb
+     */
+    static UserAgent of(Agent agent) {
+        return ImmutableUserAgent.builder().primary(agent).build();
+    }
+
+    /**
+     * Returns a new {@link UserAgent} instance whose {@link #informational} agents are this instance's agents plus the
+     * given agent.
+     */
+    default UserAgent addAgent(Agent agent) {
         return ImmutableUserAgent.builder()
-                .addAgents(agent)
+                .from(this)
+                .addInformational(agent)
                 .build();
     }
 
-    static UserAgent append(UserAgent userAgent, String serviceName, String version) {
-        Agent agent = ImmutableAgent.builder()
-                .serviceName(serviceName)
-                .version(version)
-                .build();
-        return ImmutableUserAgent.builder()
-                .from(userAgent)
-                .addAgents(agent)
-                .build();
+    @Value.Check
+    default void check() {
+        if (nodeId().isPresent()) {
+            checkArgument(UserAgents.isValidNodeId(nodeId().get()),
+                    "Illegal node id format: %s", nodeId().get());
+        }
     }
 
+    /** Specifies an agent that participates (client-side) in an RPC call in terms of its name and version. */
     @Value.Immutable
     @ImmutablesStyle
     interface Agent {
-        Pattern SERVICE_NAME_REGEX = Pattern.compile("([a-zA-Z][a-zA-Z0-9\\-]*)");
-        Pattern INSTANCE_ID_REGEX = SERVICE_NAME_REGEX;
-        // See https://github.com/palantir/sls-packaging/blob/develop/sls-versions/src/main/java/com/palantir/slspackaging/versions/SlsProductVersions.java
-        Pattern[] ORDERABLE_VERSION = new Pattern[]{
-                Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+-g[a-f0-9]+$"),
-                Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+$"),
-                Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-rc[0-9]+$"),
-                Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-rc[0-9]+-[0-9]+-g[a-f0-9]+$")
-        };
+        String DEFAULT_VERSION = "0.0.0";
 
-        String serviceName();
-        Optional<String> instanceId();
+        String name();
         String version();
-
-        @Value.Lazy
-        default String headerFormat() {
-            StringBuilder builder = new StringBuilder(serviceName());
-
-            instanceId().ifPresent(id -> builder.append("/").append(id));
-
-            builder.append(" (").append(version()).append(")");
-            return builder.toString();
-        }
 
         @Value.Check
         default void check() {
-            checkArgument(SERVICE_NAME_REGEX.matcher(serviceName()).matches(),
-                    "Illegal service name format: %s", serviceName());
-            if (instanceId().isPresent()) {
-                checkArgument(INSTANCE_ID_REGEX.matcher(instanceId().get()).matches(),
-                        "Illegal instance id format: %s", instanceId().get());
-            }
-            checkArgument(isOrderableVersion(version()), "Illegal version format: %s", version());
+            checkArgument(UserAgents.isValidLibraryName(name()), "Illegal agent name format: %s", name());
+            // Should never hit the following.
+            checkArgument(UserAgents.isValidVersion(version()), "Illegal version format: %s. This is a bug", version());
         }
 
-        static boolean isOrderableVersion(String version) {
-            for (Pattern p : ORDERABLE_VERSION) {
-                if (p.matcher(version).matches()) {
-                    return true;
-                }
-            }
-            return false;
+        static Agent of(String name, String version) {
+            return ImmutableAgent.builder()
+                    .name(name)
+                    .version(UserAgents.isValidVersion(version) ? version : DEFAULT_VERSION)
+                    .build();
         }
     }
 }
