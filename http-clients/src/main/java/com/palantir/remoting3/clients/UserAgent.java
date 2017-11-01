@@ -89,7 +89,7 @@ public interface UserAgent {
 
         @Value.Check
         default void check() {
-            checkArgument(UserAgents.isValidLibraryName(name()), "Illegal agent name format: %s", name());
+            checkArgument(UserAgents.isValidName(name()), "Illegal agent name format: %s", name());
             // Should never hit the following.
             checkArgument(UserAgents.isValidVersion(version()), "Illegal version format: %s. This is a bug", version());
         }

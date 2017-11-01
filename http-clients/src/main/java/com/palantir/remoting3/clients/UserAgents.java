@@ -16,12 +16,20 @@
 
 package com.palantir.remoting3.clients;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +40,8 @@ public final class UserAgents {
 
     private static final Joiner COMMA_JOINER = Joiner.on(", ");
     private static final Joiner.MapJoiner COLON_SEMICOLON_JOINER = Joiner.on(';').withKeyValueSeparator(":");
+    private static final Splitter.MapSplitter COLON_SEMICOLON_SPLITTER = Splitter.on(';').withKeyValueSeparator(":");
+    private static final Splitter COMMA_SPLITTER = Splitter.on(",").omitEmptyStrings().trimResults();
     private static final Pattern SERVICE_NAME_REGEX = Pattern.compile("([a-zA-Z][a-zA-Z0-9\\-]*)");
     private static final Pattern NODE_ID_REGEX = SERVICE_NAME_REGEX;
     private static final Pattern[] ORDERABLE_VERSION = new Pattern[] {
@@ -73,7 +83,78 @@ public final class UserAgents {
         return formatted.toString();
     }
 
-    static boolean isValidLibraryName(String serviceName) {
+
+    /**
+     * Parses the given string into a {@link UserAgent} or throws an {@link IllegalArgumentException} if the string does
+     * not conform to the user agent syntax restrictions.
+     */
+    public static UserAgent parse(String userAgent) {
+        return parseInternal(userAgent, false /* strict */);
+    }
+
+    /** Like {@link #parse}, but returns only the syntactically correct agent parts (, possibly zero). */
+    public static UserAgent tryParse(String userAgent) {
+        return parseInternal(userAgent, true /* lenient*/);
+    }
+
+    private static UserAgent parseInternal(String userAgent, boolean lenient) {
+        ImmutableUserAgent.Builder builder = ImmutableUserAgent.builder();
+        List<String> parts = COMMA_SPLITTER.splitToList(userAgent);
+        checkArgument(!parts.isEmpty(), "Empty user agents are not allowed");
+
+        // Primary agent with optional nodeId
+        Map<String, String> primaryComments = Maps.newHashMap();
+        Optional<UserAgent.Agent> primaryAgent = tryParseSingleAgent(parts.get(0), primaryComments);
+        if (primaryAgent.isPresent()) {
+            builder.primary(primaryAgent.get());
+        } else {
+            if (lenient) {
+                builder.primary(UserAgent.Agent.of("unknown", UserAgent.Agent.DEFAULT_VERSION));
+            } else {
+                throw new IllegalArgumentException("Agent string was malformed: " + parts.get(0));
+            }
+        }
+        if (primaryComments.containsKey("nodeId")) {
+            builder.nodeId(primaryComments.get("nodeId"));
+        }
+
+        // Informational agents
+        for (String part : parts.subList(1, parts.size())) {
+            Optional<UserAgent.Agent> informationlAgent = tryParseSingleAgent(part, Maps.newHashMap());
+            if (informationlAgent.isPresent()) {
+                builder.addInformational(informationlAgent.get());
+            } else {
+                if (lenient) {
+                    // Ignore malformed agent
+                    log.warn("Cannot parse malformed user agent string", UnsafeArg.of("agent", part));
+                } else {
+                    throw new IllegalArgumentException("Agent string was malformed: " + part);
+                }
+            }
+        }
+        return builder.build();
+    }
+
+    // returns found comments in the provided map.
+    private static Optional<UserAgent.Agent> tryParseSingleAgent(String agent, Map<String, String> comments) {
+        int slashPos = agent.indexOf('/');
+        if (slashPos == -1) {
+            return Optional.empty(); // no version
+        }
+        int spacePos = agent.indexOf(" (");
+        String name = agent.substring(0, slashPos);
+        String version = agent.substring(slashPos + 1, spacePos == -1 ? agent.length() : spacePos);
+
+        // Extract comments
+        if (spacePos != -1) {
+            String commentString = agent.substring(spacePos + 2, agent.length() - 1);
+            COLON_SEMICOLON_SPLITTER.split(commentString).forEach(comments::put);
+        }
+
+        return Optional.of(UserAgent.Agent.of(name, version));
+    }
+
+    static boolean isValidName(String serviceName) {
         return SERVICE_NAME_REGEX.matcher(serviceName).matches();
     }
 
@@ -87,7 +168,7 @@ public final class UserAgents {
                 return true;
             }
         }
-        log.warn("Encountered invalid user agent version: " + version);
+        log.warn("Encountered invalid user agent version", SafeArg.of("version", version));
         return false;
     }
 }
