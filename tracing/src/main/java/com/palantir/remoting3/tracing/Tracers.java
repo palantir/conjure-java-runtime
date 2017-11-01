@@ -205,7 +205,6 @@ public final class Tracers {
         }
     }
 
-    @SuppressWarnings("unused")
     private static class TracingAwareStreamingOutput implements StreamingOutput {
 
         private final StreamingOutput delegate;
