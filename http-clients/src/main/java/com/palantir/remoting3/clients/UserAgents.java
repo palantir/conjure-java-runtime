@@ -92,7 +92,7 @@ public final class UserAgents {
 
     /** Like {@link #parse}, but returns only the syntactically correct agent parts (, possibly zero). */
     public static UserAgent tryParse(String userAgent) {
-        return parseInternal(userAgent, true /* lenient*/);
+        return parseInternal(userAgent, true /* lenient */);
     }
 
     private static UserAgent parseInternal(String userAgent, boolean lenient) {
