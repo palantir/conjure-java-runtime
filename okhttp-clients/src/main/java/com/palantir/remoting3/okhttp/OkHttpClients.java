@@ -24,7 +24,6 @@ import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -66,30 +65,31 @@ public final class OkHttpClients {
      */
     public static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
         return createInternal(
-                config, userAgent, serviceClass, createQosHandler(config), true /* randomize URL order */);
+                config, userAgent, serviceClass, getQosHandlerProvider(config), true /* randomize URL order */);
     }
 
     @VisibleForTesting
-    static QosIoExceptionAwareOkHttpClient withCustomQosHandler(
-            ClientConfiguration config, String userAgent, Class<?> serviceClass,
-            Supplier<QosIoExceptionHandler> handlerFactory) {
-        return createInternal(config, userAgent, serviceClass, handlerFactory, true);
+    static QosIoExceptionAwareOkHttpClient withCustomQosHandlerProvider(
+            ClientConfiguration config,
+            String userAgent,
+            Class<?> serviceClass,
+            QosIoExceptionHandlerProvider provider) {
+        return createInternal(config, userAgent, serviceClass, provider, true);
     }
 
     @VisibleForTesting
     static QosIoExceptionAwareOkHttpClient withStableUris(
             ClientConfiguration config, String userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, createQosHandler(config), false);
+        return createInternal(config, userAgent, serviceClass, getQosHandlerProvider(config), false);
     }
 
-    private static Supplier<QosIoExceptionHandler> createQosHandler(ClientConfiguration config) {
-        return () -> new AsyncQosIoExceptionHandler(scheduledExecutorService, executorService,
-                new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()));
+    private static QosIoExceptionHandlerProvider getQosHandlerProvider(ClientConfiguration config) {
+        return new AsyncQosIoExceptionHandlerFactory(scheduledExecutorService, executorService, config);
     }
 
     private static QosIoExceptionAwareOkHttpClient createInternal(
             ClientConfiguration config, String userAgent, Class<?> serviceClass,
-            Supplier<QosIoExceptionHandler> handlerFactory, boolean randomizeUrlOrder) {
+            QosIoExceptionHandlerProvider handlerProvider, boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // response metrics
@@ -139,7 +139,8 @@ public final class OkHttpClients {
         // dispatcher with static executor service
         client.dispatcher(createDispatcher());
 
-        return new QosIoExceptionAwareOkHttpClient(client.build(), handlerFactory);
+        OkHttpClient okHttpClient = client.build();
+        return new QosIoExceptionAwareOkHttpClient(okHttpClient, () -> handlerProvider.createHandler(okHttpClient));
     }
 
     private static ImmutableList<ConnectionSpec> createConnectionSpecs(boolean enableGcmCipherSuites) {

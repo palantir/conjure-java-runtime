@@ -38,8 +38,8 @@ interface QosIoExceptionHandler {
      *          OkHttp {@link Interceptor}s could wait-and-retry upon observing 429 or 503, but this would happen on the
      *          same thread. Since all http-remoting clients (in a JVM) share the same OkHttp thread pool, only a few
      *          backed up requests would have the potential to stall all outgoing RPC. The {@link QosIoExceptionHandler}
-     *          approach taken here circumnavigates this pitful by re-scheduling call re-execution instead of performing
-     *          thread-blocking sleep.
+     *          approach taken here circumnavigates this pitfall by re-scheduling call re-execution instead of
+     *          performing thread-blocking sleep.
      *      </li>
      * </ul>
      * <p>

@@ -25,6 +25,7 @@ import static org.mockito.Mockito.when;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.palantir.remoting.api.errors.QosException;
@@ -36,9 +37,11 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -70,15 +73,18 @@ public final class OkHttpClientsTest extends TestBase {
     private String url2;
     private OkHttpClient mockHandlerClient;
 
+    private MultiServerRequestCreator requestCreator;
+
     @Before
     public void before() {
         url = "http://localhost:" + server.getPort();
         url2 = "http://localhost:" + server2.getPort();
-        mockHandlerClient = OkHttpClients.withCustomQosHandler(
+        mockHandlerClient = OkHttpClients.withCustomQosHandlerProvider(
                 createTestConfig(url),
                 "test",
                 OkHttpClientsTest.class,
-                () -> handler);
+                unused -> handler);
+        requestCreator = new MultiServerRequestCreator(UrlSelectorImpl.create(ImmutableList.of(url), false));
     }
 
     @Test
@@ -119,25 +125,21 @@ public final class OkHttpClientsTest extends TestBase {
         int threadPoolSize = 5;
 
         AtomicLong counter = new AtomicLong(maxRetries);
-        QosIoExceptionHandler retryingHandler = new AsyncQosIoExceptionHandler(
-                Executors.newScheduledThreadPool(threadPoolSize),
-                Executors.newCachedThreadPool(),
-                () -> {
-                    if (counter.decrementAndGet() <= 0) {
-                        return Optional.empty();
-                    }
-                    return Optional.of(Duration.ofMillis(1));
-                });
+        Supplier<BackoffStrategy> countingBackoffStrategy = () -> () -> {
+            if (counter.decrementAndGet() <= 0) {
+                return Optional.empty();
+            }
+            return Optional.of(Duration.ofMillis(1));
+        };
 
         for (int i = 0; i <= maxRetries; i++) {
             server.enqueue(new MockResponse().setResponseCode(503));
         }
 
-        OkHttpClient client = OkHttpClients.withCustomQosHandler(
-                createTestConfig(url),
-                "test",
-                OkHttpClientsTest.class,
-                () -> retryingHandler);
+        OkHttpClient client = createClientWithRetryingQosHandler(
+                threadPoolSize,
+                Executors.newCachedThreadPool(),
+                countingBackoffStrategy);
 
         Call call = client.newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(call::execute).isInstanceOf(QosIoException.class);
@@ -145,13 +147,6 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void throwsProperRemoteExceptionAfterRetry() throws Exception {
-        QosIoExceptionHandler retryingHandler = new AsyncQosIoExceptionHandler(
-                Executors.newScheduledThreadPool(5),
-                Executors.newSingleThreadExecutor(),
-                () -> {
-                    return Optional.of(Duration.ofMillis(1));
-                });
-
         // first we get a 503
         server.enqueue(new MockResponse().setResponseCode(503));
 
@@ -163,11 +158,10 @@ public final class OkHttpClientsTest extends TestBase {
                 .setResponseCode(400);
         server.enqueue(mockResponse);
 
-        OkHttpClient client = OkHttpClients.withCustomQosHandler(
-                createTestConfig(url),
-                "test",
-                OkHttpClientsTest.class,
-                () -> retryingHandler);
+        OkHttpClient client = createClientWithRetryingQosHandler(
+                5,
+                Executors.newSingleThreadExecutor(),
+                () -> () -> Optional.of(Duration.ofMillis(1)));
 
         Call call = client.newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(call::execute).isInstanceOf(RemoteException.class);
@@ -321,5 +315,21 @@ public final class OkHttpClientsTest extends TestBase {
                 ClientConfiguration.builder().from(createTestConfig(url)).maxNumRetries(maxNumRetries).build(),
                 "test",
                 OkHttpClientsTest.class);
+    }
+
+    private OkHttpClient createClientWithRetryingQosHandler(
+            int threadPoolSize,
+            ExecutorService dispatcherExecutorService,
+            Supplier<BackoffStrategy> backoffStrategy) {
+        AsyncQosIoExceptionHandlerFactory retryingHandlerFactory = new AsyncQosIoExceptionHandlerFactory(
+                Executors.newScheduledThreadPool(threadPoolSize),
+                dispatcherExecutorService,
+                backoffStrategy,
+                requestCreator);
+        return OkHttpClients.withCustomQosHandlerProvider(
+                createTestConfig(url),
+                "test",
+                OkHttpClientsTest.class,
+                retryingHandlerFactory);
     }
 }
