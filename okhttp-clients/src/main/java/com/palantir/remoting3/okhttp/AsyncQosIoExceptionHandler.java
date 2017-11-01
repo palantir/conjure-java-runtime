@@ -30,6 +30,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import okhttp3.Call;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -80,7 +81,7 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
                     return Futures.immediateFailedFuture(qosIoException);
                 } else {
                     log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()));
-                    return retry(call.clone(), backoff.get());
+                    return retry(call::clone, backoff.get());
                 }
             }
 
@@ -110,18 +111,16 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
                 log.debug("Rescheduling call on a new host, after backoff",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
                         SafeArg.of("host", newRequest.url().host())); // Must be host, url itself is unsafe
-                return retry(callFactory.newCall(newRequest), backoff.get());
+                return retry(() -> callFactory.newCall(newRequest), backoff.get());
             }
         });
     }
 
     // Have to schedule the retry on a different thread to avoid deadlocking a fixed size thread pool.
-    private ListenableFuture<Response> retry(Call call, Duration backoff) {
-        Preconditions.checkState(call instanceof QosIoExceptionAwareCall,
-                "Attempted to retry with a call that is not QoSIoExceptionAware");
+    private ListenableFuture<Response> retry(Supplier<Call> callSupplier, Duration backoff) {
         ListenableFuture<ListenableFuture<Response>> result =
                 scheduledExecutorService.schedule(
-                        () -> executorService.submit(call::execute),
+                        () -> executorService.submit(() -> callSupplier.get().execute()),
                         backoff.toMillis(), TimeUnit.MILLISECONDS);
         return Futures.dereference(result);
     }
