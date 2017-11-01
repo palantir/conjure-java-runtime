@@ -18,6 +18,7 @@ package com.palantir.remoting3.clients;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.Test;
 
@@ -59,5 +60,65 @@ public final class UserAgentTest {
     public void testInvalidVersion() {
         assertThat(UserAgents.format(UserAgent.of(UserAgent.Agent.of("serviceName", "1 0 0"), "myNode")))
                 .isEqualTo("serviceName/0.0.0 (nodeId:myNode)");
+    }
+
+    @Test
+    public void parse_handlesPrimaryAgent() throws Exception {
+        // Valid strings
+        for (String agent : new String[] {
+                "service/1.2.3",
+                "service/10.20.30",
+                "service/10.20.30 (nodeId:myNode)",
+                }) {
+            assertThat(UserAgents.format(UserAgents.parse(agent))).isEqualTo(agent).withFailMessage(agent);
+        }
+        assertThat(UserAgents.format(UserAgents.parse("service/1.2.3 (foo:bar)"))).isEqualTo("service/1.2.3");
+
+        // Invalid version parses to 0.0.0
+        assertThat(UserAgents.format(UserAgents.parse("service/1.2"))).isEqualTo("service/0.0.0");
+
+        // Invalid syntax throws exception
+        for (String agent : new String[] {
+                "s",
+                "se rvice/10.20.30"
+        }) {
+            assertThatThrownBy(() -> UserAgents.format(UserAgents.parse(agent)))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+    }
+
+    @Test
+    public void parse_handlesInformationalAgents() throws Exception {
+        // Valid strings
+        for (String agent : new String[] {
+                "serviceA/1.2.3, serviceB/4.5.6",
+                "serviceB/1.2.3 (nodeId:myNode), serviceB/4.5.6",
+                }) {
+            assertThat(UserAgents.format(UserAgents.parse(agent))).isEqualTo(agent).withFailMessage(agent);
+        }
+        assertThat(UserAgents.format(UserAgents.parse("serviceA/1.2.3, serviceB/4.5.6 (nodeId:myNode)")))
+                .isEqualTo("serviceA/1.2.3, serviceB/4.5.6");
+
+        // Invalid syntax throws exception
+        for (String agent : new String[] {
+                "serviceB/1.2.3, serviceB|4.5.6"
+        }) {
+            assertThatThrownBy(() -> UserAgents.format(UserAgents.parse(agent)))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+    }
+
+    @Test
+    public void tryParse_parsesWithBestEffort() throws Exception {
+        // Fixes up the primary agent
+        assertThat(UserAgents.format(UserAgents.tryParse("serviceA|1.2.3"))).isEqualTo("unknown/0.0.0");
+        assertThat(UserAgents.format(UserAgents.tryParse("serviceA/1.2"))).isEqualTo("serviceA/0.0.0");
+
+        // Omits malformed informational agents
+        assertThat(UserAgents.format(UserAgents.tryParse("serviceA/1.2.3, bogus|1.2.3, foo bar (boom)")))
+                .isEqualTo("serviceA/1.2.3");
+
+        // Empty agent yields unknown primary
+        assertThat(UserAgents.format(UserAgents.tryParse(""))).isEqualTo("unknown/0.0.0");
     }
 }

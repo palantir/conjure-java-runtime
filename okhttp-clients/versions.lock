@@ -139,6 +139,7 @@
             "locked": "0.1.3",
             "transitive": [
                 "com.palantir.remoting-api:errors",
+                "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing"
             ]
         },
@@ -324,6 +325,7 @@
             "locked": "0.1.3",
             "transitive": [
                 "com.palantir.remoting-api:errors",
+                "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing"
             ]
         },
