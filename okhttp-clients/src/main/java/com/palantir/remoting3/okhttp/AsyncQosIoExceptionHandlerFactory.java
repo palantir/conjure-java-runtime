@@ -30,35 +30,35 @@ import okhttp3.Call;
  * {@link okhttp3.OkHttpClient} that is used.
  */
 final class AsyncQosIoExceptionHandlerFactory implements QosIoExceptionHandlerProvider {
-    private final ScheduledExecutorService scheduledExecutorService;
-    private final ExecutorService executorService;
-    private final Supplier<BackoffStrategy> backoffStrategy;
+    private final ScheduledExecutorService retryExecutorService;
+    private final ExecutorService dispatcherExecutorService;
+    private final Supplier<BackoffStrategy> backoffStrategySupplier;
 
     @VisibleForTesting
     AsyncQosIoExceptionHandlerFactory(
-            ScheduledExecutorService scheduledExecutorService,
-            ExecutorService executorService,
-            Supplier<BackoffStrategy> backoffStrategy) {
-        this.scheduledExecutorService = scheduledExecutorService;
-        this.executorService = executorService;
-        this.backoffStrategy = backoffStrategy;
+            ScheduledExecutorService retryExecutorService,
+            ExecutorService dispatcherExecutorService,
+            Supplier<BackoffStrategy> backoffStrategySupplier) {
+        this.retryExecutorService = retryExecutorService;
+        this.dispatcherExecutorService = dispatcherExecutorService;
+        this.backoffStrategySupplier = backoffStrategySupplier;
     }
 
     AsyncQosIoExceptionHandlerFactory(
-            ScheduledExecutorService scheduledExecutorService,
-            ExecutorService executorService,
+            ScheduledExecutorService retryExecutorService,
+            ExecutorService dispatcherExecutorService,
             ClientConfiguration config) {
-        this(scheduledExecutorService,
-                executorService,
+        this(retryExecutorService,
+                dispatcherExecutorService,
                 () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()));
     }
 
     @Override
     public QosIoExceptionHandler createHandler(UrlSelector urlSelector, Call.Factory callFactory) {
         return new AsyncQosIoExceptionHandler(
-                scheduledExecutorService,
-                executorService,
-                backoffStrategy.get(),
+                retryExecutorService,
+                dispatcherExecutorService,
+                backoffStrategySupplier.get(),
                 new MultiServerRequestCreator(urlSelector),
                 callFactory);
     }
