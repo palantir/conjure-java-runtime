@@ -191,6 +191,25 @@ public final class Tracers {
         T call() throws E;
     }
 
+    /**
+     * Utility class for capturing the current trace at time of construction, and then
+     * running callables at some later time with that captured trace.
+     * <pre>
+     * <code>
+     * DeferredTracer deferredTracer = new DeferredTracer();
+     *
+     * //...
+     *
+     * // some time later
+     * deferredTracer.withTrace(() -> {
+     *     doThings();
+     *     System.out.println(Tracer.getTraceId()); // prints trace id at time of construction of deferred tracer
+     *     return null;
+     * });
+     *
+     * </code>
+     * </pre>
+     */
     public static final class DeferredTracer {
         private final Trace trace;
 
