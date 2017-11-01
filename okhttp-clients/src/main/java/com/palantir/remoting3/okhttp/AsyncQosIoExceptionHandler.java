@@ -16,21 +16,19 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.google.common.base.Preconditions;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.QosException;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,65 +42,82 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(AsyncQosIoExceptionHandler.class);
 
     private final ListeningScheduledExecutorService scheduledExecutorService;
-    private final ListeningExecutorService executorService;
     private final BackoffStrategy backoffStrategy;
 
     AsyncQosIoExceptionHandler(
             ScheduledExecutorService scheduledExecutorService,
-            ExecutorService executorService,
             BackoffStrategy backoffStrategy) {
-        Preconditions.checkArgument(scheduledExecutorService != executorService,
-                "Almost certainly you want these to be different - need fixed pool vs cached.");
         this.scheduledExecutorService = MoreExecutors.listeningDecorator(scheduledExecutorService);
-        this.executorService = MoreExecutors.listeningDecorator(executorService);
         this.backoffStrategy = backoffStrategy;
     }
 
     @Override
-    public ListenableFuture<Response> handle(QosIoExceptionAwareCall call, QosIoException qosIoException) {
-        return qosIoException.getQosException().accept(new QosException.Visitor<ListenableFuture<Response>>() {
+    public Response handle(QosIoExceptionAwareCall call, QosIoException qosIoException) throws IOException {
+        Duration backoff = getNextBackoffOrRethrow(qosIoException);
+
+        return retry(call, backoff);
+    }
+
+    @Override
+    public void handleAsync(QosIoExceptionAwareCall call, QosIoException qosIoException, Callback callback) {
+        try {
+            Duration backoff = getNextBackoffOrRethrow(qosIoException);
+
+            retryAsync(call, backoff, callback);
+        } catch (IOException e) {
+            callback.onFailure(call, e);
+        } catch (Throwable t) {
+            callback.onFailure(call, new IOException("Unexpected error during async retry", t));
+        }
+    }
+
+    private Duration getNextBackoffOrRethrow(QosIoException qosIoException) throws IOException {
+        return getNextBackoff(qosIoException)
+                .orElseThrow(() -> qosIoException);
+    }
+
+    private Optional<Duration> getNextBackoff(QosIoException qosIoException) {
+        return qosIoException.getQosException().accept(new QosException.Visitor<Optional<Duration>>() {
             @Override
-            public ListenableFuture<Response> visit(QosException.Throttle exception) {
-                Optional<Duration> backoff = exception.getRetryAfter().isPresent()
+            public Optional<Duration> visit(QosException.Throttle exception) {
+                return exception.getRetryAfter().isPresent()
                         ? exception.getRetryAfter()
                         : backoffStrategy.nextBackoff();
-
-                if (!backoff.isPresent()) {
-                    log.debug("No backoff advertised, failing call");
-                    return Futures.immediateFailedFuture(qosIoException);
-                } else {
-                    log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()));
-                    return retry(call, backoff.get());
-                }
             }
 
             @Override
-            public ListenableFuture<Response> visit(QosException.RetryOther exception) {
-                // Redirects are handled in QosRetryLaterInterceptor.
-                return Futures.immediateFailedFuture(new IOException(
-                        "Internal error, did not expect to handle RetryOther exception in handler", exception));
+            public Optional<Duration> visit(QosException.RetryOther exception) {
+                // TODO(nziebart): is it ok to throw a runtime exception here? If not, Visitor needs to declare that
+                // it throws IOException, and this should be an IOException
+                throw new IllegalStateException(
+                        "Internal error, did not expect to handle RetryOther exception in handler", exception);
             }
 
             @Override
-            public ListenableFuture<Response> visit(QosException.Unavailable exception) {
-                Optional<Duration> backoff = backoffStrategy.nextBackoff();
-                if (!backoff.isPresent()) {
-                    log.debug("No backoff advertised, failing call");
-                    return Futures.immediateFailedFuture(qosIoException);
-                } else {
-                    log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()));
-                    return retry(call, backoff.get());
-                }
+            public Optional<Duration> visit(QosException.Unavailable exception) {
+                return backoffStrategy.nextBackoff();
             }
         });
     }
 
-    // Have to schedule the retry on a different thread to avoid deadlocking a fixed size thread pool.
-    private ListenableFuture<Response> retry(QosIoExceptionAwareCall call, Duration backoff) {
-        ListenableFuture<ListenableFuture<Response>> result =
-                scheduledExecutorService.schedule(
-                        () -> executorService.submit(() -> call.clone().execute()),
-                        backoff.toMillis(), TimeUnit.MILLISECONDS);
-        return Futures.dereference(result);
+    private void retryAsync(QosIoExceptionAwareCall call, Duration backoff, Callback callback) {
+        scheduledExecutorService.schedule(
+                () -> call.clone().enqueue(callback),
+                backoff.toMillis(), TimeUnit.MILLISECONDS);
+    }
+
+    private Response retry(QosIoExceptionAwareCall call, Duration backoff) throws IOException {
+        log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.toMillis()));
+        sleepForBackoff(backoff);
+
+        return call.clone().execute();
+    }
+
+    private void sleepForBackoff(Duration duration) throws IOException {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException ex) {
+            throw new InterruptedIOException("Interrupted while pausing for retry backoff");
+        }
     }
 }

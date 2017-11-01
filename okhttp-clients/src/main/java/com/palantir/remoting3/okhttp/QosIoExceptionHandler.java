@@ -16,9 +16,10 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.remoting.api.errors.QosException;
+import java.io.IOException;
 import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
@@ -60,5 +61,7 @@ interface QosIoExceptionHandler {
      *     </li>
      * </ul>
      */
-    ListenableFuture<Response> handle(QosIoExceptionAwareCall call, QosIoException exception);
+    Response handle(QosIoExceptionAwareCall call, QosIoException exception) throws IOException;
+
+    void handleAsync(QosIoExceptionAwareCall call, QosIoException exception, Callback callback);
 }

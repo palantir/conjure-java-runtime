@@ -31,7 +31,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -98,7 +103,8 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
     public void testThrottle_withoutRetryAfter_reschedulesByBackoffDuration() throws Exception {
         when(backoff.nextBackoff()).thenReturn(BACKOFF_10SECS);
         QosIoException exception = new QosIoException(QosException.throttle(BACKOFF_10SECS.get()), RESPONSE);
-        ListenableFuture<Response> response = handler.handle(call, exception);
+        FutureCallback response = new FutureCallback();
+        handler.handleAsync(call, exception, response);
 
         scheduler.tick(5, TimeUnit.SECONDS);
         verifyNoMoreInteractions(delegateCall);
@@ -115,18 +121,18 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
     public void testThrottle_withoutRetryAfter_failsIfBackoffIsEmpty() throws Exception {
         when(backoff.nextBackoff()).thenReturn(NO_BACKOFF);
         QosIoException exception = new QosIoException(QosException.throttle(), RESPONSE);
-        assertThatThrownBy(() -> handler.handle(call, exception).get(1, TimeUnit.SECONDS))
-                .hasCause(exception);
+        assertThatThrownBy(() -> handler.handle(call, exception))
+                .isEqualTo(exception);
         verifyNoMoreInteractions(delegateCall);
     }
 
     @Test
     public void testRetryOther_notHandled() throws Exception {
         QosIoException exception = new QosIoException(QosException.retryOther(new URL("http://foo")), RESPONSE);
-        assertThatThrownBy(() -> handler.handle(call, exception).get(1, TimeUnit.SECONDS))
+        assertThatThrownBy(() -> handler.handle(call, exception))
                 .hasMessage("java.io.IOException: Internal error, did not expect to handle "
                         + "RetryOther exception in handler")
-                .hasCauseInstanceOf(IOException.class);
+                .isInstanceOf(IOException.class);
         verifyNoMoreInteractions(delegateCall);
     }
 
@@ -134,8 +140,8 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
     public void testUnavailable_doesNotScheduleWhenBackoffIsEmpty() throws Exception {
         when(backoff.nextBackoff()).thenReturn(NO_BACKOFF);
         QosIoException exception = new QosIoException(QosException.unavailable(), RESPONSE);
-        assertThatThrownBy(() -> handler.handle(call, exception).get(1, TimeUnit.SECONDS))
-                .hasCause(exception);
+        assertThatThrownBy(() -> handler.handle(call, exception))
+                .isEqualTo(exception);
         verifyNoMoreInteractions(delegateCall);
     }
 
@@ -143,7 +149,8 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
     public void testUnavailable_reschedulesByBackoffDuration() throws Exception {
         when(backoff.nextBackoff()).thenReturn(BACKOFF_10SECS);
         QosIoException exception = new QosIoException(QosException.unavailable(), RESPONSE);
-        ListenableFuture<Response> response = handler.handle(call, exception);
+        FutureCallback response = new FutureCallback();
+        handler.handleAsync(call, exception, response);
 
         scheduler.tick(5, TimeUnit.SECONDS);
         verifyNoMoreInteractions(delegateCall);
@@ -154,5 +161,18 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
         verify(delegateCall).clone();
         assertThat(response.isDone()).isTrue();
         assertThat(response.get(1, TimeUnit.SECONDS)).isEqualTo(CLONED_RESPONSE);
+    }
+
+    private class FutureCallback extends CompletableFuture<Response> implements Callback {
+
+        @Override
+        public void onFailure(Call call, IOException e) {
+            completeExceptionally(e);
+        }
+
+        @Override
+        public void onResponse(Call call, Response response) throws IOException {
+            complete(response);
+        }
     }
 }

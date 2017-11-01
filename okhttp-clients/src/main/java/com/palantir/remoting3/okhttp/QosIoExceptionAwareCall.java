@@ -19,9 +19,7 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.palantir.remoting.api.errors.RemoteException;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import javax.annotation.Nullable;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -41,24 +39,7 @@ public final class QosIoExceptionAwareCall extends ForwardingCall {
         try {
             return super.execute();
         } catch (QosIoException e) {
-            ListenableFuture<Response> futureResponse = exceptionHandler.handle(this, e);
-            try {
-                return futureResponse.get();
-            } catch (ExecutionException executionException) {
-                Throwable cause = executionException.getCause();
-                if (cause instanceof QosIoException) {
-                    QosIoException qosIoException = (QosIoException) cause;
-                    throw new QosIoException(qosIoException.getQosException(), qosIoException.getResponse());
-                } else if (cause instanceof RemoteException) {
-                    // TODO(jbaker): don't want to rethrow cause, but need to make changes to remoting-api.
-                    throw (RemoteException) cause;
-                } else {
-                    throw new IOException("Failed to execute request", cause);
-                }
-            } catch (InterruptedException interruptedException) {
-                Thread.currentThread().interrupt();
-                throw new IOException("Failed to execute request (interrupted?)", interruptedException);
-            }
+            return exceptionHandler.handle(this, e);
         }
     }
 
@@ -70,7 +51,7 @@ public final class QosIoExceptionAwareCall extends ForwardingCall {
                 if (ioException instanceof QosIoException) {
                     // Let retry handler deal with the call and propagate its result to the responseCallback
                     ListenableFuture<Response> response =
-                            exceptionHandler.handle(QosIoExceptionAwareCall.this, (QosIoException) ioException);
+                            exceptionHandler.handleAsync(QosIoExceptionAwareCall.this, (QosIoException) ioException);
                     Futures.addCallback(response, new FutureCallback<Response>() {
                         @Override
                         public void onSuccess(@Nullable Response result) {
