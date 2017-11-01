@@ -56,6 +56,17 @@ public interface UserAgent {
                 .build();
     }
 
+    /**
+     * Returns the {@link UserAgent} comprising all {@link UserAgent#agents} from the left and all {@link
+     * UserAgent#agents} from the right given {@link UserAgent}s.
+     */
+    default UserAgent merge(UserAgent other) {
+        return ImmutableUserAgent.builder()
+                .from(this)
+                .addAllAgents(other.agents())
+                .build();
+    }
+
     @Value.Immutable
     @ImmutablesStyle
     interface Agent {

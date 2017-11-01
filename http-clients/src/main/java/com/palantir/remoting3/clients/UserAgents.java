@@ -43,17 +43,6 @@ public final class UserAgents {
         return COMMA_JOINER.join(Lists.transform(userAgent.agents(), UserAgents::formatSingleAgent));
     }
 
-    /**
-     * Returns the {@link UserAgent} comprising all {@link UserAgent#agents} from the left and all {@link
-     * UserAgent#agents} from the right given {@link UserAgent}s.
-     */
-    public static UserAgent merge(UserAgent left, UserAgent right) {
-        return ImmutableUserAgent.builder()
-                .from(left)
-                .addAllAgents(right.agents())
-                .build();
-    }
-
     private static String formatSingleAgent(UserAgent.Agent agent) {
         StringBuilder builder = new StringBuilder(agent.serviceName());
 
