@@ -17,7 +17,6 @@
 package com.palantir.remoting3.okhttp;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -64,7 +63,7 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
         this.executorService = MoreExecutors.listeningDecorator(executorService);
         this.backoffStrategy = backoffStrategy;
         this.requestCreator = requestCreator;
-        this.callFactory = callFactory;
+        this.callFactory = request -> new QosIoExceptionAwareCall(callFactory.newCall(request), this);
     }
 
     @Override
@@ -81,7 +80,7 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
                     return Futures.immediateFailedFuture(qosIoException);
                 } else {
                     log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()));
-                    return retry(call::clone, backoff.get());
+                    return retry(call.clone(), backoff.get());
                 }
             }
 
@@ -111,17 +110,18 @@ class AsyncQosIoExceptionHandler implements QosIoExceptionHandler {
                 log.debug("Rescheduling call on a new host, after backoff",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
                         SafeArg.of("host", newRequest.url().host())); // Must be host, url itself is unsafe
-                return retry(() -> callFactory.newCall(newRequest), backoff.get());
+                return retry(callFactory.newCall(newRequest), backoff.get());
             }
         });
     }
 
     // Have to schedule the retry on a different thread to avoid deadlocking a fixed size thread pool.
-    private ListenableFuture<Response> retry(Supplier<Call> callSupplier, Duration backoff) {
+    private ListenableFuture<Response> retry(Call call, Duration backoff) {
+        Preconditions.checkState(call instanceof QosIoExceptionAwareCall,
+                "Attempted to retry with a call that is not QoSIoExceptionAware");
         ListenableFuture<ListenableFuture<Response>> result =
                 scheduledExecutorService.schedule(
-                        () -> executorService.submit(
-                                () -> new QosIoExceptionAwareCall(callSupplier.get(), this).execute()),
+                        () -> executorService.submit(call::execute),
                         backoff.toMillis(), TimeUnit.MILLISECONDS);
         return Futures.dereference(result);
     }
