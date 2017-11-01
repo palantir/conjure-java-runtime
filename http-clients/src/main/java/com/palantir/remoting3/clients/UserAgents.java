@@ -58,6 +58,7 @@ public final class UserAgents {
      * is omitted if zero comments are provided.
      */
     private static String formatSingleAgent(UserAgent.Agent agent, Map<String, String> comments) {
+        // TODO(rfink): Think about validation comments here? Must not contain special characters.
         StringBuilder formatted = new StringBuilder()
                 .append(agent.name())
                 .append("/")
