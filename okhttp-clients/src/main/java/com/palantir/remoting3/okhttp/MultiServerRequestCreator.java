@@ -27,11 +27,11 @@ class MultiServerRequestCreator {
 
     private final UrlSelector urls;
 
-    public MultiServerRequestCreator(UrlSelector urls) {
+    MultiServerRequestCreator(UrlSelector urls) {
         this.urls = urls;
     }
 
-    public Request getNextRequest(Request originalRequest) throws IOException {
+    Request getNextRequest(Request originalRequest) throws IOException {
         HttpUrl originalUrl = originalRequest.url();
         HttpUrl nextUrl = urls.redirectToNext(originalUrl).orElseThrow(() -> new IOException(
                 "Failed to determine suitable target URL for request URL " + originalUrl
