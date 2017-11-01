@@ -26,19 +26,19 @@ public final class UserAgentTest {
     @Test
     public void testCorrectHeaderFormatWithInstanceId() {
         UserAgent baseUserAgent = UserAgent.of("service", "instanceId", "1.0.0");
-        assertThat(baseUserAgent.headerFormat()).isEqualTo("service/instanceId (1.0.0)");
+        assertThat(UserAgents.format(baseUserAgent)).isEqualTo("service/instanceId (1.0.0)");
 
-        UserAgent derivedAgent = UserAgent.append(baseUserAgent, "remoting", "2.0.0");
-        assertThat(derivedAgent.headerFormat()).isEqualTo("service/instanceId (1.0.0), remoting (2.0.0)");
+        UserAgent derivedAgent = UserAgents.merge(baseUserAgent, UserAgent.of("remoting", "2.0.0"));
+        assertThat(UserAgents.format(derivedAgent)).isEqualTo("service/instanceId (1.0.0), remoting (2.0.0)");
     }
 
     @Test
     public void testCorrectHeaderFormatWithoutInstanceId() {
         UserAgent baseUserAgent = UserAgent.of("service", "1.0.0");
-        assertThat(baseUserAgent.headerFormat()).isEqualTo("service (1.0.0)");
+        assertThat(UserAgents.format(baseUserAgent)).isEqualTo("service (1.0.0)");
 
-        UserAgent derivedAgent = UserAgent.append(baseUserAgent, "remoting", "2.0.0");
-        assertThat(derivedAgent.headerFormat()).isEqualTo("service (1.0.0), remoting (2.0.0)");
+        UserAgent derivedAgent = UserAgents.merge(baseUserAgent, UserAgent.of("remoting", "2.0.0"));
+        assertThat(UserAgents.format(derivedAgent)).isEqualTo("service (1.0.0), remoting (2.0.0)");
     }
 
     @Test
@@ -57,8 +57,7 @@ public final class UserAgentTest {
 
     @Test
     public void testInvalidVersion() {
-        assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> UserAgent.of("serviceName", "instanceId", "1 0 0"))
-                .withMessage("Illegal version format: 1 0 0");
+        assertThat(UserAgents.format(UserAgent.of("serviceName", "instanceId", "1 0 0")))
+                .isEqualTo("serviceName/instanceId (0.0.0)");
     }
 }
