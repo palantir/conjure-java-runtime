@@ -117,5 +117,8 @@ public final class UserAgentTest {
         // Omits malformed informational agents
         assertThat(UserAgents.format(UserAgents.tryParse("serviceA/1.2.3, bogus|1.2.3, foo bar (boom)")))
                 .isEqualTo("serviceA/1.2.3");
+
+        // Empty agent yields unknown primary
+        assertThat(UserAgents.format(UserAgents.tryParse(""))).isEqualTo("unknown/0.0.0");
     }
 }

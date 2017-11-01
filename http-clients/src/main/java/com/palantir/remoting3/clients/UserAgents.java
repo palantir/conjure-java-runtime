@@ -16,8 +16,6 @@
 
 package com.palantir.remoting3.clients;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -100,7 +98,13 @@ public final class UserAgents {
     private static UserAgent parseInternal(String userAgent, boolean lenient) {
         ImmutableUserAgent.Builder builder = ImmutableUserAgent.builder();
         List<String> parts = COMMA_SPLITTER.splitToList(userAgent);
-        checkArgument(!parts.isEmpty(), "Empty user agents are not allowed");
+        if (parts.isEmpty()) {
+            if (lenient) {
+                return builder.primary(UserAgent.Agent.of("unknown", UserAgent.Agent.DEFAULT_VERSION)).build();
+            } else {
+                throw new IllegalArgumentException("Empty user agents are not allowed: " + userAgent);
+            }
+        }
 
         // Primary agent with optional nodeId
         Map<String, String> primaryComments = Maps.newHashMap();
