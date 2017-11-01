@@ -29,7 +29,7 @@ public final class UserAgentTest {
         assertThat(UserAgents.format(baseUserAgent)).isEqualTo("service/1.0.0 (nodeId:myNode)");
 
         UserAgent derivedAgent = baseUserAgent.addAgent(UserAgent.Agent.of("remoting", "2.0.0"));
-        assertThat(UserAgents.format(derivedAgent)).isEqualTo("service/1.0.0 (nodeId:nodeId), remoting/2.0.0");
+        assertThat(UserAgents.format(derivedAgent)).isEqualTo("service/1.0.0 (nodeId:myNode), remoting/2.0.0");
     }
 
     @Test
