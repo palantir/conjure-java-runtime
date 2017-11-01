@@ -18,18 +18,26 @@ package com.palantir.remoting3.okhttp.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.codahale.metrics.MetricRegistry;
+import com.palantir.tritium.metrics.MetricName;
+import com.palantir.tritium.metrics.TaggedMetricRegistry;
 import org.junit.Test;
 
 public final class HostMetricsRegistryTest {
 
     @Test
     public void test() {
-        MetricRegistry registry = new MetricRegistry();
+        TaggedMetricRegistry registry = new TaggedMetricRegistry();
         HostMetricsRegistry hostRegistry = new HostMetricsRegistry(registry, "service");
 
-        assertThat(HostMetricsTest.getMeter(registry, "service", "host", "successful")).isEmpty();
+        MetricName name = MetricName.builder()
+                .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
+                .putSafeTags(HostMetrics.SERVICE_NAME_TAG, "service")
+                .putSafeTags(HostMetrics.HOSTNAME_TAG, "host")
+                .putSafeTags(HostMetrics.FAMILY_TAG, "successful")
+                .build();
+
+        assertThat(registry.getMetrics().get(name)).isNull();
         hostRegistry.record("host", 200);
-        assertThat(HostMetricsTest.getMeter(registry, "service", "host", "successful").get().getCount()).isEqualTo(1);
+        assertThat(registry.meter(name).getCount()).isEqualTo(1);
     }
 }

@@ -20,8 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
-import com.palantir.remoting3.okhttp.metrics.HostMetricsTest;
+import com.palantir.remoting3.okhttp.metrics.HostMetrics;
+import com.palantir.tritium.metrics.MetricName;
+import com.palantir.tritium.metrics.TaggedMetricRegistry;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
@@ -43,12 +44,21 @@ public final class InstrumentedInterceptorTest {
     private Interceptor.Chain chain;
 
     private InstrumentedInterceptor interceptor;
-    private MetricRegistry registry;
+    private TaggedMetricRegistry registry;
 
     @Before
     public void before() throws IOException {
-        registry = new MetricRegistry();
+        registry = new TaggedMetricRegistry();
         interceptor = new InstrumentedInterceptor(registry, "client");
+    }
+
+    private static MetricName name(String hostname) {
+        return MetricName.builder()
+                .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
+                .putSafeTags(HostMetrics.SERVICE_NAME_TAG, "client")
+                .putSafeTags(HostMetrics.HOSTNAME_TAG, hostname)
+                .putSafeTags(HostMetrics.FAMILY_TAG, "successful")
+                .build();
     }
 
     @Test
@@ -56,13 +66,13 @@ public final class InstrumentedInterceptorTest {
         successfulRequest(REQUEST_A);
         interceptor.intercept(chain);
 
-        Meter meterA = HostMetricsTest.getMeter(registry, "client", "hosta", "successful").get();
+        Meter meterA = registry.meter(name("hosta"));
         assertThat(meterA.getCount()).isEqualTo(1);
 
         successfulRequest(REQUEST_B);
         interceptor.intercept(chain);
 
-        Meter meterB = HostMetricsTest.getMeter(registry, "client", "hostb", "successful").get();
+        Meter meterB = registry.meter(name("hostb"));
         assertThat(meterB.getCount()).isEqualTo(1);
     }
 

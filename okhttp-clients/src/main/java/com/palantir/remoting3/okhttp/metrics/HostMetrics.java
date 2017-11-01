@@ -18,9 +18,8 @@ package com.palantir.remoting3.okhttp.metrics;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.collect.ImmutableMap;
-import com.palantir.tritium.tags.TaggedMetric;
-import java.util.Map;
+import com.palantir.tritium.metrics.MetricName;
+import com.palantir.tritium.metrics.TaggedMetricRegistry;
 
 /**
  * Records per-target-host HTTP response code metrics in a {@link MetricRegistry}.
@@ -40,7 +39,7 @@ public final class HostMetrics {
     private final Meter other;
 
     /** Creates a metrics registry for calls from the given service to the given host. */
-    public HostMetrics(MetricRegistry registry, String serviceName, String hostname) {
+    public HostMetrics(TaggedMetricRegistry registry, String serviceName, String hostname) {
         informational = registry.meter(name(serviceName, hostname, "informational"));
         successful    = registry.meter(name(serviceName, hostname, "successful"));
         redirection   = registry.meter(name(serviceName, hostname, "redirection"));
@@ -49,13 +48,13 @@ public final class HostMetrics {
         other         = registry.meter(name(serviceName, hostname, "other"));
     }
 
-    private static String name(String serviceName, String hostname, String family) {
-        Map<String, String> tags = ImmutableMap.<String, String>builder()
-                .put(SERVICE_NAME_TAG, serviceName)
-                .put(HOSTNAME_TAG, hostname)
-                .put(FAMILY_TAG, family)
+    private static MetricName name(String serviceName, String hostname, String family) {
+        return MetricName.builder()
+                .safeName(CLIENT_RESPONSE_METRIC_NAME)
+                .putSafeTags(SERVICE_NAME_TAG, serviceName)
+                .putSafeTags(HOSTNAME_TAG, hostname)
+                .putSafeTags(FAMILY_TAG, family)
                 .build();
-        return TaggedMetric.toCanonicalName(CLIENT_RESPONSE_METRIC_NAME, tags);
     }
 
     /**

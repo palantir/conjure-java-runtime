@@ -22,8 +22,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.SharedMetricRegistries;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
@@ -31,7 +29,9 @@ import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.clients.ClientConfiguration;
-import com.palantir.remoting3.okhttp.metrics.HostMetricsTest;
+import com.palantir.remoting3.okhttp.metrics.HostMetrics;
+import com.palantir.tritium.metrics.MetricName;
+import com.palantir.tritium.metrics.TaggedMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
@@ -81,20 +81,26 @@ public final class OkHttpClientsTest extends TestBase {
                 () -> handler);
     }
 
+    private static MetricName name(String family) {
+        return MetricName.builder()
+                .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
+                .putSafeTags(HostMetrics.SERVICE_NAME_TAG, OkHttpClientsTest.class.getCanonicalName())
+                .putSafeTags(HostMetrics.HOSTNAME_TAG, "localhost")
+                .putSafeTags(HostMetrics.FAMILY_TAG, family).build();
+    }
+
     @Test
     public void verifyResponseMetricsAreRegistered() throws IOException {
-        SharedMetricRegistries.setDefault("test");
+        TaggedMetricRegistry registry = TaggedMetricRegistry.getDefault();
 
         server.enqueue(new MockResponse().setBody("pong"));
         createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();
 
-        String className = OkHttpClientsTest.class.getCanonicalName();
-        MetricRegistry registry = SharedMetricRegistries.getDefault();
-        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "informational")).isEmpty();
-        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "successful")).isEmpty();
-        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "redirection")).isEmpty();
-        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "client-error")).isEmpty();
-        assertThat(HostMetricsTest.getMeter(registry, className, "127.0.0.1", "server-error")).isEmpty();
+        assertThat(registry.getMetrics().get(name("informational"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("successful"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("redirection"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("client-error"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("server-error"))).isNotNull();
     }
 
     @Test
