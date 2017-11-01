@@ -140,7 +140,8 @@ public final class OkHttpClients {
         client.dispatcher(createDispatcher());
 
         OkHttpClient okHttpClient = client.build();
-        return new QosIoExceptionAwareOkHttpClient(okHttpClient, () -> handlerProvider.createHandler(okHttpClient));
+        return new QosIoExceptionAwareOkHttpClient(okHttpClient, () -> handlerProvider.createHandler(
+                urls, okHttpClient));
     }
 
     private static ImmutableList<ConnectionSpec> createConnectionSpecs(boolean enableGcmCipherSuites) {

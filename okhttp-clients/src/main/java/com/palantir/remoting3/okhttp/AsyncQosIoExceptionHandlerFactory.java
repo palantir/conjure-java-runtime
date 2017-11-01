@@ -25,26 +25,23 @@ import java.util.function.Supplier;
 import okhttp3.Call;
 
 /**
- * Constructs instances of {@link AsyncQosIoExceptionHandler} given a {@link okhttp3.Call.Factory}, which is often
- * provided at a substantially later time (e.g. after constructing an {@link okhttp3.OkHttpClient}) than the
- * other parameters needed for construction.
+ * Constructs instances of {@link AsyncQosIoExceptionHandler} given a {@link UrlSelector} and an
+ * {@link okhttp3.Call.Factory}. These parameters typically cannot be generated independent of the underlying
+ * {@link okhttp3.OkHttpClient} that is used.
  */
 final class AsyncQosIoExceptionHandlerFactory implements QosIoExceptionHandlerProvider {
     private final ScheduledExecutorService scheduledExecutorService;
     private final ExecutorService executorService;
     private final Supplier<BackoffStrategy> backoffStrategy;
-    private final MultiServerRequestCreator requestCreator;
 
     @VisibleForTesting
     AsyncQosIoExceptionHandlerFactory(
             ScheduledExecutorService scheduledExecutorService,
             ExecutorService executorService,
-            Supplier<BackoffStrategy> backoffStrategy,
-            MultiServerRequestCreator requestCreator) {
+            Supplier<BackoffStrategy> backoffStrategy) {
         this.scheduledExecutorService = scheduledExecutorService;
         this.executorService = executorService;
         this.backoffStrategy = backoffStrategy;
-        this.requestCreator = requestCreator;
     }
 
     AsyncQosIoExceptionHandlerFactory(
@@ -53,13 +50,16 @@ final class AsyncQosIoExceptionHandlerFactory implements QosIoExceptionHandlerPr
             ClientConfiguration config) {
         this(scheduledExecutorService,
                 executorService,
-                () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()),
-                new MultiServerRequestCreator(UrlSelectorImpl.create(config.uris(), true)));
+                () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()));
     }
 
     @Override
-    public QosIoExceptionHandler createHandler(Call.Factory callFactory) {
+    public QosIoExceptionHandler createHandler(UrlSelector urlSelector, Call.Factory callFactory) {
         return new AsyncQosIoExceptionHandler(
-                scheduledExecutorService, executorService, backoffStrategy.get(), requestCreator, callFactory);
+                scheduledExecutorService,
+                executorService,
+                backoffStrategy.get(),
+                new MultiServerRequestCreator(urlSelector),
+                callFactory);
     }
 }

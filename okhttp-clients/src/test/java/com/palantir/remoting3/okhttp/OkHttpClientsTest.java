@@ -83,7 +83,7 @@ public final class OkHttpClientsTest extends TestBase {
                 createTestConfig(url),
                 "test",
                 OkHttpClientsTest.class,
-                unused -> handler);
+                (unused1, unused2) -> handler);
         requestCreator = new MultiServerRequestCreator(UrlSelectorImpl.create(ImmutableList.of(url), false));
     }
 
@@ -281,7 +281,7 @@ public final class OkHttpClientsTest extends TestBase {
         OkHttpClient client = OkHttpClients.withStableUris(
                 ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
                 "test", OkHttpClientsTest.class);
-        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setResponseCode(429));
         server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
         server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
 
@@ -298,9 +298,9 @@ public final class OkHttpClientsTest extends TestBase {
                 ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
                 "test", OkHttpClientsTest.class);
 
-        // First hits server,then 308 redirects to server2, then retries, waits on 503, then retries server2 again.
+        // First hits server,then 308 redirects to server2, then retries, waits on 429, then retries server2 again.
         server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
-        server2.enqueue(new MockResponse().setResponseCode(503));
+        server2.enqueue(new MockResponse().setResponseCode(429));
         server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
 
         Call call = client.newCall(new Request.Builder().url(url).build());
@@ -308,6 +308,24 @@ public final class OkHttpClientsTest extends TestBase {
 
         assertThat(server.getRequestCount()).isEqualTo(1);
         assertThat(server2.getRequestCount()).isEqualTo(2);
+    }
+
+    @Test
+    public void interceptsAndHandlesQos_endToEnd_canRedirectAndThenRetryLater() throws Exception {
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
+                "test", OkHttpClientsTest.class);
+
+        // First hits server,then 308 redirects to server2, then retries, waits on 503, then retries server again.
+        server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
+        server2.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+
+        Call call = client.newCall(new Request.Builder().url(url).build());
+        assertThat(call.execute().body().string()).isEqualTo("foo");
+
+        assertThat(server.getRequestCount()).isEqualTo(2);
+        assertThat(server2.getRequestCount()).isEqualTo(1);
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {
@@ -324,8 +342,7 @@ public final class OkHttpClientsTest extends TestBase {
         AsyncQosIoExceptionHandlerFactory retryingHandlerFactory = new AsyncQosIoExceptionHandlerFactory(
                 Executors.newScheduledThreadPool(threadPoolSize),
                 dispatcherExecutorService,
-                backoffStrategy,
-                requestCreator);
+                backoffStrategy);
         return OkHttpClients.withCustomQosHandlerProvider(
                 createTestConfig(url),
                 "test",

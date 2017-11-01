@@ -19,5 +19,5 @@ package com.palantir.remoting3.okhttp;
 import okhttp3.Call;
 
 interface QosIoExceptionHandlerProvider {
-    QosIoExceptionHandler createHandler(Call.Factory factory);
+    QosIoExceptionHandler createHandler(UrlSelector urlSelector, Call.Factory factory);
 }
