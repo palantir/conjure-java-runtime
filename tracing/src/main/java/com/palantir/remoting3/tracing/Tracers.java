@@ -16,15 +16,11 @@
 
 package com.palantir.remoting3.tracing;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.StreamingOutput;
 
 /** Utility methods for making {@link ExecutorService} and {@link Runnable} instances tracing-aware. */
 public final class Tracers {
@@ -105,11 +101,6 @@ public final class Tracers {
         return new TracingAwareRunnable(delegate);
     }
 
-    /** Like {@link #wrap(Callable)}, but for StreamingOutputs. */
-    public static StreamingOutput wrap(StreamingOutput delegate) {
-        return new TracingAwareStreamingOutput(delegate);
-    }
-
     /**
      * Wraps the given {@link Callable} such that it creates a fresh {@link Trace tracing state} for its execution.
      * That is, the trace during its {@link Callable#call() execution} is entirely separate from the trace at
@@ -161,22 +152,16 @@ public final class Tracers {
      */
     private static class TracingAwareCallable<V> implements Callable<V> {
         private final Callable<V> delegate;
-        private final Trace trace;
+        private final DeferredTracer deferredTracer;
 
         TracingAwareCallable(Callable<V> delegate) {
             this.delegate = delegate;
-            this.trace = Tracer.copyTrace();
+            this.deferredTracer = new DeferredTracer();
         }
 
         @Override
         public V call() throws Exception {
-            Trace originalTrace = Tracer.copyTrace();
-            Tracer.setTrace(trace);
-            try {
-                return delegate.call();
-            } finally {
-                Tracer.setTrace(originalTrace);
-            }
+            return this.deferredTracer.withTrace(delegate::call);
         }
     }
 
@@ -186,41 +171,38 @@ public final class Tracers {
      */
     private static class TracingAwareRunnable implements Runnable {
         private final Runnable delegate;
-        private final Trace trace;
+        private DeferredTracer deferredTracer;
 
         TracingAwareRunnable(Runnable delegate) {
             this.delegate = delegate;
-            this.trace = Tracer.copyTrace();
+            this.deferredTracer = new DeferredTracer();
         }
 
         @Override
         public void run() {
-            Trace originalTrace = Tracer.copyTrace();
-            Tracer.setTrace(trace);
-            try {
+            deferredTracer.withTrace(() -> {
                 delegate.run();
-            } finally {
-                Tracer.setTrace(originalTrace);
-            }
+                return null;
+            });
         }
     }
 
-    private static class TracingAwareStreamingOutput implements StreamingOutput {
+    public interface ThrowingCallable<T, E extends Throwable> {
+        T call() throws E;
+    }
 
-        private final StreamingOutput delegate;
+    public static final class DeferredTracer {
         private final Trace trace;
 
-        TracingAwareStreamingOutput(StreamingOutput delegate) {
-            this.delegate = delegate;
+        public DeferredTracer() {
             this.trace = Tracer.copyTrace();
         }
 
-        @Override
-        public void write(OutputStream output) throws IOException, WebApplicationException {
+        public <T, E extends Throwable> T withTrace(ThrowingCallable<T, E> inner) throws E {
             Trace originalTrace = Tracer.copyTrace();
             Tracer.setTrace(trace);
             try {
-                delegate.write(output);
+                return inner.call();
             } finally {
                 Tracer.setTrace(originalTrace);
             }

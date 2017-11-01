@@ -12,7 +12,6 @@ dependencies {
     compile "com.palantir.remoting-api:tracing"
     compile "com.palantir.safe-logging:safe-logging"
     compile "org.slf4j:slf4j-api"
-    compile "javax.ws.rs:javax.ws.rs-api"
 
     testCompile "ch.qos.logback:logback-classic"
     testCompile "junit:junit"
