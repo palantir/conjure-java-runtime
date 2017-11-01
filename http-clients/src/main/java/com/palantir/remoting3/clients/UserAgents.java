@@ -18,9 +18,10 @@ package com.palantir.remoting3.clients;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import java.util.Optional;
+import java.util.Map;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +31,9 @@ public final class UserAgents {
     private static final Logger log = LoggerFactory.getLogger(UserAgents.class);
 
     private static final Joiner COMMA_JOINER = Joiner.on(", ");
+    private static final Joiner.MapJoiner COLON_SEMICOLON_JOINER = Joiner.on(';').withKeyValueSeparator(":");
     private static final Pattern SERVICE_NAME_REGEX = Pattern.compile("([a-zA-Z][a-zA-Z0-9\\-]*)");
-    private static final Pattern INSTANCE_ID_REGEX = SERVICE_NAME_REGEX;
+    private static final Pattern NODE_ID_REGEX = SERVICE_NAME_REGEX;
     private static final Pattern[] ORDERABLE_VERSION = new Pattern[] {
             Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+-g[a-f0-9]+$"),
             Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+$"),
@@ -42,19 +44,33 @@ public final class UserAgents {
     private UserAgents() {}
 
     /** Returns the canonical string format for the given {@link UserAgent}. */
-    // TODO(rfink): Rethink the format: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent
     public static String format(UserAgent userAgent) {
-        return COMMA_JOINER.join(
-                Iterables.concat(
-                        ImmutableList.of(formatSingleAgent(userAgent.primary(), userAgent.nodeId())),
-                        Lists.transform(userAgent.informational(), a -> formatSingleAgent(a, Optional.empty()))));
+        Map<String, String> primaryComments = userAgent.nodeId().isPresent()
+                ? ImmutableMap.of("nodeId", userAgent.nodeId().get())
+                : ImmutableMap.of();
+        return COMMA_JOINER.join(Iterables.concat(
+                ImmutableList.of(formatSingleAgent(userAgent.primary(), primaryComments)),
+                Lists.transform(userAgent.informational(), a -> formatSingleAgent(a, ImmutableMap.of()))));
     }
 
-    private static String formatSingleAgent(UserAgent.Agent agent, Optional<String> nodeId) {
-        StringBuilder builder = new StringBuilder(agent.name());
-        nodeId.ifPresent(id -> builder.append("/").append(id));
-        builder.append(" (").append(agent.version()).append(")");
-        return builder.toString();
+    /**
+     * Formats the given agent in the form {@code name/version (key:value; key:value)}, where the ()-block of comments
+     * is omitted if zero comments are provided.
+     */
+    private static String formatSingleAgent(UserAgent.Agent agent, Map<String, String> comments) {
+        // TODO(rfink): Think about validation comments here? Must not contain special characters.
+        StringBuilder formatted = new StringBuilder()
+                .append(agent.name())
+                .append("/")
+                .append(agent.version());
+
+        String formattedComments = COLON_SEMICOLON_JOINER.join(comments);
+        if (!formattedComments.isEmpty()) {
+            formatted.append(" (")
+                    .append(formattedComments)
+                    .append(')');
+        }
+        return formatted.toString();
     }
 
     static boolean isValidLibraryName(String serviceName) {
@@ -62,7 +78,7 @@ public final class UserAgents {
     }
 
     static boolean isValidNodeId(String instanceId) {
-        return INSTANCE_ID_REGEX.matcher(instanceId).matches();
+        return NODE_ID_REGEX.matcher(instanceId).matches();
     }
 
     static boolean isValidVersion(String version) {
