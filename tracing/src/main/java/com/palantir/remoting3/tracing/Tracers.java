@@ -198,6 +198,10 @@ public final class Tracers {
             this.trace = Tracer.copyTrace();
         }
 
+        /**
+         * Runs the given callable with the current trace at
+         * the time of construction of this {@link DeferredTracer}.
+         */
         public <T, E extends Throwable> T withTrace(ThrowingCallable<T, E> inner) throws E {
             Trace originalTrace = Tracer.copyTrace();
             Tracer.setTrace(trace);
