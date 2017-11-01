@@ -99,12 +99,6 @@
                 "com.squareup.okhttp3:okhttp"
             ]
         },
-        "javax.ws.rs:javax.ws.rs-api": {
-            "locked": "2.0.1",
-            "transitive": [
-                "com.palantir.remoting3:tracing"
-            ]
-        },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
@@ -210,12 +204,6 @@
             "locked": "1.13.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
-            ]
-        },
-        "javax.ws.rs:javax.ws.rs-api": {
-            "locked": "2.0.1",
-            "transitive": [
-                "com.palantir.remoting3:tracing"
             ]
         },
         "org.slf4j:slf4j-api": {

@@ -159,7 +159,6 @@
             "transitive": [
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:error-handling",
-                "com.palantir.remoting3:tracing",
                 "org.glassfish.jersey.core:jersey-client",
                 "org.glassfish.jersey.core:jersey-common",
                 "org.glassfish.jersey.core:jersey-server"
@@ -418,7 +417,6 @@
             "transitive": [
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:error-handling",
-                "com.palantir.remoting3:tracing",
                 "org.glassfish.jersey.core:jersey-client",
                 "org.glassfish.jersey.core:jersey-common",
                 "org.glassfish.jersey.core:jersey-server"
