@@ -24,6 +24,7 @@ import com.palantir.remoting.api.config.service.ServiceConfigurationFactory;
 import com.palantir.remoting.api.config.service.ServicesConfigBlock;
 import com.palantir.remoting3.clients.ClientConfigurations;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
+import com.palantir.remoting3.jaxrs.TestBase;
 import com.palantir.remoting3.jaxrs.TestService;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -33,7 +34,7 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class ServiceConfigTest {
+public final class ServiceConfigTest extends TestBase {
 
     @Rule
     public final DropwizardAppRule<ServiceConfigTestAppConfig> rule =
@@ -46,9 +47,9 @@ public final class ServiceConfigTest {
                 ServiceConfigurationFactory.of(rule.getConfiguration().getServiceDiscoveryConfiguration());
 
         TestService full = JaxRsClient.create(
-                TestService.class, "agent", ClientConfigurations.of(factory.get("full")));
+                TestService.class, AGENT, ClientConfigurations.of(factory.get("full")));
         TestService minimal = JaxRsClient.create(
-                TestService.class, "agent", ClientConfigurations.of(factory.get("minimal")));
+                TestService.class, AGENT, ClientConfigurations.of(factory.get("minimal")));
 
         assertEquals("string", full.string());
         assertEquals("string", minimal.string());

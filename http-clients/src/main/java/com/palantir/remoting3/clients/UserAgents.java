@@ -40,8 +40,7 @@ public final class UserAgents {
     private static final Joiner.MapJoiner COLON_SEMICOLON_JOINER = Joiner.on(';').withKeyValueSeparator(":");
     private static final Splitter.MapSplitter COLON_SEMICOLON_SPLITTER = Splitter.on(';').withKeyValueSeparator(":");
     private static final Splitter COMMA_SPLITTER = Splitter.on(",").omitEmptyStrings().trimResults();
-    private static final Pattern SERVICE_NAME_REGEX = Pattern.compile("([a-zA-Z][a-zA-Z0-9\\-]*)");
-    private static final Pattern NODE_ID_REGEX = SERVICE_NAME_REGEX;
+    private static final Pattern NAME_REGEX = Pattern.compile("([a-zA-Z][a-zA-Z0-9\\-]*)");
     private static final Pattern[] ORDERABLE_VERSION = new Pattern[] {
             Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+-g[a-f0-9]+$"),
             Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+$"),
@@ -161,11 +160,11 @@ public final class UserAgents {
     }
 
     static boolean isValidName(String serviceName) {
-        return SERVICE_NAME_REGEX.matcher(serviceName).matches();
+        return NAME_REGEX.matcher(serviceName).matches();
     }
 
     static boolean isValidNodeId(String instanceId) {
-        return NODE_ID_REGEX.matcher(instanceId).matches();
+        return NAME_REGEX.matcher(instanceId).matches();
     }
 
     static boolean isValidVersion(String version) {

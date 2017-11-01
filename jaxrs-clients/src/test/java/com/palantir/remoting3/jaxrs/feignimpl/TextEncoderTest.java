@@ -41,7 +41,7 @@ public final class TextEncoderTest extends TestBase {
 
     @Before
     public void before() {
-        service = JaxRsClient.create(Service.class, "agent",
+        service = JaxRsClient.create(Service.class, AGENT,
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("{}"));
     }

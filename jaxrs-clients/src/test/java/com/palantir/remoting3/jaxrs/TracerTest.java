@@ -41,7 +41,7 @@ public final class TracerTest extends TestBase {
     @Before
     public void before() {
         String uri = "http://localhost:" + server.getPort();
-        service = JaxRsClient.create(TestService.class, "agent", createTestConfig(uri));
+        service = JaxRsClient.create(TestService.class, AGENT, createTestConfig(uri));
         server.enqueue(new MockResponse().setBody("\"server\""));
     }
 

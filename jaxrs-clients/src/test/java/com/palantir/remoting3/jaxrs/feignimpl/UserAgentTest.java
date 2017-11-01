@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
+import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import com.palantir.remoting3.jaxrs.TestBase;
 import com.palantir.remoting3.jaxrs.TestService;
@@ -32,8 +33,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public final class UserAgentTest extends TestBase {
-
-    private static final String USER_AGENT = "TestSuite/1";
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -51,11 +50,11 @@ public final class UserAgentTest extends TestBase {
 
     @Test
     public void testUserAgent_default() throws InterruptedException {
-        TestService service = JaxRsClient.create(TestService.class, USER_AGENT, createTestConfig(endpointUri));
+        TestService service = JaxRsClient.create(TestService.class, AGENT, createTestConfig(endpointUri));
         service.string();
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getHeader("User-Agent"), startsWith(USER_AGENT));
+        assertThat(request.getHeader("User-Agent"), startsWith(UserAgents.format(AGENT)));
     }
 
     @Test

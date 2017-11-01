@@ -49,7 +49,7 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.create(Java8TestServer.TestService.class, "agent", createTestConfig(endpointUri));
+        service = JaxRsClient.create(Java8TestServer.TestService.class, AGENT, createTestConfig(endpointUri));
     }
 
     @Test

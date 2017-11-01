@@ -56,9 +56,9 @@ public final class SlashEncodingContractTest extends TestBase {
 
     @Before
     public void before() {
-        jerseyProxy = JaxRsClient.create(Service.class, "agent",
+        jerseyProxy = JaxRsClient.create(Service.class, AGENT,
                 createTestConfig("http://localhost:" + APP.getLocalPort()));
-        inMemoryProxy = JaxRsClient.create(Service.class, "agent",
+        inMemoryProxy = JaxRsClient.create(Service.class, AGENT,
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }

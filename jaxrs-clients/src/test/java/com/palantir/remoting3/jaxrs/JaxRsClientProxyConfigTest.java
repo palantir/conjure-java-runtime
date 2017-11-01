@@ -46,13 +46,13 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\""));
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        TestService directService = JaxRsClient.create(TestService.class, "agent",
+        TestService directService = JaxRsClient.create(TestService.class, AGENT,
                 createTestConfig("http://localhost:" + server.getPort()));
         ClientConfiguration proxiedConfig = ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server.getPort()))
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .build();
-        TestService proxiedService = JaxRsClient.create(TestService.class, "agent", proxiedConfig);
+        TestService proxiedService = JaxRsClient.create(TestService.class, AGENT, proxiedConfig);
 
         assertThat(directService.string()).isEqualTo("server");
         assertThat(proxiedService.string()).isEqualTo("proxyServer");
@@ -70,7 +70,7 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .proxyCredentials(BasicCredentials.of("fakeUser", "fakePassword"))
                 .build();
-        TestService proxiedService = JaxRsClient.create(TestService.class, "agent", proxiedConfig);
+        TestService proxiedService = JaxRsClient.create(TestService.class, AGENT, proxiedConfig);
 
         assertThat(proxiedService.string()).isEqualTo("proxyServer");
         RecordedRequest firstRequest = proxyServer.takeRequest();
