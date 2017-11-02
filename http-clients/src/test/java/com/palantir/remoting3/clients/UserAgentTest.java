@@ -25,6 +25,32 @@ import org.junit.Test;
 public final class UserAgentTest {
 
     @Test
+    public void validAndInvalidNodeSyntax() throws Exception {
+        // Valid nodeId
+        for (String nodeId : new String[] {
+                "nodeId",
+                "NODEID",
+                "node-id",
+                "node.id",
+                "nodeId.",
+                "192.168.0.1",
+                "my.server.foo.local"
+        }) {
+            UserAgent.of(UserAgent.Agent.of("valid-service", "1.0.0"), nodeId);
+        }
+
+        // Invalid nodeId
+        for (String nodeId : new String[] {
+                ".nodeId",
+                "node$",
+                "node_id"
+        }) {
+            assertThatThrownBy(() -> UserAgent.of(UserAgent.Agent.of("valid-service", "1.0.0"), nodeId))
+                    .isInstanceOf(IllegalArgumentException.class);
+        }
+    }
+
+    @Test
     public void testCorrectHeaderFormatWithNodeId() {
         UserAgent baseUserAgent = UserAgent.of(UserAgent.Agent.of("service", "1.0.0"), "myNode");
         assertThat(UserAgents.format(baseUserAgent)).isEqualTo("service/1.0.0 (nodeId:myNode)");
