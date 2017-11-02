@@ -19,21 +19,27 @@ package com.palantir.remoting3.okhttp.metrics;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
 public final class HostMetricsTest {
 
-    private MetricRegistry registry;
+    private static final String SERVICE_NAME = "serviceName";
+    private static final String HOSTNAME = "hostname";
+
+    private TaggedMetricRegistry registry;
     private HostMetrics hostMetrics;
 
     @Before
     public void before() {
-        registry = new MetricRegistry();
-        hostMetrics = new HostMetrics(registry, "serviceName", "hostname");
+        registry = new DefaultTaggedMetricRegistry();
+        hostMetrics = new HostMetrics(registry, SERVICE_NAME, HOSTNAME);
     }
 
     @Test
@@ -48,7 +54,7 @@ public final class HostMetricsTest {
                 .build();
 
         for (Map.Entry<Integer, String> testCase : testCases.entrySet()) {
-            Meter meter = registry.getMeters().get("serviceName.response.family." + testCase.getValue());
+            Meter meter = getMeter(registry, SERVICE_NAME, HOSTNAME, testCase.getValue()).get();
             assertThat(meter.getCount()).isZero();
 
             hostMetrics.record(testCase.getKey());
@@ -56,4 +62,15 @@ public final class HostMetricsTest {
             assertThat(meter.getCount()).isEqualTo(1);
         }
     }
+
+    public static Optional<Meter> getMeter(
+            TaggedMetricRegistry registry, String serviceName, String hostname, String family) {
+        MetricName name = MetricName.builder()
+                .safeName(serviceName + HostMetrics.CLIENT_RESPONSE_METRIC_NAME_SUFFIX)
+                .putSafeTags(HostMetrics.HOSTNAME_TAG, hostname)
+                .putSafeTags(HostMetrics.FAMILY_TAG, family)
+                .build();
+        return Optional.ofNullable((Meter) registry.getMetrics().get(name));
+    }
+
 }

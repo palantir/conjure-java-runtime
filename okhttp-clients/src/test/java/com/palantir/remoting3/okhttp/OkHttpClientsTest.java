@@ -22,8 +22,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.SharedMetricRegistries;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
@@ -31,10 +29,13 @@ import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.okhttp.metrics.HostMetrics;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -81,20 +82,25 @@ public final class OkHttpClientsTest extends TestBase {
                 () -> handler);
     }
 
+    private static MetricName name(String family) {
+        return MetricName.builder()
+                .safeName("OkHttpClientsTest" + HostMetrics.CLIENT_RESPONSE_METRIC_NAME_SUFFIX)
+                .putSafeTags(HostMetrics.HOSTNAME_TAG, "localhost")
+                .putSafeTags(HostMetrics.FAMILY_TAG, family).build();
+    }
+
     @Test
     public void verifyResponseMetricsAreRegistered() throws IOException {
-        SharedMetricRegistries.setDefault("test");
+        TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
         server.enqueue(new MockResponse().setBody("pong"));
         createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();
 
-        SortedMap<String, Meter> meters = SharedMetricRegistries.getDefault().getMeters();
-        String className = OkHttpClientsTest.class.getCanonicalName();
-        assertThat(meters.get(className + ".response.family.informational")).isNotNull();
-        assertThat(meters.get(className + ".response.family.successful")).isNotNull();
-        assertThat(meters.get(className + ".response.family.redirection")).isNotNull();
-        assertThat(meters.get(className + ".response.family.client-error")).isNotNull();
-        assertThat(meters.get(className + ".response.family.server-error")).isNotNull();
+        assertThat(registry.getMetrics().get(name("informational"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("successful"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("redirection"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("client-error"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("server-error"))).isNotNull();
     }
 
     @Test

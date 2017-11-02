@@ -20,7 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry;
+import com.palantir.remoting3.okhttp.metrics.HostMetrics;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
@@ -42,27 +45,35 @@ public final class InstrumentedInterceptorTest {
     private Interceptor.Chain chain;
 
     private InstrumentedInterceptor interceptor;
-    private MetricRegistry registry;
+    private TaggedMetricRegistry registry;
 
     @Before
     public void before() throws IOException {
-        registry = new MetricRegistry();
+        registry = new DefaultTaggedMetricRegistry();
         interceptor = new InstrumentedInterceptor(registry, "client");
+    }
 
-        successfulRequest(REQUEST_A);
-        successfulRequest(REQUEST_B);
+    private static MetricName name(String hostname) {
+        return MetricName.builder()
+                .safeName("client" + HostMetrics.CLIENT_RESPONSE_METRIC_NAME_SUFFIX)
+                .putSafeTags(HostMetrics.HOSTNAME_TAG, hostname)
+                .putSafeTags(HostMetrics.FAMILY_TAG, "successful")
+                .build();
     }
 
     @Test
     public void testResponseFamilyMetrics() throws IOException {
+        successfulRequest(REQUEST_A);
         interceptor.intercept(chain);
 
-        Meter meter = registry.getMeters().get("client.response.family.successful");
-        assertThat(meter.getCount()).isEqualTo(1);
+        Meter meterA = registry.meter(name("hosta"));
+        assertThat(meterA.getCount()).isEqualTo(1);
 
-        // TODO(jellis): check different meter once we add tags
+        successfulRequest(REQUEST_B);
         interceptor.intercept(chain);
-        assertThat(meter.getCount()).isEqualTo(2);
+
+        Meter meterB = registry.meter(name("hostb"));
+        assertThat(meterB.getCount()).isEqualTo(1);
     }
 
     private void successfulRequest(Request request) throws IOException {

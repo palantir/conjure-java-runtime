@@ -18,8 +18,17 @@ package com.palantir.remoting3.okhttp.metrics;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 
+/**
+ * Records per-target-host HTTP response code metrics in a {@link MetricRegistry}.
+ */
 public final class HostMetrics {
+
+    public static final String CLIENT_RESPONSE_METRIC_NAME_SUFFIX = ".client.response";
+    public static final String HOSTNAME_TAG = "hostname";
+    public static final String FAMILY_TAG = "family";
 
     private final Meter informational;
     private final Meter successful;
@@ -28,16 +37,28 @@ public final class HostMetrics {
     private final Meter serverError;
     private final Meter other;
 
-    public HostMetrics(MetricRegistry registry, String name, String hostname) {
-        // TODO(jellis): #581 add hostname as a tag
-        informational = registry.meter(MetricRegistry.name(name, "response", "family", "informational"));
-        successful    = registry.meter(MetricRegistry.name(name, "response", "family", "successful"));
-        redirection   = registry.meter(MetricRegistry.name(name, "response", "family", "redirection"));
-        clientError   = registry.meter(MetricRegistry.name(name, "response", "family", "client-error"));
-        serverError   = registry.meter(MetricRegistry.name(name, "response", "family", "server-error"));
-        other         = registry.meter(MetricRegistry.name(name, "response", "family", "other"));
+    /** Creates a metrics registry for calls from the given service to the given host. */
+    public HostMetrics(TaggedMetricRegistry registry, String serviceName, String hostname) {
+        informational = registry.meter(name(serviceName, hostname, "informational"));
+        successful    = registry.meter(name(serviceName, hostname, "successful"));
+        redirection   = registry.meter(name(serviceName, hostname, "redirection"));
+        clientError   = registry.meter(name(serviceName, hostname, "client-error"));
+        serverError   = registry.meter(name(serviceName, hostname, "server-error"));
+        other         = registry.meter(name(serviceName, hostname, "other"));
     }
 
+    private static MetricName name(String serviceName, String hostname, String family) {
+        return MetricName.builder()
+                .safeName(serviceName + CLIENT_RESPONSE_METRIC_NAME_SUFFIX)
+                .putSafeTags(HOSTNAME_TAG, hostname)
+                .putSafeTags(FAMILY_TAG, family)
+                .build();
+    }
+
+    /**
+      * Records that an HTTP call from the configured service to the configured host (see constructor)
+      * yielded the given HTTP status code.
+      */
     public void record(int statusCode) {
         switch (javax.ws.rs.core.Response.Status.Family.familyOf(statusCode)) {
             case INFORMATIONAL:

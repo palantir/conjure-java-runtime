@@ -159,13 +159,20 @@
             "transitive": [
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:http-clients",
-                "com.palantir.remoting3:tracing"
+                "com.palantir.remoting3:tracing",
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "3.0.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config"
+            ]
+        },
+        "com.palantir.tritium:tritium-registry": {
+            "locked": "0.8.0",
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
             ]
         },
         "com.squareup.okhttp3:logging-interceptor": {
@@ -201,7 +208,8 @@
         "io.dropwizard.metrics:metrics-core": {
             "locked": "3.2.3",
             "transitive": [
-                "com.palantir.remoting3:okhttp-clients"
+                "com.palantir.remoting3:okhttp-clients",
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
@@ -382,13 +390,20 @@
             "transitive": [
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:http-clients",
-                "com.palantir.remoting3:tracing"
+                "com.palantir.remoting3:tracing",
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "3.0.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config"
+            ]
+        },
+        "com.palantir.tritium:tritium-registry": {
+            "locked": "0.8.0",
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
             ]
         },
         "com.squareup.okhttp3:logging-interceptor": {
@@ -424,7 +439,8 @@
         "io.dropwizard.metrics:metrics-core": {
             "locked": "3.2.3",
             "transitive": [
-                "com.palantir.remoting3:okhttp-clients"
+                "com.palantir.remoting3:okhttp-clients",
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {

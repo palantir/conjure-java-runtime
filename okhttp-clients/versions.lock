@@ -140,7 +140,8 @@
             "transitive": [
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:http-clients",
-                "com.palantir.remoting3:tracing"
+                "com.palantir.remoting3:tracing",
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "com.palantir.tokens:auth-tokens": {
@@ -148,6 +149,9 @@
             "transitive": [
                 "com.palantir.remoting-api:service-config"
             ]
+        },
+        "com.palantir.tritium:tritium-registry": {
+            "locked": "0.8.0"
         },
         "com.squareup.okhttp3:logging-interceptor": {
             "locked": "3.8.1"
@@ -166,7 +170,10 @@
             ]
         },
         "io.dropwizard.metrics:metrics-core": {
-            "locked": "3.2.3"
+            "locked": "3.2.3",
+            "transitive": [
+                "com.palantir.tritium:tritium-registry"
+            ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
@@ -326,7 +333,8 @@
             "transitive": [
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:http-clients",
-                "com.palantir.remoting3:tracing"
+                "com.palantir.remoting3:tracing",
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "com.palantir.tokens:auth-tokens": {
@@ -334,6 +342,9 @@
             "transitive": [
                 "com.palantir.remoting-api:service-config"
             ]
+        },
+        "com.palantir.tritium:tritium-registry": {
+            "locked": "0.8.0"
         },
         "com.squareup.okhttp3:logging-interceptor": {
             "locked": "3.8.1"
@@ -352,7 +363,10 @@
             ]
         },
         "io.dropwizard.metrics:metrics-core": {
-            "locked": "3.2.3"
+            "locked": "3.2.3",
+            "transitive": [
+                "com.palantir.tritium:tritium-registry"
+            ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",

@@ -16,11 +16,11 @@
 
 package com.palantir.remoting3.okhttp.metrics;
 
-import com.codahale.metrics.MetricRegistry;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.palantir.logsafe.UnsafeArg;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public final class HostMetricsRegistry {
 
     private final LoadingCache<String, HostMetrics> hostMetrics;
 
-    public HostMetricsRegistry(MetricRegistry registry, String serviceName) {
+    public HostMetricsRegistry(TaggedMetricRegistry registry, String serviceName) {
         this.hostMetrics = CacheBuilder.newBuilder()
                 .maximumSize(1_000)
                 .expireAfterAccess(1, TimeUnit.DAYS)
