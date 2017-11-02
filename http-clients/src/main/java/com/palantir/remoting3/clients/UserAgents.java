@@ -25,7 +25,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -176,19 +175,5 @@ public final class UserAgents {
         }
         log.warn("Encountered invalid user agent version", SafeArg.of("version", version));
         return false;
-    }
-
-    // TODO(rfink): Put in the right place and fix up.
-    String getVersionString(Class<?> serviceClass) {
-        List<String> versions = new ArrayList<>(2);
-        String maybeServiceVersion = serviceClass.getPackage().getImplementationVersion();
-        if (maybeServiceVersion != null) {
-            versions.add("Service API " + serviceClass.getSimpleName() + " " + maybeServiceVersion);
-        }
-        String maybeRemotingVersion = this.getClass().getPackage().getImplementationVersion();
-        if (maybeRemotingVersion != null) {
-            versions.add("http-remoting " + maybeRemotingVersion);
-        }
-        return Joiner.on(";").join(versions);
     }
 }

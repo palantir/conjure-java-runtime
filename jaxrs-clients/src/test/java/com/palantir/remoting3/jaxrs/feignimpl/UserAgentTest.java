@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.jaxrs.feignimpl;
 
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
@@ -64,5 +65,15 @@ public final class UserAgentTest extends TestBase {
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader("User-Agent"), startsWith("unknown/0.0.0"));
+    }
+
+    @Test
+    public void testUserAgent_augmentedByHttpRemotingAndServiceComponents() throws Exception {
+        TestService service = JaxRsClient.create(TestService.class, AGENT, createTestConfig(endpointUri));
+        service.string();
+
+        RecordedRequest request = server.takeRequest();
+        // Versions are not available since the tests run on classes, not Gradle-built JARs
+        assertThat(request.getHeader("User-Agent"), is("test/0.0.1, TestService/0.0.0, http-remoting/0.0.0"));
     }
 }

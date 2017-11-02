@@ -140,7 +140,7 @@ public final class OkHttpClients {
         }
 
         // User agent setup
-        client.addInterceptor(UserAgentInterceptor.of(userAgent));
+        client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
 
         // cipher setup
         client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
@@ -152,6 +152,27 @@ public final class OkHttpClients {
         client.dispatcher(createDispatcher());
 
         return new QosIoExceptionAwareOkHttpClient(client.build(), handlerFactory);
+    }
+
+    /**
+     * Adds informational {@link com.palantir.remoting3.clients.UserAgent.Agent}s to the given {@link UserAgent}, one
+     * for the http-remoting library and one for the given service class. Version strings are extracted from the
+     * packages' {@link Package#getImplementationVersion implementation version}, defaulting to 0.0.0 if no version can
+     * be found.
+     */
+    private static UserAgent augmentUserAgent(UserAgent agent, Class<?> serviceClass) {
+        UserAgent augmentedAgent = agent;
+
+        String maybeServiceVersion = serviceClass.getPackage().getImplementationVersion();
+        augmentedAgent = augmentedAgent.addAgent(UserAgent.Agent.of(
+                serviceClass.getSimpleName(),
+                maybeServiceVersion != null ? maybeServiceVersion : "0.0.0"));
+
+        String maybeRemotingVersion = OkHttpClients.class.getPackage().getImplementationVersion();
+        augmentedAgent = augmentedAgent.addAgent(UserAgent.Agent.of(
+                "http-remoting",
+                maybeRemotingVersion != null ? maybeRemotingVersion : "0.0.0"));
+        return augmentedAgent;
     }
 
     private static ImmutableList<ConnectionSpec> createConnectionSpecs(boolean enableGcmCipherSuites) {

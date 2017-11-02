@@ -84,4 +84,17 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         RecordedRequest capturedRequest = server.takeRequest();
         assertThat(capturedRequest.getHeader("User-Agent"), startsWith("unknown/0.0.0"));
     }
+
+    @Test
+    public void testUserAgent_augmentedByHttpRemotingAndServiceComponents() throws Exception {
+        TestService service = Retrofit2Client.create(
+                TestService.class, AGENT, createTestConfig(
+                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
+        server.enqueue(new MockResponse().setBody("\"server\""));
+        service.get().execute();
+
+        RecordedRequest capturedRequest = server.takeRequest();
+        // Versions are not available since the tests run on classes, not Gradle-built JARs
+        assertThat(capturedRequest.getHeader("User-Agent"), is("test/0.0.1, TestService/0.0.0, http-remoting/0.0.0"));
+    }
 }
