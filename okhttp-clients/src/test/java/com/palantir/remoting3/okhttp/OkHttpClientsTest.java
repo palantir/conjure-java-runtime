@@ -84,8 +84,7 @@ public final class OkHttpClientsTest extends TestBase {
 
     private static MetricName name(String family) {
         return MetricName.builder()
-                .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
-                .putSafeTags(HostMetrics.SERVICE_NAME_TAG, OkHttpClientsTest.class.getCanonicalName())
+                .safeName("OkHttpClientsTest" + HostMetrics.CLIENT_RESPONSE_METRIC_NAME_SUFFIX)
                 .putSafeTags(HostMetrics.HOSTNAME_TAG, "localhost")
                 .putSafeTags(HostMetrics.FAMILY_TAG, family).build();
     }

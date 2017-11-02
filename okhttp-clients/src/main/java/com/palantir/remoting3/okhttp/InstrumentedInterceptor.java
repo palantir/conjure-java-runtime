@@ -44,7 +44,7 @@ public final class InstrumentedInterceptor implements Interceptor {
         return response;
     }
 
-    static InstrumentedInterceptor withDefaultMetricRegistry(String serviceName) {
-        return new InstrumentedInterceptor(DefaultTaggedMetricRegistry.getDefault(), serviceName);
+    static InstrumentedInterceptor withDefaultMetricRegistry(Class<?> serviceClass) {
+        return new InstrumentedInterceptor(DefaultTaggedMetricRegistry.getDefault(), serviceClass.getSimpleName());
     }
 }

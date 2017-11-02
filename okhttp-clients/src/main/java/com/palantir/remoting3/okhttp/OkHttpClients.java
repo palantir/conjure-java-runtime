@@ -93,7 +93,7 @@ public final class OkHttpClients {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // response metrics
-        client.addNetworkInterceptor(InstrumentedInterceptor.withDefaultMetricRegistry(serviceClass.getName()));
+        client.addNetworkInterceptor(InstrumentedInterceptor.withDefaultMetricRegistry(serviceClass));
 
         // Error handling, retry/failover, etc: the order of these matters.
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
