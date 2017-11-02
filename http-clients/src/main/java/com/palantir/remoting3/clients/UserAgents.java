@@ -159,15 +159,15 @@ public final class UserAgents {
         return Optional.of(UserAgent.Agent.of(name, version));
     }
 
-    static boolean isValidName(String serviceName) {
-        return NAME_REGEX.matcher(serviceName).matches();
+    private static boolean isValidName(String name) {
+        return NAME_REGEX.matcher(name).matches();
     }
 
-    static boolean isValidNodeId(String instanceId) {
+    private static boolean isValidNodeId(String instanceId) {
         return NAME_REGEX.matcher(instanceId).matches();
     }
 
-    static boolean isValidVersion(String version) {
+    private static boolean isValidVersion(String version) {
         for (Pattern p : ORDERABLE_VERSION) {
             if (p.matcher(version).matches()) {
                 return true;
