@@ -41,6 +41,7 @@ public final class UserAgents {
     private static final Splitter.MapSplitter COLON_SEMICOLON_SPLITTER = Splitter.on(';').withKeyValueSeparator(":");
     private static final Splitter COMMA_SPLITTER = Splitter.on(",").omitEmptyStrings().trimResults();
     private static final Pattern NAME_REGEX = Pattern.compile("([a-zA-Z][a-zA-Z0-9\\-]*)");
+    private static final Pattern NODE_REGEX = Pattern.compile("([a-zA-Z0-9][a-zA-Z0-9.\\-]*)");
     private static final Pattern[] ORDERABLE_VERSION = new Pattern[] {
             Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+-g[a-f0-9]+$"),
             Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+$"),
@@ -164,7 +165,7 @@ public final class UserAgents {
     }
 
     static boolean isValidNodeId(String instanceId) {
-        return NAME_REGEX.matcher(instanceId).matches();
+        return NODE_REGEX.matcher(instanceId).matches();
     }
 
     static boolean isValidVersion(String version) {
