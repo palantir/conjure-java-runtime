@@ -20,7 +20,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
+import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
+import com.palantir.remoting3.okhttp.OkHttpClients;
 import java.io.IOException;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -93,8 +95,11 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.get().execute();
 
-        RecordedRequest capturedRequest = server.takeRequest();
-        // Versions are not available since the tests run on classes, not Gradle-built JARs
-        assertThat(capturedRequest.getHeader("User-Agent"), is("test/0.0.1, TestService/0.0.0, http-remoting/0.0.0"));
+        RecordedRequest request = server.takeRequest();
+        String remotingVersion = OkHttpClients.class.getPackage().getImplementationVersion();
+        UserAgent expected = AGENT
+                .addAgent(UserAgent.Agent.of("TestService", "0.0.0"))
+                .addAgent(UserAgent.Agent.of("http-remoting", remotingVersion != null ? remotingVersion : "0.0.0"));
+        assertThat(request.getHeader("User-Agent"), is(UserAgents.format(expected)));
     }
 }
