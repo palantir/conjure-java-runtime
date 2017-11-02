@@ -103,7 +103,7 @@ public final class SerializableErrorInterceptorTest extends TestBase {
     }
 
     @Test
-    public void testDeserialization_withContentTypeTextPlain() throws InterruptedException, IOException {
+    public void testDeserialization_withContentTypeTextPlain() throws Exception {
         MockResponse mockResponse = new MockResponse()
                 .setBody("errorbody")
                 .addHeader("Content-Type", "text/html")
@@ -112,7 +112,11 @@ public final class SerializableErrorInterceptorTest extends TestBase {
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Error 400. Body:\nerrorbody");
-        service.get().execute();
+        try {
+            service.get().execute();
+        } catch (IOException e) {
+            throw (Exception) e.getCause();
+        }
     }
 
     @Test

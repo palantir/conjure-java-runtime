@@ -16,11 +16,8 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import com.palantir.remoting.api.errors.RemoteException;
 import java.io.IOException;
-import javax.annotation.Nullable;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -40,6 +37,10 @@ public final class QosIoExceptionAwareCall extends ForwardingCall {
             return super.execute();
         } catch (QosIoException e) {
             return exceptionHandler.handle(this, e);
+        } catch (IOException | RemoteException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw wrapRuntimeException(e);
         }
     }
 
@@ -49,32 +50,8 @@ public final class QosIoExceptionAwareCall extends ForwardingCall {
             @Override
             public void onFailure(Call call, IOException ioException) {
                 if (ioException instanceof QosIoException) {
-                    // Let retry handler deal with the call and propagate its result to the responseCallback
-                    ListenableFuture<Response> response =
-                            exceptionHandler.handleAsync(QosIoExceptionAwareCall.this, (QosIoException) ioException);
-                    Futures.addCallback(response, new FutureCallback<Response>() {
-                        @Override
-                        public void onSuccess(@Nullable Response result) {
-                            try {
-                                responseCallback.onResponse(call, result);
-                            } catch (IOException ioException) {
-                                responseCallback.onFailure(call,
-                                        new IOException("Unexpected exception when notifying callback", ioException));
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Throwable throwable) {
-                            if (throwable instanceof QosIoException) {
-                                QosIoException qosIoException = (QosIoException) throwable;
-                                responseCallback.onFailure(call, new QosIoException(
-                                        qosIoException.getQosException(), qosIoException.getResponse()));
-                            } else {
-                                responseCallback.onFailure(
-                                        call, new IOException("Failed to execute request", throwable));
-                            }
-                        }
-                    });
+                    handleQosExceptionAsync(QosIoExceptionAwareCall.this, (QosIoException) ioException,
+                            responseCallback);
                 } else {
                     responseCallback.onFailure(call, ioException);
                 }
@@ -86,6 +63,19 @@ public final class QosIoExceptionAwareCall extends ForwardingCall {
             }
         };
         super.enqueue(qosAwareCallback);
+    }
+
+    private void handleQosExceptionAsync(QosIoExceptionAwareCall call, QosIoException ioException,
+            Callback responseCallback) {
+        try {
+            exceptionHandler.handleAsync(call, ioException, responseCallback);
+        } catch (Throwable t) {
+            responseCallback.onFailure(call, wrapRuntimeException(t));
+        }
+    }
+
+    private IOException wrapRuntimeException(Throwable throwable) {
+        return new IOException("Failed to execute request", throwable);
     }
 
     @Override

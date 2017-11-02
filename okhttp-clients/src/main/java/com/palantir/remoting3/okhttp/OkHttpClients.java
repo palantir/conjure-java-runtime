@@ -28,8 +28,8 @@ import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import okhttp3.Call;
@@ -40,7 +40,6 @@ import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.TlsVersion;
-import okhttp3.internal.Util;
 
 public final class OkHttpClients {
 
@@ -49,16 +48,7 @@ public final class OkHttpClients {
      */
     private static final ExecutorService executorService = Tracers.wrap(new Dispatcher().executorService());
 
-    /**
-     * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
-     * internal thread pool and from the thread pool used by {@link #executorService}.
-     * <p>
-     * Note: In contrast to the {@link java.util.concurrent.ThreadPoolExecutor} used by OkHttp's {@link
-     * #executorService}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
-     * Javadoc.
-     */
-    private static final ScheduledExecutorService scheduledExecutorService = Tracers.wrap(
-            new ScheduledThreadPoolExecutor(5, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
+    private static final ScheduledExecutorService asyncRetryExecutor = Executors.newSingleThreadScheduledExecutor();
 
     private OkHttpClients() {}
 
@@ -95,8 +85,10 @@ public final class OkHttpClients {
     }
 
     private static Supplier<QosIoExceptionHandler> createQosHandler(ClientConfiguration config) {
-        return () -> new AsyncQosIoExceptionHandler(scheduledExecutorService, executorService,
-                new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()));
+        return () -> new QosIoExceptionHandlerImpl(
+                new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()),
+                BackoffSleeper.DEFAULT,
+                asyncRetryExecutor);
     }
 
     private static QosIoExceptionAwareOkHttpClient createInternal(
