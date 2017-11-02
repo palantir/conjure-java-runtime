@@ -20,10 +20,12 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
+import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import com.palantir.remoting3.jaxrs.TestBase;
 import com.palantir.remoting3.jaxrs.TestService;
+import com.palantir.remoting3.okhttp.OkHttpClients;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -73,7 +75,10 @@ public final class UserAgentTest extends TestBase {
         service.string();
 
         RecordedRequest request = server.takeRequest();
-        // Versions are not available since the tests run on classes, not Gradle-built JARs
-        assertThat(request.getHeader("User-Agent"), is("test/0.0.1, TestService/0.0.0, http-remoting/0.0.0"));
+        String remotingVersion = OkHttpClients.class.getPackage().getImplementationVersion();
+        UserAgent expected = AGENT
+                .addAgent(UserAgent.Agent.of("TestService", "0.0.0"))
+                .addAgent(UserAgent.Agent.of("http-remoting", remotingVersion != null ? remotingVersion : "0.0.0"));
+        assertThat(request.getHeader("User-Agent"), is(UserAgents.format(expected)));
     }
 }
