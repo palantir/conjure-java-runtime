@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.jmock.lib.concurrent.DeterministicScheduler;
@@ -46,7 +47,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public final class AsyncQosIoExceptionHandlerTest extends TestBase {
 
-    private static final Request REQUEST = new Request.Builder().url("http://foo").build();
+    private static final String HTTP_URL_STRING = "http://foo";
+    private static final HttpUrl HTTP_URL = HttpUrl.parse(HTTP_URL_STRING);
+    private static final Request REQUEST = new Request.Builder().url(HTTP_URL_STRING).build();
     private static final Response RESPONSE = responseWithCode(REQUEST, 101 /* unused */);
     private static final Response CLONED_RESPONSE = responseWithCode(REQUEST, 102 /* unused */);
     private static final Optional<Duration> BACKOFF_10SECS = Optional.of(Duration.ofSeconds(10));
@@ -63,14 +66,29 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
     private AsyncQosIoExceptionHandler handler;
     private QosIoExceptionAwareCall call;
 
+    @Mock
+    private MultiServerRequestCreator requestCreator;
+    @Mock
+    private Call.Factory callFactory;
+
     @Before
     public void before() throws Exception {
         scheduler = new DeterministicScheduler();
-        handler = new AsyncQosIoExceptionHandler(scheduler, MoreExecutors.newDirectExecutorService(), backoff);
+        handler = new AsyncQosIoExceptionHandler(scheduler,
+                MoreExecutors.newDirectExecutorService(),
+                backoff,
+                requestCreator,
+                callFactory);
         call = new QosIoExceptionAwareCall(delegateCall, handler);
         when(call.clone()).thenReturn(clonedDelegateCall);
+        when(callFactory.newCall(any())).thenReturn(clonedDelegateCall);
         when(delegateCall.execute()).thenReturn(RESPONSE);
         when(clonedDelegateCall.execute()).thenReturn(CLONED_RESPONSE);
+
+        when(delegateCall.request()).thenReturn(REQUEST);
+        when(clonedDelegateCall.request()).thenReturn(REQUEST);
+        when(requestCreator.getNextRequest(any())).thenReturn(REQUEST);
+
         doAnswer(args -> {
             Callback callback = args.getArgumentAt(0, Callback.class);
             callback.onResponse(delegateCall, CLONED_RESPONSE);
@@ -146,12 +164,12 @@ public final class AsyncQosIoExceptionHandlerTest extends TestBase {
         ListenableFuture<Response> response = handler.handle(call, exception);
 
         scheduler.tick(5, TimeUnit.SECONDS);
-        verifyNoMoreInteractions(delegateCall);
+        verifyNoMoreInteractions(callFactory);
         assertThat(response.isDone()).isFalse();
         assertThat(response.isCancelled()).isFalse();
 
         scheduler.tick(10, TimeUnit.SECONDS);
-        verify(delegateCall).clone();
+        verify(callFactory).newCall(any());
         assertThat(response.isDone()).isTrue();
         assertThat(response.get(1, TimeUnit.SECONDS)).isEqualTo(CLONED_RESPONSE);
     }

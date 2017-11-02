@@ -17,7 +17,6 @@
 package com.palantir.remoting3.okhttp;
 
 import java.io.IOException;
-import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -28,10 +27,12 @@ public final class MultiServerRetryInterceptor implements Interceptor {
     private static final Logger logger = LoggerFactory.getLogger(MultiServerRetryInterceptor.class);
 
     private final UrlSelector urls;
+    private final MultiServerRequestCreator requestCreator;
     private final int maxNumRetries;
 
     private MultiServerRetryInterceptor(UrlSelector urls, int maxNumRetries) {
         this.urls = urls;
+        this.requestCreator = new MultiServerRequestCreator(urls);
         this.maxNumRetries = maxNumRetries;
     }
 
@@ -52,24 +53,13 @@ public final class MultiServerRetryInterceptor implements Interceptor {
         }
 
         // If the original URL failed, retry according to the UrlSelector.
-        HttpUrl currentUrl = chain.request().url();
+        Request request = chain.request();
         for (int i = 0; i < maxNumRetries; ++i) {
-            HttpUrl nextUrl = urls.redirectToNext(currentUrl).orElseThrow(() -> new IOException(
-                    "Failed to determine suitable target URL for request URL " + chain.request().url()
-                            + " amongst known base URLs: " + urls.getBaseUrls()));
-            logger.debug("Redirecting request from {} to {}", currentUrl, nextUrl);
-            Request originalRequest = chain.request();
-            Request request = originalRequest.newBuilder()
-                    .url(nextUrl)
-                    // Request.this.tag field by default points to request itself if it was not set in RequestBuilder.
-                    // We don't want to reference old request in new one - that is why we need to reset tag to null.
-                    .tag(originalRequest.tag().equals(originalRequest) ? null : originalRequest.tag())
-                    .build();
+            request = requestCreator.getNextRequest(request);
             try {
                 return chain.proceed(request);
             } catch (IOException e) {
                 lastException = e;
-                currentUrl = nextUrl;
                 logger.warn("Failed to send request to {}", request.url(), e);
             }
         }
