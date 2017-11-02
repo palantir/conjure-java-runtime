@@ -159,8 +159,8 @@ public final class UserAgents {
         return Optional.of(UserAgent.Agent.of(name, version));
     }
 
-    static boolean isValidName(String serviceName) {
-        return NAME_REGEX.matcher(serviceName).matches();
+    static boolean isValidName(String name) {
+        return NAME_REGEX.matcher(name).matches();
     }
 
     static boolean isValidNodeId(String instanceId) {

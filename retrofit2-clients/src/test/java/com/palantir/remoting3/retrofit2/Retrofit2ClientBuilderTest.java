@@ -20,7 +20,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
+import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
+import com.palantir.remoting3.okhttp.OkHttpClients;
 import java.io.IOException;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -74,9 +76,30 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
     }
 
     @Test
-    public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()\\-#;/.,_\\s]+': !@"));
-        Retrofit2Client.create(TestService.class, "!@", createTestConfig("http://localhost:" + server.getPort()));
+    public void testUserAgent_usesUnknownAgentIfBogusAgentIsGiven() throws InterruptedException, IOException {
+        TestService service = Retrofit2Client.create(
+                TestService.class, "bogus user agent", createTestConfig(
+                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
+        server.enqueue(new MockResponse().setBody("\"server\""));
+        service.get().execute();
+
+        RecordedRequest capturedRequest = server.takeRequest();
+        assertThat(capturedRequest.getHeader("User-Agent"), startsWith("unknown/0.0.0"));
+    }
+
+    @Test
+    public void testUserAgent_augmentedByHttpRemotingAndServiceComponents() throws Exception {
+        TestService service = Retrofit2Client.create(
+                TestService.class, AGENT, createTestConfig(
+                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
+        server.enqueue(new MockResponse().setBody("\"server\""));
+        service.get().execute();
+
+        RecordedRequest request = server.takeRequest();
+        String remotingVersion = OkHttpClients.class.getPackage().getImplementationVersion();
+        UserAgent expected = AGENT
+                .addAgent(UserAgent.Agent.of("TestService", "0.0.0"))
+                .addAgent(UserAgent.Agent.of("http-remoting", remotingVersion != null ? remotingVersion : "0.0.0"));
+        assertThat(request.getHeader("User-Agent"), is(UserAgents.format(expected)));
     }
 }

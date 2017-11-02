@@ -19,6 +19,8 @@ package com.palantir.remoting3.jaxrs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.clients.UserAgent;
+import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
@@ -68,7 +70,15 @@ abstract class AbstractFeignJaxRsClientBuilder {
 
     protected abstract ObjectMapper getCborObjectMapper();
 
+    /**
+     * @deprecated Use {@link #build(Class, UserAgent)}.
+     */
+    @Deprecated
     public final <T> T build(Class<T> serviceClass, String userAgent) {
+        return build(serviceClass, UserAgents.tryParse(userAgent));
+    }
+
+    public final <T> T build(Class<T> serviceClass, UserAgent userAgent) {
         ObjectMapper objectMapper = getObjectMapper();
         ObjectMapper cborObjectMapper = getCborObjectMapper();
 
@@ -92,9 +102,9 @@ abstract class AbstractFeignJaxRsClientBuilder {
     private Contract createContract() {
         return new PathTemplateHeaderEnrichmentContract(
                 new SlashEncodingContract(
-                    new Java8OptionalAwareContract(
-                            new GuavaOptionalAwareContract(
-                                    new JAXRSContract()))));
+                        new Java8OptionalAwareContract(
+                                new GuavaOptionalAwareContract(
+                                        new JAXRSContract()))));
     }
 
     private Request.Options createRequestOptions() {

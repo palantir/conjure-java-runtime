@@ -16,46 +16,23 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Preconditions;
+import com.palantir.remoting3.clients.UserAgent;
+import com.palantir.remoting3.clients.UserAgents;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
 public final class UserAgentInterceptor implements Interceptor {
 
-    private static final Pattern VALID_USER_AGENT = Pattern.compile("[A-Za-z0-9()\\-#;/.,_\\s]+");
     private final String userAgent;
 
-    private UserAgentInterceptor(String userAgent, Class<?> serviceClass) {
-        Preconditions.checkArgument(VALID_USER_AGENT.matcher(userAgent).matches(),
-                "User Agent must match pattern '%s': %s", VALID_USER_AGENT, userAgent);
-
-        String version = getVersionString(serviceClass);
-        this.userAgent = version.isEmpty()
-                ? userAgent
-                : userAgent + " (" + version + ")";
+    private UserAgentInterceptor(UserAgent userAgent) {
+        this.userAgent = UserAgents.format(userAgent);
     }
 
-    private String getVersionString(Class<?> serviceClass) {
-        List<String> versions = new ArrayList<>(2);
-        String maybeServiceVersion = serviceClass.getPackage().getImplementationVersion();
-        if (maybeServiceVersion != null) {
-            versions.add("Service API " + serviceClass.getSimpleName() + " " + maybeServiceVersion);
-        }
-        String maybeRemotingVersion = this.getClass().getPackage().getImplementationVersion();
-        if (maybeRemotingVersion != null) {
-            versions.add("http-remoting " + maybeRemotingVersion);
-        }
-        return Joiner.on(";").join(versions);
-    }
-
-    public static UserAgentInterceptor of(String userAgent, Class<?> serviceClass) {
-        return new UserAgentInterceptor(userAgent, serviceClass);
+    public static UserAgentInterceptor of(UserAgent userAgent) {
+        return new UserAgentInterceptor(userAgent);
     }
 
     @Override

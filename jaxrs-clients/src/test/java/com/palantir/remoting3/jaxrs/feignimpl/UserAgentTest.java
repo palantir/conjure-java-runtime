@@ -20,10 +20,12 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
+import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import com.palantir.remoting3.jaxrs.TestBase;
 import com.palantir.remoting3.jaxrs.TestService;
+import com.palantir.remoting3.okhttp.OkHttpClients;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -58,9 +60,25 @@ public final class UserAgentTest extends TestBase {
     }
 
     @Test
-    public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()\\-#;/.,_\\s]+': !@"));
-        JaxRsClient.create(TestService.class, "!@", createTestConfig(endpointUri));
+    public void testUserAgent_usesUnknownAgentWhenProvidedWithBogusAgentString() throws InterruptedException {
+        TestService service = JaxRsClient.create(TestService.class, "bogus version string",
+                createTestConfig(endpointUri));
+        service.string();
+
+        RecordedRequest request = server.takeRequest();
+        assertThat(request.getHeader("User-Agent"), startsWith("unknown/0.0.0"));
+    }
+
+    @Test
+    public void testUserAgent_augmentedByHttpRemotingAndServiceComponents() throws Exception {
+        TestService service = JaxRsClient.create(TestService.class, AGENT, createTestConfig(endpointUri));
+        service.string();
+
+        RecordedRequest request = server.takeRequest();
+        String remotingVersion = OkHttpClients.class.getPackage().getImplementationVersion();
+        UserAgent expected = AGENT
+                .addAgent(UserAgent.Agent.of("TestService", "0.0.0"))
+                .addAgent(UserAgent.Agent.of("http-remoting", remotingVersion != null ? remotingVersion : "0.0.0"));
+        assertThat(request.getHeader("User-Agent"), is(UserAgents.format(expected)));
     }
 }
