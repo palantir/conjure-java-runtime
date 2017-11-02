@@ -22,6 +22,8 @@ import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.clients.UserAgent;
+import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.Random;
@@ -64,21 +66,31 @@ public final class OkHttpClients {
      * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
-    public static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
+    public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
         return createInternal(
                 config, userAgent, serviceClass, createQosHandler(config), true /* randomize URL order */);
     }
 
+    /**
+     * Deprecated variant of {@link #create(ClientConfiguration, String, Class)}.
+     *
+     * @deprecated Use {@link #create(ClientConfiguration, UserAgent, Class)}
+     */
+    @Deprecated
+    public static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
+        return create(config, UserAgents.tryParse(userAgent), serviceClass);
+    }
+
     @VisibleForTesting
     static QosIoExceptionAwareOkHttpClient withCustomQosHandler(
-            ClientConfiguration config, String userAgent, Class<?> serviceClass,
+            ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass,
             Supplier<QosIoExceptionHandler> handlerFactory) {
         return createInternal(config, userAgent, serviceClass, handlerFactory, true);
     }
 
     @VisibleForTesting
     static QosIoExceptionAwareOkHttpClient withStableUris(
-            ClientConfiguration config, String userAgent, Class<?> serviceClass) {
+            ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
         return createInternal(config, userAgent, serviceClass, createQosHandler(config), false);
     }
 
@@ -88,7 +100,7 @@ public final class OkHttpClients {
     }
 
     private static QosIoExceptionAwareOkHttpClient createInternal(
-            ClientConfiguration config, String userAgent, Class<?> serviceClass,
+            ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass,
             Supplier<QosIoExceptionHandler> handlerFactory, boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
@@ -128,7 +140,7 @@ public final class OkHttpClients {
         }
 
         // User agent setup
-        client.addInterceptor(UserAgentInterceptor.of(userAgent, serviceClass));
+        client.addInterceptor(UserAgentInterceptor.of(userAgent));
 
         // cipher setup
         client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));

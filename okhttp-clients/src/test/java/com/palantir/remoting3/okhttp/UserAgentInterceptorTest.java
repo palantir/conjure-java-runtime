@@ -21,6 +21,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.palantir.remoting3.clients.UserAgent;
+import com.palantir.remoting3.clients.UserAgents;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Request;
@@ -33,9 +35,8 @@ import org.mockito.ArgumentCaptor;
 
 public final class UserAgentInterceptorTest {
 
-    private static final String USER_AGENT = "TestSuite/1 (0.0.0)";
-    private static final UserAgentInterceptor interceptor =
-            UserAgentInterceptor.of(USER_AGENT, UserAgentInterceptor.class);
+    private static final UserAgent USER_AGENT = UserAgent.of(UserAgent.Agent.of("test", "1.2.3"));
+    private static final UserAgentInterceptor interceptor = UserAgentInterceptor.of(USER_AGENT);
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -55,6 +56,6 @@ public final class UserAgentInterceptorTest {
         verify(chain).request();
         ArgumentCaptor<Request> argument = ArgumentCaptor.forClass(Request.class);
         verify(chain).proceed(argument.capture());
-        assertThat(argument.getValue().header("User-Agent")).isEqualTo(USER_AGENT);
+        assertThat(argument.getValue().header("User-Agent")).isEqualTo(UserAgents.format(USER_AGENT));
     }
 }

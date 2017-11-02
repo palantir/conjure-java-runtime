@@ -16,7 +16,6 @@
 
 package com.palantir.remoting3.jaxrs.feignimpl;
 
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
@@ -58,9 +57,12 @@ public final class UserAgentTest extends TestBase {
     }
 
     @Test
-    public void testUserAgent_invalidUserAgentThrows() throws InterruptedException {
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage(is("User Agent must match pattern '[A-Za-z0-9()\\-#;/.,_\\s]+': !@"));
-        JaxRsClient.create(TestService.class, "!@", createTestConfig(endpointUri));
+    public void testUserAgent_usesUnknownAgentWhenProvidedWithBogusAgentString() throws InterruptedException {
+        TestService service = JaxRsClient.create(TestService.class, "bogus version string",
+                createTestConfig(endpointUri));
+        service.string();
+
+        RecordedRequest request = server.takeRequest();
+        assertThat(request.getHeader("User-Agent"), startsWith("unknown/0.0.0"));
     }
 }

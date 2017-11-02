@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.ClientConfigurations;
+import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.config.ssl.SslSocketFactories;
 import java.nio.file.Paths;
 import java.util.List;
@@ -30,6 +31,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public abstract class TestBase {
+
+    protected static final UserAgent AGENT = UserAgent.of(UserAgent.Agent.of("test", "0.0.1"));
 
     @SafeVarargs
     static <T> Set<T> set(T... items) {

@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -159,15 +160,15 @@ public final class UserAgents {
         return Optional.of(UserAgent.Agent.of(name, version));
     }
 
-    private static boolean isValidName(String name) {
+    static boolean isValidName(String name) {
         return NAME_REGEX.matcher(name).matches();
     }
 
-    private static boolean isValidNodeId(String instanceId) {
+    static boolean isValidNodeId(String instanceId) {
         return NAME_REGEX.matcher(instanceId).matches();
     }
 
-    private static boolean isValidVersion(String version) {
+    static boolean isValidVersion(String version) {
         for (Pattern p : ORDERABLE_VERSION) {
             if (p.matcher(version).matches()) {
                 return true;
@@ -175,5 +176,19 @@ public final class UserAgents {
         }
         log.warn("Encountered invalid user agent version", SafeArg.of("version", version));
         return false;
+    }
+
+    // TODO(rfink): Put in the right place and fix up.
+    String getVersionString(Class<?> serviceClass) {
+        List<String> versions = new ArrayList<>(2);
+        String maybeServiceVersion = serviceClass.getPackage().getImplementationVersion();
+        if (maybeServiceVersion != null) {
+            versions.add("Service API " + serviceClass.getSimpleName() + " " + maybeServiceVersion);
+        }
+        String maybeRemotingVersion = this.getClass().getPackage().getImplementationVersion();
+        if (maybeRemotingVersion != null) {
+            versions.add("http-remoting " + maybeRemotingVersion);
+        }
+        return Joiner.on(";").join(versions);
     }
 }

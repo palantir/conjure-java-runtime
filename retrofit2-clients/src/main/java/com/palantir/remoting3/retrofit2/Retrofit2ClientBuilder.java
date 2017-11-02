@@ -19,6 +19,8 @@ package com.palantir.remoting3.retrofit2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.clients.UserAgent;
+import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.okhttp.AsyncCallTagCallFactory;
 import com.palantir.remoting3.okhttp.OkHttpClients;
@@ -36,7 +38,15 @@ public final class Retrofit2ClientBuilder {
         this.config = config;
     }
 
+    /**
+     * @deprecated Use {@link #build(Class, UserAgent)}.
+     */
+    @Deprecated
     public <T> T build(Class<T> serviceClass, String userAgent) {
+        return build(serviceClass, UserAgents.tryParse(userAgent));
+    }
+
+    public <T> T build(Class<T> serviceClass, UserAgent userAgent) {
         okhttp3.OkHttpClient client = OkHttpClients.create(config, userAgent, serviceClass);
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
