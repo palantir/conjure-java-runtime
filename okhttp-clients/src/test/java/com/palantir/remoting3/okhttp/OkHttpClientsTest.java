@@ -18,16 +18,10 @@ package com.palantir.remoting3.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
-import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.clients.ClientConfiguration;
@@ -36,15 +30,14 @@ import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.SortedMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -57,32 +50,25 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(Parameterized.class)
 public final class OkHttpClientsTest extends TestBase {
 
     @Parameterized.Parameters
-    public static Collection<CallExecutor> clusters() {
+    public static Collection<CallExecutor> callExecutors() {
         return ImmutableList.of(
                 CallExecutor.BLOCKING,
                 CallExecutor.ASYNC);
     }
-
-    private static final Request REQUEST = new Request.Builder().url("http://127.0.0.1").build();
 
     @Rule
     public final MockWebServer server = new MockWebServer();
     @Rule
     public final MockWebServer server2 = new MockWebServer();
 
-    @Mock
-    private QosIoExceptionHandler handler;
-
     private String url;
     private String url2;
-    private OkHttpClient mockHandlerClient;
     private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private CallExecutor callExecutor;
 
@@ -96,11 +82,6 @@ public final class OkHttpClientsTest extends TestBase {
 
         url = "http://localhost:" + server.getPort();
         url2 = "http://localhost:" + server2.getPort();
-        mockHandlerClient = OkHttpClients.withCustomQosHandler(
-                createTestConfig(url),
-                AGENT,
-                OkHttpClientsTest.class,
-                () -> handler);
     }
 
     private static MetricName name(String family) {
@@ -125,59 +106,24 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
-    public void interceptsAndHandlesQosIoExceptions_propagatesQosIoExceptions() throws Exception {
-        QosIoException qosIoException = new QosIoException(QosException.unavailable(), responseWithCode(REQUEST, 503));
-        mockHandlerIoException(qosIoException);
-
-        server.enqueue(new MockResponse().setResponseCode(503));
-
-        Call call = mockHandlerClient.newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(() -> execute(call))
-                .hasMessage("Failed to complete the request due to a server-side QoS condition: 503")
-                .isInstanceOfSatisfying(QosIoException.class, actualException -> {
-                    assertThat(actualException.getResponse()).isEqualTo(qosIoException.getResponse());
-                    assertThat(actualException.getQosException()).isEqualTo(qosIoException.getQosException());
-                });
-    }
-    @Test
     public void doesNotHangIfManyCallsResultInExceptions() throws Exception {
-        int maxRetries = 10;
-
-        AtomicLong counter = new AtomicLong(maxRetries);
-        QosIoExceptionHandler retryingHandler = new QosIoExceptionHandlerImpl(
-                () -> {
-                    if (counter.decrementAndGet() <= 0) {
-                        return Optional.empty();
-                    }
-                    return Optional.of(Duration.ofMillis(1));
-                },
-                BackoffSleeper.DEFAULT,
-                scheduler);
+        int maxRetries = 50;
 
         for (int i = 0; i <= maxRetries; i++) {
             server.enqueue(new MockResponse().setResponseCode(503));
         }
 
-        OkHttpClient client = OkHttpClients.withCustomQosHandler(
-                createTestConfig(url),
-                AGENT,
-                OkHttpClientsTest.class,
-                () -> retryingHandler);
+        OkHttpClient client = createRetryingClient(maxRetries);
 
         Call call = client.newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(() -> execute(call)).isInstanceOf(QosIoException.class);
     }
 
     @Test
-    public void throwsProperRemoteExceptionAfterRetry() throws Exception {
+    public void throwsProperRemoteExceptionAfterRetryForBlockingCalls() throws Exception {
         if (callExecutor == CallExecutor.ASYNC) {
             return; // this test cannot be made to pass with an async call, as Callback requires an IOException
         }
-
-        QosIoExceptionHandler retryingHandler = new QosIoExceptionHandlerImpl(
-                () -> Optional.of(Duration.ofMillis(1)),
-                BackoffSleeper.DEFAULT,
-                scheduler);
 
         // first we get a 503
         server.enqueue(new MockResponse().setResponseCode(503));
@@ -190,29 +136,10 @@ public final class OkHttpClientsTest extends TestBase {
                 .setResponseCode(400);
         server.enqueue(mockResponse);
 
-        OkHttpClient client = OkHttpClients.withCustomQosHandler(
-                createTestConfig(url),
-                AGENT,
-                OkHttpClientsTest.class,
-                () -> retryingHandler);
+        OkHttpClient client = createRetryingClient(5);
 
         Call call = client.newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(() -> execute(call)).isInstanceOf(RemoteException.class);
-    }
-
-    @Test
-    public void interceptsAndHandlesQosIoExceptions_wrapsRuntimeExceptionsAsIoExceptions() throws Exception {
-        RuntimeException runtimeException = new RuntimeException("Foo");
-        mockHandlerRuntimeException(runtimeException);
-
-        server.enqueue(new MockResponse().setResponseCode(503));
-
-        Call call = mockHandlerClient.newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(() -> execute(call))
-                .hasMessage("Failed to execute request")
-                .isInstanceOf(IOException.class)
-                .hasCause(runtimeException);
-        verify(handler).handle(any(), any());
     }
 
     @Test
@@ -342,20 +269,6 @@ public final class OkHttpClientsTest extends TestBase {
 
         assertThat(server.getRequestCount()).isEqualTo(1);
         assertThat(server2.getRequestCount()).isEqualTo(2);
-    }
-
-    private void mockHandlerIoException(QosIoException qosIoException) throws IOException {
-        when(handler.handle(any(), any())).thenThrow(qosIoException);
-        doAnswer(inv -> {
-            Callback callback = (Callback)inv.getArgumentAt(2, Callback.class);
-            callback.onFailure(null, qosIoException);
-            return null;
-        }).when(handler).handleAsync(any(), any(), any());
-    }
-
-    private void mockHandlerRuntimeException(RuntimeException exception) throws IOException {
-        when(handler.handle(any(), any())).thenThrow(exception);
-        doThrow(exception).when(handler).handleAsync(any(), any(), any());
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {

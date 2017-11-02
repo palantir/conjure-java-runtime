@@ -22,7 +22,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-interface QosIoExceptionHandler {
+interface CallRetrier {
     /**
      * Handles a {@link QosIoException} that was thrown for the given {@link Call} and potentially retries it at a later
      * time. If the maximum allowed retries are exhausted, an exception will be thrown. This exception will either be
@@ -46,20 +46,20 @@ interface QosIoExceptionHandler {
      *     </li>
      *     <li>
      *         A {@link OkHttpClients.QosIoExceptionAwareOkHttpClient} catches all {@link QosIoException}s and passes
-     *         on to a configured {@link QosIoExceptionHandler}.
+     *         on to a configured {@link CallRetrier}.
      *     </li>
      *     <li>
-     *         The {@link QosIoExceptionHandler} decides to reschedule the request, throw the {@link QosIoException}
+     *         The {@link CallRetrier} decides to reschedule the request, throw the {@link QosIoException}
      *         to the calling user, redirect the request, etc.
      *     </li>
      * </ul>
      */
-    Response handle(QosIoExceptionAwareCall call, QosIoException exception) throws IOException;
+    Response executeWithRetry(Call call) throws IOException;
 
     /**
-     * Performs the same logic as {@link #handle}, except that the request will be retried asynchronously via {@link
+     * Performs the same logic as {@link #executeWithRetry}, except that the request will be retried asynchronously via {@link
      * Call#enqueue}, using the provided callback. This method does not block the calling thread.
      */
-    void handleAsync(QosIoExceptionAwareCall call, QosIoException exception, Callback callback);
+    void enqueueWithRetry(Call call, Callback callback);
 
 }

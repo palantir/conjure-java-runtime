@@ -74,7 +74,7 @@ public final class OkHttpClients {
     @VisibleForTesting
     static QosIoExceptionAwareOkHttpClient withCustomQosHandler(
             ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass,
-            Supplier<QosIoExceptionHandler> handlerFactory) {
+            Supplier<CallRetrier> handlerFactory) {
         return createInternal(config, userAgent, serviceClass, handlerFactory, true);
     }
 
@@ -84,8 +84,8 @@ public final class OkHttpClients {
         return createInternal(config, userAgent, serviceClass, createQosHandler(config), false);
     }
 
-    private static Supplier<QosIoExceptionHandler> createQosHandler(ClientConfiguration config) {
-        return () -> new QosIoExceptionHandlerImpl(
+    private static Supplier<CallRetrier> createQosHandler(ClientConfiguration config) {
+        return () -> new QosAwareCallRetrier(
                 new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()),
                 BackoffSleeper.DEFAULT,
                 asyncRetryExecutor);
@@ -93,7 +93,7 @@ public final class OkHttpClients {
 
     private static QosIoExceptionAwareOkHttpClient createInternal(
             ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass,
-            Supplier<QosIoExceptionHandler> handlerFactory, boolean randomizeUrlOrder) {
+            Supplier<CallRetrier> handlerFactory, boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // response metrics
@@ -187,23 +187,23 @@ public final class OkHttpClients {
 
     /**
      * An OkHttp client that executes requests, catches all {@link QosIoException}s and passes them to the configured
-     * {@link QosIoExceptionHandler}.
+     * {@link CallRetrier}.
      * <p>
-     * See {@link QosIoExceptionHandler} for an end-to-end explanation of http-remoting specific client-side error
+     * See {@link CallRetrier} for an end-to-end explanation of http-remoting specific client-side error
      * handling.
      */
     private static final class QosIoExceptionAwareOkHttpClient extends ForwardingOkHttpClient {
 
-        private final Supplier<QosIoExceptionHandler> handlerFactory;
+        private final Supplier<CallRetrier> handlerFactory;
 
-        private QosIoExceptionAwareOkHttpClient(OkHttpClient delegate, Supplier<QosIoExceptionHandler> handlerFactory) {
+        private QosIoExceptionAwareOkHttpClient(OkHttpClient delegate, Supplier<CallRetrier> handlerFactory) {
             super(delegate);
             this.handlerFactory = handlerFactory;
         }
 
         @Override
         public Call newCall(Request request) {
-            return new QosIoExceptionAwareCall(getDelegate().newCall(request), handlerFactory.get());
+            return new RetryingCall(getDelegate().newCall(request), handlerFactory.get());
         }
     }
 }

@@ -26,7 +26,7 @@ import okhttp3.Response;
  * QosException}s and is needed since OkHttp {@link okhttp3.Interceptor}s must only throw {@link IOException}s when
  * handling requests or responses.
  * <p>
- * See {@link QosIoExceptionHandler} for an end-to-end explanation of http-remoting specific client-side error
+ * See {@link CallRetrier} for an end-to-end explanation of http-remoting specific client-side error
  * handling.
  */
 class QosIoException extends IOException {
