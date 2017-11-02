@@ -18,15 +18,16 @@ package com.palantir.remoting3.okhttp.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.palantir.tritium.metrics.MetricName;
-import com.palantir.tritium.metrics.TaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import org.junit.Test;
 
 public final class HostMetricsRegistryTest {
 
     @Test
     public void test() {
-        TaggedMetricRegistry registry = new TaggedMetricRegistry();
+        TaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
         HostMetricsRegistry hostRegistry = new HostMetricsRegistry(registry, "service");
 
         MetricName name = MetricName.builder()

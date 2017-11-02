@@ -17,7 +17,8 @@
 package com.palantir.remoting3.okhttp;
 
 import com.palantir.remoting3.okhttp.metrics.HostMetricsRegistry;
-import com.palantir.tritium.metrics.TaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;
@@ -44,6 +45,6 @@ public final class InstrumentedInterceptor implements Interceptor {
     }
 
     static InstrumentedInterceptor withDefaultMetricRegistry(String serviceName) {
-        return new InstrumentedInterceptor(TaggedMetricRegistry.getDefault(), serviceName);
+        return new InstrumentedInterceptor(DefaultTaggedMetricRegistry.getDefault(), serviceName);
     }
 }

@@ -68,21 +68,11 @@
                 "com.palantir.remoting3:tracing"
             ]
         },
-        "com.google.code.findbugs:annotations": {
-            "locked": "3.0.1",
-            "transitive": [
-                "com.palantir.tritium:tritium-api",
-                "com.palantir.tritium:tritium-core",
-                "com.palantir.tritium:tritium-metrics"
-            ]
-        },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.google.code.findbugs:annotations",
                 "com.palantir.remoting-api:errors",
-                "com.palantir.remoting3:refresh-utils",
-                "org.mpierce.metrics.reservoir:hdrhistogram-metrics-reservoir"
+                "com.palantir.remoting3:refresh-utils"
             ]
         },
         "com.google.guava:guava": {
@@ -93,9 +83,7 @@
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:refresh-utils",
-                "com.palantir.remoting3:tracing",
-                "com.palantir.tritium:tritium-core",
-                "com.palantir.tritium:tritium-metrics"
+                "com.palantir.remoting3:tracing"
             ]
         },
         "com.netflix.feign:feign-core": {
@@ -193,8 +181,7 @@
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tritium:tritium-core",
-                "com.palantir.tritium:tritium-metrics"
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "com.palantir.tokens:auth-tokens": {
@@ -203,21 +190,8 @@
                 "com.palantir.remoting-api:service-config"
             ]
         },
-        "com.palantir.tritium:tritium-api": {
-            "locked": "0.7.0",
-            "transitive": [
-                "com.palantir.tritium:tritium-core",
-                "com.palantir.tritium:tritium-metrics"
-            ]
-        },
-        "com.palantir.tritium:tritium-core": {
-            "locked": "0.7.0",
-            "transitive": [
-                "com.palantir.tritium:tritium-metrics"
-            ]
-        },
-        "com.palantir.tritium:tritium-metrics": {
-            "locked": "0.7.0",
+        "com.palantir.tritium:tritium-registry": {
+            "locked": "0.8.0",
             "transitive": [
                 "com.palantir.remoting3:okhttp-clients"
             ]
@@ -247,8 +221,7 @@
             "locked": "3.2.3",
             "transitive": [
                 "com.palantir.remoting3:okhttp-clients",
-                "com.palantir.tritium:tritium-metrics",
-                "org.mpierce.metrics.reservoir:hdrhistogram-metrics-reservoir"
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
@@ -258,29 +231,10 @@
                 "com.palantir.remoting3:error-handling"
             ]
         },
-        "net.jcip:jcip-annotations": {
-            "locked": "1.0",
-            "transitive": [
-                "com.google.code.findbugs:annotations"
-            ]
-        },
-        "org.hdrhistogram:HdrHistogram": {
-            "locked": "2.1.10",
-            "transitive": [
-                "com.palantir.tritium:tritium-metrics",
-                "org.mpierce.metrics.reservoir:hdrhistogram-metrics-reservoir"
-            ]
-        },
         "org.jvnet:animal-sniffer-annotation": {
             "locked": "1.0",
             "transitive": [
                 "com.netflix.feign:feign-core"
-            ]
-        },
-        "org.mpierce.metrics.reservoir:hdrhistogram-metrics-reservoir": {
-            "locked": "1.1.2",
-            "transitive": [
-                "com.palantir.tritium:tritium-metrics"
             ]
         },
         "org.slf4j:slf4j-api": {
@@ -291,8 +245,6 @@
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tokens:auth-tokens",
-                "com.palantir.tritium:tritium-core",
-                "com.palantir.tritium:tritium-metrics",
                 "io.dropwizard.metrics:metrics-core"
             ]
         }
@@ -366,21 +318,11 @@
                 "com.palantir.remoting3:tracing"
             ]
         },
-        "com.google.code.findbugs:annotations": {
-            "locked": "3.0.1",
-            "transitive": [
-                "com.palantir.tritium:tritium-api",
-                "com.palantir.tritium:tritium-core",
-                "com.palantir.tritium:tritium-metrics"
-            ]
-        },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.google.code.findbugs:annotations",
                 "com.palantir.remoting-api:errors",
-                "com.palantir.remoting3:refresh-utils",
-                "org.mpierce.metrics.reservoir:hdrhistogram-metrics-reservoir"
+                "com.palantir.remoting3:refresh-utils"
             ]
         },
         "com.google.guava:guava": {
@@ -391,9 +333,7 @@
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:refresh-utils",
-                "com.palantir.remoting3:tracing",
-                "com.palantir.tritium:tritium-core",
-                "com.palantir.tritium:tritium-metrics"
+                "com.palantir.remoting3:tracing"
             ]
         },
         "com.netflix.feign:feign-core": {
@@ -491,8 +431,7 @@
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tritium:tritium-core",
-                "com.palantir.tritium:tritium-metrics"
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "com.palantir.tokens:auth-tokens": {
@@ -501,21 +440,8 @@
                 "com.palantir.remoting-api:service-config"
             ]
         },
-        "com.palantir.tritium:tritium-api": {
-            "locked": "0.7.0",
-            "transitive": [
-                "com.palantir.tritium:tritium-core",
-                "com.palantir.tritium:tritium-metrics"
-            ]
-        },
-        "com.palantir.tritium:tritium-core": {
-            "locked": "0.7.0",
-            "transitive": [
-                "com.palantir.tritium:tritium-metrics"
-            ]
-        },
-        "com.palantir.tritium:tritium-metrics": {
-            "locked": "0.7.0",
+        "com.palantir.tritium:tritium-registry": {
+            "locked": "0.8.0",
             "transitive": [
                 "com.palantir.remoting3:okhttp-clients"
             ]
@@ -545,8 +471,7 @@
             "locked": "3.2.3",
             "transitive": [
                 "com.palantir.remoting3:okhttp-clients",
-                "com.palantir.tritium:tritium-metrics",
-                "org.mpierce.metrics.reservoir:hdrhistogram-metrics-reservoir"
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
@@ -556,29 +481,10 @@
                 "com.palantir.remoting3:error-handling"
             ]
         },
-        "net.jcip:jcip-annotations": {
-            "locked": "1.0",
-            "transitive": [
-                "com.google.code.findbugs:annotations"
-            ]
-        },
-        "org.hdrhistogram:HdrHistogram": {
-            "locked": "2.1.10",
-            "transitive": [
-                "com.palantir.tritium:tritium-metrics",
-                "org.mpierce.metrics.reservoir:hdrhistogram-metrics-reservoir"
-            ]
-        },
         "org.jvnet:animal-sniffer-annotation": {
             "locked": "1.0",
             "transitive": [
                 "com.netflix.feign:feign-core"
-            ]
-        },
-        "org.mpierce.metrics.reservoir:hdrhistogram-metrics-reservoir": {
-            "locked": "1.1.2",
-            "transitive": [
-                "com.palantir.tritium:tritium-metrics"
             ]
         },
         "org.slf4j:slf4j-api": {
@@ -589,8 +495,6 @@
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tokens:auth-tokens",
-                "com.palantir.tritium:tritium-core",
-                "com.palantir.tritium:tritium-metrics",
                 "io.dropwizard.metrics:metrics-core"
             ]
         }

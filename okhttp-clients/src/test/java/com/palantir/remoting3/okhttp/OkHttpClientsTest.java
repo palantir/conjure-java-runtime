@@ -30,8 +30,9 @@ import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.okhttp.metrics.HostMetrics;
-import com.palantir.tritium.metrics.MetricName;
-import com.palantir.tritium.metrics.TaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
@@ -91,7 +92,7 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void verifyResponseMetricsAreRegistered() throws IOException {
-        TaggedMetricRegistry registry = TaggedMetricRegistry.getDefault();
+        TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
         server.enqueue(new MockResponse().setBody("pong"));
         createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();

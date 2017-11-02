@@ -18,8 +18,8 @@ package com.palantir.remoting3.okhttp.metrics;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
-import com.palantir.tritium.metrics.MetricName;
-import com.palantir.tritium.metrics.TaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 
 /**
  * Records per-target-host HTTP response code metrics in a {@link MetricRegistry}.

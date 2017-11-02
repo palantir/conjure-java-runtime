@@ -21,8 +21,9 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Meter;
 import com.palantir.remoting3.okhttp.metrics.HostMetrics;
-import com.palantir.tritium.metrics.MetricName;
-import com.palantir.tritium.metrics.TaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
@@ -48,7 +49,7 @@ public final class InstrumentedInterceptorTest {
 
     @Before
     public void before() throws IOException {
-        registry = new TaggedMetricRegistry();
+        registry = new DefaultTaggedMetricRegistry();
         interceptor = new InstrumentedInterceptor(registry, "client");
     }
 

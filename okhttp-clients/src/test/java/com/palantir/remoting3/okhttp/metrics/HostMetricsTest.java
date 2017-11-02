@@ -20,8 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codahale.metrics.Meter;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.tritium.metrics.MetricName;
-import com.palantir.tritium.metrics.TaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
@@ -37,7 +38,7 @@ public final class HostMetricsTest {
 
     @Before
     public void before() {
-        registry = new TaggedMetricRegistry();
+        registry = new DefaultTaggedMetricRegistry();
         hostMetrics = new HostMetrics(registry, SERVICE_NAME, HOSTNAME);
     }
 
