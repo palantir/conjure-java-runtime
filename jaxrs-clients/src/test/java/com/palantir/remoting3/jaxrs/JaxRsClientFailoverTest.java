@@ -41,7 +41,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
     @Before
     public void before() throws Exception {
-        proxy = JaxRsClient.create(TestService.class, "agent",
+        proxy = JaxRsClient.create(TestService.class, AGENT,
                 ClientConfiguration.builder()
                         .from(createTestConfig(
                                 "http://localhost:" + server1.getPort(),
@@ -82,7 +82,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
     public void testConnectionError_performsFailoverOnDnsFailure() throws Exception {
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService bogusHostProxy = JaxRsClient.create(TestService.class, "agent",
+        TestService bogusHostProxy = JaxRsClient.create(TestService.class, AGENT,
                 ClientConfiguration.builder()
                         .from(createTestConfig(
                                 "http://foo-bar-bogus-host.unresolvable:80",

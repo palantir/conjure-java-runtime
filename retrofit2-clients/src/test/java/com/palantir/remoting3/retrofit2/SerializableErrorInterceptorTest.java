@@ -67,7 +67,7 @@ public final class SerializableErrorInterceptorTest extends TestBase {
     public void before() {
         MockitoAnnotations.initMocks(this);
         when(chain.request()).thenReturn(request);
-        service = Retrofit2Client.create(TestService.class, "agent",
+        service = Retrofit2Client.create(TestService.class, AGENT,
                 createTestConfig("http://localhost:" + server.getPort()));
     }
 

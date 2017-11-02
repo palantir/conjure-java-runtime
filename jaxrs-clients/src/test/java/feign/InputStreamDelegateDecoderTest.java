@@ -52,7 +52,7 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
         inputStreamDelegateDecoder = new InputStreamDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.create(GuavaTestServer.TestService.class, "agent", createTestConfig(endpointUri));
+        service = JaxRsClient.create(GuavaTestServer.TestService.class, AGENT, createTestConfig(endpointUri));
     }
 
     @Test

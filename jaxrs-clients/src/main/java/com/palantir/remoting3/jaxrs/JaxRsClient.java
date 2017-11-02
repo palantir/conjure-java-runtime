@@ -18,6 +18,8 @@ package com.palantir.remoting3.jaxrs;
 
 import com.google.common.reflect.Reflection;
 import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.clients.UserAgent;
+import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.ext.refresh.Refreshable;
 import com.palantir.remoting3.ext.refresh.RefreshableProxyInvocationHandler;
 
@@ -30,19 +32,42 @@ public final class JaxRsClient {
 
     /**
      * Creates a {@code T client} for the given service configuration. The HTTP {@code User-Agent} header of every
-     * request is set to the given non-empty {@code userAgent} string. Recommended user agents are of the form: {@code
-     * ServiceName (Version)}, e.g. MyServer (1.2.3) For services that run multiple instances, recommended user agents
-     * are of the form: {@code ServiceName/InstanceId (Version)}, e.g. MyServer/12 (1.2.3).
+     * request is set to the given non-empty {@code userAgent} string.
      */
+    public static <T> T create(Class<T> serviceClass, UserAgent userAgent, ClientConfiguration config) {
+        // TODO(rfink): Add http-remoting agent as informational
+        return create(serviceClass, UserAgents.format(userAgent), config);
+    }
+
+    /**
+     * Like {@link #create(Class, UserAgent, ClientConfiguration)}, but with a custom user agent string.
+     *
+     * @deprecated Use {@link #create(Class, UserAgent, ClientConfiguration)}
+     */
+    @Deprecated
     public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration config) {
         return new FeignJaxRsClientBuilder(config).build(serviceClass, userAgent);
     }
 
     /**
-     * Similar to {@link #create(Class, String, ClientConfiguration)}, but creates a mutable client that updates its
+     * Similar to {@link #create(Class, UserAgent, ClientConfiguration)}, but creates a mutable client that updates its
      * configuration transparently whenever the given {@link Refreshable refreshable} {@link ClientConfiguration}
      * changes.
      */
+    public static <T> T create(
+            Class<T> serviceClass,
+            UserAgent userAgent,
+            Refreshable<ClientConfiguration> config) {
+        // TODO(rfink): Add http-remoting agent as informational
+        return create(serviceClass, UserAgents.format(userAgent), config);
+    }
+
+    /**
+     * Like {@link #create(Class, UserAgent, Refreshable)}, but with a custom user agent string.
+     *
+     * @deprecated Use {@link #create(Class, UserAgent, Refreshable)}
+     */
+    @Deprecated
     public static <T> T create(
             Class<T> serviceClass,
             String userAgent,

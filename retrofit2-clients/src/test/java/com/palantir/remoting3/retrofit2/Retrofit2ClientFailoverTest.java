@@ -44,7 +44,7 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
     @Before
     public void before() throws Exception {
         proxy = Retrofit2Client.create(
-                TestService.class, "agent",
+                TestService.class, AGENT,
                 ClientConfiguration.builder()
                         .from(createTestConfig(
                                 String.format("http://%s:%s/api/", server1.getHostName(), server1.getPort()),
@@ -81,7 +81,7 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
     public void testConnectionError_performsFailoverOnDnsFailure() throws Exception {
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService bogusHostProxy = Retrofit2Client.create(TestService.class, "agent",
+        TestService bogusHostProxy = Retrofit2Client.create(TestService.class, AGENT,
                 ClientConfiguration.builder()
                         .from(createTestConfig(
                                 "http://foo-bar-bogus-host.unresolvable:80",

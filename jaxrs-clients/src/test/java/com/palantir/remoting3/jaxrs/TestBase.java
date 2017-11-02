@@ -20,11 +20,14 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.ClientConfigurations;
+import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.config.ssl.SslSocketFactories;
 import java.nio.file.Paths;
 
 // TODO(rfink): Use static utility class instead?
 public abstract class TestBase {
+
+    protected static final UserAgent AGENT = UserAgent.of(UserAgent.Agent.of("test", "0.0.1"));
 
     protected final ClientConfiguration createTestConfig(String... uri) {
         SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));

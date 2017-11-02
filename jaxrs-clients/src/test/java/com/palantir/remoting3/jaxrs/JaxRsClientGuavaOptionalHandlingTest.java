@@ -42,7 +42,7 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
 
     @Before
     public void before() {
-        proxy = JaxRsClient.create(Service.class, "agent",
+        proxy = JaxRsClient.create(Service.class, AGENT,
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
@@ -72,7 +72,7 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
     @Test
     public void testCannotDecorateInterfaceWithOptionalPathParam() {
         try {
-            JaxRsClient.create(CannotDecorateInterface.class, "agent",
+            JaxRsClient.create(CannotDecorateInterface.class, AGENT,
                     createTestConfig("http://localhost:" + server.getPort()));
             fail();
         } catch (RuntimeException e) {

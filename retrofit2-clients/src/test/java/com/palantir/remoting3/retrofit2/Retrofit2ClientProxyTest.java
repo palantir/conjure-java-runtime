@@ -49,12 +49,12 @@ public final class Retrofit2ClientProxyTest extends TestBase {
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
         TestService directService = Retrofit2Client.create(
-                TestService.class, "agent", createTestConfig("http://localhost:" + server.getPort()));
+                TestService.class, AGENT, createTestConfig("http://localhost:" + server.getPort()));
         ClientConfiguration proxiedConfig = ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server.getPort()))
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .build();
-        TestService proxiedService = Retrofit2Client.create(TestService.class, "agent", proxiedConfig);
+        TestService proxiedService = Retrofit2Client.create(TestService.class, AGENT, proxiedConfig);
 
         assertThat(directService.get().execute().body(), is("server"));
         assertThat(proxiedService.get().execute().body(), is("proxyServer"));
@@ -72,7 +72,7 @@ public final class Retrofit2ClientProxyTest extends TestBase {
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .proxyCredentials(BasicCredentials.of("fakeUser", "fakePassword"))
                 .build();
-        TestService proxiedService = Retrofit2Client.create(TestService.class, "agent", proxiedConfig);
+        TestService proxiedService = Retrofit2Client.create(TestService.class, AGENT, proxiedConfig);
 
         assertThat(proxiedService.get().execute().body(), is("proxyServer"));
         RecordedRequest firstRequest = proxyServer.takeRequest();
