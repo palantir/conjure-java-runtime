@@ -58,8 +58,7 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
         String errorInstanceId = UUID.randomUUID().toString();
         ErrorType errorType = getErrorType(exception);
 
-        Response.Status.Family family = Response.Status.Family.familyOf(errorType.httpErrorCode());
-        if (family == Response.Status.Family.CLIENT_ERROR) {
+        if (errorType.httpErrorCode() / 100 == 4 /* client error */) {
             log.info("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         } else {
             log.error("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);

@@ -44,8 +44,7 @@ final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicat
         log.warn(this.getClass().getSimpleName() + " is deprecated. Servers should throw ServiceExceptions instead.");
 
         String errorInstanceId = UUID.randomUUID().toString();
-        Response.Status.Family family = Response.Status.Family.familyOf(exception.getResponse().getStatus());
-        if (family == Response.Status.Family.CLIENT_ERROR) {
+        if (exception.getResponse().getStatus() / 100 == 4 /* client error */) {
             log.info("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         } else {
             log.error("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
