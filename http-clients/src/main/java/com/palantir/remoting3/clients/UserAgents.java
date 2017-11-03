@@ -34,6 +34,13 @@ import org.slf4j.LoggerFactory;
 
 public final class UserAgents {
 
+    /**
+     * The {@link com.palantir.remoting3.clients.UserAgent.Agent#name agent name} identifying the http-remoting library
+     * in a {@link UserAgent}.
+     */
+    public static final String REMOTING_AGENT_NAME = "http-remoting";
+
+
     private static final Logger log = LoggerFactory.getLogger(UserAgents.class);
 
     private static final Joiner COMMA_JOINER = Joiner.on(", ");
