@@ -44,8 +44,7 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
     @Override
     public Response toResponse(ServiceException exception) {
         int httpStatus = exception.getErrorType().httpErrorCode();
-        if (Response.Status.Family.familyOf(httpStatus)
-                .equals(Response.Status.Family.CLIENT_ERROR)) {
+        if (httpStatus / 100 == 4 /* client error */) {
             log.info("Error handling request",
                     SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), exception);
         } else {
