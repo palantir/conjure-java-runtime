@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -34,7 +35,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.annotation.Nullable;
@@ -54,11 +54,11 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.OngoingStubbing;
 
 @RunWith(Parameterized.class)
-public final class QosAwareCallRetrierTest extends TestBase {
+public final class QosAwareCallRetryerTest extends TestBase {
 
     @Parameterized.Parameters
     public static Collection<Boolean> clusters() {
-        return ImmutableList.of(true, false);
+        return ImmutableList.of(false, true);
     }
 
     private static final Request REQUEST = new Request.Builder().url("http://foo").build();
@@ -76,13 +76,13 @@ public final class QosAwareCallRetrierTest extends TestBase {
     @Mock
     private Call clonedDelegateCall;
 
-    private QosAwareCallRetrier retrier;
+    private QosAwareCallRetryer retrier;
     private RetryingCall call;
     private DeterministicScheduler scheduler = new DeterministicScheduler();
 
     private RetryVerifier verifier;
 
-    public QosAwareCallRetrierTest(boolean async) {
+    public QosAwareCallRetryerTest(boolean async) {
         verifier = async ? new AsyncCallVerifier() : new BlockingCallVerifier();
     }
 
@@ -90,22 +90,18 @@ public final class QosAwareCallRetrierTest extends TestBase {
     public void before() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        retrier = new QosAwareCallRetrier(backoff, sleeper, Executors.newSingleThreadScheduledExecutor());
+        retrier = new QosAwareCallRetryer(backoff, sleeper, scheduler);
         call = new RetryingCall(delegateCall, retrier);
-        when(call.clone()).thenReturn(clonedDelegateCall);
-        when(clonedDelegateCall.execute()).thenReturn(CLONED_RESPONSE);
-        doAnswer(args -> {
-            Callback callback = args.getArgumentAt(0, Callback.class);
-            callback.onResponse(delegateCall, CLONED_RESPONSE);
-            return null;
-        }).when(clonedDelegateCall).enqueue(any());
+        when(delegateCall.clone()).thenReturn(clonedDelegateCall);
+        when(clonedDelegateCall.clone()).thenReturn(clonedDelegateCall);
+        when(backoff.nextBackoff()).thenReturn(BACKOFF_10SECS);
     }
 
     @Test
     public void testThrottle_withRetryAfter_reschedules() throws Exception {
         QosIoException exception = new QosIoException(QosException.throttle(BACKOFF_10SECS.get()), RESPONSE);
 
-        verifyBackoffAndRetry(exception);
+        verifyBackoffAndRetry(exception, 1);
     }
 
     @Test
@@ -113,7 +109,7 @@ public final class QosAwareCallRetrierTest extends TestBase {
         when(backoff.nextBackoff()).thenReturn(BACKOFF_10SECS);
         QosIoException exception = new QosIoException(QosException.throttle(BACKOFF_10SECS.get()), RESPONSE);
 
-        verifyBackoffAndRetry(exception);
+        verifyBackoffAndRetry(exception, 1);
     }
 
     @Test
@@ -129,8 +125,21 @@ public final class QosAwareCallRetrierTest extends TestBase {
         QosIoException exception = new QosIoException(QosException.retryOther(new URL("http://foo")), RESPONSE);
 
         verifyNoRetryAndThrow(exception)
-                .hasMessageContaining("did not expect to handle RetryOther exception in retrier")
-                .isInstanceOf(IllegalStateException.class);
+                .satisfies(ex -> exceptionOrCauseHasMessage(ex, "did not expect to backoff for RetryOther"));
+    }
+
+    @Test
+    public void test_UnexpectedExceptionDuringRetry_isPropagated() throws Exception {
+        RuntimeException unexpected = new RuntimeException("foo");
+        when(backoff.nextBackoff()).thenThrow(unexpected);
+        QosIoException exception = new QosIoException(QosException.throttle(), RESPONSE);
+
+        verifyNoRetryAndThrow(exception)
+                .satisfies(ex -> exceptionOrCauseHasMessage(ex, "foo"));
+    }
+
+    private void exceptionOrCauseHasMessage(Throwable ex, String message) {
+        assertThat(ex.getMessage().contains(message) || ex.getCause().getMessage().contains(message)).isTrue();
     }
 
     @Test
@@ -146,24 +155,36 @@ public final class QosAwareCallRetrierTest extends TestBase {
         when(backoff.nextBackoff()).thenReturn(BACKOFF_10SECS);
         QosIoException exception = new QosIoException(QosException.unavailable(), RESPONSE);
 
-        verifyBackoffAndRetry(exception);
+        verifyBackoffAndRetry(exception, 1);
     }
 
+    @Test
+    public void test_doesNotRetryIfNoExceptionIsThrown() throws Exception {
+        verifyBackoffAndRetry(new IOException(), 0);
+    }
 
-    private void verifyBackoffAndRetry(QosIoException exception) throws Exception {
-        verifier.verifyBackoffAndRetry(exception, 0);
-        verifier.verifyBackoffAndRetry(exception, 1);
-        verifier.verifyBackoffAndRetry(exception, 100);
+    @Test
+    public void testUnavailable_reschedulesByBackoffDuration_manyRetries() throws Exception {
+        when(backoff.nextBackoff()).thenReturn(BACKOFF_10SECS);
+        QosIoException exception = new QosIoException(QosException.unavailable(), RESPONSE);
+
+        verifyBackoffAndRetry(exception, 100);
+    }
+
+    private void verifyBackoffAndRetry(IOException exception, int numRetries) throws Exception {
+        stubResponseAfterThrowing(exception, numRetries);
+        verifier.verifyBackoffAndRetry(exception, numRetries);
     }
 
     AbstractThrowableAssert<?, ? extends Throwable> verifyNoRetryAndThrow(QosIoException exception)
             throws Exception {
+        stubResponseAfterThrowing(exception, 1);
         return verifier.verifyNoRetryAndThrow(exception);
     }
 
     private interface RetryVerifier {
 
-        void verifyBackoffAndRetry(QosIoException exception, int numRetries) throws Exception;
+        void verifyBackoffAndRetry(IOException exception, int numRetries) throws Exception;
 
         AbstractThrowableAssert<?, ? extends Throwable> verifyNoRetryAndThrow(QosIoException exception)
                 throws Exception;
@@ -173,31 +194,33 @@ public final class QosAwareCallRetrierTest extends TestBase {
     class BlockingCallVerifier implements RetryVerifier {
 
         @Override
-        public void verifyBackoffAndRetry(QosIoException exception, int numRetries) throws Exception {
-            OngoingStubbing<Response> stubbing = when(delegateCall.execute());
-            for (int i = 0; i < numRetries; i++) {
-               stubbing = stubbing.thenThrow(exception);
+        public void verifyBackoffAndRetry(IOException exception, int numRetries) throws Exception {
+            Response response = call.execute();
+
+            verify(sleeper, times(numRetries)).sleepForBackoff(BACKOFF_10SECS.get());
+            verify(delegateCall, times(1)).execute();
+
+            if (numRetries > 0) {
+                verify(delegateCall, times(1)).clone();
+                verify(clonedDelegateCall, times(numRetries)).execute();
+                verify(clonedDelegateCall, times(numRetries - 1)).clone();
             }
-            stubbing = stubbing.thenReturn(RESPONSE);
 
-            Response response = retrier.executeWithRetry(call);
+            verifyNoMoreInteractions(delegateCall, clonedDelegateCall);
 
-            verify(sleeper).sleepForBackoff(BACKOFF_10SECS.get());
-            verify(delegateCall).clone();
-            verifyNoMoreInteractions(delegateCall);
-            assertThat(response).isEqualTo(CLONED_RESPONSE);
+            assertThat(response).isEqualTo(numRetries > 0 ? CLONED_RESPONSE : RESPONSE);
         }
 
         @Override
         public AbstractThrowableAssert<?, ? extends Throwable> verifyNoRetryAndThrow(QosIoException exception)
                 throws Exception {
-            when(delegateCall.execute())
-                    .thenThrow(exception);
             AbstractThrowableAssert<?, ? extends Throwable> thrown =
                     assertThatThrownBy(() -> retrier.executeWithRetry(call));
 
+            verify(delegateCall).execute();
             verifyZeroInteractions(sleeper);
-            verifyZeroInteractions(delegateCall);
+
+            verifyNoMoreInteractions(delegateCall, clonedDelegateCall);
 
             return thrown;
         }
@@ -206,62 +229,100 @@ public final class QosAwareCallRetrierTest extends TestBase {
     class AsyncCallVerifier implements RetryVerifier {
 
         @Override
-        public void verifyBackoffAndRetry(QosIoException exception, int numRetries) {
+        public void verifyBackoffAndRetry(IOException exception, int numRetries) {
             FutureCallback response = new FutureCallback();
-            AtomicLong retriesDone = new AtomicLong(0);
-            doAnswer(inv -> {
-                Callback callback = inv.getArgumentAt(0, Callback.class);
-
-                if (retriesDone.incrementAndGet() <= numRetries) {
-                    callback.onFailure(delegateCall, exception);
-                } else {
-                    callback.onResponse(delegateCall, RESPONSE);
-                }
-                return null;
-            }).when(delegateCall).enqueue(any());
-            retrier.enqueueWithRetry(call, response);
+            call.enqueue(response);
 
             if (numRetries > 0) {
                 scheduler.tick(numRetries * 10 - 1, TimeUnit.SECONDS);
-                verifyNoMoreInteractions(delegateCall);
                 assertThat(response.isDone()).isFalse();
                 assertThat(response.isCancelled()).isFalse();
             }
 
+            scheduler.tick(1, TimeUnit.NANOSECONDS);
             scheduler.tick(10 * numRetries, TimeUnit.SECONDS);
-            verify(delegateCall).clone();
             assertThat(response.isDone()).isTrue();
-            assertThat(response.getNow(null)).isEqualTo(CLONED_RESPONSE);
+            assertThat(response.getNow(null)).isEqualTo(numRetries > 0 ? CLONED_RESPONSE : RESPONSE);
+
+            verify(delegateCall, times(1)).enqueue(any());
+            verify(clonedDelegateCall, times(numRetries)).enqueue(any());
+
+            if (numRetries > 0) {
+                verify(delegateCall, times(1)).clone();
+                verify(clonedDelegateCall, times(numRetries - 1)).clone();
+            }
+
+            verifyNoMoreInteractions(delegateCall, clonedDelegateCall);
         }
 
         @Override
         public AbstractThrowableAssert<?, ? extends Throwable> verifyNoRetryAndThrow(QosIoException exception) {
-            doAnswer(inv -> {
-                Callback callback = inv.getArgumentAt(0, Callback.class);
-                callback.onFailure(delegateCall, exception);
-                return null;
-            }).when(delegateCall).enqueue(any());
-
             FutureCallback response = new FutureCallback();
-            retrier.enqueueWithRetry(call, response);
+            call.enqueue(response);
+            scheduler.tick(100, TimeUnit.SECONDS);
             assertThat(response.isDone()).isTrue();
 
-            verifyZeroInteractions(scheduler);
-            verifyZeroInteractions(delegateCall);
+            verify(delegateCall, times(1)).enqueue(any());
+
+            verifyNoMoreInteractions(clonedDelegateCall);
 
             return AssertionsForClassTypes.assertThat(response.getException());
         }
     }
 
+    private void stubResponseAfterThrowing(IOException exception, int numThrows) throws Exception {
+        if (numThrows == 0) {
+            // blocking
+            when(delegateCall.execute()).thenReturn(RESPONSE);
+
+            // async
+            doAnswer(inv -> {
+                Callback callback = inv.getArgumentAt(0, Callback.class);
+                callback.onResponse(delegateCall, RESPONSE);
+                return null;
+            }).when(delegateCall).enqueue(any());
+
+            return;
+        }
+
+        // blocking
+        when(delegateCall.execute()).thenThrow(exception);
+        OngoingStubbing<Response> stubbing = when(clonedDelegateCall.execute());
+        for (int i = 1; i < numThrows; i++) {
+            stubbing = stubbing.thenThrow(exception);
+        }
+        stubbing = stubbing.thenReturn(CLONED_RESPONSE);
+
+        // async
+        doAnswer(inv -> {
+            Callback callback = inv.getArgumentAt(0, Callback.class);
+            callback.onFailure(delegateCall, exception);
+            return null;
+        }).when(delegateCall).enqueue(any());
+
+        AtomicLong numThrown = new AtomicLong(1);
+        doAnswer(inv -> {
+            Callback callback = inv.getArgumentAt(0, Callback.class);
+
+            if (numThrown.incrementAndGet() <= numThrows) {
+                callback.onFailure(clonedDelegateCall, exception);
+            } else {
+                callback.onResponse(clonedDelegateCall, CLONED_RESPONSE);
+            }
+            return null;
+        }).when(clonedDelegateCall).enqueue(any());
+
+    }
+
     private class FutureCallback extends CompletableFuture<Response> implements Callback {
 
         @Override
-        public void onFailure(Call call, IOException e) {
-            completeExceptionally(e);
+        public void onFailure(Call ignored, IOException ex) {
+            completeExceptionally(ex);
         }
 
         @Override
-        public void onResponse(Call call, Response response) throws IOException {
+        public void onResponse(Call ignored, Response response) throws IOException {
             complete(response);
         }
 

@@ -23,9 +23,9 @@ import okhttp3.Response;
 
 public final class RetryingCall extends ForwardingCall {
 
-    private final CallRetrier retryer;
+    private final CallRetryer retryer;
 
-    RetryingCall(Call delegate, CallRetrier retryer) {
+    RetryingCall(Call delegate, CallRetryer retryer) {
         super(delegate);
         this.retryer = retryer;
     }

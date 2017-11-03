@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * QosIoException}s. Only exceptions that require delaying/throttling/postponing a request are handled by this
  * interceptor.
  * <p>
- * See {@link CallRetrier} for an end-to-end explanation of http-remoting specific client-side error
+ * See {@link CallRetryer} for an end-to-end explanation of http-remoting specific client-side error
  * handling.
  */
 final class QosRetryLaterInterceptor implements Interceptor {

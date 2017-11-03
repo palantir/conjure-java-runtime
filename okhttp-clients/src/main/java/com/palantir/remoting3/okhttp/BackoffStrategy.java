@@ -16,7 +16,6 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.palantir.remoting.api.errors.QosException;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -30,25 +29,4 @@ public interface BackoffStrategy {
      */
     Optional<Duration> nextBackoff();
 
-    default Optional<Duration> nextBackoff(QosIoException qosIoException) {
-        return qosIoException.getQosException().accept(new QosException.Visitor<Optional<Duration>>() {
-            @Override
-            public Optional<Duration> visit(QosException.Throttle exception) {
-                return exception.getRetryAfter().isPresent()
-                        ? exception.getRetryAfter()
-                        : nextBackoff();
-            }
-
-            @Override
-            public Optional<Duration> visit(QosException.RetryOther exception) {
-                throw new IllegalStateException(
-                        "Internal error, did not expect to backoff for RetryOther", exception);
-            }
-
-            @Override
-            public Optional<Duration> visit(QosException.Unavailable exception) {
-                return nextBackoff();
-            }
-        });
-    }
 }

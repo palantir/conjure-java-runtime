@@ -32,26 +32,26 @@ import org.slf4j.LoggerFactory;
  * Inspects the {@link QosException} thrown by a {@link Call} execution and -- depending on the type of {@link
  * QosException} -- pauses for backoff and retries the call.
  */
-class QosAwareCallRetrier implements CallRetrier {
+class QosAwareCallRetryer implements CallRetryer {
 
-    private static final Logger log = LoggerFactory.getLogger(QosAwareCallRetrier.class);
+    private static final Logger log = LoggerFactory.getLogger(QosAwareCallRetryer.class);
 
-    private final BackoffStrategy backoffStrategy;
+    private final QosExceptionBackoffStrategy backoffStrategy;
     private final BackoffSleeper backoffSleeper;
     private final ScheduledExecutorService scheduler;
 
-    QosAwareCallRetrier(
+    QosAwareCallRetryer(
             BackoffStrategy backoffStrategy,
             BackoffSleeper backoffSleeper,
             ScheduledExecutorService asyncRetryScheduler) {
-        this.backoffStrategy = backoffStrategy;
+        this.backoffStrategy = new QosExceptionBackoffStrategy(backoffStrategy);
         this.backoffSleeper = backoffSleeper;
         this.scheduler = asyncRetryScheduler;
     }
 
     @Override
     public Response executeWithRetry(Call originalCall) throws IOException {
-        for (Call call = originalCall; ; call = call.clone()) {
+        for (Call call = originalCall;; call = call.clone()) {
             try {
                 return call.execute();
             } catch (QosIoException e) {
@@ -60,8 +60,8 @@ class QosAwareCallRetrier implements CallRetrier {
         }
     }
 
-    private void backoffOrRethrow(QosIoException e) throws IOException {
-        Duration backoff = backoffStrategy.nextBackoff(e).orElseThrow(() -> e);
+    private void backoffOrRethrow(QosIoException ex) throws IOException {
+        Duration backoff = backoffStrategy.nextBackoff(ex).orElseThrow(() -> ex);
         backoffSleeper.sleepForBackoff(backoff);
     }
 
@@ -71,9 +71,9 @@ class QosAwareCallRetrier implements CallRetrier {
     }
 
     private void enqueueAsyncWithRetry(Call call, Callback callback, Duration backoff) {
-        QosAwareCallback qosAwareCallback = new QosAwareCallback(callback, call);
+        QosAwareCallback qosAwareCallback = new QosAwareCallback(callback);
 
-        scheduler.schedule(() -> call.enqueue(qosAwareCallback), backoff.toMillis(), TimeUnit.MILLISECONDS);
+        scheduler.schedule(() -> call.enqueue(qosAwareCallback), backoff.toNanos(), TimeUnit.NANOSECONDS);
     }
 
     private void backoffAsyncOrFail(Call call, QosIoException qosIoException, Callback callback) {
@@ -88,11 +88,9 @@ class QosAwareCallRetrier implements CallRetrier {
 
     class QosAwareCallback implements Callback {
         private final Callback delegate;
-        private final Call call;
 
-        public QosAwareCallback(Callback delegate, Call call) {
+        QosAwareCallback(Callback delegate) {
             this.delegate = delegate;
-            this.call = call;
         }
 
         @Override

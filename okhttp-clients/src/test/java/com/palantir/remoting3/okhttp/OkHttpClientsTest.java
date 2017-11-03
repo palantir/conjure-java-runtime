@@ -30,6 +30,7 @@ import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.SortedMap;
@@ -113,7 +114,7 @@ public final class OkHttpClientsTest extends TestBase {
             server.enqueue(new MockResponse().setResponseCode(503));
         }
 
-        OkHttpClient client = createRetryingClient(maxRetries);
+        OkHttpClient client = createRetryingClient(maxRetries, Duration.ofMillis(0));
 
         Call call = client.newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(() -> execute(call)).isInstanceOf(QosIoException.class);
@@ -272,8 +273,15 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {
+        return createRetryingClient(maxNumRetries, Duration.ofMillis(10));
+    }
+
+    private OkHttpClient createRetryingClient(int maxNumRetries, Duration backoffSlotSize) {
         return OkHttpClients.withStableUris(
-                ClientConfiguration.builder().from(createTestConfig(url)).maxNumRetries(maxNumRetries).build(),
+                ClientConfiguration.builder().from(createTestConfig(url))
+                        .maxNumRetries(maxNumRetries)
+                        .backoffSlotSize(backoffSlotSize)
+                        .build(),
                 AGENT,
                 OkHttpClientsTest.class);
     }
