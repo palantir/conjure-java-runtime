@@ -40,11 +40,11 @@ public final class HostMetrics {
     /** Creates a metrics registry for calls from the given service to the given host. */
     public HostMetrics(TaggedMetricRegistry registry, String serviceName, String hostname) {
         informational = registry.meter(name(serviceName, hostname, "informational"));
-        successful    = registry.meter(name(serviceName, hostname, "successful"));
-        redirection   = registry.meter(name(serviceName, hostname, "redirection"));
-        clientError   = registry.meter(name(serviceName, hostname, "client-error"));
-        serverError   = registry.meter(name(serviceName, hostname, "server-error"));
-        other         = registry.meter(name(serviceName, hostname, "other"));
+        successful = registry.meter(name(serviceName, hostname, "successful"));
+        redirection = registry.meter(name(serviceName, hostname, "redirection"));
+        clientError = registry.meter(name(serviceName, hostname, "client-error"));
+        serverError = registry.meter(name(serviceName, hostname, "server-error"));
+        other = registry.meter(name(serviceName, hostname, "other"));
     }
 
     private static MetricName name(String serviceName, String hostname, String family) {
@@ -56,27 +56,27 @@ public final class HostMetrics {
     }
 
     /**
-      * Records that an HTTP call from the configured service to the configured host (see constructor)
-      * yielded the given HTTP status code.
-      */
+     * Records that an HTTP call from the configured service to the configured host (see constructor) yielded the given
+     * HTTP status code.
+     */
     public void record(int statusCode) {
-        switch (javax.ws.rs.core.Response.Status.Family.familyOf(statusCode)) {
-            case INFORMATIONAL:
+        switch (statusCode / 100) {
+            case 1:
                 informational.mark();
                 break;
-            case SUCCESSFUL:
+            case 2:
                 successful.mark();
                 break;
-            case REDIRECTION:
+            case 3:
                 redirection.mark();
                 break;
-            case CLIENT_ERROR:
+            case 4:
                 clientError.mark();
                 break;
-            case SERVER_ERROR:
+            case 5:
                 serverError.mark();
                 break;
-            case OTHER:
+            default:
                 other.mark();
                 break;
         }
