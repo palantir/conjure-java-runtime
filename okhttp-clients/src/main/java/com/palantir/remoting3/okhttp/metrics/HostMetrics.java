@@ -60,6 +60,7 @@ public final class HostMetrics {
      * HTTP status code.
      */
     public void record(int statusCode) {
+        // Explicitly not using javax.ws.rs.core.Response API since it's incompatible across versions.
         switch (statusCode / 100) {
             case 1:
                 informational.mark();
