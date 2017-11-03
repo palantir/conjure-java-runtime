@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Inspects the {@link QosException} thrown by a {@link Call} execution and -- depending on the type of {@link
+ * Executes {@link Call} and, if a {@link QosException} is thrown -- depending on the type of {@link
  * QosException} -- pauses for backoff and retries the call.
  */
 class QosAwareCallRetryer implements CallRetryer {

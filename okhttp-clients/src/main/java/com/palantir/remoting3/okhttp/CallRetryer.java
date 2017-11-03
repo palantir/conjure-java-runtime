@@ -24,9 +24,9 @@ import okhttp3.Response;
 
 interface CallRetryer {
     /**
-     * Handles a {@link QosIoException} that was thrown for the given {@link Call} and potentially retries it at a later
-     * time. If the maximum allowed retries are exhausted, an exception will be thrown. This exception will either be
-     * the original exception, or an exception thrown by a later retry.
+     * Attempts to execute the given {@link Call} and, if a {@link QosIoException} thrown, potentially
+     * retries it at a later time. If the maximum allowed retries are exhausted, an exception will be thrown. This
+     * exception will either be the original exception, or an exception thrown by a later retry.
      *
      * <p>
      * Note that vanilla OkHttp functionality does not cover what's needed here, for example:
@@ -34,6 +34,13 @@ interface CallRetryer {
      *     <li>
      *         OkHttp doesn't have out-of-the-box support for re-locating complex requests,
      *         cf. https://github.com/square/okhttp/issues/3111 .
+     *      </li>
+     *      <li>
+     *          OkHttp {@link Interceptor}s could wait-and-retry upon observing 429 or 503, but this would happen on the
+     *          same thread. Since all http-remoting clients (in a JVM) share the same OkHttp thread pool, only a few
+     *          backed up requests would have the potential to stall all outgoing RPC. The {@link CallRetryer}
+     *          approach taken here circumnavigates this pitfall by re-scheduling call re-execution instead of
+     *          performing thread-blocking sleep for async calls.
      *      </li>
      * </ul>
      * <p>
