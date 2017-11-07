@@ -17,15 +17,19 @@
 package com.palantir.remoting3.clients;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.net.HostAndPort;
+import com.palantir.remoting.api.config.service.ProxyConfiguration;
 import com.palantir.remoting.api.config.service.ServiceConfiguration;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import java.net.Proxy;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Optional;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import org.junit.Test;
@@ -66,5 +70,27 @@ public final class ClientConfigurationsTest {
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(10));
         assertThat(actual.enableGcmCipherSuites()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
+    }
+
+    @Test
+    public void meshProxy_maxRetriesSetTo0() throws Exception {
+        ServiceConfiguration invalidServiceConfig = ServiceConfiguration.builder()
+                .uris(uris)
+                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                .proxy(ProxyConfiguration.mesh("localhost:1234"))
+                .maxNumRetries(2)
+                .build();
+        assertThatThrownBy(() -> ClientConfigurations.of(invalidServiceConfig))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("If meshProxy is configured then maxNumRetries must be 0");
+
+        ClientConfiguration validConfig = ClientConfigurations.of(ServiceConfiguration.builder()
+                .uris(uris)
+                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                .proxy(ProxyConfiguration.mesh("localhost:1234"))
+                .maxNumRetries(0)
+                .build());
+        assertThat(validConfig.meshProxy()).isEqualTo(Optional.of(HostAndPort.fromParts("localhost", 1234)));
+        assertThat(validConfig.maxNumRetries()).isEqualTo(0);
     }
 }

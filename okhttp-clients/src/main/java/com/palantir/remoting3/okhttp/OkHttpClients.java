@@ -114,6 +114,7 @@ public final class OkHttpClients {
         client.addInterceptor(CurrentUrlInterceptor.create(urls));
         client.addInterceptor(new QosRetryOtherInterceptor(urls));
         client.addInterceptor(MultiServerRetryInterceptor.create(urls, config.maxNumRetries()));
+        config.meshProxy().ifPresent(meshProxy -> client.addInterceptor(new MeshProxyInterceptor(meshProxy)));
         client.followRedirects(false);  // We implement our own redirect logic.
 
         // SSL

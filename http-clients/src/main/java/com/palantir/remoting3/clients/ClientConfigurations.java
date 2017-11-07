@@ -60,8 +60,27 @@ public final class ClientConfigurations {
                 .enableGcmCipherSuites(config.enableGcmCipherSuites().orElse(DEFAULT_ENABLE_GCM_CIPHERS))
                 .proxy(config.proxy().map(ClientConfigurations::createProxySelector).orElse(ProxySelector.getDefault()))
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
+                .meshProxy(meshProxy(config.proxy()))
                 .maxNumRetries(config.maxNumRetries().orElse(config.uris().size()))
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
+                .build();
+    }
+
+    public static ClientConfiguration of(
+            String uri, HostAndPort meshProxy, SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
+        return ClientConfiguration.builder()
+                .sslSocketFactory(sslSocketFactory)
+                .trustManager(trustManager)
+                .addUris(uri)
+                .connectTimeout(DEFAULT_CONNECT_TIMEOUT)
+                .readTimeout(DEFAULT_READ_TIMEOUT)
+                .writeTimeout(DEFAULT_WRITE_TIMEOUT)
+                .enableGcmCipherSuites(DEFAULT_ENABLE_GCM_CIPHERS)
+                .proxy(ProxySelector.getDefault())
+                .proxyCredentials(Optional.empty())
+                .meshProxy(meshProxy)
+                .maxNumRetries(0)
+                .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
                 .build();
     }
 
@@ -96,11 +115,20 @@ public final class ClientConfigurations {
                                 "Expected to find proxy hostAndPort configuration for HTTP proxy")));
                 InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort());
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, addr));
+            case MESH:
+                return ProxySelector.getDefault(); // MESH proxy is not a Java proxy
             default:
                 // fall through
         }
 
         throw new IllegalStateException("Failed to create ProxySelector for proxy configuration: " + proxyConfig);
+    }
+
+    private static Optional<HostAndPort> meshProxy(Optional<ProxyConfiguration> proxy) {
+        if (!proxy.isPresent() || proxy.get().type() != ProxyConfiguration.Type.MESH) {
+            return Optional.empty();
+        }
+        return Optional.of(HostAndPort.fromString(proxy.get().hostAndPort().get()));
     }
 
     private static ProxySelector fixedProxySelectorFor(Proxy proxy) {

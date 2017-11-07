@@ -16,6 +16,9 @@
 
 package com.palantir.remoting3.clients;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
+import com.google.common.net.HostAndPort;
 import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.remoting.api.config.service.ServiceConfiguration;
 import java.net.ProxySelector;
@@ -61,6 +64,15 @@ public interface ClientConfiguration {
     /** The credentials to use for the proxy selected by {@link #proxy}. */
     Optional<BasicCredentials> proxyCredentials();
 
+    /**
+     * Rewrites all request URLs to the mesh proxy, but keeps the "Host" (or HTTP2 :authority pseudo-header) as the
+     * authority from the original request URL.
+     * <p>
+     * Note that if this option is set, then the {@link #maxNumRetries} must also be set to 0 since the mesh proxy is
+     * expected to handle all retry logic.
+     */
+    Optional<HostAndPort> meshProxy();
+
     /** The maximum number of times a failed request is retried. */
     int maxNumRetries();
 
@@ -69,6 +81,13 @@ public interface ClientConfiguration {
      * choose a backoff time in {@code [0, backoffSlotSize * 2^c]} for the c-th retry.
      */
     Duration backoffSlotSize();
+
+    @Value.Check
+    default void check() {
+        if (meshProxy().isPresent()) {
+            checkArgument(maxNumRetries() == 0, "If meshProxy is configured then maxNumRetries must be 0");
+        }
+    }
 
     static Builder builder() {
         return new Builder();
