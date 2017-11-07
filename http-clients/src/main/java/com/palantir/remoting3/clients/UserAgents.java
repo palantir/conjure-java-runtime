@@ -90,6 +90,8 @@ public final class UserAgents {
     /**
      * Parses the given string into a {@link UserAgent} or throws an {@link IllegalArgumentException} if no correctly
      * formatted primary user agent can be found. Incorrectly formatted informational agents are omitted.
+     * <p>
+     * Valid user agent strings loosely follow RFC 7230 (https://tools.ietf.org/html/rfc7230#section-3.2.6).
      */
     public static UserAgent parse(String userAgent) {
         return parseInternal(userAgent, false /* strict */);
