@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.clients;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -24,10 +25,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.UnsafeArg;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,18 +44,16 @@ public final class UserAgents {
 
     private static final Logger log = LoggerFactory.getLogger(UserAgents.class);
 
-    private static final Joiner COMMA_JOINER = Joiner.on(", ");
+    private static final Joiner SPACE_JOINER = Joiner.on(" ");
     private static final Joiner.MapJoiner COLON_SEMICOLON_JOINER = Joiner.on(';').withKeyValueSeparator(":");
-    private static final Splitter.MapSplitter COLON_SEMICOLON_SPLITTER = Splitter.on(';').withKeyValueSeparator(":");
-    private static final Splitter COMMA_SPLITTER = Splitter.on(",").omitEmptyStrings().trimResults();
-    private static final Pattern NAME_REGEX = Pattern.compile("([a-zA-Z][a-zA-Z0-9\\-]*)");
-    private static final Pattern NODE_REGEX = Pattern.compile("([a-zA-Z0-9][a-zA-Z0-9.\\-]*)");
-    private static final Pattern[] ORDERABLE_VERSION = new Pattern[] {
-            Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+-g[a-f0-9]+$"),
-            Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+$"),
-            Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-rc[0-9]+$"),
-            Pattern.compile("^[0-9]+\\.[0-9]+\\.[0-9]+-rc[0-9]+-[0-9]+-g[a-f0-9]+$")
-    };
+    private static final Splitter COMMENT_SPLITTER = Splitter.on(CharMatcher.anyOf(",;"));
+    private static final Splitter COLON_SPLITTER = Splitter.on(':');
+    private static final Pattern NAME_REGEX = Pattern.compile("[a-zA-Z][a-zA-Z0-9\\-]*");
+    private static final Pattern LENIENT_VERSION_REGEX = Pattern.compile("[0-9a-z.-]+");
+    private static final Pattern NODE_REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9.\\-]*");
+    private static final Pattern[] VERSION_REGEX = new Pattern[] {
+            Pattern.compile("^[0-9]+(\\.[0-9]+)*(-rc[0-9]+)?(-[0-9]+-g[a-f0-9]+)?$"),
+            };
 
     private UserAgents() {}
 
@@ -63,7 +62,7 @@ public final class UserAgents {
         Map<String, String> primaryComments = userAgent.nodeId().isPresent()
                 ? ImmutableMap.of("nodeId", userAgent.nodeId().get())
                 : ImmutableMap.of();
-        return COMMA_JOINER.join(Iterables.concat(
+        return SPACE_JOINER.join(Iterables.concat(
                 ImmutableList.of(formatSingleAgent(userAgent.primary(), primaryComments)),
                 Lists.transform(userAgent.informational(), a -> formatSingleAgent(a, ImmutableMap.of()))));
     }
@@ -88,83 +87,76 @@ public final class UserAgents {
         return formatted.toString();
     }
 
-
     /**
-     * Parses the given string into a {@link UserAgent} or throws an {@link IllegalArgumentException} if the string does
-     * not conform to the user agent syntax restrictions.
+     * Parses the given string into a {@link UserAgent} or throws an {@link IllegalArgumentException} if no correctly
+     * formatted primary user agent can be found. Incorrectly formatted informational agents are omitted.
      */
     public static UserAgent parse(String userAgent) {
         return parseInternal(userAgent, false /* strict */);
     }
 
-    /** Like {@link #parse}, but returns only the syntactically correct agent parts (, possibly zero). */
+    /**
+     * Like {@link #parse}, but never fails and returns the primary agent {@code unknown/0.0.0} if no valid primary
+     * agent can be parsed.
+     */
     public static UserAgent tryParse(String userAgent) {
         return parseInternal(userAgent, true /* lenient */);
     }
 
     private static UserAgent parseInternal(String userAgent, boolean lenient) {
         ImmutableUserAgent.Builder builder = ImmutableUserAgent.builder();
-        List<String> parts = COMMA_SPLITTER.splitToList(userAgent);
-        if (parts.isEmpty()) {
+
+        Pattern segmentPattern = Pattern.compile(
+                String.format("(%s)/(%s)( \\((.+?)\\))?", NAME_REGEX, LENIENT_VERSION_REGEX));
+        Matcher matcher = segmentPattern.matcher(userAgent);
+        boolean foundFirst = false;
+        while (matcher.find()) {
+            String name = matcher.group(1);
+            String version = matcher.group(2);
+            Optional<String> comments = Optional.ofNullable(matcher.group(4));
+
+            if (!foundFirst) {
+                // primary
+                builder.primary(UserAgent.Agent.of(name, version));
+                comments.ifPresent(c -> {
+                    Map<String, String> parsedComments = parseComments(c);
+                    if (parsedComments.containsKey("nodeId")) {
+                        builder.nodeId(parsedComments.get("nodeId"));
+                    }
+                });
+            } else {
+                // informational
+                builder.addInformational(UserAgent.Agent.of(name, version));
+            }
+
+            foundFirst = true;
+        }
+
+        if (!foundFirst) {
             if (lenient) {
                 log.warn("Empty user agent, falling back to default/unknown agent");
                 return builder.primary(UserAgent.Agent.of("unknown", UserAgent.Agent.DEFAULT_VERSION)).build();
             } else {
-                throw new IllegalArgumentException("Empty user agents are not allowed: " + userAgent);
+                throw new IllegalArgumentException("Failed to parse user agent string: " + userAgent);
             }
         }
 
-        // Primary agent with optional nodeId
-        Map<String, String> primaryComments = Maps.newHashMap();
-        Optional<UserAgent.Agent> primaryAgent = tryParseSingleAgent(parts.get(0), primaryComments);
-        if (primaryAgent.isPresent()) {
-            builder.primary(primaryAgent.get());
-        } else {
-            if (lenient) {
-                log.warn("Malformed primary user agent", UnsafeArg.of("agent", parts.get(0)));
-                builder.primary(UserAgent.Agent.of("unknown", UserAgent.Agent.DEFAULT_VERSION));
-            } else {
-                throw new IllegalArgumentException("Agent string was malformed: " + parts.get(0));
-            }
-        }
-        if (primaryComments.containsKey("nodeId")) {
-            builder.nodeId(primaryComments.get("nodeId"));
-        }
-
-        // Informational agents
-        for (String part : parts.subList(1, parts.size())) {
-            Optional<UserAgent.Agent> informationlAgent = tryParseSingleAgent(part, Maps.newHashMap());
-            if (informationlAgent.isPresent()) {
-                builder.addInformational(informationlAgent.get());
-            } else {
-                if (lenient) {
-                    // Ignore malformed agent
-                    log.warn("Cannot parse malformed user agent string", UnsafeArg.of("agent", part));
-                } else {
-                    throw new IllegalArgumentException("Agent string was malformed: " + part);
-                }
-            }
-        }
         return builder.build();
     }
 
-    // returns found comments in the provided map.
-    private static Optional<UserAgent.Agent> tryParseSingleAgent(String agent, Map<String, String> comments) {
-        int slashPos = agent.indexOf('/');
-        if (slashPos == -1) {
-            return Optional.empty(); // no version
+    private static Map<String, String> parseComments(String commentsString) {
+        Map<String, String> comments = Maps.newHashMap();
+        for (String comment : COMMENT_SPLITTER.split(commentsString)) {
+            List<String> fields = COLON_SPLITTER.splitToList(comment);
+            if (fields.isEmpty()) {
+                // continue
+            } else if (fields.size() == 2) {
+                comments.put(fields.get(0), fields.get(1));
+            } else {
+                comments.put(comment, comment);
+            }
         }
-        int spacePos = agent.indexOf(" (");
-        String name = agent.substring(0, slashPos);
-        String version = agent.substring(slashPos + 1, spacePos == -1 ? agent.length() : spacePos);
-
-        // Extract comments
-        if (spacePos != -1) {
-            String commentString = agent.substring(spacePos + 2, agent.length() - 1);
-            COLON_SEMICOLON_SPLITTER.split(commentString).forEach(comments::put);
-        }
-
-        return Optional.of(UserAgent.Agent.of(name, version));
+        return comments;
     }
 
     static boolean isValidName(String name) {
@@ -176,7 +168,7 @@ public final class UserAgents {
     }
 
     static boolean isValidVersion(String version) {
-        for (Pattern p : ORDERABLE_VERSION) {
+        for (Pattern p : VERSION_REGEX) {
             if (p.matcher(version).matches()) {
                 return true;
             }
