@@ -108,11 +108,14 @@ public final class UserAgentTest {
         assertThat(UserAgents.format(UserAgents.parse("  service/1.2.3"))).isEqualTo("service/1.2.3");
         assertThat(UserAgents.format(UserAgents.parse("bogus  service/1.2.3"))).isEqualTo("service/1.2.3");
 
+        // Fixes primary agent version to 0.0.0 if it cannot be parsed
+        assertThat(UserAgents.format(UserAgents.parse("service/foo-1.2.3"))).isEqualTo("service/0.0.0");
+
         // Invalid syntax throws exception
         for (String agent : new String[] {
                 "s",
-                "foo|1.2.3"
-        }) {
+                "foo|1.2.3",
+                }) {
             assertThatThrownBy(() -> UserAgents.format(UserAgents.parse(agent)))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("Failed to parse user agent string: " + agent);

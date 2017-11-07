@@ -51,9 +51,8 @@ public final class UserAgents {
     private static final Pattern NAME_REGEX = Pattern.compile("[a-zA-Z][a-zA-Z0-9\\-]*");
     private static final Pattern LENIENT_VERSION_REGEX = Pattern.compile("[0-9a-z.-]+");
     private static final Pattern NODE_REGEX = Pattern.compile("[a-zA-Z0-9][a-zA-Z0-9.\\-]*");
-    private static final Pattern[] VERSION_REGEX = new Pattern[] {
-            Pattern.compile("^[0-9]+(\\.[0-9]+)*(-rc[0-9]+)?(-[0-9]+-g[a-f0-9]+)?$"),
-            };
+    private static final Pattern VERSION_REGEX =
+            Pattern.compile("^[0-9]+(\\.[0-9]+)*(-rc[0-9]+)?(-[0-9]+-g[a-f0-9]+)?$");
 
     private UserAgents() {}
 
@@ -170,11 +169,10 @@ public final class UserAgents {
     }
 
     static boolean isValidVersion(String version) {
-        for (Pattern p : VERSION_REGEX) {
-            if (p.matcher(version).matches()) {
-                return true;
-            }
+        if (VERSION_REGEX.matcher(version).matches()) {
+            return true;
         }
+
         log.warn("Encountered invalid user agent version", SafeArg.of("version", version));
         return false;
     }
