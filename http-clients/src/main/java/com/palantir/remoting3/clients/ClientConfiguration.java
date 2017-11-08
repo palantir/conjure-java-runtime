@@ -16,6 +16,9 @@
 
 package com.palantir.remoting3.clients;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
+import com.google.common.net.HostAndPort;
 import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.remoting.api.config.service.ServiceConfiguration;
 import java.net.ProxySelector;
@@ -61,6 +64,17 @@ public interface ClientConfiguration {
     /** The credentials to use for the proxy selected by {@link #proxy}. */
     Optional<BasicCredentials> proxyCredentials();
 
+    /**
+     * Clients configured with a mesh proxy send all HTTP requests to the configured proxy address instead of the
+     * configured {@link #uris uri}; requests carry an additional {@code Host} header (or http/2 {@code :authority}
+     * pseudo-header) set to the configured {@link #uris uri}. The proxy is expected to forward such requests to the
+     * original {@code #uris uri}.
+     * <p>
+     * Note that if this option is set, then the {@link #maxNumRetries} must also be set to 0 and exactly one {@link
+     * #uris} must exist since the mesh proxy is expected to handle all retry logic.
+     */
+    Optional<HostAndPort> meshProxy();
+
     /** The maximum number of times a failed request is retried. */
     int maxNumRetries();
 
@@ -69,6 +83,14 @@ public interface ClientConfiguration {
      * choose a backoff time in {@code [0, backoffSlotSize * 2^c]} for the c-th retry.
      */
     Duration backoffSlotSize();
+
+    @Value.Check
+    default void check() {
+        if (meshProxy().isPresent()) {
+            checkArgument(maxNumRetries() == 0, "If meshProxy is configured then maxNumRetries must be 0");
+            checkArgument(uris().size() == 1, "If meshProxy is configured then uris must contain exactly 1 URI");
+        }
+    }
 
     static Builder builder() {
         return new Builder();

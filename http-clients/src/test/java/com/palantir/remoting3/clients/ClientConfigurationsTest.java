@@ -17,15 +17,20 @@
 package com.palantir.remoting3.clients;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.net.HostAndPort;
+import com.palantir.remoting.api.config.service.ProxyConfiguration;
 import com.palantir.remoting.api.config.service.ServiceConfiguration;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import java.net.Proxy;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import org.junit.Test;
@@ -67,4 +72,32 @@ public final class ClientConfigurationsTest {
         assertThat(actual.enableGcmCipherSuites()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
     }
+
+    @Test
+    public void meshProxy_maxRetriesMustBe0() throws Exception {
+        assertThatThrownBy(() -> ClientConfigurations.of(meshProxyServiceConfig(uris, 2)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("If meshProxy is configured then maxNumRetries must be 0");
+
+        ClientConfiguration validConfig = ClientConfigurations.of(meshProxyServiceConfig(uris, 0));
+        assertThat(validConfig.meshProxy()).isEqualTo(Optional.of(HostAndPort.fromParts("localhost", 1234)));
+        assertThat(validConfig.maxNumRetries()).isEqualTo(0);
+    }
+
+    @Test
+    public void meshProxy_exactlyOneUri() throws Exception {
+        assertThatThrownBy(() -> ClientConfigurations.of(meshProxyServiceConfig(ImmutableList.of("uri1", "uri2"), 0)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("If meshProxy is configured then uris must contain exactly 1 URI");
+    }
+
+    private ServiceConfiguration meshProxyServiceConfig(List<String> theUris, int maxNumRetries) {
+        return ServiceConfiguration.builder()
+                .uris(theUris)
+                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                .proxy(ProxyConfiguration.mesh("localhost:1234"))
+                .maxNumRetries(maxNumRetries)
+                .build();
+    }
+
 }
