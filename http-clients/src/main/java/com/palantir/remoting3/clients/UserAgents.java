@@ -18,7 +18,9 @@ package com.palantir.remoting3.clients;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -93,6 +95,7 @@ public final class UserAgents {
      * Valid user agent strings loosely follow RFC 7230 (https://tools.ietf.org/html/rfc7230#section-3.2.6).
      */
     public static UserAgent parse(String userAgent) {
+        Preconditions.checkNotNull(userAgent, "userAgent must not be null");
         return parseInternal(userAgent, false /* strict */);
     }
 
@@ -101,7 +104,7 @@ public final class UserAgents {
      * agent can be parsed.
      */
     public static UserAgent tryParse(String userAgent) {
-        return parseInternal(userAgent, true /* lenient */);
+        return parseInternal(Strings.nullToEmpty(userAgent), true /* lenient */);
     }
 
     private static UserAgent parseInternal(String userAgent, boolean lenient) {
