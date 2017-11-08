@@ -67,7 +67,7 @@ public interface ClientConfiguration {
     /**
      * Clients configured with a mesh proxy send all HTTP requests to the configured proxy address instead of the
      * configured {@link #uris uri}; requests carry an additional {@code Host} header (or http/2 {@code :authority}
-     * pseudo-header) set to the configured {@link #uris uri}. The proxy is expected to forward such requests to 
+     * pseudo-header) set to the configured {@link #uris uri}. The proxy is expected to forward such requests to
      * the original {@code #uris uri}.
      * <p>
      * Note that if this option is set, then the {@link #maxNumRetries} must also be set to 0 and exactly one {@link
