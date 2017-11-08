@@ -26,6 +26,9 @@ import java.net.Proxy;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import org.junit.Test;
@@ -50,6 +53,30 @@ public final class ClientConfigurationsTest {
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(10));
         assertThat(actual.enableGcmCipherSuites()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
+        assertThat(actual.maxNumRetries()).isEqualTo(3);
+    }
+
+    @Test
+    public void testFromServiceConfig_maxNumRetriesGrowsWithUrisSize() {
+        ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
+                .uris(getUrisList(5))
+                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                .build();
+
+        ClientConfiguration actual = ClientConfigurations.of(serviceConfig);
+
+        assertThat(actual.maxNumRetries()).isEqualTo(5);
+    }
+
+    @Test
+    public void testFromServiceConfig_limitsMaxNumRetriesTo10() {
+        ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
+                .uris(getUrisList(20))
+                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                .build();
+        ClientConfiguration actual = ClientConfigurations.of(serviceConfig);
+
+        assertThat(actual.maxNumRetries()).isEqualTo(10);
     }
 
     @Test
@@ -66,5 +93,30 @@ public final class ClientConfigurationsTest {
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(10));
         assertThat(actual.enableGcmCipherSuites()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
+        assertThat(actual.maxNumRetries()).isEqualTo(3);
+    }
+
+    @Test
+    public void testFromParameters_maxNumRetriesGrowsWithUrisSize() {
+        SSLSocketFactory sslFactory = mock(SSLSocketFactory.class);
+        X509TrustManager trustManager = mock(X509TrustManager.class);
+        ClientConfiguration actual = ClientConfigurations.of(getUrisList(7), sslFactory, trustManager);
+
+        assertThat(actual.maxNumRetries()).isEqualTo(7);
+    }
+
+    @Test
+    public void testFromParameters_limitsMaxNumRetriesTo10() {
+        SSLSocketFactory sslFactory = mock(SSLSocketFactory.class);
+        X509TrustManager trustManager = mock(X509TrustManager.class);
+        ClientConfiguration actual = ClientConfigurations.of(getUrisList(11), sslFactory, trustManager);
+
+        assertThat(actual.maxNumRetries()).isEqualTo(10);
+    }
+
+    private static List<String> getUrisList(int size) {
+        return IntStream.range(0, size)
+                .mapToObj(String::valueOf)
+                .collect(Collectors.toList());
     }
 }
