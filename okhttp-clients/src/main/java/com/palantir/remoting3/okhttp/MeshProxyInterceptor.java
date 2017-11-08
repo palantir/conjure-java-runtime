@@ -25,8 +25,8 @@ import okhttp3.Response;
 
 /**
  * An {@link Interceptor} that changes the {@link okhttp3.Request#url Request URL's} authority to a given {@link
- * HostAndPort}, but adds a "Host" header that is set to the original Request's authority. This allows the use of a L4
- * service mesh proxy over SSL.
+ * HostAndPort}, and adds an explicit "Host" header that is set to the original Request's authority. This allows the use
+ * of a L4 service mesh proxy over SSL.
  */
 final class MeshProxyInterceptor implements Interceptor {
 

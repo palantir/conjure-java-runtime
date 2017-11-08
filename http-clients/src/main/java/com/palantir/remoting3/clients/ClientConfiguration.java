@@ -65,11 +65,11 @@ public interface ClientConfiguration {
     Optional<BasicCredentials> proxyCredentials();
 
     /**
-     * Rewrites all request URLs to the mesh proxy, but keeps the "Host" (or HTTP2 :authority pseudo-header) as the
-     * authority from the original request URL.
+     * If set, all requests are sent to the configured mesh proxy instead of the {@link #uris target URI}, the "Host"
+     * (or HTTP2 :authority pseudo-header) from the original target URI is kept.
      * <p>
-     * Note that if this option is set, then the {@link #maxNumRetries} must also be set to 0 since the mesh proxy is
-     * expected to handle all retry logic.
+     * Note that if this option is set, then the {@link #maxNumRetries} must also be set to 0 and exactly one {@link
+     * #uris} must exist since the mesh proxy is expected to handle all retry logic.
      */
     Optional<HostAndPort> meshProxy();
 
@@ -86,6 +86,7 @@ public interface ClientConfiguration {
     default void check() {
         if (meshProxy().isPresent()) {
             checkArgument(maxNumRetries() == 0, "If meshProxy is configured then maxNumRetries must be 0");
+            checkArgument(uris().size() == 1, "If meshProxy is configured then uris must contain exactly 1 URI");
         }
     }
 

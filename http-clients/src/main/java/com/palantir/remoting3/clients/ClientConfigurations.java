@@ -66,24 +66,6 @@ public final class ClientConfigurations {
                 .build();
     }
 
-    public static ClientConfiguration of(
-            String uri, HostAndPort meshProxy, SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
-        return ClientConfiguration.builder()
-                .sslSocketFactory(sslSocketFactory)
-                .trustManager(trustManager)
-                .addUris(uri)
-                .connectTimeout(DEFAULT_CONNECT_TIMEOUT)
-                .readTimeout(DEFAULT_READ_TIMEOUT)
-                .writeTimeout(DEFAULT_WRITE_TIMEOUT)
-                .enableGcmCipherSuites(DEFAULT_ENABLE_GCM_CIPHERS)
-                .proxy(ProxySelector.getDefault())
-                .proxyCredentials(Optional.empty())
-                .meshProxy(meshProxy)
-                .maxNumRetries(0)
-                .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
-                .build();
-    }
-
     /**
      * Creates a new {@link ClientConfiguration} instance from the given SSL configuration and URIs, filling in all
      * other configuration with the defaults specified as constants in this class.
@@ -125,10 +107,11 @@ public final class ClientConfigurations {
     }
 
     private static Optional<HostAndPort> meshProxy(Optional<ProxyConfiguration> proxy) {
-        if (!proxy.isPresent() || proxy.get().type() != ProxyConfiguration.Type.MESH) {
+        if (proxy.isPresent() && proxy.get().type() == ProxyConfiguration.Type.MESH) {
+            return Optional.of(HostAndPort.fromString(proxy.get().hostAndPort().get()));
+        } else {
             return Optional.empty();
         }
-        return Optional.of(HostAndPort.fromString(proxy.get().hostAndPort().get()));
     }
 
     private static ProxySelector fixedProxySelectorFor(Proxy proxy) {

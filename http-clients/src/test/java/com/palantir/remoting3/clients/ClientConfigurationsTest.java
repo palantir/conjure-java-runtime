@@ -73,7 +73,7 @@ public final class ClientConfigurationsTest {
     }
 
     @Test
-    public void meshProxy_maxRetriesSetTo0() throws Exception {
+    public void meshProxy_maxRetriesMustBe0() throws Exception {
         ServiceConfiguration invalidServiceConfig = ServiceConfiguration.builder()
                 .uris(uris)
                 .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
@@ -92,5 +92,18 @@ public final class ClientConfigurationsTest {
                 .build());
         assertThat(validConfig.meshProxy()).isEqualTo(Optional.of(HostAndPort.fromParts("localhost", 1234)));
         assertThat(validConfig.maxNumRetries()).isEqualTo(0);
+    }
+
+    @Test
+    public void meshProxy_exactlyOneUri() throws Exception {
+        ServiceConfiguration invalidServiceConfig = ServiceConfiguration.builder()
+                .uris(ImmutableList.of("uri1", "uri2"))
+                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                .proxy(ProxyConfiguration.mesh("localhost:1234"))
+                .maxNumRetries(0)
+                .build();
+        assertThatThrownBy(() -> ClientConfigurations.of(invalidServiceConfig))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("If meshProxy is configured then uris must contain exactly 1 URI");
     }
 }
