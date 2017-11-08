@@ -42,6 +42,8 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(10);
     private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(500);
     private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = false;
+    private static final int DEFAULT_MAX_NUM_RETRIES_LOWER_LIMIT = 3;
+    private static final int DEFAULT_MAX_NUM_RETRIES_UPPER_LIMIT = 10;
 
     private ClientConfigurations() {}
 
@@ -60,7 +62,7 @@ public final class ClientConfigurations {
                 .enableGcmCipherSuites(config.enableGcmCipherSuites().orElse(DEFAULT_ENABLE_GCM_CIPHERS))
                 .proxy(config.proxy().map(ClientConfigurations::createProxySelector).orElse(ProxySelector.getDefault()))
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
-                .maxNumRetries(config.maxNumRetries().orElse(config.uris().size()))
+                .maxNumRetries(config.maxNumRetries().orElseGet(() -> getMaxNumRetries(config.uris().size())))
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
                 .build();
     }
@@ -81,7 +83,7 @@ public final class ClientConfigurations {
                 .enableGcmCipherSuites(DEFAULT_ENABLE_GCM_CIPHERS)
                 .proxy(ProxySelector.getDefault())
                 .proxyCredentials(Optional.empty())
-                .maxNumRetries(uris.size())
+                .maxNumRetries(getMaxNumRetries(uris.size()))
                 .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
                 .build();
     }
@@ -113,5 +115,14 @@ public final class ClientConfigurations {
             @Override
             public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {}
         };
+    }
+
+    private static Integer getMaxNumRetries(int numUris) {
+        if (numUris > DEFAULT_MAX_NUM_RETRIES_UPPER_LIMIT) {
+            return DEFAULT_MAX_NUM_RETRIES_UPPER_LIMIT;
+        } else if (numUris < DEFAULT_MAX_NUM_RETRIES_LOWER_LIMIT) {
+            return DEFAULT_MAX_NUM_RETRIES_LOWER_LIMIT;
+        }
+        return numUris;
     }
 }
