@@ -45,7 +45,7 @@ final class MeshProxyInterceptor implements Interceptor {
                         .host(meshProxy.getHostText())
                         .port(meshProxy.getPort())
                         .build())
-                // TODO(jnewman): add HTTP2 :authority pseudo-header as well? Or does OkHttp handle this for us?
+                // TODO(jnewman): #612 - add HTTP2 :authority pseudo-header as well? Or does OkHttp handle this for us?
                 .header(HttpHeaders.HOST, originalUri.url().getAuthority())
                 .build());
     }

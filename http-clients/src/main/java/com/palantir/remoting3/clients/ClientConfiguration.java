@@ -65,8 +65,9 @@ public interface ClientConfiguration {
     Optional<BasicCredentials> proxyCredentials();
 
     /**
-     * If set, all requests are sent to the configured mesh proxy instead of the {@link #uris target URI}, the "Host"
-     * (or HTTP2 :authority pseudo-header) from the original target URI is kept.
+     * Clients configured with a mesh proxy send all HTTP requests to the configured proxy address instead of the
+     * configured {@link #uris uri}; requests carry an additional {@code Host} header (or http/2 {@code :authority}
+     * pseudo-header) set to the configured {@link #uris uri}.
      * <p>
      * Note that if this option is set, then the {@link #maxNumRetries} must also be set to 0 and exactly one {@link
      * #uris} must exist since the mesh proxy is expected to handle all retry logic.
