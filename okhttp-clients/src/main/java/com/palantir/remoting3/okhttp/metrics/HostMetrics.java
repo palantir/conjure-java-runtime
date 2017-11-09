@@ -26,7 +26,7 @@ import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
  */
 public final class HostMetrics {
 
-    public static final String CLIENT_RESPONSE_METRIC_NAME = ".client.response";
+    public static final String CLIENT_RESPONSE_METRIC_NAME = "client.response";
     public static final String SERVICE_NAME_TAG = "service-name";
     public static final String HOSTNAME_TAG = "hostname";
     public static final String FAMILY_TAG = "family";
