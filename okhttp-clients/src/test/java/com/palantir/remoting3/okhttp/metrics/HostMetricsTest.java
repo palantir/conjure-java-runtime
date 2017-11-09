@@ -66,7 +66,8 @@ public final class HostMetricsTest {
     public static Optional<Meter> getMeter(
             TaggedMetricRegistry registry, String serviceName, String hostname, String family) {
         MetricName name = MetricName.builder()
-                .safeName(serviceName + HostMetrics.CLIENT_RESPONSE_METRIC_NAME_SUFFIX)
+                .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
+                .putSafeTags(HostMetrics.SERVICE_NAME_TAG, serviceName)
                 .putSafeTags(HostMetrics.HOSTNAME_TAG, hostname)
                 .putSafeTags(HostMetrics.FAMILY_TAG, family)
                 .build();

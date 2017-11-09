@@ -55,7 +55,8 @@ public final class InstrumentedInterceptorTest {
 
     private static MetricName name(String hostname) {
         return MetricName.builder()
-                .safeName("client" + HostMetrics.CLIENT_RESPONSE_METRIC_NAME_SUFFIX)
+                .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
+                .putSafeTags(HostMetrics.SERVICE_NAME_TAG, "client")
                 .putSafeTags(HostMetrics.HOSTNAME_TAG, hostname)
                 .putSafeTags(HostMetrics.FAMILY_TAG, "successful")
                 .build();

@@ -26,7 +26,8 @@ import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
  */
 public final class HostMetrics {
 
-    public static final String CLIENT_RESPONSE_METRIC_NAME_SUFFIX = ".client.response";
+    public static final String CLIENT_RESPONSE_METRIC_NAME = "client.response";
+    public static final String SERVICE_NAME_TAG = "service-name";
     public static final String HOSTNAME_TAG = "hostname";
     public static final String FAMILY_TAG = "family";
 
@@ -49,7 +50,8 @@ public final class HostMetrics {
 
     private static MetricName name(String serviceName, String hostname, String family) {
         return MetricName.builder()
-                .safeName(serviceName + CLIENT_RESPONSE_METRIC_NAME_SUFFIX)
+                .safeName(CLIENT_RESPONSE_METRIC_NAME)
+                .putSafeTags(SERVICE_NAME_TAG, serviceName)
                 .putSafeTags(HOSTNAME_TAG, hostname)
                 .putSafeTags(FAMILY_TAG, family)
                 .build();
