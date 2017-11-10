@@ -28,8 +28,8 @@ import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import okhttp3.Call;
@@ -40,7 +40,6 @@ import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.TlsVersion;
-import okhttp3.internal.Util;
 
 public final class OkHttpClients {
 
@@ -49,16 +48,7 @@ public final class OkHttpClients {
      */
     private static final ExecutorService executorService = Tracers.wrap(new Dispatcher().executorService());
 
-    /**
-     * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
-     * internal thread pool and from the thread pool used by {@link #executorService}.
-     * <p>
-     * Note: In contrast to the {@link java.util.concurrent.ThreadPoolExecutor} used by OkHttp's {@link
-     * #executorService}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
-     * Javadoc.
-     */
-    private static final ScheduledExecutorService scheduledExecutorService = Tracers.wrap(
-            new ScheduledThreadPoolExecutor(5, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
+    private static final ScheduledExecutorService asyncRetryExecutor = Executors.newSingleThreadScheduledExecutor();
 
     private OkHttpClients() {}
 
@@ -84,7 +74,7 @@ public final class OkHttpClients {
     @VisibleForTesting
     static QosIoExceptionAwareOkHttpClient withCustomQosHandler(
             ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass,
-            Supplier<QosIoExceptionHandler> handlerFactory) {
+            Supplier<CallRetryer> handlerFactory) {
         return createInternal(config, userAgent, serviceClass, handlerFactory, true);
     }
 
@@ -94,14 +84,16 @@ public final class OkHttpClients {
         return createInternal(config, userAgent, serviceClass, createQosHandler(config), false);
     }
 
-    private static Supplier<QosIoExceptionHandler> createQosHandler(ClientConfiguration config) {
-        return () -> new AsyncQosIoExceptionHandler(scheduledExecutorService, executorService,
-                new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()));
+    private static Supplier<CallRetryer> createQosHandler(ClientConfiguration config) {
+        return () -> new QosAwareCallRetryer(
+                new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()),
+                BackoffSleeper.DEFAULT,
+                asyncRetryExecutor);
     }
 
     private static QosIoExceptionAwareOkHttpClient createInternal(
             ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass,
-            Supplier<QosIoExceptionHandler> handlerFactory, boolean randomizeUrlOrder) {
+            Supplier<CallRetryer> handlerFactory, boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // response metrics
@@ -196,23 +188,23 @@ public final class OkHttpClients {
 
     /**
      * An OkHttp client that executes requests, catches all {@link QosIoException}s and passes them to the configured
-     * {@link QosIoExceptionHandler}.
+     * {@link CallRetryer}.
      * <p>
-     * See {@link QosIoExceptionHandler} for an end-to-end explanation of http-remoting specific client-side error
+     * See {@link CallRetryer} for an end-to-end explanation of http-remoting specific client-side error
      * handling.
      */
     private static final class QosIoExceptionAwareOkHttpClient extends ForwardingOkHttpClient {
 
-        private final Supplier<QosIoExceptionHandler> handlerFactory;
+        private final Supplier<CallRetryer> handlerFactory;
 
-        private QosIoExceptionAwareOkHttpClient(OkHttpClient delegate, Supplier<QosIoExceptionHandler> handlerFactory) {
+        private QosIoExceptionAwareOkHttpClient(OkHttpClient delegate, Supplier<CallRetryer> handlerFactory) {
             super(delegate);
             this.handlerFactory = handlerFactory;
         }
 
         @Override
         public Call newCall(Request request) {
-            return new QosIoExceptionAwareCall(getDelegate().newCall(request), handlerFactory.get());
+            return new RetryingCall(getDelegate().newCall(request), handlerFactory.get());
         }
     }
 }

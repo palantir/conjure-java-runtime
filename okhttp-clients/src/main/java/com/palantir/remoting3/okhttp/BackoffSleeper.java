@@ -16,17 +16,21 @@
 
 package com.palantir.remoting3.okhttp;
 
+import java.io.InterruptedIOException;
 import java.time.Duration;
-import java.util.Optional;
 
-/**
- * Defines a strategy for waiting in between successive retries of an operation that is subject to failure.
- */
-public interface BackoffStrategy {
-    /**
-     * Returns the next suggested backoff duration, or {@link Optional#empty} if the operation should not be retried
-     * again.
-     */
-    Optional<Duration> nextBackoff();
+interface BackoffSleeper {
+
+    BackoffSleeper DEFAULT = duration -> {
+        try {
+            Thread.sleep(duration.toMillis());
+        } catch (InterruptedException ex) {
+            throw new InterruptedIOException("Interrupted while pausing for backoff");
+        }
+    };
+
+    BackoffSleeper NO_OP = duration -> { };
+
+    void sleepForBackoff(Duration duration) throws InterruptedIOException;
 
 }

@@ -16,17 +16,18 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.remoting.api.errors.QosException;
+import java.io.IOException;
 import okhttp3.Call;
-import okhttp3.Interceptor;
+import okhttp3.Callback;
 import okhttp3.Response;
 
-interface QosIoExceptionHandler {
-     /**
-     * Handles a {@link QosIoException} that was thrown for the given {@link Call} and returns a future for a suitable
-     * response. The future can either encapsulate the original exception, or the response to retrying the call at a
-     * later time, or the exception thrown by a later retried execution.
+interface CallRetryer {
+    /**
+     * Attempts to execute the given {@link Call} and, if a {@link QosIoException} thrown, potentially
+     * retries it at a later time. If the maximum allowed retries are exhausted, an exception will be thrown. This
+     * exception will either be the original exception, or an exception thrown by a later retry.
+     *
      * <p>
      * Note that vanilla OkHttp functionality does not cover what's needed here, for example:
      * <ul>
@@ -37,9 +38,9 @@ interface QosIoExceptionHandler {
      *      <li>
      *          OkHttp {@link Interceptor}s could wait-and-retry upon observing 429 or 503, but this would happen on the
      *          same thread. Since all http-remoting clients (in a JVM) share the same OkHttp thread pool, only a few
-     *          backed up requests would have the potential to stall all outgoing RPC. The {@link QosIoExceptionHandler}
-     *          approach taken here circumnavigates this pitful by re-scheduling call re-execution instead of performing
-     *          thread-blocking sleep.
+     *          backed up requests would have the potential to stall all outgoing RPC. The {@link CallRetryer}
+     *          approach taken here circumnavigates this pitfall by re-scheduling call re-execution instead of
+     *          performing thread-blocking sleep for async calls.
      *      </li>
      * </ul>
      * <p>
@@ -52,13 +53,20 @@ interface QosIoExceptionHandler {
      *     </li>
      *     <li>
      *         A {@link OkHttpClients.QosIoExceptionAwareOkHttpClient} catches all {@link QosIoException}s and passes
-     *         on to a configured {@link QosIoExceptionHandler}.
+     *         on to a configured {@link CallRetryer}.
      *     </li>
      *     <li>
-     *         The {@link QosIoExceptionHandler} decides to reschedule the request, throw the {@link QosIoException}
+     *         The {@link CallRetryer} decides to reschedule the request, throw the {@link QosIoException}
      *         to the calling user, redirect the request, etc.
      *     </li>
      * </ul>
      */
-    ListenableFuture<Response> handle(QosIoExceptionAwareCall call, QosIoException exception);
+    Response executeWithRetry(Call call) throws IOException;
+
+    /**
+     * Performs the same logic as {@link #executeWithRetry}, except that the request will be retried asynchronously
+     * via {@link Call#enqueue}, using the provided callback. This method does not block the calling thread.
+     */
+    void enqueueWithRetry(Call call, Callback callback);
+
 }
