@@ -60,13 +60,13 @@ public final class InstrumentedInterceptorTest {
         interceptor.intercept(chain);
 
         HostMetrics hostA = hostMetrics("hosta");
-        assertThat(hostA.get2XX().getCount()).isEqualTo(1);
+        assertThat(hostA.get2xx().getCount()).isEqualTo(1);
 
         successfulRequest(REQUEST_B);
         interceptor.intercept(chain);
 
         HostMetrics hostB = hostMetrics("hostb");
-        assertThat(hostB.get2XX().getCount()).isEqualTo(1);
+        assertThat(hostB.get2xx().getCount()).isEqualTo(1);
     }
 
     private HostMetrics hostMetrics(String hostname) {

@@ -43,7 +43,7 @@ public final class HostMetricsRegistryTest {
         hostRegistry.record("service", "host", 200);
 
         HostMetrics hostMetrics = Iterables.getOnlyElement(hostRegistry.getMetrics());
-        assertThat(hostMetrics.get2XX().getCount()).isEqualTo(1);
+        assertThat(hostMetrics.get2xx().getCount()).isEqualTo(1);
     }
 
     @Test

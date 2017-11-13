@@ -84,23 +84,23 @@ public final class HostMetrics {
         return hostname;
     }
 
-    public Meter get1XX() {
+    public Meter get1xx() {
         return informational;
     }
 
-    public Meter get2XX() {
+    public Meter get2xx() {
         return successful;
     }
 
-    public Meter get3XX() {
+    public Meter get3xx() {
         return redirection;
     }
 
-    public Meter get4XX() {
+    public Meter get4xx() {
         return clientError;
     }
 
-    public Meter get5XX() {
+    public Meter get5xx() {
         return serverError;
     }
 

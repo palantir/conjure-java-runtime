@@ -93,7 +93,7 @@ public final class OkHttpClientsTest extends TestBase {
                 .collect(Collectors.toList());
 
         HostMetrics actualMetrics = Iterables.getOnlyElement(hostMetrics);
-        assertThat(actualMetrics.get2XX().getCount()).isEqualTo(1);
+        assertThat(actualMetrics.get2xx().getCount()).isGreaterThanOrEqualTo(1);
     }
 
     @Test
