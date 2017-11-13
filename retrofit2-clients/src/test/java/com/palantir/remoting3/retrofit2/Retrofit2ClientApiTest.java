@@ -19,6 +19,7 @@ package com.palantir.remoting3.retrofit2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,6 +43,7 @@ import okio.Buffer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import retrofit2.Call;
 
 public final class Retrofit2ClientApiTest extends TestBase {
     @Rule
@@ -127,7 +129,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     }
 
     @Test
-    public void makeFutureRequestError() throws JsonProcessingException {
+    public void completableFuture_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
         SerializableError error = SerializableError.builder()
                 .errorCode("errorCode")
                 .errorName("errorName")
@@ -146,6 +148,34 @@ public final class Retrofit2ClientApiTest extends TestBase {
         } catch (CompletionException e) {
             assertThat(e.getCause()).isInstanceOf(RemoteException.class);
             assertThat(((RemoteException) e.getCause()).getError()).isEqualTo(error);
+        }
+    }
+
+    @Test
+    public void normal_retrofit_call_should_throw_RemoteException_for_server_serializable_errors()
+            throws JsonProcessingException {
+        SerializableError error = SerializableError.builder()
+                .errorCode("errorCode")
+                .errorName("errorName")
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(error)));
+
+        Call<String> future = service.getRelative();
+
+        try {
+            future.execute();
+            failBecauseExceptionWasNotThrown(IOException.class);
+        } catch (RuntimeException e) {
+            assertThat(e).isInstanceOf(RemoteException.class);
+            RemoteException cast = (RemoteException) e;
+            assertThat(cast.getError()).isEqualTo(error);
+            assertThat(cast.getStatus()).isEqualTo(500);
+        } catch (IOException e) {
+            failBecauseExceptionWasNotThrown(RemoteException.class);
         }
     }
 
