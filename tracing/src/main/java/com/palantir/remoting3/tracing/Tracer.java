@@ -18,6 +18,7 @@ package com.palantir.remoting3.tracing;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanObserver;
@@ -202,10 +203,13 @@ public final class Tracer {
      */
     public static synchronized SpanObserver subscribe(String name, SpanObserver observer) {
         if (observers.containsKey(name)) {
-            log.warn("Overwriting existing SpanObserver with name {} by new observer: {}", name, observer);
+            log.warn("Overwriting existing SpanObserver with name {} by new observer: {}",
+                    UnsafeArg.of("name", name),
+                    UnsafeArg.of("observer", observer));
         }
         if (observers.size() >= 5) {
-            log.warn("Five or more SpanObservers registered: {}", observers.keySet());
+            log.warn("Five or more SpanObservers registered: {}",
+                    UnsafeArg.of("observers", observers.keySet()));
         }
         SpanObserver currentValue = observers.put(name, observer);
         computeObserversList();
