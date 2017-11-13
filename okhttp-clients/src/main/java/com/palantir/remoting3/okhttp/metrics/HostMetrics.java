@@ -31,6 +31,14 @@ public final class HostMetrics {
     public static final String HOSTNAME_TAG = "hostname";
     public static final String FAMILY_TAG = "family";
 
+    // TODO(jellis): standard tags and tag names should move to public place, possibly Tritium
+    static final String INFORMATIONAL = "1xx";
+    static final String SUCCESSFUL = "2xx";
+    static final String REDIRECTION = "3xx";
+    static final String CLIENT_ERROR = "4xx";
+    static final String SERVER_ERROR = "5xx";
+    static final String OTHER = "other";
+
     private final Meter informational;
     private final Meter successful;
     private final Meter redirection;
@@ -40,12 +48,12 @@ public final class HostMetrics {
 
     /** Creates a metrics registry for calls from the given service to the given host. */
     public HostMetrics(TaggedMetricRegistry registry, String serviceName, String hostname) {
-        informational = registry.meter(name(serviceName, hostname, "1xx"));
-        successful = registry.meter(name(serviceName, hostname, "2xx"));
-        redirection = registry.meter(name(serviceName, hostname, "3xx"));
-        clientError = registry.meter(name(serviceName, hostname, "4xx"));
-        serverError = registry.meter(name(serviceName, hostname, "5xx"));
-        other = registry.meter(name(serviceName, hostname, "other"));
+        informational = registry.meter(name(serviceName, hostname, INFORMATIONAL));
+        successful = registry.meter(name(serviceName, hostname, SUCCESSFUL));
+        redirection = registry.meter(name(serviceName, hostname, REDIRECTION));
+        clientError = registry.meter(name(serviceName, hostname, CLIENT_ERROR));
+        serverError = registry.meter(name(serviceName, hostname, SERVER_ERROR));
+        other = registry.meter(name(serviceName, hostname, OTHER));
     }
 
     private static MetricName name(String serviceName, String hostname, String family) {
