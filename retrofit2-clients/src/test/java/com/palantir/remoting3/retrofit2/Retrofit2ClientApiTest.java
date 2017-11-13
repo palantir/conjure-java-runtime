@@ -20,7 +20,6 @@ package com.palantir.remoting3.retrofit2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
-import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
@@ -145,10 +144,16 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
         try {
             future.join();
-            fail();
+            failBecauseExceptionWasNotThrown(CompletionException.class);
         } catch (CompletionException e) {
-            assertThat(e.getCause()).isInstanceOf(RemoteException.class);
-            assertThat(((RemoteException) e.getCause()).getError()).isEqualTo(error);
+            // TODO(dfox): make this a RemoteException again
+            assertThat(e.getCause()).isInstanceOf(RemoteIoException.class);
+            RemoteIoException wrapper = (RemoteIoException) e.getCause();
+
+            assertThat(wrapper.getRuntimeExceptionCause()).isInstanceOf(RemoteException.class);
+            RemoteException remoteException = (RemoteException) wrapper.getRuntimeExceptionCause();
+
+            assertThat(remoteException.getError()).isEqualTo(error);
         }
     }
 
@@ -171,14 +176,15 @@ public final class Retrofit2ClientApiTest extends TestBase {
             future.execute();
             failBecauseExceptionWasNotThrown(RemoteIoException.class);
         } catch (RuntimeException e) {
+            // TODO(dfox): make this throw an unwrapped RemoteException.
             failBecauseExceptionWasNotThrown(RemoteIoException.class);
         } catch (IOException e) {
             assertThat(e).isInstanceOf(RemoteIoException.class);
-
             RemoteIoException wrapper = (RemoteIoException) e;
-            assertThat(wrapper.getRuntimeExceptionCause()).isInstanceOf(RemoteException.class);
 
+            assertThat(wrapper.getRuntimeExceptionCause()).isInstanceOf(RemoteException.class);
             RemoteException remoteException = (RemoteException) wrapper.getRuntimeExceptionCause();
+
             assertThat(remoteException.getError()).isEqualTo(error);
         }
     }

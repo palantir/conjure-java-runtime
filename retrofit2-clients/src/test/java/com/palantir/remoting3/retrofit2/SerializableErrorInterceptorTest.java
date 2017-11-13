@@ -74,11 +74,16 @@ public final class SerializableErrorInterceptorTest extends TestBase {
     }
 
     @Test
-    public void doesNothingIfAsyncCall() throws IOException {
+    public void asyncCallTagIsHandledNormally() throws IOException {
         tag.setCallAsync();
         Response response = responseWithCode(request, 400);
         when(chain.proceed(any(Request.class))).thenReturn(response);
-        assertThat(SerializableErrorInterceptor.INSTANCE.intercept(chain), Matchers.is(response));
+        try {
+            assertThat(SerializableErrorInterceptor.INSTANCE.intercept(chain), Matchers.is(response));
+            fail();
+        } catch (RemoteIoException e) {
+            assertThat(e.getMessage(), containsString("Error 400"));
+        }
     }
 
     @Test

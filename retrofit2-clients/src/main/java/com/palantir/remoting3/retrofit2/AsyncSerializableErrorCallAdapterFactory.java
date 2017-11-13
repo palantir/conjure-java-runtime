@@ -39,6 +39,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
+// See https://github.com/square/retrofit/blob/parent-2.3.0/retrofit-adapters/java8/src/main/java/retrofit2/adapter/java8/Java8CallAdapterFactory.java#L59
 final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory {
     static final AsyncSerializableErrorCallAdapterFactory INSTANCE = new AsyncSerializableErrorCallAdapterFactory();
 
