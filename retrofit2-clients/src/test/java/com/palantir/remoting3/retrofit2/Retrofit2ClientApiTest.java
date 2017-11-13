@@ -28,6 +28,7 @@ import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
+import com.palantir.remoting3.okhttp.RemoteIoException;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -168,14 +169,17 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
         try {
             future.execute();
-            failBecauseExceptionWasNotThrown(IOException.class);
+            failBecauseExceptionWasNotThrown(RemoteIoException.class);
         } catch (RuntimeException e) {
-            assertThat(e).isInstanceOf(RemoteException.class);
-            RemoteException cast = (RemoteException) e;
-            assertThat(cast.getError()).isEqualTo(error);
-            assertThat(cast.getStatus()).isEqualTo(500);
+            failBecauseExceptionWasNotThrown(RemoteIoException.class);
         } catch (IOException e) {
-            failBecauseExceptionWasNotThrown(RemoteException.class);
+            assertThat(e).isInstanceOf(RemoteIoException.class);
+
+            RemoteIoException wrapper = (RemoteIoException) e;
+            assertThat(wrapper.getRuntimeExceptionCause()).isInstanceOf(RemoteException.class);
+
+            RemoteException remoteException = (RemoteException) wrapper.getRuntimeExceptionCause();
+            assertThat(remoteException.getError()).isEqualTo(error);
         }
     }
 
