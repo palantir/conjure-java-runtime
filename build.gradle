@@ -97,4 +97,8 @@ subprojects {
             force 'com.google.guava:guava:21.0'
         }
     }
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += ['-XepDisableWarningsInGeneratedCode']
+    }
 }
