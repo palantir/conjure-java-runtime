@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,8 @@ package com.palantir.remoting3.tracing;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanObserver;
@@ -64,7 +66,7 @@ public final class Tracer {
      * configured sampler} returns true.
      */
     private static Trace createTrace(Optional<Boolean> isObservable, String traceId) {
-        validateId(traceId, "traceId must be non-empty: %s");
+        Preconditions.checkArgument(traceId != null && !traceId.isEmpty(), "traceId must be non-empty: %s", traceId);
         boolean observable = isObservable.orElse(sampler.sample());
         return new Trace(observable, traceId);
     }
@@ -85,7 +87,8 @@ public final class Tracer {
     public static OpenSpan startSpan(String operation, String parentSpanId, SpanType type) {
         Preconditions.checkState(currentTrace.get().isEmpty(),
                 "Cannot start a span with explicit parent if the current thread's trace is non-empty");
-        validateId(parentSpanId, "parentTraceId must be non-empty: %s");
+        Preconditions.checkArgument(parentSpanId != null && !parentSpanId.isEmpty(),
+                "parentTraceId must be non-empty: %s", parentSpanId);
         OpenSpan span = OpenSpan.builder()
                 .spanId(Tracers.randomId())
                 .operation(operation)
@@ -202,10 +205,13 @@ public final class Tracer {
      */
     public static synchronized SpanObserver subscribe(String name, SpanObserver observer) {
         if (observers.containsKey(name)) {
-            log.warn("Overwriting existing SpanObserver with name {} by new observer: {}", name, observer);
+            log.warn("Overwriting existing SpanObserver with name {} by new observer: {}",
+                    SafeArg.of("name", name),
+                    UnsafeArg.of("observer", observer));
         }
         if (observers.size() >= 5) {
-            log.warn("Five or more SpanObservers registered: {}", observers.keySet());
+            log.warn("Five or more SpanObservers registered: {}",
+                    SafeArg.of("observers", observers.keySet()));
         }
         SpanObserver currentValue = observers.put(name, observer);
         computeObserversList();
@@ -268,9 +274,4 @@ public final class Tracer {
         MDC.put(Tracers.TRACE_ID_KEY, trace.getTraceId());
     }
 
-    private static String validateId(String id, String messageTemplate) {
-        // TODO(rfink): Should we check the format?
-        Preconditions.checkArgument(id != null && !id.isEmpty(), messageTemplate, id);
-        return id;
-    }
 }

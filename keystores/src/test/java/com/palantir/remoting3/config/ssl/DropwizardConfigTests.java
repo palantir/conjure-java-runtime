@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,17 +44,9 @@ public final class DropwizardConfigTests {
     }
 
     public static final class DropwizardConfigTestsServer extends Application<DropwizardConfigTestsConfiguration> {
-        private DropwizardConfigTestsConfiguration config;
 
         @Override
-        public void run(DropwizardConfigTestsConfiguration cfg, final Environment env) throws Exception {
-            this.config = cfg;
-        }
-
-        public DropwizardConfigTestsConfiguration getConfig() {
-            return config;
-        }
-
+        public void run(DropwizardConfigTestsConfiguration cfg, final Environment env) throws Exception {}
     }
 
     public static final class DropwizardConfigTestsConfiguration extends Configuration {

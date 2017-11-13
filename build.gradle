@@ -5,20 +5,19 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.6'
-        classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:4.4.0'
-        classpath 'com.netflix.nebula:nebula-dependency-recommender:4.0.2'
-        classpath 'com.netflix.nebula:nebula-publishing-plugin:4.9.1'
-        classpath 'com.palantir.baseline:gradle-baseline-java:0.14.0'
-        classpath 'gradle.plugin.com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.2.0'
-        classpath 'net.ltgt.gradle:gradle-errorprone-plugin:0.0.9'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:4.9.5'
+        classpath 'com.netflix.nebula:nebula-dependency-recommender:5.0.0'
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:5.1.5'
+        classpath 'com.palantir.baseline:gradle-baseline-java:0.17.1'
+        classpath 'com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.3.0'
     }
 }
 
 plugins {
-    id 'com.palantir.git-version' version '0.2.0'
-    id 'org.inferred.processors' version '1.2.2'
+    id 'com.palantir.git-version' version '0.9.1'
+    id 'org.inferred.processors' version '1.2.15'
 }
 
 apply plugin: 'com.palantir.baseline-config' // provides baselineUpdateConfig task
@@ -29,7 +28,7 @@ repositories {
 }
 
 dependencies {
-    baseline "com.palantir.baseline:gradle-baseline-java-config:0.14.0@zip"
+    baseline "com.palantir.baseline:gradle-baseline-java-config:0.17.1@zip"
 }
 
 allprojects {
@@ -49,7 +48,7 @@ subprojects {
     apply plugin: 'com.palantir.baseline-checkstyle'
     apply plugin: 'com.palantir.baseline-eclipse'
     apply plugin: 'com.palantir.baseline-idea'
-    apply plugin: 'net.ltgt.errorprone'
+    apply plugin: 'com.palantir.baseline-error-prone'
 
     repositories {
         jcenter()
@@ -64,15 +63,18 @@ subprojects {
         lockFile = 'versions.lock'
         configurationNames = ['runtime', 'compileClasspath']
     }
-    task verifyDependencyLocksAreCurrent << {
-        def expectedDependencies = tasks.saveLock.getOutputLock()
-        def actualDependencies = tasks.saveLock.getGeneratedLock()
-        def digester = java.security.MessageDigest.getInstance('SHA')
-        logger.info("Verifying integrity of dependency locks: {} vs {}", expectedDependencies, actualDependencies)
-        if (digester.digest(expectedDependencies.bytes) != digester.digest(actualDependencies.bytes)) {
-            throw new GradleException("The dependencies of project " + project.name + " do not match the expected "
-                + "dependencies recorded in " + expectedDependencies + ". "
-                + "Run `./gradlew generateLock saveLock` and commit the updated version.lock files")
+
+    task verifyDependencyLocksAreCurrent {
+        doLast {
+            def expectedDependencies = tasks.saveLock.getOutputLock()
+            def actualDependencies = tasks.saveLock.getGeneratedLock()
+            def digester = java.security.MessageDigest.getInstance('SHA')
+            logger.info("Verifying integrity of dependency locks: {} vs {}", expectedDependencies, actualDependencies)
+            if (digester.digest(expectedDependencies.bytes) != digester.digest(actualDependencies.bytes)) {
+                throw new GradleException("The dependencies of project " + project.name + " do not match the expected "
+                    + "dependencies recorded in " + expectedDependencies + ". "
+                    + "Run `./gradlew generateLock saveLock` and commit the updated version.lock files")
+            }
         }
     }
 
@@ -97,5 +99,9 @@ subprojects {
         resolutionStrategy {
             force 'com.google.guava:guava:21.0'
         }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += ['-XepDisableWarningsInGeneratedCode']
     }
 }

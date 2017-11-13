@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.collect.Lists;
+import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.net.Inet4Address;
@@ -195,7 +196,7 @@ public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
     @Override
     public void doConsume(Span span) {
         if (logger.isTraceEnabled()) {
-            logger.trace("{}", ZipkinCompatSpan.fromSpan(span, endpoint).toJson());
+            logger.trace("{}", UnsafeArg.of("span", ZipkinCompatSpan.fromSpan(span, endpoint).toJson()));
         }
     }
 }
