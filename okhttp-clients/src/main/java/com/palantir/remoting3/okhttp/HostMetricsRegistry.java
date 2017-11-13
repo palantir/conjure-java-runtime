@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting3.okhttp.metrics;
+package com.palantir.remoting3.okhttp;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -28,13 +28,13 @@ import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HostMetricsRegistry {
+final class HostMetricsRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(HostMetricsRegistry.class);
 
     private final LoadingCache<ServiceAndHost, HostMetrics> hostMetrics;
 
-    public HostMetricsRegistry(TaggedMetricRegistry registry) {
+    HostMetricsRegistry(TaggedMetricRegistry registry) {
         this.hostMetrics = CacheBuilder.newBuilder()
                 .maximumSize(1_000)
                 .expireAfterAccess(1, TimeUnit.DAYS)
@@ -46,7 +46,7 @@ public final class HostMetricsRegistry {
                 });
     }
 
-    public void record(String serviceName, String hostname, int statusCode) {
+    void record(String serviceName, String hostname, int statusCode) {
         try {
             hostMetrics.getUnchecked(ImmutableServiceAndHost.of(serviceName, hostname)).record(statusCode);
         } catch (Exception e) {
@@ -54,7 +54,7 @@ public final class HostMetricsRegistry {
         }
     }
 
-    public Collection<HostMetrics> getMetrics() {
+    Collection<HostMetrics> getMetrics() {
         return hostMetrics.asMap().values();
     }
 

@@ -21,8 +21,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
-import com.palantir.remoting3.okhttp.metrics.HostMetrics;
-import com.palantir.remoting3.okhttp.metrics.HostMetricsRegistry;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.io.IOException;
 import java.util.Collection;

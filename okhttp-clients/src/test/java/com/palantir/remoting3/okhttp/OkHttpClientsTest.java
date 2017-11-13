@@ -30,7 +30,6 @@ import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.clients.ClientConfiguration;
-import com.palantir.remoting3.okhttp.metrics.HostMetrics;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;

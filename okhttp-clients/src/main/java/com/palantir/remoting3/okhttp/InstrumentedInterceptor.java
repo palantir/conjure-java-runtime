@@ -16,7 +16,6 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.palantir.remoting3.okhttp.metrics.HostMetricsRegistry;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;

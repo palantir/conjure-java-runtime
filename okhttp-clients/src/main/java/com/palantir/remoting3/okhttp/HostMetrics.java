@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting3.okhttp.metrics;
+package com.palantir.remoting3.okhttp;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
@@ -112,7 +112,7 @@ public final class HostMetrics {
      * Records that an HTTP call from the configured service to the configured host (see constructor) yielded the given
      * HTTP status code.
      */
-    public void record(int statusCode) {
+    void record(int statusCode) {
         // Explicitly not using javax.ws.rs.core.Response API since it's incompatible across versions.
         switch (statusCode / 100) {
             case 1:

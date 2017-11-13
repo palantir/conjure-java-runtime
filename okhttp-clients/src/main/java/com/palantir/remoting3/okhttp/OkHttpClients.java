@@ -24,8 +24,6 @@ import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
-import com.palantir.remoting3.okhttp.metrics.HostMetrics;
-import com.palantir.remoting3.okhttp.metrics.HostMetricsRegistry;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
