@@ -58,7 +58,7 @@ public final class InstrumentedInterceptorTest {
                 .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
                 .putSafeTags(HostMetrics.SERVICE_NAME_TAG, "client")
                 .putSafeTags(HostMetrics.HOSTNAME_TAG, hostname)
-                .putSafeTags(HostMetrics.FAMILY_TAG, "successful")
+                .putSafeTags(HostMetrics.FAMILY_TAG, "2xx")
                 .build();
     }
 
