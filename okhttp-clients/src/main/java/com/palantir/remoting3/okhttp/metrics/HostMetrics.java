@@ -52,12 +52,12 @@ public final class HostMetrics {
     HostMetrics(TaggedMetricRegistry registry, String serviceName, String hostname) {
         this.serviceName = serviceName;
         this.hostname = hostname;
-        this.informational = registry.meter(name("informational"));
-        this.successful = registry.meter(name("successful"));
-        this.redirection = registry.meter(name("redirection"));
-        this.clientError = registry.meter(name("client-error"));
-        this.serverError = registry.meter(name("server-error"));
-        this.other = registry.meter(name("other"));
+        this.informational = registry.meter(name(INFORMATIONAL));
+        this.successful = registry.meter(name(SUCCESSFUL));
+        this.redirection = registry.meter(name(REDIRECTION));
+        this.clientError = registry.meter(name(CLIENT_ERROR));
+        this.serverError = registry.meter(name(SERVER_ERROR));
+        this.other = registry.meter(name(OTHER));
     }
 
     private MetricName name(String family) {
