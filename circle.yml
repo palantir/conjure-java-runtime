@@ -8,6 +8,7 @@ machine:
 dependencies:
   override:
     - ./gradlew resolveConfigurations --parallel
+    - ./gradlew generateLock verifyDependencyLocksAreCurrent --stacktrace --parallel
 
 test:
   override:
@@ -20,7 +21,6 @@ test:
             ./gradlew build --parallel
             ;;
           1)
-            ./gradlew generateLock verifyDependencyLocksAreCurrent --stacktrace --parallel
             ./gradlew testBouncyCastle testSun --parallel
             ;;
           esac
