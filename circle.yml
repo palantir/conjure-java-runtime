@@ -7,9 +7,9 @@ machine:
 
 dependencies:
   override:
-    - ./gradlew resolveConfigurations
-    - ./gradlew --stacktrace generateLock verifyDependencyLocksAreCurrent
-    - ./gradlew testClasses
+    - ./gradlew resolveConfigurations --parallel
+    - ./gradlew --stacktrace generateLock verifyDependencyLocksAreCurrent --parallel
+    - ./gradlew testClasses --parallel
 
 test:
   override:
