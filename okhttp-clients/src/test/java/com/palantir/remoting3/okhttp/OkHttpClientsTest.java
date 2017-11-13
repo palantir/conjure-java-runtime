@@ -97,11 +97,11 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setBody("pong"));
         createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();
 
-        assertThat(registry.getMetrics().get(name("informational"))).isNotNull();
-        assertThat(registry.getMetrics().get(name("successful"))).isNotNull();
-        assertThat(registry.getMetrics().get(name("redirection"))).isNotNull();
-        assertThat(registry.getMetrics().get(name("client-error"))).isNotNull();
-        assertThat(registry.getMetrics().get(name("server-error"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("1xx"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("2xx"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("3xx"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("4xx"))).isNotNull();
+        assertThat(registry.getMetrics().get(name("5xx"))).isNotNull();
     }
 
     @Test

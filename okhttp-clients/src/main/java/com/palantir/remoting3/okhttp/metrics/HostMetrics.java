@@ -40,11 +40,11 @@ public final class HostMetrics {
 
     /** Creates a metrics registry for calls from the given service to the given host. */
     public HostMetrics(TaggedMetricRegistry registry, String serviceName, String hostname) {
-        informational = registry.meter(name(serviceName, hostname, "informational"));
-        successful = registry.meter(name(serviceName, hostname, "successful"));
-        redirection = registry.meter(name(serviceName, hostname, "redirection"));
-        clientError = registry.meter(name(serviceName, hostname, "client-error"));
-        serverError = registry.meter(name(serviceName, hostname, "server-error"));
+        informational = registry.meter(name(serviceName, hostname, "1xx"));
+        successful = registry.meter(name(serviceName, hostname, "2xx"));
+        redirection = registry.meter(name(serviceName, hostname, "3xx"));
+        clientError = registry.meter(name(serviceName, hostname, "4xx"));
+        serverError = registry.meter(name(serviceName, hostname, "5xx"));
         other = registry.meter(name(serviceName, hostname, "other"));
     }
 

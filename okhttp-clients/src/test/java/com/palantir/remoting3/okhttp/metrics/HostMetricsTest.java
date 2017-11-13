@@ -45,11 +45,11 @@ public final class HostMetricsTest {
     @Test
     public void testUpdateMetricUpdatesMeter() {
         Map<Integer, String> testCases = ImmutableMap.<Integer, String>builder()
-                .put(100, "informational")
-                .put(200, "successful")
-                .put(300, "redirection")
-                .put(400, "client-error")
-                .put(500, "server-error")
+                .put(100, "1xx")
+                .put(200, "2xx")
+                .put(300, "3xx")
+                .put(400, "4xx")
+                .put(500, "5xx")
                 .put(600, "other")
                 .build();
 
