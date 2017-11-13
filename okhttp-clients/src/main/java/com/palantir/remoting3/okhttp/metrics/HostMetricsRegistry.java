@@ -20,8 +20,11 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.palantir.logsafe.UnsafeArg;
+import com.palantir.remoting3.clients.ImmutablesStyle;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,25 +32,36 @@ public final class HostMetricsRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(HostMetricsRegistry.class);
 
-    private final LoadingCache<String, HostMetrics> hostMetrics;
+    private final LoadingCache<ServiceAndHost, HostMetrics> hostMetrics;
 
-    public HostMetricsRegistry(TaggedMetricRegistry registry, String serviceName) {
+    public HostMetricsRegistry(TaggedMetricRegistry registry) {
         this.hostMetrics = CacheBuilder.newBuilder()
                 .maximumSize(1_000)
                 .expireAfterAccess(1, TimeUnit.DAYS)
-                .build(new CacheLoader<String, HostMetrics>() {
+                .build(new CacheLoader<ServiceAndHost, HostMetrics>() {
                     @Override
-                    public HostMetrics load(String hostname) throws Exception {
-                        return new HostMetrics(registry, serviceName, hostname);
+                    public HostMetrics load(ServiceAndHost serviceAndHost) throws Exception {
+                        return new HostMetrics(registry, serviceAndHost.serviceName(), serviceAndHost.hostname());
                     }
                 });
     }
 
-    public void record(String hostname, int statusCode) {
+    public void record(String serviceName, String hostname, int statusCode) {
         try {
-            hostMetrics.getUnchecked(hostname).record(statusCode);
+            hostMetrics.getUnchecked(ImmutableServiceAndHost.of(serviceName, hostname)).record(statusCode);
         } catch (Exception e) {
             log.warn("Unable to record metrics for host", UnsafeArg.of("hostname", hostname));
         }
+    }
+
+    public Collection<HostMetrics> getMetrics() {
+        return hostMetrics.asMap().values();
+    }
+
+    @Value.Immutable
+    @ImmutablesStyle
+    interface ServiceAndHost {
+        @Value.Parameter String serviceName();
+        @Value.Parameter String hostname();
     }
 }

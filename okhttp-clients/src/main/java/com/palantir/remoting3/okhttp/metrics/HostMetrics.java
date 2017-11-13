@@ -39,6 +39,8 @@ public final class HostMetrics {
     static final String SERVER_ERROR = "5xx";
     static final String OTHER = "other";
 
+    private final String serviceName;
+    private final String hostname;
     private final Meter informational;
     private final Meter successful;
     private final Meter redirection;
@@ -47,22 +49,63 @@ public final class HostMetrics {
     private final Meter other;
 
     /** Creates a metrics registry for calls from the given service to the given host. */
-    public HostMetrics(TaggedMetricRegistry registry, String serviceName, String hostname) {
-        informational = registry.meter(name(serviceName, hostname, INFORMATIONAL));
-        successful = registry.meter(name(serviceName, hostname, SUCCESSFUL));
-        redirection = registry.meter(name(serviceName, hostname, REDIRECTION));
-        clientError = registry.meter(name(serviceName, hostname, CLIENT_ERROR));
-        serverError = registry.meter(name(serviceName, hostname, SERVER_ERROR));
-        other = registry.meter(name(serviceName, hostname, OTHER));
+    HostMetrics(TaggedMetricRegistry registry, String serviceName, String hostname) {
+        this.serviceName = serviceName;
+        this.hostname = hostname;
+        this.informational = registry.meter(name("informational"));
+        this.successful = registry.meter(name("successful"));
+        this.redirection = registry.meter(name("redirection"));
+        this.clientError = registry.meter(name("client-error"));
+        this.serverError = registry.meter(name("server-error"));
+        this.other = registry.meter(name("other"));
     }
 
-    private static MetricName name(String serviceName, String hostname, String family) {
+    private MetricName name(String family) {
         return MetricName.builder()
                 .safeName(CLIENT_RESPONSE_METRIC_NAME)
                 .putSafeTags(SERVICE_NAME_TAG, serviceName)
                 .putSafeTags(HOSTNAME_TAG, hostname)
                 .putSafeTags(FAMILY_TAG, family)
                 .build();
+    }
+
+    /**
+     * The name of the service these metrics describe. This is generally the simple name of the class being proxied (eg:
+     * RemoteService).
+     */
+    public String serviceName() {
+        return serviceName;
+    }
+
+    /**
+     * The name of the host these metrics describe. This may be the hostname, ip, or some other URI.
+     */
+    public String hostname() {
+        return hostname;
+    }
+
+    public Meter get1XX() {
+        return informational;
+    }
+
+    public Meter get2XX() {
+        return successful;
+    }
+
+    public Meter get3XX() {
+        return redirection;
+    }
+
+    public Meter get4XX() {
+        return clientError;
+    }
+
+    public Meter get5XX() {
+        return serverError;
+    }
+
+    public Meter getOther() {
+        return other;
     }
 
     /**

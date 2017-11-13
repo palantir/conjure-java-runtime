@@ -18,18 +18,36 @@ package com.palantir.remoting3.okhttp.metrics;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.Iterables;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import org.junit.Before;
 import org.junit.Test;
 
 public final class HostMetricsRegistryTest {
 
-    @Test
-    public void test() {
-        TaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
-        HostMetricsRegistry hostRegistry = new HostMetricsRegistry(registry, "service");
+    private TaggedMetricRegistry registry;
+    private HostMetricsRegistry hostRegistry;
 
+    @Before
+    public void before() {
+        registry = new DefaultTaggedMetricRegistry();
+        hostRegistry = new HostMetricsRegistry(registry);
+    }
+
+    @Test
+    public void testMetricsUpdated() {
+        assertThat(hostRegistry.getMetrics()).isEmpty();
+
+        hostRegistry.record("service", "host", 200);
+
+        HostMetrics hostMetrics = Iterables.getOnlyElement(hostRegistry.getMetrics());
+        assertThat(hostMetrics.get2XX().getCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void testMetricsRegistered() {
         MetricName name = MetricName.builder()
                 .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
                 .putSafeTags(HostMetrics.SERVICE_NAME_TAG, "service")
@@ -38,7 +56,7 @@ public final class HostMetricsRegistryTest {
                 .build();
 
         assertThat(registry.getMetrics().get(name)).isNull();
-        hostRegistry.record("host", 200);
+        hostRegistry.record("service", "host", 200);
         assertThat(registry.meter(name).getCount()).isEqualTo(1);
     }
 }
