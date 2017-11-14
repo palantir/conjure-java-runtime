@@ -34,6 +34,7 @@ import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.Timeout;
 
 public final class GuavaOptionalAwareDecoderTest extends TestBase {
 
@@ -43,6 +44,9 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    @Rule
+    public Timeout timeout = Timeout.millis(2000);
 
     private GuavaTestServer.TestService service;
 
