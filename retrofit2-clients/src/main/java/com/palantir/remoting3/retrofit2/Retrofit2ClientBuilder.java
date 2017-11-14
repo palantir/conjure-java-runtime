@@ -50,7 +50,7 @@ public final class Retrofit2ClientBuilder {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(addTrailingSlash(config.uris().get(0)))
-                .callFactory(client)
+                .callFactory(new UnwrapRemoteIoExceptionCallFactory(client))
                 .addConverterFactory(new CborConverterFactory(
                         JacksonConverterFactory.create(OBJECT_MAPPER),
                         CBOR_OBJECT_MAPPER))

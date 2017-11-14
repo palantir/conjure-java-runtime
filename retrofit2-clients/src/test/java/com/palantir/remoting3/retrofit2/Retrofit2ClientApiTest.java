@@ -20,7 +20,6 @@ package com.palantir.remoting3.retrofit2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
@@ -157,8 +156,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     }
 
     @Test
-    public void normal_retrofit_call_should_throw_RemoteException_for_server_serializable_errors()
-            throws JsonProcessingException {
+    public void normal_retrofit_call_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
         SerializableError error = SerializableError.builder()
                 .errorCode("errorCode")
                 .errorName("errorName")
@@ -173,18 +171,9 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
         try {
             future.execute();
-            failBecauseExceptionWasNotThrown(RemoteIoException.class);
-        } catch (RuntimeException e) {
-            // TODO(dfox): make this throw an unwrapped RemoteException.
-            failBecauseExceptionWasNotThrown(RemoteIoException.class);
-        } catch (IOException e) {
-            assertThat(e).isInstanceOf(RemoteIoException.class);
-            RemoteIoException wrapper = (RemoteIoException) e;
-
-            assertThat(wrapper.getRuntimeExceptionCause()).isInstanceOf(RemoteException.class);
-            RemoteException remoteException = (RemoteException) wrapper.getRuntimeExceptionCause();
-
-            assertThat(remoteException.getError()).isEqualTo(error);
+            failBecauseExceptionWasNotThrown(RemoteException.class);
+        } catch (RemoteException e) {
+            assertThat(e.getError()).isEqualTo(error);
         }
     }
 

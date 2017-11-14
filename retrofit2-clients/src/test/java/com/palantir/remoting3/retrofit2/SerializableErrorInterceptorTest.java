@@ -105,7 +105,7 @@ public final class SerializableErrorInterceptorTest extends TestBase {
         try {
             service.get().execute();
             fail();
-        } catch (RemoteIoException e) {
+        } catch (RuntimeException e) {
             assertThat(e.getMessage(), containsString("Error 400. Body:\nerrorbody"));
         }
     }
@@ -122,8 +122,7 @@ public final class SerializableErrorInterceptorTest extends TestBase {
         try {
             service.get().execute();
             fail();
-        } catch (RemoteIoException e) {
-            assertThat(e.getRuntimeExceptionCause() instanceof RemoteException, Matchers.is(true));
+        } catch (RemoteException e) {
             assertThat(e.getMessage(), containsString("error name"));
         }
     }
