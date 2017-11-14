@@ -18,6 +18,7 @@
  */
 package com.palantir.remoting3.retrofit2;
 
+import com.palantir.remoting3.okhttp.RemoteIoException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
@@ -26,7 +27,6 @@ import java.util.concurrent.CompletableFuture;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Callback;
-import retrofit2.HttpException;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
@@ -35,7 +35,7 @@ import retrofit2.Retrofit;
  *
  * - Made code style comply with Palantir checkstyle.
  * - Made the BodyCallAdapter create RemoteExceptions.
- *
+ * - Delete the ResponseCallAdapter.
  */
 /**
  * A {@linkplain CallAdapter.Factory call adapter} which creates Java 8 futures.
@@ -84,8 +84,8 @@ public final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.
             throw new IllegalStateException("Response must be parameterized"
                     + " as Response<Foo> or Response<? extends Foo>");
         }
-        Type responseType = getParameterUpperBound(0, (ParameterizedType) innerType);
-        return new ResponseCallAdapter<>(responseType);
+
+        return null;
     }
 
     private static final class BodyCallAdapter<R> implements CallAdapter<R, CompletableFuture<R>> {
@@ -115,63 +115,17 @@ public final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.
             call.enqueue(new Callback<R>() {
                 @Override
                 public void onResponse(Call<R> call, Response<R> response) {
-                    if (response.isSuccessful()) {
-                        future.complete(response.body());
-                    } else {
-                        future.completeExceptionally(new HttpException(response));
-//                        Collection<String> contentTypes = response.raw().headers("Content-Type");
-//                        InputStream body = response.errorBody().byteStream();
-//                        future.completeExceptionally(SerializableErrorToExceptionConverter.getException(
-//                                contentTypes,
-//                                response.code(),
-//                                body));
-                    }
+                    future.complete(response.body());
                 }
 
                 @Override
                 public void onFailure(Call<R> call, Throwable throwable) {
-                    future.completeExceptionally(throwable);
-                }
-            });
-
-            return future;
-        }
-    }
-
-    private static final class ResponseCallAdapter<R>
-            implements CallAdapter<R, CompletableFuture<Response<R>>> {
-        private final Type responseType;
-
-        ResponseCallAdapter(Type responseType) {
-            this.responseType = responseType;
-        }
-
-        @Override
-        public Type responseType() {
-            return responseType;
-        }
-
-        @Override
-        public CompletableFuture<Response<R>> adapt(final Call<R> call) {
-            final CompletableFuture<Response<R>> future = new CompletableFuture<Response<R>>() {
-                @Override
-                public boolean cancel(boolean mayInterruptIfRunning) {
-                    if (mayInterruptIfRunning) {
-                        call.cancel();
+                    if (throwable instanceof RemoteIoException) {
+                        RemoteIoException cast = (RemoteIoException) throwable;
+                        future.completeExceptionally(cast.getRuntimeExceptionCause());
+                    } else {
+                        future.completeExceptionally(throwable);
                     }
-                    return super.cancel(mayInterruptIfRunning);
-                }
-            };
-
-            call.enqueue(new Callback<R>() {
-                @Override
-                public void onResponse(Call<R> call, Response<R> response) {
-                    future.complete(response);
-                }
-
-                @Override
-                public void onFailure(Call<R> call, Throwable t) {
-                    future.completeExceptionally(t);
                 }
             });
 
