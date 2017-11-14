@@ -16,7 +16,9 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.google.common.base.Stopwatch;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
@@ -35,10 +37,12 @@ public final class InstrumentedInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
+        Stopwatch stopwatch = Stopwatch.createStarted();
         Response response = chain.proceed(chain.request());
-        String hostname = chain.request().url().host();
+        long micros = stopwatch.elapsed(TimeUnit.MICROSECONDS);
 
-        hostMetrics.record(serviceName, hostname, response.code());
+        String hostname = chain.request().url().host();
+        hostMetrics.record(serviceName, hostname, response.code(), micros);
 
         return response;
     }

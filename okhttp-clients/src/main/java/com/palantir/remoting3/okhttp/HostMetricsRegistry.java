@@ -23,6 +23,7 @@ import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting3.clients.ImmutablesStyle;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.immutables.value.Value;
 import org.slf4j.Logger;
@@ -32,30 +33,30 @@ final class HostMetricsRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(HostMetricsRegistry.class);
 
-    private final LoadingCache<ServiceAndHost, HostMetrics> hostMetrics;
+    private final LoadingCache<ServiceAndHost, DefaultHostMetrics> hostMetrics;
 
     HostMetricsRegistry(TaggedMetricRegistry registry) {
         this.hostMetrics = CacheBuilder.newBuilder()
                 .maximumSize(1_000)
                 .expireAfterAccess(1, TimeUnit.DAYS)
-                .build(new CacheLoader<ServiceAndHost, HostMetrics>() {
+                .build(new CacheLoader<ServiceAndHost, DefaultHostMetrics>() {
                     @Override
-                    public HostMetrics load(ServiceAndHost serviceAndHost) throws Exception {
-                        return new HostMetrics(registry, serviceAndHost.serviceName(), serviceAndHost.hostname());
+                    public DefaultHostMetrics load(ServiceAndHost key) throws Exception {
+                        return new DefaultHostMetrics(registry, key.serviceName(), key.hostname());
                     }
                 });
     }
 
-    void record(String serviceName, String hostname, int statusCode) {
+    void record(String serviceName, String hostname, int statusCode, long micros) {
         try {
-            hostMetrics.getUnchecked(ImmutableServiceAndHost.of(serviceName, hostname)).record(statusCode);
+            hostMetrics.getUnchecked(ImmutableServiceAndHost.of(serviceName, hostname)).record(statusCode, micros);
         } catch (Exception e) {
             log.warn("Unable to record metrics for host", UnsafeArg.of("hostname", hostname));
         }
     }
 
     Collection<HostMetrics> getMetrics() {
-        return hostMetrics.asMap().values();
+        return Collections.unmodifiableCollection(hostMetrics.asMap().values());
     }
 
     @Value.Immutable

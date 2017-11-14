@@ -40,10 +40,10 @@ public final class HostMetricsRegistryTest {
     public void testMetricsUpdated() {
         assertThat(hostRegistry.getMetrics()).isEmpty();
 
-        hostRegistry.record("service", "host", 200);
+        hostRegistry.record("service", "host", 200, 1);
 
         HostMetrics hostMetrics = Iterables.getOnlyElement(hostRegistry.getMetrics());
-        assertThat(hostMetrics.get2xx().getCount()).isEqualTo(1);
+        assertThat(hostMetrics.get2xx().getSnapshot().getMin()).isEqualTo(1_000);
     }
 
     @Test
@@ -52,11 +52,13 @@ public final class HostMetricsRegistryTest {
                 .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
                 .putSafeTags(HostMetrics.SERVICE_NAME_TAG, "service")
                 .putSafeTags(HostMetrics.HOSTNAME_TAG, "host")
-                .putSafeTags(HostMetrics.FAMILY_TAG, HostMetrics.SUCCESSFUL)
+                .putSafeTags(HostMetrics.FAMILY_TAG, DefaultHostMetrics.SUCCESSFUL)
                 .build();
 
         assertThat(registry.getMetrics().get(name)).isNull();
-        hostRegistry.record("service", "host", 200);
-        assertThat(registry.meter(name).getCount()).isEqualTo(1);
+
+        hostRegistry.record("service", "host", 200, 1);
+
+        assertThat(registry.timer(name).getSnapshot().getMin()).isEqualTo(1_000);
     }
 }
