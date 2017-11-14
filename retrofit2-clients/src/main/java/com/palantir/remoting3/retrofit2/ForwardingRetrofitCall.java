@@ -9,7 +9,7 @@ import okhttp3.Request;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-@SuppressWarnings({"checkstyle:noclone", "checkstyle:superclone", "checkstyle:designforextension"})
+@SuppressWarnings({"checkstyle:noclone", "checkstyle:superclone"})
 abstract class ForwardingRetrofitCall<T> implements retrofit2.Call<T> {
     private final retrofit2.Call<T> delegate;
 

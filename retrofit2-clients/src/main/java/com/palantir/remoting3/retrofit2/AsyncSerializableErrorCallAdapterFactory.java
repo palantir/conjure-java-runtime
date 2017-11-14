@@ -34,8 +34,8 @@ import retrofit2.Retrofit;
  * Changes from {@link https://github.com/square/retrofit/blob/parent-2.3.0/retrofit-adapters/java8/src/main/java/retrofit2/adapter/java8/Java8CallAdapterFactory.java}
  *
  * - Made code style comply with Palantir checkstyle.
+ * - Removed the ResponseCallAdapter
  * - Made the BodyCallAdapter create RemoteExceptions.
- * - Delete the ResponseCallAdapter.
  */
 /**
  * A {@linkplain CallAdapter.Factory call adapter} which creates Java 8 futures.
@@ -76,19 +76,13 @@ public final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.
 
         if (getRawType(innerType) != Response.class) {
             // Generic type is not Response<T>. Use it for body-only adapter.
-            return new BodyCallAdapter<>(innerType);
-        }
-
-        // Generic type is Response<T>. Extract T and create the Response version of the adapter.
-        if (!(innerType instanceof ParameterizedType)) {
-            throw new IllegalStateException("Response must be parameterized"
-                    + " as Response<Foo> or Response<? extends Foo>");
+            return new BodyCallAdapter(innerType);
         }
 
         return null;
     }
 
-    private static final class BodyCallAdapter<R> implements CallAdapter<R, CompletableFuture<R>> {
+    private static class BodyCallAdapter<R> implements CallAdapter<R, CompletableFuture<R>> {
         private final Type responseType;
 
         BodyCallAdapter(Type responseType) {

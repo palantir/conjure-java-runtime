@@ -147,7 +147,6 @@ public final class Retrofit2ClientApiTest extends TestBase {
         } catch (CompletionException e) {
             assertThat(e.getCause()).isInstanceOf(RemoteException.class);
             RemoteException remoteException = (RemoteException) e.getCause();
-
             assertThat(remoteException.getError()).isEqualTo(error);
         }
     }
@@ -176,12 +175,11 @@ public final class Retrofit2ClientApiTest extends TestBase {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(error)));
 
-        CountDownLatch done = new CountDownLatch(1);
+        CountDownLatch assertionsPassed = new CountDownLatch(1);
         retrofit2.Call<String> call = service.getRelative();
         call.enqueue(new retrofit2.Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
-                done.countDown();
                 failBecauseExceptionWasNotThrown(RemoteException.class);
             }
 
@@ -189,10 +187,10 @@ public final class Retrofit2ClientApiTest extends TestBase {
             public void onFailure(Call<String> call, Throwable throwable) {
                 assertThat(throwable).isInstanceOf(RemoteException.class);
                 assertThat(((RemoteException) throwable).getError()).isEqualTo(error);
-                done.countDown(); // if you delete this countdown latch then this test will vacuously pass.
+                assertionsPassed.countDown(); // if you delete this countdown latch then this test will vacuously pass.
             }
         });
-        assertThat(done.await(1, TimeUnit.SECONDS)).as("Callback was executed").isTrue();
+        assertThat(assertionsPassed.await(1, TimeUnit.SECONDS)).as("Callback was executed").isTrue();
     }
 
     @Test

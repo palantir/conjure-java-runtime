@@ -94,7 +94,7 @@ public final class UnwrapRemoteIoExceptionCallAdapterFactory extends CallAdapter
 
         @Override
         public Call<T> doClone() {
-            return new UnwrapRemoteIoExceptionCall<>(getDelegate());
+            return new UnwrapRemoteIoExceptionCall<>(getDelegate().clone());
         }
     }
 }
