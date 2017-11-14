@@ -189,7 +189,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     }
 
     @Test
-    public void completableFuture_should_throw_normal_IOException_for_client_side_errors() {
+    public void completableFuture_should_throw_normal_IoException_for_client_side_errors() {
         service = Retrofit2Client.create(TestService.class, AGENT,
                 ClientConfiguration.builder()
                         .from(createTestConfig("https://invalid.service.dev"))
@@ -200,7 +200,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
         try {
             completableFuture.join();
-        } catch(CompletionException e) {
+        } catch (CompletionException e) {
             assertThat(e.getCause()).isInstanceOf(IOException.class);
             assertThat(e.getCause().getMessage()).contains(
                     "Could not connect to any of the configured URLs: [https://invalid.service.dev/]. "
