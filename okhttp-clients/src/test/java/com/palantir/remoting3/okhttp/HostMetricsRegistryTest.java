@@ -22,13 +22,10 @@ import com.google.common.collect.Iterables;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.time.Duration;
 import org.junit.Before;
 import org.junit.Test;
 
 public final class HostMetricsRegistryTest {
-
-    private static final Duration ONE_MS = Duration.ofMillis(1);
 
     private TaggedMetricRegistry registry;
     private HostMetricsRegistry hostRegistry;
@@ -43,10 +40,10 @@ public final class HostMetricsRegistryTest {
     public void testMetricsUpdated() {
         assertThat(hostRegistry.getMetrics()).isEmpty();
 
-        hostRegistry.record("service", "host", 200, ONE_MS.toMillis());
+        hostRegistry.record("service", "host", 200, 1);
 
         HostMetrics hostMetrics = Iterables.getOnlyElement(hostRegistry.getMetrics());
-        assertThat(hostMetrics.get2xx().getSnapshot().getMin()).isEqualTo(ONE_MS.toNanos());
+        assertThat(hostMetrics.get2xx().getSnapshot().getMin()).isEqualTo(1_000);
     }
 
     @Test
@@ -59,7 +56,9 @@ public final class HostMetricsRegistryTest {
                 .build();
 
         assertThat(registry.getMetrics().get(name)).isNull();
-        hostRegistry.record("service", "host", 200, ONE_MS.toMillis());
-        assertThat(registry.timer(name).getSnapshot().getMin()).isEqualTo(ONE_MS.toNanos());
+
+        hostRegistry.record("service", "host", 200, 1);
+
+        assertThat(registry.timer(name).getSnapshot().getMin()).isEqualTo(1_000);
     }
 }

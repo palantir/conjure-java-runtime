@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableMap;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.Before;
@@ -31,7 +30,6 @@ import org.junit.Test;
 
 public final class HostMetricsTest {
 
-    private static final Duration ONE_MS = Duration.ofMillis(1);
     private static final String SERVICE_NAME = "serviceName";
     private static final String HOSTNAME = "hostname";
 
@@ -60,10 +58,10 @@ public final class HostMetricsTest {
             assertThat(timer.getCount()).isZero();
             assertThat(timer.getSnapshot().getMin()).isEqualTo(0);
 
-            hostMetrics.record(testCase.getKey(), ONE_MS.toMillis());
+            hostMetrics.record(testCase.getKey(), 1);
 
             assertThat(timer.getCount()).isEqualTo(1);
-            assertThat(timer.getSnapshot().getMin()).isEqualTo(ONE_MS.toNanos());
+            assertThat(timer.getSnapshot().getMin()).isEqualTo(1_000);
         }
     }
 
