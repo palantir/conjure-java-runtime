@@ -31,6 +31,8 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.MediaType;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -41,6 +43,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import retrofit2.Call;
+import retrofit2.Response;
 
 public final class Retrofit2ClientApiTest extends TestBase {
     @Rule
@@ -48,6 +51,10 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     private HttpUrl url;
     private TestService service;
+    private static final SerializableError error = SerializableError.builder()
+            .errorCode("errorCode")
+            .errorName("errorName")
+            .build();
 
     @Before
     public void before() {
@@ -127,11 +134,6 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void completableFuture_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
-        SerializableError error = SerializableError.builder()
-                .errorCode("errorCode")
-                .errorName("errorName")
-                .build();
-
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
@@ -151,25 +153,46 @@ public final class Retrofit2ClientApiTest extends TestBase {
     }
 
     @Test
-    public void normal_retrofit_call_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
-        SerializableError error = SerializableError.builder()
-                .errorCode("errorCode")
-                .errorName("errorName")
-                .build();
-
+    public void sync_retrofit_call_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(error)));
 
-        Call<String> future = service.getRelative();
+        Call<String> call = service.getRelative();
 
         try {
-            future.execute();
+            call.execute();
             failBecauseExceptionWasNotThrown(RemoteException.class);
         } catch (RemoteException e) {
             assertThat(e.getError()).isEqualTo(error);
         }
+    }
+
+    @Test
+    public void async_retrofit_call_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(error)));
+
+        CountDownLatch done = new CountDownLatch(1);
+        retrofit2.Call<String> call = service.getRelative();
+        call.enqueue(new retrofit2.Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                done.countDown();
+                failBecauseExceptionWasNotThrown(RemoteException.class);
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable throwable) {
+                assertThat(throwable).isInstanceOf(RemoteException.class);
+                assertThat(((RemoteException) throwable).getError()).isEqualTo(error);
+                done.countDown(); // if you delete this countdown latch then this test will vacuously pass.
+            }
+        });
+        assertThat(done.await(1, TimeUnit.SECONDS)).as("Callback was executed").isTrue();
     }
 
     @Test

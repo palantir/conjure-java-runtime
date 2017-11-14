@@ -56,6 +56,7 @@ public final class Retrofit2ClientBuilder {
                         CBOR_OBJECT_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
                 .addCallAdapterFactory(AsyncSerializableErrorCallAdapterFactory.INSTANCE)
+                .addCallAdapterFactory(UnwrapRemoteIoExceptionCallAdapterFactory.INSTANCE)
                 .build();
         return retrofit.create(serviceClass);
     }

@@ -7,7 +7,6 @@ package com.palantir.remoting3.retrofit2;
 import com.palantir.remoting3.okhttp.ForwardingCall;
 import com.palantir.remoting3.okhttp.RemoteIoException;
 import java.io.IOException;
-import okhttp3.Call;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -20,20 +19,20 @@ import okhttp3.Response;
  *
  * For the jaxrs version, see RemoteIoExceptionClient.
  */
-public final class UnwrapRemoteIoExceptionCallFactory implements Call.Factory {
-    private final Call.Factory delegate;
+public final class UnwrapRemoteIoExceptionCallFactory implements okhttp3.Call.Factory {
+    private final okhttp3.Call.Factory delegate;
 
-    public UnwrapRemoteIoExceptionCallFactory(Call.Factory delegate) {
+    public UnwrapRemoteIoExceptionCallFactory(okhttp3.Call.Factory delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public Call newCall(Request request) {
+    public okhttp3.Call newCall(Request request) {
         return new RemoteIoExceptionCall(delegate.newCall(request));
     }
 
     private static class RemoteIoExceptionCall extends ForwardingCall {
-        RemoteIoExceptionCall(Call call) {
+        RemoteIoExceptionCall(okhttp3.Call call) {
             super(call);
         }
 
@@ -47,7 +46,7 @@ public final class UnwrapRemoteIoExceptionCallFactory implements Call.Factory {
         }
 
         @Override
-        public Call doClone() {
+        public okhttp3.Call doClone() {
             return new RemoteIoExceptionCall(getDelegate());
         }
     }
