@@ -10,14 +10,13 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import javax.annotation.Nullable;
-import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-public class UnwrapRemoteIoExceptionCallAdapterFactory extends CallAdapter.Factory {
+public final class UnwrapRemoteIoExceptionCallAdapterFactory extends CallAdapter.Factory {
     public static final CallAdapter.Factory INSTANCE = new UnwrapRemoteIoExceptionCallAdapterFactory();
 
     @Nullable
@@ -34,7 +33,6 @@ public class UnwrapRemoteIoExceptionCallAdapterFactory extends CallAdapter.Facto
 
         if (getRawType(innerType) != Response.class) {
             // Generic type is not Response<T>. Use it for body-only adapter.
-            System.out.println("HELLO TEAM");
             return new UnwrapIoExceptionCallAdapter<>(innerType);
         }
 
@@ -55,46 +53,38 @@ public class UnwrapRemoteIoExceptionCallAdapterFactory extends CallAdapter.Facto
 
         @Override
         public retrofit2.Call<R> adapt(final retrofit2.Call<R> call) {
-            return new DelegatingCall<>(call);
+            return new UnwrapRemoteIoExceptionCall<>(call);
         }
     }
 
-    private static class DelegatingCall<T> implements Call<T> {
-        private final Call<T> delegate;
+    private static class UnwrapRemoteIoExceptionCall<T> extends ForwardingRetrofitCall<T> {
 
-        public DelegatingCall(Call<T> delegate) {
-            this.delegate = delegate;
+        UnwrapRemoteIoExceptionCall(retrofit2.Call<T> delegate) {
+            super(delegate);
         }
 
         @Override
         public Response<T> execute() throws IOException {
-            return delegate.execute();
+            try {
+                return getDelegate().execute();
+            } catch (RemoteIoException e) {
+                throw e.getRuntimeExceptionCause();
+            }
         }
 
         @Override
         public void enqueue(Callback<T> userCode) {
-            delegate.enqueue(new Callback<T>() {
+            getDelegate().enqueue(new Callback<T>() {
                 @Override
-                public void onResponse(Call<T> call, Response<T> response) {
-//                    if (response.isSuccessful()) {
-//                        userCode.onResponse(call, response);
-//                        return;
-//                    }
-//
-//                    Collection<String> contentTypes = response.raw().headers("Content-Type");
-//                    InputStream body = response.errorBody().byteStream();
-//                    RuntimeException exception = SerializableErrorToExceptionConverter.getException(
-//                            contentTypes,
-//                            response.code(),
-//                            body);
-
+                public void onResponse(retrofit2.Call<T> call, Response<T> response) {
                     userCode.onResponse(call, response);
                 }
 
                 @Override
-                public void onFailure(Call<T> call, Throwable throwable) {
+                public void onFailure(retrofit2.Call<T> call, Throwable throwable) {
                     if (throwable instanceof RemoteIoException) {
-                        userCode.onFailure(call, ((RemoteIoException) throwable).getRuntimeExceptionCause());
+                        RemoteIoException unwrapped = (RemoteIoException) throwable;
+                        userCode.onFailure(call, unwrapped.getRuntimeExceptionCause());
                     } else {
                         userCode.onFailure(call, throwable);
                     }
@@ -103,28 +93,8 @@ public class UnwrapRemoteIoExceptionCallAdapterFactory extends CallAdapter.Facto
         }
 
         @Override
-        public boolean isExecuted() {
-            return delegate.isExecuted();
-        }
-
-        @Override
-        public void cancel() {
-            delegate.cancel();
-        }
-
-        @Override
-        public boolean isCanceled() {
-            return delegate.isCanceled();
-        }
-
-        @Override
-        public Call<T> clone() {
-            return delegate.clone();
-        }
-
-        @Override
-        public Request request() {
-            return delegate.request();
+        public Call<T> doClone() {
+            return new UnwrapRemoteIoExceptionCall<>(getDelegate());
         }
     }
 }
