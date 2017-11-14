@@ -19,12 +19,11 @@ package com.palantir.remoting3.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import com.codahale.metrics.Meter;
-import com.palantir.remoting3.okhttp.metrics.HostMetrics;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
-import com.palantir.tritium.metrics.registry.MetricName;
-import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
+import java.util.Collection;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
 import okhttp3.Request;
@@ -45,21 +44,12 @@ public final class InstrumentedInterceptorTest {
     private Interceptor.Chain chain;
 
     private InstrumentedInterceptor interceptor;
-    private TaggedMetricRegistry registry;
+    private HostMetricsRegistry hostMetrics;
 
     @Before
     public void before() throws IOException {
-        registry = new DefaultTaggedMetricRegistry();
-        interceptor = new InstrumentedInterceptor(registry, "client");
-    }
-
-    private static MetricName name(String hostname) {
-        return MetricName.builder()
-                .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
-                .putSafeTags(HostMetrics.SERVICE_NAME_TAG, "client")
-                .putSafeTags(HostMetrics.HOSTNAME_TAG, hostname)
-                .putSafeTags(HostMetrics.FAMILY_TAG, "2xx")
-                .build();
+        hostMetrics = new HostMetricsRegistry(new DefaultTaggedMetricRegistry());
+        interceptor = new InstrumentedInterceptor(hostMetrics, "client");
     }
 
     @Test
@@ -67,14 +57,20 @@ public final class InstrumentedInterceptorTest {
         successfulRequest(REQUEST_A);
         interceptor.intercept(chain);
 
-        Meter meterA = registry.meter(name("hosta"));
-        assertThat(meterA.getCount()).isEqualTo(1);
+        HostMetrics hostA = hostMetrics("hosta");
+        assertThat(hostA.get2xx().getCount()).isEqualTo(1);
 
         successfulRequest(REQUEST_B);
         interceptor.intercept(chain);
 
-        Meter meterB = registry.meter(name("hostb"));
-        assertThat(meterB.getCount()).isEqualTo(1);
+        HostMetrics hostB = hostMetrics("hostb");
+        assertThat(hostB.get2xx().getCount()).isEqualTo(1);
+    }
+
+    private HostMetrics hostMetrics(String hostname) {
+        Collection<HostMetrics> matching =
+                Collections2.filter(hostMetrics.getMetrics(), metrics -> metrics.hostname().equals(hostname));
+        return Iterables.getOnlyElement(matching);
     }
 
     private void successfulRequest(Request request) throws IOException {

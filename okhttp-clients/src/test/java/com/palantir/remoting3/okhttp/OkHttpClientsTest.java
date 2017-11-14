@@ -23,23 +23,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.clients.ClientConfiguration;
-import com.palantir.remoting3.okhttp.metrics.HostMetrics;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
-import com.palantir.tritium.metrics.registry.MetricName;
-import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -82,26 +81,18 @@ public final class OkHttpClientsTest extends TestBase {
                 () -> handler);
     }
 
-    private static MetricName name(String family) {
-        return MetricName.builder()
-                .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
-                .putSafeTags(HostMetrics.SERVICE_NAME_TAG, "OkHttpClientsTest")
-                .putSafeTags(HostMetrics.HOSTNAME_TAG, "localhost")
-                .putSafeTags(HostMetrics.FAMILY_TAG, family).build();
-    }
-
     @Test
     public void verifyResponseMetricsAreRegistered() throws IOException {
-        TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
-
         server.enqueue(new MockResponse().setBody("pong"));
         createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();
 
-        assertThat(registry.getMetrics().get(name("1xx"))).isNotNull();
-        assertThat(registry.getMetrics().get(name("2xx"))).isNotNull();
-        assertThat(registry.getMetrics().get(name("3xx"))).isNotNull();
-        assertThat(registry.getMetrics().get(name("4xx"))).isNotNull();
-        assertThat(registry.getMetrics().get(name("5xx"))).isNotNull();
+        List<HostMetrics> hostMetrics = OkHttpClients.hostMetrics().stream()
+                .filter(metrics -> metrics.hostname().equals("localhost"))
+                .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
+                .collect(Collectors.toList());
+
+        HostMetrics actualMetrics = Iterables.getOnlyElement(hostMetrics);
+        assertThat(actualMetrics.get2xx().getCount()).isGreaterThanOrEqualTo(1);
     }
 
     @Test

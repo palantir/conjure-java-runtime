@@ -26,6 +26,8 @@ import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -60,6 +62,12 @@ public final class OkHttpClients {
     private static final ScheduledExecutorService scheduledExecutorService = Tracers.wrap(
             new ScheduledThreadPoolExecutor(5, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
 
+    /**
+     * The per service and host metrics recorded for each HTTP call.
+     */
+    private static final HostMetricsRegistry hostMetrics =
+            new HostMetricsRegistry(DefaultTaggedMetricRegistry.getDefault());
+
     private OkHttpClients() {}
 
     /**
@@ -79,6 +87,13 @@ public final class OkHttpClients {
     @Deprecated
     public static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
         return create(config, UserAgents.tryParse(userAgent), serviceClass);
+    }
+
+    /**
+     * Return the per service and host metrics for all clients created by {@link OkHttpClients}.
+     */
+    public static Collection<HostMetrics> hostMetrics() {
+        return hostMetrics.getMetrics();
     }
 
     @VisibleForTesting
@@ -105,7 +120,7 @@ public final class OkHttpClients {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // response metrics
-        client.addNetworkInterceptor(InstrumentedInterceptor.withDefaultMetricRegistry(serviceClass));
+        client.addNetworkInterceptor(InstrumentedInterceptor.create(hostMetrics, serviceClass));
 
         // Error handling, retry/failover, etc: the order of these matters.
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
