@@ -27,7 +27,6 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
-import com.palantir.remoting3.okhttp.AsyncCallTag;
 import com.palantir.remoting3.okhttp.RemoteIoException;
 import com.palantir.remoting3.okhttp.SerializableErrorInterceptor;
 import java.io.IOException;
@@ -52,8 +51,7 @@ public final class SerializableErrorInterceptorTest extends TestBase {
 
     private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
 
-    private final AsyncCallTag tag = new AsyncCallTag();
-    private final Request request = new Request.Builder().url("http://url").tag(tag).build();
+    private final Request request = new Request.Builder().url("http://url").build();
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -71,19 +69,6 @@ public final class SerializableErrorInterceptorTest extends TestBase {
         when(chain.request()).thenReturn(request);
         service = Retrofit2Client.create(TestService.class, AGENT,
                 createTestConfig("http://localhost:" + server.getPort()));
-    }
-
-    @Test
-    public void asyncCallTagIsHandledNormally() throws IOException {
-        tag.setCallAsync();
-        Response response = responseWithCode(request, 400);
-        when(chain.proceed(any(Request.class))).thenReturn(response);
-        try {
-            assertThat(SerializableErrorInterceptor.INSTANCE.intercept(chain), Matchers.is(response));
-            fail();
-        } catch (RemoteIoException e) {
-            assertThat(e.getMessage(), containsString("Error 400"));
-        }
     }
 
     @Test
