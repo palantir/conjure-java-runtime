@@ -65,7 +65,7 @@ public final class HostMetricsTest {
         }
     }
 
-    public static Optional<Timer> getMeter(
+    private static Optional<Timer> getMeter(
             TaggedMetricRegistry registry, String serviceName, String hostname, String family) {
         MetricName name = MetricName.builder()
                 .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)

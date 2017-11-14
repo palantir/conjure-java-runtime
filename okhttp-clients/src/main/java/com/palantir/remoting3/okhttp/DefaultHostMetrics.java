@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Records per-target-host HTTP response code metrics in a {@link TaggedMetricRegistry}.
  */
-public final class DefaultHostMetrics implements HostMetrics {
+final class DefaultHostMetrics implements HostMetrics {
 
     private static final TimeUnit MICROS = TimeUnit.MICROSECONDS;
 

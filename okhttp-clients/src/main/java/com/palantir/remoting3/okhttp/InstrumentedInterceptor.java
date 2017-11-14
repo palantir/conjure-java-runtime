@@ -25,7 +25,7 @@ import okhttp3.Response;
 /**
  * Records metrics about the response codes of http requests.
  */
-public final class InstrumentedInterceptor implements Interceptor {
+final class InstrumentedInterceptor implements Interceptor {
 
     private final HostMetricsRegistry hostMetrics;
     private final String serviceName;
