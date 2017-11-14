@@ -56,7 +56,7 @@ abstract class ForwardingRetrofitCall<T> implements retrofit2.Call<T> {
      * Subclasses must provide a clone implementation. It typically returns a new instance of a subclass of {@link
      * ForwardingRetrofitCall}.
      */
-    public abstract retrofit2.Call<T> doClone();
+    protected abstract retrofit2.Call<T> doClone();
 
     protected retrofit2.Call<T> getDelegate() {
         return delegate;

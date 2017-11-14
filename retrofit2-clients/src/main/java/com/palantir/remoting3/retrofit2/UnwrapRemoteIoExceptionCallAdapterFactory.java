@@ -4,6 +4,7 @@
 
 package com.palantir.remoting3.retrofit2;
 
+import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting3.okhttp.RemoteIoException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -16,6 +17,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
+/**
+ * This class ensures retrofit2 interfaces that return a plain {@code retrofit2.Call<T>} receive a
+ * proper {@link RemoteException} on both their synchronous and async codepaths instead of the
+ * {@link RemoteIoException} wrapper class.
+ * <p>
+ * Similar to the Java8 Competable Future logic in {@link AsyncSerializableErrorCallAdapterFactory}.
+ */
 public final class UnwrapRemoteIoExceptionCallAdapterFactory extends CallAdapter.Factory {
     public static final CallAdapter.Factory INSTANCE = new UnwrapRemoteIoExceptionCallAdapterFactory();
 
