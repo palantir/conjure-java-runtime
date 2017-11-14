@@ -18,6 +18,7 @@ package com.palantir.remoting3.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -166,7 +167,13 @@ public final class OkHttpClientsTest extends TestBase {
                 () -> retryingHandler);
 
         Call call = client.newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(call::execute).isInstanceOf(RemoteException.class);
+        try {
+            call.execute();
+            failBecauseExceptionWasNotThrown(RemoteIoException.class);
+        } catch (RemoteIoException e) {
+            assertThat(e.getRuntimeExceptionCause()).isInstanceOf(RemoteException.class);
+            assertThat(e.getMessage()).contains("error code (error name) with instance ID");
+        }
     }
 
     @Test

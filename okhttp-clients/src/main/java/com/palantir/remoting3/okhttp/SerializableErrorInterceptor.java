@@ -28,19 +28,13 @@ public enum SerializableErrorInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        // Async (Retrofit) calls surface the exception via a handler rather than throwing,
-        // see AsyncSerializableErrorCallAdapterFactory
-        if (AsyncCallTag.class.isAssignableFrom(chain.request().tag().getClass())) {
-            if (((AsyncCallTag) chain.request().tag()).isAsyncCall()) {
-                return chain.proceed(chain.request());
-            }
-        }
-
         Response response = chain.proceed(chain.request());
         if (!(response.isSuccessful() || response.code() == 101)) {
             Collection<String> contentTypes = response.headers("Content-Type");
             InputStream body = response.body().byteStream();
-            throw SerializableErrorToExceptionConverter.getException(contentTypes, response.code(), body);
+            RuntimeException runtimeException = SerializableErrorToExceptionConverter.getException(
+                    contentTypes, response.code(), body);
+            throw new RemoteIoException(runtimeException);
         }
 
         return response;

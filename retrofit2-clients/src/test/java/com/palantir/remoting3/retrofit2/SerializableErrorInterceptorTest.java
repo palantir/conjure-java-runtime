@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.retrofit2;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
@@ -26,7 +27,7 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
-import com.palantir.remoting3.okhttp.AsyncCallTag;
+import com.palantir.remoting3.okhttp.RemoteIoException;
 import com.palantir.remoting3.okhttp.SerializableErrorInterceptor;
 import java.io.IOException;
 import okhttp3.Headers;
@@ -50,8 +51,7 @@ public final class SerializableErrorInterceptorTest extends TestBase {
 
     private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
 
-    private final AsyncCallTag tag = new AsyncCallTag();
-    private final Request request = new Request.Builder().url("http://url").tag(tag).build();
+    private final Request request = new Request.Builder().url("http://url").build();
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -72,14 +72,6 @@ public final class SerializableErrorInterceptorTest extends TestBase {
     }
 
     @Test
-    public void doesNothingIfAsyncCall() throws IOException {
-        tag.setCallAsync();
-        Response response = responseWithCode(request, 400);
-        when(chain.proceed(any(Request.class))).thenReturn(response);
-        assertThat(SerializableErrorInterceptor.INSTANCE.intercept(chain), Matchers.is(response));
-    }
-
-    @Test
     public void testThrowsIfHttpCodeIsNot2xx() throws Exception {
         for (int code : ImmutableList.of(300, 400, 404, 500)) {
             Response response = responseWithCode(request, code);
@@ -88,8 +80,8 @@ public final class SerializableErrorInterceptorTest extends TestBase {
             try {
                 SerializableErrorInterceptor.INSTANCE.intercept(chain);
                 fail();
-            } catch (RuntimeException e) {
-                assertThat(e.getMessage(), Matchers.containsString("Error " + code));
+            } catch (RemoteIoException e) {
+                assertThat(e.getMessage(), containsString("Error " + code));
             }
         }
     }
@@ -110,9 +102,12 @@ public final class SerializableErrorInterceptorTest extends TestBase {
                 .setResponseCode(400);
         server.enqueue(mockResponse);
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Error 400. Body:\nerrorbody");
-        service.get().execute();
+        try {
+            service.get().execute();
+            fail();
+        } catch (RuntimeException e) {
+            assertThat(e.getMessage(), containsString("Error 400. Body:\nerrorbody"));
+        }
     }
 
     @Test
@@ -124,9 +119,12 @@ public final class SerializableErrorInterceptorTest extends TestBase {
                 .setResponseCode(400);
         server.enqueue(mockResponse);
 
-        expectedException.expect(RemoteException.class);
-        expectedException.expectMessage("error name");
-        service.get().execute();
+        try {
+            service.get().execute();
+            fail();
+        } catch (RemoteException e) {
+            assertThat(e.getMessage(), containsString("error name"));
+        }
     }
 
     @Test

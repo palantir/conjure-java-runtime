@@ -16,18 +16,20 @@
 
 package com.palantir.remoting3.okhttp;
 
-import okhttp3.Call;
-import okhttp3.Request;
+import java.io.IOException;
 
-public final class AsyncCallTagCallFactory implements Call.Factory {
-    private final Call.Factory delegate;
-
-    public AsyncCallTagCallFactory(Call.Factory delegate) {
-        this.delegate = delegate;
+/**
+ * We want RuntimeExceptions eventually, but we have to wrap them up in an IOException to convince the {@link
+ * okhttp3.RealCall} method to propagate them nicely.
+ * <p>
+ * They're unwrapped right at the top of the stack by our RemoteIOExceptionClient.
+ */
+public final class RemoteIoException extends IOException {
+    public RemoteIoException(RuntimeException runtimeException) {
+        super(runtimeException);
     }
 
-    @Override
-    public Call newCall(Request request) {
-        return delegate.newCall(request.newBuilder().tag(new AsyncCallTag()).build());
+    public RuntimeException getRuntimeExceptionCause() {
+        return (RuntimeException) getCause();
     }
 }

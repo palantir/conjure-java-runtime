@@ -1,8 +1,6 @@
 /*
  * Copied from Retrofit 2.3.0 and modified; original copyright notice below.
  *
- * See {@link https://github.com/square/retrofit/blob/master/retrofit-adapters/java8/src/main/java/retrofit2/adapter/java8/Java8CallAdapterFactory.java}
- *
  * Copyright (C) 2016 Square, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,21 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Changes made:
- * - Made code style comply with Palantir checkstyle.
- * - Removed the ResponseCallAdapter
- * - Made the BodyCallAdapter create RemoteExceptions.
- * - Made the BodyCallAdapter tell the AsyncCallTag that this is an async call.
  */
 package com.palantir.remoting3.retrofit2;
 
-import com.palantir.remoting3.errors.SerializableErrorToExceptionConverter;
-import com.palantir.remoting3.okhttp.AsyncCallTag;
-import java.io.InputStream;
+import com.palantir.remoting3.okhttp.RemoteIoException;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
@@ -39,8 +30,36 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory {
-    static final AsyncSerializableErrorCallAdapterFactory INSTANCE = new AsyncSerializableErrorCallAdapterFactory();
+/*
+ * Changes from {@link https://github.com/square/retrofit/blob/parent-2.3.0/retrofit-adapters/java8/src/main/java/retrofit2/adapter/java8/Java8CallAdapterFactory.java}
+ *
+ * - Made code style comply with Palantir checkstyle.
+ * - Removed the ResponseCallAdapter
+ * - Made the BodyCallAdapter create RemoteExceptions.
+ */
+/**
+ * A {@linkplain CallAdapter.Factory call adapter} which creates Java 8 futures.
+ * <p>
+ * Adding this class to {@link Retrofit} allows you to return {@link CompletableFuture} from
+ * service methods.
+ * <pre><code>
+ * interface MyService {
+ *   &#64;GET("user/me")
+ *   CompletableFuture&lt;User&gt; getUser()
+ * }
+ * </code></pre>
+ * There are two configurations supported for the {@code CompletableFuture} type parameter:
+ * <ul>
+ * <li>Direct body (e.g., {@code CompletableFuture<User>}) returns the deserialized body for 2XX
+ * responses, sets {@link retrofit2.HttpException HttpException} errors for non-2XX responses, and
+ * sets {@link IOException} for network errors.</li>
+ * <li>Response wrapped body (e.g., {@code CompletableFuture<Response<User>>}) returns a
+ * {@link Response} object for all HTTP responses and sets {@link IOException} for network
+ * errors</li>
+ * </ul>
+ */
+public final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory {
+    public static final AsyncSerializableErrorCallAdapterFactory INSTANCE = new AsyncSerializableErrorCallAdapterFactory();
 
     private AsyncSerializableErrorCallAdapterFactory() {}
 
@@ -77,8 +96,6 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
 
         @Override
         public CompletableFuture<R> adapt(final Call<R> call) {
-            ((AsyncCallTag) call.request().tag()).setCallAsync();
-
             final CompletableFuture<R> future = new CompletableFuture<R>() {
                 @Override
                 public boolean cancel(boolean mayInterruptIfRunning) {
@@ -92,21 +109,17 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
             call.enqueue(new Callback<R>() {
                 @Override
                 public void onResponse(Call<R> call, Response<R> response) {
-                    if (response.isSuccessful()) {
-                        future.complete(response.body());
-                    } else {
-                        Collection<String> contentTypes = response.raw().headers("Content-Type");
-                        InputStream body = response.errorBody().byteStream();
-                        future.completeExceptionally(SerializableErrorToExceptionConverter.getException(
-                                contentTypes,
-                                response.code(),
-                                body));
-                    }
+                    future.complete(response.body());
                 }
 
                 @Override
                 public void onFailure(Call<R> call, Throwable throwable) {
-                    future.completeExceptionally(throwable);
+                    if (throwable instanceof RemoteIoException) {
+                        RemoteIoException cast = (RemoteIoException) throwable;
+                        future.completeExceptionally(cast.getRuntimeExceptionCause());
+                    } else {
+                        future.completeExceptionally(throwable);
+                    }
                 }
             });
 

@@ -18,10 +18,8 @@ package com.palantir.remoting3.retrofit2;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
@@ -33,6 +31,8 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.MediaType;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -42,6 +42,8 @@ import okio.Buffer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import retrofit2.Call;
+import retrofit2.Response;
 
 public final class Retrofit2ClientApiTest extends TestBase {
     @Rule
@@ -49,6 +51,10 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     private HttpUrl url;
     private TestService service;
+    private static final SerializableError error = SerializableError.builder()
+            .errorCode("errorCode")
+            .errorName("errorName")
+            .build();
 
     @Before
     public void before() {
@@ -127,12 +133,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     }
 
     @Test
-    public void makeFutureRequestError() throws JsonProcessingException {
-        SerializableError error = SerializableError.builder()
-                .errorCode("errorCode")
-                .errorName("errorName")
-                .build();
-
+    public void completableFuture_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
@@ -142,22 +143,74 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
         try {
             future.join();
-            fail();
+            failBecauseExceptionWasNotThrown(CompletionException.class);
         } catch (CompletionException e) {
             assertThat(e.getCause()).isInstanceOf(RemoteException.class);
-            assertThat(((RemoteException) e.getCause()).getError()).isEqualTo(error);
+            RemoteException remoteException = (RemoteException) e.getCause();
+            assertThat(remoteException.getError()).isEqualTo(error);
         }
     }
 
     @Test
-    public void connectionFailureWithCompletableFuture() {
+    public void sync_retrofit_call_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(error)));
+
+        Call<String> call = service.getRelative();
+
+        try {
+            call.execute();
+            failBecauseExceptionWasNotThrown(RemoteException.class);
+        } catch (RemoteException e) {
+            assertThat(e.getError()).isEqualTo(error);
+        }
+    }
+
+    @Test
+    public void async_retrofit_call_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(error)));
+
+        CountDownLatch assertionsPassed = new CountDownLatch(1);
+        retrofit2.Call<String> call = service.getRelative();
+        call.enqueue(new retrofit2.Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                failBecauseExceptionWasNotThrown(RemoteException.class);
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable throwable) {
+                assertThat(throwable).isInstanceOf(RemoteException.class);
+                assertThat(((RemoteException) throwable).getError()).isEqualTo(error);
+                assertionsPassed.countDown(); // if you delete this countdown latch then this test will vacuously pass.
+            }
+        });
+        assertThat(assertionsPassed.await(1, TimeUnit.SECONDS)).as("Callback was executed").isTrue();
+    }
+
+    @Test
+    public void completableFuture_should_throw_normal_IoException_for_client_side_errors() {
         service = Retrofit2Client.create(TestService.class, AGENT,
                 ClientConfiguration.builder()
                         .from(createTestConfig("https://invalid.service.dev"))
                         .connectTimeout(Duration.ofMillis(10))
                         .build());
 
-        assertThatExceptionOfType(CompletionException.class).isThrownBy(() -> service.makeFutureRequest().join());
+        CompletableFuture<String> completableFuture = service.makeFutureRequest();
+
+        try {
+            completableFuture.join();
+        } catch (CompletionException e) {
+            assertThat(e.getCause()).isInstanceOf(IOException.class);
+            assertThat(e.getCause().getMessage()).contains(
+                    "Could not connect to any of the configured URLs: [https://invalid.service.dev/]. "
+                            + "Please check that the URIs are correct and servers are accessible.");
+        }
     }
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {
