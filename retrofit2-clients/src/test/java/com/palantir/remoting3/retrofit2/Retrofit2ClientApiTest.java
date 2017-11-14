@@ -18,7 +18,6 @@ package com.palantir.remoting3.retrofit2;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -190,14 +189,23 @@ public final class Retrofit2ClientApiTest extends TestBase {
     }
 
     @Test
-    public void connectionFailureWithCompletableFuture() {
+    public void completableFuture_should_throw_normal_IOException_for_client_side_errors() {
         service = Retrofit2Client.create(TestService.class, AGENT,
                 ClientConfiguration.builder()
                         .from(createTestConfig("https://invalid.service.dev"))
                         .connectTimeout(Duration.ofMillis(10))
                         .build());
 
-        assertThatExceptionOfType(CompletionException.class).isThrownBy(() -> service.makeFutureRequest().join());
+        CompletableFuture<String> completableFuture = service.makeFutureRequest();
+
+        try {
+            completableFuture.join();
+        } catch(CompletionException e) {
+            assertThat(e.getCause()).isInstanceOf(IOException.class);
+            assertThat(e.getCause().getMessage()).contains(
+                    "Could not connect to any of the configured URLs: [https://invalid.service.dev/]. "
+                            + "Please check that the URIs are correct and servers are accessible.");
+        }
     }
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {

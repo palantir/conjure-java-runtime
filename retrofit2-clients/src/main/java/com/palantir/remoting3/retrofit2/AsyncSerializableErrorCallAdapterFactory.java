@@ -1,8 +1,6 @@
 /*
  * Copied from Retrofit 2.3.0 and modified; original copyright notice below.
  *
- * See {@link https://github.com/square/retrofit/blob/master/retrofit-adapters/java8/src/main/java/retrofit2/adapter/java8/Java8CallAdapterFactory.java}
- *
  * Copyright (C) 2016 Square, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,31 +15,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * Changes made:
- * - Made code style comply with Palantir checkstyle.
- * - Removed the ResponseCallAdapter
- * - Made the BodyCallAdapter create RemoteExceptions.
- * - Made the BodyCallAdapter tell the AsyncCallTag that this is an async call.
  */
 package com.palantir.remoting3.retrofit2;
 
-import com.palantir.remoting3.errors.SerializableErrorToExceptionConverter;
-import com.palantir.remoting3.okhttp.AsyncCallTag;
-import java.io.InputStream;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Callback;
+import retrofit2.HttpException;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-// See https://github.com/square/retrofit/blob/parent-2.3.0/retrofit-adapters/java8/src/main/java/retrofit2/adapter/java8/Java8CallAdapterFactory.java#L59
-final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory {
-    static final AsyncSerializableErrorCallAdapterFactory INSTANCE = new AsyncSerializableErrorCallAdapterFactory();
+/*
+ * Changes from {@link https://github.com/square/retrofit/blob/parent-2.3.0/retrofit-adapters/java8/src/main/java/retrofit2/adapter/java8/Java8CallAdapterFactory.java}
+ *
+ * - Made code style comply with Palantir checkstyle.
+ * - Made the BodyCallAdapter create RemoteExceptions.
+ *
+ */
+/**
+ * A {@linkplain CallAdapter.Factory call adapter} which creates Java 8 futures.
+ * <p>
+ * Adding this class to {@link Retrofit} allows you to return {@link CompletableFuture} from
+ * service methods.
+ * <pre><code>
+ * interface MyService {
+ *   &#64;GET("user/me")
+ *   CompletableFuture&lt;User&gt; getUser()
+ * }
+ * </code></pre>
+ * There are two configurations supported for the {@code CompletableFuture} type parameter:
+ * <ul>
+ * <li>Direct body (e.g., {@code CompletableFuture<User>}) returns the deserialized body for 2XX
+ * responses, sets {@link retrofit2.HttpException HttpException} errors for non-2XX responses, and
+ * sets {@link IOException} for network errors.</li>
+ * <li>Response wrapped body (e.g., {@code CompletableFuture<Response<User>>}) returns a
+ * {@link Response} object for all HTTP responses and sets {@link IOException} for network
+ * errors</li>
+ * </ul>
+ */
+public final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory {
+    public static final AsyncSerializableErrorCallAdapterFactory INSTANCE = new AsyncSerializableErrorCallAdapterFactory();
 
     private AsyncSerializableErrorCallAdapterFactory() {}
 
@@ -58,13 +76,19 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
 
         if (getRawType(innerType) != Response.class) {
             // Generic type is not Response<T>. Use it for body-only adapter.
-            return new BodyCallAdapter(innerType);
+            return new BodyCallAdapter<>(innerType);
         }
 
-        return null;
+        // Generic type is Response<T>. Extract T and create the Response version of the adapter.
+        if (!(innerType instanceof ParameterizedType)) {
+            throw new IllegalStateException("Response must be parameterized"
+                    + " as Response<Foo> or Response<? extends Foo>");
+        }
+        Type responseType = getParameterUpperBound(0, (ParameterizedType) innerType);
+        return new ResponseCallAdapter<>(responseType);
     }
 
-    private static class BodyCallAdapter<R> implements CallAdapter<R, CompletableFuture<R>> {
+    private static final class BodyCallAdapter<R> implements CallAdapter<R, CompletableFuture<R>> {
         private final Type responseType;
 
         BodyCallAdapter(Type responseType) {
@@ -78,8 +102,6 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
 
         @Override
         public CompletableFuture<R> adapt(final Call<R> call) {
-            ((AsyncCallTag) call.request().tag()).setCallAsync();
-
             final CompletableFuture<R> future = new CompletableFuture<R>() {
                 @Override
                 public boolean cancel(boolean mayInterruptIfRunning) {
@@ -96,18 +118,60 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
                     if (response.isSuccessful()) {
                         future.complete(response.body());
                     } else {
-                        Collection<String> contentTypes = response.raw().headers("Content-Type");
-                        InputStream body = response.errorBody().byteStream();
-                        future.completeExceptionally(SerializableErrorToExceptionConverter.getException(
-                                contentTypes,
-                                response.code(),
-                                body));
+                        future.completeExceptionally(new HttpException(response));
+//                        Collection<String> contentTypes = response.raw().headers("Content-Type");
+//                        InputStream body = response.errorBody().byteStream();
+//                        future.completeExceptionally(SerializableErrorToExceptionConverter.getException(
+//                                contentTypes,
+//                                response.code(),
+//                                body));
                     }
                 }
 
                 @Override
                 public void onFailure(Call<R> call, Throwable throwable) {
                     future.completeExceptionally(throwable);
+                }
+            });
+
+            return future;
+        }
+    }
+
+    private static final class ResponseCallAdapter<R>
+            implements CallAdapter<R, CompletableFuture<Response<R>>> {
+        private final Type responseType;
+
+        ResponseCallAdapter(Type responseType) {
+            this.responseType = responseType;
+        }
+
+        @Override
+        public Type responseType() {
+            return responseType;
+        }
+
+        @Override
+        public CompletableFuture<Response<R>> adapt(final Call<R> call) {
+            final CompletableFuture<Response<R>> future = new CompletableFuture<Response<R>>() {
+                @Override
+                public boolean cancel(boolean mayInterruptIfRunning) {
+                    if (mayInterruptIfRunning) {
+                        call.cancel();
+                    }
+                    return super.cancel(mayInterruptIfRunning);
+                }
+            };
+
+            call.enqueue(new Callback<R>() {
+                @Override
+                public void onResponse(Call<R> call, Response<R> response) {
+                    future.complete(response);
+                }
+
+                @Override
+                public void onFailure(Call<R> call, Throwable t) {
+                    future.completeExceptionally(t);
                 }
             });
 
