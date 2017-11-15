@@ -188,20 +188,16 @@ final class RemotingOkHttpCall extends ForwardingCall {
         return new QosException.Visitor<Void>() {
             @Override
             public Void visit(QosException.Throttle exception) {
-                Optional<Duration> backoff = exception.getRetryAfter().isPresent()
-                        ? exception.getRetryAfter()
-                        : backoffStrategy.nextBackoff();
-
-                if (!backoff.isPresent()) {
-                    log.debug("No backoff advertised, failing call");
+                Optional<Duration> nonAdvertizedBackoff = backoffStrategy.nextBackoff();
+                if (!nonAdvertizedBackoff.isPresent()) {
                     callback.onFailure(call, new IOException("Failed to reschedule call since "
-                            + "QosException.Throttle did not advertise a backoff and the number of "
-                            + "configured backoffs are exhausted", exception));
-                } else {
-                    log.debug("Rescheduling call after backoff",
-                            SafeArg.of("backoffMillis", backoff.get().toMillis()));
-                    scheduleExecution(callback, backoff.get());
+                            + "the number of configured backoffs are exhausted", exception));
+                    return null;
                 }
+
+                Duration backoff = exception.getRetryAfter().orElse(nonAdvertizedBackoff.get());
+                log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.toMillis()));
+                scheduleExecution(callback, backoff);
                 return null;
             }
 

@@ -198,8 +198,7 @@ public final class OkHttpClientsTest extends TestBase {
         call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(call::execute)
                 .isInstanceOf(IOException.class)
-                .hasMessage("Failed to reschedule call since QosException.Throttle did not advertise a backoff and "
-                        + "the number of configured backoffs are exhausted");
+                .hasMessage("Failed to reschedule call since the number of configured backoffs are exhausted");
 
         server.enqueue(new MockResponse().setResponseCode(429));
         server.enqueue(new MockResponse().setResponseCode(429));
@@ -211,6 +210,18 @@ public final class OkHttpClientsTest extends TestBase {
                         + "the number of configured backoffs are exhausted");
 
         assertThat(server.getRequestCount()).isEqualTo(4 /* original plus two retries */);
+    }
+
+    @Test
+    public void handlesThrottle_obeysMaxNumRetriesEvenWhenRetryAfterHeaderIsGiven() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
+        server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
+        server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
+        Call call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
+        assertThatThrownBy(call::execute)
+                .isInstanceOf(IOException.class)
+                .hasMessage("Failed to reschedule call since the number of configured backoffs are exhausted");
+        assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
 
     @Test
@@ -231,7 +242,7 @@ public final class OkHttpClientsTest extends TestBase {
         // backoff advertised, configured with no retry: uses advertised backoff
         server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
         server.enqueue(new MockResponse().setBody("foo"));
-        call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
+        call = createRetryingClient(1).newCall(new Request.Builder().url(url).build());
         assertThat(call.execute().body().string()).isEqualTo("foo");
 
         // no backoff advertised, but configured with one retry: uses backoff to retry
@@ -245,12 +256,11 @@ public final class OkHttpClientsTest extends TestBase {
         call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(call::execute)
                 .isInstanceOf(IOException.class)
-                .hasMessage("Failed to reschedule call since QosException.Throttle did not advertise a backoff and "
-                        + "the number of configured backoffs are exhausted");
+                .hasMessage("Failed to reschedule call since the number of configured backoffs are exhausted");
     }
 
     @Test
-    public void doesNotShareBackoffStateBetweenCalls() throws Exception {
+    public void doesNotShareBackoffStateBetweenDifferentCalls() throws Exception {
         OkHttpClient client = createRetryingClient(1);
 
         server.enqueue(new MockResponse().setResponseCode(503));
