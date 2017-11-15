@@ -206,8 +206,7 @@ public final class OkHttpClientsTest extends TestBase {
         call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
         assertThatThrownBy(call::execute)
                 .isInstanceOf(IOException.class)
-                .hasMessage("Failed to reschedule call since QosException.Throttle did not advertise a backoff and "
-                        + "the number of configured backoffs are exhausted");
+                .hasMessage("Failed to reschedule call since the number of configured backoffs are exhausted");
 
         assertThat(server.getRequestCount()).isEqualTo(4 /* original plus two retries */);
     }
