@@ -23,6 +23,10 @@ import java.util.function.Supplier;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
+/**
+ * An {@link OkHttpClient} that executes {@link okhttp3.Call}s as {@link RemotingOkHttpCall}s in order to retry a class
+ * of retryable error states.
+ */
 final class RemotingOkHttpClient extends ForwardingOkHttpClient {
 
     private static final int MAX_NUM_RELOCATIONS = 20;

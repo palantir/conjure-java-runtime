@@ -37,7 +37,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO(rfink): Consider differentiating the IOExceptions thrown/returned by this class, #628
-public final class RemotingOkHttpCall extends ForwardingCall {
+
+/**
+ * An OkHttp {@link Call} implementation that handles standard retryable error status such as 308, 429, 503, and
+ * connection errors. Calls are rescheduled on a given scheduler and executed on a given executor.
+ */
+final class RemotingOkHttpCall extends ForwardingCall {
 
     private static final Logger log = LoggerFactory.getLogger(RemotingOkHttpCall.class);
 
@@ -73,16 +78,42 @@ public final class RemotingOkHttpCall extends ForwardingCall {
         this.maxNumRelocations = maxNumRelocations;
     }
 
-    @SuppressWarnings("FutureReturnValueIgnored")
-    private void scheduleExecution(Callback callback, Duration backoff) {
-        // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
-        schedulingExecutor.schedule(
-                () -> executionExecutor.submit(() -> doClone().enqueue(callback)),
-                backoff.toMillis(),
-                TimeUnit.MILLISECONDS);
+    @Override
+    public Response execute() throws IOException {
+        SettableFuture<Response> future = SettableFuture.create();
+        enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException exception) {
+                future.setException(exception);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                future.set(response);
+            }
+        });
+
+        try {
+            return future.get(syncCallTimeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Call was interrupted during execution");
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof IoRemoteException) {
+                // TODO(rfink): Consider unwrapping the RemoteException at the Retrofit/Feign layer for symmetry, #626
+                throw ((IoRemoteException) e.getCause()).getWrappedException();
+            } else if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            } else {
+                throw new IOException("Failed to execute call", e);
+            }
+        } catch (TimeoutException e) {
+            throw new IOException("Call timed out after: " + syncCallTimeout.toString(), e);
+        }
     }
 
-    private void doEnqueueAndHandleErrorsAndRetries(Callback callback) {
+    @Override
+    public void enqueue(Callback callback) {
         super.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {
@@ -139,6 +170,15 @@ public final class RemotingOkHttpCall extends ForwardingCall {
                 callback.onFailure(call, new IOException("Failed to handle request, this is an http-remoting bug."));
             }
         });
+    }
+
+    @SuppressWarnings("FutureReturnValueIgnored")
+    private void scheduleExecution(Callback callback, Duration backoff) {
+        // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
+        schedulingExecutor.schedule(
+                () -> executionExecutor.submit(() -> doClone().enqueue(callback)),
+                backoff.toMillis(),
+                TimeUnit.MILLISECONDS);
     }
 
     private QosException.Visitor<Void> createQosVisitor(Callback callback, Call call) {
@@ -206,44 +246,6 @@ public final class RemotingOkHttpCall extends ForwardingCall {
         };
     }
 
-    @Override
-    public Response execute() throws IOException {
-        SettableFuture<Response> future = SettableFuture.create();
-        enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException exception) {
-                future.setException(exception);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                future.set(response);
-            }
-        });
-
-        try {
-            return future.get(syncCallTimeout.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException("Call was interrupted during execution");
-        } catch (ExecutionException e) {
-            if (e.getCause() instanceof IoRemoteException) {
-                // TODO(rfink): Consider unwrapping the RemoteException at the Retrofit/Feign layer for symmetry, #626
-                throw ((IoRemoteException) e.getCause()).getWrappedException();
-            } else if (e.getCause() instanceof IOException) {
-                throw (IOException) e.getCause();
-            } else {
-                throw new IOException("Failed to execute call", e);
-            }
-        } catch (TimeoutException e) {
-            throw new IOException("Call timed out after: " + syncCallTimeout.toString(), e);
-        }
-    }
-
-    @Override
-    public void enqueue(Callback callback) {
-        doEnqueueAndHandleErrorsAndRetries(callback);
-    }
 
     // TODO(rfink): Consider removing RemotingOkHttpCall#doClone method, #627
     @Override
