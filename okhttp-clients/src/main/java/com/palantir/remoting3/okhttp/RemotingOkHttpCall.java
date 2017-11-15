@@ -96,9 +96,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
         try {
             return future.get(syncCallTimeout.toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
+            getDelegate().cancel();
             Thread.currentThread().interrupt();
             throw new IOException("Call was interrupted during execution");
         } catch (ExecutionException e) {
+            getDelegate().cancel();
             if (e.getCause() instanceof IoRemoteException) {
                 // TODO(rfink): Consider unwrapping the RemoteException at the Retrofit/Feign layer for symmetry, #626
                 throw ((IoRemoteException) e.getCause()).getWrappedException();
@@ -108,6 +110,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 throw new IOException("Failed to execute call", e);
             }
         } catch (TimeoutException e) {
+            getDelegate().cancel();
             throw new IOException("Call timed out after: " + syncCallTimeout.toString(), e);
         }
     }
