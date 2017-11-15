@@ -31,20 +31,24 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     private final UrlSelector urls;
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
-    private final Duration timeout;
+    /**
+     * The timeout for synchronous {@link okhttp3.Call#execute call execution}. Typically, this should be larger than
+     * the maximum of the OkHttp connect/read/write timeout.
+     */
+    private final Duration syncCallTimeout;
 
     RemotingOkHttpClient(
             OkHttpClient delegate,
             Supplier<BackoffStrategy> backoffStrategy,
             UrlSelector urls,
             ScheduledExecutorService schedulingExecutor,
-            ExecutorService executionExecutor, Duration timeout) {
+            ExecutorService executionExecutor, Duration syncCallTimeout) {
         super(delegate);
         this.backoffStrategyFactory = backoffStrategy;
         this.urls = urls;
         this.schedulingExecutor = schedulingExecutor;
         this.executionExecutor = executionExecutor;
-        this.timeout = timeout;
+        this.syncCallTimeout = syncCallTimeout;
     }
 
     @Override
@@ -61,7 +65,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 this,
                 schedulingExecutor,
                 executionExecutor,
-                timeout,
+                syncCallTimeout,
                 maxNumRelocations);
     }
 }

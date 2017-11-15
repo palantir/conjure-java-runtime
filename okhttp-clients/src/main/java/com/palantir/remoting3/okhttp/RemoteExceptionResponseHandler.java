@@ -45,7 +45,7 @@ enum RemoteExceptionResponseHandler implements ResponseHandler<RemoteException> 
     public Optional<RemoteException> handle(Response response) {
         if (response.body() == null || response.body().byteStream() == null
                 || response.isSuccessful()
-                || response.code() == 101) {
+                || response.code() == MoreHttpCodes.SWITCHING_PROTOCOLS) {
             return Optional.empty();
         }
 

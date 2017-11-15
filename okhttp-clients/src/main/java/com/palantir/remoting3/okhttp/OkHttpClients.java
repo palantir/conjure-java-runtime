@@ -28,6 +28,7 @@ import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -163,13 +164,7 @@ public final class OkHttpClients {
 
     @VisibleForTesting
     static Duration largestOf(Duration... durations) {
-        Duration largest = Duration.ZERO;
-        for (Duration duration : durations) {
-            if (duration.compareTo(largest) > 0) {
-                largest = duration;
-            }
-        }
-        return largest;
+        return Arrays.stream(durations).max(Duration::compareTo).orElse(Duration.ZERO);
     }
 
     /**

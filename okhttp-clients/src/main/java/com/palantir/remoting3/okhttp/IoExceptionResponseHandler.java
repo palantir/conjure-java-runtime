@@ -30,7 +30,7 @@ enum IoExceptionResponseHandler implements ResponseHandler<IOException> {
 
     @Override
     public Optional<IOException> handle(Response response) {
-        if (response.isSuccessful() || response.code() == 101) {
+        if (response.isSuccessful() || response.code() == MoreHttpCodes.SWITCHING_PROTOCOLS) {
             return Optional.empty();
         }
 

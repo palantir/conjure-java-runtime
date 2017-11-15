@@ -375,7 +375,9 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(server3.getRequestCount()).isEqualTo(0);
     }
 
+    @Test
     public void largestOf_sanity() throws Exception {
+        assertThat(OkHttpClients.largestOf()).isEqualTo(Duration.ZERO);
         assertThat(OkHttpClients.largestOf(Duration.ofMinutes(1), Duration.ofSeconds(20), Duration.ofHours(7)))
                 .isEqualTo(Duration.ofHours(7));
     }

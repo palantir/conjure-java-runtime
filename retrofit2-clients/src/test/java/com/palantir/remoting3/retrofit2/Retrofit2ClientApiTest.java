@@ -19,7 +19,7 @@ package com.palantir.remoting3.retrofit2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Fail.failBecauseExceptionWasNotThrown;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
