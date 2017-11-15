@@ -21,6 +21,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting.api.errors.RemoteException;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -98,7 +99,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         } catch (InterruptedException e) {
             getDelegate().cancel();
             Thread.currentThread().interrupt();
-            throw new IOException("Call was interrupted during execution");
+            throw new InterruptedIOException("Call was interrupted during execution");
         } catch (ExecutionException e) {
             getDelegate().cancel();
             if (e.getCause() instanceof IoRemoteException) {
