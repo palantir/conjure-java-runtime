@@ -209,7 +209,7 @@ public final class RemotingOkHttpCall extends ForwardingCall {
         try {
             return future.get(timeout.toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
-            Thread.interrupted();
+            Thread.currentThread().interrupt();
             throw new IOException("Call was interrupted during execution");
         } catch (ExecutionException e) {
             if (e.getCause() instanceof IoRemoteException) {
