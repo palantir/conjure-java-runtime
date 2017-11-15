@@ -91,7 +91,7 @@ public final class OkHttpClientsTest extends TestBase {
             CountDownLatch wasSuccessful = new CountDownLatch(1);
             call.enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException e) {}
+                public void onFailure(Call call, IOException exception) {}
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
