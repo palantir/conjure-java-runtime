@@ -36,7 +36,7 @@ import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO(rfink): Consider differentiating the IOExceptions thrown/returned by this class, #628
+// TODO(rfink): Consider differentiating the IOExceptions thrown/returned by this class, add better error messages, #628
 
 /**
  * An OkHttp {@link Call} implementation that handles standard retryable error status such as 308, 429, 503, and
