@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -80,6 +81,27 @@ public final class OkHttpClientsTest extends TestBase {
 
         HostMetrics actualMetrics = Iterables.getOnlyElement(hostMetrics);
         assertThat(actualMetrics.get2xx().getCount()).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    public void handlesSuccessfulResponseCodesWithSuccessHandler() throws Exception {
+        for (int code : new int[] {100, 101, 200, 204}) {
+            server.enqueue(new MockResponse().setResponseCode(code));
+            Call call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
+            CountDownLatch wasSuccessful = new CountDownLatch(1);
+            call.enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {}
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.code() == code) {
+                        wasSuccessful.countDown();
+                    }
+                }
+            });
+            assertThat(wasSuccessful.await(100, TimeUnit.MILLISECONDS)).as("Expected code: " + code).isTrue();
+        }
     }
 
     @Test

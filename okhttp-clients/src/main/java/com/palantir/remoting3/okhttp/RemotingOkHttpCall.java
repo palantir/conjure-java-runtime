@@ -49,7 +49,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     private static final ResponseHandler<RemoteException> remoteExceptionHandler =
             RemoteExceptionResponseHandler.INSTANCE;
-    private static final ResponseHandler<IOException> catchAllExceptionHandler = IoExceptionResponseHandler.INSTANCE;
+    private static final ResponseHandler<IOException> ioExceptionHandler = IoExceptionResponseHandler.INSTANCE;
     private static final ResponseHandler<QosException> qosHandler = QosExceptionResponseHandler.INSTANCE;
 
     private final BackoffStrategy backoffStrategy;
@@ -65,10 +65,12 @@ final class RemotingOkHttpCall extends ForwardingCall {
     RemotingOkHttpCall(
             Call delegate,
             BackoffStrategy backoffStrategy,
-            UrlSelector urls, RemotingOkHttpClient client,
+            UrlSelector urls,
+            RemotingOkHttpClient client,
             ScheduledExecutorService schedulingExecutor,
             ExecutorService executionExecutor,
-            Duration syncCallTimeout, int maxNumRelocations) {
+            Duration syncCallTimeout,
+            int maxNumRelocations) {
         super(delegate);
         this.backoffStrategy = backoffStrategy;
         this.urls = urls;
@@ -145,7 +147,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 // Relay successful responses
-                if (response.code() / 100 == 2) {
+                if (response.code() / 100 <= 2) {
                     callback.onResponse(call, response);
                     return;
                 }
@@ -165,7 +167,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 // Catch-all: handle all other responses
-                Optional<IOException> ioException = catchAllExceptionHandler.handle(response);
+                Optional<IOException> ioException = ioExceptionHandler.handle(response);
                 if (ioException.isPresent()) {
                     callback.onFailure(call, ioException.get());
                     return;
