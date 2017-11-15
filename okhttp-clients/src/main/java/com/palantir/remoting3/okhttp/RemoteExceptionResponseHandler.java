@@ -18,6 +18,8 @@ package com.palantir.remoting3.okhttp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
@@ -59,9 +61,10 @@ enum RemoteExceptionResponseHandler implements ResponseHandler<RemoteException> 
                 SerializableError serializableError = MAPPER.readValue(body, SerializableError.class);
                 return Optional.of(new RemoteException(serializableError, response.code()));
             } catch (Exception e) {
-                log.warn("Failed to deserialize JSON: {}", String.format(
-                        "Error %s. Failed to parse error body and deserialize exception: %s. Body:%n%s",
-                        response.code(), e.getMessage(), body), e);
+                log.warn("Failed to deserialize JSON, could not deserialize SerializableError",
+                        SafeArg.of("code", response.code()),
+                        UnsafeArg.of("body", body),
+                        e);
             }
         }
 

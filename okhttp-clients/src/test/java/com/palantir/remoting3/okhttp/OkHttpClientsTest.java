@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import okhttp3.Call;
@@ -77,6 +78,52 @@ public final class OkHttpClientsTest extends TestBase {
 
         HostMetrics actualMetrics = Iterables.getOnlyElement(hostMetrics);
         assertThat(actualMetrics.get2xx().getCount()).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    public void successfulCallDoesNotInvokeFailureHandler() throws Exception {
+        server.enqueue(new MockResponse().setBody("pong"));
+
+        Call call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
+        Semaphore failureHandlerExecuted = new Semaphore(0);
+        Semaphore successHandlerExecuted = new Semaphore(0);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException ioException) {
+                failureHandlerExecuted.release();  // should never happen
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                successHandlerExecuted.release();
+            }
+        });
+        assertThat(successHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(failureHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS))
+                .as("onFailure was executed").isFalse();
+    }
+
+    @Test
+    public void unsuccessfulCallDoesNotInvokeSuccessHandler() throws Exception {
+        server.shutdown();
+
+        Call call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
+        Semaphore failureHandlerExecuted = new Semaphore(0);
+        Semaphore successHandlerExecuted = new Semaphore(0);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException ioException) {
+                failureHandlerExecuted.release();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                successHandlerExecuted.release();  // should never happen
+            }
+        });
+        assertThat(successHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS))
+                .as("onSuccess was executed").isFalse();
+        assertThat(failureHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
     }
 
     @Test

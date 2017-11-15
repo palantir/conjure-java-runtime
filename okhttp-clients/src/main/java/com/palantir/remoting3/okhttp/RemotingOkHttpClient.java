@@ -20,7 +20,6 @@ import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
-import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -49,11 +48,12 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     }
 
     @Override
-    public Call newCall(Request request) {
+    public RemotingOkHttpCall newCall(Request request) {
         return newCallWithMutableState(request, backoffStrategyFactory.get(), MAX_NUM_RELOCATIONS);
     }
 
-    Call newCallWithMutableState(Request request, BackoffStrategy backoffStrategy, int maxNumRelocations) {
+    RemotingOkHttpCall newCallWithMutableState(
+            Request request, BackoffStrategy backoffStrategy, int maxNumRelocations) {
         return new RemotingOkHttpCall(
                 getDelegate().newCall(request),
                 backoffStrategy,

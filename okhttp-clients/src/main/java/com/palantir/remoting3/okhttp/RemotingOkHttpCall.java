@@ -36,6 +36,7 @@ import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// TODO(rfink): Consider differentiating the IOExceptions thrown/returned by this class, #628
 public final class RemotingOkHttpCall extends ForwardingCall {
 
     private static final Logger log = LoggerFactory.getLogger(RemotingOkHttpCall.class);
@@ -82,22 +83,25 @@ public final class RemotingOkHttpCall extends ForwardingCall {
         super.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {
+                // Fail call if backoffs are exhausted or if no retry URL can be determined.
                 if (!backoffStrategy.nextBackoff().isPresent()) {
                     callback.onFailure(call, new IOException("Failed to complete the request due to an "
                             + "IOException", exception));
-                } else {
-                    Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
-                    if (!redirectTo.isPresent()) {
-                        callback.onFailure(call, new IOException("Failed to determine valid failover URL"
-                                + "for '" + request().url() + "' and base URLs " + urls.getBaseUrls()));
-                    } else {
-                        Request redirectedRequest = request().newBuilder()
-                                .url(redirectTo.get())
-                                .build();
-                        client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
-                                .enqueue(callback);
-                    }
+                    return;
                 }
+                Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
+                if (!redirectTo.isPresent()) {
+                    callback.onFailure(call, new IOException("Failed to determine valid failover URL"
+                            + "for '" + request().url() + "' and base URLs " + urls.getBaseUrls()));
+                    return;
+                }
+
+                Request redirectedRequest = request().newBuilder()
+                        .url(redirectTo.get())
+                        .build();
+                RemotingOkHttpCall retryCall =
+                        client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
+                retryCall.enqueue(callback);
             }
 
             @Override
@@ -105,6 +109,7 @@ public final class RemotingOkHttpCall extends ForwardingCall {
                 // Relay successful responses
                 if (response.code() / 100 == 2) {
                     callback.onResponse(call, response);
+                    return;
                 }
 
                 // Handle to handle QoS situations: retry, failover, etc.
@@ -237,6 +242,7 @@ public final class RemotingOkHttpCall extends ForwardingCall {
         doEnqueueAndHandleErrorsAndRetries(callback);
     }
 
+    // TODO(rfink): Consider removing RemotingOkHttpCall#doClone method, #627
     @Override
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(),
