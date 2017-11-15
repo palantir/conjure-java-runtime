@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
+import com.google.common.util.concurrent.Uninterruptibles;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.clients.ClientConfiguration;
@@ -39,6 +40,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.SocketPolicy;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -368,11 +370,31 @@ public final class OkHttpClientsTest extends TestBase {
 
         OkHttpClient client = createRetryingClient(1, url, url2, url3);
         Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
-        assertThatThrownBy(() -> call.execute())
+        assertThatThrownBy(call::execute)
                 .isInstanceOf(IOException.class)
                 .hasMessage("Failed to complete the request due to an IOException");
 
         assertThat(server3.getRequestCount()).isEqualTo(0);
+    }
+
+    @Test(timeout = 10_000)
+    public void handlesInterruptedThreads() throws Exception {
+        server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE));
+
+        OkHttpClient client = createRetryingClient(0);
+
+        Thread thread = new Thread(() -> {
+            try {
+                client.newCall(new Request.Builder().url(url).build()).execute();
+            } catch (IOException e) {
+                // nothing
+            }
+        });
+
+        thread.start();
+        Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+        thread.interrupt();
+        thread.join();
     }
 
     @Test
