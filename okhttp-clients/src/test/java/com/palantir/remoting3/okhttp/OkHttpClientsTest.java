@@ -219,7 +219,7 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
-    public void interceptsAndHandlesQosExceptions_asyncCall() throws Exception {
+    public void handlesQosExceptions_asyncCall() throws Exception {
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setBody("pong"));
@@ -237,7 +237,7 @@ public final class OkHttpClientsTest extends TestBase {
                 future.complete(response.body().string());
             }
         });
-        assertThat(future.get(10 * (2 + 4) /* exp backoff upper bound */, TimeUnit.MILLISECONDS))
+        assertThat(future.get(100 * (2 + 4) /* generous exp backoff upper bound */, TimeUnit.MILLISECONDS))
                 .isEqualTo("pong");
         assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
