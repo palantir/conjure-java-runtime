@@ -76,8 +76,7 @@ public final class OkHttpClients {
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
     public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass,
-                true /* randomize URLs */);
+        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */);
     }
 
     /**
