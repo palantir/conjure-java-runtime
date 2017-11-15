@@ -16,17 +16,23 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.palantir.remoting.api.errors.RemoteException;
 import java.io.IOException;
 
 // TODO(rfink): Can we hide this as an implementation detail of RemotingOkHttpCall?
-public final class IoRemoteException extends IOException {
-    private final RuntimeException wrappedException;
 
-    IoRemoteException(RuntimeException wrappedException) {
+/**
+ * An {@link IOException} wrapper for {@link RemoteException}s. Used to make exception propagation compatible with
+ * OkHttp APIs which generally require IOExceptions rather than RuntimeExceptions.
+ */
+public final class IoRemoteException extends IOException {
+    private final RemoteException wrappedException;
+
+    IoRemoteException(RemoteException wrappedException) {
         this.wrappedException = wrappedException;
     }
 
-    public RuntimeException getWrappedException() {
+    public RemoteException getWrappedException() {
         return wrappedException;
     }
 }
