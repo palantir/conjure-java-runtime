@@ -110,65 +110,7 @@ public final class RemotingOkHttpCall extends ForwardingCall {
                 // Handle to handle QoS situations: retry, failover, etc.
                 Optional<QosException> qosError = qosHandler.handle(response);
                 if (qosError.isPresent()) {
-                    qosError.get().accept(new QosException.Visitor<Void>() {
-                        @Override
-                        public Void visit(QosException.Throttle exception) {
-                            Optional<Duration> backoff = exception.getRetryAfter().isPresent()
-                                    ? exception.getRetryAfter()
-                                    : backoffStrategy.nextBackoff();
-
-                            if (!backoff.isPresent()) {
-                                log.debug("No backoff advertised, failing call");
-                                callback.onFailure(call, new IOException("Failed to reschedule call since "
-                                        + "QosException.Throttle did not advertise a backoff and the number of "
-                                        + "configured backoffs are exhausted", exception));
-                            } else {
-                                log.debug("Rescheduling call after backoff",
-                                        SafeArg.of("backoffMillis", backoff.get().toMillis()));
-                                scheduleExecution(callback, backoff.get());
-                            }
-                            return null;
-                        }
-
-                        @Override
-                        public Void visit(QosException.RetryOther exception) {
-                            if (maxNumRelocations <= 0) {
-                                callback.onFailure(call, new IOException("Exceeded the maximum number of allowed "
-                                        + "redirects for initial URL: " + call.request().url()));
-                            } else {
-                                Optional<HttpUrl> redirectTo = urls.redirectTo(request().url(),
-                                        exception.getRedirectTo().toString());
-                                if (!redirectTo.isPresent()) {
-                                    callback.onFailure(call, new IOException("Failed to determine valid redirect URL "
-                                            + "for '" + exception.getRedirectTo() + "' and base URLs "
-                                            + urls.getBaseUrls()));
-                                } else {
-                                    Request redirectedRequest = request().newBuilder()
-                                            .url(redirectTo.get())
-                                            .build();
-                                    client.newCallWithMutableState(
-                                            redirectedRequest, backoffStrategy, maxNumRelocations - 1)
-                                            .enqueue(callback);
-                                }
-                            }
-                            return null;
-                        }
-
-                        @Override
-                        public Void visit(QosException.Unavailable exception) {
-                            Optional<Duration> backoff = backoffStrategy.nextBackoff();
-                            if (!backoff.isPresent()) {
-                                log.debug("Max number of retries exceeded, failing call");
-                                callback.onFailure(call, new IOException("Failed to complete the request due to a "
-                                        + "server-side QoS condition: 503", exception));
-                            } else {
-                                log.debug("Rescheduling call after backoff",
-                                        SafeArg.of("backoffMillis", backoff.get().toMillis()));
-                                scheduleExecution(callback, backoff.get());
-                            }
-                            return null;
-                        }
-                    });
+                    qosError.get().accept(createQosVisitor(callback, call));
                     return;
                 }
 
@@ -189,6 +131,71 @@ public final class RemotingOkHttpCall extends ForwardingCall {
                 callback.onFailure(call, new IOException("Failed to handle request, this is an http-remoting bug."));
             }
         });
+    }
+
+    private QosException.Visitor<Void> createQosVisitor(Callback callback, Call call) {
+        return new QosException.Visitor<Void>() {
+            @Override
+            public Void visit(QosException.Throttle exception) {
+                Optional<Duration> backoff = exception.getRetryAfter().isPresent()
+                        ? exception.getRetryAfter()
+                        : backoffStrategy.nextBackoff();
+
+                if (!backoff.isPresent()) {
+                    log.debug("No backoff advertised, failing call");
+                    callback.onFailure(call, new IOException("Failed to reschedule call since "
+                            + "QosException.Throttle did not advertise a backoff and the number of "
+                            + "configured backoffs are exhausted", exception));
+                } else {
+                    log.debug("Rescheduling call after backoff",
+                            SafeArg.of("backoffMillis", backoff.get().toMillis()));
+                    scheduleExecution(callback, backoff.get());
+                }
+                return null;
+            }
+
+            @Override
+            public Void visit(QosException.RetryOther exception) {
+                if (maxNumRelocations <= 0) {
+                    callback.onFailure(call,
+                            new IOException("Exceeded the maximum number of allowed "
+                                    + "redirects for initial URL: " + call.request().url()));
+                } else {
+                    Optional<HttpUrl> redirectTo = urls.redirectTo(request().url(),
+                            exception.getRedirectTo().toString());
+                    if (!redirectTo.isPresent()) {
+                        callback.onFailure(call,
+                                new IOException("Failed to determine valid redirect URL "
+                                        + "for '" + exception.getRedirectTo() + "' and base URLs "
+                                        + urls.getBaseUrls()));
+                    } else {
+                        Request redirectedRequest = request().newBuilder()
+                                .url(redirectTo.get())
+                                .build();
+                        client.newCallWithMutableState(
+                                redirectedRequest, backoffStrategy, maxNumRelocations - 1)
+                                .enqueue(callback);
+                    }
+                }
+                return null;
+            }
+
+            @Override
+            public Void visit(QosException.Unavailable exception) {
+                Optional<Duration> backoff = backoffStrategy.nextBackoff();
+                if (!backoff.isPresent()) {
+                    log.debug("Max number of retries exceeded, failing call");
+                    callback.onFailure(call,
+                            new IOException("Failed to complete the request due to a "
+                                    + "server-side QoS condition: 503", exception));
+                } else {
+                    log.debug("Rescheduling call after backoff",
+                            SafeArg.of("backoffMillis", backoff.get().toMillis()));
+                    scheduleExecution(callback, backoff.get());
+                }
+                return null;
+            }
+        };
     }
 
     @Override
