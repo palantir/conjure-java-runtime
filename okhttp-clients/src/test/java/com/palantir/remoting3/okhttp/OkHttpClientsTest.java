@@ -100,7 +100,7 @@ public final class OkHttpClientsTest extends TestBase {
                     }
                 }
             });
-            assertThat(wasSuccessful.await(100, TimeUnit.MILLISECONDS)).as("Expected code: " + code).isTrue();
+            assertThat(wasSuccessful.await(500, TimeUnit.MILLISECONDS)).as("Expected code: " + code).isTrue();
         }
     }
 
@@ -122,8 +122,8 @@ public final class OkHttpClientsTest extends TestBase {
                 successHandlerExecuted.release();
             }
         });
-        assertThat(successHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
-        assertThat(failureHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS))
+        assertThat(successHandlerExecuted.tryAcquire(500, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(failureHandlerExecuted.tryAcquire(500, TimeUnit.MILLISECONDS))
                 .as("onFailure was executed").isFalse();
     }
 
