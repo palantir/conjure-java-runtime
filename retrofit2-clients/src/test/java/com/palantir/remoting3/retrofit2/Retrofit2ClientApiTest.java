@@ -71,9 +71,9 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
         assertThat(service.getGuavaOptionalString(guavaOptional("p"), guavaEmptyOptional()).execute().body())
-            .isEqualTo(guavaOptional("pong"));
+                .isEqualTo(guavaOptional("pong"));
         assertThat(server.takeRequest().getPath())
-            .isEqualTo("/getGuavaOptionalString/p/");
+                .isEqualTo("/getGuavaOptionalString/p/");
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
         assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaEmptyOptional()).execute().body())

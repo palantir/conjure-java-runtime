@@ -16,18 +16,17 @@
 
 package com.palantir.remoting3.okhttp;
 
-import okhttp3.Call;
-import okhttp3.Request;
+import java.io.IOException;
 
-public final class AsyncCallTagCallFactory implements Call.Factory {
-    private final Call.Factory delegate;
+// TODO(rfink): Can we hide this as an implementation detail of RemotingOkHttpCall?
+public final class IoRemoteException extends IOException {
+    private final RuntimeException wrappedException;
 
-    public AsyncCallTagCallFactory(Call.Factory delegate) {
-        this.delegate = delegate;
+    IoRemoteException(RuntimeException wrappedException) {
+        this.wrappedException = wrappedException;
     }
 
-    @Override
-    public Call newCall(Request request) {
-        return delegate.newCall(request.newBuilder().tag(new AsyncCallTag()).build());
+    public RuntimeException getWrappedException() {
+        return wrappedException;
     }
 }
