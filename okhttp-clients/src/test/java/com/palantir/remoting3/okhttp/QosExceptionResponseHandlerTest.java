@@ -21,16 +21,11 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.errors.QosException;
-import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
-import okhttp3.MediaType;
-import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
-import okio.Okio;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
