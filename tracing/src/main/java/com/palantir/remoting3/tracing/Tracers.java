@@ -77,7 +77,9 @@ public final class Tracers {
 
     /**
      * Wraps the provided scheduled executor service to make submitted tasks traceable, see {@link
-     * #wrap(ScheduledExecutorService)}.
+     * #wrap(ScheduledExecutorService)}. This method should not be used to wrap a ScheduledExecutorService that has
+     * already been {@link #wrapWithNewTrace(ScheduledExecutorService) wrapped with new trace}. If this is done, a new
+     * trace will be generated for each execution, effectively bypassing the intent of this method.
      */
     public static ScheduledExecutorService wrap(ScheduledExecutorService executorService) {
         return new WrappingScheduledExecutorService(executorService) {
@@ -103,7 +105,10 @@ public final class Tracers {
 
     /**
      * Wraps the provided scheduled executor service to make submitted tasks traceable with a fresh {@link Trace trace}
-     * for each execution, see {@link #wrapWithNewTrace(ScheduledExecutorService)}.
+     * for each execution, see {@link #wrapWithNewTrace(ScheduledExecutorService)}. This method should not be used to
+     * wrap a ScheduledExecutorService that has already been {@link #wrap(ScheduledExecutorService) wrapped}. If this is
+     * done, a new trace will be generated for each execution, effectively bypassing the intent of the previous
+     * wrapping.
      */
     public static ScheduledExecutorService wrapWithNewTrace(ScheduledExecutorService executorService) {
         return new WrappingScheduledExecutorService(executorService) {
