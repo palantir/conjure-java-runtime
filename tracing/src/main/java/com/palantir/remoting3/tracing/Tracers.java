@@ -89,19 +89,6 @@ public final class Tracers {
     }
 
     /**
-     * Wraps the provided scheduled executor service to make submitted tasks traceable with a fresh {@link Trace trace}
-     * for each execution, see {@link #wrapWithNewTrace(ScheduledExecutorService)}.
-     */
-    public static ScheduledExecutorService wrapWithNewTrace(ScheduledExecutorService executorService) {
-        return new WrappingScheduledExecutorService(executorService) {
-            @Override
-            protected <T> Callable<T> wrapTask(Callable<T> callable) {
-                return wrapWithNewTrace(callable);
-            }
-        };
-    }
-
-    /**
      * Wraps the given {@link Callable} such that it uses the thread-local {@link Trace tracing state} at the time of
      * it's construction during its {@link Callable#call() execution}.
      */
@@ -112,6 +99,19 @@ public final class Tracers {
     /** Like {@link #wrap(Callable)}, but for Runnables. */
     public static Runnable wrap(Runnable delegate) {
         return new TracingAwareRunnable(delegate);
+    }
+
+    /**
+     * Wraps the provided scheduled executor service to make submitted tasks traceable with a fresh {@link Trace trace}
+     * for each execution, see {@link #wrapWithNewTrace(ScheduledExecutorService)}.
+     */
+    public static ScheduledExecutorService wrapWithNewTrace(ScheduledExecutorService executorService) {
+        return new WrappingScheduledExecutorService(executorService) {
+            @Override
+            protected <T> Callable<T> wrapTask(Callable<T> callable) {
+                return wrapWithNewTrace(callable);
+            }
+        };
     }
 
     /**
