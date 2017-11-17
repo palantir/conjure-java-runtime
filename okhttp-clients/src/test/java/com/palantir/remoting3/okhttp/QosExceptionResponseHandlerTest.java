@@ -17,13 +17,13 @@
 package com.palantir.remoting3.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.errors.QosException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.junit.Test;
@@ -42,14 +42,13 @@ public final class QosExceptionResponseHandlerTest extends TestBase {
         Response response;
 
         // with header
-        response = responseWithCode(REQUEST, 308).newBuilder().header(HttpHeaders.LOCATION, URL.toString()).build();
+        response = response(REQUEST, 308).header(HttpHeaders.LOCATION, URL.toString()).build();
         assertThat(handler.handle(response).get())
                 .isInstanceOfSatisfying(QosException.RetryOther.class,
                         retryOther -> assertThat(retryOther.getRedirectTo()).isEqualTo(URL));
-        assertClosed(response);
 
         // with header
-        response = responseWithCode(REQUEST, 308);
+        response = response(REQUEST, 308).build();
         assertThat(handler.handle(response)).isEmpty();
     }
 
@@ -60,26 +59,21 @@ public final class QosExceptionResponseHandlerTest extends TestBase {
         assertThat(handler.handle(response).get())
                 .isInstanceOfSatisfying(QosException.Throttle.class,
                         retryAfter -> assertThat(retryAfter.getRetryAfter()).isEmpty());
-        assertClosed(response);
     }
 
     @Test
     public void test429WithRetryAfter() throws Exception {
-        Response response = responseWithCode(REQUEST, 429).newBuilder()
-                .header("Retry-After", "120")
-                .build();
+        Response response = response(REQUEST, 429).header("Retry-After", "120").build();
 
         assertThat(handler.handle(response).get())
                 .isInstanceOfSatisfying(QosException.Throttle.class,
                         retryAfter -> assertThat(retryAfter.getRetryAfter()).contains(Duration.ofMinutes(2)));
-        assertClosed(response);
     }
 
     @Test
     public void test503() throws Exception {
         Response response = responseWithCode(REQUEST, 503);
         assertThat(handler.handle(response).get()).isInstanceOf(QosException.Unavailable.class);
-        assertClosed(response);
     }
 
     @Test
@@ -96,9 +90,11 @@ public final class QosExceptionResponseHandlerTest extends TestBase {
         }
     }
 
-    private static void assertClosed(Response response) {
-        assertThatExceptionOfType(IllegalStateException.class)
-                .isThrownBy(response.body().source()::exhausted)
-                .withMessage("closed");
+    private static Response.Builder response(Request request, int code) {
+        return new Response.Builder()
+                .request(request)
+                .protocol(Protocol.HTTP_1_1)
+                .code(code)
+                .message("unused");
     }
 }

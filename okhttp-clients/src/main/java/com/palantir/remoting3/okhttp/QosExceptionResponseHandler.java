@@ -39,22 +39,16 @@ enum QosExceptionResponseHandler implements ResponseHandler<QosException> {
 
     @Override
     public Optional<QosException> handle(Response response) {
-        final Optional<QosException> result;
         switch (response.code()) {
             case 308:
-                result = handle308(response);
-                break;
+                return handle308(response);
             case 429:
-                result = Optional.of(handle429(response));
-                break;
+                return Optional.of(handle429(response));
             case 503:
-                result = Optional.of(handle503());
-                break;
-            default:
-                result = Optional.empty();
+                return Optional.of(handle503());
         }
-        result.ifPresent(exception -> response.close());
-        return result;
+
+        return Optional.empty();
     }
 
     private Optional<QosException> handle308(Response response) {
