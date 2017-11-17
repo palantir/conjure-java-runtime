@@ -120,7 +120,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     private static ResponseBody buffer(ResponseBody body) throws IOException {
-        return ResponseBody.create(body.contentType(), body.bytes());
+        return ResponseBody.create(body.contentType(), body.bytes()); // closes the response body
     }
 
     @Override
@@ -157,6 +157,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
+                // Buffer the response into a byte[] so that multiple handler can safely consume the body.
+                // The buffer call consumes and closes the original unbufferedResponse body.
                 final Response response;
                 try {
                     response = unbufferedResponse.newBuilder().body(buffer(unbufferedResponse.body())).build();
