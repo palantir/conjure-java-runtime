@@ -23,16 +23,12 @@ import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.ClientConfigurations;
 import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.config.ssl.SslSocketFactories;
-import java.io.ByteArrayInputStream;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
-import okhttp3.MediaType;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
-import okio.Okio;
 
 public abstract class TestBase {
 
@@ -61,8 +57,6 @@ public abstract class TestBase {
                 .request(request)
                 .protocol(Protocol.HTTP_1_1)
                 .code(code)
-                .body(ResponseBody.create(MediaType.parse("*"), 10,
-                        Okio.buffer(Okio.source(new ByteArrayInputStream(new byte[10])))))
                 .message("unused")
                 .build();
     }
