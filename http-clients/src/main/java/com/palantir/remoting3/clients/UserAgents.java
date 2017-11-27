@@ -138,7 +138,7 @@ public final class UserAgents {
 
         if (!foundFirst) {
             if (lenient) {
-                log.info("Invalid user agent, falling back to default/unknown agent",
+                log.debug("Invalid user agent, falling back to default/unknown agent",
                         SafeArg.of("userAgent", userAgent));
                 return builder.primary(UserAgent.Agent.of("unknown", UserAgent.Agent.DEFAULT_VERSION)).build();
             } else {
