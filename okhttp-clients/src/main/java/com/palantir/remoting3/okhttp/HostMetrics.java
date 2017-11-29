@@ -39,6 +39,8 @@ public interface HostMetrics {
      */
     String hostname();
 
+    Timer getResponse();
+
     Timer get1xx();
 
     Timer get2xx();

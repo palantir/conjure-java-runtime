@@ -52,7 +52,6 @@ public final class HostMetricsRegistryTest {
                 .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
                 .putSafeTags(HostMetrics.SERVICE_NAME_TAG, "service")
                 .putSafeTags(HostMetrics.HOSTNAME_TAG, "host")
-                .putSafeTags(HostMetrics.FAMILY_TAG, DefaultHostMetrics.SUCCESSFUL)
                 .build();
 
         assertThat(registry.getMetrics().get(name)).isNull();

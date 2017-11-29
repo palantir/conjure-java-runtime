@@ -44,25 +44,38 @@ public final class HostMetricsTest {
 
     @Test
     public void testUpdateMetricUpdatesMeter() {
-        Map<Integer, String> testCases = ImmutableMap.<Integer, String>builder()
-                .put(100, DefaultHostMetrics.INFORMATIONAL)
-                .put(200, DefaultHostMetrics.SUCCESSFUL)
-                .put(300, DefaultHostMetrics.REDIRECTION)
-                .put(400, DefaultHostMetrics.CLIENT_ERROR)
-                .put(500, DefaultHostMetrics.SERVER_ERROR)
-                .put(600, DefaultHostMetrics.OTHER)
+        Map<Integer, Timer> testCases = ImmutableMap.<Integer, Timer>builder()
+                .put(100, hostMetrics.get1xx())
+                .put(200, hostMetrics.get2xx())
+                .put(300, hostMetrics.get3xx())
+                .put(400, hostMetrics.get4xx())
+                .put(500, hostMetrics.get5xx())
+                .put(600, hostMetrics.getOther())
                 .build();
 
-        for (Map.Entry<Integer, String> testCase : testCases.entrySet()) {
-            Timer timer = getMeter(registry, SERVICE_NAME, HOSTNAME, testCase.getValue()).get();
+        int numRequests = 0;
+        for (Map.Entry<Integer, Timer> testCase : testCases.entrySet()) {
+            // family specific timer
+            Timer timer = testCase.getValue();
             assertThat(timer.getCount()).isZero();
             assertThat(timer.getSnapshot().getMin()).isEqualTo(0);
 
+            // global response timer
+            Timer responseTimer = hostMetrics.getResponse();
+            assertThat(responseTimer.getCount()).isEqualTo(numRequests);
+
             hostMetrics.record(testCase.getKey(), 1);
+            numRequests++;
 
             assertThat(timer.getCount()).isEqualTo(1);
             assertThat(timer.getSnapshot().getMin()).isEqualTo(1_000);
+            assertThat(responseTimer.getCount()).isEqualTo(numRequests);
         }
+    }
+
+    @Test
+    public void testResponseMetrics() {
+
     }
 
     private static Optional<Timer> getMeter(
@@ -71,7 +84,6 @@ public final class HostMetricsTest {
                 .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
                 .putSafeTags(HostMetrics.SERVICE_NAME_TAG, serviceName)
                 .putSafeTags(HostMetrics.HOSTNAME_TAG, hostname)
-                .putSafeTags(HostMetrics.FAMILY_TAG, family)
                 .build();
         return Optional.ofNullable((Timer) registry.getMetrics().get(name));
     }
