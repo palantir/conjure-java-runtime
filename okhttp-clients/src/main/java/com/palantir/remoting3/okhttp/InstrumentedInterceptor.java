@@ -16,7 +16,10 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.codahale.metrics.Timer;
 import com.google.common.base.Stopwatch;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import okhttp3.Interceptor;
@@ -27,12 +30,17 @@ import okhttp3.Response;
  */
 final class InstrumentedInterceptor implements Interceptor {
 
+    static final String CLIENT_RESPONSE_METRIC_NAME = "client.response";
+    static final String SERVICE_NAME_TAG = "service-name";
+
     private final HostMetricsRegistry hostMetrics;
     private final String serviceName;
+    private final Timer responseTimer;
 
-    InstrumentedInterceptor(HostMetricsRegistry hostMetrics, String serviceName) {
+    InstrumentedInterceptor(TaggedMetricRegistry registry, HostMetricsRegistry hostMetrics, String serviceName) {
         this.hostMetrics = hostMetrics;
         this.serviceName = serviceName;
+        this.responseTimer = registry.timer(name());
     }
 
     @Override
@@ -43,11 +51,20 @@ final class InstrumentedInterceptor implements Interceptor {
 
         String hostname = chain.request().url().host();
         hostMetrics.record(serviceName, hostname, response.code(), micros);
+        responseTimer.update(micros, TimeUnit.MICROSECONDS);
 
         return response;
     }
 
-    static InstrumentedInterceptor create(HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
-        return new InstrumentedInterceptor(hostMetrics, serviceClass.getSimpleName());
+    static InstrumentedInterceptor create(
+            TaggedMetricRegistry registry, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
+        return new InstrumentedInterceptor(registry, hostMetrics, serviceClass.getSimpleName());
+    }
+
+    private MetricName name() {
+        return MetricName.builder()
+                .safeName(CLIENT_RESPONSE_METRIC_NAME)
+                .putSafeTags(SERVICE_NAME_TAG, serviceName)
+                .build();
     }
 }

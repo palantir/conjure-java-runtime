@@ -17,7 +17,6 @@
 package com.palantir.remoting3.okhttp;
 
 import com.codahale.metrics.Timer;
-import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +29,6 @@ final class DefaultHostMetrics implements HostMetrics {
 
     private final String serviceName;
     private final String hostname;
-    private final Timer response;
     private final Timer informational;
     private final Timer successful;
     private final Timer redirection;
@@ -39,24 +37,15 @@ final class DefaultHostMetrics implements HostMetrics {
     private final Timer other;
 
     /** Creates a metrics registry for calls from the given service to the given host. */
-    DefaultHostMetrics(TaggedMetricRegistry registry, String serviceName, String hostname) {
+    DefaultHostMetrics(String serviceName, String hostname) {
         this.serviceName = serviceName;
         this.hostname = hostname;
-        this.response = registry.timer(name());
         this.informational = new Timer();
         this.successful = new Timer();
         this.redirection = new Timer();
         this.clientError = new Timer();
         this.serverError = new Timer();
         this.other = new Timer();
-    }
-
-    private MetricName name() {
-        return MetricName.builder()
-                .safeName(CLIENT_RESPONSE_METRIC_NAME)
-                .putSafeTags(SERVICE_NAME_TAG, serviceName)
-                .putSafeTags(HOSTNAME_TAG, hostname)
-                .build();
     }
 
     @Override
@@ -67,11 +56,6 @@ final class DefaultHostMetrics implements HostMetrics {
     @Override
     public String hostname() {
         return hostname;
-    }
-
-    @Override
-    public Timer getResponse() {
-        return response;
     }
 
     @Override
@@ -109,7 +93,6 @@ final class DefaultHostMetrics implements HostMetrics {
      * HTTP status code.
      */
     void record(int statusCode, long micros) {
-        response.update(micros, MICROS);
         // Explicitly not using javax.ws.rs.core.Response API since it's incompatible across versions.
         switch (statusCode / 100) {
             case 1:

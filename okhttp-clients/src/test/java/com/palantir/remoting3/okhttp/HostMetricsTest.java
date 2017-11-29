@@ -20,11 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
-import com.palantir.tritium.metrics.registry.MetricName;
-import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Map;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,13 +29,11 @@ public final class HostMetricsTest {
     private static final String SERVICE_NAME = "serviceName";
     private static final String HOSTNAME = "hostname";
 
-    private TaggedMetricRegistry registry;
     private DefaultHostMetrics hostMetrics;
 
     @Before
     public void before() {
-        registry = new DefaultTaggedMetricRegistry();
-        hostMetrics = new DefaultHostMetrics(registry, SERVICE_NAME, HOSTNAME);
+        hostMetrics = new DefaultHostMetrics(SERVICE_NAME, HOSTNAME);
     }
 
     @Test
@@ -53,39 +47,15 @@ public final class HostMetricsTest {
                 .put(600, hostMetrics.getOther())
                 .build();
 
-        int numRequests = 0;
         for (Map.Entry<Integer, Timer> testCase : testCases.entrySet()) {
-            // family specific timer
             Timer timer = testCase.getValue();
             assertThat(timer.getCount()).isZero();
             assertThat(timer.getSnapshot().getMin()).isEqualTo(0);
 
-            // global response timer
-            Timer responseTimer = hostMetrics.getResponse();
-            assertThat(responseTimer.getCount()).isEqualTo(numRequests);
-
             hostMetrics.record(testCase.getKey(), 1);
-            numRequests++;
 
             assertThat(timer.getCount()).isEqualTo(1);
             assertThat(timer.getSnapshot().getMin()).isEqualTo(1_000);
-            assertThat(responseTimer.getCount()).isEqualTo(numRequests);
         }
     }
-
-    @Test
-    public void testResponseMetrics() {
-
-    }
-
-    private static Optional<Timer> getMeter(
-            TaggedMetricRegistry registry, String serviceName, String hostname, String family) {
-        MetricName name = MetricName.builder()
-                .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
-                .putSafeTags(HostMetrics.SERVICE_NAME_TAG, serviceName)
-                .putSafeTags(HostMetrics.HOSTNAME_TAG, hostname)
-                .build();
-        return Optional.ofNullable((Timer) registry.getMetrics().get(name));
-    }
-
 }
