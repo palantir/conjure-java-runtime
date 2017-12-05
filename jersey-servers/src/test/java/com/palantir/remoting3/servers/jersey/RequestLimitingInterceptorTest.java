@@ -18,11 +18,14 @@ package com.palantir.remoting3.servers.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.io.ByteStreams;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -42,6 +45,7 @@ public final class RequestLimitingInterceptorTest {
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP =
             new DropwizardAppRule<>(RequestLimitingTestServer.class, "src/test/resources/test-server.yml");
+    public static final int REQUEST_LIMIT = 10;
 
     private WebTarget target;
 
@@ -56,7 +60,7 @@ public final class RequestLimitingInterceptorTest {
     @Test
     public void testUnderLimit() {
         Response response = target.path("/limit").request().post(Entity.json("short"));
-        assertThat(response.getStatus()).isEqualTo(204);
+        assertThat(response.getStatus()).isEqualTo(200);
     }
 
     @Test
@@ -68,13 +72,13 @@ public final class RequestLimitingInterceptorTest {
     @Test
     public void testUnderLimit_streaming() {
         Response response = target.path("/streaming").request().post(Entity.json("short"));
-        assertThat(response.getStatus()).isEqualTo(204);
+        assertThat(response.getStatus()).isEqualTo(200);
     }
 
     @Test
     public void testOverLimit_streaming() {
         Response response = target.path("/streaming").request().post(Entity.json("over the limit"));
-        assertThat(response.getStatus()).isEqualTo(204);
+        assertThat(response.getStatus()).isEqualTo(200);
     }
 
     public static class RequestLimitingTestServer extends Application<Configuration> {
@@ -88,10 +92,19 @@ public final class RequestLimitingInterceptorTest {
 
     public static final class RequestLimitingTestResource implements RequestLimitingTestService {
         @Override
-        public void limited(String string) {}
+        public String limited(String string) {
+            return string;
+        }
 
         @Override
-        public void streaming(InputStream stream) {}
+        public String streaming(InputStream stream) {
+            try {
+                byte[] bytes = ByteStreams.toByteArray(stream);
+                return new String(bytes, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @Path("/")
@@ -100,10 +113,10 @@ public final class RequestLimitingInterceptorTest {
     public interface RequestLimitingTestService {
         @POST
         @Path("/limit")
-        void limited(String string);
+        String limited(String string);
 
         @POST
         @Path("/streaming")
-        void streaming(InputStream stream);
+        String streaming(InputStream stream);
     }
 }

@@ -44,24 +44,27 @@ public final class RequestLimitingInterceptor implements ReaderInterceptor {
 
     @Override
     public Object aroundReadFrom(ReaderInterceptorContext context) throws IOException, WebApplicationException {
-        LimitingInputStream limitedStream = new LimitingInputStream(context.getInputStream());
+        LimitingInputStream limitedStream = new LimitingInputStream(context.getInputStream(), maxRequestSize);
         context.setInputStream(limitedStream);
 
         Object result = context.proceed();
 
-        // If the input stream has not been limited yet then the endpoint streams the input so do not limit
+        // If we have not thrown yet, the endpoint streams the input or it has been consumed, so do not limit
         limitedStream.doNotLimit();
 
         return result;
     }
 
-    private final class LimitingInputStream extends FilterInputStream {
+    private static final class LimitingInputStream extends FilterInputStream {
+
+        private final int maxRequestSize;
 
         private int bytesRead = 0;
         private boolean shouldLimit = true;
 
-        LimitingInputStream(InputStream in) {
+        LimitingInputStream(InputStream in, int maxRequestSize) {
             super(in);
+            this.maxRequestSize = maxRequestSize;
         }
 
         void doNotLimit() {
