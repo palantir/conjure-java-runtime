@@ -61,6 +61,9 @@ public enum HttpRemotingJerseyFeature implements Feature {
         // Tracing
         context.register(new TraceEnrichingFilter());
 
+        // Limits
+        context.register(new RequestLimitingInterceptor());
+
         return true;
     }
 }
