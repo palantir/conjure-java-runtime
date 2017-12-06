@@ -120,6 +120,9 @@ public final class OkHttpClients {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
+        // response metrics
+        client.addNetworkInterceptor(InstrumentedInterceptor.create(registry, hostMetrics, serviceClass));
+
         // Error handling, retry/failover, etc: the order of these matters.
         client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
         client.addInterceptor(QosRetryLaterInterceptor.INSTANCE);
@@ -132,9 +135,6 @@ public final class OkHttpClients {
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
-
-        // response metrics
-        client.addNetworkInterceptor(InstrumentedInterceptor.create(registry, hostMetrics, serviceClass));
 
         // tracing
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
