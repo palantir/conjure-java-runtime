@@ -17,6 +17,7 @@
 package com.palantir.remoting3.okhttp;
 
 import com.codahale.metrics.Timer;
+import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +27,14 @@ import java.util.concurrent.TimeUnit;
 final class DefaultHostMetrics implements HostMetrics {
 
     private static final TimeUnit MICROS = TimeUnit.MICROSECONDS;
+
+    // TODO(jellis): standard tags and tag names should move to public place, possibly Tritium
+    static final String INFORMATIONAL = "1xx";
+    static final String SUCCESSFUL = "2xx";
+    static final String REDIRECTION = "3xx";
+    static final String CLIENT_ERROR = "4xx";
+    static final String SERVER_ERROR = "5xx";
+    static final String OTHER = "other";
 
     private final String serviceName;
     private final String hostname;
@@ -37,15 +46,24 @@ final class DefaultHostMetrics implements HostMetrics {
     private final Timer other;
 
     /** Creates a metrics registry for calls from the given service to the given host. */
-    DefaultHostMetrics(String serviceName, String hostname) {
+    DefaultHostMetrics(TaggedMetricRegistry registry, String serviceName, String hostname) {
         this.serviceName = serviceName;
         this.hostname = hostname;
-        this.informational = new Timer();
-        this.successful = new Timer();
-        this.redirection = new Timer();
-        this.clientError = new Timer();
-        this.serverError = new Timer();
-        this.other = new Timer();
+        this.informational = registry.timer(name(INFORMATIONAL));
+        this.successful = registry.timer(name(SUCCESSFUL));
+        this.redirection = registry.timer(name(REDIRECTION));
+        this.clientError = registry.timer(name(CLIENT_ERROR));
+        this.serverError = registry.timer(name(SERVER_ERROR));
+        this.other = registry.timer(name(OTHER));
+    }
+
+    private MetricName name(String family) {
+        return MetricName.builder()
+                .safeName(CLIENT_RESPONSE_METRIC_NAME)
+                .putSafeTags(SERVICE_NAME_TAG, serviceName)
+                .putSafeTags(HOSTNAME_TAG, hostname)
+                .putSafeTags(FAMILY_TAG, family)
+                .build();
     }
 
     @Override

@@ -20,7 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,26 +33,28 @@ public final class HostMetricsTest {
     private static final String SERVICE_NAME = "serviceName";
     private static final String HOSTNAME = "hostname";
 
+    private TaggedMetricRegistry registry;
     private DefaultHostMetrics hostMetrics;
 
     @Before
     public void before() {
-        hostMetrics = new DefaultHostMetrics(SERVICE_NAME, HOSTNAME);
+        registry = new DefaultTaggedMetricRegistry();
+        hostMetrics = new DefaultHostMetrics(registry, SERVICE_NAME, HOSTNAME);
     }
 
     @Test
     public void testUpdateMetricUpdatesMeter() {
-        Map<Integer, Timer> testCases = ImmutableMap.<Integer, Timer>builder()
-                .put(100, hostMetrics.get1xx())
-                .put(200, hostMetrics.get2xx())
-                .put(300, hostMetrics.get3xx())
-                .put(400, hostMetrics.get4xx())
-                .put(500, hostMetrics.get5xx())
-                .put(600, hostMetrics.getOther())
+        Map<Integer, String> testCases = ImmutableMap.<Integer, String>builder()
+                .put(100, DefaultHostMetrics.INFORMATIONAL)
+                .put(200, DefaultHostMetrics.SUCCESSFUL)
+                .put(300, DefaultHostMetrics.REDIRECTION)
+                .put(400, DefaultHostMetrics.CLIENT_ERROR)
+                .put(500, DefaultHostMetrics.SERVER_ERROR)
+                .put(600, DefaultHostMetrics.OTHER)
                 .build();
 
-        for (Map.Entry<Integer, Timer> testCase : testCases.entrySet()) {
-            Timer timer = testCase.getValue();
+        for (Map.Entry<Integer, String> testCase : testCases.entrySet()) {
+            Timer timer = getMeter(registry, SERVICE_NAME, HOSTNAME, testCase.getValue()).get();
             assertThat(timer.getCount()).isZero();
             assertThat(timer.getSnapshot().getMin()).isEqualTo(0);
 
@@ -58,4 +64,16 @@ public final class HostMetricsTest {
             assertThat(timer.getSnapshot().getMin()).isEqualTo(1_000);
         }
     }
+
+    private static Optional<Timer> getMeter(
+            TaggedMetricRegistry registry, String serviceName, String hostname, String family) {
+        MetricName name = MetricName.builder()
+                .safeName(HostMetrics.CLIENT_RESPONSE_METRIC_NAME)
+                .putSafeTags(HostMetrics.SERVICE_NAME_TAG, serviceName)
+                .putSafeTags(HostMetrics.HOSTNAME_TAG, hostname)
+                .putSafeTags(HostMetrics.FAMILY_TAG, family)
+                .build();
+        return Optional.ofNullable((Timer) registry.getMetrics().get(name));
+    }
+
 }

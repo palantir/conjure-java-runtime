@@ -21,6 +21,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting3.clients.ImmutablesStyle;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -34,14 +35,14 @@ final class HostMetricsRegistry {
 
     private final LoadingCache<ServiceAndHost, DefaultHostMetrics> hostMetrics;
 
-    HostMetricsRegistry() {
+    HostMetricsRegistry(TaggedMetricRegistry registry) {
         this.hostMetrics = CacheBuilder.newBuilder()
                 .maximumSize(1_000)
                 .expireAfterAccess(1, TimeUnit.DAYS)
                 .build(new CacheLoader<ServiceAndHost, DefaultHostMetrics>() {
                     @Override
                     public DefaultHostMetrics load(ServiceAndHost key) throws Exception {
-                        return new DefaultHostMetrics(key.serviceName(), key.hostname());
+                        return new DefaultHostMetrics(registry, key.serviceName(), key.hostname());
                     }
                 });
     }
