@@ -34,7 +34,6 @@ import okhttp3.Callback;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,10 +118,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }
     }
 
-    private static ResponseBody buffer(ResponseBody body) throws IOException {
-        return ResponseBody.create(body.contentType(), body.bytes()); // closes the response body
-    }
-
     @Override
     public void enqueue(Callback callback) {
         super.enqueue(new Callback() {
@@ -150,20 +145,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
             }
 
             @Override
-            public void onResponse(Call call, Response unbufferedResponse) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 // Relay successful responses
-                if (unbufferedResponse.code() / 100 <= 2) {
-                    callback.onResponse(call, unbufferedResponse);
-                    return;
-                }
-
-                // Buffer the response into a byte[] so that multiple handler can safely consume the body.
-                // The buffer call consumes and closes the original unbufferedResponse body.
-                final Response response;
-                try {
-                    response = unbufferedResponse.newBuilder().body(buffer(unbufferedResponse.body())).build();
-                } catch (IOException e) {
-                    onFailure(call, e);
+                if (response.code() / 100 <= 2) {
+                    callback.onResponse(call, response);
                     return;
                 }
 
