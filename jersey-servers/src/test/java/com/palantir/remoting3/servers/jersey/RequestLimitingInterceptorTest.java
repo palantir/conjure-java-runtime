@@ -26,6 +26,7 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -63,8 +64,14 @@ public final class RequestLimitingInterceptorTest {
     }
 
     @Test
-    public void testOverLimit() {
+    public void testStringOverLimit() {
         Response response = target.path("/limit").request().post(Entity.json("over the limit"));
+        assertThat(response.getStatus()).isEqualTo(413);
+    }
+
+    @Test
+    public void testJsonOverLimit() {
+        Response response = target.path("/limit-complex").request().post(Entity.json("{\"over\":true}"));
         assertThat(response.getStatus()).isEqualTo(413);
     }
 
@@ -91,8 +98,13 @@ public final class RequestLimitingInterceptorTest {
 
     public static final class RequestLimitingTestResource implements RequestLimitingTestService {
         @Override
-        public String limited(String string) {
+        public String limitedString(String string) {
             return string;
+        }
+
+        @Override
+        public boolean limitedComplex(Map<String, Boolean> someComplexType) {
+            return someComplexType.get("over");
         }
 
         @Override
@@ -112,7 +124,11 @@ public final class RequestLimitingInterceptorTest {
     public interface RequestLimitingTestService {
         @POST
         @Path("/limit")
-        String limited(String string);
+        String limitedString(String string);
+
+        @POST
+        @Path("/limit-complex")
+        boolean limitedComplex(Map<String, Boolean> someComplexType);
 
         @POST
         @Path("/streaming")
