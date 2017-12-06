@@ -28,8 +28,6 @@ import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -135,11 +133,11 @@ public final class OkHttpClients {
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
 
+        // response metrics
+        client.addNetworkInterceptor(InstrumentedInterceptor.create(registry, hostMetrics, serviceClass));
+
         // tracing
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
-
-        // Metrics
-        client.addNetworkInterceptor(InstrumentedInterceptor.create(registry, hostMetrics, serviceClass));
 
         // timeouts
         // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
