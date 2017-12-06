@@ -16,23 +16,18 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.palantir.remoting.api.errors.RemoteException;
-import java.io.IOException;
+import okhttp3.Call;
+import okhttp3.Request;
 
-// TODO(rfink): Can we hide this as an implementation detail of RemotingOkHttpCall?
+public final class AsyncCallTagCallFactory implements Call.Factory {
+    private final Call.Factory delegate;
 
-/**
- * An {@link IOException} wrapper for {@link RemoteException}s. Used to make exception propagation compatible with
- * OkHttp APIs which generally require IOExceptions rather than RuntimeExceptions.
- */
-public final class IoRemoteException extends IOException {
-    private final RemoteException wrappedException;
-
-    IoRemoteException(RemoteException wrappedException) {
-        this.wrappedException = wrappedException;
+    public AsyncCallTagCallFactory(Call.Factory delegate) {
+        this.delegate = delegate;
     }
 
-    public RemoteException getWrappedException() {
-        return wrappedException;
+    @Override
+    public Call newCall(Request request) {
+        return delegate.newCall(request.newBuilder().tag(new AsyncCallTag()).build());
     }
 }

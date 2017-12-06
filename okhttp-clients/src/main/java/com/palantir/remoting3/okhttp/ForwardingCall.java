@@ -69,8 +69,7 @@ abstract class ForwardingCall implements Call {
 
     /**
      * Subclasses must provide a clone implementation. It typically returns a new instance of a subclass of {@link
-     * ForwardingCall}. If calls have mutable internal state (e.g., counters, timeouts, etc.), then implementations
-     * should copy the "current" internal state.
+     * ForwardingCall}.
      */
     abstract Call doClone();
 

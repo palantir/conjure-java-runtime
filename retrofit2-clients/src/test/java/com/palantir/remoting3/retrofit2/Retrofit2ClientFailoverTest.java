@@ -49,7 +49,7 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
                         .from(createTestConfig(
                                 String.format("http://%s:%s/api/", server1.getHostName(), server1.getPort()),
                                 String.format("http://%s:%s/api/", server2.getHostName(), server2.getPort())))
-                        .maxNumRetries(2)  // need 2 retries because URL order is not deterministic
+                        .maxNumRetries(1)
                         .build());
     }
 
@@ -67,7 +67,7 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
 
         assertThatThrownBy(() -> proxy.get().execute())
                 .isInstanceOf(IOException.class)
-                .hasMessageStartingWith("Failed to complete the request due to an IOException");
+                .hasMessageStartingWith("Could not connect to any of the configured URLs: ");
 
         // Subsequent call (with the same proxy instance) succeeds.
         MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
@@ -86,7 +86,7 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
                         .from(createTestConfig(
                                 "http://foo-bar-bogus-host.unresolvable:80",
                                 "http://localhost:" + server1.getPort()))
-                        .maxNumRetries(2)
+                        .maxNumRetries(1)
                         .build());
         assertThat(bogusHostProxy.get().execute().body()).isEqualTo("foo");
         assertThat(server1.getRequestCount()).isEqualTo(1);
