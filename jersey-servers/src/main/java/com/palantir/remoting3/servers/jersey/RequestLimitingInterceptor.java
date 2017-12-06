@@ -93,7 +93,7 @@ public final class RequestLimitingInterceptor implements ReaderInterceptor {
             bytesRead += bytes;
             if (bytesRead > maxRequestSize && shouldLimit) {
                 throw new IllegalArgumentException(
-                        "Request size exceeded maximum number of allowed bytes " + MAX_REQUEST_SIZE_BYTES);
+                        "Request size exceeded maximum number of allowed bytes " + maxRequestSize);
             }
         }
     }

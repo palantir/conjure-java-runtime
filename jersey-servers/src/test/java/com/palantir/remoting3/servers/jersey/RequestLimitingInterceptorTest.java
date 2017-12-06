@@ -45,7 +45,6 @@ public final class RequestLimitingInterceptorTest {
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP =
             new DropwizardAppRule<>(RequestLimitingTestServer.class, "src/test/resources/test-server.yml");
-    public static final int REQUEST_LIMIT = 10;
 
     private WebTarget target;
 
