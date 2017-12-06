@@ -50,7 +50,7 @@ enum RemoteExceptionResponseHandler implements ResponseHandler<RemoteException> 
         }
 
         Collection<String> contentTypes = response.headers("Content-Type");
-        if (contentTypes.contains(MediaType.APPLICATION_JSON)) {
+        if (contentTypes.contains(MediaType.APPLICATION_JSON) && !response.request().method().equals("HEAD")) {
             final String body;
             try {
                 body = toString(response.body().byteStream());
