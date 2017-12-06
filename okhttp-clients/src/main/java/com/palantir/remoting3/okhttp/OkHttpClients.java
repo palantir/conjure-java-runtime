@@ -27,6 +27,7 @@ import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
@@ -67,8 +68,7 @@ public final class OkHttpClients {
     /**
      * The per service and host metrics recorded for each HTTP call.
      */
-    private static final HostMetricsRegistry hostMetrics =
-            new HostMetricsRegistry(DefaultTaggedMetricRegistry.getDefault());
+    private static final HostMetricsRegistry hostMetrics = new HostMetricsRegistry();
 
     private OkHttpClients() {}
 
@@ -100,8 +100,7 @@ public final class OkHttpClients {
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
             ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass,
-                false);
+        return createInternal(config, userAgent, serviceClass, false);
     }
 
     private static RemotingOkHttpClient createInternal(
@@ -110,9 +109,7 @@ public final class OkHttpClients {
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
-
-        // response metrics
-        client.addNetworkInterceptor(InstrumentedInterceptor.create(hostMetrics, serviceClass));
+        TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
         // TODO(rfink): Should this go into the call itself?
         config.meshProxy().ifPresent(meshProxy -> client.addInterceptor(new MeshProxyInterceptor(meshProxy)));
@@ -122,7 +119,7 @@ public final class OkHttpClients {
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
 
         // Intercept calls to augment request meta data
-        client.addNetworkInterceptor(InstrumentedInterceptor.create(hostMetrics, serviceClass));
+        client.addNetworkInterceptor(InstrumentedInterceptor.create(registry, hostMetrics, serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
         client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
 
