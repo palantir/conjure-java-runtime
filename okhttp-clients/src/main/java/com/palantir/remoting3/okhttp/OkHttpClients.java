@@ -100,8 +100,7 @@ public final class OkHttpClients {
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
             ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass,
-                false);
+        return createInternal(config, userAgent, serviceClass, false);
     }
 
     private static RemotingOkHttpClient createInternal(
@@ -111,9 +110,6 @@ public final class OkHttpClients {
             boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
-
-        // response metrics
-        client.addNetworkInterceptor(InstrumentedInterceptor.create(registry, hostMetrics, serviceClass));
 
         // TODO(rfink): Should this go into the call itself?
         config.meshProxy().ifPresent(meshProxy -> client.addInterceptor(new MeshProxyInterceptor(meshProxy)));
