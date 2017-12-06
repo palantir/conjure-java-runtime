@@ -22,7 +22,6 @@ import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
-import com.palantir.remoting3.okhttp.AsyncCallTagCallFactory;
 import com.palantir.remoting3.okhttp.OkHttpClients;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
@@ -51,7 +50,6 @@ public final class Retrofit2ClientBuilder {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(addTrailingSlash(config.uris().get(0)))
-                .callFactory(new AsyncCallTagCallFactory(client))
                 .addConverterFactory(new CborConverterFactory(
                         JacksonConverterFactory.create(OBJECT_MAPPER),
                         CBOR_OBJECT_MAPPER))
