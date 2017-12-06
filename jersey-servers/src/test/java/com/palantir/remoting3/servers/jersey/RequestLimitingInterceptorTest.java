@@ -65,7 +65,7 @@ public final class RequestLimitingInterceptorTest {
     @Test
     public void testOverLimit() {
         Response response = target.path("/limit").request().post(Entity.json("over the limit"));
-        assertThat(response.getStatus()).isEqualTo(400);
+        assertThat(response.getStatus()).isEqualTo(413);
     }
 
     @Test
