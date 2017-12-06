@@ -19,7 +19,6 @@ package com.palantir.remoting3.retrofit2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -34,8 +33,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import javax.ws.rs.core.MediaType;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -43,20 +40,12 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
-import retrofit2.Call;
-import retrofit2.Response;
 
 public final class Retrofit2ClientApiTest extends TestBase {
     @Rule
     public final MockWebServer server = new MockWebServer();
-
-    private static final SerializableError ERROR = SerializableError.builder()
-            .errorCode("errorCode")
-            .errorName("errorName")
-            .build();
 
     private HttpUrl url;
     private TestService service;
@@ -82,9 +71,9 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
         assertThat(service.getGuavaOptionalString(guavaOptional("p"), guavaEmptyOptional()).execute().body())
-                .isEqualTo(guavaOptional("pong"));
+            .isEqualTo(guavaOptional("pong"));
         assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString/p/");
+            .isEqualTo("/getGuavaOptionalString/p/");
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
         assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaEmptyOptional()).execute().body())
@@ -169,86 +158,6 @@ public final class Retrofit2ClientApiTest extends TestBase {
                         .build());
 
         assertThatExceptionOfType(CompletionException.class).isThrownBy(() -> service.makeFutureRequest().join());
-    }
-
-    @Test
-    public void completableFuture_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
-        server.enqueue(new MockResponse()
-                .setResponseCode(500)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(ERROR)));
-
-        CompletableFuture<String> future = service.makeFutureRequest();
-
-        try {
-            future.join();
-            failBecauseExceptionWasNotThrown(CompletionException.class);
-        } catch (CompletionException e) {
-            assertThat(e.getCause()).isInstanceOf(RemoteException.class);
-            RemoteException remoteException = (RemoteException) e.getCause();
-            assertThat(remoteException.getError()).isEqualTo(ERROR);
-        }
-    }
-
-    @Test
-    public void sync_retrofit_call_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
-        server.enqueue(new MockResponse()
-                .setResponseCode(500)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(ERROR)));
-
-        Call<String> call = service.getRelative();
-
-        try {
-            call.execute();
-            failBecauseExceptionWasNotThrown(RemoteException.class);
-        } catch (RemoteException e) {
-            assertThat(e.getError()).isEqualTo(ERROR);
-        }
-    }
-
-    @Ignore("TODO(rfink): Async Retrofit calls should produce RemoteException, Issue #625")
-    @Test
-    public void async_retrofit_call_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
-        server.enqueue(new MockResponse()
-                .setResponseCode(500)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(ERROR)));
-
-        CountDownLatch assertionsPassed = new CountDownLatch(1);
-        retrofit2.Call<String> call = service.getRelative();
-        call.enqueue(new retrofit2.Callback<String>() {
-            @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                failBecauseExceptionWasNotThrown(RemoteException.class);
-            }
-
-            @Override
-            public void onFailure(Call<String> call, Throwable throwable) {
-                assertThat(throwable).isInstanceOf(RemoteException.class);
-                assertThat(((RemoteException) throwable).getError()).isEqualTo(ERROR);
-                assertionsPassed.countDown(); // if you delete this countdown latch then this test will vacuously pass.
-            }
-        });
-        assertThat(assertionsPassed.await(1, TimeUnit.SECONDS)).as("Callback was executed").isTrue();
-    }
-
-    @Test
-    public void completableFuture_should_throw_normal_IoException_for_client_side_errors() {
-        service = Retrofit2Client.create(TestService.class, AGENT,
-                ClientConfiguration.builder()
-                        .from(createTestConfig("https://invalid.service.dev"))
-                        .connectTimeout(Duration.ofMillis(10))
-                        .build());
-
-        CompletableFuture<String> completableFuture = service.makeFutureRequest();
-
-        try {
-            completableFuture.join();
-        } catch (CompletionException e) {
-            assertThat(e.getCause()).isInstanceOf(IOException.class);
-            assertThat(e.getCause().getMessage()).isEqualTo("Failed to complete the request due to an IOException");
-        }
     }
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {

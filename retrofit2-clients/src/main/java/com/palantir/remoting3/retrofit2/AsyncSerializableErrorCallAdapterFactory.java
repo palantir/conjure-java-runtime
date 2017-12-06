@@ -25,10 +25,13 @@
  */
 package com.palantir.remoting3.retrofit2;
 
-import com.palantir.remoting3.okhttp.IoRemoteException;
+import com.palantir.remoting3.errors.SerializableErrorToExceptionConverter;
+import com.palantir.remoting3.okhttp.AsyncCallTag;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
@@ -74,6 +77,8 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
 
         @Override
         public CompletableFuture<R> adapt(final Call<R> call) {
+            ((AsyncCallTag) call.request().tag()).setCallAsync();
+
             final CompletableFuture<R> future = new CompletableFuture<R>() {
                 @Override
                 public boolean cancel(boolean mayInterruptIfRunning) {
@@ -87,18 +92,21 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
             call.enqueue(new Callback<R>() {
                 @Override
                 public void onResponse(Call<R> call, Response<R> response) {
-                    future.complete(response.body());
+                    if (response.isSuccessful()) {
+                        future.complete(response.body());
+                    } else {
+                        Collection<String> contentTypes = response.raw().headers("Content-Type");
+                        InputStream body = response.errorBody().byteStream();
+                        future.completeExceptionally(SerializableErrorToExceptionConverter.getException(
+                                contentTypes,
+                                response.code(),
+                                body));
+                    }
                 }
 
                 @Override
                 public void onFailure(Call<R> call, Throwable throwable) {
-                    // TODO(rfink): Would be good to not leak okhttp internals here
-                    if (throwable instanceof IoRemoteException) {
-                        future.completeExceptionally(
-                                ((IoRemoteException) throwable).getWrappedException());
-                    } else {
-                        future.completeExceptionally(throwable);
-                    }
+                    future.completeExceptionally(throwable);
                 }
             });
 

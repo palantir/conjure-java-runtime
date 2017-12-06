@@ -35,6 +35,7 @@ public final class Retrofit2Client {
      * request is set to the given non-empty {@code userAgent} string.
      */
     public static <T> T create(Class<T> serviceClass, UserAgent userAgent, ClientConfiguration config) {
+        // TODO(rfink): Add http-remoting agent as informational
         return create(serviceClass, UserAgents.format(userAgent), config);
     }
 
@@ -57,6 +58,7 @@ public final class Retrofit2Client {
             Class<T> serviceClass,
             UserAgent userAgent,
             Refreshable<ClientConfiguration> config) {
+        // TODO(rfink): Add http-remoting agent as informational
         return create(serviceClass, UserAgents.format(userAgent), config);
     }
 
