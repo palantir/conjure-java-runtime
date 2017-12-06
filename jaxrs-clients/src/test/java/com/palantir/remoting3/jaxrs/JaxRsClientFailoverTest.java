@@ -46,7 +46,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
                         .from(createTestConfig(
                                 "http://localhost:" + server1.getPort(),
                                 "http://localhost:" + server2.getPort()))
-                        .maxNumRetries(2)
+                        .maxNumRetries(1)
                         .build());
     }
 
@@ -67,7 +67,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
             proxy.string();
             fail();
         } catch (RetryableException e) {
-            assertThat(e.getMessage(), startsWith("Failed to complete the request due to an IOException"));
+            assertThat(e.getMessage(), startsWith("Could not connect to any of the configured URLs: "));
         }
 
         // Subsequent call (with the same proxy instance) succeeds.
@@ -87,7 +87,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
                         .from(createTestConfig(
                                 "http://foo-bar-bogus-host.unresolvable:80",
                                 "http://localhost:" + server1.getPort()))
-                        .maxNumRetries(2)
+                        .maxNumRetries(1)
                         .build());
         assertThat(bogusHostProxy.string(), is("foo"));
         assertThat(server1.getRequestCount(), is(1));

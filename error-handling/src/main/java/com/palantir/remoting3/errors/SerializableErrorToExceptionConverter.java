@@ -38,10 +38,7 @@ import org.slf4j.LoggerFactory;
  * re-create the original (or close-to) exception including exception type, message, and stacktrace. Creates {@link
  * RuntimeException} if the body cannot be interpreted as a {@link SerializableError}, or if the exception otherwise
  * fails to get re-created.
- *
- * @deprecated Use RemoteExceptionResponseHandler instead. This class and package will get removed in release 4.0.0.
  */
-@Deprecated
 public final class SerializableErrorToExceptionConverter {
 
     private SerializableErrorToExceptionConverter() {}

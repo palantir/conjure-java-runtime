@@ -19,12 +19,9 @@ package com.palantir.remoting3.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-import com.codahale.metrics.Timer;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
-import com.palantir.tritium.metrics.registry.MetricName;
-import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.util.Collection;
 import okhttp3.Interceptor;
@@ -46,15 +43,13 @@ public final class InstrumentedInterceptorTest {
     @Mock
     private Interceptor.Chain chain;
 
-    private TaggedMetricRegistry registry;
     private InstrumentedInterceptor interceptor;
     private HostMetricsRegistry hostMetrics;
 
     @Before
     public void before() throws IOException {
-        registry = new DefaultTaggedMetricRegistry();
-        hostMetrics = new HostMetricsRegistry();
-        interceptor = new InstrumentedInterceptor(registry, hostMetrics, "client");
+        hostMetrics = new HostMetricsRegistry(new DefaultTaggedMetricRegistry());
+        interceptor = new InstrumentedInterceptor(hostMetrics, "client");
     }
 
     @Test
@@ -70,22 +65,6 @@ public final class InstrumentedInterceptorTest {
 
         HostMetrics hostB = hostMetrics("hostb");
         assertThat(hostB.get2xx().getCount()).isEqualTo(1);
-    }
-
-    @Test
-    public void testResponseMetricRegistered() throws IOException {
-        MetricName name = MetricName.builder()
-                .safeName(InstrumentedInterceptor.CLIENT_RESPONSE_METRIC_NAME)
-                .putSafeTags(InstrumentedInterceptor.SERVICE_NAME_TAG, "client")
-                .build();
-        Timer timer = registry.timer(name);
-
-        assertThat(timer.getCount()).isEqualTo(0);
-
-        successfulRequest(REQUEST_A);
-        interceptor.intercept(chain);
-
-        assertThat(timer.getCount()).isEqualTo(1);
     }
 
     private HostMetrics hostMetrics(String hostname) {

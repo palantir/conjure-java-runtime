@@ -23,6 +23,11 @@ import com.codahale.metrics.Timer;
  */
 public interface HostMetrics {
 
+    String CLIENT_RESPONSE_METRIC_NAME = "client.response";
+    String SERVICE_NAME_TAG = "service-name";
+    String HOSTNAME_TAG = "hostname";
+    String FAMILY_TAG = "family";
+
     /**
      * The name of the service these metrics describe. This is generally the simple name of the class being proxied (eg:
      * RemoteService).
