@@ -17,6 +17,9 @@
 package com.palantir.remoting3.servers.jersey;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.remoting.api.errors.ErrorType;
+import com.palantir.remoting.api.errors.ServiceException;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,8 +95,8 @@ public final class RequestLimitingInterceptor implements ReaderInterceptor {
         private void validateSize(int bytes) {
             bytesRead += bytes;
             if (bytesRead > maxRequestSize && shouldLimit) {
-                throw new IllegalArgumentException(
-                        "Request size exceeded maximum number of allowed bytes " + maxRequestSize);
+                throw new ServiceException(ErrorType.REQUEST_ENTITY_TOO_LARGE,
+                        SafeArg.of("maxRequestSizeBytes", maxRequestSize));
             }
         }
     }
