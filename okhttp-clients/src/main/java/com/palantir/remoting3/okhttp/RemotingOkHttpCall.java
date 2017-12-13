@@ -127,7 +127,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     private static ResponseBody buffer(MediaType mediaType, byte[] bodyBytes) {
-        return ResponseBody.create(mediaType, bodyBytes); // closes the response body
+        return ResponseBody.create(mediaType, bodyBytes);
     }
 
     @Override
@@ -168,7 +168,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 // The buffer call consumes and closes the original response body.
                 byte[] bodyBytes;
                 try {
-                    bodyBytes = response.body().bytes();
+                    bodyBytes = response.body().bytes(); // closes the response body
                 } catch (IOException e) {
                     onFailure(call, e);
                     return;
