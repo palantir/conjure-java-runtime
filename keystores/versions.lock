@@ -19,7 +19,7 @@
             ]
         },
         "com.google.guava:guava": {
-            "locked": "18.0"
+            "locked": "20.0"
         },
         "com.palantir.remoting-api:ssl-config": {
             "locked": "1.4.3"
@@ -45,7 +45,7 @@
             ]
         },
         "com.google.guava:guava": {
-            "locked": "18.0"
+            "locked": "20.0"
         },
         "com.palantir.remoting-api:ssl-config": {
             "locked": "1.4.3"
