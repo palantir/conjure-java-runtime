@@ -32,6 +32,7 @@ import java.util.concurrent.TimeoutException;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
@@ -119,8 +120,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }
     }
 
-    private static ResponseBody buffer(ResponseBody body) throws IOException {
-        return ResponseBody.create(body.contentType(), body.bytes()); // closes the response body
+    private static ResponseBody buffer(MediaType mediaType, byte[] bodyBytes) {
+        return ResponseBody.create(mediaType, bodyBytes); // closes the response body
+    }
+
+    private static Response rebuildFrom(Response unbufferedResponse, byte[] bodyBytes) {
+        return unbufferedResponse.newBuilder()
+                .body(buffer(unbufferedResponse.body().contentType(), bodyBytes))
+                .build();
     }
 
     @Override
@@ -159,13 +166,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 // Buffer the response into a byte[] so that multiple handler can safely consume the body.
                 // The buffer call consumes and closes the original unbufferedResponse body.
-                final Response response;
-                try {
-                    response = unbufferedResponse.newBuilder().body(buffer(unbufferedResponse.body())).build();
-                } catch (IOException e) {
-                    onFailure(call, e);
-                    return;
-                }
+                Response response;
+                byte[] bodyBytes = unbufferedResponse.body().bytes();
+
+                response = rebuildFrom(unbufferedResponse, bodyBytes);
 
                 // Handle to handle QoS situations: retry, failover, etc.
                 Optional<QosException> qosError = qosHandler.handle(response);
@@ -174,12 +178,16 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
+                response = rebuildFrom(unbufferedResponse, bodyBytes);
+
                 // Handle responses that correspond to RemoteExceptions / SerializableErrors
                 Optional<RemoteException> httpError = remoteExceptionHandler.handle(response);
                 if (httpError.isPresent()) {
                     callback.onFailure(call, new IoRemoteException(httpError.get()));
                     return;
                 }
+
+                response = rebuildFrom(unbufferedResponse, bodyBytes);
 
                 // Catch-all: handle all other responses
                 Optional<IOException> ioException = ioExceptionHandler.handle(response);
