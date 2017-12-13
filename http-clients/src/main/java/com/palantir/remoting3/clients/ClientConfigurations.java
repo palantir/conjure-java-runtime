@@ -95,7 +95,7 @@ public final class ClientConfigurations {
                 HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig.hostAndPort()
                         .orElseThrow(() -> new IllegalArgumentException(
                                 "Expected to find proxy hostAndPort configuration for HTTP proxy")));
-                InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHostText(), hostAndPort.getPort());
+                InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHost(), hostAndPort.getPort());
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, addr));
             case MESH:
                 return ProxySelector.getDefault(); // MESH proxy is not a Java proxy
