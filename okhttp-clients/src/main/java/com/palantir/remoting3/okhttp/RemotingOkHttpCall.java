@@ -120,14 +120,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }
     }
 
-    private static ResponseBody buffer(MediaType mediaType, byte[] bodyBytes) {
-        return ResponseBody.create(mediaType, bodyBytes); // closes the response body
-    }
-
-    private static Response rebuildFrom(Response unbufferedResponse, byte[] bodyBytes) {
+    private static Response buildFrom(Response unbufferedResponse, byte[] bodyBytes) {
         return unbufferedResponse.newBuilder()
                 .body(buffer(unbufferedResponse.body().contentType(), bodyBytes))
                 .build();
+    }
+
+    private static ResponseBody buffer(MediaType mediaType, byte[] bodyBytes) {
+        return ResponseBody.create(mediaType, bodyBytes); // closes the response body
     }
 
     @Override
@@ -157,40 +157,39 @@ final class RemotingOkHttpCall extends ForwardingCall {
             }
 
             @Override
-            public void onResponse(Call call, Response unbufferedResponse) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 // Relay successful responses
-                if (unbufferedResponse.code() / 100 <= 2) {
-                    callback.onResponse(call, unbufferedResponse);
+                if (response.code() / 100 <= 2) {
+                    callback.onResponse(call, response);
                     return;
                 }
 
                 // Buffer the response into a byte[] so that multiple handler can safely consume the body.
-                // The buffer call consumes and closes the original unbufferedResponse body.
-                Response response;
-                byte[] bodyBytes = unbufferedResponse.body().bytes();
-
-                response = rebuildFrom(unbufferedResponse, bodyBytes);
+                // The buffer call consumes and closes the original response body.
+                byte[] bodyBytes;
+                try {
+                    bodyBytes = response.body().bytes();
+                } catch (IOException e) {
+                    onFailure(call, e);
+                    return;
+                }
 
                 // Handle to handle QoS situations: retry, failover, etc.
-                Optional<QosException> qosError = qosHandler.handle(response);
+                Optional<QosException> qosError = qosHandler.handle(buildFrom(response, bodyBytes));
                 if (qosError.isPresent()) {
                     qosError.get().accept(createQosVisitor(callback, call));
                     return;
                 }
 
-                response = rebuildFrom(unbufferedResponse, bodyBytes);
-
                 // Handle responses that correspond to RemoteExceptions / SerializableErrors
-                Optional<RemoteException> httpError = remoteExceptionHandler.handle(response);
+                Optional<RemoteException> httpError = remoteExceptionHandler.handle(buildFrom(response, bodyBytes));
                 if (httpError.isPresent()) {
                     callback.onFailure(call, new IoRemoteException(httpError.get()));
                     return;
                 }
 
-                response = rebuildFrom(unbufferedResponse, bodyBytes);
-
                 // Catch-all: handle all other responses
-                Optional<IOException> ioException = ioExceptionHandler.handle(response);
+                Optional<IOException> ioException = ioExceptionHandler.handle(buildFrom(response, bodyBytes));
                 if (ioException.isPresent()) {
                     callback.onFailure(call, ioException.get());
                     return;
