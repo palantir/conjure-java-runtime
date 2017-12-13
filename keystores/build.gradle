@@ -41,8 +41,8 @@ private void configureTestTask(Test test, String name) {
     test.classpath = test.classpath + project(":pkcs1-reader-${name}").sourceSets.main.getOutput() +
             project(":pkcs1-reader-${name}").sourceSets.main.runtimeClasspath
 
-    test.reports.junitXml.destination("${project.test.reports.junitXml.getDestination().absolutePath}-${name}")
-    test.reports.html.destination("${project.test.reports.html.getDestination().absolutePath}-${name}")
+    test.reports.junitXml.destination file("${project.test.reports.junitXml.getDestination().absolutePath}-${name}")
+    test.reports.html.destination file("${project.test.reports.html.getDestination().absolutePath}-${name}")
 
     project.plugins.withType(JacocoPlugin) {
         ((JacocoTaskExtension) test.jacoco).destinationFile = project.file("${project.getBuildDir()}/jacoco/${name}.exec")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.Lists;
 import com.palantir.remoting.api.tracing.OpenSpan;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -73,6 +75,32 @@ public final class TracersTest {
         Tracer.startSpan("baz");
         wrappedService.schedule(traceExpectingCallable(), 0, TimeUnit.SECONDS).get();
         wrappedService.schedule(traceExpectingRunnable(), 0, TimeUnit.SECONDS).get();
+        Tracer.completeSpan();
+        Tracer.completeSpan();
+        Tracer.completeSpan();
+    }
+
+    @Test
+    public void testScheduledExecutorServiceWrapsCallablesWithNewTraces() throws Exception {
+        ScheduledExecutorService wrappedService =
+                Tracers.wrapWithNewTrace(Executors.newSingleThreadScheduledExecutor());
+
+        Callable<Void> callable = newTraceExpectingCallable();
+        Runnable runnable = newTraceExpectingRunnable();
+
+        // Empty trace
+        wrappedService.schedule(callable, 0, TimeUnit.SECONDS).get();
+        wrappedService.schedule(runnable, 0, TimeUnit.SECONDS).get();
+
+        wrappedService.schedule(callable, 0, TimeUnit.SECONDS).get();
+        wrappedService.schedule(runnable, 0, TimeUnit.SECONDS).get();
+
+        // Non-empty trace
+        Tracer.startSpan("foo");
+        Tracer.startSpan("bar");
+        Tracer.startSpan("baz");
+        wrappedService.schedule(callable, 0, TimeUnit.SECONDS).get();
+        wrappedService.schedule(runnable, 0, TimeUnit.SECONDS).get();
         Tracer.completeSpan();
         Tracer.completeSpan();
         Tracer.completeSpan();
@@ -223,6 +251,39 @@ public final class TracersTest {
         assertThat(Tracers.longToPaddedHex(42)).isEqualTo("000000000000002a");
         assertThat(Tracers.longToPaddedHex(-42)).isEqualTo("ffffffffffffffd6");
         assertThat(Tracers.longToPaddedHex(123456789L)).isEqualTo("00000000075bcd15");
+    }
+
+    private static Callable<Void> newTraceExpectingCallable() {
+        final Set<String> seenTraceIds = new HashSet<>();
+        seenTraceIds.add(Tracer.getTraceId());
+
+        return new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                String newTraceId = Tracer.getTraceId();
+
+                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(newTraceId);
+                assertThat(seenTraceIds).doesNotContain(newTraceId);
+                seenTraceIds.add(newTraceId);
+                return null;
+            }
+        };
+    }
+
+    private static Runnable newTraceExpectingRunnable() {
+        final Set<String> seenTraceIds = new HashSet<>();
+        seenTraceIds.add(Tracer.getTraceId());
+
+        return new Runnable() {
+            @Override
+            public void run() {
+                String newTraceId = Tracer.getTraceId();
+
+                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(newTraceId);
+                assertThat(seenTraceIds).doesNotContain(newTraceId);
+                seenTraceIds.add(newTraceId);
+            }
+        };
     }
 
     private static Callable<Void> traceExpectingCallable() {

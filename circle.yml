@@ -7,9 +7,8 @@ machine:
 
 dependencies:
   override:
-    - ./gradlew resolveConfigurations
-    - ./gradlew --stacktrace generateLock verifyDependencyLocksAreCurrent
-    - ./gradlew testClasses
+    - ./gradlew resolveConfigurations --parallel
+    - ./gradlew generateLock verifyDependencyLocksAreCurrent --stacktrace --parallel
 
 test:
   override:
@@ -19,10 +18,10 @@ test:
 
           case $CIRCLE_NODE_INDEX in
           0)
-            ./gradlew build
+            ./gradlew build --parallel
             ;;
           1)
-            ./gradlew testBouncyCastle testSun
+            ./gradlew testBouncyCastle testSun --parallel
             ;;
           esac
       :

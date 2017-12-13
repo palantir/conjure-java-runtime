@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Palantir Technologies, Inc. All rights reserved.
+ * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,9 @@ public final class Tracers {
 
     /**
      * Wraps the provided scheduled executor service to make submitted tasks traceable, see {@link
-     * #wrap(ScheduledExecutorService)}.
+     * #wrap(ScheduledExecutorService)}. This method should not be used to wrap a ScheduledExecutorService that has
+     * already been {@link #wrapWithNewTrace(ScheduledExecutorService) wrapped with new trace}. If this is done, a new
+     * trace will be generated for each execution, effectively bypassing the intent of this method.
      */
     public static ScheduledExecutorService wrap(ScheduledExecutorService executorService) {
         return new WrappingScheduledExecutorService(executorService) {
@@ -99,6 +101,22 @@ public final class Tracers {
     /** Like {@link #wrap(Callable)}, but for Runnables. */
     public static Runnable wrap(Runnable delegate) {
         return new TracingAwareRunnable(delegate);
+    }
+
+    /**
+     * Wraps the provided scheduled executor service to make submitted tasks traceable with a fresh {@link Trace trace}
+     * for each execution, see {@link #wrapWithNewTrace(ScheduledExecutorService)}. This method should not be used to
+     * wrap a ScheduledExecutorService that has already been {@link #wrap(ScheduledExecutorService) wrapped}. If this is
+     * done, a new trace will be generated for each execution, effectively bypassing the intent of the previous
+     * wrapping.
+     */
+    public static ScheduledExecutorService wrapWithNewTrace(ScheduledExecutorService executorService) {
+        return new WrappingScheduledExecutorService(executorService) {
+            @Override
+            protected <T> Callable<T> wrapTask(Callable<T> callable) {
+                return wrapWithNewTrace(callable);
+            }
+        };
     }
 
     /**

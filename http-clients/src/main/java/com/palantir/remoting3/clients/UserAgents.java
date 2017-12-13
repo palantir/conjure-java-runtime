@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
+ * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,8 @@ public final class UserAgents {
 
         if (!foundFirst) {
             if (lenient) {
-                log.warn("Empty user agent, falling back to default/unknown agent");
+                log.debug("Invalid user agent, falling back to default/unknown agent",
+                        SafeArg.of("userAgent", userAgent));
                 return builder.primary(UserAgent.Agent.of("unknown", UserAgent.Agent.DEFAULT_VERSION)).build();
             } else {
                 throw new IllegalArgumentException("Failed to parse user agent string: " + userAgent);

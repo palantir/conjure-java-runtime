@@ -22,6 +22,7 @@
 
     <!-- Copied Retrofit classes. -->
     <suppress files="[/\\]src[/\\].*(AsyncSerializableErrorCallAdapterFactory.java)" checks="." />
+    <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="VisibilityModifier" />
 
     <!-- JavadocStyle enforces existence of package-info.java package-level Javadoc; we consider this a bug. -->
     <suppress files="package-info.java" checks="JavadocStyle" />
@@ -36,4 +37,5 @@
     <!-- Generated code should not be subjected to checkstyle. -->
     <suppress files="[/\\].*[/\\]generated_src[/\\]" checks="." />
     <suppress files="[/\\].*[/\\]generated_testSrc[/\\]" checks="." />
+    <suppress files="[/\\].*[/\\]generated[/\\]" checks="." />
 </suppressions>

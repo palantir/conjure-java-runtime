@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
+ * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,55 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.palantir.remoting3.okhttp.metrics.HostMetricsRegistry;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.codahale.metrics.Timer;
+import com.google.common.base.Stopwatch;
+import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
 /**
  * Records metrics about the response codes of http requests.
  */
-public final class InstrumentedInterceptor implements Interceptor {
+final class InstrumentedInterceptor implements Interceptor {
+
+    static final String CLIENT_RESPONSE_METRIC_NAME = "client.response";
+    static final String SERVICE_NAME_TAG = "service-name";
 
     private final HostMetricsRegistry hostMetrics;
+    private final String serviceName;
+    private final Timer responseTimer;
 
-    InstrumentedInterceptor(TaggedMetricRegistry registry, String serviceName) {
-        this.hostMetrics = new HostMetricsRegistry(registry, serviceName);
+    InstrumentedInterceptor(TaggedMetricRegistry registry, HostMetricsRegistry hostMetrics, String serviceName) {
+        this.hostMetrics = hostMetrics;
+        this.serviceName = serviceName;
+        this.responseTimer = registry.timer(name());
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
+        Stopwatch stopwatch = Stopwatch.createStarted();
         Response response = chain.proceed(chain.request());
-        String hostname = chain.request().url().host();
+        long micros = stopwatch.elapsed(TimeUnit.MICROSECONDS);
 
-        hostMetrics.record(hostname, response.code());
+        String hostname = chain.request().url().host();
+        hostMetrics.record(serviceName, hostname, response.code(), micros);
+        responseTimer.update(micros, TimeUnit.MICROSECONDS);
 
         return response;
     }
 
-    static InstrumentedInterceptor withDefaultMetricRegistry(Class<?> serviceClass) {
-        return new InstrumentedInterceptor(DefaultTaggedMetricRegistry.getDefault(), serviceClass.getSimpleName());
+    static InstrumentedInterceptor create(
+            TaggedMetricRegistry registry, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
+        return new InstrumentedInterceptor(registry, hostMetrics, serviceClass.getSimpleName());
+    }
+
+    private MetricName name() {
+        return MetricName.builder()
+                .safeName(CLIENT_RESPONSE_METRIC_NAME)
+                .putSafeTags(SERVICE_NAME_TAG, serviceName)
+                .build();
     }
 }
