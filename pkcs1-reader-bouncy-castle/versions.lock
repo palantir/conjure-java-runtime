@@ -20,7 +20,7 @@
             ]
         },
         "com.google.guava:guava": {
-            "locked": "18.0",
+            "locked": "20.0",
             "transitive": [
                 "com.palantir.remoting3:keystores"
             ]
@@ -65,7 +65,7 @@
             ]
         },
         "com.google.guava:guava": {
-            "locked": "18.0",
+            "locked": "20.0",
             "transitive": [
                 "com.palantir.remoting3:keystores"
             ]
