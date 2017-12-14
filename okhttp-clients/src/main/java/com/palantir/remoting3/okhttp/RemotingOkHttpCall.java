@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -127,7 +128,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     private static ResponseBody buffer(MediaType mediaType, byte[] bodyBytes) {
-        return ResponseBody.create(mediaType, bodyBytes);
+        return ResponseBody.create(mediaType, bodyBytes); // closes the response body
     }
 
     @Override
@@ -166,30 +167,32 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 // Buffer the response into a byte[] so that multiple handler can safely consume the body.
                 // The buffer call consumes and closes the original response body.
-                byte[] bodyBytes;
+                Supplier<Response> errorResponseSupplier;
                 try {
-                    bodyBytes = response.body().bytes(); // closes the response body
+                    byte[] body = response.body().bytes();
+                    // so error handlers can read the body without breaking subsequent handlers
+                    errorResponseSupplier = () -> buildFrom(response, body);
                 } catch (IOException e) {
                     onFailure(call, e);
                     return;
                 }
 
                 // Handle to handle QoS situations: retry, failover, etc.
-                Optional<QosException> qosError = qosHandler.handle(buildFrom(response, bodyBytes));
+                Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
                 if (qosError.isPresent()) {
                     qosError.get().accept(createQosVisitor(callback, call));
                     return;
                 }
 
                 // Handle responses that correspond to RemoteExceptions / SerializableErrors
-                Optional<RemoteException> httpError = remoteExceptionHandler.handle(buildFrom(response, bodyBytes));
+                Optional<RemoteException> httpError = remoteExceptionHandler.handle(errorResponseSupplier.get());
                 if (httpError.isPresent()) {
                     callback.onFailure(call, new IoRemoteException(httpError.get()));
                     return;
                 }
 
                 // Catch-all: handle all other responses
-                Optional<IOException> ioException = ioExceptionHandler.handle(buildFrom(response, bodyBytes));
+                Optional<IOException> ioException = ioExceptionHandler.handle(errorResponseSupplier.get());
                 if (ioException.isPresent()) {
                     callback.onFailure(call, ioException.get());
                     return;
