@@ -29,9 +29,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
+import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
@@ -119,8 +121,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }
     }
 
-    private static ResponseBody buffer(ResponseBody body) throws IOException {
-        return ResponseBody.create(body.contentType(), body.bytes()); // closes the response body
+    private static Response buildFrom(Response unbufferedResponse, byte[] bodyBytes) {
+        return unbufferedResponse.newBuilder()
+                .body(buffer(unbufferedResponse.body().contentType(), bodyBytes))
+                .build();
+    }
+
+    private static ResponseBody buffer(MediaType mediaType, byte[] bodyBytes) {
+        return ResponseBody.create(mediaType, bodyBytes);
     }
 
     @Override
@@ -150,39 +158,41 @@ final class RemotingOkHttpCall extends ForwardingCall {
             }
 
             @Override
-            public void onResponse(Call call, Response unbufferedResponse) throws IOException {
+            public void onResponse(Call call, Response response) throws IOException {
                 // Relay successful responses
-                if (unbufferedResponse.code() / 100 <= 2) {
-                    callback.onResponse(call, unbufferedResponse);
+                if (response.code() / 100 <= 2) {
+                    callback.onResponse(call, response);
                     return;
                 }
 
                 // Buffer the response into a byte[] so that multiple handler can safely consume the body.
-                // The buffer call consumes and closes the original unbufferedResponse body.
-                final Response response;
+                // This consumes and closes the original response body.
+                Supplier<Response> errorResponseSupplier;
                 try {
-                    response = unbufferedResponse.newBuilder().body(buffer(unbufferedResponse.body())).build();
+                    byte[] body = response.body().bytes();
+                    // so error handlers can read the body without breaking subsequent handlers
+                    errorResponseSupplier = () -> buildFrom(response, body);
                 } catch (IOException e) {
                     onFailure(call, e);
                     return;
                 }
 
                 // Handle to handle QoS situations: retry, failover, etc.
-                Optional<QosException> qosError = qosHandler.handle(response);
+                Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
                 if (qosError.isPresent()) {
                     qosError.get().accept(createQosVisitor(callback, call));
                     return;
                 }
 
                 // Handle responses that correspond to RemoteExceptions / SerializableErrors
-                Optional<RemoteException> httpError = remoteExceptionHandler.handle(response);
+                Optional<RemoteException> httpError = remoteExceptionHandler.handle(errorResponseSupplier.get());
                 if (httpError.isPresent()) {
                     callback.onFailure(call, new IoRemoteException(httpError.get()));
                     return;
                 }
 
                 // Catch-all: handle all other responses
-                Optional<IOException> ioException = ioExceptionHandler.handle(response);
+                Optional<IOException> ioException = ioExceptionHandler.handle(errorResponseSupplier.get());
                 if (ioException.isPresent()) {
                     callback.onFailure(call, ioException.get());
                     return;
