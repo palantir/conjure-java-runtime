@@ -181,6 +181,20 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
+    public void throwsIoExceptionWithCorrectBodyAfterFailingToDeserializeSerializableError() throws Exception {
+        String responseJson = "{\"attribute\": \"foo\"}";
+        MockResponse mockResponse = new MockResponse()
+                .setBody(responseJson)
+                .addHeader("Content-Type", "application/json")
+                .setResponseCode(400);
+        server.enqueue(mockResponse);
+
+        OkHttpClient client = createRetryingClient(1);
+        Call call = client.newCall(new Request.Builder().url(url).build());
+        assertThatThrownBy(call::execute).isInstanceOf(IOException.class).hasMessageContaining(responseJson);
+    }
+
+    @Test
     public void handlesUnavailable_obeysMaxNumRetriesAndEventuallyPropagatesQosException() throws Exception {
         Call call;
 
