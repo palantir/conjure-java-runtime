@@ -37,10 +37,9 @@ import org.slf4j.LoggerFactory;
  * caller/browser -> [server A] -> [server B]
  * <p>
  * this is the exception mapper used in Server A. When code in B throws an exception, the {@link JsonExceptionMapper}
- * maps that exception to a JSON response with appropriate HTTP status code and returns it to server A over HTTP.
- * That response is then processed by a {@link com.palantir.remoting3.errors.SerializableErrorToExceptionConverter} and
- * thrown as a {@link RemoteException} at the call point in server A.  If server A does not catch this exception and
- * it raises up the call stack back into Jersey, execution enters this {@link RemoteExceptionMapper}.
+ * maps that exception to a JSON response with appropriate HTTP status code and returns it to server A over HTTP. That
+ * response is then thrown as a {@link RemoteException} at the call point in server A.  If server A does not catch this
+ * exception and it raises up the call stack back into Jersey, execution enters this {@link RemoteExceptionMapper}.
  * <p>
  * To preserve debuggability, the exception and HTTP status code from B's exception are logged at WARN level and
  * returned back to the caller/browser.

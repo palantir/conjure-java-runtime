@@ -26,7 +26,6 @@ import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
 import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderRewriter;
 import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
-import com.palantir.remoting3.okhttp.MultiServerRetryInterceptor;
 import com.palantir.remoting3.okhttp.OkHttpClients;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
@@ -55,8 +54,8 @@ abstract class AbstractFeignJaxRsClientBuilder {
     private final ClientConfiguration config;
     /**
      * The primary URI used to bootstrap the Feign client; this is the URI used by Feign to create an OkHttp call. Note
-     * that the {@link MultiServerRetryInterceptor} replaces this URI with a random URI from the client configuration
-     * when retrying a request.
+     * that this URI is typically replaced in the OkHttp client with a random URI from the client configuration when
+     * retrying a request.
      */
     private final String primaryUri;
 

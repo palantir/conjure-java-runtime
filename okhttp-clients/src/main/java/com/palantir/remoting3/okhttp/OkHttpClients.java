@@ -28,40 +28,42 @@ import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-import okhttp3.Call;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.TlsVersion;
 import okhttp3.internal.Util;
 
 public final class OkHttpClients {
 
+    @VisibleForTesting
+    static final int NUM_SCHEDULING_THREADS = 5;
+
     /**
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
      */
-    private static final ExecutorService executorService = Tracers.wrap(new Dispatcher().executorService());
+    private static final ExecutorService executionExecutor = Tracers.wrap(new Dispatcher().executorService());
 
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
-     * internal thread pool and from the thread pool used by {@link #executorService}.
+     * internal thread pool and from the thread pool used by {@link #executionExecutor}.
      * <p>
      * Note: In contrast to the {@link java.util.concurrent.ThreadPoolExecutor} used by OkHttp's {@link
-     * #executorService}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
+     * #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
      * Javadoc.
      */
-    private static final ScheduledExecutorService scheduledExecutorService = Tracers.wrap(
-            new ScheduledThreadPoolExecutor(5, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
+    private static final ScheduledExecutorService schedulingExecutor = Tracers.wrap(new ScheduledThreadPoolExecutor(
+            NUM_SCHEDULING_THREADS, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
 
     /**
      * The per service and host metrics recorded for each HTTP call.
@@ -75,12 +77,11 @@ public final class OkHttpClients {
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
     public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(
-                config, userAgent, serviceClass, createQosHandler(config), true /* randomize URL order */);
+        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */);
     }
 
     /**
-     * Deprecated variant of {@link #create(ClientConfiguration, String, Class)}.
+     * Deprecated variant of {@link #create(ClientConfiguration, UserAgent, Class)}.
      *
      * @deprecated Use {@link #create(ClientConfiguration, UserAgent, Class)}
      */
@@ -97,47 +98,30 @@ public final class OkHttpClients {
     }
 
     @VisibleForTesting
-    static QosIoExceptionAwareOkHttpClient withCustomQosHandler(
-            ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass,
-            Supplier<QosIoExceptionHandler> handlerFactory) {
-        return createInternal(config, userAgent, serviceClass, handlerFactory, true);
-    }
-
-    @VisibleForTesting
-    static QosIoExceptionAwareOkHttpClient withStableUris(
+    static RemotingOkHttpClient withStableUris(
             ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, createQosHandler(config), false);
+        return createInternal(config, userAgent, serviceClass, false);
     }
 
-    private static Supplier<QosIoExceptionHandler> createQosHandler(ClientConfiguration config) {
-        return () -> new AsyncQosIoExceptionHandler(scheduledExecutorService, executorService,
-                new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()));
-    }
-
-    private static QosIoExceptionAwareOkHttpClient createInternal(
-            ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass,
-            Supplier<QosIoExceptionHandler> handlerFactory, boolean randomizeUrlOrder) {
+    private static RemotingOkHttpClient createInternal(
+            ClientConfiguration config,
+            UserAgent userAgent,
+            Class<?> serviceClass,
+            boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
-        // response metrics
-        client.addNetworkInterceptor(InstrumentedInterceptor.create(registry, hostMetrics, serviceClass));
-
-        // Error handling, retry/failover, etc: the order of these matters.
-        client.addInterceptor(SerializableErrorInterceptor.INSTANCE);
-        client.addInterceptor(QosRetryLaterInterceptor.INSTANCE);
-        UrlSelector urls = UrlSelectorImpl.create(config.uris(), randomizeUrlOrder);
-        client.addInterceptor(CurrentUrlInterceptor.create(urls));
-        client.addInterceptor(new QosRetryOtherInterceptor(urls));
-        client.addInterceptor(MultiServerRetryInterceptor.create(urls, config.maxNumRetries()));
+        // TODO(rfink): Should this go into the call itself?
         config.meshProxy().ifPresent(meshProxy -> client.addInterceptor(new MeshProxyInterceptor(meshProxy)));
         client.followRedirects(false);  // We implement our own redirect logic.
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
 
-        // tracing
+        // Intercept calls to augment request meta data
+        client.addNetworkInterceptor(InstrumentedInterceptor.create(registry, hostMetrics, serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
+        client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
 
         // timeouts
         // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
@@ -156,9 +140,6 @@ public final class OkHttpClients {
                     .build());
         }
 
-        // User agent setup
-        client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
-
         // cipher setup
         client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
 
@@ -168,7 +149,19 @@ public final class OkHttpClients {
         // dispatcher with static executor service
         client.dispatcher(createDispatcher());
 
-        return new QosIoExceptionAwareOkHttpClient(client.build(), handlerFactory);
+        return new RemotingOkHttpClient(
+                client.build(),
+                () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()),
+                UrlSelectorImpl.create(config.uris(), randomizeUrlOrder),
+                schedulingExecutor,
+                executionExecutor,
+                largestOf(config.connectTimeout(), config.readTimeout(), config.writeTimeout())
+        );
+    }
+
+    @VisibleForTesting
+    static Duration largestOf(Duration... durations) {
+        return Arrays.stream(durations).max(Duration::compareTo).orElse(Duration.ZERO);
     }
 
     /**
@@ -204,31 +197,10 @@ public final class OkHttpClients {
     }
 
     private static Dispatcher createDispatcher() {
-        Dispatcher dispatcher = new Dispatcher(executorService);
+        Dispatcher dispatcher = new Dispatcher(executionExecutor);
         dispatcher.setMaxRequests(256);
         dispatcher.setMaxRequestsPerHost(256);
         return dispatcher;
     }
 
-    /**
-     * An OkHttp client that executes requests, catches all {@link QosIoException}s and passes them to the configured
-     * {@link QosIoExceptionHandler}.
-     * <p>
-     * See {@link QosIoExceptionHandler} for an end-to-end explanation of http-remoting specific client-side error
-     * handling.
-     */
-    private static final class QosIoExceptionAwareOkHttpClient extends ForwardingOkHttpClient {
-
-        private final Supplier<QosIoExceptionHandler> handlerFactory;
-
-        private QosIoExceptionAwareOkHttpClient(OkHttpClient delegate, Supplier<QosIoExceptionHandler> handlerFactory) {
-            super(delegate);
-            this.handlerFactory = handlerFactory;
-        }
-
-        @Override
-        public Call newCall(Request request) {
-            return new QosIoExceptionAwareCall(getDelegate().newCall(request), handlerFactory.get());
-        }
-    }
 }
