@@ -67,7 +67,7 @@ public final class Tracer {
      */
     private static Trace createTrace(Optional<Boolean> isObservable, String traceId) {
         Preconditions.checkArgument(traceId != null && !traceId.isEmpty(), "traceId must be non-empty: %s", traceId);
-        boolean observable = isObservable.orElse(sampler.sample());
+        boolean observable = isObservable.orElseGet(sampler::sample);
         return new Trace(observable, traceId);
     }
 
