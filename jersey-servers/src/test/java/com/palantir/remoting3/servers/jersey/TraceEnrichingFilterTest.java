@@ -22,6 +22,8 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +31,7 @@ import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanObserver;
 import com.palantir.remoting.api.tracing.SpanType;
 import com.palantir.remoting.api.tracing.TraceHttpHeaders;
+import com.palantir.remoting3.tracing.TraceSampler;
 import com.palantir.remoting3.tracing.Tracer;
 import com.palantir.remoting3.tracing.Tracers;
 import io.dropwizard.Application;
@@ -73,6 +76,8 @@ public final class TraceEnrichingFilterTest {
     private ContainerRequestContext request;
     @Mock
     private UriInfo uriInfo;
+    @Mock
+    private TraceSampler traceSampler;
 
     private WebTarget target;
 
@@ -84,12 +89,14 @@ public final class TraceEnrichingFilterTest {
         Client client = builder.build();
         target = client.target(endpointUri);
         Tracer.subscribe("", observer);
+        Tracer.setSampler(traceSampler);
 
         MDC.clear();
 
         when(request.getMethod()).thenReturn("GET");
         when(uriInfo.getPath()).thenReturn("/foo");
         when(request.getUriInfo()).thenReturn(uriInfo);
+        when(traceSampler.sample()).thenReturn(true);
     }
 
     @After
@@ -147,6 +154,23 @@ public final class TraceEnrichingFilterTest {
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID), is(nullValue()));
         verify(observer).consume(spanCaptor.capture());
         assertThat(spanCaptor.getValue().getOperation(), is("GET /trace"));
+    }
+
+    @Test
+    public void testTraceState_withSamplingHeaderWithoutTraceIdDoesNotUseTraceSampler() {
+        target.path("/trace").request()
+                .header(TraceHttpHeaders.IS_SAMPLED, "0")
+                .get();
+        verify(traceSampler, never()).sample();
+
+        target.path("/trace").request()
+                .header(TraceHttpHeaders.IS_SAMPLED, "1")
+                .get();
+        verify(traceSampler, never()).sample();
+
+        target.path("/trace").request()
+                .get();
+        verify(traceSampler, times(1)).sample();
     }
 
     @Test
