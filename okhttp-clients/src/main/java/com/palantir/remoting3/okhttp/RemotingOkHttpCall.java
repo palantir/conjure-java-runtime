@@ -100,7 +100,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
         });
 
         try {
-            return future.get(syncCallTimeout.toMillis(), TimeUnit.MILLISECONDS);
+            // zero is treated as an infinite timeout
+            return syncCallTimeout.isZero()
+                    ? future.get()
+                    : future.get(syncCallTimeout.toMillis(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             getDelegate().cancel();
             Thread.currentThread().interrupt();

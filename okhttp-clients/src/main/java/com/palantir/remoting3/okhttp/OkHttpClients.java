@@ -159,9 +159,18 @@ public final class OkHttpClients {
         );
     }
 
+    /**
+     * Treat {@link Duration#ZERO} as infinity to match okhttp3.
+     */
     @VisibleForTesting
     static Duration largestOf(Duration... durations) {
-        return Arrays.stream(durations).max(Duration::compareTo).orElse(Duration.ZERO);
+        if (Arrays.stream(durations).anyMatch(Duration::isZero)) {
+            return Duration.ZERO;
+        }
+
+        return Arrays.stream(durations)
+                .max(Duration::compareTo)
+                .orElseThrow(() -> new IllegalArgumentException("largestOf must be called with at least one argument"));
     }
 
     /**

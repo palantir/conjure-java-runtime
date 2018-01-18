@@ -23,10 +23,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.palantir.remoting.api.config.service.ServiceConfiguration;
+import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.clients.ClientConfigurations;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -443,10 +447,67 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
+    public void timeouts_set_to_all_zero_should_be_treated_as_infinity() throws Exception {
+        server.enqueue(new MockResponse()
+                .setBodyDelay(Duration.ofSeconds(11).toMillis(), TimeUnit.MILLISECONDS)
+                .setBody("Hello, world!"));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url))
+                        .connectTimeout(Duration.ZERO)
+                        .readTimeout(Duration.ZERO)
+                        .writeTimeout(Duration.ZERO) // want to allow unlimited time for uploads
+                        .maxNumRetries(0)
+                        .backoffSlotSize(Duration.ofMillis(10))
+                        .build(),
+                AGENT,
+                OkHttpClientsTest.class);
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        Response synchronousCall = client.newCall(request).execute();
+        assertThat(synchronousCall.body().string()).isEqualTo("Hello, world!");
+    }
+
+    @Test
+    public void sync_call_to_a_slow_endpoint_should_not_time_out_if_read_timeout_is_zero() throws Exception {
+        server.enqueue(new MockResponse()
+                .setBodyDelay(Duration.ofSeconds(11).toMillis(), TimeUnit.MILLISECONDS)
+                .setBody("Hello, world!"));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfigurations.of(
+                        ServiceConfiguration.builder()
+                                // ClientConfigurations has a connectTimeout default of 10 seconds
+                                .readTimeout(Duration.ZERO) // unlimited pls
+                                .writeTimeout(Duration.ZERO) // unlimited pls
+                                .security(SslConfiguration.of(Paths.get("src", "test", "resources", "trustStore.jks")))
+                                .build()
+                ),
+                AGENT,
+                OkHttpClientsTest.class);
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        Response synchronousCall = client.newCall(request).execute();
+        assertThat(synchronousCall.body().string()).isEqualTo("Hello, world!");
+    }
+
+    @Test
     public void largestOf_sanity() throws Exception {
-        assertThat(OkHttpClients.largestOf()).isEqualTo(Duration.ZERO);
         assertThat(OkHttpClients.largestOf(Duration.ofMinutes(1), Duration.ofSeconds(20), Duration.ofHours(7)))
                 .isEqualTo(Duration.ofHours(7));
+    }
+
+    @Test
+    public void largestOf_treats_zero_as_infinity() throws Exception {
+        assertThat(OkHttpClients.largestOf(Duration.ZERO, Duration.ofSeconds(20), Duration.ofHours(7)))
+                .isEqualTo(Duration.ZERO);
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {
