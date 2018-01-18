@@ -500,9 +500,14 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void largestOf_sanity() throws Exception {
-        assertThat(OkHttpClients.largestOf()).isEqualTo(Duration.ZERO);
         assertThat(OkHttpClients.largestOf(Duration.ofMinutes(1), Duration.ofSeconds(20), Duration.ofHours(7)))
                 .isEqualTo(Duration.ofHours(7));
+    }
+
+    @Test
+    public void largestOf_treats_zero_as_infinity() throws Exception {
+        assertThat(OkHttpClients.largestOf(Duration.ZERO, Duration.ofSeconds(20), Duration.ofHours(7)))
+                .isEqualTo(Duration.ZERO);
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {
