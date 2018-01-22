@@ -67,6 +67,6 @@ public final class HostMetricsTest {
 
         hostMetrics.recordIoException();
 
-        assertThat(ioExceptions.getCount()).isZero();
+        assertThat(ioExceptions.getCount()).isEqualTo(1);
     }
 }
