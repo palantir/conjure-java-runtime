@@ -79,25 +79,28 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setBody("pong"));
         createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();
 
-        assertThat(onlyHostMetrics().get2xx().getCount()).isGreaterThanOrEqualTo(1);
-    }
-
-    @Test
-    public void verifyIoExceptionMetricsAreRegistered() throws IOException {
-        Call call = createRetryingClient(0).newCall(new Request.Builder().url("http://bogus").build());
-        call.execute();
-
-        assertThatExceptionOfType(IOException.class)
-                .isThrownBy(call::execute);
-        assertThat(onlyHostMetrics().getIoExceptions().getCount()).isEqualTo(1);
-    }
-
-    private HostMetrics onlyHostMetrics() {
         List<HostMetrics> hostMetrics = OkHttpClients.hostMetrics().stream()
                 .filter(metrics -> metrics.hostname().equals("localhost"))
                 .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
                 .collect(Collectors.toList());
-        return Iterables.getOnlyElement(hostMetrics);
+        HostMetrics actualMetrics = Iterables.getOnlyElement(hostMetrics);
+
+        assertThat(actualMetrics.get2xx().getCount()).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    public void verifyIoExceptionMetricsAreRegistered() {
+        Call call = createRetryingClient(0).newCall(new Request.Builder().url("http://bogus").build());
+        assertThatExceptionOfType(IOException.class)
+                .isThrownBy(call::execute);
+
+        List<HostMetrics> hostMetrics = OkHttpClients.hostMetrics().stream()
+                .filter(metrics -> metrics.hostname().equals("bogus"))
+                .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
+                .collect(Collectors.toList());
+        HostMetrics actualMetrics = Iterables.getOnlyElement(hostMetrics);
+
+        assertThat(actualMetrics.getIoExceptions().getCount()).isEqualTo(1);
     }
 
     @Test
@@ -541,9 +544,6 @@ public final class OkHttpClientsTest extends TestBase {
                         .from(createTestConfig(urls))
                         .maxNumRetries(maxNumRetries)
                         .backoffSlotSize(backoffSlotSize)
-                        .readTimeout(Duration.ofSeconds(1))
-                        .writeTimeout(Duration.ofSeconds(1))
-                        .connectTimeout(Duration.ofSeconds(1))
                         .build(),
                 AGENT,
                 OkHttpClientsTest.class);
