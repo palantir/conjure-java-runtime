@@ -40,7 +40,7 @@ final class HostMetricsRegistry {
                 .expireAfterAccess(1, TimeUnit.DAYS)
                 .build(new CacheLoader<ServiceAndHost, DefaultHostMetrics>() {
                     @Override
-                    public DefaultHostMetrics load(ServiceAndHost key) throws Exception {
+                    public DefaultHostMetrics load(ServiceAndHost key) {
                         return new DefaultHostMetrics(key.serviceName(), key.hostname());
                     }
                 });
@@ -51,6 +51,14 @@ final class HostMetricsRegistry {
             hostMetrics.getUnchecked(ImmutableServiceAndHost.of(serviceName, hostname)).record(statusCode, micros);
         } catch (Exception e) {
             log.warn("Unable to record metrics for host", UnsafeArg.of("hostname", hostname));
+        }
+    }
+
+    void recordIoException(String serviceName, String hostname) {
+        try {
+            hostMetrics.getUnchecked(ImmutableServiceAndHost.of(serviceName, hostname)).recordIoException();
+        } catch (Exception e) {
+            log.warn("Unable to record IO exception for host", UnsafeArg.of("hostname", hostname));
         }
     }
 

@@ -45,11 +45,19 @@ final class InstrumentedInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
+        String hostname = chain.request().url().host();
         Stopwatch stopwatch = Stopwatch.createStarted();
-        Response response = chain.proceed(chain.request());
+        Response response;
+
+        try {
+            response = chain.proceed(chain.request());
+        } catch (IOException e) {
+            hostMetrics.recordIoException(serviceName, hostname);
+            throw e;
+        }
+
         long micros = stopwatch.elapsed(TimeUnit.MICROSECONDS);
 
-        String hostname = chain.request().url().host();
         hostMetrics.record(serviceName, hostname, response.code(), micros);
         responseTimer.update(micros, TimeUnit.MICROSECONDS);
 
