@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 
 /**
@@ -45,4 +46,6 @@ public interface HostMetrics {
     Timer get5xx();
 
     Timer getOther();
+
+    Meter getIoExceptions();
 }
