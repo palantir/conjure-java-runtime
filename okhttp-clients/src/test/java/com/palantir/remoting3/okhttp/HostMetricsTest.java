@@ -18,6 +18,7 @@ package com.palantir.remoting3.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
@@ -57,5 +58,15 @@ public final class HostMetricsTest {
             assertThat(timer.getCount()).isEqualTo(1);
             assertThat(timer.getSnapshot().getMin()).isEqualTo(1_000);
         }
+    }
+
+    @Test
+    public void testIoExceptionUpdatesMeter() {
+        Meter ioExceptions = hostMetrics.getIoExceptions();
+        assertThat(ioExceptions.getCount()).isZero();
+
+        hostMetrics.recordIoException();
+
+        assertThat(ioExceptions.getCount()).isEqualTo(1);
     }
 }

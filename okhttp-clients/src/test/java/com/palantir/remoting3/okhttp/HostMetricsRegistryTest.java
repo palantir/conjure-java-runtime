@@ -40,4 +40,14 @@ public final class HostMetricsRegistryTest {
         HostMetrics hostMetrics = Iterables.getOnlyElement(hostRegistry.getMetrics());
         assertThat(hostMetrics.get2xx().getSnapshot().getMin()).isEqualTo(1_000);
     }
+
+    @Test
+    public void testIoExceptionsUpdated() {
+        assertThat(hostRegistry.getMetrics()).isEmpty();
+
+        hostRegistry.recordIoException("service", "host");
+
+        HostMetrics hostMetrics = Iterables.getOnlyElement(hostRegistry.getMetrics());
+        assertThat(hostMetrics.getIoExceptions().getCount()).isEqualTo(1);
+    }
 }

@@ -17,6 +17,8 @@
 package com.palantir.remoting3.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Timer;
@@ -43,15 +45,14 @@ public final class InstrumentedInterceptorTest {
     private static final Request REQUEST_A = new Request.Builder().url("http://hostA").build();
     private static final Request REQUEST_B = new Request.Builder().url("http://hostB").build();
 
-    @Mock
-    private Interceptor.Chain chain;
+    @Mock private Interceptor.Chain chain;
 
     private TaggedMetricRegistry registry;
     private InstrumentedInterceptor interceptor;
     private HostMetricsRegistry hostMetrics;
 
     @Before
-    public void before() throws IOException {
+    public void before() {
         registry = new DefaultTaggedMetricRegistry();
         hostMetrics = new HostMetricsRegistry();
         interceptor = new InstrumentedInterceptor(registry, hostMetrics, "client");
@@ -86,6 +87,20 @@ public final class InstrumentedInterceptorTest {
         interceptor.intercept(chain);
 
         assertThat(timer.getCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void testIoExceptionRecorded() throws IOException {
+        when(chain.request()).thenReturn(REQUEST_A);
+        when(chain.proceed(any())).thenThrow(IOException.class);
+
+        assertThat(hostMetrics.getMetrics()).isEmpty();
+
+        assertThatExceptionOfType(IOException.class)
+                .isThrownBy(() -> interceptor.intercept(chain));
+
+        HostMetrics metrics = Iterables.getOnlyElement(hostMetrics.getMetrics());
+        assertThat(metrics.getIoExceptions().getCount()).isEqualTo(1);
     }
 
     private HostMetrics hostMetrics(String hostname) {

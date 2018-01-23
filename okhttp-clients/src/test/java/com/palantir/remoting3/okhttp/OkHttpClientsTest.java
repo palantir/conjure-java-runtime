@@ -17,6 +17,7 @@
 package com.palantir.remoting3.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -82,9 +83,24 @@ public final class OkHttpClientsTest extends TestBase {
                 .filter(metrics -> metrics.hostname().equals("localhost"))
                 .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
                 .collect(Collectors.toList());
-
         HostMetrics actualMetrics = Iterables.getOnlyElement(hostMetrics);
+
         assertThat(actualMetrics.get2xx().getCount()).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    public void verifyIoExceptionMetricsAreRegistered() {
+        Call call = createRetryingClient(0).newCall(new Request.Builder().url("http://bogus").build());
+        assertThatExceptionOfType(IOException.class)
+                .isThrownBy(call::execute);
+
+        List<HostMetrics> hostMetrics = OkHttpClients.hostMetrics().stream()
+                .filter(metrics -> metrics.hostname().equals("bogus"))
+                .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
+                .collect(Collectors.toList());
+        HostMetrics actualMetrics = Iterables.getOnlyElement(hostMetrics);
+
+        assertThat(actualMetrics.getIoExceptions().getCount()).isEqualTo(1);
     }
 
     @Test
