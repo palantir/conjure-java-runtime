@@ -39,6 +39,16 @@ final class MeshProxyInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         HttpUrl originalUri = chain.request().url();
+
+        // Not using URL#getAuthority since we are removing the userinfo portion.
+        // Note that userinfo is not allowed in http2 :authority headers: https://tools.ietf.org/html/rfc7540#section-8.1.2.3
+        // or in the HTTP/1.1 Host header: https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.23
+        StringBuilder host = new StringBuilder(originalUri.uri().getHost());
+        if (originalUri.uri().getPort() != -1) {
+            host.append(':');
+            host.append(originalUri.uri().getPort());
+        }
+
         return chain.proceed(chain.request()
                 .newBuilder()
                 .url(originalUri.newBuilder()
@@ -46,7 +56,7 @@ final class MeshProxyInterceptor implements Interceptor {
                         .port(meshProxy.getPort())
                         .build())
                 // TODO(jnewman): #612 - add HTTP2 :authority pseudo-header as well? Or does OkHttp handle this for us?
-                .header(HttpHeaders.HOST, originalUri.url().getAuthority())
+                .header(HttpHeaders.HOST, host.toString())
                 .build());
     }
 }
