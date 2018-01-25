@@ -78,9 +78,9 @@ public final class MeshProxyInterceptorTest {
     @Test
     public void intercept_stripsUserinfoFromAuthority() throws Exception {
         when(chain.request()).thenReturn(new Request.Builder()
-            .url("https://user:pass@foo.com/foo/bar?baz=norf")
-            .method("GET", null)
-            .build());
+                .url("https://user:pass@foo.com/foo/bar?baz=norf")
+                .method("GET", null)
+                .build());
 
         interceptor.intercept(chain);
 
