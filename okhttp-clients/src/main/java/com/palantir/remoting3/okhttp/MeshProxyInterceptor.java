@@ -40,6 +40,9 @@ final class MeshProxyInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         HttpUrl originalUri = chain.request().url();
 
+        // Not using URL#getAuthority since we are removing the userinfo portion.
+        // Note that userinfo is not allowed in http2 :authority headers: https://tools.ietf.org/html/rfc7540#section-8.1.2.3
+        // or in the HTTP/1.1 Host header: https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.23
         StringBuilder host = new StringBuilder(originalUri.uri().getHost());
         if (originalUri.uri().getPort() != -1) {
             host.append(':');
