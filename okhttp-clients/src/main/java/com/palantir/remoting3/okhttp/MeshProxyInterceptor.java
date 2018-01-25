@@ -39,6 +39,13 @@ final class MeshProxyInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         HttpUrl originalUri = chain.request().url();
+
+        StringBuilder host = new StringBuilder(originalUri.uri().getHost());
+        if (originalUri.uri().getPort() != -1) {
+            host.append(':');
+            host.append(originalUri.uri().getPort());
+        }
+
         return chain.proceed(chain.request()
                 .newBuilder()
                 .url(originalUri.newBuilder()
@@ -46,7 +53,7 @@ final class MeshProxyInterceptor implements Interceptor {
                         .port(meshProxy.getPort())
                         .build())
                 // TODO(jnewman): #612 - add HTTP2 :authority pseudo-header as well? Or does OkHttp handle this for us?
-                .header(HttpHeaders.HOST, originalUri.url().getAuthority())
+                .header(HttpHeaders.HOST, host.toString())
                 .build());
     }
 }
