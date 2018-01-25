@@ -21,8 +21,13 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.Lists;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import feign.RetryableException;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Before;
@@ -56,6 +61,24 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server2.enqueue(new MockResponse().setBody("\"foo\""));
 
         assertThat(proxy.string(), is("foo"));
+    }
+
+    @Test
+    public void testConnectionError_performsFailover_testHarder() throws Exception {
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+
+        server1.shutdown();
+        for (int i = 0; i < 100; i++) {
+            server2.enqueue(new MockResponse().setBody("\"foo\""));
+        }
+
+        List<Future<String>> things = Lists.newArrayListWithCapacity(100);
+        for (int i = 0; i < 100; i++) {
+            things.add(executorService.submit(() -> proxy.string()));
+        }
+        for (int i = 0; i < 100; i++) {
+            assertThat(things.get(i).get(), is("foo"));
+        }
     }
 
     @Test
