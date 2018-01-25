@@ -76,7 +76,7 @@ public final class MeshProxyInterceptorTest {
     }
 
     @Test
-    public void intercept_userinfoNotInHost() throws Exception {
+    public void intercept_stripsUserinfoFromAuthority() throws Exception {
         when(chain.request()).thenReturn(new Request.Builder()
             .url("https://user:pass@foo.com/foo/bar?baz=norf")
             .method("GET", null)
