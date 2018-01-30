@@ -97,11 +97,14 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     @Override
-    public Optional<HttpUrl> redirectToNext(HttpUrl current) {
-        Optional<Integer> currentIndex = indexFor(current);
+    public Optional<HttpUrl> redirectToNext(HttpUrl existingUrl) {
+        // if possible, determine the index of the passed in url (so we can be sure to return a url which is different)
+        Optional<Integer> existingUrlIndex = indexFor(existingUrl);
+
+        // ...otherwise we fall back to the stateful current url index
         int index = currentUrl.updateAndGet(
-                (currentUrlIndex) -> (currentIndex.orElse(currentUrlIndex) + 1) % baseUrls.size());
-        return redirectTo(current, baseUrls.get(index));
+                (currentUrlIndex) -> (existingUrlIndex.orElse(currentUrlIndex) + 1) % baseUrls.size());
+        return redirectTo(existingUrl, baseUrls.get(index));
     }
 
     @Override
