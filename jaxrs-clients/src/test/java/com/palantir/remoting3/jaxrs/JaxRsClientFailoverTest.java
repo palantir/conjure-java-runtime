@@ -64,19 +64,19 @@ public final class JaxRsClientFailoverTest extends TestBase {
     }
 
     @Test
-    public void testConnectionError_performsFailover_testHarder() throws Exception {
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
+    public void testConnectionError_performsFailover_concurrentRequests() throws Exception {
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         server1.shutdown();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             server2.enqueue(new MockResponse().setBody("\"foo\""));
         }
 
-        List<Future<String>> things = Lists.newArrayListWithCapacity(100);
-        for (int i = 0; i < 100; i++) {
+        List<Future<String>> things = Lists.newArrayListWithCapacity(10);
+        for (int i = 0; i < 10; i++) {
             things.add(executorService.submit(() -> proxy.string()));
         }
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             assertThat(things.get(i).get(), is("foo"));
         }
     }
