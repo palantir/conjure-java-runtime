@@ -142,6 +142,29 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
+    public void testRedirectToNext_isAFunctionOfArgument_updatesCurrent() {
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a", "http://bar/a"), false);
+
+        HttpUrl baseIsFoo = HttpUrl.parse("http://foo/a/b/path");
+        HttpUrl baseIsBar = HttpUrl.parse("http://bar/a/b/path");
+        HttpUrl baseIsBaz = HttpUrl.parse("http://baz/a/b/path");
+
+        // calling twice with the same argument gives the same result, i.e. move forward by one
+        assertThat(selector.redirectToNext(baseIsFoo)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(baseIsFoo)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        // ...and bar is now the current
+        assertThat(selector.redirectToCurrent(baseIsBaz)).contains(HttpUrl.parse("http://bar/a/b/path"));
+
+        // bar goes back to foo
+        assertThat(selector.redirectToNext(baseIsBar)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(baseIsBaz)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        // baz goes to the next after the current
+        // current is foo, so we expect bar
+        assertThat(selector.redirectToNext(baseIsBaz)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
     public void testWorksWithWebSockets() throws Exception {
         Request wsRequest = new Request.Builder()
                 .url("wss://foo/a")
