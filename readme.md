@@ -41,11 +41,12 @@ all clients, plain-text HTTP is not supported. Example:
 
 ```java
 SslConfiguration sslConfig = SslConfiguration.of(Paths.get("path/to/trustStore""));
+UserAgent userAgent = UserAgent.of(UserAgent.Agent.of("my-user-agent", "1.0.0"));
 ClientConfiguration config = ClientConfigurations.of(
         ImmutableList.copyOf("https://url-to-server:6789"),
         SslSocketFactories.createSslSocketFactory(sslConfig),
         SslSocketFactories.createX509TrustManager(sslConfig));
-MyService service = JaxRsClient.create(MyService.class, "my user agent", config);
+MyService service = JaxRsClient.create(MyService.class, userAgent, config);
 ```
 
 The `JaxRsClient#create` factory comes in two flavours: one for creating immutable clients given a fixed
