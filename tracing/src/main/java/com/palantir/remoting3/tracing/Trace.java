@@ -20,15 +20,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.remoting.api.tracing.SpanObserver;
+import com.palantir.remoting3.context.Contextual;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
+import org.slf4j.MDC;
 
 /**
  * Represents a trace as an ordered list of non-completed spans. Supports adding and removing of spans. This class is
  * not thread-safe and is intended to be used in a thread-local context.
  */
-final class Trace {
+final class Trace implements Contextual<Trace> {
 
     private final Deque<OpenSpan> stack;
     private final boolean isObservable;
@@ -77,8 +79,19 @@ final class Trace {
         return traceId;
     }
 
+    @Override
+    public void onSet() {
+        MDC.put(Tracers.TRACE_ID_KEY, getTraceId());
+    }
+
+    @Override
+    public void onUnset() {
+        MDC.remove(Tracers.TRACE_ID_KEY);
+    }
+
     /** Returns a copy of this Trace which can be independently mutated. */
-    Trace deepCopy() {
+    @Override
+    public Trace taskCopy() {
         return new Trace(new ArrayDeque<>(stack), isObservable, traceId);
     }
 }

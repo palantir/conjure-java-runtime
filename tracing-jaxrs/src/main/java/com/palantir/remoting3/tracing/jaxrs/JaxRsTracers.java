@@ -4,7 +4,7 @@
 
 package com.palantir.remoting3.tracing.jaxrs;
 
-import com.palantir.remoting3.tracing.DeferredTracer;
+import com.palantir.remoting3.context.DeferredContext;
 import com.palantir.remoting3.tracing.Tracers;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -24,16 +24,16 @@ public final class JaxRsTracers {
     private static class TracingAwareStreamingOutput implements StreamingOutput {
 
         private final StreamingOutput delegate;
-        private DeferredTracer deferredTracer;
+        private DeferredContext deferredContext;
 
         TracingAwareStreamingOutput(StreamingOutput delegate) {
             this.delegate = delegate;
-            this.deferredTracer = new DeferredTracer();
+            this.deferredContext = new DeferredContext();
         }
 
         @Override
         public void write(OutputStream output) throws IOException, WebApplicationException {
-            deferredTracer.withTrace(() -> {
+            deferredContext.withContext(() -> {
                 delegate.write(output);
                 return null;
             });

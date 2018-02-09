@@ -1,7 +1,5 @@
 /*
- * Copied from Guava 18.0; original copyright notice below.
- *
- * Copyright (C) 2011 The Guava Authors
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.palantir.remoting3.tracing;
+package com.palantir.remoting3.context;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -44,11 +42,13 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Chris Nokleberg
  */
-abstract class WrappingExecutorService implements ExecutorService {
+class WrappingExecutorService implements ExecutorService {
     private final ExecutorService delegate;
+    private final TaskWrapper wrapper;
 
-    protected WrappingExecutorService(ExecutorService delegate) {
+    protected WrappingExecutorService(ExecutorService delegate, TaskWrapper wrapper) {
         this.delegate = checkNotNull(delegate);
+        this.wrapper = checkNotNull(wrapper);
     }
 
     /**
@@ -56,7 +56,9 @@ abstract class WrappingExecutorService implements ExecutorService {
      * method is also applied to any {@code Runnable} passed to the default
      * implementation of {@link #wrapTask(Runnable)}.
      */
-    protected abstract <T> Callable<T> wrapTask(Callable<T> callable);
+    protected <T> Callable<T> wrapTask(Callable<T> callable) {
+        return wrapper.wrapTask(callable);
+    }
 
     /**
      * Wraps a {@code Runnable} for submission to the underlying executor. The

@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanObserver;
 import com.palantir.remoting.api.tracing.SpanType;
+import com.palantir.remoting3.context.RequestContext;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
  * The singleton entry point for handling Zipkin-style traces and spans. Provides functionality for starting and
@@ -40,17 +40,10 @@ import org.slf4j.MDC;
  * This class is thread-safe.
  */
 public final class Tracer {
-
+    public static final String CONTEXT_KEY = "trace";
     private static final Logger log = LoggerFactory.getLogger(Tracer.class);
 
     private Tracer() {}
-
-    // Thread-safe since thread-local
-    private static final ThreadLocal<Trace> currentTrace = ThreadLocal.withInitial(() -> {
-        Trace trace = createTrace(Optional.empty(), Tracers.randomId());
-        MDC.put(Tracers.TRACE_ID_KEY, trace.getTraceId());
-        return trace;
-    });
 
     // Only access in a class-synchronized fashion
     private static final Map<String, SpanObserver> observers = new HashMap<>();
@@ -59,6 +52,15 @@ public final class Tracer {
 
     // Thread-safe since stateless
     private static volatile TraceSampler sampler = AlwaysSampler.INSTANCE;
+
+    // Retrieve the current trace
+    private static Trace currentTrace() {
+        return RequestContext.getInstance(CONTEXT_KEY, Trace.class).orElseGet(() -> {
+            Trace trace = createTrace(Optional.empty(), Tracers.randomId());
+            setTrace(trace);
+            return trace;
+        });
+    }
 
     /**
      * Creates a new trace, but does not set it as the current trace. The new trace is {@link Trace#isObservable
@@ -85,7 +87,8 @@ public final class Tracer {
      * when the current trace is empty.
      */
     public static OpenSpan startSpan(String operation, String parentSpanId, SpanType type) {
-        Preconditions.checkState(currentTrace.get().isEmpty(),
+        Trace trace = currentTrace();
+        Preconditions.checkState(trace.isEmpty(),
                 "Cannot start a span with explicit parent if the current thread's trace is non-empty");
         Preconditions.checkArgument(parentSpanId != null && !parentSpanId.isEmpty(),
                 "parentTraceId must be non-empty: %s", parentSpanId);
@@ -95,7 +98,7 @@ public final class Tracer {
                 .parentSpanId(parentSpanId)
                 .type(type)
                 .build();
-        currentTrace.get().push(span);
+        trace.push(span);
         return span;
     }
 
@@ -119,13 +122,14 @@ public final class Tracer {
                 .spanId(Tracers.randomId())
                 .type(type);
 
-        Optional<OpenSpan> prevState = currentTrace.get().top();
+        Trace trace = currentTrace();
+        Optional<OpenSpan> prevState = trace.top();
         if (prevState.isPresent()) {
             spanBuilder.parentSpanId(prevState.get().getSpanId());
         }
 
         OpenSpan span = spanBuilder.build();
-        currentTrace.get().push(span);
+        trace.push(span);
         return span;
     }
 
@@ -144,7 +148,7 @@ public final class Tracer {
      */
     public static void fastCompleteSpan(Map<String, String> metadata) {
         popCurrentSpan()
-                .filter(openSpan -> currentTrace.get().isObservable())
+                .filter(openSpan -> currentTrace().isObservable())
                 .map(openSpan -> toSpan(openSpan, metadata))
                 .ifPresent(Tracer::notifyObservers);
     }
@@ -166,7 +170,7 @@ public final class Tracer {
 
         // Notify subscribers iff trace is observable
         maybeSpan.ifPresent(span -> {
-            if (currentTrace.get().isObservable()) {
+            if (currentTrace().isObservable()) {
                 notifyObservers(span);
             }
         });
@@ -181,7 +185,7 @@ public final class Tracer {
     }
 
     private static Optional<OpenSpan> popCurrentSpan() {
-        return currentTrace.get().pop();
+        return currentTrace().pop();
     }
 
     private static Span toSpan(OpenSpan openSpan, Map<String, String> metadata) {
@@ -239,14 +243,13 @@ public final class Tracer {
 
     /** Returns the globally unique identifier for this thread's trace. */
     public static String getTraceId() {
-        return currentTrace.get().getTraceId();
+        return currentTrace().getTraceId();
     }
 
     /** Clears the current trace id and returns (a copy of) it. */
     public static Trace getAndClearTrace() {
-        Trace trace = currentTrace.get();
-        currentTrace.remove();
-        MDC.remove(Tracers.TRACE_ID_KEY);
+        Trace trace = currentTrace();
+        RequestContext.remove(CONTEXT_KEY);
         return trace;
     }
 
@@ -255,23 +258,19 @@ public final class Tracer {
      * Tracer#completeSpan span completion}.
      */
     public static boolean isTraceObservable() {
-        return currentTrace.get().isObservable();
+        return currentTrace().isObservable();
     }
 
     /** Returns an independent copy of this thread's {@link Trace}. */
     static Trace copyTrace() {
-        return currentTrace.get().deepCopy();
+        return currentTrace().taskCopy();
     }
 
     /**
-     * Sets the thread-local trace. Considered an internal API used only for propagating the trace state across
-     * threads.
+     * Sets the thread-local trace in the RequestContext.
      */
     static void setTrace(Trace trace) {
-        currentTrace.set(trace);
-
-        // Give SLF4J appenders access to the trace id
-        MDC.put(Tracers.TRACE_ID_KEY, trace.getTraceId());
+        RequestContext.set(CONTEXT_KEY, trace);
     }
 
 }
