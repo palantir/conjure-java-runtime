@@ -4,6 +4,7 @@ apply from: "${rootDir}/gradle/publish.gradle"
 
 dependencies {
     compile project(":extras:jackson-support")
+    compile project(":context")
     compile "com.fasterxml.jackson.core:jackson-databind"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-guava"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"

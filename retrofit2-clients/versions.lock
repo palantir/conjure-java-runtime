@@ -79,6 +79,7 @@
             "locked": "20.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.palantir.remoting3:context",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:okhttp-clients",
@@ -107,6 +108,12 @@
         },
         "com.palantir.remoting-api:tracing": {
             "locked": "1.7.0",
+            "transitive": [
+                "com.palantir.remoting3:tracing"
+            ]
+        },
+        "com.palantir.remoting3:context": {
+            "project": true,
             "transitive": [
                 "com.palantir.remoting3:tracing"
             ]
@@ -158,6 +165,7 @@
             "locked": "0.1.3",
             "transitive": [
                 "com.palantir.remoting-api:errors",
+                "com.palantir.remoting3:context",
                 "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tritium:tritium-registry"
@@ -222,6 +230,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.palantir.remoting3:context",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",
@@ -310,6 +319,7 @@
             "locked": "20.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.palantir.remoting3:context",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:okhttp-clients",
@@ -338,6 +348,12 @@
         },
         "com.palantir.remoting-api:tracing": {
             "locked": "1.7.0",
+            "transitive": [
+                "com.palantir.remoting3:tracing"
+            ]
+        },
+        "com.palantir.remoting3:context": {
+            "project": true,
             "transitive": [
                 "com.palantir.remoting3:tracing"
             ]
@@ -389,6 +405,7 @@
             "locked": "0.1.3",
             "transitive": [
                 "com.palantir.remoting-api:errors",
+                "com.palantir.remoting3:context",
                 "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tritium:tritium-registry"
@@ -453,6 +470,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.palantir.remoting3:context",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",

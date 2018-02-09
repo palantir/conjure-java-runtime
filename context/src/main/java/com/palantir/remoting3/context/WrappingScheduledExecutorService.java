@@ -1,5 +1,5 @@
 /*
- * Copied from Guava 18.0; original copyright notice below.
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.palantir.remoting3.tracing;
+package com.palantir.remoting3.context;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,12 +28,12 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Luke Sandberg
  */
-abstract class WrappingScheduledExecutorService extends WrappingExecutorService
+class WrappingScheduledExecutorService extends WrappingExecutorService
         implements ScheduledExecutorService {
     final ScheduledExecutorService delegate;
 
-    protected WrappingScheduledExecutorService(ScheduledExecutorService delegate) {
-        super(delegate);
+    protected WrappingScheduledExecutorService(ScheduledExecutorService delegate, TaskWrapper wrapper) {
+        super(delegate, wrapper);
         this.delegate = delegate;
     }
 
