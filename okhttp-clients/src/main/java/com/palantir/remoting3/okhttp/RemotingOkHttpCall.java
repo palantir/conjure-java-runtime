@@ -112,7 +112,12 @@ final class RemotingOkHttpCall extends ForwardingCall {
             getDelegate().cancel();
             if (e.getCause() instanceof IoRemoteException) {
                 // TODO(rfink): Consider unwrapping the RemoteException at the Retrofit/Feign layer for symmetry, #626
-                throw ((IoRemoteException) e.getCause()).getWrappedException();
+                RemoteException wrappedException = ((IoRemoteException) e.getCause()).getWrappedException();
+                RemoteException correctStackTrace = new RemoteException(
+                        wrappedException.getError(),
+                        wrappedException.getStatus());
+                correctStackTrace.initCause(e);
+                throw correctStackTrace;
             } else if (e.getCause() instanceof IOException) {
                 throw (IOException) e.getCause();
             } else {

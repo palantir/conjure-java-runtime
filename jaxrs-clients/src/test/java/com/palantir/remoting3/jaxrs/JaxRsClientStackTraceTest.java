@@ -28,7 +28,6 @@ import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -61,7 +60,6 @@ public final class JaxRsClientStackTraceTest extends TestBase {
         }
     }
 
-    @Ignore // failing test
     @Test
     public void stack_trace_from_remote_exception_should_include_call_site() throws Exception {
         server1.enqueue(serializableError());
