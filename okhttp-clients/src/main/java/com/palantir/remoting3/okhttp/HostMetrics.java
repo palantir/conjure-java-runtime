@@ -18,6 +18,7 @@ package com.palantir.remoting3.okhttp;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
+import java.time.Instant;
 
 /**
  * Per-target-host HTTP response code metrics.
@@ -34,6 +35,11 @@ public interface HostMetrics {
      * The name of the host these metrics describe. This may be the hostname, ip, or some other URI.
      */
     String hostname();
+
+    /**
+     * The {@link Instant} that these {@link HostMetrics} were last updated.
+     */
+    Instant lastUpdate();
 
     Timer get1xx();
 

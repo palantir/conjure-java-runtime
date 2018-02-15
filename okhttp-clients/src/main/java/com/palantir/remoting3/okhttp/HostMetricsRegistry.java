@@ -21,6 +21,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting3.clients.ImmutablesStyle;
+import java.time.Clock;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +42,7 @@ final class HostMetricsRegistry {
                 .build(new CacheLoader<ServiceAndHost, DefaultHostMetrics>() {
                     @Override
                     public DefaultHostMetrics load(ServiceAndHost key) {
-                        return new DefaultHostMetrics(key.serviceName(), key.hostname());
+                        return new DefaultHostMetrics(key.serviceName(), key.hostname(), Clock.systemUTC());
                     }
                 });
     }

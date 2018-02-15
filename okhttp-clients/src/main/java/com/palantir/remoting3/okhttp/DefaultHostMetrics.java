@@ -19,6 +19,8 @@ package com.palantir.remoting3.okhttp;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,9 +39,12 @@ final class DefaultHostMetrics implements HostMetrics {
     private final Timer serverError;
     private final Timer other;
     private final Meter ioExceptions;
+    private final Clock clock;
+
+    private Instant lastUpdate;
 
     /** Creates a metrics registry for calls from the given service to the given host. */
-    DefaultHostMetrics(String serviceName, String hostname) {
+    DefaultHostMetrics(String serviceName, String hostname, Clock clock) {
         this.serviceName = serviceName;
         this.hostname = hostname;
         this.informational = new Timer();
@@ -49,6 +54,8 @@ final class DefaultHostMetrics implements HostMetrics {
         this.serverError = new Timer();
         this.other = new Timer();
         this.ioExceptions = new Meter();
+        this.clock = clock;
+        this.lastUpdate = Instant.now(clock);
     }
 
     @Override
@@ -59,6 +66,11 @@ final class DefaultHostMetrics implements HostMetrics {
     @Override
     public String hostname() {
         return hostname;
+    }
+
+    @Override
+    public Instant lastUpdate() {
+        return lastUpdate;
     }
 
     @Override
@@ -122,9 +134,11 @@ final class DefaultHostMetrics implements HostMetrics {
                 other.update(micros, MICROS);
                 break;
         }
+        lastUpdate = Instant.now(clock);
     }
 
     void recordIoException() {
         ioExceptions.mark();
+        lastUpdate = Instant.now(clock);
     }
 }
