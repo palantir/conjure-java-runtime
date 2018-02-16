@@ -16,13 +16,9 @@
 
 package com.palantir.remoting3.servers.jersey;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting.api.errors.ServiceException;
-import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -38,8 +34,6 @@ import org.slf4j.LoggerFactory;
 final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceExceptionMapper.class);
-    private static final ObjectMapper MAPPER =
-            ObjectMappers.newServerObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     @Override
     public Response toResponse(ServiceException exception) {
@@ -60,9 +54,8 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
                     .message("Refer to the server logs with this errorInstanceId: " + exception.getErrorInstanceId())
                     .build();
             builder.type(MediaType.APPLICATION_JSON);
-            String json = MAPPER.writeValueAsString(error);
-            builder.entity(json);
-        } catch (RuntimeException | JsonProcessingException e) {
+            builder.entity(error);
+        } catch (RuntimeException e) {
             log.warn("Unable to translate exception to json",
                     SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), e);
             // simply write out the exception message
