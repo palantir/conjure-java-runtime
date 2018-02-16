@@ -16,7 +16,6 @@
 
 package com.palantir.remoting3.servers.jersey;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
@@ -62,9 +61,8 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
         ResponseBuilder builder = Response.status(status);
         try {
             builder.type(MediaType.APPLICATION_JSON);
-            String json = JsonExceptionMapper.MAPPER.writeValueAsString(error);
-            builder.entity(json);
-        } catch (RuntimeException | JsonProcessingException e) {
+            builder.entity(error);
+        } catch (RuntimeException e) {
             log.warn("Unable to translate exception to json for request", e);
             // simply write out the exception message
             builder = Response.status(status);

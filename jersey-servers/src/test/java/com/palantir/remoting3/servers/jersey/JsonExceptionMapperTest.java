@@ -18,7 +18,10 @@ package com.palantir.remoting3.servers.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.remoting.api.errors.ErrorType;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import javax.ws.rs.core.Response;
 import org.junit.Test;
 
@@ -31,19 +34,24 @@ public final class JsonExceptionMapperTest {
         }
     };
 
+    private final ObjectMapper objectMapper = ObjectMappers.newServerObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT);
+
     @Test
-    public void testExpectedSerializedError() {
+    public void testExpectedSerializedError() throws Exception {
         Response response = mapper.toResponse(new NullPointerException("foo"));
-        assertThat(response.getEntity().toString()).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
-        assertThat(response.getEntity().toString()).contains("\"errorName\" : \"Default:InvalidArgument\"");
-        assertThat(response.getEntity().toString()).contains("\"exceptionClass\" : \"java.lang.NullPointerException\"");
-        assertThat(response.getEntity().toString())
+        String entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
+        assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
+        assertThat(entity).contains("\"exceptionClass\" : \"java.lang.NullPointerException\"");
+        assertThat(entity)
                 .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
     }
 
     @Test
-    public void testDoesNotPropagateExceptionMessage() {
+    public void testDoesNotPropagateExceptionMessage() throws Exception {
         Response response = new RuntimeExceptionMapper().toResponse(new NullPointerException("secret"));
-        assertThat(response.getEntity().toString()).doesNotContain("secret");
+        String entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity).doesNotContain("secret");
     }
 }

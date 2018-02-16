@@ -18,6 +18,9 @@ package com.palantir.remoting3.servers.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
@@ -30,73 +33,81 @@ import org.junit.Test;
 public final class WebApplicationExceptionMapperTest {
 
     private final WebApplicationExceptionMapper mapper = new WebApplicationExceptionMapper();
+    private final ObjectMapper objectMapper = ObjectMappers.newServerObjectMapper()
+            .enable(SerializationFeature.INDENT_OUTPUT);
 
     @Test
-    public void testExplicitlyHandledExceptions() {
+    public void testExplicitlyHandledExceptions() throws Exception {
         Response response;
 
         response = mapper.toResponse(new ForbiddenException("secret"));
-        assertThat(response.getEntity().toString()).contains("\"errorCode\" : \"PERMISSION_DENIED\"");
-        assertThat(response.getEntity().toString()).contains("\"errorName\" : \"Default:PermissionDenied\"");
-        assertThat(response.getEntity().toString()).contains("\"exceptionClass\" : \"javax.ws.rs.ForbiddenException\"");
-        assertThat(response.getEntity().toString())
+        String entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity).contains("\"errorCode\" : \"PERMISSION_DENIED\"");
+        assertThat(entity).contains("\"errorName\" : \"Default:PermissionDenied\"");
+        assertThat(entity).contains("\"exceptionClass\" : \"javax.ws.rs.ForbiddenException\"");
+        assertThat(entity)
                 .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(403);
-        assertThat(response.getEntity().toString()).doesNotContain("secret");
+        assertThat(entity).doesNotContain("secret");
 
         response = mapper.toResponse(new NotFoundException());
-        assertThat(response.getEntity().toString()).contains("\"errorCode\" : \"NOT_FOUND\"");
-        assertThat(response.getEntity().toString()).contains("\"errorName\" : \"Default:NotFound\"");
-        assertThat(response.getEntity().toString()).contains("\"exceptionClass\" : \"javax.ws.rs.NotFoundException\"");
-        assertThat(response.getEntity().toString())
+        entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity).contains("\"errorCode\" : \"NOT_FOUND\"");
+        assertThat(entity).contains("\"errorName\" : \"Default:NotFound\"");
+        assertThat(entity).contains("\"exceptionClass\" : \"javax.ws.rs.NotFoundException\"");
+        assertThat(entity)
                 .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(404);
-        assertThat(response.getEntity().toString()).doesNotContain("secret");
+        assertThat(entity).doesNotContain("secret");
 
         response = mapper.toResponse(new BadRequestException());
-        assertThat(response.getEntity().toString()).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
-        assertThat(response.getEntity().toString()).contains("\"errorName\" : \"Default:InvalidArgument\"");
-        assertThat(response.getEntity().toString())
+        entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
+        assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
+        assertThat(entity)
                 .contains("\"exceptionClass\" : \"javax.ws.rs.BadRequestException\"");
-        assertThat(response.getEntity().toString())
+        assertThat(entity)
                 .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(400);
-        assertThat(response.getEntity().toString()).doesNotContain("secret");
+        assertThat(entity).doesNotContain("secret");
 
         response = mapper.toResponse(new ParamException.CookieParamException(null, null, null));
-        assertThat(response.getEntity().toString()).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
-        assertThat(response.getEntity().toString()).contains("\"errorName\" : \"Default:InvalidArgument\"");
-        assertThat(response.getEntity().toString())
+        entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
+        assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
+        assertThat(entity)
                 .contains("\"exceptionClass\" : \"org.glassfish.jersey.server.ParamException$CookieParamException\"");
-        assertThat(response.getEntity().toString())
+        assertThat(entity)
                 .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(400);
-        assertThat(response.getEntity().toString()).doesNotContain("secret");
+        assertThat(entity).doesNotContain("secret");
     }
 
     @Test
-    public void testNotExplicitlyHandledExceptions() {
+    public void testNotExplicitlyHandledExceptions() throws Exception {
         Response response;
 
         response = mapper.toResponse(new WebApplicationException("secret", 503));
-        assertThat(response.getEntity().toString()).contains("\"errorCode\" : \"javax.ws.rs.WebApplicationException\"");
-        assertThat(response.getEntity().toString()).contains("\"errorName\" : \"WebApplicationException\"");
-        assertThat(response.getEntity().toString())
+        String entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity).contains("\"errorCode\" : \"javax.ws.rs.WebApplicationException\"");
+        assertThat(entity).contains("\"errorName\" : \"WebApplicationException\"");
+        assertThat(entity)
                 .contains("\"exceptionClass\" : \"javax.ws.rs.WebApplicationException\"");
-        assertThat(response.getEntity().toString())
+        assertThat(entity)
                 .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(503);
-        assertThat(response.getEntity().toString()).doesNotContain("secret");
+        assertThat(entity).doesNotContain("secret");
 
         response = mapper.toResponse(new ServiceUnavailableException("secret"));
-        assertThat(response.getEntity().toString())
+        entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity)
                 .contains("\"errorCode\" : \"javax.ws.rs.ServiceUnavailableException\"");
-        assertThat(response.getEntity().toString()).contains("\"errorName\" : \"ServiceUnavailableException\"");
-        assertThat(response.getEntity().toString())
+        assertThat(entity).contains("\"errorName\" : \"ServiceUnavailableException\"");
+        assertThat(entity)
                 .contains("\"exceptionClass\" : \"javax.ws.rs.ServiceUnavailableException\"");
-        assertThat(response.getEntity().toString())
+        assertThat(entity)
                 .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(503);
-        assertThat(response.getEntity().toString()).doesNotContain("secret");
+        assertThat(entity).doesNotContain("secret");
     }
 }

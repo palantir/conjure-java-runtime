@@ -16,7 +16,6 @@
 
 package com.palantir.remoting3.servers.jersey;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.logsafe.SafeArg;
@@ -76,17 +75,15 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
             String exceptionClass) {
         ResponseBuilder builder = Response.status(httpErrorCode);
         try {
-            SerializableError error = SerializableError.builder()
+            builder.entity(SerializableError.builder()
                     .errorCode(errorCode)
                     .errorName(errorName)
                     .errorInstanceId(errorInstanceId)
                     .exceptionClass(exceptionClass)
                     .message("Refer to the server logs with this errorInstanceId: " + errorInstanceId)
-                    .build();
-            builder.type(MediaType.APPLICATION_JSON);
-            String json = MAPPER.writeValueAsString(error);
-            builder.entity(json);
-        } catch (RuntimeException | JsonProcessingException e) {
+                    .build())
+                    .type(MediaType.APPLICATION_JSON);
+        } catch (RuntimeException e) {
             log.warn("Unable to translate exception to json",
                     SafeArg.of("errorInstanceId", errorInstanceId), e);
             builder = Response.status(httpErrorCode);
