@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 public final class CipherSuites {
 
     private static final ImmutableList<String> FAST_CIPHER_SUITES = ImmutableList.of(
+            "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
             "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
             "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
             "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384",
