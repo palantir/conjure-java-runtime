@@ -36,15 +36,15 @@ public final class HostMetricsTest {
 
     private static final String SERVICE_NAME = "serviceName";
     private static final String HOSTNAME = "hostname";
-    private static final Instant firstInstant = Instant.ofEpochMilli(0);
-    private static final Instant secondInstant = Instant.ofEpochMilli(1);
+    private static final long firstInstant = 0;
+    private static final long secondInstant = 1;
 
     private DefaultHostMetrics hostMetrics;
     @Mock private Clock clock;
 
     @Before
     public void before() {
-        when(clock.instant()).thenReturn(firstInstant, secondInstant);
+        when(clock.millis()).thenReturn(firstInstant, secondInstant);
         hostMetrics = new DefaultHostMetrics(SERVICE_NAME, HOSTNAME, clock);
     }
 

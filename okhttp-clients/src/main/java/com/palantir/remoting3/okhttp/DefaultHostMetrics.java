@@ -41,7 +41,7 @@ final class DefaultHostMetrics implements HostMetrics {
     private final Meter ioExceptions;
     private final Clock clock;
 
-    private long lastUpdateEpochMillis;
+    private volatile long lastUpdateEpochMillis;
 
     /** Creates a metrics registry for calls from the given service to the given host. */
     DefaultHostMetrics(String serviceName, String hostname, Clock clock) {
