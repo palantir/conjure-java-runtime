@@ -41,7 +41,7 @@ final class DefaultHostMetrics implements HostMetrics {
     private final Meter ioExceptions;
     private final Clock clock;
 
-    private Instant lastUpdate;
+    private long lastUpdateEpochMillis;
 
     /** Creates a metrics registry for calls from the given service to the given host. */
     DefaultHostMetrics(String serviceName, String hostname, Clock clock) {
@@ -55,7 +55,7 @@ final class DefaultHostMetrics implements HostMetrics {
         this.other = new Timer();
         this.ioExceptions = new Meter();
         this.clock = clock;
-        this.lastUpdate = Instant.now(clock);
+        this.lastUpdateEpochMillis = clock.millis();
     }
 
     @Override
@@ -70,7 +70,7 @@ final class DefaultHostMetrics implements HostMetrics {
 
     @Override
     public Instant lastUpdate() {
-        return lastUpdate;
+        return Instant.ofEpochMilli(lastUpdateEpochMillis);
     }
 
     @Override
@@ -134,11 +134,11 @@ final class DefaultHostMetrics implements HostMetrics {
                 other.update(micros, MICROS);
                 break;
         }
-        lastUpdate = Instant.now(clock);
+        lastUpdateEpochMillis = clock.millis();
     }
 
     void recordIoException() {
         ioExceptions.mark();
-        lastUpdate = Instant.now(clock);
+        lastUpdateEpochMillis = clock.millis();
     }
 }
