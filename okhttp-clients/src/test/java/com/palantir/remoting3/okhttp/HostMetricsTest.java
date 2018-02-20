@@ -17,24 +17,35 @@
 package com.palantir.remoting3.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableMap;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public final class HostMetricsTest {
 
     private static final String SERVICE_NAME = "serviceName";
     private static final String HOSTNAME = "hostname";
+    private static final long firstInstant = 0;
+    private static final long secondInstant = 1;
 
     private DefaultHostMetrics hostMetrics;
+    @Mock private Clock clock;
 
     @Before
     public void before() {
-        hostMetrics = new DefaultHostMetrics(SERVICE_NAME, HOSTNAME);
+        when(clock.millis()).thenReturn(firstInstant, secondInstant);
+        hostMetrics = new DefaultHostMetrics(SERVICE_NAME, HOSTNAME, clock);
     }
 
     @Test
@@ -68,5 +79,21 @@ public final class HostMetricsTest {
         hostMetrics.recordIoException();
 
         assertThat(ioExceptions.getCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void testRecordUpdatesInstant() {
+        Instant previousUpdate = hostMetrics.lastUpdate();
+        hostMetrics.record(200, 100);
+
+        assertThat(hostMetrics.lastUpdate()).isGreaterThan(previousUpdate);
+    }
+
+    @Test
+    public void testRecordIoExceptionUpdatesInstant() {
+        Instant previousUpdate = hostMetrics.lastUpdate();
+        hostMetrics.recordIoException();
+
+        assertThat(hostMetrics.lastUpdate()).isGreaterThan(previousUpdate);
     }
 }
