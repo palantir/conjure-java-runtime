@@ -305,7 +305,10 @@ consume for clients and support transmitting exception parameters in a safe way.
 
 ##### `RemoteException` vs `ServiceException` vs `SerializableError` vs `ErrorType`
 
- - `E
+ - `ErrorType` is a record type, meant to be used as 'compile time constants' - essentially used by services to define the 'enum' of their service exceptions
+ - `SerializableError` is a record type, containing things like error code, error instance id, params - used as the wire format
+ - `ServiceException` is a final subclass of `Exception`, thrown by the server
+ - `RemoteException` is what the client sees if a remote call results in the server internally throwing a `ServiceException`
 
  - Server code throws an instance of `ServiceException`, containing some `ErrorType`
  - The `com.palantir.remoting3.servers.jersey.ServiceExceptionMapper` exception mapper
