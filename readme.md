@@ -310,6 +310,8 @@ consume for clients and support transmitting exception parameters in a safe way.
  - `ServiceException` is a final subclass of `Exception`, thrown by the server
  - `RemoteException` is what the client sees if a remote call results in the server internally throwing a `ServiceException`
 
+The rough workflow thus becomes
+
  - Server code throws an instance of `ServiceException`, containing some `ErrorType`
  - The `com.palantir.remoting3.servers.jersey.ServiceExceptionMapper` exception mapper
    - determines the response code for this service exception
