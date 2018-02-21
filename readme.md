@@ -303,6 +303,18 @@ typically yield `SerializableError`s with `exceptionClass=errorCode=<exception c
 user directly. Services should prefer to throw `ServiceException`s instead of the above, since they are easier to
 consume for clients and support transmitting exception parameters in a safe way.
 
+##### `RemoteException` vs `ServiceException` vs `SerializableError` vs `ErrorType`
+
+ - `E
+
+ - Server code throws an instance of `ServiceException`, containing some `ErrorType`
+ - The `com.palantir.remoting3.servers.jersey.ServiceExceptionMapper` exception mapper
+   - determines the response code for this service exception
+   - converts this into a `SerializableError`
+   - serializes this into the response body as JSON
+ - The client sees a `RemoteException`, which contains the `SerializableException` which was sent over the wire
+ - The client can look at the `SerializableException` and determine what went wrong
+ - Alternatively if the `RemoteException` hits the exception mapper layer, the contained `SerializableError` is sent in the response as-is.
 
 #### Serialization of Optional and Nullable objects
 `@Nullable` or `Optional<?>` fields in complex types are serialized using the standard Jackson mechanism:
