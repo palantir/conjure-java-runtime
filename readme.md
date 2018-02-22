@@ -303,6 +303,23 @@ typically yield `SerializableError`s with `exceptionClass=errorCode=<exception c
 user directly. Services should prefer to throw `ServiceException`s instead of the above, since they are easier to
 consume for clients and support transmitting exception parameters in a safe way.
 
+##### `RemoteException` vs `ServiceException` vs `SerializableError` vs `ErrorType`
+
+ - `ErrorType` is a record type, meant to be used as 'compile time constants' - essentially used by services to define the 'enum' of their service exceptions
+ - `SerializableError` defines the wire format for serializing ServiceExceptions in HTTP response bodies and contains the error code, error instance id, and application-defined parameters
+ - `ServiceException` is a final subclass of `Exception`, thrown by the server
+ - `RemoteException` is what the client sees if a remote call results in the server internally throwing a `ServiceException`
+
+The workflow is:
+
+ - Server code throws an instance of `ServiceException`, containing some `ErrorType`
+ - The `com.palantir.remoting3.servers.jersey.ServiceExceptionMapper` exception mapper
+   - determines the response code for this service exception
+   - converts this into a `SerializableError`
+   - serializes this into the response body as JSON
+ - The client sees a `RemoteException`, which contains the `SerializableError` which was sent over the wire
+ - The client can inspect the `SerializableError` and choose to act
+ - If the client is itself a server, does not handle the exception and just re-throws the `RemoteException`, the `RemoteException` will be propagated i.e. re-serialized as its own erroneous response
 
 #### Serialization of Optional and Nullable objects
 `@Nullable` or `Optional<?>` fields in complex types are serialized using the standard Jackson mechanism:
