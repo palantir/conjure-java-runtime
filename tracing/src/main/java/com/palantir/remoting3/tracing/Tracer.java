@@ -152,14 +152,20 @@ public final class Tracer {
     /**
      * Completes and returns the current span (if it exists) and notifies all {@link #observers subscribers} about the
      * completed span.
+     *
+     * @deprecated Prefer {@link #fastCompleteSpan()}
      */
+    @Deprecated
     public static Optional<Span> completeSpan() {
         return completeSpan(Collections.emptyMap());
     }
 
     /**
      * Like {@link #completeSpan()}, but adds {@code metadata} to the current span being completed.
+     *
+     * @deprecated Prefer {@link #fastCompleteSpan(Map)}
      */
+    @Deprecated
     public static Optional<Span> completeSpan(Map<String, String> metadata) {
         Optional<Span> maybeSpan = popCurrentSpan()
                 .map(openSpan -> toSpan(openSpan, metadata));
