@@ -36,6 +36,8 @@ final class UrlSelectorImpl implements UrlSelector {
     private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls) {
         this.baseUrls = baseUrls;
         this.currentUrl = new AtomicInteger(0);
+
+        Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
     }
 
     static UrlSelectorImpl create(Collection<String> baseUrls, boolean randomizeOrder) {
@@ -44,7 +46,7 @@ final class UrlSelectorImpl implements UrlSelector {
             Collections.shuffle(orderedUrls);
         }
 
-        ImmutableSet.Builder<HttpUrl> canonicalUrls = ImmutableSet.builder();
+        ImmutableSet.Builder<HttpUrl> canonicalUrls = ImmutableSet.builder();  // ImmutableSet maintains insert order
         orderedUrls.forEach(url -> {
             HttpUrl httpUrl = HttpUrl.parse(switchWsToHttp(url));
             Preconditions.checkArgument(httpUrl != null, "Not a valid URL: %s", url);
