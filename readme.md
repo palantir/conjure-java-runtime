@@ -248,7 +248,9 @@ class Errors {
     ErrorType.create(ErrorType.Code.INVALID_ARGUMENT, "MyApplication:DatasetNotFound");
 
   static ServiceException datasetNotFound(DatasetId datasetId, String userName) {
-    // Note that only SafeArg parameters are sent to the caller in the resulting SerializableError.
+    // Both the safe and unsafe params will be sent back to the client; the client needs
+    // to decide themselves if any of these are safe to log. We're only marking things as
+    // safe or unsafe for this server to log.
     return new ServiceException(
             DATASET_NOT_FOUND, SafeArg.of("datasetId", datasetId), UnsafeArg.of("userName", userName));
   }
@@ -272,6 +274,7 @@ capturing the error code, error name, and error parameters. The resulting JSON r
   "errorInstanceId": "xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx",
   "parameters": {
     "datasetId": "123abc",
+    "userName": "yourUserName"
   }
 }
 ```
