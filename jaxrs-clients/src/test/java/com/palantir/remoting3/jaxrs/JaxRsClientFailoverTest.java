@@ -117,11 +117,22 @@ public final class JaxRsClientFailoverTest extends TestBase {
     }
 
     @Test
+    public void testQosError_performsRetry() throws Exception {
+        server1.enqueue(new MockResponse().setResponseCode(503));
+        server1.enqueue(new MockResponse().setBody("\"foo\""));
+        server2.enqueue(new MockResponse().setBody("\"bar\""));
+
+        assertThat(proxy.string(), is("foo"));
+    }
+
+    // Should fail
+    @Test
     public void testQosError_performsFailover() throws Exception {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
-        server2.enqueue(new MockResponse().setBody("\"foo\""));
+        server2.enqueue(new MockResponse().setBody("\"bar\""));
 
-        assertThat(proxy.string(), is("foo"));
+        // If we wanted the behavior to be "always try another host if the first one is unavailable"
+        assertThat(proxy.string(), is("bar"));
     }
 }
