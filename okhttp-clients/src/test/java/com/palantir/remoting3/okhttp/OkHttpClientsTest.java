@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
+import com.google.common.net.HostAndPort;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.palantir.remoting.api.config.service.ServiceConfiguration;
@@ -90,7 +91,7 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void verifyIoExceptionMetricsAreRegistered() {
-        Call call = createRetryingClient(0).newCall(new Request.Builder().url("http://bogus").build());
+        Call call = createRetryingClient(0, "http://bogus").newCall(new Request.Builder().url("http://bogus").build());
         assertThatExceptionOfType(IOException.class)
                 .isThrownBy(call::execute);
 
@@ -497,6 +498,7 @@ public final class OkHttpClientsTest extends TestBase {
         OkHttpClient client = OkHttpClients.withStableUris(
                 ClientConfigurations.of(
                         ServiceConfiguration.builder()
+                                .addUris(url)
                                 // ClientConfigurations has a connectTimeout default of 10 seconds
                                 .readTimeout(Duration.ZERO) // unlimited pls
                                 .writeTimeout(Duration.ZERO) // unlimited pls
@@ -524,6 +526,53 @@ public final class OkHttpClientsTest extends TestBase {
     public void largestOf_treats_zero_as_infinity() throws Exception {
         assertThat(OkHttpClients.largestOf(Duration.ZERO, Duration.ofSeconds(20), Duration.ofHours(7)))
                 .isEqualTo(Duration.ZERO);
+    }
+
+    @Test(timeout = 10_000)
+    public void randomizesUrls() throws IOException {
+        boolean server2WasHit = false;
+        server.shutdown();
+        server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+
+        while (!server2WasHit) {
+            OkHttpClient client = OkHttpClients.create(
+                    ClientConfiguration.builder()
+                            .from(createTestConfig(url, url2))
+                            .maxNumRetries(0)
+                            .build(),
+                    AGENT,
+                    OkHttpClientsTest.class);
+            Call call = client.newCall(new Request.Builder().url(url).build());
+            String response = null;
+            try {
+                response = call.execute().body().string();
+            } catch (Exception e) {
+                System.out.println("Failed to talk to shutdown server (this is expected with p=1/2)");
+                assertThat(e.getCause().toString()).contains(Integer.toString(server.getPort()));
+            }
+
+            if (response != null) {
+                assertThat(response).isEqualTo("foo");
+                server2WasHit = true;
+            }
+        }
+    }
+
+    @Test
+    public void meshProxyClientChangesTargetAndInjectHostHeader() throws Exception {
+        server.enqueue(new MockResponse().setBody("foo"));
+
+        String serviceUrl = "http://foo.com/";
+        ClientConfiguration proxiedConfig = ClientConfiguration.builder()
+                .from(createTestConfig(serviceUrl))
+                .meshProxy(HostAndPort.fromParts("localhost", server.getPort()))
+                .maxNumRetries(0)
+                .build();
+        OkHttpClient client = OkHttpClients.create(proxiedConfig, AGENT, OkHttpClientsTest.class);
+
+        assertThat(client.newCall(new Request.Builder().url(serviceUrl).build()).execute().body().string())
+                .isEqualTo("foo");
+        assertThat(server.takeRequest().getHeader(HttpHeaders.HOST)).isEqualTo("foo.com");
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {
