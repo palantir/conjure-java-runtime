@@ -27,6 +27,8 @@ import java.nio.file.Paths;
 // TODO(rfink): Use static utility class instead?
 abstract class TestBase {
 
+    protected static final int UNAVAILABLE_RESPONSE_CODE = 503;
+
     protected static final UserAgent AGENT = UserAgent.of(UserAgent.Agent.of("test", "0.0.1"));
 
     final ClientConfiguration createTestConfig(String... uri) {

@@ -118,10 +118,23 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
     @Test
     public void testQosError_performsFailover() throws Exception {
-        server1.enqueue(new MockResponse().setResponseCode(503));
+        server1.enqueue(new MockResponse().setResponseCode(UNAVAILABLE_RESPONSE_CODE));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
-        server2.enqueue(new MockResponse().setBody("\"foo\""));
+        server2.enqueue(new MockResponse().setBody("\"bar\""));
 
-        assertThat(proxy.string(), is("foo"));
+        assertThat(proxy.string(), is("bar"));
+    }
+
+    @Test
+    public void testQosError_performsRetryWithOneNode() throws Exception {
+        server1.enqueue(new MockResponse().setResponseCode(UNAVAILABLE_RESPONSE_CODE));
+        server1.enqueue(new MockResponse().setBody("\"foo\""));
+
+        TestService anotherProxy = JaxRsClient.create(TestService.class, AGENT, ClientConfiguration.builder()
+                .from(createTestConfig("http://localhost:" + server1.getPort()))
+                .maxNumRetries(2)
+                .build());
+
+        assertThat(anotherProxy.string(), is("foo"));
     }
 }

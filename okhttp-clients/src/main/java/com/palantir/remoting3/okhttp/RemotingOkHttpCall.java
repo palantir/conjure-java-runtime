@@ -239,48 +239,44 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public Void visit(QosException.RetryOther exception) {
-                if (maxNumRelocations <= 0) {
-                    callback.onFailure(call,
-                            new IOException("Exceeded the maximum number of allowed "
-                                    + "redirects for initial URL: " + call.request().url()));
-                } else {
-                    Optional<HttpUrl> redirectTo = urls.redirectTo(request().url(),
-                            exception.getRedirectTo().toString());
-                    if (!redirectTo.isPresent()) {
-                        callback.onFailure(call,
-                                new IOException("Failed to determine valid redirect URL "
-                                        + "for '" + exception.getRedirectTo() + "' and base URLs "
-                                        + urls.getBaseUrls()));
-                    } else {
-                        Request redirectedRequest = request().newBuilder()
-                                .url(redirectTo.get())
-                                .build();
-                        client.newCallWithMutableState(
-                                redirectedRequest, backoffStrategy, maxNumRelocations - 1)
-                                .enqueue(callback);
-                    }
-                }
-                return null;
+                return redirectToUrl(callback, call,
+                        // Redirect to the URL specified by the exception.
+                        () -> urls.redirectTo(request().url(), exception.getRedirectTo().toString()),
+                        () -> "Failed to determine valid redirect URL for '" + exception.getRedirectTo() + "' and base "
+                                + "URLs " + urls.getBaseUrls());
             }
 
             @Override
             public Void visit(QosException.Unavailable exception) {
-                Optional<Duration> backoff = backoffStrategy.nextBackoff();
-                if (!backoff.isPresent()) {
-                    log.debug("Max number of retries exceeded, failing call");
-                    callback.onFailure(call,
-                            new IOException("Failed to complete the request due to a "
-                                    + "server-side QoS condition: 503", exception));
-                } else {
-                    log.debug("Rescheduling call after backoff",
-                            SafeArg.of("backoffMillis", backoff.get().toMillis()));
-                    scheduleExecution(callback, backoff.get());
-                }
-                return null;
+                return redirectToUrl(callback, call,
+                        // Redirect to the "next" URL, whichever that may be.
+                        () -> urls.redirectToNext(request().url()),
+                        () -> "Failed to determine valid redirect URL for base URLs " + urls.getBaseUrls());
             }
         };
     }
 
+    private Void redirectToUrl(Callback callback, Call call, Supplier<Optional<HttpUrl>> optionalUrlSupplier,
+            Supplier<String> redirectErrorMessageSupplier) {
+        if (maxNumRelocations <= 0) {
+            callback.onFailure(call,
+                    new IOException("Exceeded the maximum number of allowed "
+                            + "redirects for initial URL: " + call.request().url()));
+        } else {
+            Optional<HttpUrl> redirectTo = optionalUrlSupplier.get();
+            if (!redirectTo.isPresent()) {
+                callback.onFailure(call, new IOException(redirectErrorMessageSupplier.get()));
+            } else {
+                Request redirectedRequest = request().newBuilder()
+                        .url(redirectTo.get())
+                        .build();
+                client.newCallWithMutableState(
+                        redirectedRequest, backoffStrategy, maxNumRelocations - 1)
+                        .enqueue(callback);
+            }
+        }
+        return null;
+    }
 
     // TODO(rfink): Consider removing RemotingOkHttpCall#doClone method, #627
     @Override
