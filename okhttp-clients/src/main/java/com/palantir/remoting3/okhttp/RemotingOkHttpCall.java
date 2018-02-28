@@ -213,7 +213,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     @SuppressWarnings("FutureReturnValueIgnored")
-    private void scheduleExecution(Callback callback, Duration backoff, Runnable execution) {
+    private void scheduleExecution(Runnable execution, Duration backoff) {
         // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
         schedulingExecutor.schedule(
                 () -> executionExecutor.submit(execution),
@@ -234,7 +234,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 Duration backoff = exception.getRetryAfter().orElse(nonAdvertizedBackoff.get());
                 log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.toMillis()));
-                scheduleExecution(callback, backoff, () -> doClone().enqueue(callback));
+                scheduleExecution(() -> doClone().enqueue(callback), backoff);
                 return null;
             }
 
@@ -269,9 +269,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             // Redirect to the "next" URL, whichever that may be, after backing off.
                             () -> urls.redirectToNext(request().url()),
                             "Failed to determine valid redirect URL for base URLs " + urls.getBaseUrls(),
-                            (request) -> scheduleExecution(callback, backoff.get(),
-                                    () -> client.newCallWithMutableState(request, backoffStrategy,
-                                            maxNumRelocations - 1).enqueue(callback)));
+                            request -> scheduleExecution(() -> client.newCallWithMutableState(request,
+                                    backoffStrategy, maxNumRelocations - 1).enqueue(callback), backoff.get()));
                 }
                 return null;
             }
