@@ -94,7 +94,7 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
 
     @Test
     public void testQosError_performsFailover_forSynchronousOperation() throws Exception {
-        server1.enqueue(new MockResponse().setResponseCode(UNAVAILABLE_RESPONSE_CODE));
+        server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
         server2.enqueue(new MockResponse().setBody("\"bar\""));
 
@@ -103,7 +103,7 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
 
     @Test
     public void testQosError_performsFailover_forAsynchronousOperation() throws Exception {
-        server1.enqueue(new MockResponse().setResponseCode(UNAVAILABLE_RESPONSE_CODE));
+        server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
         server2.enqueue(new MockResponse().setBody("\"bar\""));
 
@@ -124,7 +124,7 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
 
     @Test
     public void testQosError_performsRetryWithOneNode_forSynchronousOperation() throws Exception {
-        server1.enqueue(new MockResponse().setResponseCode(UNAVAILABLE_RESPONSE_CODE));
+        server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
         TestService anotherProxy = Retrofit2Client.create(TestService.class, AGENT, ClientConfiguration.builder()
@@ -137,7 +137,7 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
 
     @Test
     public void testQosError_performsRetryWithOneNode_forAsynchronousOperation() throws Exception {
-        server1.enqueue(new MockResponse().setResponseCode(UNAVAILABLE_RESPONSE_CODE));
+        server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
         TestService anotherProxy = Retrofit2Client.create(TestService.class, AGENT, ClientConfiguration.builder()
