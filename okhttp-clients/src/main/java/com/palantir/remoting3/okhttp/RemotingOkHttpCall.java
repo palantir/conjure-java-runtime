@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -212,10 +213,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     @SuppressWarnings("FutureReturnValueIgnored")
-    private void scheduleExecution(Callback callback, Duration backoff) {
+    private void scheduleExecution(Callback callback, Duration backoff, Runnable execution) {
         // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
         schedulingExecutor.schedule(
-                () -> executionExecutor.submit(() -> doClone().enqueue(callback)),
+                () -> executionExecutor.submit(execution),
                 backoff.toMillis(),
                 TimeUnit.MILLISECONDS);
     }
@@ -233,49 +234,67 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 Duration backoff = exception.getRetryAfter().orElse(nonAdvertizedBackoff.get());
                 log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.toMillis()));
-                scheduleExecution(callback, backoff);
+                scheduleExecution(callback, backoff, () -> doClone().enqueue(callback));
                 return null;
             }
 
             @Override
             public Void visit(QosException.RetryOther exception) {
-                return redirectToUrl(callback, call,
+                redirectToUrl(
+                        callback,
+                        call,
                         // Redirect to the URL specified by the exception.
                         () -> urls.redirectTo(request().url(), exception.getRedirectTo().toString()),
-                        () -> "Failed to determine valid redirect URL for '" + exception.getRedirectTo() + "' and base "
-                                + "URLs " + urls.getBaseUrls());
+                        "Failed to determine valid redirect URL for '" + exception.getRedirectTo() + "' and base URLs "
+                                + urls.getBaseUrls(),
+                        request -> client.newCallWithMutableState(request, backoffStrategy, maxNumRelocations - 1)
+                                .enqueue(callback));
+                return null;
             }
 
             @Override
             public Void visit(QosException.Unavailable exception) {
-                return redirectToUrl(callback, call,
-                        // Redirect to the "next" URL, whichever that may be.
-                        () -> urls.redirectToNext(request().url()),
-                        () -> "Failed to determine valid redirect URL for base URLs " + urls.getBaseUrls());
+                Optional<Duration> backoff = backoffStrategy.nextBackoff();
+                if (!backoff.isPresent()) {
+                    log.debug("Max number of retries exceeded, failing call");
+                    callback.onFailure(call,
+                            new IOException("Failed to complete the request due to a "
+                                    + "server-side QoS condition: 503", exception));
+                } else {
+                    log.debug("Rescheduling call after backoff",
+                            SafeArg.of("backoffMillis", backoff.get().toMillis()));
+                    redirectToUrl(
+                            callback,
+                            call,
+                            // Redirect to the "next" URL, whichever that may be, after backing off.
+                            () -> urls.redirectToNext(request().url()),
+                            "Failed to determine valid redirect URL for base URLs " + urls.getBaseUrls(),
+                            (request) -> scheduleExecution(callback, backoff.get(),
+                                    () -> client.newCallWithMutableState(request, backoffStrategy,
+                                            maxNumRelocations - 1).enqueue(callback)));
+                }
+                return null;
             }
         };
     }
 
-    private Void redirectToUrl(Callback callback, Call call, Supplier<Optional<HttpUrl>> optionalUrlSupplier,
-            Supplier<String> redirectErrorMessageSupplier) {
+    private void redirectToUrl(Callback callback, Call call, Supplier<Optional<HttpUrl>> optionalUrlSupplier,
+            String redirectErrorMessage, Consumer<Request> redirectAction) {
         if (maxNumRelocations <= 0) {
             callback.onFailure(call,
-                    new IOException("Exceeded the maximum number of allowed "
-                            + "redirects for initial URL: " + call.request().url()));
+                    new IOException("Exceeded the maximum number of allowed redirects for initial URL: "
+                            + call.request().url()));
         } else {
             Optional<HttpUrl> redirectTo = optionalUrlSupplier.get();
             if (!redirectTo.isPresent()) {
-                callback.onFailure(call, new IOException(redirectErrorMessageSupplier.get()));
+                callback.onFailure(call, new IOException(redirectErrorMessage));
             } else {
                 Request redirectedRequest = request().newBuilder()
                         .url(redirectTo.get())
                         .build();
-                client.newCallWithMutableState(
-                        redirectedRequest, backoffStrategy, maxNumRelocations - 1)
-                        .enqueue(callback);
+                redirectAction.accept(redirectedRequest);
             }
         }
-        return null;
     }
 
     // TODO(rfink): Consider removing RemotingOkHttpCall#doClone method, #627
