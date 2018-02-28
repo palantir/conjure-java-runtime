@@ -32,6 +32,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 public final class UrlSelectorTest extends TestBase {
 
     @Test
+    public void mustSpecifyAtLeastOneUrl() throws Exception {
+        assertThatThrownBy(() -> UrlSelectorImpl.create(set(), false))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Must specify at least one URL");
+    }
+
+    @Test
     public void baseUrlsMustBeCanonical() throws Exception {
         for (String url : new String[] {
                 "user:pass@foo.com/path",

@@ -111,8 +111,15 @@ public final class OkHttpClients {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
-        // TODO(rfink): Should this go into the call itself?
-        config.meshProxy().ifPresent(meshProxy -> client.addInterceptor(new MeshProxyInterceptor(meshProxy)));
+        // Routing
+        UrlSelectorImpl urlSelector = UrlSelectorImpl.create(config.uris(), randomizeUrlOrder);
+        if (config.meshProxy().isPresent()) {
+            // TODO(rfink): Should this go into the call itself?
+            client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
+        } else {
+            // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in the request
+            client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
+        }
         client.followRedirects(false);  // We implement our own redirect logic.
 
         // SSL
@@ -152,7 +159,7 @@ public final class OkHttpClients {
         return new RemotingOkHttpClient(
                 client.build(),
                 () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()),
-                UrlSelectorImpl.create(config.uris(), randomizeUrlOrder),
+                urlSelector,
                 schedulingExecutor,
                 executionExecutor,
                 largestOf(config.connectTimeout(), config.readTimeout(), config.writeTimeout())
