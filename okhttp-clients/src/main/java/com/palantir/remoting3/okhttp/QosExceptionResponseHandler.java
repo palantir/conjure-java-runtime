@@ -84,7 +84,7 @@ enum QosExceptionResponseHandler implements ResponseHandler<QosException> {
     }
 
     private static QosException handle503() {
-        log.debug("Received 503 response, throwing QosException to trigger delayed retry");
+        log.debug("Received 503 response, throwing QosException to trigger failover");
         return QosException.unavailable();
     }
 }

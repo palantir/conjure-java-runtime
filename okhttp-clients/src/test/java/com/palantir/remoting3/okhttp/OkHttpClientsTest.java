@@ -387,10 +387,11 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
-    public void handlesQos_canRetryLaterAndThenRedirect() throws Exception {
-        server.enqueue(new MockResponse().setResponseCode(503));
+    public void handlesQos_redirectsToOtherUrlThenRetriesAnotherUrl() throws Exception {
+        // First hits server, then 308 redirects to server2, then 503 redirects back to server.
         server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
-        server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+        server2.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
 
         OkHttpClient client = createRetryingClient(1, url, url2);
         Call call = client.newCall(new Request.Builder().url(url).build());
@@ -401,18 +402,16 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
-    public void handlesQos_memorizedCurrentUrlBetweenCalls() throws Exception {
-        // First hits server,then 308 redirects to server2, then retries, waits on 503, then retries server2 again.
-        server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
-        server2.enqueue(new MockResponse().setResponseCode(503));
-        server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+    public void handlesQos_503FailsOverToAnotherUrl() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server2.enqueue(new MockResponse().setBody("foo"));
 
         OkHttpClient client = createRetryingClient(1, url, url2);
         Call call = client.newCall(new Request.Builder().url(url).build());
         assertThat(call.execute().body().string()).isEqualTo("foo");
 
         assertThat(server.getRequestCount()).isEqualTo(1);
-        assertThat(server2.getRequestCount()).isEqualTo(2);
+        assertThat(server2.getRequestCount()).isEqualTo(1);
     }
 
     @Test
