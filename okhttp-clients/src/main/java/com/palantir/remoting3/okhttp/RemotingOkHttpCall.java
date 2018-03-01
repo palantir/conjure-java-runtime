@@ -240,15 +240,24 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public Void visit(QosException.RetryOther exception) {
-                redirectToUrl(
-                        callback,
-                        call,
-                        // Redirect to the URL specified by the exception.
-                        () -> urls.redirectTo(request().url(), exception.getRedirectTo().toString()),
-                        "Failed to determine valid redirect URL for '" + exception.getRedirectTo() + "' and base URLs "
-                                + urls.getBaseUrls(),
-                        request -> client.newCallWithMutableState(request, backoffStrategy, maxNumRelocations - 1)
-                                .enqueue(callback));
+                if (maxNumRelocations <= 0) {
+                    callback.onFailure(call, new IOException("Exceeded the maximum number of allowed redirects for "
+                            + "initial URL: " + call.request().url()));
+                } else {
+                    // Redirect to the URL specified by the exception.
+                    Optional<HttpUrl> redirectTo = urls.redirectTo(request().url(),
+                            exception.getRedirectTo().toString());
+                    if (!redirectTo.isPresent()) {
+                        callback.onFailure(call, new IOException("Failed to determine valid redirect URL for '"
+                                + exception.getRedirectTo() + "' and base URLs " + urls.getBaseUrls()));
+                    } else {
+                        Request redirectedRequest = request().newBuilder()
+                                .url(redirectTo.get())
+                                .build();
+                        client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
+                                .enqueue(callback);
+                    }
+                }
                 return null;
             }
 
@@ -263,37 +272,22 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 } else {
                     log.debug("Rescheduling call after backoff",
                             SafeArg.of("backoffMillis", backoff.get().toMillis()));
-                    redirectToUrl(
-                            callback,
-                            call,
-                            // Redirect to the "next" URL, whichever that may be, after backing off.
-                            () -> urls.redirectToNext(request().url()),
-                            "Failed to determine valid redirect URL for base URLs " + urls.getBaseUrls(),
-                            request -> scheduleExecution(() -> client.newCallWithMutableState(request,
-                                    backoffStrategy, maxNumRelocations - 1).enqueue(callback), backoff.get()));
+                    // Redirect to the "next" URL, whichever that may be, after backing off.
+                    Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
+                    if (!redirectTo.isPresent()) {
+                        callback.onFailure(call, new IOException("Failed to determine valid redirect URL for base "
+                                + "URLs " + urls.getBaseUrls()));
+                    } else {
+                        Request redirectedRequest = request().newBuilder()
+                                .url(redirectTo.get())
+                                .build();
+                        scheduleExecution(() -> client.newCallWithMutableState(redirectedRequest, backoffStrategy,
+                                maxNumRelocations).enqueue(callback), backoff.get());
+                    }
                 }
                 return null;
             }
         };
-    }
-
-    private void redirectToUrl(Callback callback, Call call, Supplier<Optional<HttpUrl>> optionalUrlSupplier,
-            String redirectErrorMessage, Consumer<Request> redirectAction) {
-        if (maxNumRelocations <= 0) {
-            callback.onFailure(call,
-                    new IOException("Exceeded the maximum number of allowed redirects for initial URL: "
-                            + call.request().url()));
-        } else {
-            Optional<HttpUrl> redirectTo = optionalUrlSupplier.get();
-            if (!redirectTo.isPresent()) {
-                callback.onFailure(call, new IOException(redirectErrorMessage));
-            } else {
-                Request redirectedRequest = request().newBuilder()
-                        .url(redirectTo.get())
-                        .build();
-                redirectAction.accept(redirectedRequest);
-            }
-        }
     }
 
     // TODO(rfink): Consider removing RemotingOkHttpCall#doClone method, #627
