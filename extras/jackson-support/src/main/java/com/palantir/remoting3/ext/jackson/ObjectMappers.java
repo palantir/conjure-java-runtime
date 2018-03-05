@@ -116,6 +116,7 @@ public final class ObjectMappers {
                 .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
                 .disable(DeserializationFeature.WRAP_EXCEPTIONS)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
+                .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+                .enable(SerializationFeature.WRITE_DATES_WITH_ZONE_ID);
     }
 }

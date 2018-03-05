@@ -17,6 +17,7 @@
 package com.palantir.remoting3.ext.jackson;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,9 +86,15 @@ public final class ObjectMappersTest {
         assertThat(ser(offsetDateTime)).isEqualTo("\"2001-02-03T04:05:06.000000007-05:00\"");
         assertThat(serDe(offsetDateTime, OffsetDateTime.class)).isEqualTo(offsetDateTime);
 
-        ZonedDateTime zoneDateTime = ZonedDateTime.of(2001, 2, 3, 4, 5, 6, 7, ZoneId.of(ZoneId.SHORT_IDS.get("EST")));
-        assertThat(ser(zoneDateTime)).isEqualTo("\"2001-02-03T04:05:06.000000007-05:00\"");
+        ZonedDateTime zoneDateTime = ZonedDateTime.of(2001, 2, 3, 4, 5, 6, 7, ZoneId.of(ZoneId.SHORT_IDS.get("CST")));
+        assertThat(ser(zoneDateTime)).isEqualTo("\"2001-02-03T04:05:06.000000007-06:00[America/Chicago]\"");
         assertThat(serDe(zoneDateTime, ZonedDateTime.class)).isEqualTo(zoneDateTime);
+        /* Explicitly use assertTrue since .isEqualTo() for ZonedDateTime returns true if the two instances refer to the
+         * same point on the number line expressed differently. Since we're testing serde here, we need to be more
+         * restrictive and only accept the deserialized version if it expresses the same point on the number line in the
+         * same way as the original object (and .equals() reflects this).
+          */
+        assertTrue(zoneDateTime.equals(serDe(zoneDateTime, ZonedDateTime.class)));
 
         LocalDate localDate = LocalDate.of(2001, 2, 3);
         assertThat(ser(localDate)).isEqualTo("\"2001-02-03\"");
