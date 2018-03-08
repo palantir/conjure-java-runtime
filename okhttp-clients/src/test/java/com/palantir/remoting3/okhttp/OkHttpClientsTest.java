@@ -405,13 +405,16 @@ public final class OkHttpClientsTest extends TestBase {
     public void handlesQos_503FailsOverToAnotherUrl() throws Exception {
         server.enqueue(new MockResponse().setResponseCode(503));
         server2.enqueue(new MockResponse().setBody("foo"));
+        server2.enqueue(new MockResponse().setBody("bar"));
 
         OkHttpClient client = createRetryingClient(1, url, url2);
         Call call = client.newCall(new Request.Builder().url(url).build());
         assertThat(call.execute().body().string()).isEqualTo("foo");
+        Call call2 = client.newCall(new Request.Builder().url(url).build());
+        assertThat(call2.execute().body().string()).isEqualTo("bar");
 
         assertThat(server.getRequestCount()).isEqualTo(1);
-        assertThat(server2.getRequestCount()).isEqualTo(1);
+        assertThat(server2.getRequestCount()).isEqualTo(2);
     }
 
     @Test
