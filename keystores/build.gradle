@@ -8,11 +8,11 @@ dependencies {
     compile "com.palantir.remoting-api:ssl-config"
 
     testCompile project(":extras:jackson-support")
-    testCompile("com.netflix.feign:feign-jaxrs") {
+    testCompile("io.github.openfeign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
     }
-    testCompile "com.netflix.feign:feign-okhttp"
+    testCompile "io.github.openfeign:feign-okhttp"
     testCompile "org.hamcrest:hamcrest-all"
     testCompile "io.dropwizard:dropwizard-core"
     testCompile "io.dropwizard:dropwizard-testing"

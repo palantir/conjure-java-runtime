@@ -24,14 +24,14 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
-                "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting-api:ssl-config",
                 "com.palantir.remoting-api:tracing",
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "io.github.openfeign:feign-jackson"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -85,27 +85,6 @@
                 "com.palantir.remoting3:refresh-utils",
                 "com.palantir.remoting3:tracing"
             ]
-        },
-        "com.netflix.feign:feign-core": {
-            "locked": "8.17.0",
-            "transitive": [
-                "com.netflix.feign:feign-jackson",
-                "com.netflix.feign:feign-jaxrs",
-                "com.netflix.feign:feign-okhttp",
-                "com.netflix.feign:feign-slf4j"
-            ]
-        },
-        "com.netflix.feign:feign-jackson": {
-            "locked": "8.17.0"
-        },
-        "com.netflix.feign:feign-jaxrs": {
-            "locked": "8.17.0"
-        },
-        "com.netflix.feign:feign-okhttp": {
-            "locked": "8.17.0"
-        },
-        "com.netflix.feign:feign-slf4j": {
-            "locked": "8.17.0"
         },
         "com.palantir.remoting-api:errors": {
             "locked": "1.7.0",
@@ -205,10 +184,10 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.9.0",
             "transitive": [
-                "com.netflix.feign:feign-okhttp",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing-okhttp3",
-                "com.squareup.okhttp3:logging-interceptor"
+                "com.squareup.okhttp3:logging-interceptor",
+                "io.github.openfeign:feign-okhttp"
             ]
         },
         "com.squareup.okio:okio": {
@@ -224,6 +203,27 @@
                 "com.palantir.tritium:tritium-registry"
             ]
         },
+        "io.github.openfeign:feign-core": {
+            "locked": "9.6.0",
+            "transitive": [
+                "io.github.openfeign:feign-jackson",
+                "io.github.openfeign:feign-jaxrs",
+                "io.github.openfeign:feign-okhttp",
+                "io.github.openfeign:feign-slf4j"
+            ]
+        },
+        "io.github.openfeign:feign-jackson": {
+            "locked": "9.6.0"
+        },
+        "io.github.openfeign:feign-jaxrs": {
+            "locked": "9.6.0"
+        },
+        "io.github.openfeign:feign-okhttp": {
+            "locked": "9.6.0"
+        },
+        "io.github.openfeign:feign-slf4j": {
+            "locked": "9.6.0"
+        },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
@@ -231,21 +231,15 @@
                 "com.palantir.remoting3:error-handling"
             ]
         },
-        "org.jvnet:animal-sniffer-annotation": {
-            "locked": "1.0",
-            "transitive": [
-                "com.netflix.feign:feign-core"
-            ]
-        },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tokens:auth-tokens",
-                "io.dropwizard.metrics:metrics-core"
+                "io.dropwizard.metrics:metrics-core",
+                "io.github.openfeign:feign-slf4j"
             ]
         }
     },
@@ -274,14 +268,14 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
-                "com.netflix.feign:feign-jackson",
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting-api:ssl-config",
                 "com.palantir.remoting-api:tracing",
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "io.github.openfeign:feign-jackson"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -335,27 +329,6 @@
                 "com.palantir.remoting3:refresh-utils",
                 "com.palantir.remoting3:tracing"
             ]
-        },
-        "com.netflix.feign:feign-core": {
-            "locked": "8.17.0",
-            "transitive": [
-                "com.netflix.feign:feign-jackson",
-                "com.netflix.feign:feign-jaxrs",
-                "com.netflix.feign:feign-okhttp",
-                "com.netflix.feign:feign-slf4j"
-            ]
-        },
-        "com.netflix.feign:feign-jackson": {
-            "locked": "8.17.0"
-        },
-        "com.netflix.feign:feign-jaxrs": {
-            "locked": "8.17.0"
-        },
-        "com.netflix.feign:feign-okhttp": {
-            "locked": "8.17.0"
-        },
-        "com.netflix.feign:feign-slf4j": {
-            "locked": "8.17.0"
         },
         "com.palantir.remoting-api:errors": {
             "locked": "1.7.0",
@@ -455,10 +428,10 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.9.0",
             "transitive": [
-                "com.netflix.feign:feign-okhttp",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing-okhttp3",
-                "com.squareup.okhttp3:logging-interceptor"
+                "com.squareup.okhttp3:logging-interceptor",
+                "io.github.openfeign:feign-okhttp"
             ]
         },
         "com.squareup.okio:okio": {
@@ -474,6 +447,27 @@
                 "com.palantir.tritium:tritium-registry"
             ]
         },
+        "io.github.openfeign:feign-core": {
+            "locked": "9.6.0",
+            "transitive": [
+                "io.github.openfeign:feign-jackson",
+                "io.github.openfeign:feign-jaxrs",
+                "io.github.openfeign:feign-okhttp",
+                "io.github.openfeign:feign-slf4j"
+            ]
+        },
+        "io.github.openfeign:feign-jackson": {
+            "locked": "9.6.0"
+        },
+        "io.github.openfeign:feign-jaxrs": {
+            "locked": "9.6.0"
+        },
+        "io.github.openfeign:feign-okhttp": {
+            "locked": "9.6.0"
+        },
+        "io.github.openfeign:feign-slf4j": {
+            "locked": "9.6.0"
+        },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
@@ -481,21 +475,15 @@
                 "com.palantir.remoting3:error-handling"
             ]
         },
-        "org.jvnet:animal-sniffer-annotation": {
-            "locked": "1.0",
-            "transitive": [
-                "com.netflix.feign:feign-core"
-            ]
-        },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tokens:auth-tokens",
-                "io.dropwizard.metrics:metrics-core"
+                "io.dropwizard.metrics:metrics-core",
+                "io.github.openfeign:feign-slf4j"
             ]
         }
     }

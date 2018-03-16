@@ -11,15 +11,15 @@ dependencies {
 
     compile "com.google.code.findbugs:jsr305"
     compile "com.google.guava:guava"
-    compile "com.netflix.feign:feign-jackson"
-    compile("com.netflix.feign:feign-jaxrs") {
+    compile "io.github.openfeign:feign-jackson"
+    compile("io.github.openfeign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
     }
-    compile "com.netflix.feign:feign-okhttp"
+    compile "io.github.openfeign:feign-okhttp"
     compile "javax.ws.rs:javax.ws.rs-api"
     compile "org.slf4j:slf4j-api"
-    compile "com.netflix.feign:feign-slf4j"
+    compile "io.github.openfeign:feign-slf4j"
 
     testCompile project(":jersey-servers")
     testCompile project(":retrofit2-clients")
