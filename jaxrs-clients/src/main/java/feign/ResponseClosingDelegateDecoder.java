@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,25 +18,26 @@ package feign;
 
 import feign.codec.Decoder;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
 
 /**
- * If the return type is InputStream, return it, otherwise delegate to provided decoder.
+ * {@link ResponseClosingDelegateDecoder} closes all {@link Response} instances.
+ * This is only necessary when <pre>doNotCloseAfterDecode</pre> has been set
+ * on the feign builder.
  */
-public final class InputStreamDelegateDecoder implements Decoder {
+public final class ResponseClosingDelegateDecoder implements Decoder {
     private final Decoder delegate;
 
-    public InputStreamDelegateDecoder(Decoder delegate) {
+    public ResponseClosingDelegateDecoder(Decoder delegate) {
         this.delegate = delegate;
     }
 
     @Override
     public Object decode(Response response, Type type) throws IOException, FeignException {
-        if (type.equals(InputStream.class)) {
-            return response.body().asInputStream();
-        } else {
+        try {
             return delegate.decode(response, type);
+        } finally {
+            response.close();
         }
     }
 }

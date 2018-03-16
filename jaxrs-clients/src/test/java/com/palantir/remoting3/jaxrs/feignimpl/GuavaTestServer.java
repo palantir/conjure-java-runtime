@@ -127,6 +127,21 @@ public class GuavaTestServer extends Application<Configuration> {
         }
 
         @Override
+        public InputStream writeInputStream(long sizeInBytes) {
+            return new InputStream() {
+                private long remaining = sizeInBytes;
+                @Override
+                public int read() {
+                    if (remaining == 0) {
+                        return -1;
+                    }
+                    remaining--;
+                    return 1;
+                }
+            };
+        }
+
+        @Override
         public String readInputStream(InputStream data) {
             try {
                 return new String(Util.toByteArray(data), StandardCharsets.UTF_8);
@@ -221,6 +236,11 @@ public class GuavaTestServer extends Application<Configuration> {
         @Consumes(MediaType.TEXT_PLAIN)
         @Produces(MediaType.TEXT_PLAIN)
         InputStream writeInputStream(@QueryParam("value") @Nullable String bytes);
+
+        @GET
+        @Path("/readInputStream")
+        @Produces(MediaType.APPLICATION_OCTET_STREAM)
+        InputStream writeInputStream(@QueryParam("size") long sizeInBytes);
 
         @POST
         @Path("/readInputStream")

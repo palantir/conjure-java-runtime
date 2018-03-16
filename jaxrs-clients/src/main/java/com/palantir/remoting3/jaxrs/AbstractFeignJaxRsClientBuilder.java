@@ -37,6 +37,7 @@ import feign.InputStreamDelegateEncoder;
 import feign.Java8OptionalAwareDecoder;
 import feign.Logger;
 import feign.Request;
+import feign.ResponseClosingDelegateDecoder;
 import feign.Retryer;
 import feign.TextDelegateDecoder;
 import feign.TextDelegateEncoder;
@@ -95,6 +96,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
                 .retryer(new Retryer.Default(0, 0, 1))  // use OkHttp retry mechanism only
+                .doNotCloseAfterDecode()
                 .target(serviceClass, primaryUri);
     }
 
@@ -116,9 +118,10 @@ abstract class AbstractFeignJaxRsClientBuilder {
         return new Java8OptionalAwareDecoder(
                 new GuavaOptionalAwareDecoder(
                         new InputStreamDelegateDecoder(
-                                new TextDelegateDecoder(
-                                        new CborDelegateDecoder(
-                                                cborObjectMapper,
-                                                new JacksonDecoder(objectMapper))))));
+                                new ResponseClosingDelegateDecoder(
+                                    new TextDelegateDecoder(
+                                            new CborDelegateDecoder(
+                                                    cborObjectMapper,
+                                                    new JacksonDecoder(objectMapper)))))));
     }
 }

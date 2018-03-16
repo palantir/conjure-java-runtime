@@ -23,6 +23,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CountingInputStream;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import com.palantir.remoting3.jaxrs.TestBase;
 import com.palantir.remoting3.jaxrs.feignimpl.GuavaTestServer;
@@ -80,6 +82,16 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
     public void testStandardClientsUseInputStreamDelegateDecoder() throws IOException {
         String data = "bytes";
         assertThat(Util.toByteArray(service.writeInputStream(data)), is(bytes(data)));
+    }
+
+    @Test
+    public void testInputStreamIsNotBuffered() throws IOException {
+        // Creating an array of size Integer.MAX_VALUE will always throw an OutOfMemoryError
+        try (InputStream response = service.writeInputStream(Integer.MAX_VALUE);
+             CountingInputStream countingInputStream = new CountingInputStream(response)) {
+            ByteStreams.copy(countingInputStream, ByteStreams.nullOutputStream());
+            assertThat(countingInputStream.getCount(), is((long) Integer.MAX_VALUE));
+        }
     }
 
     private static byte[] bytes(String text) {
