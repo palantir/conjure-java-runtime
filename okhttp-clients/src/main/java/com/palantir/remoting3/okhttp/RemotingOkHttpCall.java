@@ -145,7 +145,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
             @Override
             public void onFailure(Call call, IOException exception) {
                 // Fail call if backoffs are exhausted or if no retry URL can be determined.
-                if (!backoffStrategy.nextBackoff().isPresent()) {
+                Optional<Duration> backoff = backoffStrategy.nextBackoff();
+                if (!backoff.isPresent()) {
                     callback.onFailure(call, new IOException("Failed to complete the request due to an "
                             + "IOException", exception));
                     return;
@@ -162,7 +163,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                         .build();
                 RemotingOkHttpCall retryCall =
                         client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
-                retryCall.enqueue(callback);
+                scheduleExecution(() -> retryCall.enqueue(callback), backoff.get());
             }
 
             @Override
