@@ -50,7 +50,7 @@ public final class ExponentialBackoffTest {
         assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(4));
 
         when(random.nextDouble()).thenReturn(0.5);
-        assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(4));
+        assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(4 /* 8 * 0.5 (exp * jitter), see above */));
 
         assertThat(backoff.nextBackoff()).isEmpty();
     }
