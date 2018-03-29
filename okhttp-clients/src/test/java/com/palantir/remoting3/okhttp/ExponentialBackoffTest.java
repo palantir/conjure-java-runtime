@@ -17,9 +17,7 @@
 package com.palantir.remoting3.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -45,17 +43,14 @@ public final class ExponentialBackoffTest {
         Random random = mock(Random.class);
         ExponentialBackoff backoff = new ExponentialBackoff(3, ONE_SECOND, random);
 
-        when(random.nextInt(anyInt())).thenReturn(1);
-        assertThat(backoff.nextBackoff()).contains(ONE_SECOND);
-        verify(random).nextInt(2);
-
-        when(random.nextInt(anyInt())).thenReturn(2);
+        when(random.nextDouble()).thenReturn(1.0);
         assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(2));
-        verify(random).nextInt(4);
 
-        when(random.nextInt(anyInt())).thenReturn(3);
-        assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(3));
-        verify(random).nextInt(8);
+        when(random.nextDouble()).thenReturn(1.0);
+        assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(4));
+
+        when(random.nextDouble()).thenReturn(0.5);
+        assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(4 /* 8 * 0.5 (exp * jitter), see above */));
 
         assertThat(backoff.nextBackoff()).isEmpty();
     }
