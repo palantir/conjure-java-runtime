@@ -46,13 +46,13 @@ public final class ExponentialBackoffTest {
         ExponentialBackoff backoff = new ExponentialBackoff(3, ONE_SECOND, random);
 
         when(random.nextDouble()).thenReturn(1.0);
-        assertThat(backoff.nextBackoff()).contains(ONE_SECOND);
-
-        when(random.nextDouble()).thenReturn(1.0);
         assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(2));
 
         when(random.nextDouble()).thenReturn(1.0);
         assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(4));
+
+        when(random.nextDouble()).thenReturn(1.0);
+        assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(8));
 
         assertThat(backoff.nextBackoff()).isEmpty();
     }
