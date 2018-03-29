@@ -163,6 +163,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                         .build();
                 RemotingOkHttpCall retryCall =
                         client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
+                log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()));
                 scheduleExecution(() -> retryCall.enqueue(callback), backoff.get());
             }
 
