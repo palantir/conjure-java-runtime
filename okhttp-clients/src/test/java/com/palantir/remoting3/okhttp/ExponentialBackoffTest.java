@@ -45,17 +45,14 @@ public final class ExponentialBackoffTest {
         Random random = mock(Random.class);
         ExponentialBackoff backoff = new ExponentialBackoff(3, ONE_SECOND, random);
 
-        when(random.nextInt(anyInt())).thenReturn(1);
+        when(random.nextDouble()).thenReturn(1.0);
         assertThat(backoff.nextBackoff()).contains(ONE_SECOND);
-        verify(random).nextInt(2);
 
-        when(random.nextInt(anyInt())).thenReturn(2);
+        when(random.nextDouble()).thenReturn(1.0);
         assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(2));
-        verify(random).nextInt(4);
 
-        when(random.nextInt(anyInt())).thenReturn(3);
-        assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(3));
-        verify(random).nextInt(8);
+        when(random.nextDouble()).thenReturn(1.0);
+        assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(4));
 
         assertThat(backoff.nextBackoff()).isEmpty();
     }

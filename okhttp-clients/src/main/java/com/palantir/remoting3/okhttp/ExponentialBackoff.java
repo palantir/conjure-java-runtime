@@ -42,12 +42,11 @@ final class ExponentialBackoff implements BackoffStrategy {
 
     @Override
     public Optional<Duration> nextBackoff() {
-        retryNumber += 1;
+        int upperBound = (int) Math.pow(2, retryNumber++);
         if (retryNumber > maxNumRetries) {
             return Optional.empty();
         }
 
-        int upperBound = (int) Math.pow(2, retryNumber);
         return Optional.of(Duration.ofNanos(Math.round(backoffSlotSize.toNanos() * random.nextDouble() * upperBound)));
     }
 }
