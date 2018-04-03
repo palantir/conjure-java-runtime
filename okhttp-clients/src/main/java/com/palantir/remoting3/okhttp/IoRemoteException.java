@@ -29,6 +29,7 @@ public final class IoRemoteException extends IOException {
     private final RemoteException wrappedException;
 
     IoRemoteException(RemoteException wrappedException) {
+        super(wrappedException);
         this.wrappedException = wrappedException;
     }
 
