@@ -16,14 +16,12 @@
 
 package com.palantir.remoting3.jaxrs.feignimpl;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting3.servers.jersey.HttpRemotingJerseyFeature;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
-import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -43,11 +41,6 @@ import javax.ws.rs.core.MediaType;
 import org.assertj.core.util.Strings;
 
 public class GuavaTestServer extends Application<Configuration> {
-
-    @Override
-    public final void initialize(Bootstrap<Configuration> bootstrap) {
-        bootstrap.getObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
-    }
 
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
