@@ -121,7 +121,7 @@ public final class SerializableErrorErrorDecoderTests {
         assertThat(decode.getMessage()).isEqualTo(
                 "Error 42. Failed to parse error body and deserialize exception: "
                         + "Unrecognized token 'notjsonifiable': was expecting 'null', 'true', 'false' or NaN\n "
-                        + "at [Source: notjsonifiable!; line: 1, column: 15]. Body:\n"
+                        + "at [Source: (String)\"notjsonifiable!\"; line: 1, column: 15]. Body:\n"
                         + "notjsonifiable!");
     }
 
