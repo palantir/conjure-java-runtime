@@ -124,7 +124,7 @@ public final class CompressionFilterTest {
     public void testNoCompressionWithoutHeader() {
         Response response = baseRequest(target).get();
 
-        assertThat(response.getHeaderString(HttpHeaders.VARY), is(HttpHeaders.ACCEPT_ENCODING));
+        assertThat(response.getHeaderString(HttpHeaders.VARY), is(nullValue()));
         assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is(nullValue()));
         assertThat(response.readEntity(String.class), is("val"));
     }
@@ -133,7 +133,7 @@ public final class CompressionFilterTest {
     public void testNoCompressionForUncompressableResponse() {
         Response response = target.path("uncompressible").request().get();
 
-        assertThat(response.getHeaderString(HttpHeaders.VARY), is(HttpHeaders.ACCEPT_ENCODING));
+        assertThat(response.getHeaderString(HttpHeaders.VARY), is(nullValue()));
         assertThat(response.getHeaderString(HttpHeaders.CONTENT_ENCODING), is(nullValue()));
         assertThat(response.readEntity(String.class), is("value"));
     }
