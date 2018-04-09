@@ -23,6 +23,7 @@ import com.palantir.remoting3.servers.jersey.HttpRemotingJerseyFeature;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
+import io.dropwizard.jersey.optional.EmptyOptionalException;
 import io.dropwizard.setup.Environment;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -40,12 +41,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
 public class Java8TestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
         env.jersey().register(new TestResource());
+        env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
         env.getObjectMapper().registerModule(new Jdk8Module());
     }
 
@@ -140,6 +145,14 @@ public class Java8TestServer extends Application<Configuration> {
         @Override
         public Java8ComplexType getJava8ComplexType(Java8ComplexType value) {
             return value;
+        }
+    }
+
+    @Provider
+    private static final class EmptyOptionalTo204ExceptionMapper implements ExceptionMapper<EmptyOptionalException> {
+        @Override
+        public Response toResponse(EmptyOptionalException exception) {
+            return Response.noContent().build();
         }
     }
 

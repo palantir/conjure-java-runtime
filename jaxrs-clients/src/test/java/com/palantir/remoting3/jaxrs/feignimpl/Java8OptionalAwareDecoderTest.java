@@ -132,9 +132,9 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
                         new Java8ComplexType(
                                 Optional.empty(),
                                 Optional.empty(),
-                                Paths.get("bar"))),
+                                Paths.get("/bar"))),
                 Optional.of("baz"),
-                Paths.get("foo"));
+                Paths.get("/foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
         assertThat(service.getJava8ComplexType(value), is(value));
     }

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThat;
 import com.google.common.base.Strings;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
+import io.dropwizard.jersey.optional.EmptyOptionalException;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.util.Optional;
@@ -40,6 +41,8 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -134,7 +137,16 @@ public final class Java8OptionalTest {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
+            env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
             env.jersey().register(new OptionalTestResource());
+        }
+    }
+
+    @Provider
+    private static final class EmptyOptionalTo204ExceptionMapper implements ExceptionMapper<EmptyOptionalException> {
+        @Override
+        public Response toResponse(EmptyOptionalException exception) {
+            return Response.noContent().build();
         }
     }
 

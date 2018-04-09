@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codahale.metrics.MetricRegistry;
 import io.dropwizard.jersey.DropwizardResourceConfig;
+import io.dropwizard.jersey.optional.EmptyOptionalException;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -33,6 +34,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
 import org.junit.Test;
@@ -44,6 +47,7 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
         forceSet(TestProperties.CONTAINER_PORT, "0");
         return DropwizardResourceConfig.forTesting(new MetricRegistry())
                 .register(HttpRemotingJerseyFeature.INSTANCE)
+                .register(new EmptyOptionalTo204ExceptionMapper())
                 .register(OptionalReturnResource.class);
     }
 
@@ -83,6 +87,14 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
 
         response = target("/optional-return/double").request().get();
         assertThat(response.getStatus()).isEqualTo(204);
+    }
+
+    @Provider
+    private static final class EmptyOptionalTo204ExceptionMapper implements ExceptionMapper<EmptyOptionalException> {
+        @Override
+        public Response toResponse(EmptyOptionalException exception) {
+            return Response.noContent().build();
+        }
     }
 
     @Path("/optional-return/")
