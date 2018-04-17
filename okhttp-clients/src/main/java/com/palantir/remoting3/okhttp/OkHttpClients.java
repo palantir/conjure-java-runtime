@@ -68,7 +68,7 @@ public final class OkHttpClients {
     /**
      * The per service and host metrics recorded for each HTTP call.
      */
-    private static final HostMetricsRegistry hostMetrics = new HostMetricsRegistry();
+    private static final HostMetricsRegistry hostMetrics = HostMetricsRegistry.getDefault();
 
     private OkHttpClients() {}
 
