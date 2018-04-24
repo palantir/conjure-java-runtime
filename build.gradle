@@ -5,7 +5,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'gradle.plugin.com.palantir:gradle-circle-style:1.1.1'
+        classpath 'gradle.plugin.com.palantir:gradle-circle-style:1.1.2'
         classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
         classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:4.9.5'
