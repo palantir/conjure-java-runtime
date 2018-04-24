@@ -10,25 +10,11 @@
     <!-- Suppress test classes -->
     <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="Javadoc*" />
     <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="VariableDeclarationUsageDistance" />
-
-    <!-- Allow logback imports in these tests. -->
-    <suppress files="[/\\]src[/\\].*(FeignClientFactoryTest.java)" checks="IllegalImport" />
-    <suppress files="[/\\]src[/\\].*(AsyncSlf4jSpanObserverTest.java)" checks="IllegalImport" />
-    <suppress files="[/\\]src[/\\].*(TracerTest.java)" checks="IllegalImport" />
-
-    <!-- Copied Guava classes. -->
-    <suppress files="[/\\]src[/\\].*(WrappingExecutorService.java)" checks="." />
-    <suppress files="[/\\]src[/\\].*(WrappingScheduledExecutorService.java)" checks="." />
-
-    <!-- Copied Retrofit classes. -->
-    <suppress files="[/\\]src[/\\].*(AsyncSerializableErrorCallAdapterFactory.java)" checks="." />
     <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="VisibilityModifier" />
+    <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="AvoidStaticImport" />
 
     <!-- JavadocStyle enforces existence of package-info.java package-level Javadoc; we consider this a bug. -->
     <suppress files="package-info.java" checks="JavadocStyle" />
-
-    <!-- Needs sun package. -->
-    <suppress files="[/\\]src[/\\].*(SunPkcs1Reader.java)" checks="IllegalImport" />
 
     <!-- non-code classes -->
     <suppress files="\.(bdr|eot|gif|gzip|jar|json|otf|png|svg|ttf|woff|zip)$" checks="FileTabCharacter" />
