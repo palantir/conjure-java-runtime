@@ -10,6 +10,17 @@
     <!-- Suppress test classes -->
     <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="Javadoc*" />
     <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="VariableDeclarationUsageDistance" />
+
+    <!-- Allow logback imports in these tests. -->
+    <suppress files="[/\\]src[/\\].*(AsyncSlf4jSpanObserverTest.java)" checks="IllegalImport" />
+    <suppress files="[/\\]src[/\\].*(TracerTest.java)" checks="IllegalImport" />
+
+    <!-- Copied Guava classes. -->
+    <suppress files="[/\\]src[/\\].*(WrappingExecutorService.java)" checks="." />
+    <suppress files="[/\\]src[/\\].*(WrappingScheduledExecutorService.java)" checks="." />
+
+    <!-- Copied Retrofit classes. -->
+    <suppress files="[/\\]src[/\\].*(AsyncSerializableErrorCallAdapterFactory.java)" checks="." />
     <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="VisibilityModifier" />
     <suppress files="[/\\]src[/\\].*[Tt]est[/\\](java|groovy)[/\\]" checks="AvoidStaticImport" />
 
