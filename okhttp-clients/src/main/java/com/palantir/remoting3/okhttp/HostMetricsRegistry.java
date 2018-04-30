@@ -29,13 +29,22 @@ import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class HostMetricsRegistry {
+public final class HostMetricsRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(HostMetricsRegistry.class);
 
     private final LoadingCache<ServiceAndHost, DefaultHostMetrics> hostMetrics;
 
-    HostMetricsRegistry() {
+    private static final HostMetricsRegistry DEFAULT = new HostMetricsRegistry();
+
+    /**
+     * Get the global default {@link HostMetricsRegistry}.
+     */
+    public static HostMetricsRegistry getDefault() {
+        return HostMetricsRegistry.DEFAULT;
+    }
+
+    public HostMetricsRegistry() {
         this.hostMetrics = CacheBuilder.newBuilder()
                 .maximumSize(1_000)
                 .expireAfterAccess(1, TimeUnit.DAYS)
@@ -47,7 +56,7 @@ final class HostMetricsRegistry {
                 });
     }
 
-    void record(String serviceName, String hostname, int statusCode, long micros) {
+    public void record(String serviceName, String hostname, int statusCode, long micros) {
         try {
             hostMetrics.getUnchecked(ImmutableServiceAndHost.of(serviceName, hostname)).record(statusCode, micros);
         } catch (Exception e) {
@@ -55,7 +64,7 @@ final class HostMetricsRegistry {
         }
     }
 
-    void recordIoException(String serviceName, String hostname) {
+    public void recordIoException(String serviceName, String hostname) {
         try {
             hostMetrics.getUnchecked(ImmutableServiceAndHost.of(serviceName, hostname)).recordIoException();
         } catch (Exception e) {
@@ -63,7 +72,7 @@ final class HostMetricsRegistry {
         }
     }
 
-    Collection<HostMetrics> getMetrics() {
+    public Collection<HostMetrics> getMetrics() {
         return Collections.unmodifiableCollection(hostMetrics.asMap().values());
     }
 
