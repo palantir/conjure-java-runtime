@@ -245,6 +245,53 @@ public final class TracersTest {
     }
 
     @Test
+    public void testWrapRunnableWithTrace_traceStateInsideRunnableUsesGivenTraceId() {
+        String traceIdBeforeConstruction = Tracer.getTraceId();
+
+        List<String> traceIds = Lists.newArrayList();
+
+        String traceIdToUse = "someTraceId";
+        Runnable wrappedRunnable = Tracers.wrapWithTrace(() -> {
+            traceIds.add(Tracer.getTraceId());
+        }, traceIdToUse);
+
+        wrappedRunnable.run();
+        wrappedRunnable.run();
+
+        String traceIdFirstCall = traceIds.get(0);
+        String traceIdSecondCall = traceIds.get(1);
+
+        String traceIdAfterCalls = Tracer.getTraceId();
+
+        assertThat(traceIdFirstCall)
+                .isNotEqualTo(traceIdBeforeConstruction)
+                .isNotEqualTo(traceIdAfterCalls)
+                .isEqualTo(traceIdToUse);
+
+        assertThat(traceIdSecondCall)
+                .isNotEqualTo(traceIdBeforeConstruction)
+                .isNotEqualTo(traceIdAfterCalls)
+                .isEqualTo(traceIdToUse);
+
+        assertThat(traceIdBeforeConstruction)
+                .isEqualTo(traceIdAfterCalls);
+    }
+
+    @Test
+    public void testWrapRunnableWithTrace_traceStateRestoredWhenThrows() {
+        String traceIdBeforeConstruction = Tracer.getTraceId();
+
+        Runnable rawRunnable = () -> {
+            throw new IllegalStateException();
+        };
+        Runnable wrappedRunnable = Tracers.wrapWithTrace(rawRunnable, "someTraceId");
+
+        assertThatThrownBy(() -> wrappedRunnable.run()).isInstanceOf(IllegalStateException.class);
+
+        assertThat(Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);
+    }
+
+    @Test
     public void testTraceIdGeneration() throws Exception {
         assertThat(Tracers.randomId()).hasSize(16); // fails with p=1/16 if generated string is not padded
         assertThat(Tracers.longToPaddedHex(0)).isEqualTo("0000000000000000");

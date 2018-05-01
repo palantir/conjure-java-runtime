@@ -159,6 +159,27 @@ public final class Tracers {
     }
 
     /**
+     * Wraps the given {@link Runnable} such that it creates a fresh {@link Trace tracing state with the given traceId}
+     * for its execution. That is, the trace during its {@link Runnable#run() execution} will use the traceId provided
+     * instead of any trace already set on the thread used to execute the runnable. Each execution of the runnable
+     * will use a new {@link Trace tracing state} with the same given traceId.
+     */
+    public static Runnable wrapWithTrace(Runnable delegate, String traceId) {
+        return () -> {
+            // clear the existing trace and keep it around for restoration when we're done
+            Trace originalTrace = Tracer.getAndClearTrace();
+
+            try {
+                Tracer.initTrace(Optional.empty(), traceId);
+                delegate.run();
+            } finally {
+                // restore the trace
+                Tracer.setTrace(originalTrace);
+            }
+        };
+    }
+
+    /**
      * Wraps a given callable such that its execution operates with the {@link Trace thread-local Trace} of the thread
      * that constructs the {@link TracingAwareCallable} instance rather than the thread that executes the callable.
      * <p>
