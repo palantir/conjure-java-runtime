@@ -36,11 +36,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.UnaryOperator;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient.Builder;
 import okhttp3.TlsVersion;
 import okhttp3.internal.Util;
 
@@ -76,8 +78,20 @@ public final class OkHttpClients {
      * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
+    public static OkHttpClient create(
+            ClientConfiguration config,
+            UserAgent userAgent,
+            Class<?> serviceClass,
+            UnaryOperator<Builder> builderExtraConfiguration) {
+        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */, builderExtraConfiguration);
+    }
+
+    /**
+     * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
+     * ClientConfiguration#uris URIs} are initialized in random order.
+     */
     public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */);
+        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */, UnaryOperator.identity());
     }
 
     /**
@@ -100,14 +114,15 @@ public final class OkHttpClients {
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
             ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, false);
+        return createInternal(config, userAgent, serviceClass, false, UnaryOperator.identity());
     }
 
     private static RemotingOkHttpClient createInternal(
             ClientConfiguration config,
             UserAgent userAgent,
             Class<?> serviceClass,
-            boolean randomizeUrlOrder) {
+            boolean randomizeUrlOrder,
+            UnaryOperator<Builder> builderExtraConfiguration) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
@@ -157,7 +172,7 @@ public final class OkHttpClients {
         client.dispatcher(createDispatcher());
 
         return new RemotingOkHttpClient(
-                client.build(),
+                builderExtraConfiguration.apply(client).build(),
                 () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()),
                 urlSelector,
                 schedulingExecutor,
