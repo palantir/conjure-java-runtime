@@ -23,8 +23,6 @@ import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.okhttp.OkHttpClients;
-import java.util.Optional;
-import okhttp3.Cache;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -48,11 +46,7 @@ public final class Retrofit2ClientBuilder {
     }
 
     public <T> T build(Class<T> serviceClass, UserAgent userAgent) {
-        return build(serviceClass, userAgent, Optional.empty());
-    }
-
-    public <T> T build(Class<T> serviceClass, UserAgent userAgent, Optional<Cache> cache) {
-        okhttp3.OkHttpClient client = OkHttpClients.create(config, userAgent, serviceClass, cache);
+        okhttp3.OkHttpClient client = OkHttpClients.create(config, userAgent, serviceClass);
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(addTrailingSlash(config.uris().get(0)))
