@@ -17,9 +17,12 @@
 package com.palantir.remoting3.okhttp;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
+import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting.api.config.service.BasicCredentials;
+import com.palantir.remoting3.clients.CacheConfig;
 import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.UserAgent;
@@ -28,14 +31,20 @@ import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.concurrent.GuardedBy;
+import okhttp3.Cache;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
@@ -43,8 +52,11 @@ import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
 import okhttp3.internal.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class OkHttpClients {
+    private static final Logger log = LoggerFactory.getLogger(OkHttpClients.class);
 
     @VisibleForTesting
     static final int NUM_SCHEDULING_THREADS = 5;
@@ -53,6 +65,14 @@ public final class OkHttpClients {
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
      */
     private static final ExecutorService executionExecutor = Tracers.wrap(new Dispatcher().executorService());
+
+    private static final Object cacheLock = new Object();
+
+    /**
+     * Keys are guaranteed to be normalized paths.
+     */
+    @GuardedBy("cacheLock")
+    private static final Map<Path, Cache> caches = new HashMap<>();
 
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
@@ -156,6 +176,9 @@ public final class OkHttpClients {
         // dispatcher with static executor service
         client.dispatcher(createDispatcher());
 
+        // Cache
+        config.cacheConfig().map(OkHttpClients::cacheFromConfig).ifPresent(client::cache);
+
         return new RemotingOkHttpClient(
                 client.build(),
                 () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()),
@@ -164,6 +187,35 @@ public final class OkHttpClients {
                 executionExecutor,
                 largestOf(config.connectTimeout(), config.readTimeout(), config.writeTimeout())
         );
+    }
+
+    private static Cache cacheFromConfig(CacheConfig cacheConfig) {
+        Path requestedPath = cacheConfig.directory().toPath().normalize();
+        long requestedMaxSize = cacheConfig.maxSizeMb() * 1024 * 1024;
+        synchronized (cacheLock) {
+            if (caches.containsKey(requestedPath)) {
+                log.debug("Reusing existing OkHttp cache", UnsafeArg.of("cacheConfig", cacheConfig));
+                Cache cache = caches.get(requestedPath);
+                Preconditions.checkArgument(cache.maxSize() == requestedMaxSize,
+                        "Requested cache exists but with different max size: %s; Requested was: %s",
+                        cache.maxSize(),
+                        cacheConfig);
+                return cache;
+            }
+            Optional<Path> conflictsWith = caches
+                    .keySet()
+                    .stream()
+                    .filter(path -> path.startsWith(requestedPath) || requestedPath.startsWith(path))
+                    .findFirst();
+            Preconditions.checkArgument(
+                    !conflictsWith.isPresent(),
+                    "Requested cache directory is contained in or contains an already in-use cache directory. "
+                            + "Requested: %s; conflicts with: %s",
+                    requestedPath,
+                    conflictsWith);
+        }
+        log.info("Creating new OkHttp cache", UnsafeArg.of("cacheConfig", cacheConfig));
+        return new Cache(cacheConfig.directory(), requestedMaxSize);
     }
 
     /**

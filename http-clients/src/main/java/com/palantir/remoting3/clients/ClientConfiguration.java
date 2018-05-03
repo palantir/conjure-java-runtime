@@ -84,6 +84,11 @@ public interface ClientConfiguration {
      */
     Duration backoffSlotSize();
 
+    /**
+     * Configuration for the OkHttp LRU on-disk cache. If unset, clients will use the default OkHttpClient cache.
+     */
+    Optional<CacheConfig> cacheConfig();
+
     @Value.Check
     default void check() {
         if (meshProxy().isPresent()) {
