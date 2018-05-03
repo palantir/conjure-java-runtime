@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import okhttp3.Cache;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
@@ -155,6 +156,10 @@ public final class OkHttpClients {
 
         // dispatcher with static executor service
         client.dispatcher(createDispatcher());
+
+        // Cache
+        config.cacheConfig().ifPresent(cacheConfig ->
+                client.cache(new Cache(cacheConfig.directory(), cacheConfig.maxSizeMb() * 1024 * 1024)));
 
         return new RemotingOkHttpClient(
                 client.build(),
