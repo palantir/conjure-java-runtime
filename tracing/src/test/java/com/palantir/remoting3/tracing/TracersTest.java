@@ -246,15 +246,13 @@ public final class TracersTest {
     }
 
     @Test
-    public void testWrapRunnableWithTrace_traceStateInsideRunnableUsesGivenTraceId() {
+    public void testWrapRunnableWithAlternateTraceId_traceStateInsideRunnableUsesGivenTraceId() {
         String traceIdBeforeConstruction = Tracer.getTraceId();
-
         AtomicReference<String> traceId = new AtomicReference<>();
-
         String traceIdToUse = "someTraceId";
-        Runnable wrappedRunnable = Tracers.wrapWithTrace(() -> {
+        Runnable wrappedRunnable = Tracers.wrapWithAlternateTraceId(traceIdToUse, () -> {
             traceId.set(Tracer.getTraceId());
-        }, traceIdToUse);
+        });
 
         wrappedRunnable.run();
 
@@ -269,12 +267,12 @@ public final class TracersTest {
     }
 
     @Test
-    public void testWrapRunnableWithTrace_traceStateRestoredWhenThrows() {
+    public void testWrapRunnableWithAlternateTraceId_traceStateRestoredWhenThrows() {
         String traceIdBeforeConstruction = Tracer.getTraceId();
         Runnable rawRunnable = () -> {
             throw new IllegalStateException();
         };
-        Runnable wrappedRunnable = Tracers.wrapWithTrace(rawRunnable, "someTraceId");
+        Runnable wrappedRunnable = Tracers.wrapWithAlternateTraceId("someTraceId", rawRunnable);
 
         assertThatThrownBy(() -> wrappedRunnable.run()).isInstanceOf(IllegalStateException.class);
         assertThat(Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);

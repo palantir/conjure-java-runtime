@@ -164,7 +164,7 @@ public final class Tracers {
      * instead of any trace already set on the thread used to execute the runnable. Each execution of the runnable
      * will use a new {@link Trace tracing state} with the same given traceId.
      */
-    public static Runnable wrapWithTrace(Runnable delegate, String traceId) {
+    public static Runnable wrapWithAlternateTraceId(String traceId, Runnable delegate) {
         return () -> {
             // clear the existing trace and keep it around for restoration when we're done
             Trace originalTrace = Tracer.getAndClearTrace();
