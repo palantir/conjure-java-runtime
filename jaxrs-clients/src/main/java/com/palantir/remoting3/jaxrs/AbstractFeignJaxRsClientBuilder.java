@@ -45,6 +45,8 @@ import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JAXRSContract;
 import feign.okhttp.OkHttpClient;
+import java.util.Optional;
+import okhttp3.Cache;
 
 /**
  * Not meant to be implemented outside of this library.
@@ -78,6 +80,10 @@ abstract class AbstractFeignJaxRsClientBuilder {
     }
 
     public final <T> T build(Class<T> serviceClass, UserAgent userAgent) {
+        return build(serviceClass, userAgent, Optional.empty());
+    }
+
+    public final <T> T build(Class<T> serviceClass, UserAgent userAgent, Optional<Cache> cache) {
         ObjectMapper objectMapper = getObjectMapper();
         ObjectMapper cborObjectMapper = getCborObjectMapper();
 
@@ -91,7 +97,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
                 .requestInterceptor(PathTemplateHeaderRewriter.INSTANCE)
-                .client(new OkHttpClient(OkHttpClients.create(config, userAgent, serviceClass)))
+                .client(new OkHttpClient(OkHttpClients.create(config, userAgent, serviceClass, cache)))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
                 .retryer(new Retryer.Default(0, 0, 1))  // use OkHttp retry mechanism only

@@ -31,6 +31,7 @@ import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -78,7 +79,16 @@ public final class OkHttpClients {
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
     public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */);
+        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */, Optional.empty());
+    }
+
+    /**
+     * Creates an OkHttp client from the given {@link ClientConfiguration} and using the given {@link Cache}.
+     * Note that the configured {@link ClientConfiguration#uris URIs} are initialized in random order.
+     */
+    public static OkHttpClient create(
+            ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass, Optional<Cache> cache) {
+        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */, cache);
     }
 
     /**
@@ -101,14 +111,15 @@ public final class OkHttpClients {
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
             ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, false);
+        return createInternal(config, userAgent, serviceClass, false, Optional.empty());
     }
 
     private static RemotingOkHttpClient createInternal(
             ClientConfiguration config,
             UserAgent userAgent,
             Class<?> serviceClass,
-            boolean randomizeUrlOrder) {
+            boolean randomizeUrlOrder,
+            Optional<Cache> cacheOptional) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
@@ -158,8 +169,7 @@ public final class OkHttpClients {
         client.dispatcher(createDispatcher());
 
         // Cache
-        config.cacheConfig().ifPresent(cacheConfig ->
-                client.cache(new Cache(cacheConfig.directory(), cacheConfig.maxSizeMb() * 1024 * 1024)));
+        cacheOptional.ifPresent(client::cache);
 
         return new RemotingOkHttpClient(
                 client.build(),
