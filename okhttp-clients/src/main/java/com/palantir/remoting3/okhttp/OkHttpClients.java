@@ -55,7 +55,7 @@ public final class OkHttpClients {
     private static final ExecutorService executionExecutor = Tracers.wrap(new Dispatcher().executorService());
 
     /**
-     * Shared dispatcher with static executor service
+     * Shared dispatcher with static executor service.
      */
     private static final Dispatcher dispatcher = createDispatcher();
 
@@ -221,6 +221,7 @@ public final class OkHttpClients {
                 ConnectionSpec.CLEARTEXT);
     }
 
+    @SuppressWarnings("checkstyle:HiddenField")
     private static Dispatcher createDispatcher() {
         Dispatcher dispatcher = new Dispatcher(executionExecutor);
         dispatcher.setMaxRequests(256);
