@@ -55,6 +55,16 @@ public final class OkHttpClients {
     private static final ExecutorService executionExecutor = Tracers.wrap(new Dispatcher().executorService());
 
     /**
+     * Shared dispatcher with static executor service
+     */
+    private static final Dispatcher dispatcher = createDispatcher();
+
+    /**
+     * Shared connection pool.
+     */
+    private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
+
+    /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
      * internal thread pool and from the thread pool used by {@link #executionExecutor}.
      * <p>
@@ -151,10 +161,9 @@ public final class OkHttpClients {
         client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
 
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
-        client.connectionPool(new ConnectionPool(100, 10, TimeUnit.MINUTES));
+        client.connectionPool(connectionPool);
 
-        // dispatcher with static executor service
-        client.dispatcher(createDispatcher());
+        client.dispatcher(dispatcher);
 
         return new RemotingOkHttpClient(
                 client.build(),
