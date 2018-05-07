@@ -37,6 +37,11 @@ public interface HostMetrics {
     String hostname();
 
     /**
+     * The url used to gather the metrics.
+     */
+    String url();
+
+    /**
      * The {@link Instant} that these {@link HostMetrics} were last updated.
      */
     Instant lastUpdate();
