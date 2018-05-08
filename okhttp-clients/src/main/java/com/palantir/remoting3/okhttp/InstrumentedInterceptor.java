@@ -48,19 +48,20 @@ final class InstrumentedInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         HttpUrl url = chain.request().url();
         String hostname = url.host();
+        int port = url.port();
         Stopwatch stopwatch = Stopwatch.createStarted();
         Response response;
 
         try {
             response = chain.proceed(chain.request());
         } catch (IOException e) {
-            hostMetrics.recordIoException(serviceName, hostname, url.toString());
+            hostMetrics.recordIoException(serviceName, hostname, port);
             throw e;
         }
 
         long micros = stopwatch.elapsed(TimeUnit.MICROSECONDS);
 
-        hostMetrics.record(serviceName, hostname, url.toString(), response.code(), micros);
+        hostMetrics.record(serviceName, hostname, port, response.code(), micros);
         responseTimer.update(micros, TimeUnit.MICROSECONDS);
 
         return response;

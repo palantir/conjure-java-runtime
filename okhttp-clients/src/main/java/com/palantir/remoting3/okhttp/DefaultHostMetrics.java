@@ -32,7 +32,7 @@ final class DefaultHostMetrics implements HostMetrics {
 
     private final String serviceName;
     private final String hostname;
-    private final String url;
+    private final int port;
     private final Timer informational;
     private final Timer successful;
     private final Timer redirection;
@@ -44,11 +44,11 @@ final class DefaultHostMetrics implements HostMetrics {
 
     private volatile long lastUpdateEpochMillis;
 
-    /** Creates a metrics registry for calls from the given service to the given host and url. */
-    DefaultHostMetrics(String serviceName, String hostname, String url, Clock clock) {
+    /** Creates a metrics registry for calls from the given service to the given host and port. */
+    DefaultHostMetrics(String serviceName, String hostname, int port, Clock clock) {
         this.serviceName = serviceName;
         this.hostname = hostname;
-        this.url = url;
+        this.port = port;
         this.informational = new Timer();
         this.successful = new Timer();
         this.redirection = new Timer();
@@ -71,8 +71,8 @@ final class DefaultHostMetrics implements HostMetrics {
     }
 
     @Override
-    public String url() {
-        return url;
+    public int port() {
+        return port;
     }
 
     @Override

@@ -33,38 +33,38 @@ final class HostMetricsRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(HostMetricsRegistry.class);
 
-    private final LoadingCache<ServiceHostAndUrl, DefaultHostMetrics> hostMetrics;
+    private final LoadingCache<ServiceHostAndPort, DefaultHostMetrics> hostMetrics;
 
     HostMetricsRegistry() {
         this.hostMetrics = CacheBuilder.newBuilder()
                 .maximumSize(1_000)
                 .expireAfterAccess(1, TimeUnit.DAYS)
-                .build(new CacheLoader<ServiceHostAndUrl, DefaultHostMetrics>() {
+                .build(new CacheLoader<ServiceHostAndPort, DefaultHostMetrics>() {
                     @Override
-                    public DefaultHostMetrics load(ServiceHostAndUrl key) {
-                        return new DefaultHostMetrics(key.serviceName(), key.hostname(), key.url(), Clock.systemUTC());
+                    public DefaultHostMetrics load(ServiceHostAndPort key) {
+                        return new DefaultHostMetrics(key.serviceName(), key.hostname(), key.port(), Clock.systemUTC());
                     }
                 });
     }
 
-    void record(String serviceName, String hostname, String url, int statusCode, long micros) {
+    void record(String serviceName, String hostname, int port, int statusCode, long micros) {
         try {
             hostMetrics.getUnchecked(
-                    ImmutableServiceHostAndUrl.of(serviceName, hostname, url)).record(statusCode, micros);
+                    ImmutableServiceHostAndPort.of(serviceName, hostname, port)).record(statusCode, micros);
         } catch (Exception e) {
             log.warn("Unable to record metrics for host and url",
                     UnsafeArg.of("hostname", hostname),
-                    UnsafeArg.of("url", url));
+                    UnsafeArg.of("url", port));
         }
     }
 
-    void recordIoException(String serviceName, String hostname, String url) {
+    void recordIoException(String serviceName, String hostname, int port) {
         try {
-            hostMetrics.getUnchecked(ImmutableServiceHostAndUrl.of(serviceName, hostname, url)).recordIoException();
+            hostMetrics.getUnchecked(ImmutableServiceHostAndPort.of(serviceName, hostname, port)).recordIoException();
         } catch (Exception e) {
             log.warn("Unable to record IO exception for host and url",
                     UnsafeArg.of("hostname", hostname),
-                    UnsafeArg.of("url", url));
+                    UnsafeArg.of("url", port));
         }
     }
 
@@ -74,9 +74,9 @@ final class HostMetricsRegistry {
 
     @Value.Immutable
     @ImmutablesStyle
-    interface ServiceHostAndUrl {
+    interface ServiceHostAndPort {
         @Value.Parameter String serviceName();
         @Value.Parameter String hostname();
-        @Value.Parameter String url();
+        @Value.Parameter int port();
     }
 }
