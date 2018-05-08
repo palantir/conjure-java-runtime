@@ -19,6 +19,7 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting3.clients.ImmutablesStyle;
 import java.time.Clock;
@@ -52,9 +53,9 @@ final class HostMetricsRegistry {
             hostMetrics.getUnchecked(
                     ImmutableServiceHostAndPort.of(serviceName, hostname, port)).record(statusCode, micros);
         } catch (Exception e) {
-            log.warn("Unable to record metrics for host and url",
+            log.warn("Unable to record metrics for host and port",
                     UnsafeArg.of("hostname", hostname),
-                    UnsafeArg.of("url", port));
+                    SafeArg.of("port", port));
         }
     }
 
@@ -62,9 +63,9 @@ final class HostMetricsRegistry {
         try {
             hostMetrics.getUnchecked(ImmutableServiceHostAndPort.of(serviceName, hostname, port)).recordIoException();
         } catch (Exception e) {
-            log.warn("Unable to record IO exception for host and url",
+            log.warn("Unable to record IO exception for host and port",
                     UnsafeArg.of("hostname", hostname),
-                    UnsafeArg.of("url", port));
+                    SafeArg.of("port", port));
         }
     }
 
