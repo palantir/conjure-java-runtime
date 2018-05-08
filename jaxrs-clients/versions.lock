@@ -75,6 +75,12 @@
                 "com.palantir.remoting3:refresh-utils"
             ]
         },
+        "com.google.errorprone:error_prone_annotations": {
+            "locked": "2.1.3",
+            "transitive": [
+                "com.palantir.safe-logging:preconditions"
+            ]
+        },
         "com.google.guava:guava": {
             "locked": "20.0",
             "transitive": [
@@ -175,12 +181,19 @@
                 "com.palantir.remoting3:okhttp-clients"
             ]
         },
+        "com.palantir.safe-logging:preconditions": {
+            "locked": "1.3.0",
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
+            ]
+        },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "0.1.3",
+            "locked": "1.3.0",
             "transitive": [
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing",
+                "com.palantir.safe-logging:preconditions",
                 "com.palantir.tritium:tritium-registry"
             ]
         },
@@ -325,6 +338,12 @@
                 "com.palantir.remoting3:refresh-utils"
             ]
         },
+        "com.google.errorprone:error_prone_annotations": {
+            "locked": "2.1.3",
+            "transitive": [
+                "com.palantir.safe-logging:preconditions"
+            ]
+        },
         "com.google.guava:guava": {
             "locked": "20.0",
             "transitive": [
@@ -425,12 +444,19 @@
                 "com.palantir.remoting3:okhttp-clients"
             ]
         },
+        "com.palantir.safe-logging:preconditions": {
+            "locked": "1.3.0",
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
+            ]
+        },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "0.1.3",
+            "locked": "1.3.0",
             "transitive": [
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing",
+                "com.palantir.safe-logging:preconditions",
                 "com.palantir.tritium:tritium-registry"
             ]
         },

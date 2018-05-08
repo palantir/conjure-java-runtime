@@ -48,7 +48,7 @@
             "project": true
         },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "0.1.3"
+            "locked": "1.3.0"
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "3.0.0",
@@ -112,7 +112,7 @@
             "project": true
         },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "0.1.3"
+            "locked": "1.3.0"
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "3.0.0",

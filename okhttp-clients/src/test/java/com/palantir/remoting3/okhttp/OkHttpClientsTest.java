@@ -25,6 +25,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.net.HostAndPort;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.remoting.api.config.service.ServiceConfiguration;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import com.palantir.remoting.api.errors.RemoteException;
@@ -212,7 +213,8 @@ public final class OkHttpClientsTest extends TestBase {
 
         OkHttpClient client = createRetryingClient(1);
         Call call = client.newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(call::execute).isInstanceOf(IOException.class).hasMessageContaining(responseJson);
+        assertThatThrownBy(call::execute).isInstanceOf(SafeIoException.class)
+                .hasMessageContaining("Error 400. (Failed to parse response body as SerializableError.)");
     }
 
     @Test
