@@ -41,7 +41,7 @@ enum IoExceptionResponseHandler implements ResponseHandler<IOException> {
                     ? toString(response.body().byteStream())
                     : "<empty>";
             return Optional.of(new SafeIoException(
-                    String.format("Error %s. (Failed to parse response body as SerializableError.) ", response.code()),
+                    String.format("Error %s. (Failed to parse response body as SerializableError.)", response.code()),
                     UnsafeArg.of("body", body)));
         } catch (IOException e) {
             return Optional.of(new IOException("Failed to read response body", e));
