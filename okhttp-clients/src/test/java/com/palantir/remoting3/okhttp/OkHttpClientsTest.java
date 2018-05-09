@@ -84,6 +84,7 @@ public final class OkHttpClientsTest extends TestBase {
         List<HostMetrics> hostMetrics = OkHttpClients.hostMetrics().stream()
                 .filter(metrics -> metrics.hostname().equals("localhost"))
                 .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
+                .filter(metrics -> metrics.port() == server.getPort())
                 .collect(Collectors.toList());
         HostMetrics actualMetrics = Iterables.getOnlyElement(hostMetrics);
 

@@ -42,8 +42,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public final class InstrumentedInterceptorTest {
 
-    private static final Request REQUEST_A = new Request.Builder().url("http://hostA").build();
-    private static final Request REQUEST_B = new Request.Builder().url("http://hostB").build();
+    private static final int PORT = 8080;
+    private static final String URL_A = "https://hosta:" + PORT;
+    private static final String URL_B = "https://hostb:" + PORT;
+    private static final Request REQUEST_A = new Request.Builder().url(URL_A).build();
+    private static final Request REQUEST_B = new Request.Builder().url(URL_B).build();
 
     @Mock private Interceptor.Chain chain;
 
@@ -63,13 +66,13 @@ public final class InstrumentedInterceptorTest {
         successfulRequest(REQUEST_A);
         interceptor.intercept(chain);
 
-        HostMetrics hostA = hostMetrics("hosta");
+        HostMetrics hostA = hostMetrics("hosta", PORT);
         assertThat(hostA.get2xx().getCount()).isEqualTo(1);
 
         successfulRequest(REQUEST_B);
         interceptor.intercept(chain);
 
-        HostMetrics hostB = hostMetrics("hostb");
+        HostMetrics hostB = hostMetrics("hostb", PORT);
         assertThat(hostB.get2xx().getCount()).isEqualTo(1);
     }
 
@@ -103,9 +106,9 @@ public final class InstrumentedInterceptorTest {
         assertThat(metrics.getIoExceptions().getCount()).isEqualTo(1);
     }
 
-    private HostMetrics hostMetrics(String hostname) {
-        Collection<HostMetrics> matching =
-                Collections2.filter(hostMetrics.getMetrics(), metrics -> metrics.hostname().equals(hostname));
+    private HostMetrics hostMetrics(String hostname, int port) {
+        Collection<HostMetrics> matching = Collections2.filter(hostMetrics.getMetrics(),
+                metrics -> metrics.hostname().equals(hostname) && metrics.port() == port);
         return Iterables.getOnlyElement(matching);
     }
 

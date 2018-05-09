@@ -37,6 +37,11 @@ public interface HostMetrics {
     String hostname();
 
     /**
+     * The port on the host used to gather the metrics.
+     */
+    int port();
+
+    /**
      * The {@link Instant} that these {@link HostMetrics} were last updated.
      */
     Instant lastUpdate();
