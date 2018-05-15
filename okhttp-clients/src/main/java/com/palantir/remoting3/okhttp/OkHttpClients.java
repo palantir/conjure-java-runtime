@@ -54,14 +54,16 @@ public final class OkHttpClients {
      */
     private static final ExecutorService executionExecutor = Tracers.wrap(new Dispatcher().executorService());
 
-    /**
-     * Shared dispatcher with static executor service.
-     */
-    private static final Dispatcher dispatcher = createDispatcher();
+    /** Shared dispatcher with static executor service. */
+    private static final Dispatcher dispatcher;
 
-    /**
-     * Shared connection pool.
-     */
+    static {
+        dispatcher = new Dispatcher(executionExecutor);
+        dispatcher.setMaxRequests(256);
+        dispatcher.setMaxRequestsPerHost(256);
+    }
+
+    /** Shared connection pool. */
     private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
 
     /**
@@ -219,14 +221,6 @@ public final class OkHttpClients {
                                 : CipherSuites.fastCipherSuites())
                         .build(),
                 ConnectionSpec.CLEARTEXT);
-    }
-
-    @SuppressWarnings("checkstyle:HiddenField")
-    private static Dispatcher createDispatcher() {
-        Dispatcher dispatcher = new Dispatcher(executionExecutor);
-        dispatcher.setMaxRequests(256);
-        dispatcher.setMaxRequestsPerHost(256);
-        return dispatcher;
     }
 
 }
