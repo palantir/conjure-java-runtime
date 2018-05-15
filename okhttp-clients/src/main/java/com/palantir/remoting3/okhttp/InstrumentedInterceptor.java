@@ -22,6 +22,7 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
@@ -45,20 +46,22 @@ final class InstrumentedInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        String hostname = chain.request().url().host();
+        HttpUrl url = chain.request().url();
+        String hostname = url.host();
+        int port = url.port();
         Stopwatch stopwatch = Stopwatch.createStarted();
         Response response;
 
         try {
             response = chain.proceed(chain.request());
         } catch (IOException e) {
-            hostMetrics.recordIoException(serviceName, hostname);
+            hostMetrics.recordIoException(serviceName, hostname, port);
             throw e;
         }
 
         long micros = stopwatch.elapsed(TimeUnit.MICROSECONDS);
 
-        hostMetrics.record(serviceName, hostname, response.code(), micros);
+        hostMetrics.record(serviceName, hostname, port, response.code(), micros);
         responseTimer.update(micros, TimeUnit.MICROSECONDS);
 
         return response;

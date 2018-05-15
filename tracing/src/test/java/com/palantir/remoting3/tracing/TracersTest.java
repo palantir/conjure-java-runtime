@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -241,6 +242,39 @@ public final class TracersTest {
 
         assertThatThrownBy(() -> wrappedRunnable.run()).isInstanceOf(IllegalStateException.class);
 
+        assertThat(Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);
+    }
+
+    @Test
+    public void testWrapRunnableWithAlternateTraceId_traceStateInsideRunnableUsesGivenTraceId() {
+        String traceIdBeforeConstruction = Tracer.getTraceId();
+        AtomicReference<String> traceId = new AtomicReference<>();
+        String traceIdToUse = "someTraceId";
+        Runnable wrappedRunnable = Tracers.wrapWithAlternateTraceId(traceIdToUse, () -> {
+            traceId.set(Tracer.getTraceId());
+        });
+
+        wrappedRunnable.run();
+
+        String traceIdAfterCall = Tracer.getTraceId();
+
+        assertThat(traceId.get())
+                .isNotEqualTo(traceIdBeforeConstruction)
+                .isNotEqualTo(traceIdAfterCall)
+                .isEqualTo(traceIdToUse);
+
+        assertThat(traceIdBeforeConstruction).isEqualTo(traceIdAfterCall);
+    }
+
+    @Test
+    public void testWrapRunnableWithAlternateTraceId_traceStateRestoredWhenThrows() {
+        String traceIdBeforeConstruction = Tracer.getTraceId();
+        Runnable rawRunnable = () -> {
+            throw new IllegalStateException();
+        };
+        Runnable wrappedRunnable = Tracers.wrapWithAlternateTraceId("someTraceId", rawRunnable);
+
+        assertThatThrownBy(() -> wrappedRunnable.run()).isInstanceOf(IllegalStateException.class);
         assertThat(Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);
     }
 

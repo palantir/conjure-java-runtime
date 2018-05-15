@@ -19,6 +19,7 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting3.clients.ImmutablesStyle;
 import java.time.Clock;
@@ -33,33 +34,38 @@ final class HostMetricsRegistry {
 
     private static final Logger log = LoggerFactory.getLogger(HostMetricsRegistry.class);
 
-    private final LoadingCache<ServiceAndHost, DefaultHostMetrics> hostMetrics;
+    private final LoadingCache<ServiceHostAndPort, DefaultHostMetrics> hostMetrics;
 
     HostMetricsRegistry() {
         this.hostMetrics = CacheBuilder.newBuilder()
                 .maximumSize(1_000)
                 .expireAfterAccess(1, TimeUnit.DAYS)
-                .build(new CacheLoader<ServiceAndHost, DefaultHostMetrics>() {
+                .build(new CacheLoader<ServiceHostAndPort, DefaultHostMetrics>() {
                     @Override
-                    public DefaultHostMetrics load(ServiceAndHost key) {
-                        return new DefaultHostMetrics(key.serviceName(), key.hostname(), Clock.systemUTC());
+                    public DefaultHostMetrics load(ServiceHostAndPort key) {
+                        return new DefaultHostMetrics(key.serviceName(), key.hostname(), key.port(), Clock.systemUTC());
                     }
                 });
     }
 
-    void record(String serviceName, String hostname, int statusCode, long micros) {
+    void record(String serviceName, String hostname, int port, int statusCode, long micros) {
         try {
-            hostMetrics.getUnchecked(ImmutableServiceAndHost.of(serviceName, hostname)).record(statusCode, micros);
+            hostMetrics.getUnchecked(
+                    ImmutableServiceHostAndPort.of(serviceName, hostname, port)).record(statusCode, micros);
         } catch (Exception e) {
-            log.warn("Unable to record metrics for host", UnsafeArg.of("hostname", hostname));
+            log.warn("Unable to record metrics for host and port",
+                    UnsafeArg.of("hostname", hostname),
+                    SafeArg.of("port", port));
         }
     }
 
-    void recordIoException(String serviceName, String hostname) {
+    void recordIoException(String serviceName, String hostname, int port) {
         try {
-            hostMetrics.getUnchecked(ImmutableServiceAndHost.of(serviceName, hostname)).recordIoException();
+            hostMetrics.getUnchecked(ImmutableServiceHostAndPort.of(serviceName, hostname, port)).recordIoException();
         } catch (Exception e) {
-            log.warn("Unable to record IO exception for host", UnsafeArg.of("hostname", hostname));
+            log.warn("Unable to record IO exception for host and port",
+                    UnsafeArg.of("hostname", hostname),
+                    SafeArg.of("port", port));
         }
     }
 
@@ -69,8 +75,9 @@ final class HostMetricsRegistry {
 
     @Value.Immutable
     @ImmutablesStyle
-    interface ServiceAndHost {
+    interface ServiceHostAndPort {
         @Value.Parameter String serviceName();
         @Value.Parameter String hostname();
+        @Value.Parameter int port();
     }
 }
