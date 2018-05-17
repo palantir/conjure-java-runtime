@@ -389,7 +389,7 @@ http-remoting clients (both Retrofit2 and JaxRs) handle the above error codes an
 * `throttle`: reschedule the request with a delay: either the indicated `Retry-After` period, or a configured
   exponential backoff
 * `retryOther`: retry the request against the indicated service node; all request parameters and headers are maintained
-* `unavailable`: retry the same host after a configurable exponential delay
+* `unavailable`: retry the request on a different host after a configurable exponential delay
 
 Additionally, connection errors (e.g., `connection refused` or DNS errors) yield a retry against a different node of the
 service. Retries pick a target host by cycling through the list of URLs configured for a Service (see
