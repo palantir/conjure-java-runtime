@@ -16,18 +16,14 @@
 
 package com.palantir.remoting3.ext.jackson;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
-import java.nio.file.Path;
 
 public final class ObjectMappers {
 
@@ -111,7 +107,6 @@ public final class ObjectMappers {
      */
     public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
         return mapper
-                .registerModule(new SimpleModule("PathToString").addSerializer(Path.class, new ToStringSerializer()))
                 .registerModule(new GuavaModule())
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
                 .registerModule(new AfterburnerModule())
