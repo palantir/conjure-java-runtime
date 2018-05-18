@@ -142,14 +142,6 @@ public final class Java8OptionalTest {
         }
     }
 
-    @Provider
-    private static final class EmptyOptionalTo204ExceptionMapper implements ExceptionMapper<EmptyOptionalException> {
-        @Override
-        public Response toResponse(EmptyOptionalException exception) {
-            return Response.noContent().build();
-        }
-    }
-
     public static final class OptionalTestResource implements OptionalTestService {
         @Override
         public Optional<String> getOptional(@Nullable String value) {

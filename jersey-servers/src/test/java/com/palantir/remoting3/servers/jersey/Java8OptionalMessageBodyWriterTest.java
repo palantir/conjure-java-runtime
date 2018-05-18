@@ -89,13 +89,6 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
         assertThat(response.getStatus()).isEqualTo(204);
     }
 
-    @Provider
-    private static final class EmptyOptionalTo204ExceptionMapper implements ExceptionMapper<EmptyOptionalException> {
-        @Override
-        public Response toResponse(EmptyOptionalException exception) {
-            return Response.noContent().build();
-        }
-    }
 
     @Path("/optional-return/")
     @Produces(MediaType.TEXT_PLAIN)

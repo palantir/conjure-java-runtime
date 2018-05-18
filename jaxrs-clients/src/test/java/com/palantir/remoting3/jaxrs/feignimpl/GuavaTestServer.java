@@ -41,7 +41,6 @@ import javax.ws.rs.core.MediaType;
 import org.assertj.core.util.Strings;
 
 public class GuavaTestServer extends Application<Configuration> {
-
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
