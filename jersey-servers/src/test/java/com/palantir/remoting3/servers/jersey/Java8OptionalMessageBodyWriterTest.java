@@ -89,7 +89,6 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
         assertThat(response.getStatus()).isEqualTo(204);
     }
 
-
     @Path("/optional-return/")
     @Produces(MediaType.TEXT_PLAIN)
     public static final class OptionalReturnResource {
