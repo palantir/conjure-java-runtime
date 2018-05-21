@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.io.IOException;
+import java.nio.file.Paths;
 import org.junit.Test;
 
 public final class SerializationTests {
@@ -33,9 +34,9 @@ public final class SerializationTests {
     public void testJsonSerDe() throws IOException {
 
         SslConfiguration sslConfig = SslConfiguration.of(
-                TestConstants.CA_TRUST_STORE_PATH,
-                TestConstants.SERVER_KEY_STORE_JKS_PATH,
-                TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
+                Paths.get("/", TestConstants.CA_TRUST_STORE_PATH.toString()),
+                Paths.get("/", TestConstants.SERVER_KEY_STORE_JKS_PATH.toString()),
+                Paths.get("/", TestConstants.SERVER_KEY_STORE_JKS_PASSWORD).toString());
 
         assertThat(MAPPER.readValue(MAPPER.writeValueAsBytes(sslConfig), SslConfiguration.class), is(sslConfig));
     }
