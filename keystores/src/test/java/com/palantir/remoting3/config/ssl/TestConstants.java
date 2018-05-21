@@ -32,6 +32,7 @@ final class TestConstants {
     static final Path CA_DER_CERT_PATH = Paths.get("src", "test", "resources", "testCA", "testCA.der");
     static final Path CA_PEM_CERT_PATH = Paths.get("src", "test", "resources", "testCA", "testCA.cer");
     static final SslConfiguration.StoreType CA_TRUST_STORE_TYPE = SslConfiguration.StoreType.JKS;
+    static final String CA_TRUST_STIRE_JKS_PASSWORD = "caStore";
 
     static final Path SERVER_KEY_STORE_JKS_PATH = Paths.get(
             "src",
