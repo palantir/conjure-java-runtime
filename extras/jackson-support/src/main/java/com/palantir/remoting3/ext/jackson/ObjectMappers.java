@@ -108,6 +108,7 @@ public final class ObjectMappers {
     public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
         return mapper
                 .registerModule(new GuavaModule())
+                .registerModule(new ShimJdk7Module())
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
                 .registerModule(new AfterburnerModule())
                 .registerModule(new JavaTimeModule())
