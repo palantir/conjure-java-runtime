@@ -41,7 +41,8 @@ import javax.ws.rs.core.MultivaluedMap;
  * standard library due to performance issues observed on high core machines:
  * https://bugs.openjdk.java.net/browse/JDK-8179001
  *
- * @deprecated This class will be removed in the next major release.
+ * @deprecated This class is unused and will be considered for removal in the next major release. As a workaround,
+ * consider setting the Jetty compression threshold to a small value (e.g., 1MB).
  */
 @Deprecated
 public final class CompressionFilter implements ContainerResponseFilter {
