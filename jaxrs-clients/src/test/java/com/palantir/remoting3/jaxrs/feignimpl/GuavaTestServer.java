@@ -18,10 +18,12 @@ package com.palantir.remoting3.jaxrs.feignimpl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.servers.jersey.HttpRemotingJerseyFeature;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
+import io.dropwizard.jersey.jackson.JacksonMessageBodyProvider;
 import io.dropwizard.setup.Environment;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -44,6 +46,7 @@ public class GuavaTestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
+        env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerObjectMapper()));
         env.jersey().register(new TestResource());
     }
 

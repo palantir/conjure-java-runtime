@@ -134,6 +134,7 @@ public final class Java8OptionalTest {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
             env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
+            env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
             env.jersey().register(new OptionalTestResource());
         }
     }

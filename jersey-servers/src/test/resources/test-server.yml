@@ -6,6 +6,8 @@ server:
   adminConnectors:
     - type: http
       port: 0
+  gzip:
+    enabled: false
 
 logging:
   level: INFO

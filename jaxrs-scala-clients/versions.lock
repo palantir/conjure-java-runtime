@@ -1,14 +1,15 @@
 {
     "compileClasspath": {
         "com.fasterxml.jackson.core:jackson-annotations": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
+                "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor",
@@ -20,7 +21,7 @@
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
@@ -39,20 +40,20 @@
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:tracing",
@@ -60,26 +61,26 @@
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:tracing"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-paranamer": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-scala_2.11": {
-            "locked": "2.6.7"
+            "locked": "2.9.5"
         },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
@@ -272,13 +273,13 @@
             ]
         },
         "com.thoughtworks.paranamer:paranamer": {
-            "locked": "2.6",
+            "locked": "2.8",
             "transitive": [
                 "com.fasterxml.jackson.module:jackson-module-paranamer"
             ]
         },
         "io.dropwizard.metrics:metrics-core": {
-            "locked": "3.2.3",
+            "locked": "3.2.5",
             "transitive": [
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.tritium:tritium-registry"
@@ -299,14 +300,14 @@
             ]
         },
         "org.scala-lang:scala-library": {
-            "locked": "2.11.8",
+            "locked": "2.11.11",
             "transitive": [
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11",
                 "org.scala-lang:scala-reflect"
             ]
         },
         "org.scala-lang:scala-reflect": {
-            "locked": "2.11.8",
+            "locked": "2.11.11",
             "transitive": [
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11"
             ]
@@ -326,14 +327,15 @@
     },
     "runtime": {
         "com.fasterxml.jackson.core:jackson-annotations": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
+                "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind",
                 "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor",
@@ -345,7 +347,7 @@
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
@@ -364,20 +366,20 @@
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:tracing",
@@ -385,26 +387,26 @@
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:tracing"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-paranamer": {
-            "locked": "2.6.7",
+            "locked": "2.9.5",
             "transitive": [
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-scala_2.11": {
-            "locked": "2.6.7"
+            "locked": "2.9.5"
         },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
@@ -597,13 +599,13 @@
             ]
         },
         "com.thoughtworks.paranamer:paranamer": {
-            "locked": "2.6",
+            "locked": "2.8",
             "transitive": [
                 "com.fasterxml.jackson.module:jackson-module-paranamer"
             ]
         },
         "io.dropwizard.metrics:metrics-core": {
-            "locked": "3.2.3",
+            "locked": "3.2.5",
             "transitive": [
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.tritium:tritium-registry"
@@ -624,14 +626,14 @@
             ]
         },
         "org.scala-lang:scala-library": {
-            "locked": "2.11.8",
+            "locked": "2.11.11",
             "transitive": [
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11",
                 "org.scala-lang:scala-reflect"
             ]
         },
         "org.scala-lang:scala-reflect": {
-            "locked": "2.11.8",
+            "locked": "2.11.11",
             "transitive": [
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11"
             ]

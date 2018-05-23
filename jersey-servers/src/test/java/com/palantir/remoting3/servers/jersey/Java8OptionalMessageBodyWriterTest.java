@@ -44,6 +44,7 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
         forceSet(TestProperties.CONTAINER_PORT, "0");
         return DropwizardResourceConfig.forTesting(new MetricRegistry())
                 .register(HttpRemotingJerseyFeature.INSTANCE)
+                .register(new EmptyOptionalTo204ExceptionMapper())
                 .register(OptionalReturnResource.class);
     }
 

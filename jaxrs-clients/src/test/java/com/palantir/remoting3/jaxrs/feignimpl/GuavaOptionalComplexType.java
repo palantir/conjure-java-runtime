@@ -18,6 +18,7 @@ package com.palantir.remoting3.jaxrs.feignimpl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Optional;
 import java.nio.file.Path;
 
@@ -47,6 +48,15 @@ public final class GuavaOptionalComplexType {
 
     public Path getPath() {
         return path;
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("nested", nested)
+                .add("string", string)
+                .add("path", path)
+                .toString();
     }
 
     @Override

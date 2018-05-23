@@ -16,13 +16,15 @@
 
 package com.palantir.remoting3.jaxrs.feignimpl;
 
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.servers.jersey.HttpRemotingJerseyFeature;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
+import io.dropwizard.jersey.jackson.JacksonMessageBodyProvider;
+import io.dropwizard.jersey.optional.EmptyOptionalException;
 import io.dropwizard.setup.Environment;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -40,14 +42,27 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
 public class Java8TestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
+        env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerObjectMapper()));
+        env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
         env.jersey().register(new TestResource());
-        env.getObjectMapper().registerModule(new Jdk8Module());
     }
+
+    @Provider
+    private static final class EmptyOptionalTo204ExceptionMapper implements ExceptionMapper<EmptyOptionalException> {
+        @Override
+        public Response toResponse(EmptyOptionalException exception) {
+            return Response.noContent().build();
+        }
+    }
+
 
     static class TestResource implements TestService {
         @Override

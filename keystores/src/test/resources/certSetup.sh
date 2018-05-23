@@ -174,7 +174,7 @@ while getopts ":vf" opt; do
 done
 
 # create CA
-create_ca_dir "testCA" "changeit"
+create_ca_dir "testCA" "caStore"
 
 # create keys for server
 create_key_pair_dir "testServer" "localhost" "testServer" "serverStore" "testCA"
