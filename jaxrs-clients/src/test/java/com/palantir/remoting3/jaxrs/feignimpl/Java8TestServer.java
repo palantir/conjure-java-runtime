@@ -16,7 +16,6 @@
 
 package com.palantir.remoting3.jaxrs.feignimpl;
 
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
