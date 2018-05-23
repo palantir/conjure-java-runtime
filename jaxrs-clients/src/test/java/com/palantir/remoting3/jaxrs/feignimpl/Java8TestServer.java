@@ -19,10 +19,12 @@ package com.palantir.remoting3.jaxrs.feignimpl;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.servers.jersey.HttpRemotingJerseyFeature;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
+import io.dropwizard.jersey.jackson.JacksonMessageBodyProvider;
 import io.dropwizard.jersey.optional.EmptyOptionalException;
 import io.dropwizard.setup.Environment;
 import java.io.ByteArrayInputStream;
@@ -49,9 +51,9 @@ public class Java8TestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
         env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
-        env.jersey().register(new TestResource());
+        env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerObjectMapper()));
         env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
-        env.getObjectMapper().registerModule(new Jdk8Module());
+        env.jersey().register(new TestResource());
     }
 
     @Provider
