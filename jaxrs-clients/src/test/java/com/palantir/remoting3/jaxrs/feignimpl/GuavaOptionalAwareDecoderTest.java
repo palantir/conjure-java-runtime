@@ -132,9 +132,9 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
                         new GuavaOptionalComplexType(
                                 Optional.absent(),
                                 Optional.absent(),
-                                Paths.get("/bar"))),
+                                Paths.get("bar"))),
                 Optional.of("baz"),
-                Paths.get("/foo"));
+                Paths.get("foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
         assertThat(service.getGuavaComplexType(value), is(value));
     }
@@ -144,11 +144,11 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
                 Optional.of(
                         new GuavaOptionalComplexType(
-                                Optional.absent(),
-                                Optional.absent(),
-                                Paths.get("/bar"))),
+                                Optional.<GuavaOptionalComplexType>absent(),
+                                Optional.<String>absent(),
+                                Paths.get("bar"))),
                 Optional.of("baz"),
-                Paths.get("/foo"));
+                Paths.get("foo"));
         assertThat(service.getCborResponse(value), is(value));
     }
 
@@ -157,11 +157,11 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
                 Optional.of(
                         new GuavaOptionalComplexType(
-                                Optional.absent(),
-                                Optional.absent(),
-                                Paths.get("/bar"))),
+                                Optional.<GuavaOptionalComplexType>absent(),
+                                Optional.<String>absent(),
+                                Paths.get("bar"))),
                 Optional.of("baz"),
-                Paths.get("/foo"));
+                Paths.get("foo"));
         assertThat(service.postCborRequest(value), is(value));
     }
 }

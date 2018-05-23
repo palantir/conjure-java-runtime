@@ -39,15 +39,15 @@ public final class ObjectMappersTest {
     @Test
     public void deserializeJdk7ModuleObject() throws IOException {
         String pathSeparator = File.pathSeparator;
-        String json = "\"file:///" + pathSeparator + "tmp" + pathSeparator + "foo.txt\"";
+        String json = "\"" + pathSeparator + "tmp" + pathSeparator + "foo.txt\"";
 
-        assertThat(MAPPER.readValue(json, Path.class)).isEqualTo(Paths.get("/:tmp:foo.txt"));
+        assertThat(MAPPER.readValue(json, Path.class)).isEqualTo(Paths.get(":tmp:foo.txt"));
     }
 
     @Test
     public void serializeJdk7ModuleObject() throws JsonProcessingException {
-        Path path = Paths.get("/:tmp:foo.txt");
-        assertThat(MAPPER.writeValueAsString(path)).isEqualTo("\"file:///:tmp:foo.txt\"");
+        Path path = Paths.get(":tmp:foo.txt");
+        assertThat(MAPPER.writeValueAsString(path)).isEqualTo("\":tmp:foo.txt\"");
     }
 
     @Test
