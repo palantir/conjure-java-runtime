@@ -40,7 +40,11 @@ import javax.ws.rs.core.MultivaluedMap;
  * This is an alternative compression filter implementation that uses jzlib for compression rather than the java
  * standard library due to performance issues observed on high core machines:
  * https://bugs.openjdk.java.net/browse/JDK-8179001
+ *
+ * @deprecated This class is unused and will be considered for removal in the next major release. As a workaround,
+ * consider setting the Jetty compression threshold to a small value (e.g., 1MB).
  */
+@Deprecated
 public final class CompressionFilter implements ContainerResponseFilter {
 
     private static final ImmutableSet<MediaType> UNCOMPRESSIBLE = ImmutableSet.of(
