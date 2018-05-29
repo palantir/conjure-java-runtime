@@ -17,6 +17,7 @@
 package com.palantir.remoting3.okhttp;
 
 import com.google.common.io.CharStreams;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
@@ -42,7 +43,7 @@ enum IoExceptionResponseHandler implements ResponseHandler<IOException> {
                     : "<empty>";
             return Optional.of(new SafeIoException(
                     String.format("Error %s. (Failed to parse response body as SerializableError.)", response.code()),
-                    SafeArg.of("code", response.code),
+                    SafeArg.of("code", response.code()),
                     UnsafeArg.of("body", body)));
         } catch (IOException e) {
             return Optional.of(new IOException("Failed to read response body", e));
