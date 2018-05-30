@@ -25,6 +25,9 @@ import com.palantir.remoting.api.tracing.SpanType;
  *   try (CloseableTracer trace = CloseableTracer.start("traceName")) {
  *       [...]
  *   }
+ * 
+ * Note that network calls using remoting will be automatically wrapped with appropriate traces. Only use this
+ * to add traces to internal code.
  */
 public final class CloseableTracer implements AutoCloseable {
     private static final CloseableTracer INSTANCE = new CloseableTracer();
