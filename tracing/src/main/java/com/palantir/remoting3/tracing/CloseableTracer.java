@@ -42,23 +42,6 @@ public final class CloseableTracer implements AutoCloseable {
         return INSTANCE;
     }
 
-    /**
-     * Like {@link #startSpan(String)}, but opens a span of the explicitly given {@link SpanType span type}.
-     */
-    public static CloseableTracer startSpan(String operation, SpanType spanType) {
-        Tracer.startSpan(operation, spanType);
-        return INSTANCE;
-    }
-
-    /**
-     * Opens a new span for this thread's call trace, labeled with the provided operation and parent span. Only allowed
-     * when the current trace is empty.
-     */
-    public static CloseableTracer startSpan(String operation, String parentSpanId, SpanType spanType) {
-        Tracer.startSpan(operation, parentSpanId, spanType);
-        return INSTANCE;
-    }
-
     @Override
     public void close() {
         Tracer.fastCompleteSpan();
