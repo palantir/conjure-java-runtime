@@ -19,6 +19,7 @@ package com.palantir.remoting3.jaxrs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
+import com.palantir.remoting3.okhttp.RpcMode;
 
 public final class FeignJaxRsClientBuilder extends AbstractFeignJaxRsClientBuilder {
 
@@ -27,6 +28,10 @@ public final class FeignJaxRsClientBuilder extends AbstractFeignJaxRsClientBuild
 
     FeignJaxRsClientBuilder(ClientConfiguration config) {
         super(config);
+    }
+
+    FeignJaxRsClientBuilder(ClientConfiguration config, RpcMode mode) {
+        super(config, mode);
     }
 
     @Override
