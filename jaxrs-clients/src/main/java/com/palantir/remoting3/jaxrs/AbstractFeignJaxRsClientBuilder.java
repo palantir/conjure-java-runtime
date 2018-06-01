@@ -93,9 +93,9 @@ abstract class AbstractFeignJaxRsClientBuilder {
     public final <T> T build(Class<T> serviceClass, UserAgent userAgent) {
         ObjectMapper objectMapper = getObjectMapper();
         ObjectMapper cborObjectMapper = getCborObjectMapper();
-        OkHttpClient okHttpClient = new OkHttpClient(Optional.ofNullable(hostMetricsRegistry)
+        okhttp3.OkHttpClient okHttpClient = Optional.ofNullable(hostMetricsRegistry)
                 .map(hostMetrics -> OkHttpClients.create(config, userAgent, hostMetrics, serviceClass))
-                .orElse(OkHttpClients.create(config, userAgent, serviceClass)));
+                .orElse(OkHttpClients.create(config, userAgent, serviceClass));
 
         return Feign.builder()
                 .contract(createContract())
@@ -107,7 +107,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
                 .requestInterceptor(PathTemplateHeaderRewriter.INSTANCE)
-                .client(okHttpClient)
+                .client(new OkHttpClient(okHttpClient))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
                 .retryer(new Retryer.Default(0, 0, 1))  // use OkHttp retry mechanism only
