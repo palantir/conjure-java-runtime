@@ -78,35 +78,27 @@ public final class OkHttpClients {
             NUM_SCHEDULING_THREADS, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
 
     /**
-     * Static instance of OkHttpClients provided for backwards compatability.
-     */
-    private static final OkHttpClients instance = new OkHttpClients(new HostMetricsRegistry());
-
-    /**
      * The per service and host metrics recorded for each HTTP call.
      */
-    private final HostMetricsRegistry hostMetrics;
+    private static final HostMetricsRegistry defaultHostMetrics = new HostMetricsRegistry();
 
-    public OkHttpClients(HostMetricsRegistry hostMetrics) {
-        this.hostMetrics = hostMetrics;
+    private OkHttpClients() {}
+
+    /**
+     * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
+     * ClientConfiguration#uris URIs} are initialized in random order.
+     */
+    public static OkHttpClient create(
+            ClientConfiguration config, UserAgent userAgent, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
+        return createInternal(config, userAgent, hostMetrics, serviceClass, true /* randomize URLs */);
     }
 
     /**
      * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
-    public OkHttpClient createClient(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */);
-    }
-
-    /**
-     * Deprecated variant of {@link #createClient(ClientConfiguration, UserAgent, Class)}.
-     *
-     * @deprecated Use {@link #createClient(ClientConfiguration, UserAgent, Class)}
-     */
-    @Deprecated
     public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return instance.createClient(config, userAgent, serviceClass);
+        return create(config, userAgent, defaultHostMetrics, serviceClass);
     }
 
     /**
@@ -122,28 +114,20 @@ public final class OkHttpClients {
     /**
      * Return the per service and host metrics for all clients created by {@link OkHttpClients}.
      */
-    public Collection<HostMetrics> getHostMetrics() {
-        return hostMetrics.getMetrics();
-    }
-
-    /**
-     * Deprecated variant of {@link #getHostMetrics()}.
-     *
-     * @deprecated Use {@link #getHostMetrics()}
-     */
-    @Deprecated
     public static Collection<HostMetrics> hostMetrics() {
-        return instance.getHostMetrics();
+        return defaultHostMetrics.getMetrics();
     }
 
     @VisibleForTesting
-    static RemotingOkHttpClient withStableUris(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return instance.createInternal(config, userAgent, serviceClass, false);
+    static RemotingOkHttpClient withStableUris(
+            ClientConfiguration config, UserAgent userAgent, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
+        return createInternal(config, userAgent, hostMetrics, serviceClass, false);
     }
 
-    private RemotingOkHttpClient createInternal(
+    private static RemotingOkHttpClient createInternal(
             ClientConfiguration config,
             UserAgent userAgent,
+            HostMetricsRegistry hostMetrics,
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();

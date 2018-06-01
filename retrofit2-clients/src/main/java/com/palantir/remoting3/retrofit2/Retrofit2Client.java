@@ -22,6 +22,7 @@ import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.ext.refresh.Refreshable;
 import com.palantir.remoting3.ext.refresh.RefreshableProxyInvocationHandler;
+import com.palantir.remoting3.okhttp.HostMetricsRegistry;
 
 /**
  * Static factory methods for producing creating Retrofit2 HTTP proxies.
@@ -29,6 +30,20 @@ import com.palantir.remoting3.ext.refresh.RefreshableProxyInvocationHandler;
 public final class Retrofit2Client {
 
     private Retrofit2Client() {}
+
+    /**
+     * Creates a {@code T client} for the given service configuration. The HTTP {@code User-Agent} header of every
+     * request is set to the given non-empty {@code userAgent} string.
+     */
+    public static <T> T create(
+            Class<T> serviceClass,
+            UserAgent userAgent,
+            ClientConfiguration config,
+            HostMetricsRegistry hostMetricsRegistry) {
+        return new Retrofit2ClientBuilder(config)
+                .hostMetricsRegistry(hostMetricsRegistry)
+                .build(serviceClass, userAgent);
+    }
 
     /**
      * Creates a {@code T client} for the given service configuration. The HTTP {@code User-Agent} header of every
@@ -56,7 +71,19 @@ public final class Retrofit2Client {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            Refreshable<ClientConfiguration> config) {
+            Refreshable<ClientConfiguration> config,
+            HostMetricsRegistry hostMetricsRegistry) {
+        return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
+                config,
+                serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration, hostMetricsRegistry)));
+    }
+
+    /**
+     * Similar to {@link #create(Class, UserAgent, ClientConfiguration)}, but creates a mutable client that updates its
+     * configuration transparently whenever the given {@link Refreshable refreshable} {@link ClientConfiguration}
+     * changes.
+     */
+    public static <T> T create(Class<T> serviceClass, UserAgent userAgent, Refreshable<ClientConfiguration> config) {
         return create(serviceClass, UserAgents.format(userAgent), config);
     }
 
@@ -66,10 +93,7 @@ public final class Retrofit2Client {
      * @deprecated Use {@link #create(Class, UserAgent, Refreshable)}
      */
     @Deprecated
-    public static <T> T create(
-            Class<T> serviceClass,
-            String userAgent,
-            Refreshable<ClientConfiguration> config) {
+    public static <T> T create(Class<T> serviceClass, String userAgent, Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 config,
                 serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration)));
