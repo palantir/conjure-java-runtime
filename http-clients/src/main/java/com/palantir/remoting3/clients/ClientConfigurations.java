@@ -42,6 +42,7 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(10);
     private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(250);
     private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = false;
+    private static final RpcMode DEFAULT_RPC_MODE = RpcMode.FAILOVER_ON_ERROR;
 
     private ClientConfigurations() {}
 
@@ -50,6 +51,14 @@ public final class ClientConfigurations {
      * empty/absent configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(ServiceConfiguration config) {
+        return of(config, DEFAULT_RPC_MODE);
+    }
+
+    /**
+     * Creates a new {@link ClientConfiguration} instance from the given {@link ServiceConfiguration} and
+     * {@link RpcMode}, filling in empty/absent configuration with the defaults specified as constants in this class.
+     */
+    public static ClientConfiguration of(ServiceConfiguration config, RpcMode rpcMode) {
         return ClientConfiguration.builder()
                 .sslSocketFactory(SslSocketFactories.createSslSocketFactory(config.security()))
                 .trustManager(SslSocketFactories.createX509TrustManager(config.security()))
@@ -62,6 +71,7 @@ public final class ClientConfigurations {
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
                 .meshProxy(meshProxy(config.proxy()))
                 .maxNumRetries(config.maxNumRetries().orElse(config.uris().size()))
+                .rpcMode(rpcMode)
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
                 .build();
     }
@@ -84,6 +94,7 @@ public final class ClientConfigurations {
                 .proxyCredentials(Optional.empty())
                 .maxNumRetries(uris.size())
                 .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
+                .rpcMode(DEFAULT_RPC_MODE)
                 .build();
     }
 

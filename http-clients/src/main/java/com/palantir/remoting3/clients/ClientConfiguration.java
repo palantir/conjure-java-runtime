@@ -79,6 +79,12 @@ public interface ClientConfiguration {
     int maxNumRetries();
 
     /**
+     * The mode to use while processing requests. By default, requests are pinned to a URL until conditions are met
+     * to try another node (e.g. node is down, QoS responses).
+     */
+    RpcMode rpcMode();
+
+    /**
      * The size of one backoff time slot for call retries. For example, an exponential backoff retry algorithm may
      * choose a backoff time in {@code [0, backoffSlotSize * 2^c]} for the c-th retry.
      */

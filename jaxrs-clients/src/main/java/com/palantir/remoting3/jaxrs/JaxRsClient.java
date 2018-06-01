@@ -22,7 +22,6 @@ import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.ext.refresh.Refreshable;
 import com.palantir.remoting3.ext.refresh.RefreshableProxyInvocationHandler;
-import com.palantir.remoting3.okhttp.RpcMode;
 
 /**
  * Static factory methods for producing creating JAX-RS HTTP proxies.
@@ -30,15 +29,6 @@ import com.palantir.remoting3.okhttp.RpcMode;
 public final class JaxRsClient {
 
     private JaxRsClient() {}
-
-    /**
-     * Creates a {@code T client} for the given service configuration. The HTTP {@code User-Agent} header of every
-     * request is set to the given non-empty {@code userAgent} string.
-     */
-    public static <T> T create(Class<T> serviceClass, UserAgent userAgent, ClientConfiguration config, RpcMode mode) {
-        // TODO(rfink): Add http-remoting agent as informational
-        return create(serviceClass, UserAgents.format(userAgent), config, mode);
-    }
 
     /**
      * Creates a {@code T client} for the given service configuration. The HTTP {@code User-Agent} header of every
@@ -57,13 +47,6 @@ public final class JaxRsClient {
     @Deprecated
     public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration config) {
         return new FeignJaxRsClientBuilder(config).build(serviceClass, userAgent);
-    }
-
-    /**
-     * Like {@link #create(Class, String, ClientConfiguration)}, but with an RPC mode specified.
-     */
-    public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration config, RpcMode mode) {
-        return new FeignJaxRsClientBuilder(config, mode).build(serviceClass, userAgent);
     }
 
     /**

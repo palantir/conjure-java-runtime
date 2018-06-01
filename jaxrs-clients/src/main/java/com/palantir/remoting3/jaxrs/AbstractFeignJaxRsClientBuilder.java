@@ -27,7 +27,6 @@ import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContra
 import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderRewriter;
 import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.remoting3.okhttp.OkHttpClients;
-import com.palantir.remoting3.okhttp.RpcMode;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
 import feign.Contract;
@@ -60,20 +59,10 @@ abstract class AbstractFeignJaxRsClientBuilder {
      */
     private final String primaryUri;
 
-    private final RpcMode rpcMode;
-
     AbstractFeignJaxRsClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Must provide at least one service URI");
         this.config = config;
         this.primaryUri = config.uris().get(0);
-        this.rpcMode = RpcMode.FAILOVER_ON_ERROR;
-    }
-
-    AbstractFeignJaxRsClientBuilder(ClientConfiguration config, RpcMode mode) {
-        Preconditions.checkArgument(!config.uris().isEmpty(), "Must provide at least one service URI");
-        this.config = config;
-        this.primaryUri = config.uris().get(0);
-        this.rpcMode = mode;
     }
 
     protected abstract ObjectMapper getObjectMapper();
@@ -102,7 +91,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
                 .requestInterceptor(PathTemplateHeaderRewriter.INSTANCE)
-                .client(new OkHttpClient(OkHttpClients.create(config, userAgent, serviceClass, rpcMode)))
+                .client(new OkHttpClient(OkHttpClients.create(config, userAgent, serviceClass)))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
                 .retryer(new Retryer.Default(0, 0, 1))  // use OkHttp retry mechanism only

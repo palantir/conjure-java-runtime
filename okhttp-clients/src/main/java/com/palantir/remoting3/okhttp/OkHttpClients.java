@@ -89,17 +89,7 @@ public final class OkHttpClients {
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
     public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */,
-                RpcMode.FAILOVER_ON_ERROR);
-    }
-
-    /**
-     * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
-     * ClientConfiguration#uris URIs} are initialized in random order.
-     */
-    public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass,
-            RpcMode mode) {
-        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */, mode);
+        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */);
     }
 
     /**
@@ -122,15 +112,14 @@ public final class OkHttpClients {
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
             ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, false, RpcMode.FAILOVER_ON_ERROR);
+        return createInternal(config, userAgent, serviceClass, false);
     }
 
     private static RemotingOkHttpClient createInternal(
             ClientConfiguration config,
             UserAgent userAgent,
             Class<?> serviceClass,
-            boolean randomizeUrlOrder,
-            RpcMode mode) {
+            boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
@@ -140,14 +129,9 @@ public final class OkHttpClients {
             // TODO(rfink): Should this go into the call itself?
             client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
         } else {
-            if (mode == RpcMode.ROUND_ROBIN) {
-                // Add RoundRobinUrlInterceptor: select "next" URL for each request
-                client.addInterceptor(RoundRobinUrlInterceptor.create(urlSelector));
-            } else {
-                // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in the
-                // request
-                client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
-            }
+            // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in the
+            // request
+            client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
         }
         client.followRedirects(false);  // We implement our own redirect logic.
 
