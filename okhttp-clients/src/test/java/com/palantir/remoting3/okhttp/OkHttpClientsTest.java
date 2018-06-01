@@ -378,7 +378,9 @@ public final class OkHttpClientsTest extends TestBase {
     public void handlesRetryOther_redirectsToOtherUrl() throws Exception {
         OkHttpClient client = OkHttpClients.withStableUris(
                 ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
-                AGENT, OkHttpClientsTest.class);
+                AGENT,
+                new HostMetricsRegistry(),
+                OkHttpClientsTest.class);
         server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
         server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
 
@@ -484,6 +486,7 @@ public final class OkHttpClientsTest extends TestBase {
                         .backoffSlotSize(Duration.ofMillis(10))
                         .build(),
                 AGENT,
+                new HostMetricsRegistry(),
                 OkHttpClientsTest.class);
 
         Request request = new Request.Builder()
@@ -511,6 +514,7 @@ public final class OkHttpClientsTest extends TestBase {
                                 .build()
                 ),
                 AGENT,
+                new HostMetricsRegistry(),
                 OkHttpClientsTest.class);
 
         Request request = new Request.Builder()
@@ -600,6 +604,7 @@ public final class OkHttpClientsTest extends TestBase {
                         .backoffSlotSize(backoffSlotSize)
                         .build(),
                 AGENT,
+                new HostMetricsRegistry(),
                 OkHttpClientsTest.class);
     }
 }
