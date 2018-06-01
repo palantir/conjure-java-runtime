@@ -129,8 +129,7 @@ public final class OkHttpClients {
             // TODO(rfink): Should this go into the call itself?
             client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
         } else {
-            // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in the
-            // request
+            // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in the request
             client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
         }
         client.followRedirects(false);  // We implement our own redirect logic.
