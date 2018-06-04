@@ -42,7 +42,7 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(10);
     private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(250);
     private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = false;
-    private static final RpcMode DEFAULT_RPC_MODE = RpcMode.FAILOVER_ON_ERROR;
+    private static final NodeSelectionStrategy DEFAULT_RPC_MODE = NodeSelectionStrategy.PIN_UNTIL_ERROR;
 
     private ClientConfigurations() {}
 
@@ -55,10 +55,9 @@ public final class ClientConfigurations {
     }
 
     /**
-     * Creates a new {@link ClientConfiguration} instance from the given {@link ServiceConfiguration} and
-     * {@link RpcMode}, filling in empty/absent configuration with the defaults specified as constants in this class.
+     * Like {@link #of(ServiceConfiguration)}, but using the explicitly given NodeSelectionStrategy.
      */
-    public static ClientConfiguration of(ServiceConfiguration config, RpcMode rpcMode) {
+    public static ClientConfiguration of(ServiceConfiguration config, NodeSelectionStrategy nodeSelectionStrategy) {
         return ClientConfiguration.builder()
                 .sslSocketFactory(SslSocketFactories.createSslSocketFactory(config.security()))
                 .trustManager(SslSocketFactories.createX509TrustManager(config.security()))
@@ -71,7 +70,7 @@ public final class ClientConfigurations {
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
                 .meshProxy(meshProxy(config.proxy()))
                 .maxNumRetries(config.maxNumRetries().orElse(config.uris().size()))
-                .rpcMode(rpcMode)
+                .nodeSelectionStrategy(nodeSelectionStrategy)
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
                 .build();
     }
@@ -94,7 +93,7 @@ public final class ClientConfigurations {
                 .proxyCredentials(Optional.empty())
                 .maxNumRetries(uris.size())
                 .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
-                .rpcMode(DEFAULT_RPC_MODE)
+                .nodeSelectionStrategy(DEFAULT_RPC_MODE)
                 .build();
     }
 

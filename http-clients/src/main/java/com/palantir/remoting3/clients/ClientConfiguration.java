@@ -79,10 +79,9 @@ public interface ClientConfiguration {
     int maxNumRetries();
 
     /**
-     * The mode to use while processing requests. By default, requests are pinned to a URL until conditions are met
-     * to try another node (e.g. node is down, QoS responses).
+     * Indicates how the target node is selected for a given request.
      */
-    RpcMode rpcMode();
+    NodeSelectionStrategy nodeSelectionStrategy();
 
     /**
      * The size of one backoff time slot for call retries. For example, an exponential backoff retry algorithm may

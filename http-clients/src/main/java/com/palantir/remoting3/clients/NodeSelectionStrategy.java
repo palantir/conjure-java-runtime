@@ -16,12 +16,13 @@
 
 package com.palantir.remoting3.clients;
 
-public enum RpcMode {
+public enum NodeSelectionStrategy {
+
     /**
      * Once a node is found that returns responses successfully, continue to use that node until a failure is
      * received.
      */
-    FAILOVER_ON_ERROR,
+    PIN_UNTIL_ERROR,
     /**
      * Round robin through all available nodes after each request.
      */
