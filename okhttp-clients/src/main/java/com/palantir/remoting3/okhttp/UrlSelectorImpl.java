@@ -125,10 +125,8 @@ final class UrlSelectorImpl implements UrlSelector {
             potentialNextIndex = (potentialNextIndex + 1) % baseUrls.size();
             Boolean maybeInCache = this.failedUrls.getIfPresent(baseUrls.get(potentialNextIndex));
             if (maybeInCache == null) {
-                System.out.println("Trying to hit " + baseUrls.get(potentialNextIndex));
                 return redirectTo(existingUrl, baseUrls.get(potentialNextIndex));
             }
-            System.out.println("Skipping over " + baseUrls.get(potentialNextIndex));
             numAttempts++;
         }
 
