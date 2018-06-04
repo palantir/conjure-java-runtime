@@ -51,4 +51,9 @@ public interface UrlSelector {
      * okhttp3.Request#url} does.
      */
     List<HttpUrl> getBaseUrls();
+
+    /**
+     * Marks the specified URL as failed, which removes it from the pool of available URLs.
+     */
+    void markFailed(HttpUrl failedUrl);
 }

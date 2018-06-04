@@ -16,10 +16,13 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,15 +35,22 @@ final class UrlSelectorImpl implements UrlSelector {
 
     private final ImmutableList<HttpUrl> baseUrls;
     private final AtomicInteger currentUrl;
+    private final Cache<HttpUrl, Boolean> failedUrls;
+    private final boolean useFailedUrlCache;
 
-    private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls) {
+    private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, Duration failedUrlExpiration) {
         this.baseUrls = baseUrls;
         this.currentUrl = new AtomicInteger(0);
+        this.failedUrls = Caffeine.newBuilder()
+                .maximumSize(baseUrls.size())
+                .expireAfterWrite(failedUrlExpiration)
+                .build();
+        this.useFailedUrlCache = failedUrlExpiration.compareTo(Duration.ZERO) > 0;
 
         Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
     }
 
-    static UrlSelectorImpl create(Collection<String> baseUrls, boolean randomizeOrder) {
+    static UrlSelectorImpl create(Collection<String> baseUrls, boolean randomizeOrder, Duration failedUrlExpiration) {
         List<String> orderedUrls = new ArrayList<>(baseUrls);
         if (randomizeOrder) {
             Collections.shuffle(orderedUrls);
@@ -55,7 +65,11 @@ final class UrlSelectorImpl implements UrlSelector {
                     "Base URLs must be 'canonical' and consist of schema, host, port, and path only: %s", url);
             canonicalUrls.add(canonicalUrl);
         });
-        return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()));
+        return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()), failedUrlExpiration);
+    }
+
+    static UrlSelectorImpl create(Collection<String> baseUrls, boolean randomizeOrder) {
+        return create(baseUrls, randomizeOrder, Duration.ZERO);
     }
 
     private static String switchWsToHttp(String url) {
@@ -103,15 +117,35 @@ final class UrlSelectorImpl implements UrlSelector {
         // if possible, determine the index of the passed in url (so we can be sure to return a url which is different)
         Optional<Integer> existingUrlIndex = indexFor(existingUrl);
 
-        // ...otherwise we fall back to the stateful current url index
-        int index = currentUrl.updateAndGet(
-                (currentUrlIndex) -> (existingUrlIndex.orElse(currentUrlIndex) + 1) % baseUrls.size());
-        return redirectTo(existingUrl, baseUrls.get(index));
+        int numAttempts = 0;
+        int potentialNextIndex = existingUrlIndex.orElse(currentUrl.get());
+
+        // Skip over any URLs that are marked as failed
+        while (numAttempts < baseUrls.size()) {
+            potentialNextIndex = (potentialNextIndex + 1) % baseUrls.size();
+            Boolean maybeInCache = this.failedUrls.getIfPresent(baseUrls.get(potentialNextIndex));
+            if (maybeInCache == null) {
+                System.out.println("Trying to hit " + baseUrls.get(potentialNextIndex));
+                return redirectTo(existingUrl, baseUrls.get(potentialNextIndex));
+            }
+            System.out.println("Skipping over " + baseUrls.get(potentialNextIndex));
+            numAttempts++;
+        }
+
+        // No available URLs remain
+        return Optional.empty();
     }
 
     @Override
     public Optional<HttpUrl> redirectToCurrent(HttpUrl current) {
         return redirectTo(current, baseUrls.get(currentUrl.get()));
+    }
+
+    @Override
+    public void markFailed(HttpUrl failedUrl) {
+        if (this.useFailedUrlCache) {
+            this.failedUrls.put(failedUrl, Boolean.TRUE);
+        }
     }
 
     private Optional<Integer> indexFor(HttpUrl url) {
