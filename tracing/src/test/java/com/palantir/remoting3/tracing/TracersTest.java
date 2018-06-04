@@ -108,6 +108,32 @@ public final class TracersTest {
     }
 
     @Test
+    public void testExecutorServiceWrapsCallablesWithNewTraces() throws Exception {
+        ExecutorService wrappedService =
+                Tracers.wrapWithNewTrace(Executors.newSingleThreadExecutor());
+
+        Callable<Void> callable = newTraceExpectingCallable();
+        Runnable runnable = newTraceExpectingRunnable();
+
+        // Empty trace
+        wrappedService.submit(callable).get();
+        wrappedService.submit(runnable).get();
+
+        wrappedService.submit(callable).get();
+        wrappedService.submit(runnable).get();
+
+        // Non-empty trace
+        Tracer.startSpan("foo");
+        Tracer.startSpan("bar");
+        Tracer.startSpan("baz");
+        wrappedService.submit(callable).get();
+        wrappedService.submit(runnable).get();
+        Tracer.completeSpan();
+        Tracer.completeSpan();
+        Tracer.completeSpan();
+    }
+
+    @Test
     public void testWrappingRunnable_runnableTraceIsIsolated() throws Exception {
         Tracer.startSpan("outside");
         Runnable runnable = Tracers.wrap(new Runnable() {
