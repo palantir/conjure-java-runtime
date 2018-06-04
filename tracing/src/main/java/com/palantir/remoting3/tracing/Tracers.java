@@ -118,7 +118,7 @@ public final class Tracers {
             }
         };
     }
-    
+
     /**
      * Wraps the provided scheduled executor service to make submitted tasks traceable with a fresh {@link Trace trace}
      * for each execution, see {@link #wrapWithNewTrace(ScheduledExecutorService)}. This method should not be used to
