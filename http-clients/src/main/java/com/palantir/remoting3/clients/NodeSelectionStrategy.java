@@ -19,12 +19,13 @@ package com.palantir.remoting3.clients;
 public enum NodeSelectionStrategy {
 
     /**
-     * Once a node is found that returns responses successfully, continue to use that node until a failure is
-     * received.
+     * Once a node is found that returns responses successfully, use that node until a failure is
+     * received, then select a new node.
      */
     PIN_UNTIL_ERROR,
+
     /**
-     * Round robin through all available nodes after each request.
+     * For each new request, select the "next" node (in some undefined order).
      */
     ROUND_ROBIN
 }
