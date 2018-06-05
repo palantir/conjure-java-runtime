@@ -58,7 +58,7 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
                             String.format("http://%s:%s/api/", server1.getHostName(), server1.getPort()),
                             String.format("http://%s:%s/api/", server2.getHostName(), server2.getPort())))
                     .maxNumRetries(2)  // need 2 retries because URL order is not deterministic
-                    .failedUrlCooldown(Duration.ofMillis(50))
+                    .failedUrlCooldown(Duration.ofMillis(1000))
                     .build());
 
     @Test
