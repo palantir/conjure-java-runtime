@@ -79,6 +79,11 @@ public interface ClientConfiguration {
     int maxNumRetries();
 
     /**
+     * Indicates how the target node is selected for a given request.
+     */
+    NodeSelectionStrategy nodeSelectionStrategy();
+
+    /**
      * The size of one backoff time slot for call retries. For example, an exponential backoff retry algorithm may
      * choose a backoff time in {@code [0, backoffSlotSize * 2^c]} for the c-th retry.
      */
