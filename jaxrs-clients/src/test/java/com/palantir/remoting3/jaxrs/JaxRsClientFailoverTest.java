@@ -41,47 +41,34 @@ import org.junit.runner.RunWith;
 @RunWith(Theories.class)
 public final class JaxRsClientFailoverTest extends TestBase {
 
-    private static final MockWebServer server1 = new MockWebServer();
-    private static final MockWebServer server2 = new MockWebServer();
+    @DataPoint
+    public static final FailoverTestCase CASE = new FailoverTestCase(new MockWebServer(), new MockWebServer(), 0);
 
     @DataPoint
-    public static final TestService CLIENT = JaxRsClient.create(TestService.class, AGENT,
-                ClientConfiguration.builder()
-                        .from(createTestConfig(
-                                "http://localhost:" + server1.getPort(),
-                                "http://localhost:" + server2.getPort()))
-                        .maxNumRetries(2)
-                        .build());
-
-    @DataPoint
-    public static final TestService CLIENT_WITH_COOLDOWN = JaxRsClient.create(TestService.class, AGENT,
-            ClientConfiguration.builder()
-                    .from(createTestConfig(
-                            "http://localhost:" + server1.getPort(),
-                            "http://localhost:" + server2.getPort()))
-                    .maxNumRetries(2)
-                    .failedUrlCooldown(Duration.ofMillis(1000))
-                    .build());
+    public static final FailoverTestCase CASE_WITH_CACHE = new FailoverTestCase(new MockWebServer(),
+            new MockWebServer(), 500);
 
     @Test
     @Theory
-    public void testConnectionError_performsFailover(TestService proxy) throws IOException {
-        server1.shutdown();
-        server2.enqueue(new MockResponse().setBody("\"foo\""));
+    public void testConnectionError_performsFailover(FailoverTestCase failoverTestCase) throws IOException {
+        failoverTestCase.server1.shutdown();
+        failoverTestCase.server2.enqueue(new MockResponse().setBody("\"foo\""));
 
-        assertThat(proxy.string(), is("foo"));
+        assertThat(failoverTestCase.getProxy().string(), is("foo"));
     }
 
     @Test
     @Theory
-    public void testConnectionError_performsFailover_concurrentRequests(TestService proxy) throws Exception {
+    public void testConnectionError_performsFailover_concurrentRequests(FailoverTestCase failoverTestCase)
+            throws Exception {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
-        server1.shutdown();
+        failoverTestCase.server1.shutdown();
         for (int i = 0; i < 10; i++) {
-            server2.enqueue(new MockResponse().setBody("\"foo\""));
+            failoverTestCase.server2.enqueue(new MockResponse().setBody("\"foo\""));
         }
 
+        TestService proxy = failoverTestCase.getProxy();
         List<Future<String>> things = Lists.newArrayListWithCapacity(10);
         for (int i = 0; i < 10; i++) {
             things.add(executorService.submit(() -> proxy.string()));
@@ -93,11 +80,14 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
     @Test
     @Theory
-    public void testConnectionError_whenOneCallFailsThenSubsequentNewCallsCanStillSucceed(TestService proxy)
+    public void testConnectionError_whenOneCallFailsThenSubsequentNewCallsCanStillSucceed(FailoverTestCase
+            failoverTestCase)
             throws Exception {
         // Call fails when servers are down.
-        server1.shutdown();
-        server2.shutdown();
+        failoverTestCase.server1.shutdown();
+        failoverTestCase.server2.shutdown();
+
+        TestService proxy = failoverTestCase.getProxy();
         try {
             proxy.string();
             fail();
@@ -107,7 +97,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
         // Subsequent call (with the same proxy instance) succeeds.
         MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
-        anotherServer1.start(server1.getPort());
+        anotherServer1.start(failoverTestCase.server1.getPort());
         anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
         assertThat(proxy.string(), is("foo"));
         anotherServer1.shutdown();
@@ -115,31 +105,34 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
     @Test
     @Theory
-    public void testQosError_performsFailover(TestService proxy) throws Exception {
-        server1.enqueue(new MockResponse().setResponseCode(503));
-        server1.enqueue(new MockResponse().setBody("\"foo\""));
-        server2.enqueue(new MockResponse().setBody("\"bar\""));
+    public void testQosError_performsFailover(FailoverTestCase failoverTestCase) throws Exception {
+        failoverTestCase.server1.enqueue(new MockResponse().setResponseCode(503));
+        failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
+        failoverTestCase.server2.enqueue(new MockResponse().setBody("\"bar\""));
 
-        assertThat(proxy.string(), is("bar"));
+        assertThat(failoverTestCase.getProxy().string(), is("bar"));
     }
 
     @Test
-    public void testConnectionError_performsFailoverOnDnsFailure() throws Exception {
-        server1.enqueue(new MockResponse().setBody("\"foo\""));
+    @Theory
+    public void testConnectionError_performsFailoverOnDnsFailure(FailoverTestCase failoverTestCase)
+            throws Exception {
+        failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
 
         TestService bogusHostProxy = JaxRsClient.create(TestService.class, AGENT,
                 ClientConfiguration.builder()
                         .from(createTestConfig(
                                 "http://foo-bar-bogus-host.unresolvable:80",
-                                "http://localhost:" + server1.getPort()))
+                                "http://localhost:" + failoverTestCase.server1.getPort()))
                         .maxNumRetries(2)
                         .build());
         assertThat(bogusHostProxy.string(), is("foo"));
-        assertThat(server1.getRequestCount(), is(1));
+        assertThat(failoverTestCase.server1.getRequestCount(), is(1));
     }
 
     @Test
     public void testQosError_performsRetryWithOneNode() throws Exception {
+        MockWebServer server1 = new MockWebServer();
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
@@ -149,5 +142,28 @@ public final class JaxRsClientFailoverTest extends TestBase {
                 .build());
 
         assertThat(anotherProxy.string(), is("foo"));
+    }
+
+    private static class FailoverTestCase {
+        private final MockWebServer server1;
+        private final MockWebServer server2;
+        private final long duration;
+
+        FailoverTestCase(MockWebServer server1, MockWebServer server2, long duration) {
+            this.server1 = server1;
+            this.server2 = server2;
+            this.duration = duration;
+        }
+
+        public TestService getProxy() {
+            return JaxRsClient.create(TestService.class, AGENT,
+                    ClientConfiguration.builder()
+                            .from(createTestConfig(
+                                    "http://localhost:" + server1.getPort(),
+                                    "http://localhost:" + server2.getPort()))
+                            .maxNumRetries(2)
+                            .failedUrlCooldown(Duration.ofMillis(duration))
+                            .build());
+        }
     }
 }
