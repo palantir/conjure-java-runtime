@@ -84,6 +84,12 @@ public interface ClientConfiguration {
     NodeSelectionStrategy nodeSelectionStrategy();
 
     /**
+     * The amount of time a URL marked as failed should be avoided for subsequent calls. If the
+     * {@link #nodeSelectionStrategy} is ROUND_ROBIN, this must be a positive period of time.
+     */
+    Duration failedUrlCooldown();
+
+    /**
      * The size of one backoff time slot for call retries. For example, an exponential backoff retry algorithm may
      * choose a backoff time in {@code [0, backoffSlotSize * 2^c]} for the c-th retry.
      */
@@ -94,6 +100,10 @@ public interface ClientConfiguration {
         if (meshProxy().isPresent()) {
             checkArgument(maxNumRetries() == 0, "If meshProxy is configured then maxNumRetries must be 0");
             checkArgument(uris().size() == 1, "If meshProxy is configured then uris must contain exactly 1 URI");
+        }
+        if (nodeSelectionStrategy().equals(NodeSelectionStrategy.ROUND_ROBIN)) {
+            checkArgument(!failedUrlCooldown().isNegative() && !failedUrlCooldown().isZero(),
+                    "If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
         }
     }
 

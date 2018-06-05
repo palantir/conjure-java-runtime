@@ -24,39 +24,48 @@ import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import feign.RetryableException;
+import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoint;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 
-
+@RunWith(Theories.class)
 public final class JaxRsClientFailoverTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server1 = new MockWebServer();
-    @Rule
-    public final MockWebServer server2 = new MockWebServer();
+    private static final MockWebServer server1 = new MockWebServer();
+    private static final MockWebServer server2 = new MockWebServer();
 
-    private TestService proxy;
-
-    @Before
-    public void before() throws Exception {
-        proxy = JaxRsClient.create(TestService.class, AGENT,
+    @DataPoint
+    public static final TestService CLIENT = JaxRsClient.create(TestService.class, AGENT,
                 ClientConfiguration.builder()
                         .from(createTestConfig(
                                 "http://localhost:" + server1.getPort(),
                                 "http://localhost:" + server2.getPort()))
                         .maxNumRetries(2)
                         .build());
-    }
+
+    @DataPoint
+    public static final TestService CLIENT_WITH_COOLDOWN = JaxRsClient.create(TestService.class, AGENT,
+            ClientConfiguration.builder()
+                    .from(createTestConfig(
+                            "http://localhost:" + server1.getPort(),
+                            "http://localhost:" + server2.getPort()))
+                    .maxNumRetries(2)
+                    .failedUrlCooldown(Duration.ofMillis(50))
+                    .build());
 
     @Test
-    public void testConnectionError_performsFailover() throws Exception {
+    @Theory
+    public void testConnectionError_performsFailover(TestService proxy) throws IOException {
         server1.shutdown();
         server2.enqueue(new MockResponse().setBody("\"foo\""));
 
@@ -64,7 +73,8 @@ public final class JaxRsClientFailoverTest extends TestBase {
     }
 
     @Test
-    public void testConnectionError_performsFailover_concurrentRequests() throws Exception {
+    @Theory
+    public void testConnectionError_performsFailover_concurrentRequests(TestService proxy) throws Exception {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         server1.shutdown();
@@ -82,7 +92,9 @@ public final class JaxRsClientFailoverTest extends TestBase {
     }
 
     @Test
-    public void testConnectionError_whenOneCallFailsThenSubsequentNewCallsCanStillSucceed() throws Exception {
+    @Theory
+    public void testConnectionError_whenOneCallFailsThenSubsequentNewCallsCanStillSucceed(TestService proxy)
+            throws Exception {
         // Call fails when servers are down.
         server1.shutdown();
         server2.shutdown();
@@ -102,6 +114,16 @@ public final class JaxRsClientFailoverTest extends TestBase {
     }
 
     @Test
+    @Theory
+    public void testQosError_performsFailover(TestService proxy) throws Exception {
+        server1.enqueue(new MockResponse().setResponseCode(503));
+        server1.enqueue(new MockResponse().setBody("\"foo\""));
+        server2.enqueue(new MockResponse().setBody("\"bar\""));
+
+        assertThat(proxy.string(), is("bar"));
+    }
+
+    @Test
     public void testConnectionError_performsFailoverOnDnsFailure() throws Exception {
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
@@ -114,15 +136,6 @@ public final class JaxRsClientFailoverTest extends TestBase {
                         .build());
         assertThat(bogusHostProxy.string(), is("foo"));
         assertThat(server1.getRequestCount(), is(1));
-    }
-
-    @Test
-    public void testQosError_performsFailover() throws Exception {
-        server1.enqueue(new MockResponse().setResponseCode(503));
-        server1.enqueue(new MockResponse().setBody("\"foo\""));
-        server2.enqueue(new MockResponse().setBody("\"bar\""));
-
-        assertThat(proxy.string(), is("bar"));
     }
 
     @Test

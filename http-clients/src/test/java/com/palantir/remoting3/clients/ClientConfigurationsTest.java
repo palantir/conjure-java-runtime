@@ -91,6 +91,19 @@ public final class ClientConfigurationsTest {
                 .hasMessage("If meshProxy is configured then uris must contain exactly 1 URI");
     }
 
+    @Test
+    public void roundRobin_noCooldown() throws Exception {
+        ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
+                .uris(uris)
+                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                .build();
+
+        assertThatThrownBy(() -> ClientConfigurations.of(serviceConfig, NodeSelectionStrategy.ROUND_ROBIN,
+                Duration.ofMillis(0)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
+    }
+
     private ServiceConfiguration meshProxyServiceConfig(List<String> theUris, int maxNumRetries) {
         return ServiceConfiguration.builder()
                 .uris(theUris)

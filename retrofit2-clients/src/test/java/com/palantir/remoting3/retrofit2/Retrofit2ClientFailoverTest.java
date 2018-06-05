@@ -21,29 +21,27 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.palantir.remoting3.clients.ClientConfiguration;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoint;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-
+@RunWith(Theories.class)
 public final class Retrofit2ClientFailoverTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server1 = new MockWebServer();
-    @Rule
-    public final MockWebServer server2 = new MockWebServer();
+    private static final MockWebServer server1 = new MockWebServer();
+    private static final MockWebServer server2 = new MockWebServer();
 
-    private TestService proxy;
-
-    @Before
-    public void before() throws Exception {
-        proxy = Retrofit2Client.create(
+    @DataPoint
+    public static final TestService CLIENT = Retrofit2Client.create(
                 TestService.class, AGENT,
                 ClientConfiguration.builder()
                         .from(createTestConfig(
@@ -51,17 +49,30 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
                                 String.format("http://%s:%s/api/", server2.getHostName(), server2.getPort())))
                         .maxNumRetries(2)  // need 2 retries because URL order is not deterministic
                         .build());
-    }
+
+    @DataPoint
+    public static final TestService CLIENT_WITH_COOLDOWN = Retrofit2Client.create(
+            TestService.class, AGENT,
+            ClientConfiguration.builder()
+                    .from(createTestConfig(
+                            String.format("http://%s:%s/api/", server1.getHostName(), server1.getPort()),
+                            String.format("http://%s:%s/api/", server2.getHostName(), server2.getPort())))
+                    .maxNumRetries(2)  // need 2 retries because URL order is not deterministic
+                    .failedUrlCooldown(Duration.ofMillis(50))
+                    .build());
 
     @Test
-    public void testConnectionError_performsFailover() throws IOException {
+    @Theory
+    public void testConnectionError_performsFailover(TestService proxy) throws IOException {
         server1.shutdown();
         server2.enqueue(new MockResponse().setBody("\"pong\""));
         assertThat(proxy.get().execute().body()).isEqualTo("pong");
     }
 
     @Test
-    public void testConnectionError_whenOneCallFailsThenSubsequentNewCallsCanStillSucceed() throws Exception {
+    @Theory
+    public void testConnectionError_whenOneCallFailsThenSubsequentNewCallsCanStillSucceed(TestService proxy)
+            throws Exception {
         server1.shutdown();
         server2.shutdown();
 
@@ -78,22 +89,8 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
     }
 
     @Test
-    public void testConnectionError_performsFailoverOnDnsFailure() throws Exception {
-        server1.enqueue(new MockResponse().setBody("\"foo\""));
-
-        TestService bogusHostProxy = Retrofit2Client.create(TestService.class, AGENT,
-                ClientConfiguration.builder()
-                        .from(createTestConfig(
-                                "http://foo-bar-bogus-host.unresolvable:80",
-                                "http://localhost:" + server1.getPort()))
-                        .maxNumRetries(2)
-                        .build());
-        assertThat(bogusHostProxy.get().execute().body()).isEqualTo("foo");
-        assertThat(server1.getRequestCount()).isEqualTo(1);
-    }
-
-    @Test
-    public void testQosError_performsFailover_forSynchronousOperation() throws Exception {
+    @Theory
+    public void testQosError_performsFailover_forSynchronousOperation(TestService proxy) throws Exception {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
         server2.enqueue(new MockResponse().setBody("\"bar\""));
@@ -102,7 +99,8 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
     }
 
     @Test
-    public void testQosError_performsFailover_forAsynchronousOperation() throws Exception {
+    @Theory
+    public void testQosError_performsFailover_forAsynchronousOperation(TestService proxy) throws Exception {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
         server2.enqueue(new MockResponse().setBody("\"bar\""));
@@ -120,6 +118,21 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
             }
         });
         assertThat(future.get()).isEqualTo("bar");
+    }
+
+    @Test
+    public void testConnectionError_performsFailoverOnDnsFailure() throws Exception {
+        server1.enqueue(new MockResponse().setBody("\"foo\""));
+
+        TestService bogusHostProxy = Retrofit2Client.create(TestService.class, AGENT,
+                ClientConfiguration.builder()
+                        .from(createTestConfig(
+                                "http://foo-bar-bogus-host.unresolvable:80",
+                                "http://localhost:" + server1.getPort()))
+                        .maxNumRetries(2)
+                        .build());
+        assertThat(bogusHostProxy.get().execute().body()).isEqualTo("foo");
+        assertThat(server1.getRequestCount()).isEqualTo(1);
     }
 
     @Test

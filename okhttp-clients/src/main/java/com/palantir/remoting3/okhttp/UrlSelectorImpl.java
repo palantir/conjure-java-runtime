@@ -54,8 +54,8 @@ final class UrlSelectorImpl implements UrlSelector {
     /**
      * Creates a new {@link UrlSelector} with the supplied URLs. The order of the URLs may be randomized by setting
      * {@code randomizeOrder} to true. If a non-zero {@code duration} and {@code timeUnit} are specified, URLs that are
-     * marked as failed using {@link #markAsFailed(HttpUrl)} will be removed for the pool of available URLs for
-     * that period of time.
+     * marked as failed using {@link #markAsFailed(HttpUrl)} will be removed from the pool of prioritized, healthy URLs
+     * for that period of time.
      */
     static UrlSelectorImpl create(Collection<String> baseUrls, boolean randomizeOrder, long duration,
             TimeUnit timeUnit) {
@@ -138,8 +138,9 @@ final class UrlSelectorImpl implements UrlSelector {
             numAttempts++;
         }
 
-        // No available URLs remain
-        return Optional.empty();
+        // No healthy URLs remain; re-balance across any specified nodes
+        return redirectTo(existingUrl,
+                baseUrls.get((existingUrlIndex.orElse(currentUrl.get()) + 1) % baseUrls.size()));
     }
 
     @Override
