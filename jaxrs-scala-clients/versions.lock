@@ -82,12 +82,6 @@
         "com.fasterxml.jackson.module:jackson-module-scala_2.11": {
             "locked": "2.9.5"
         },
-        "com.github.ben-manes.caffeine:caffeine": {
-            "locked": "2.6.2",
-            "transitive": [
-                "com.palantir.remoting3:okhttp-clients"
-            ]
-        },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
@@ -413,12 +407,6 @@
         },
         "com.fasterxml.jackson.module:jackson-module-scala_2.11": {
             "locked": "2.9.5"
-        },
-        "com.github.ben-manes.caffeine:caffeine": {
-            "locked": "2.6.2",
-            "transitive": [
-                "com.palantir.remoting3:okhttp-clients"
-            ]
         },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",

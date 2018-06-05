@@ -53,7 +53,8 @@ public interface UrlSelector {
     List<HttpUrl> getBaseUrls();
 
     /**
-     * Marks the specified URL as failed, which removes it from the pool of available URLs.
+     * Indicates that a call against the given URL has failed. Implementations can use failure statistics to determine
+     * which hosts may be unavailable and should be avoided for future calls.
      */
-    void markFailed(HttpUrl failedUrl);
+    void markAsFailed(HttpUrl failedUrl);
 }

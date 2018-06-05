@@ -68,9 +68,6 @@
                 "com.palantir.remoting3:tracing"
             ]
         },
-        "com.github.ben-manes.caffeine:caffeine": {
-            "locked": "2.6.2"
-        },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
@@ -274,9 +271,6 @@
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:tracing"
             ]
-        },
-        "com.github.ben-manes.caffeine:caffeine": {
-            "locked": "2.6.2"
         },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",

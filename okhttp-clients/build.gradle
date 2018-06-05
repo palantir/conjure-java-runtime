@@ -6,7 +6,6 @@ dependencies {
     compile project(':error-handling')
     compile project(':http-clients')
     compile project(':tracing-okhttp3')
-    compile "com.github.ben-manes.caffeine:caffeine"
     compile 'com.google.guava:guava'
     compile 'com.palantir.safe-logging:preconditions'
     compile 'com.palantir.tritium:tritium-registry'
