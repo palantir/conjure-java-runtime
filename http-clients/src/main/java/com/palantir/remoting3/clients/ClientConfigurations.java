@@ -42,6 +42,7 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(10);
     private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(250);
     private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = false;
+    private static final NodeSelectionStrategy DEFAULT_RPC_MODE = NodeSelectionStrategy.PIN_UNTIL_ERROR;
 
     private ClientConfigurations() {}
 
@@ -50,6 +51,13 @@ public final class ClientConfigurations {
      * empty/absent configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(ServiceConfiguration config) {
+        return of(config, DEFAULT_RPC_MODE);
+    }
+
+    /**
+     * Like {@link #of(ServiceConfiguration)}, but using the explicitly given NodeSelectionStrategy.
+     */
+    public static ClientConfiguration of(ServiceConfiguration config, NodeSelectionStrategy nodeSelectionStrategy) {
         return ClientConfiguration.builder()
                 .sslSocketFactory(SslSocketFactories.createSslSocketFactory(config.security()))
                 .trustManager(SslSocketFactories.createX509TrustManager(config.security()))
@@ -62,6 +70,7 @@ public final class ClientConfigurations {
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
                 .meshProxy(meshProxy(config.proxy()))
                 .maxNumRetries(config.maxNumRetries().orElse(config.uris().size()))
+                .nodeSelectionStrategy(nodeSelectionStrategy)
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
                 .build();
     }
@@ -84,6 +93,7 @@ public final class ClientConfigurations {
                 .proxyCredentials(Optional.empty())
                 .maxNumRetries(uris.size())
                 .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
+                .nodeSelectionStrategy(DEFAULT_RPC_MODE)
                 .build();
     }
 

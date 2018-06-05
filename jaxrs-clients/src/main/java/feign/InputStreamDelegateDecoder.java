@@ -35,7 +35,7 @@ public final class InputStreamDelegateDecoder implements Decoder {
     @Override
     public Object decode(Response response, Type type) throws IOException, FeignException {
         if (type.equals(InputStream.class)) {
-            byte[] body = Util.toByteArray(response.body().asInputStream());
+            byte[] body = response.body() != null ? Util.toByteArray(response.body().asInputStream()) : new byte[0];
             return new ByteArrayInputStream(body);
         } else {
             return delegate.decode(response, type);

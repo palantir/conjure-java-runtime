@@ -77,8 +77,24 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
     }
 
     @Test
+    public void testSupportsNullBody() throws Exception {
+        String data = "";
+        Response response = Response.create(200, "OK", ImmutableMap.of(), (Response.Body) null);
+
+        InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
+
+        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8), is(data));
+    }
+
+    @Test
     public void testStandardClientsUseInputStreamDelegateDecoder() throws IOException {
         String data = "bytes";
+        assertThat(Util.toByteArray(service.writeInputStream(data)), is(bytes(data)));
+    }
+
+    @Test
+    public void testClientCanHandleEmptyInputStream() throws IOException {
+        String data = "";
         assertThat(Util.toByteArray(service.writeInputStream(data)), is(bytes(data)));
     }
 
