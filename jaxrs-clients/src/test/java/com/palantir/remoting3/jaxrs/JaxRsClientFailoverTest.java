@@ -60,7 +60,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
                             "http://localhost:" + server1.getPort(),
                             "http://localhost:" + server2.getPort()))
                     .maxNumRetries(2)
-                    .failedUrlCooldown(Duration.ofMillis(50))
+                    .failedUrlCooldown(Duration.ofMillis(500))
                     .build());
 
     @Test
