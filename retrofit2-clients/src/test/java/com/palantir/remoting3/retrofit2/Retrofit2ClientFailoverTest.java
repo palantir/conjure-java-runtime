@@ -138,6 +138,21 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
     }
 
     @Test
+    public void testQosError_performsRetryWithOneNodeAndCache_forSynchronousOperation() throws Exception {
+        MockWebServer server1 = new MockWebServer();
+        server1.enqueue(new MockResponse().setResponseCode(503));
+        server1.enqueue(new MockResponse().setBody("\"foo\""));
+
+        TestService anotherProxy = Retrofit2Client.create(TestService.class, AGENT, ClientConfiguration.builder()
+                .from(createTestConfig("http://localhost:" + server1.getPort()))
+                .maxNumRetries(2)
+                .failedUrlCooldown(Duration.ofMillis(500))
+                .build());
+
+        assertThat(anotherProxy.get().execute().body()).isEqualTo("foo");
+    }
+
+    @Test
     public void testQosError_performsRetryWithOneNode_forAsynchronousOperation() throws Exception {
         MockWebServer server1 = new MockWebServer();
         server1.enqueue(new MockResponse().setResponseCode(503));
@@ -146,6 +161,34 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         TestService anotherProxy = Retrofit2Client.create(TestService.class, AGENT, ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server1.getPort()))
                 .maxNumRetries(2)
+                .build());
+
+        CompletableFuture<String> future = new CompletableFuture<>();
+        anotherProxy.get().enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                future.complete(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable throwable) {
+                future.completeExceptionally(throwable);
+            }
+        });
+
+        assertThat(future.get()).isEqualTo("foo");
+    }
+
+    @Test
+    public void testQosError_performsRetryWithOneNodeAndCache_forAsynchronousOperation() throws Exception {
+        MockWebServer server1 = new MockWebServer();
+        server1.enqueue(new MockResponse().setResponseCode(503));
+        server1.enqueue(new MockResponse().setBody("\"foo\""));
+
+        TestService anotherProxy = Retrofit2Client.create(TestService.class, AGENT, ClientConfiguration.builder()
+                .from(createTestConfig("http://localhost:" + server1.getPort()))
+                .maxNumRetries(2)
+                .failedUrlCooldown(Duration.ofMillis(500))
                 .build());
 
         CompletableFuture<String> future = new CompletableFuture<>();

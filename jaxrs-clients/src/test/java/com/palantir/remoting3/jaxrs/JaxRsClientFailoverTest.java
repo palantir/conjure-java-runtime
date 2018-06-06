@@ -144,6 +144,21 @@ public final class JaxRsClientFailoverTest extends TestBase {
         assertThat(anotherProxy.string(), is("foo"));
     }
 
+    @Test
+    public void testQosError_performsRetryWithOneNodeAndCache() throws Exception {
+        MockWebServer server1 = new MockWebServer();
+        server1.enqueue(new MockResponse().setResponseCode(503));
+        server1.enqueue(new MockResponse().setBody("\"foo\""));
+
+        TestService anotherProxy = JaxRsClient.create(TestService.class, AGENT, ClientConfiguration.builder()
+                .from(createTestConfig("http://localhost:" + server1.getPort()))
+                .maxNumRetries(2)
+                .failedUrlCooldown(Duration.ofMillis(500))
+                .build());
+
+        assertThat(anotherProxy.string(), is("foo"));
+    }
+
     private static class FailoverTestCase {
         private final MockWebServer server1;
         private final MockWebServer server2;
