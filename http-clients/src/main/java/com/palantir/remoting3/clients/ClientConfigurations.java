@@ -41,7 +41,7 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofMinutes(10);
     private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(10);
     private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(250);
-    private static final Duration DEFAULT_FAILED_URL_COOLDOWN = Duration.ofMillis(0);
+    private static final Duration DEFAULT_FAILED_URL_COOLDOWN = Duration.ZERO;
     private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = false;
     private static final NodeSelectionStrategy DEFAULT_NODE_SELECTION_STRATEGY = NodeSelectionStrategy.PIN_UNTIL_ERROR;
 
@@ -52,22 +52,6 @@ public final class ClientConfigurations {
      * empty/absent configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(ServiceConfiguration config) {
-        return of(config, DEFAULT_NODE_SELECTION_STRATEGY);
-    }
-
-    /**
-     * Like {@link #of(ServiceConfiguration)}, but using the explicitly given NodeSelectionStrategy.
-     */
-    public static ClientConfiguration of(ServiceConfiguration config, NodeSelectionStrategy nodeSelectionStrategy) {
-        return of(config, nodeSelectionStrategy, DEFAULT_FAILED_URL_COOLDOWN);
-    }
-
-    /**
-     * Like {@link #of(ServiceConfiguration, NodeSelectionStrategy)}, with a specified {@link Duration} for the
-     * amount of time URLs marked as failed should be avoided in subsequent calls.
-     */
-    public static ClientConfiguration of(ServiceConfiguration config, NodeSelectionStrategy nodeSelectionStrategy,
-            Duration failedUrlCooldown) {
         return ClientConfiguration.builder()
                 .sslSocketFactory(SslSocketFactories.createSslSocketFactory(config.security()))
                 .trustManager(SslSocketFactories.createX509TrustManager(config.security()))
@@ -80,8 +64,8 @@ public final class ClientConfigurations {
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
                 .meshProxy(meshProxy(config.proxy()))
                 .maxNumRetries(config.maxNumRetries().orElse(config.uris().size()))
-                .nodeSelectionStrategy(nodeSelectionStrategy)
-                .failedUrlCooldown(failedUrlCooldown)
+                .nodeSelectionStrategy(DEFAULT_NODE_SELECTION_STRATEGY)
+                .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
                 .build();
     }

@@ -22,6 +22,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,30 +36,32 @@ final class UrlSelectorImpl implements UrlSelector {
 
     private final ImmutableList<HttpUrl> baseUrls;
     private final AtomicInteger currentUrl;
-    private final Cache<HttpUrl, Boolean> failedUrls;
+    private final Cache<HttpUrl, UrlAvailability> failedUrls;
     private final boolean useFailedUrlCache;
 
-    private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, long duration, TimeUnit unit) {
+    private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, Duration failedUrlCooldown) {
         this.baseUrls = baseUrls;
         this.currentUrl = new AtomicInteger(0);
+
+        long coolDownMillis = failedUrlCooldown.toMillis();
         this.failedUrls = CacheBuilder.newBuilder()
                 .maximumSize(baseUrls.size())
-                .expireAfterWrite(duration, unit)
+                .expireAfterWrite(coolDownMillis, TimeUnit.MILLISECONDS)
                 .build();
-        this.useFailedUrlCache = duration > 0L;
+        this.useFailedUrlCache = !failedUrlCooldown.isNegative() && !failedUrlCooldown.isZero();
 
         Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
-        Preconditions.checkArgument(duration >= 0L, "Cache expiration must be non-negative");
+        Preconditions.checkArgument(!failedUrlCooldown.isNegative(), "Cache expiration must be non-negative");
     }
 
     /**
      * Creates a new {@link UrlSelector} with the supplied URLs. The order of the URLs may be randomized by setting
-     * {@code randomizeOrder} to true. If a non-zero {@code duration} and {@code timeUnit} are specified, URLs that are
-     * marked as failed using {@link #markAsFailed(HttpUrl)} will be removed from the pool of prioritized, healthy URLs
-     * for that period of time.
+     * {@code randomizeOrder} to true. If a {@code failedUrlCooldown} is specified, URLs that are marked as failed
+     * using {@link #markAsFailed(HttpUrl)} will be removed from the pool of prioritized, healthy URLs for that period
+     * of time.
      */
-    static UrlSelectorImpl create(Collection<String> baseUrls, boolean randomizeOrder, long duration,
-            TimeUnit timeUnit) {
+    static UrlSelectorImpl createWithFailedUrlCooldown(Collection<String> baseUrls, boolean randomizeOrder,
+            Duration failedUrlCooldown) {
         List<String> orderedUrls = new ArrayList<>(baseUrls);
         if (randomizeOrder) {
             Collections.shuffle(orderedUrls);
@@ -73,11 +76,11 @@ final class UrlSelectorImpl implements UrlSelector {
                     "Base URLs must be 'canonical' and consist of schema, host, port, and path only: %s", url);
             canonicalUrls.add(canonicalUrl);
         });
-        return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()), duration, timeUnit);
+        return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()), failedUrlCooldown);
     }
 
     static UrlSelectorImpl create(Collection<String> baseUrls, boolean randomizeOrder) {
-        return create(baseUrls, randomizeOrder, 0L, TimeUnit.MILLISECONDS);
+        return createWithFailedUrlCooldown(baseUrls, randomizeOrder, Duration.ZERO);
     }
 
     private static String switchWsToHttp(String url) {
@@ -131,8 +134,8 @@ final class UrlSelectorImpl implements UrlSelector {
         // Find the next URL that is not marked as failed
         while (numAttempts < baseUrls.size()) {
             potentialNextIndex = (potentialNextIndex + 1) % baseUrls.size();
-            Boolean maybeInCache = failedUrls.getIfPresent(baseUrls.get(potentialNextIndex));
-            if (maybeInCache == null) {
+            UrlAvailability isFailed = failedUrls.getIfPresent(baseUrls.get(potentialNextIndex));
+            if (isFailed == null) {
                 return redirectTo(existingUrl, baseUrls.get(potentialNextIndex));
             }
             numAttempts++;
@@ -151,7 +154,7 @@ final class UrlSelectorImpl implements UrlSelector {
     @Override
     public void markAsFailed(HttpUrl failedUrl) {
         if (useFailedUrlCache) {
-            failedUrls.put(failedUrl, true);
+            failedUrls.put(failedUrl, UrlAvailability.FAILED);
         }
     }
 
@@ -195,5 +198,13 @@ final class UrlSelectorImpl implements UrlSelector {
     @Override
     public ImmutableList<HttpUrl> getBaseUrls() {
         return baseUrls;
+    }
+
+    private enum UrlAvailability {
+
+        /**
+         * URL has been marked as failed.
+         */
+        FAILED
     }
 }
