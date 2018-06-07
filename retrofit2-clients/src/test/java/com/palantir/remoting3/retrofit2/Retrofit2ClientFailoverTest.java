@@ -207,6 +207,35 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         assertThat(future.get()).isEqualTo("foo");
     }
 
+    @Test
+    public void testCache_recovery() throws Exception {
+        MockWebServer server1 = new MockWebServer();
+
+        TestService anotherProxy = Retrofit2Client.create(TestService.class, AGENT, ClientConfiguration.builder()
+                .from(createTestConfig("http://localhost:" + server1.getPort()))
+                .maxNumRetries(1)
+                .failedUrlCooldown(Duration.ofMillis(500))
+                .build());
+
+        server1.shutdown();
+
+        // Fail the request, ensuring that the URL is added to the cache
+        assertThatThrownBy(() -> anotherProxy.get().execute())
+                .isInstanceOf(IOException.class)
+                .hasMessageStartingWith("Failed to complete the request due to an IOException");
+
+        // Allow the cache to clear
+        Thread.sleep(1000);
+
+        MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
+        anotherServer1.start(server1.getPort());
+
+        anotherServer1.enqueue(new MockResponse().setResponseCode(503));
+        anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
+        assertThat(anotherProxy.get().execute().body()).isEqualTo("foo");
+        anotherServer1.shutdown();
+    }
+
     private static class FailoverTestCase {
         private final MockWebServer server1;
         private final MockWebServer server2;

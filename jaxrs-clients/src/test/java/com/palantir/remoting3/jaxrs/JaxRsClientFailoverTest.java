@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.jaxrs;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
@@ -157,6 +158,33 @@ public final class JaxRsClientFailoverTest extends TestBase {
                 .build());
 
         assertThat(anotherProxy.string(), is("foo"));
+    }
+
+    @Test
+    public void testCache_recovery() throws Exception {
+        MockWebServer server1 = new MockWebServer();
+
+        TestService anotherProxy = JaxRsClient.create(TestService.class, AGENT, ClientConfiguration.builder()
+                .from(createTestConfig("http://localhost:" + server1.getPort()))
+                .maxNumRetries(1)
+                .failedUrlCooldown(Duration.ofMillis(500))
+                .build());
+
+        server1.shutdown();
+
+        // Fail the request, ensuring that the URL is added to the cache
+        assertThatExceptionOfType(RetryableException.class).isThrownBy(() -> anotherProxy.string());
+
+        // Allow the cache to clear
+        Thread.sleep(1000);
+
+        MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
+        anotherServer1.start(server1.getPort());
+
+        anotherServer1.enqueue(new MockResponse().setResponseCode(503));
+        anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
+        assertThat(anotherProxy.string(), is("foo"));
+        anotherServer1.shutdown();
     }
 
     private static class FailoverTestCase {

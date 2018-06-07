@@ -154,7 +154,10 @@ final class UrlSelectorImpl implements UrlSelector {
     @Override
     public void markAsFailed(HttpUrl failedUrl) {
         if (useFailedUrlCache) {
-            failedUrls.put(failedUrl, UrlAvailability.FAILED);
+            Optional<Integer> indexForFailedUrl = indexFor(failedUrl);
+            indexForFailedUrl.ifPresent(index ->
+                failedUrls.put(baseUrls.get(index), UrlAvailability.FAILED)
+            );
         }
     }
 
