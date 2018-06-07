@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting.api.errors.RemoteException;
+import com.palantir.remoting3.clients.ClientConfiguration;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.time.Duration;
@@ -84,6 +85,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
         this.maxNumRelocations = maxNumRelocations;
     }
 
+    /**
+     * Process the call. If an IOException is encountered, mark the URL as failed, which indicates that it should
+     * be avoided for subsequent calls (if {@link UrlSelector} was initialized with a positive
+     * {@link ClientConfiguration#failedUrlCooldown()}.
+     */
     @Override
     public Response execute() throws IOException {
         SettableFuture<Response> future = SettableFuture.create();
@@ -144,6 +150,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
         super.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {
+                urls.markAsFailed(request().url());
+
                 // Fail call if backoffs are exhausted or if no retry URL can be determined.
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {

@@ -124,7 +124,8 @@ public final class OkHttpClients {
         TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
         // Routing
-        UrlSelectorImpl urlSelector = UrlSelectorImpl.create(config.uris(), randomizeUrlOrder);
+        UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(config.uris(), randomizeUrlOrder,
+                config.failedUrlCooldown());
         if (config.meshProxy().isPresent()) {
             // TODO(rfink): Should this go into the call itself?
             client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));

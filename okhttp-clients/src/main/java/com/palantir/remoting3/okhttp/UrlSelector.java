@@ -51,4 +51,10 @@ public interface UrlSelector {
      * okhttp3.Request#url} does.
      */
     List<HttpUrl> getBaseUrls();
+
+    /**
+     * Indicates that a call against the given URL has failed. Implementations can use failure statistics to determine
+     * which hosts may be unavailable and should be avoided for future calls.
+     */
+    void markAsFailed(HttpUrl failedUrl);
 }
