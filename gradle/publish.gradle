@@ -1,9 +1,10 @@
-apply from: "${rootDir}/gradle/publish-base.gradle"
+apply from: "${rootDir}/gradle/publish-jar.gradle"
 
-publishing {
-    publications {
-        nebula(MavenPublication) {
-            from components.java
-        }
+jar {
+    manifest {
+        attributes(
+                "Implementation-Title"   : project.name,
+                "Implementation-Version" : project.version,
+                "Implementation-Vendor"  : "Palantir Technologies Inc.")
     }
 }
