@@ -83,31 +83,31 @@ public final class ExceptionMappingTest {
      * WebApplicationExceptionMapper} rather than the {@link RuntimeExceptionMapper}
      */
     @Test
-    public void testForbiddenException() throws NoSuchMethodException, SecurityException {
+    public void testForbiddenException()  {
         Response response = target.path("throw-forbidden-exception").request().get();
         assertThat(response.getStatus(), is(Status.FORBIDDEN.getStatusCode()));
     }
 
     @Test
-    public void testNotFoundException() throws NoSuchMethodException, SecurityException {
+    public void testNotFoundException()  {
         Response response = target.path("throw-not-found-exception").request().get();
         assertThat(response.getStatus(), is(Status.NOT_FOUND.getStatusCode()));
     }
 
     @Test
-    public void testServerErrorException() throws NoSuchMethodException, SecurityException {
+    public void testServerErrorException()  {
         Response response = target.path("throw-server-error-exception").request().get();
         assertThat(response.getStatus(), is(SERVER_EXCEPTION_STATUS.getStatusCode()));
     }
 
     @Test
-    public void testWebApplicationException() throws NoSuchMethodException, SecurityException {
+    public void testWebApplicationException()  {
         Response response = target.path("throw-web-application-exception").request().get();
         assertThat(response.getStatus(), is(WEB_EXCEPTION_STATUS.getStatusCode()));
     }
 
     @Test
-    public void testRemoteException() throws NoSuchMethodException, SecurityException, IOException {
+    public void testRemoteException() throws IOException {
         Response response = target.path("throw-remote-exception").request().get();
         assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
         String body =
@@ -124,7 +124,7 @@ public final class ExceptionMappingTest {
     }
 
     @Test
-    public void testServiceException() throws NoSuchMethodException, SecurityException, IOException {
+    public void testServiceException() throws IOException {
         Response response = target.path("throw-service-exception").request().get();
         assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
         String body =
@@ -145,11 +145,23 @@ public final class ExceptionMappingTest {
     }
 
     @Test
-    public void testQosException() throws Exception {
+    public void testQosException() {
         Response response = target.path("throw-qos-retry-foo-exception").request().get();
 
         assertThat(response.getStatus(), is(308));
         assertThat(response.getHeaderString("Location"), is("http://foo"));
+    }
+
+    @Test
+    public void testAssertionErrorIsJsonException() throws IOException {
+        Response response = target.path("throw-assertion-error").request().get();
+        assertThat(response.getStatus(), is(SERVER_EXCEPTION_STATUS.getStatusCode()));
+        String body =
+                new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
+
+        SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
+        assertThat(error.errorCode(), is(ErrorType.INTERNAL.code().toString()));
+        assertThat(error.errorName(), is(ErrorType.INTERNAL.name()));
     }
 
     public static class ExceptionMappersTestServer extends Application<Configuration> {
@@ -203,6 +215,11 @@ public final class ExceptionMappingTest {
                 throw new RuntimeException(e);
             }
         }
+
+        @Override
+        public String throwAssertionError() {
+            throw new AssertionError();
+        }
     }
 
     @Path("/")
@@ -236,5 +253,9 @@ public final class ExceptionMappingTest {
         @GET
         @Path("/throw-qos-retry-foo-exception")
         String throwQosRetryFooException();
+
+        @GET
+        @Path("/throw-assertion-error")
+        String throwAssertionError();
     }
 }
