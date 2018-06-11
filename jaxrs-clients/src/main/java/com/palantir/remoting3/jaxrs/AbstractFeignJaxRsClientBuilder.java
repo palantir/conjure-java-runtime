@@ -95,7 +95,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
         ObjectMapper cborObjectMapper = getCborObjectMapper();
         okhttp3.OkHttpClient okHttpClient = Optional.ofNullable(hostMetricsRegistry)
                 .map(hostMetrics -> OkHttpClients.create(config, userAgent, hostMetrics, serviceClass))
-                .orElse(OkHttpClients.create(config, userAgent, serviceClass));
+                .orElseGet(() -> OkHttpClients.create(config, userAgent, serviceClass));
 
         return Feign.builder()
                 .contract(createContract())
