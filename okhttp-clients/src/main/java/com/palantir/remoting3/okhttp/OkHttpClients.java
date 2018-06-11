@@ -80,7 +80,7 @@ public final class OkHttpClients {
     /**
      * The per service and host metrics recorded for each HTTP call.
      */
-    private static final HostMetricsRegistry hostMetrics = new HostMetricsRegistry();
+    private static final HostMetricsRegistry defaultHostMetrics = new HostMetricsRegistry();
 
     private OkHttpClients() {}
 
@@ -88,8 +88,20 @@ public final class OkHttpClients {
      * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
+    public static OkHttpClient create(
+            ClientConfiguration config, UserAgent userAgent, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
+        return createInternal(config, userAgent, hostMetrics, serviceClass, true /* randomize URLs */);
+    }
+
+    /**
+     * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
+     * ClientConfiguration#uris URIs} are initialized in random order.
+     *
+     * @deprecated Use {@link #create(ClientConfiguration, UserAgent, HostMetricsRegistry, Class)}
+     */
+    @Deprecated
     public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */);
+        return create(config, userAgent, defaultHostMetrics, serviceClass);
     }
 
     /**
@@ -104,20 +116,24 @@ public final class OkHttpClients {
 
     /**
      * Return the per service and host metrics for all clients created by {@link OkHttpClients}.
+     *
+     * @deprecated Pass in a {@link HostMetricsRegistry} when creating a client.
      */
+    @Deprecated
     public static Collection<HostMetrics> hostMetrics() {
-        return hostMetrics.getMetrics();
+        return defaultHostMetrics.getMetrics();
     }
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
-            ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, false);
+            ClientConfiguration config, UserAgent userAgent, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
+        return createInternal(config, userAgent, hostMetrics, serviceClass, false);
     }
 
     private static RemotingOkHttpClient createInternal(
             ClientConfiguration config,
             UserAgent userAgent,
+            HostMetricsRegistry hostMetrics,
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();

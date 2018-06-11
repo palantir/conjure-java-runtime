@@ -22,6 +22,7 @@ import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.ext.refresh.Refreshable;
 import com.palantir.remoting3.ext.refresh.RefreshableProxyInvocationHandler;
+import com.palantir.remoting3.okhttp.HostMetricsRegistry;
 
 /**
  * Static factory methods for producing creating JAX-RS HTTP proxies.
@@ -34,9 +35,24 @@ public final class JaxRsClient {
      * Creates a {@code T client} for the given service configuration. The HTTP {@code User-Agent} header of every
      * request is set to the given non-empty {@code userAgent} string.
      */
+    public static <T> T create(
+            Class<T> serviceClass,
+            UserAgent userAgent,
+            HostMetricsRegistry hostMetricsRegistry,
+            ClientConfiguration config) {
+        // TODO(rfink): Add http-remoting agent as informational
+        return new FeignJaxRsClientBuilder(config)
+                .hostMetricsRegistry(hostMetricsRegistry)
+                .build(serviceClass, userAgent);
+    }
+
+    /**
+     * Creates a {@code T client} for the given service configuration. The HTTP {@code User-Agent} header of every
+     * request is set to the given non-empty {@code userAgent} string.
+     */
     public static <T> T create(Class<T> serviceClass, UserAgent userAgent, ClientConfiguration config) {
         // TODO(rfink): Add http-remoting agent as informational
-        return create(serviceClass, UserAgents.format(userAgent), config);
+        return new FeignJaxRsClientBuilder(config).build(serviceClass, userAgent);
     }
 
     /**
@@ -57,7 +73,19 @@ public final class JaxRsClient {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
+            HostMetricsRegistry hostMetricsRegistry,
             Refreshable<ClientConfiguration> config) {
+        return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
+                config,
+                serviceConfiguration -> create(serviceClass, userAgent, hostMetricsRegistry, serviceConfiguration)));
+    }
+
+    /**
+     * Similar to {@link #create(Class, UserAgent, ClientConfiguration)}, but creates a mutable client that updates its
+     * configuration transparently whenever the given {@link Refreshable refreshable} {@link ClientConfiguration}
+     * changes.
+     */
+    public static <T> T create(Class<T> serviceClass, UserAgent userAgent, Refreshable<ClientConfiguration> config) {
         // TODO(rfink): Add http-remoting agent as informational
         return create(serviceClass, UserAgents.format(userAgent), config);
     }
@@ -68,12 +96,10 @@ public final class JaxRsClient {
      * @deprecated Use {@link #create(Class, UserAgent, Refreshable)}
      */
     @Deprecated
-    public static <T> T create(
-            Class<T> serviceClass,
-            String userAgent,
-            Refreshable<ClientConfiguration> config) {
+    public static <T> T create(Class<T> serviceClass, String userAgent, Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 config,
                 serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration)));
     }
+
 }

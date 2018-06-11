@@ -26,6 +26,7 @@ import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
 import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderRewriter;
 import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
+import com.palantir.remoting3.okhttp.HostMetricsRegistry;
 import com.palantir.remoting3.okhttp.OkHttpClients;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
@@ -45,6 +46,7 @@ import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JAXRSContract;
 import feign.okhttp.OkHttpClient;
+import java.util.Optional;
 
 /**
  * Not meant to be implemented outside of this library.
@@ -52,12 +54,15 @@ import feign.okhttp.OkHttpClient;
 abstract class AbstractFeignJaxRsClientBuilder {
 
     private final ClientConfiguration config;
+
     /**
      * The primary URI used to bootstrap the Feign client; this is the URI used by Feign to create an OkHttp call. Note
      * that this URI is typically replaced in the OkHttp client with a random URI from the client configuration when
      * retrying a request.
      */
     private final String primaryUri;
+
+    private HostMetricsRegistry hostMetricsRegistry;
 
     AbstractFeignJaxRsClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Must provide at least one service URI");
@@ -70,6 +75,14 @@ abstract class AbstractFeignJaxRsClientBuilder {
     protected abstract ObjectMapper getCborObjectMapper();
 
     /**
+     * Set the host metrics registry to use when constructing the OkHttp client.
+     */
+    public final AbstractFeignJaxRsClientBuilder hostMetricsRegistry(HostMetricsRegistry newHostMetricsRegistry) {
+        hostMetricsRegistry = newHostMetricsRegistry;
+        return this;
+    }
+
+    /**
      * @deprecated Use {@link #build(Class, UserAgent)}.
      */
     @Deprecated
@@ -80,6 +93,9 @@ abstract class AbstractFeignJaxRsClientBuilder {
     public final <T> T build(Class<T> serviceClass, UserAgent userAgent) {
         ObjectMapper objectMapper = getObjectMapper();
         ObjectMapper cborObjectMapper = getCborObjectMapper();
+        okhttp3.OkHttpClient okHttpClient = Optional.ofNullable(hostMetricsRegistry)
+                .map(hostMetrics -> OkHttpClients.create(config, userAgent, hostMetrics, serviceClass))
+                .orElseGet(() -> OkHttpClients.create(config, userAgent, serviceClass));
 
         return Feign.builder()
                 .contract(createContract())
@@ -91,7 +107,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
                 .requestInterceptor(PathTemplateHeaderRewriter.INSTANCE)
-                .client(new OkHttpClient(OkHttpClients.create(config, userAgent, serviceClass)))
+                .client(new OkHttpClient(okHttpClient))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
                 .retryer(new Retryer.Default(0, 0, 1))  // use OkHttp retry mechanism only
