@@ -69,7 +69,7 @@ public final class HostMetricsRegistry {
         }
     }
 
-    Collection<HostMetrics> getMetrics() {
+    public Collection<HostMetrics> getMetrics() {
         return Collections.unmodifiableCollection(hostMetrics.asMap().values());
     }
 
