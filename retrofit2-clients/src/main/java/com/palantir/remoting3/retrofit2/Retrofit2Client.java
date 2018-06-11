@@ -38,8 +38,8 @@ public final class Retrofit2Client {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            ClientConfiguration config,
-            HostMetricsRegistry hostMetricsRegistry) {
+            HostMetricsRegistry hostMetricsRegistry,
+            ClientConfiguration config) {
         return new Retrofit2ClientBuilder(config)
                 .hostMetricsRegistry(hostMetricsRegistry)
                 .build(serviceClass, userAgent);
@@ -71,11 +71,11 @@ public final class Retrofit2Client {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            Refreshable<ClientConfiguration> config,
-            HostMetricsRegistry hostMetricsRegistry) {
+            HostMetricsRegistry hostMetricsRegistry,
+            Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 config,
-                serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration, hostMetricsRegistry)));
+                serviceConfiguration -> create(serviceClass, userAgent, hostMetricsRegistry, serviceConfiguration)));
     }
 
     /**
