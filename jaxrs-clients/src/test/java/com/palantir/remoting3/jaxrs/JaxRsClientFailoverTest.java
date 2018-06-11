@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 
 import com.google.common.collect.Lists;
 import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.clients.NodeSelectionStrategy;
 import feign.RetryableException;
 import java.io.IOException;
 import java.time.Duration;
@@ -42,12 +43,21 @@ import org.junit.runner.RunWith;
 @RunWith(Theories.class)
 public final class JaxRsClientFailoverTest extends TestBase {
 
+    private static final int CACHE_DURATION = 1000;
+
+    /*
     @DataPoint
-    public static final FailoverTestCase CASE = new FailoverTestCase(new MockWebServer(), new MockWebServer(), 0);
+    public static final FailoverTestCase CASE = new FailoverTestCase(new MockWebServer(), new MockWebServer(), 0,
+            NodeSelectionStrategy.PIN_UNTIL_ERROR);
 
     @DataPoint
     public static final FailoverTestCase CASE_WITH_CACHE = new FailoverTestCase(new MockWebServer(),
-            new MockWebServer(), 500);
+            new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.PIN_UNTIL_ERROR);
+
+*/
+    @DataPoint
+    public static final FailoverTestCase CASE_WITH_ROUND_ROBIN = new FailoverTestCase(new MockWebServer(),
+            new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.ROUND_ROBIN);
 
     @Test
     @Theory
@@ -154,7 +164,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
         TestService anotherProxy = JaxRsClient.create(TestService.class, AGENT, ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server1.getPort()))
                 .maxNumRetries(2)
-                .failedUrlCooldown(Duration.ofMillis(500))
+                .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
                 .build());
 
         assertThat(anotherProxy.string(), is("foo"));
@@ -167,7 +177,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
         TestService anotherProxy = JaxRsClient.create(TestService.class, AGENT, ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server1.getPort()))
                 .maxNumRetries(1)
-                .failedUrlCooldown(Duration.ofMillis(500))
+                .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
                 .build());
 
         server1.shutdown();
@@ -176,7 +186,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
         assertThatExceptionOfType(RetryableException.class).isThrownBy(() -> anotherProxy.string());
 
         // Allow the cache to clear
-        Thread.sleep(1000);
+        Thread.sleep(2 * CACHE_DURATION);
 
         MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
         anotherServer1.start(server1.getPort());
@@ -187,15 +197,34 @@ public final class JaxRsClientFailoverTest extends TestBase {
         anotherServer1.shutdown();
     }
 
+    @Test
+    public void testPerformsRoundRobin() throws Exception {
+        FailoverTestCase failoverTestCase = new FailoverTestCase(new MockWebServer(),
+                new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.ROUND_ROBIN);
+
+        TestService proxy = failoverTestCase.getProxy();
+        failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
+        failoverTestCase.server2.enqueue(new MockResponse().setBody("\"bar\""));
+
+        proxy.string();
+        proxy.string();
+
+        assertThat(failoverTestCase.server1.getRequestCount(), is(1));
+        assertThat(failoverTestCase.server2.getRequestCount(), is(1));
+    }
+
     private static class FailoverTestCase {
         private final MockWebServer server1;
         private final MockWebServer server2;
         private final long duration;
+        private final NodeSelectionStrategy nodeSelectionStrategy;
 
-        FailoverTestCase(MockWebServer server1, MockWebServer server2, long duration) {
+        FailoverTestCase(MockWebServer server1, MockWebServer server2, long duration,
+                NodeSelectionStrategy nodeSelectionStrategy) {
             this.server1 = server1;
             this.server2 = server2;
             this.duration = duration;
+            this.nodeSelectionStrategy = nodeSelectionStrategy;
         }
 
         public TestService getProxy() {
@@ -205,6 +234,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
                                     "http://localhost:" + server1.getPort(),
                                     "http://localhost:" + server2.getPort()))
                             .maxNumRetries(2)
+                            .nodeSelectionStrategy(nodeSelectionStrategy)
                             .failedUrlCooldown(Duration.ofMillis(duration))
                             .build());
         }

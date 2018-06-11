@@ -22,6 +22,7 @@ import com.google.common.net.HttpHeaders;
 import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
+import com.palantir.remoting3.clients.NodeSelectionStrategy;
 import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.tracing.Tracers;
@@ -130,8 +131,13 @@ public final class OkHttpClients {
             // TODO(rfink): Should this go into the call itself?
             client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
         } else {
-            // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in the request
-            client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
+            if (config.nodeSelectionStrategy().equals(NodeSelectionStrategy.ROUND_ROBIN)) {
+                client.addInterceptor(RoundRobinUrlInterceptor.create(urlSelector));
+            } else {
+                // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in the
+                // request
+                client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
+            }
         }
         client.followRedirects(false);  // We implement our own redirect logic.
 
