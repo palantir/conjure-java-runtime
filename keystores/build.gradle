@@ -28,13 +28,15 @@ task generateCerts(type:Exec) {
 
 task testBouncyCastle(type: Test) {
     configureTestTask(it, 'bouncy-castle')
+    tasks.test.dependsOn(it)
 }
 
 task testSun(type: Test) {
     configureTestTask(it, 'sun')
+    tasks.test.dependsOn(it)
 }
 
-[tasks.test, tasks.testBouncyCastle, tasks.testSun].each { it.dependsOn(generateCerts) }
+[tasks.testBouncyCastle, tasks.testSun].each { it.dependsOn(generateCerts) }
 
 
 private void configureTestTask(Test test, String name) {
