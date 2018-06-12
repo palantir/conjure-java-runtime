@@ -17,7 +17,7 @@ buildscript {
 }
 
 plugins {
-    id 'com.palantir.git-version' version '0.9.1'
+    id 'com.palantir.git-version' version '0.11.0'
     id 'org.inferred.processors' version '1.2.15'
 }
 
@@ -34,7 +34,7 @@ dependencies {
 }
 
 allprojects {
-    version System.env.CIRCLE_TAG ?: gitVersion()
+    version gitVersion()
     group 'com.palantir.remoting3'
 
     apply plugin: 'com.palantir.configuration-resolver'
@@ -79,6 +79,8 @@ subprojects {
             }
         }
     }
+    verifyDependencyLocksAreCurrent.dependsOn(generateLock)
+    build.dependsOn(verifyDependencyLocksAreCurrent)
 
     tasks.withType(Javadoc) {
         // suppress Javadoc doclint warnings in Java 8+
@@ -87,10 +89,6 @@ subprojects {
         }
     }
     tasks.check.dependsOn(javadoc)
-
-    if (System.env.CIRCLE_TEST_REPORTS) {
-        test.reports.junitXml.destination = new File(System.env.CIRCLE_TEST_REPORTS, it.getName())
-    }
 
     test {
         minHeapSize = "512m"
