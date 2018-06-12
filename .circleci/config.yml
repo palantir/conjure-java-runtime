@@ -29,7 +29,7 @@ jobs:
       - run:
           command: |
             mkdir -p ~/junit
-            find . -type f -regex ".*/build/.*TEST.*xml" -exec bash -c 'path="{}"; d=~/junit/$(dirname "$path"); mkdir -p "$d" ; cp "$path" "$d"' \;
+            find . -type f -regex ".*/build/.*TEST.*xml" -exec cp --parents {} ~/junit/ \;
           when: always
       - store_test_results:
           path: ~/junit
