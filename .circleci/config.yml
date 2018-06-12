@@ -3,6 +3,7 @@ jobs:
   build:
     docker:
       - image: circleci/openjdk:8u171-jdk-node-browsers
+    resource_class: xlarge
     environment:
       GRADLE_OPTS: -Dorg.gradle.console=plain -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
 
@@ -38,7 +39,14 @@ jobs:
           command: |
             if [[ "${CIRCLE_BRANCH}" == "develop" || "${CIRCLE_TAG}" =~ [0-9]+(\.[0-9]+)+(-[a-zA-Z]+[0-9]*)* ]]; then
               ./gradlew --stacktrace --continue publish
+            else
+              ./gradlew --parallel --continue publishToMavenLocal
+              mkdir -p ~/poms
+              find . -name 'pom-default.xml' -exec cp --parents {} ~/poms \;
             fi
+
+      - store_artifacts:
+          path: ~/poms
 
 workflows:
   version: 2
