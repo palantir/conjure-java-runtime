@@ -19,6 +19,7 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
@@ -33,8 +34,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
@@ -43,16 +46,27 @@ import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
 import okhttp3.internal.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class OkHttpClients {
+    private static final Logger log = LoggerFactory.getLogger(OkHttpClients.class);
 
     @VisibleForTesting
     static final int NUM_SCHEDULING_THREADS = 5;
 
+    private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
+            .setUncaughtExceptionHandler((thread, uncaughtException) ->
+                    log.error("An exception was uncaught in an execution thread. This implies a bug in http-remoting",
+                            uncaughtException))
+            .setNameFormat("remoting-okhttp-dispatcher-%d")
+            .build();
     /**
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
+     * Same as OkHttp's default, but with a logging uncaught exception handler.
      */
-    private static final ExecutorService executionExecutor = Tracers.wrap(new Dispatcher().executorService());
+    private static final ExecutorService executionExecutor =
+            Tracers.wrap(Executors.newCachedThreadPool(executionThreads));
 
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
