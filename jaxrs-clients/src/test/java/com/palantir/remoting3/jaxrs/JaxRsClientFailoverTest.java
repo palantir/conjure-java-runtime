@@ -45,7 +45,6 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
     private static final int CACHE_DURATION = 1000;
 
-    /*
     @DataPoint
     public static final FailoverTestCase CASE = new FailoverTestCase(new MockWebServer(), new MockWebServer(), 0,
             NodeSelectionStrategy.PIN_UNTIL_ERROR);
@@ -54,7 +53,6 @@ public final class JaxRsClientFailoverTest extends TestBase {
     public static final FailoverTestCase CASE_WITH_CACHE = new FailoverTestCase(new MockWebServer(),
             new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.PIN_UNTIL_ERROR);
 
-*/
     @DataPoint
     public static final FailoverTestCase CASE_WITH_ROUND_ROBIN = new FailoverTestCase(new MockWebServer(),
             new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.ROUND_ROBIN);
