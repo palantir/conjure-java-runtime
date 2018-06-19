@@ -39,7 +39,7 @@ import retrofit2.Response;
 @RunWith(Theories.class)
 public final class Retrofit2ClientFailoverTest extends TestBase {
 
-    private static final int CACHE_DURATION = 1000;
+    private static final int CACHE_DURATION = 2000;
 
     @DataPoints("PinStrategies")
     public static FailoverTestCase[] pinStrategies() {
