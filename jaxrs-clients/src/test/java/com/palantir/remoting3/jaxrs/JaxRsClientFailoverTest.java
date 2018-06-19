@@ -35,7 +35,8 @@ import java.util.concurrent.Future;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Test;
-import org.junit.experimental.theories.DataPoint;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
@@ -43,41 +44,53 @@ import org.junit.runner.RunWith;
 @RunWith(Theories.class)
 public final class JaxRsClientFailoverTest extends TestBase {
 
-    private static final int CACHE_DURATION = 1000;
+    private static final int CACHE_DURATION = 2000;
 
-    @DataPoint
-    public static final FailoverTestCase CASE = new FailoverTestCase(new MockWebServer(), new MockWebServer(), 0,
-            NodeSelectionStrategy.PIN_UNTIL_ERROR);
+    @DataPoints("PinStrategies")
+    public static FailoverTestCase[] pinStrategies() {
+        FailoverTestCase pinNoCache = new FailoverTestCase(new MockWebServer(), new MockWebServer(), 0,
+                NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase pinWithCache = new FailoverTestCase(new MockWebServer(), new MockWebServer(), CACHE_DURATION,
+                NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        return new FailoverTestCase[]{pinNoCache, pinWithCache};
+    }
 
-    @DataPoint
-    public static final FailoverTestCase CASE_WITH_CACHE = new FailoverTestCase(new MockWebServer(),
-            new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.PIN_UNTIL_ERROR);
-
-    @DataPoint
-    public static final FailoverTestCase CASE_WITH_ROUND_ROBIN = new FailoverTestCase(new MockWebServer(),
-            new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.ROUND_ROBIN);
-
-    @Test
-    @Theory
-    public void testConnectionError_performsFailover(FailoverTestCase failoverTestCase) throws IOException {
-        failoverTestCase.server1.shutdown();
-        failoverTestCase.server2.enqueue(new MockResponse().setBody("\"foo\""));
-
-        assertThat(failoverTestCase.getProxy().string(), is("foo"));
+    @DataPoints("AllStrategies")
+    public static FailoverTestCase[] allStrategies() {
+        FailoverTestCase pinNoCache = new FailoverTestCase(new MockWebServer(), new MockWebServer(), 0,
+                NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase pinWithCache = new FailoverTestCase(new MockWebServer(), new MockWebServer(), CACHE_DURATION,
+                NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase roundRobin = new FailoverTestCase(new MockWebServer(), new MockWebServer(), CACHE_DURATION,
+                NodeSelectionStrategy.ROUND_ROBIN);
+        return new FailoverTestCase[]{pinNoCache, pinWithCache, roundRobin};
     }
 
     @Test
     @Theory
-    public void testConnectionError_performsFailover_concurrentRequests(FailoverTestCase failoverTestCase)
-            throws Exception {
+    public void testConnectionError_performsFailover(
+            @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws IOException {
+        TestService proxy = failoverTestCase.getProxy();
+
+        failoverTestCase.server1.shutdown();
+        failoverTestCase.server2.enqueue(new MockResponse().setBody("\"foo\""));
+
+        assertThat(proxy.string(), is("foo"));
+    }
+
+    @Test
+    @Theory
+    public void testConnectionError_performsFailover_concurrentRequests(
+            @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws Exception {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        TestService proxy = failoverTestCase.getProxy();
 
         failoverTestCase.server1.shutdown();
         for (int i = 0; i < 10; i++) {
             failoverTestCase.server2.enqueue(new MockResponse().setBody("\"foo\""));
         }
 
-        TestService proxy = failoverTestCase.getProxy();
         List<Future<String>> things = Lists.newArrayListWithCapacity(10);
         for (int i = 0; i < 10; i++) {
             things.add(executorService.submit(() -> proxy.string()));
@@ -89,14 +102,14 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
     @Test
     @Theory
-    public void testConnectionError_whenOneCallFailsThenSubsequentNewCallsCanStillSucceed(FailoverTestCase
-            failoverTestCase)
-            throws Exception {
+    public void testConnectionError_whenOneCallFailsThenSubsequentNewCallsCanStillSucceed(
+            @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws Exception {
+        TestService proxy = failoverTestCase.getProxy();
+
         // Call fails when servers are down.
         failoverTestCase.server1.shutdown();
         failoverTestCase.server2.shutdown();
 
-        TestService proxy = failoverTestCase.getProxy();
         try {
             proxy.string();
             fail();
@@ -114,18 +127,21 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
     @Test
     @Theory
-    public void testQosError_performsFailover(FailoverTestCase failoverTestCase) throws Exception {
+    public void testQosError_performsFailover(
+            @FromDataPoints("PinStrategies")  FailoverTestCase failoverTestCase) throws Exception {
+        TestService proxy = failoverTestCase.getProxy();
+
         failoverTestCase.server1.enqueue(new MockResponse().setResponseCode(503));
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
         failoverTestCase.server2.enqueue(new MockResponse().setBody("\"bar\""));
 
-        assertThat(failoverTestCase.getProxy().string(), is("bar"));
+        assertThat(proxy.string(), is("bar"));
     }
 
     @Test
     @Theory
-    public void testConnectionError_performsFailoverOnDnsFailure(FailoverTestCase failoverTestCase)
-            throws Exception {
+    public void testConnectionError_performsFailoverOnDnsFailure(
+            @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws Exception {
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
 
         TestService bogusHostProxy = JaxRsClient.create(TestService.class, AGENT,

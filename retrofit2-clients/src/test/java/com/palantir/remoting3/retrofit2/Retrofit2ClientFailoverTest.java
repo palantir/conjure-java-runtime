@@ -27,7 +27,8 @@ import java.util.concurrent.CompletableFuture;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Test;
-import org.junit.experimental.theories.DataPoint;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
@@ -40,34 +41,45 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
 
     private static final int CACHE_DURATION = 1000;
 
-    @DataPoint
-    public static final FailoverTestCase CASE = new FailoverTestCase(new MockWebServer(), new MockWebServer(), 0,
-            NodeSelectionStrategy.PIN_UNTIL_ERROR);
+    @DataPoints("PinStrategies")
+    public static FailoverTestCase[] pinStrategies() {
+        FailoverTestCase pinNoCache = new FailoverTestCase(new MockWebServer(), new MockWebServer(), 0,
+                NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase pinWithCache = new FailoverTestCase(new MockWebServer(), new MockWebServer(), CACHE_DURATION,
+                NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        return new FailoverTestCase[]{pinNoCache, pinWithCache};
+    }
 
-    @DataPoint
-    public static final FailoverTestCase CASE_WITH_CACHE = new FailoverTestCase(new MockWebServer(),
-            new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.PIN_UNTIL_ERROR);
-
-    @DataPoint
-    public static final FailoverTestCase CASE_WITH_ROUND_ROBIN = new FailoverTestCase(new MockWebServer(),
-            new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.ROUND_ROBIN);
+    @DataPoints("AllStrategies")
+    public static FailoverTestCase[] allStrategies() {
+        FailoverTestCase pinNoCache = new FailoverTestCase(new MockWebServer(), new MockWebServer(), 0,
+                NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase pinWithCache = new FailoverTestCase(new MockWebServer(), new MockWebServer(), CACHE_DURATION,
+                NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase roundRobin = new FailoverTestCase(new MockWebServer(), new MockWebServer(), CACHE_DURATION,
+                NodeSelectionStrategy.ROUND_ROBIN);
+        return new FailoverTestCase[]{pinNoCache, pinWithCache, roundRobin};
+    }
 
     @Test
     @Theory
-    public void testConnectionError_performsFailover(FailoverTestCase failoverTestCase) throws IOException {
+    public void testConnectionError_performsFailover(
+            @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws IOException {
+        TestService proxy = failoverTestCase.getProxy();
+
         failoverTestCase.server1.shutdown();
         failoverTestCase.server2.enqueue(new MockResponse().setBody("\"pong\""));
-        assertThat(failoverTestCase.getProxy().get().execute().body()).isEqualTo("pong");
+        assertThat(proxy.get().execute().body()).isEqualTo("pong");
     }
 
     @Test
     @Theory
     public void testConnectionError_whenOneCallFailsThenSubsequentNewCallsCanStillSucceed(
-            FailoverTestCase failoverTestCase) throws Exception {
+            @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws Exception {
+        TestService proxy = failoverTestCase.getProxy();
+
         failoverTestCase.server1.shutdown();
         failoverTestCase.server2.shutdown();
-
-        TestService proxy = failoverTestCase.getProxy();
 
         assertThatThrownBy(() -> proxy.get().execute())
                 .isInstanceOf(IOException.class)
@@ -83,25 +95,29 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
 
     @Test
     @Theory
-    public void testQosError_performsFailover_forSynchronousOperation(FailoverTestCase failoverTestCase)
-            throws Exception {
+    public void testQosError_performsFailover_forSynchronousOperation(
+            @FromDataPoints("PinStrategies") FailoverTestCase failoverTestCase) throws Exception {
+        TestService proxy = failoverTestCase.getProxy();
+
         failoverTestCase.server1.enqueue(new MockResponse().setResponseCode(503));
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
         failoverTestCase.server2.enqueue(new MockResponse().setBody("\"bar\""));
 
-        assertThat(failoverTestCase.getProxy().get().execute().body()).isEqualTo("bar");
+        assertThat(proxy.get().execute().body()).isEqualTo("bar");
     }
 
     @Test
     @Theory
-    public void testQosError_performsFailover_forAsynchronousOperation(FailoverTestCase failoverTestCase)
-            throws Exception {
+    public void testQosError_performsFailover_forAsynchronousOperation(
+            @FromDataPoints("PinStrategies") FailoverTestCase failoverTestCase) throws Exception {
+        TestService proxy = failoverTestCase.getProxy();
+
         failoverTestCase.server1.enqueue(new MockResponse().setResponseCode(503));
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
         failoverTestCase.server2.enqueue(new MockResponse().setBody("\"bar\""));
 
         CompletableFuture<String> future = new CompletableFuture<>();
-        failoverTestCase.getProxy().get().enqueue(new Callback<String>() {
+        proxy.get().enqueue(new Callback<String>() {
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
                 future.complete(response.body());
@@ -117,7 +133,8 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
 
     @Test
     @Theory
-    public void testConnectionError_performsFailoverOnDnsFailure(FailoverTestCase failoverTestCase) throws Exception {
+    public void testConnectionError_performsFailoverOnDnsFailure(
+            @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws Exception {
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
 
         TestService bogusHostProxy = Retrofit2Client.create(TestService.class, AGENT,
