@@ -29,8 +29,6 @@ import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -204,20 +202,6 @@ public final class OkHttpClients {
                 urlSelector,
                 schedulingExecutor,
                 executionExecutor);
-    }
-
-    /**
-     * Treat {@link Duration#ZERO} as infinity to match okhttp3.
-     */
-    @VisibleForTesting
-    static Duration largestOf(Duration... durations) {
-        if (Arrays.stream(durations).anyMatch(Duration::isZero)) {
-            return Duration.ZERO;
-        }
-
-        return Arrays.stream(durations)
-                .max(Duration::compareTo)
-                .orElseThrow(() -> new IllegalArgumentException("largestOf must be called with at least one argument"));
     }
 
     /**

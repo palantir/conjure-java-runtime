@@ -527,18 +527,6 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(synchronousCall.body().string()).isEqualTo("Hello, world!");
     }
 
-    @Test
-    public void largestOf_sanity() throws Exception {
-        assertThat(OkHttpClients.largestOf(Duration.ofMinutes(1), Duration.ofSeconds(20), Duration.ofHours(7)))
-                .isEqualTo(Duration.ofHours(7));
-    }
-
-    @Test
-    public void largestOf_treats_zero_as_infinity() throws Exception {
-        assertThat(OkHttpClients.largestOf(Duration.ZERO, Duration.ofSeconds(20), Duration.ofHours(7)))
-                .isEqualTo(Duration.ZERO);
-    }
-
     @Test(timeout = 10_000)
     public void randomizesUrls() throws IOException {
         boolean server2WasHit = false;
