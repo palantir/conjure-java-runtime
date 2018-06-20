@@ -29,7 +29,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -62,8 +61,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
 
-    private final Duration syncCallTimeout;
-
     private final int maxNumRelocations;
 
     RemotingOkHttpCall(
@@ -73,7 +70,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
             RemotingOkHttpClient client,
             ScheduledExecutorService schedulingExecutor,
             ExecutorService executionExecutor,
-            Duration syncCallTimeout,
             int maxNumRelocations) {
         super(delegate);
         this.backoffStrategy = backoffStrategy;
@@ -81,7 +77,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
         this.client = client;
         this.schedulingExecutor = schedulingExecutor;
         this.executionExecutor = executionExecutor;
-        this.syncCallTimeout = syncCallTimeout;
         this.maxNumRelocations = maxNumRelocations;
     }
 
@@ -106,10 +101,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         });
 
         try {
-            // zero is treated as an infinite timeout
-            return syncCallTimeout.isZero()
-                    ? future.get()
-                    : future.get(syncCallTimeout.toMillis(), TimeUnit.MILLISECONDS);
+            return future.get();
         } catch (InterruptedException e) {
             getDelegate().cancel();
             Thread.currentThread().interrupt();
@@ -129,9 +121,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
             } else {
                 throw new IOException("Failed to execute call", e);
             }
-        } catch (TimeoutException e) {
-            getDelegate().cancel();
-            throw new IOException("Call timed out after: " + syncCallTimeout.toString(), e);
         }
     }
 
@@ -303,6 +292,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
     @Override
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(), backoffStrategy, urls, client, schedulingExecutor,
-                executionExecutor, syncCallTimeout, maxNumRelocations);
+                executionExecutor, maxNumRelocations);
     }
 }

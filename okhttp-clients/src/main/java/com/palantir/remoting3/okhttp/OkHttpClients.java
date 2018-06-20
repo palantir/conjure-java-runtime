@@ -203,9 +203,7 @@ public final class OkHttpClients {
                 () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()),
                 urlSelector,
                 schedulingExecutor,
-                executionExecutor,
-                largestOf(config.connectTimeout(), config.readTimeout(), config.writeTimeout())
-        );
+                executionExecutor);
     }
 
     /**
