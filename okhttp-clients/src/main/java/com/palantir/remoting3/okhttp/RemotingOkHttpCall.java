@@ -103,7 +103,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         try {
             // We don't enforce a timeout here because it's not possible to know how long this operation might take.
             // First, it might get queued indefinitely in the Dispatcher, and then it might get retried a (potentially)
-            // unknown amount of times by the BackoffStrategy. The {@code get} call times out when the underlying 
+            // unknown amount of times by the BackoffStrategy. The {@code get} call times out when the underlying
             // OkHttp call times out (, possibly after a number of retries).
             return future.get();
         } catch (InterruptedException e) {
