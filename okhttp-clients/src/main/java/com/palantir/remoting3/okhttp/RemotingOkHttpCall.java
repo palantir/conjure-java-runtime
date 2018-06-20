@@ -272,6 +272,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public Void visit(QosException.Unavailable exception) {
+                urls.markAsFailed(request().url());
+
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
                     log.debug("Max number of retries exceeded, failing call");
