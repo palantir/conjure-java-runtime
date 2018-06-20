@@ -101,6 +101,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
         });
 
         try {
+            // We don't enforce a timeout here because it's not possible to know how long this operation might take.
+            // First, it might get queued indefinitely in the Dispatcher, and then it might get retried a (potentially)
+            // unknown amount of times by the BackoffStrategy.
             return future.get();
         } catch (InterruptedException e) {
             getDelegate().cancel();
