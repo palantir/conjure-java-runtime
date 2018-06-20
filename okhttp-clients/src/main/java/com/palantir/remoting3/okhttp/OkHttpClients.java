@@ -28,6 +28,7 @@ import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.Collection;
 import java.util.Random;
@@ -69,10 +70,23 @@ public final class OkHttpClients {
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
 
+    /** Global {@link TaggedMetricRegistry} for per-client and dispatcher-wide metrics. */
+    private static TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
+
+    private static final String DISPATCHER_QUEUED_CALLS_METRIC = "dispatcher.queued-calls";
+    private static final String DISPATCHER_RUNNING_CALLS_METRIC = "dispatcher.running-calls";
+
     static {
         dispatcher = new Dispatcher(executionExecutor);
         dispatcher.setMaxRequests(256);
         dispatcher.setMaxRequestsPerHost(256);
+        // metrics
+        registry.gauge(
+                MetricName.builder().safeName(DISPATCHER_QUEUED_CALLS_METRIC).build(),
+                dispatcher::queuedCallsCount);
+        registry.gauge(
+                MetricName.builder().safeName(DISPATCHER_RUNNING_CALLS_METRIC).build(),
+                dispatcher::runningCallsCount);
     }
 
     /** Shared connection pool. */
@@ -149,7 +163,6 @@ public final class OkHttpClients {
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
-        TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
         // Routing
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(config.uris(), randomizeUrlOrder,
