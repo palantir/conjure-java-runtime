@@ -55,6 +55,7 @@ enum RemoteExceptionResponseHandler implements ResponseHandler<RemoteException> 
             try {
                 body = toString(response.body().byteStream());
             } catch (IOException e) {
+                log.warn("Failed to read response body", e);
                 return Optional.empty();
             }
             try {

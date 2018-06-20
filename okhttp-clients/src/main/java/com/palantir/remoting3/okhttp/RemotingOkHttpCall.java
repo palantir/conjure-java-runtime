@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting.api.errors.RemoteException;
+import com.palantir.remoting.api.errors.UnknownRemoteException;
 import com.palantir.remoting3.clients.ClientConfiguration;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -53,7 +54,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     private static final ResponseHandler<RemoteException> remoteExceptionHandler =
             RemoteExceptionResponseHandler.INSTANCE;
-    private static final ResponseHandler<IOException> ioExceptionHandler = IoExceptionResponseHandler.INSTANCE;
+    private static final ResponseHandler<UnknownRemoteException> unknownRemoteExceptionResponseHandler =
+            UnknownRemoteExceptionResponseHandler.INSTANCE;
     private static final ResponseHandler<QosException> qosHandler = QosExceptionResponseHandler.INSTANCE;
 
     private final BackoffStrategy backoffStrategy;
@@ -122,6 +124,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 RemoteException correctStackTrace = new RemoteException(
                         wrappedException.getError(),
                         wrappedException.getStatus());
+                correctStackTrace.initCause(e);
+                throw correctStackTrace;
+            } else if (e.getCause() instanceof IoUnknownRemoteException) {
+                UnknownRemoteException wrappedException = ((IoUnknownRemoteException) e.getCause())
+                        .getWrappedException();
+                UnknownRemoteException correctStackTrace = new UnknownRemoteException(
+                        wrappedException.getStatus(),
+                        wrappedException.getBody());
                 correctStackTrace.initCause(e);
                 throw correctStackTrace;
             } else if (e.getCause() instanceof IOException) {
@@ -210,9 +220,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 // Catch-all: handle all other responses
-                Optional<IOException> ioException = ioExceptionHandler.handle(errorResponseSupplier.get());
-                if (ioException.isPresent()) {
-                    callback.onFailure(call, ioException.get());
+                Optional<UnknownRemoteException> unknownHttpError = unknownRemoteExceptionResponseHandler.handle(
+                        errorResponseSupplier.get());
+                if (unknownHttpError.isPresent()) {
+                    callback.onFailure(call, new IoUnknownRemoteException(unknownHttpError.get()));
                     return;
                 }
 

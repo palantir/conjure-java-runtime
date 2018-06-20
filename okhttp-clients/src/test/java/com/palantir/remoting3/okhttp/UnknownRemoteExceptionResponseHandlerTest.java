@@ -19,7 +19,7 @@ package com.palantir.remoting3.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import java.io.IOException;
+import com.palantir.remoting.api.errors.UnknownRemoteException;
 import java.util.Optional;
 import javax.annotation.CheckForNull;
 import javax.ws.rs.core.HttpHeaders;
@@ -33,12 +33,12 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public final class IoExceptionResponseHandlerTest {
+public final class UnknownRemoteExceptionResponseHandlerTest {
 
     private static final int STATUS_500 = 500;
     private static final Request request = new Request.Builder().url("http://url").build();
 
-    private static final IoExceptionResponseHandler handler = IoExceptionResponseHandler.INSTANCE;
+    private static final UnknownRemoteExceptionResponseHandler handler = UnknownRemoteExceptionResponseHandler.INSTANCE;
 
     @Test
     public void doesNotProduceExceptionOn101Or2xx() throws Exception {
@@ -49,7 +49,7 @@ public final class IoExceptionResponseHandlerTest {
     @Test
     public void extractsIoExceptionForAllErrorCodes() throws Exception {
         for (int code : ImmutableList.of(300, 400, 404, 500)) {
-            IOException exception = decode(MediaType.APPLICATION_JSON, code, "body").get();
+            UnknownRemoteException exception = decode(MediaType.APPLICATION_JSON, code, "body").get();
             assertThat(exception.getMessage()).isEqualTo(
                     "Error " + code + ". (Failed to parse response body as SerializableError.)");
         }
@@ -67,7 +67,7 @@ public final class IoExceptionResponseHandlerTest {
         assertThat(decode(MediaType.APPLICATION_JSON, STATUS_500, null)).isNotEmpty();
     }
 
-    private static Optional<IOException> decode(String contentType, int status, @CheckForNull String body) {
+    private static Optional<UnknownRemoteException> decode(String contentType, int status, @CheckForNull String body) {
         return handler.handle(response(status, contentType, body));
     }
 

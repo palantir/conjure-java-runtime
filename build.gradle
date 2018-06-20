@@ -53,6 +53,7 @@ subprojects {
     apply plugin: 'com.palantir.baseline-error-prone'
 
     repositories {
+        mavenLocal()
         jcenter()
         maven { url "http://palantir.bintray.com/releases" }
     }
