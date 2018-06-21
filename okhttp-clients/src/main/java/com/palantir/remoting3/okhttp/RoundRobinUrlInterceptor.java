@@ -22,6 +22,10 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
+/**
+ * An {@link Interceptor} implementation that rebases the request's URL in a round robin fashion. The rebased URL will
+ * be the next URL after the last recorded URL used when multiple URLs are supplied via the {@link UrlSelector}.
+ */
 final class RoundRobinUrlInterceptor implements Interceptor {
 
     private final UrlSelector urls;
