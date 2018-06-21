@@ -82,16 +82,16 @@ public final class OkHttpClients {
         dispatcher.setMaxRequestsPerHost(256);
         // metrics
         registry.gauge(
-                MetricName.builder().safeName("dispatcher.calls.queued").build(),
+                MetricName.builder().safeName("com.palantir.remoting3.dispatcher.calls.queued").build(),
                 dispatcher::queuedCallsCount);
         registry.gauge(
-                MetricName.builder().safeName("dispatcher.calls.running").build(),
+                MetricName.builder().safeName("com.palantir.remoting3.dispatcher.calls.running").build(),
                 dispatcher::runningCallsCount);
         registry.gauge(
-                MetricName.builder().safeName("connection-pool.connections.total").build(),
+                MetricName.builder().safeName("com.palantir.remoting3.connection-pool.connections.total").build(),
                 connectionPool::connectionCount);
         registry.gauge(
-                MetricName.builder().safeName("connection-pool.connections.idle").build(),
+                MetricName.builder().safeName("com.palantir.remoting3.connection-pool.connections.idle").build(),
                 connectionPool::idleConnectionCount);
     }
 
