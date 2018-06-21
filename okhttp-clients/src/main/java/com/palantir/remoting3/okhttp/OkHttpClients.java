@@ -76,27 +76,22 @@ public final class OkHttpClients {
     /** Shared connection pool. */
     private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
 
-    private static final String DISPATCHER_QUEUED_CALLS_METRIC_NAME = "dispatcher.calls.queued";
-    private static final String DISPATCHER_RUNNING_CALLS_METRIC_NAME = "dispatcher.calls.running";
-    private static final String CONNECTION_POOL_TOTAL_METRIC_NAME = "connection-pool.connections.total";
-    private static final String CONNECTION_POOL_IDLE_METRIC_NAME = "connection-pool.connections.idle";
-
     static {
         dispatcher = new Dispatcher(executionExecutor);
         dispatcher.setMaxRequests(256);
         dispatcher.setMaxRequestsPerHost(256);
         // metrics
         registry.gauge(
-                MetricName.builder().safeName(DISPATCHER_QUEUED_CALLS_METRIC_NAME).build(),
+                MetricName.builder().safeName("dispatcher.calls.queued").build(),
                 dispatcher::queuedCallsCount);
         registry.gauge(
-                MetricName.builder().safeName(DISPATCHER_RUNNING_CALLS_METRIC_NAME).build(),
+                MetricName.builder().safeName("dispatcher.calls.running").build(),
                 dispatcher::runningCallsCount);
         registry.gauge(
-                MetricName.builder().safeName(CONNECTION_POOL_TOTAL_METRIC_NAME).build(),
+                MetricName.builder().safeName("connection-pool.connections.total").build(),
                 connectionPool::connectionCount);
         registry.gauge(
-                MetricName.builder().safeName(CONNECTION_POOL_IDLE_METRIC_NAME).build(),
+                MetricName.builder().safeName("connection-pool.connections.idle").build(),
                 connectionPool::idleConnectionCount);
     }
 
