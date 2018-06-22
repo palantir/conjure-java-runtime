@@ -73,8 +73,8 @@ public final class OkHttpClients {
     /** Global {@link TaggedMetricRegistry} for per-client and dispatcher-wide metrics. */
     private static TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
-    private static final String DISPATCHER_QUEUED_CALLS_METRIC = "dispatcher.queued-calls";
-    private static final String DISPATCHER_RUNNING_CALLS_METRIC = "dispatcher.running-calls";
+    /** Shared connection pool. */
+    private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
 
     static {
         dispatcher = new Dispatcher(executionExecutor);
@@ -82,15 +82,18 @@ public final class OkHttpClients {
         dispatcher.setMaxRequestsPerHost(256);
         // metrics
         registry.gauge(
-                MetricName.builder().safeName(DISPATCHER_QUEUED_CALLS_METRIC).build(),
+                MetricName.builder().safeName("com.palantir.remoting3.dispatcher.calls.queued").build(),
                 dispatcher::queuedCallsCount);
         registry.gauge(
-                MetricName.builder().safeName(DISPATCHER_RUNNING_CALLS_METRIC).build(),
+                MetricName.builder().safeName("com.palantir.remoting3.dispatcher.calls.running").build(),
                 dispatcher::runningCallsCount);
+        registry.gauge(
+                MetricName.builder().safeName("com.palantir.remoting3.connection-pool.connections.total").build(),
+                connectionPool::connectionCount);
+        registry.gauge(
+                MetricName.builder().safeName("com.palantir.remoting3.connection-pool.connections.idle").build(),
+                connectionPool::idleConnectionCount);
     }
-
-    /** Shared connection pool. */
-    private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
 
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
