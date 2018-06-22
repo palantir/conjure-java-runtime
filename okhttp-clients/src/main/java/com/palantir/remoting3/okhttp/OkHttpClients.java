@@ -174,8 +174,15 @@ public final class OkHttpClients {
             // TODO(rfink): Should this go into the call itself?
             client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
         } else {
-            // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in the request
-            client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
+            switch (config.nodeSelectionStrategy()) {
+                case ROUND_ROBIN:
+                    client.addInterceptor(RoundRobinUrlInterceptor.create(urlSelector));
+                    break;
+                case PIN_UNTIL_ERROR:
+                    // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in
+                    // the request
+                    client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
+            }
         }
         client.followRedirects(false);  // We implement our own redirect logic.
 
