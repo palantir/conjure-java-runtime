@@ -135,7 +135,6 @@ public final class OkHttpClients {
                     client.addInterceptor(RoundRobinUrlInterceptor.create(urlSelector));
                     break;
                 case PIN_UNTIL_ERROR:
-                default:
                     // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in
                     // the request
                     client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
