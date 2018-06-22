@@ -1,4 +1,4 @@
-// This file is managed by the excavator 'consistent-publish-jar' check, changes will be overwritten.
+// This file is managed by the excavator 'consistent-publish-scripts' check, changes will be overwritten.
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'nebula.maven-publish'
 apply plugin: 'nebula.maven-resolved-dependencies'
