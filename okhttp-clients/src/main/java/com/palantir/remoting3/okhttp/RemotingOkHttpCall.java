@@ -42,8 +42,6 @@ import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO(rfink): Consider differentiating the IOExceptions thrown/returned by this class, add better error messages, #628
-
 /**
  * An OkHttp {@link Call} implementation that handles standard retryable error status such as 308, 429, 503, and
  * connection errors. Calls are rescheduled on a given scheduler and executed on a given executor.

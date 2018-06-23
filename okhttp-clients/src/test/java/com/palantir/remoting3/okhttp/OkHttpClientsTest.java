@@ -216,8 +216,11 @@ public final class OkHttpClientsTest extends TestBase {
 
         OkHttpClient client = createRetryingClient(1);
         Call call = client.newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(call::execute).isInstanceOf(UnknownRemoteException.class)
-                .hasMessageContaining("Error 400. (Failed to parse response body as SerializableError.)");
+        assertThatThrownBy(call::execute)
+                .isInstanceOf(UnknownRemoteException.class)
+                .hasMessageContaining("Error 400. (Failed to parse response body as SerializableError.)")
+                .matches(exc -> ((UnknownRemoteException) exc).getStatus() == 400)
+                .matches(exc -> ((UnknownRemoteException) exc).getBody().equals(responseJson));
     }
 
     @Test
