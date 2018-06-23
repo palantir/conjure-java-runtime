@@ -28,9 +28,8 @@ import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -71,14 +70,30 @@ public final class OkHttpClients {
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
 
+    /** Global {@link TaggedMetricRegistry} for per-client and dispatcher-wide metrics. */
+    private static TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
+
+    /** Shared connection pool. */
+    private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
+
     static {
         dispatcher = new Dispatcher(executionExecutor);
         dispatcher.setMaxRequests(256);
         dispatcher.setMaxRequestsPerHost(256);
+        // metrics
+        registry.gauge(
+                MetricName.builder().safeName("com.palantir.remoting3.dispatcher.calls.queued").build(),
+                dispatcher::queuedCallsCount);
+        registry.gauge(
+                MetricName.builder().safeName("com.palantir.remoting3.dispatcher.calls.running").build(),
+                dispatcher::runningCallsCount);
+        registry.gauge(
+                MetricName.builder().safeName("com.palantir.remoting3.connection-pool.connections.total").build(),
+                connectionPool::connectionCount);
+        registry.gauge(
+                MetricName.builder().safeName("com.palantir.remoting3.connection-pool.connections.idle").build(),
+                connectionPool::idleConnectionCount);
     }
-
-    /** Shared connection pool. */
-    private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
 
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
@@ -151,7 +166,6 @@ public final class OkHttpClients {
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
-        TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
         // Routing
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(config.uris(), randomizeUrlOrder,
@@ -160,8 +174,15 @@ public final class OkHttpClients {
             // TODO(rfink): Should this go into the call itself?
             client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
         } else {
-            // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in the request
-            client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
+            switch (config.nodeSelectionStrategy()) {
+                case ROUND_ROBIN:
+                    client.addInterceptor(RoundRobinUrlInterceptor.create(urlSelector));
+                    break;
+                case PIN_UNTIL_ERROR:
+                    // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in
+                    // the request
+                    client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
+            }
         }
         client.followRedirects(false);  // We implement our own redirect logic.
 
@@ -203,23 +224,7 @@ public final class OkHttpClients {
                 () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()),
                 urlSelector,
                 schedulingExecutor,
-                executionExecutor,
-                largestOf(config.connectTimeout(), config.readTimeout(), config.writeTimeout())
-        );
-    }
-
-    /**
-     * Treat {@link Duration#ZERO} as infinity to match okhttp3.
-     */
-    @VisibleForTesting
-    static Duration largestOf(Duration... durations) {
-        if (Arrays.stream(durations).anyMatch(Duration::isZero)) {
-            return Duration.ZERO;
-        }
-
-        return Arrays.stream(durations)
-                .max(Duration::compareTo)
-                .orElseThrow(() -> new IllegalArgumentException("largestOf must be called with at least one argument"));
+                executionExecutor);
     }
 
     /**

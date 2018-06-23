@@ -36,7 +36,7 @@ public interface UrlSelector {
 
     /**
      * Similar to {@link #redirectTo}, but redirects the given URL to the next (in some undefined order) {@link
-     * #getBaseUrls baseURL}.
+     * #getBaseUrls baseURL} after the supplied {@code current} URL.
      */
     Optional<HttpUrl> redirectToNext(HttpUrl current);
 
@@ -44,6 +44,12 @@ public interface UrlSelector {
      * Similar to {@link #redirectTo}, but redirects the given URL to the current {@link #getBaseUrls baseURL}.
      */
     Optional<HttpUrl> redirectToCurrent(HttpUrl current);
+
+    /**
+     * Similar to {@link #redirectTo}, but redirects the given URL to the next (in some undefined order) after the
+     * last URL used.
+     */
+    Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl current);
 
     /**
      * Returns the base URLs that this UrlSelector matches against. Note that implementations should parse web socket

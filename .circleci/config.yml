@@ -29,7 +29,7 @@ jobs:
           paths:
             - ~/.gradle/caches
 
-      - run: ./gradlew --parallel build
+      - run: ./gradlew --parallel --continue build
 
       - run:
           command: |

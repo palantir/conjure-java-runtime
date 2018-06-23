@@ -128,17 +128,11 @@ final class UrlSelectorImpl implements UrlSelector {
         // if possible, determine the index of the passed in url (so we can be sure to return a url which is different)
         Optional<Integer> existingUrlIndex = indexFor(existingUrl);
 
-        int numAttempts = 0;
         int potentialNextIndex = existingUrlIndex.orElse(currentUrl.get());
 
-        // Find the next URL that is not marked as failed
-        while (numAttempts < baseUrls.size()) {
-            potentialNextIndex = (potentialNextIndex + 1) % baseUrls.size();
-            UrlAvailability isFailed = failedUrls.getIfPresent(baseUrls.get(potentialNextIndex));
-            if (isFailed == null) {
-                return redirectTo(existingUrl, baseUrls.get(potentialNextIndex));
-            }
-            numAttempts++;
+        Optional<HttpUrl> nextUrl = getNext(potentialNextIndex);
+        if (nextUrl.isPresent()) {
+            return redirectTo(existingUrl, nextUrl.get());
         }
 
         // No healthy URLs remain; re-balance across any specified nodes
@@ -152,6 +146,16 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     @Override
+    public Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl current) {
+        Optional<HttpUrl> nextUrl = getNext(currentUrl.get());
+        if (nextUrl.isPresent()) {
+            return redirectTo(current, nextUrl.get());
+        }
+
+        return redirectTo(current, baseUrls.get((currentUrl.get() + 1) % baseUrls.size()));
+    }
+
+    @Override
     public void markAsFailed(HttpUrl failedUrl) {
         if (useFailedUrlCache) {
             Optional<Integer> indexForFailedUrl = indexFor(failedUrl);
@@ -159,6 +163,24 @@ final class UrlSelectorImpl implements UrlSelector {
                     failedUrls.put(baseUrls.get(index), UrlAvailability.FAILED)
             );
         }
+    }
+
+    /** Get the next URL in {@code baseUrls}, after the supplied index, that has not been marked as failed. */
+    private Optional<HttpUrl> getNext(int startIndex) {
+        int numAttempts = 0;
+        int index = startIndex;
+
+        // Find the next URL that is not marked as failed
+        while (numAttempts < baseUrls.size()) {
+            index = (index + 1) % baseUrls.size();
+            UrlAvailability isFailed = failedUrls.getIfPresent(baseUrls.get(index));
+            if (isFailed == null) {
+                return Optional.of(baseUrls.get(index));
+            }
+            numAttempts++;
+        }
+
+        return Optional.empty();
     }
 
     private Optional<Integer> indexFor(HttpUrl url) {
