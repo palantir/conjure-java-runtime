@@ -53,7 +53,7 @@ public final class ClientConfigurationsTest {
         assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(10));
         assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(10));
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(10));
-        assertThat(actual.enableGcmCipherSuites()).isFalse();
+        assertThat(actual.enableGcmCipherSuites()).isTrue();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
     }
 
@@ -69,7 +69,7 @@ public final class ClientConfigurationsTest {
         assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(10));
         assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(10));
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(10));
-        assertThat(actual.enableGcmCipherSuites()).isFalse();
+        assertThat(actual.enableGcmCipherSuites()).isTrue();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
     }
 
