@@ -38,11 +38,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLSocketFactory;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.TlsVersion;
 import okhttp3.internal.Util;
 import org.slf4j.Logger;
@@ -53,6 +55,9 @@ public final class OkHttpClients {
 
     @VisibleForTesting
     static final int NUM_SCHEDULING_THREADS = 5;
+
+    private static final String JAVA_SPECIFICATION_VERSION_PROPERTY = "java.specification.version";
+    private static final String JAVA_8_SSL_SOCKET_FACTORY_CLASS = "sun.security.ssl.SSLSocketFactoryImpl";
 
     private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler((thread, uncaughtException) ->
@@ -185,6 +190,18 @@ public final class OkHttpClients {
             }
         }
         client.followRedirects(false);  // We implement our own redirect logic.
+
+        SSLSocketFactory sslSocketFactory = config.sslSocketFactory();
+
+
+        // On java 8 using the default tls provider we disable http/2 to avoid exclusively
+        // using slow GCM ciphers.
+        if (JAVA_8_SSL_SOCKET_FACTORY_CLASS.equals(sslSocketFactory.getClass().getName())) {
+            String versionString = System.getProperty(JAVA_SPECIFICATION_VERSION_PROPERTY);
+            if ("8".equals(versionString) || "1.8".equals(versionString)) {
+                client.protocols(ImmutableList.of(Protocol.HTTP_1_1));
+            }
+        }
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
