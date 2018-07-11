@@ -17,9 +17,11 @@
 package com.palantir.remoting3.ext.jackson;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -92,6 +94,22 @@ public final class ObjectMappersTest {
         LocalDate localDate = LocalDate.of(2001, 2, 3);
         assertThat(ser(localDate)).isEqualTo("\"2001-02-03\"");
         assertThat(serDe(localDate, LocalDate.class)).isEqualTo(localDate);
+    }
+
+    @Test
+    public void coercionOfScalarsShouldThrowException() {
+        assertThatThrownBy(() -> MAPPER.readValue("1", Boolean.class))
+                .isInstanceOf(MismatchedInputException.class)
+                .hasMessageContaining("(enable `MapperFeature.ALLOW_COERCION_OF_SCALARS` to allow)");
+        assertThatThrownBy(() -> MAPPER.readValue("\"true\"", Boolean.class))
+                .isInstanceOf(MismatchedInputException.class)
+                .hasMessageContaining("(enable `MapperFeature.ALLOW_COERCION_OF_SCALARS` to allow)");
+        assertThatThrownBy(() -> MAPPER.readValue("\"12.3\"", Double.class))
+                .isInstanceOf(MismatchedInputException.class)
+                .hasMessageContaining("(enable `MapperFeature.ALLOW_COERCION_OF_SCALARS` to allow)");
+        assertThatThrownBy(() -> MAPPER.readValue("\"123\"", Integer.class))
+                .isInstanceOf(MismatchedInputException.class)
+                .hasMessageContaining("(enable `MapperFeature.ALLOW_COERCION_OF_SCALARS` to allow)");
     }
 
     private static String ser(Object object) throws IOException {
