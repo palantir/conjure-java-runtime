@@ -44,9 +44,9 @@ import java.lang.reflect.Type;
  */
 public class StrictDoubleModule extends SimpleModule {
 
-   public StrictDoubleModule() {
+    public StrictDoubleModule() {
         super(StrictDoubleModule.class.getCanonicalName());
-        
+
         addDeserializer(Double.class, new StrictDoubleDeserializer(Double.class, null));
         addDeserializer(double.class, new StrictDoubleDeserializer(double.class, 0.d));
         addSerializer(Double.class, new StrictDoubleSerializer(Double.class));
