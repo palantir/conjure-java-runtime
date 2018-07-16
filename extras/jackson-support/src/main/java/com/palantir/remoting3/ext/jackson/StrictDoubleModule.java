@@ -37,11 +37,16 @@ import java.lang.reflect.Type;
 /**
  * Used to enforce strict double values by banning "NaN", "+Infinity", and "-Infinity" for both serialization
  * and deserialization.
+ * <p>
+ * Jackson does not support serialization/deserialization of strict numbers as of 2.9.6.
+ *
+ * @see <a href="https://github.com/FasterXML/jackson-databind/issues/911">https://github.com/FasterXML/jackson-databind/issues/911</a> for more details.
  */
-class StrictDoubleModule extends SimpleModule {
+public class StrictDoubleModule extends SimpleModule {
 
-    public StrictDoubleModule() {
+   public StrictDoubleModule() {
         super(StrictDoubleModule.class.getCanonicalName());
+        
         addDeserializer(Double.class, new StrictDoubleDeserializer(Double.class, null));
         addDeserializer(double.class, new StrictDoubleDeserializer(double.class, 0.d));
         addSerializer(Double.class, new StrictDoubleSerializer(Double.class));
@@ -55,25 +60,25 @@ class StrictDoubleModule extends SimpleModule {
         }
 
         @Override
-        public Double deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            Double doubleValue = super.deserialize(p, ctxt);
+        public Double deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
+            Double doubleValue = super.deserialize(parser, ctxt);
             if (Double.isInfinite(doubleValue.doubleValue()) || Double.isNaN(doubleValue.doubleValue())) {
-                throw new JsonParseException(p,
+                throw new JsonParseException(parser,
                         "NaN or Infinity is not allowed and only concrete double value is allowed.");
             }
             return doubleValue;
         }
 
         @Override
-        public Double deserializeWithType(JsonParser p, DeserializationContext ctxt,
+        public Double deserializeWithType(JsonParser parser, DeserializationContext ctxt,
                 TypeDeserializer typeDeserializer) throws IOException {
-            return deserialize(p, ctxt);
+            return deserialize(parser, ctxt);
         }
     }
 
     static class StrictDoubleSerializer extends StdScalarSerializer<Double> {
-        protected StrictDoubleSerializer(Class<Double> t) {
-            super(t);
+        protected StrictDoubleSerializer(Class<Double> clazz) {
+            super(clazz);
         }
 
         @Override

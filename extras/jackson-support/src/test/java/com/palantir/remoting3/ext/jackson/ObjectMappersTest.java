@@ -132,7 +132,7 @@ public final class ObjectMappersTest {
 
     }
 
-    private static<T> void testDeStrictDoubleWithoutConcreteValueThrowsException(String object, Class<T> clazz) {
+    private static <T> void testDeStrictDoubleWithoutConcreteValueThrowsException(String object, Class<T> clazz) {
         assertThatThrownBy(() -> MAPPER.readValue(object, clazz))
                 .isInstanceOf(JsonParseException.class)
                 .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
