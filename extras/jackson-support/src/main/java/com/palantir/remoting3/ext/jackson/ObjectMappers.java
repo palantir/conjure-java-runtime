@@ -112,6 +112,7 @@ public final class ObjectMappers {
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
                 .registerModule(new AfterburnerModule())
                 .registerModule(new JavaTimeModule())
+                .registerModule(new StrictDoubleModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
                 .disable(DeserializationFeature.WRAP_EXCEPTIONS)
