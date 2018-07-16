@@ -71,7 +71,6 @@ class StrictDoubleModule extends SimpleModule {
         }
     }
 
-
     static class StrictDoubleSerializer extends StdScalarSerializer<Double> {
         protected StrictDoubleSerializer(Class<Double> t) {
             super(t);

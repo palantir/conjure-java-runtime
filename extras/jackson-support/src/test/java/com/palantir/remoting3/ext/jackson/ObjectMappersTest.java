@@ -74,49 +74,31 @@ public final class ObjectMappersTest {
     }
 
     @Test
-    public void serializingDoubleWithoutConcreteValueThrowsException() {
-        assertThatThrownBy(() -> MAPPER.writeValueAsString(Double.valueOf("NaN")))
-                .isInstanceOf(JsonGenerationException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
-        assertThatThrownBy(() -> MAPPER.writeValueAsString(Double.valueOf("Infinity")))
-                .isInstanceOf(JsonGenerationException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
-        assertThatThrownBy(() -> MAPPER.writeValueAsString(Double.valueOf("-Infinity")))
-                .isInstanceOf(JsonGenerationException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
+    public void serializeUsingStrictDoubleModule() throws JsonProcessingException {
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.valueOf("NaN"));
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.valueOf("Infinity"));
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.valueOf("-Infinity"));
 
-        assertThatThrownBy(() -> MAPPER.writeValueAsString(Double.NaN))
-                .isInstanceOf(JsonGenerationException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
-        assertThatThrownBy(() -> MAPPER.writeValueAsString(Double.POSITIVE_INFINITY))
-                .isInstanceOf(JsonGenerationException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
-        assertThatThrownBy(() -> MAPPER.writeValueAsString(Double.NEGATIVE_INFINITY))
-                .isInstanceOf(JsonGenerationException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.NaN);
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.POSITIVE_INFINITY);
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.NEGATIVE_INFINITY);
+
+        assertThat(MAPPER.writeValueAsString(Double.valueOf("10.0"))).isEqualTo("10.0");
+        assertThat(MAPPER.writeValueAsString(10.0)).isEqualTo("10.0");
     }
 
     @Test
-    public void deserializingToDoubleWithoutConcreteValueThrowsException() {
-        assertThatThrownBy(() -> MAPPER.readValue("\"NaN\"", Double.class))
-                .isInstanceOf(JsonParseException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
-        assertThatThrownBy(() -> MAPPER.readValue("\"+Infinity\"", Double.class))
-                .isInstanceOf(JsonParseException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
-        assertThatThrownBy(() -> MAPPER.readValue("\"-Infinity\"", Double.class))
-                .isInstanceOf(JsonParseException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
+    public void deserilizeUsingStrictDoubleModule() throws IOException {
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"NaN\"", Double.class);
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"+Infinity\"", Double.class);
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"-Infinity\"", Double.class);
 
-        assertThatThrownBy(() -> MAPPER.readValue("\"NaN\"", double.class))
-                .isInstanceOf(JsonParseException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
-        assertThatThrownBy(() -> MAPPER.readValue("\"+Infinity\"", double.class))
-                .isInstanceOf(JsonParseException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
-        assertThatThrownBy(() -> MAPPER.readValue("\"-Infinity\"", double.class))
-                .isInstanceOf(JsonParseException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"NaN\"", double.class);
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"+Infinity\"", double.class);
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"-Infinity\"", double.class);
+
+        assertThat(MAPPER.readValue("10.0", Double.class)).isEqualTo(Double.valueOf(10.0d));
+        assertThat(MAPPER.readValue("10.0", double.class)).isEqualTo(Double.valueOf(10.0d));
     }
 
     @Test
@@ -143,6 +125,19 @@ public final class ObjectMappersTest {
         assertThat(serDe(localDate, LocalDate.class)).isEqualTo(localDate);
     }
 
+    private static void testSerStrictDoubleWithoutConcreteValueThrowsException(Object object) {
+        assertThatThrownBy(() -> MAPPER.writeValueAsString(object))
+                .isInstanceOf(JsonGenerationException.class)
+                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
+
+    }
+
+    private static<T> void testDeStrictDoubleWithoutConcreteValueThrowsException(String object, Class<T> clazz) {
+        assertThatThrownBy(() -> MAPPER.readValue(object, clazz))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
+    }
+
     private static String ser(Object object) throws IOException {
         return MAPPER.writeValueAsString(object);
     }
@@ -150,5 +145,4 @@ public final class ObjectMappersTest {
     private static <T> T serDe(Object object, Class<T> clazz) throws IOException {
         return MAPPER.readValue(ser(object), clazz);
     }
-
 }
