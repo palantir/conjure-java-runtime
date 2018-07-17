@@ -17,7 +17,10 @@
 package com.palantir.remoting3.ext.jackson;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -71,6 +74,41 @@ public final class ObjectMappersTest {
     }
 
     @Test
+    public void serializeUsingStrictDoubleModule() throws JsonProcessingException {
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.valueOf("NaN"));
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.valueOf("Infinity"));
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.valueOf("-Infinity"));
+
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.NaN);
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.POSITIVE_INFINITY);
+        testSerStrictDoubleWithoutConcreteValueThrowsException(Double.NEGATIVE_INFINITY);
+
+        assertThat(MAPPER.writeValueAsString(Double.valueOf("10.0"))).isEqualTo("10.0");
+        assertThat(MAPPER.writeValueAsString(10.0)).isEqualTo("10.0");
+        assertThat(MAPPER.writeValueAsString(+0.0d)).isEqualTo("0.0");
+        assertThat(MAPPER.writeValueAsString(-0.0d)).isEqualTo("-0.0");
+    }
+
+    @Test
+    public void deserilizeUsingStrictDoubleModule() throws IOException {
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"NaN\"", Double.class);
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"+Infinity\"", Double.class);
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"-Infinity\"", Double.class);
+
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"NaN\"", double.class);
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"+Infinity\"", double.class);
+        testDeStrictDoubleWithoutConcreteValueThrowsException("\"-Infinity\"", double.class);
+
+        assertThat(MAPPER.readValue("10.0", Double.class)).isEqualTo(10.0d);
+        assertThat(MAPPER.readValue("10.0", double.class)).isEqualTo(10.0d);
+
+        assertThat(MAPPER.readValue("0.0", Double.class)).isEqualTo(0.0d);
+        assertThat(MAPPER.readValue("-0.0", Double.class)).isEqualTo(-0.0d);
+        assertThat(MAPPER.readValue("0.0", double.class)).isEqualTo(0.0d);
+        assertThat(MAPPER.readValue("-0.0", double.class)).isEqualTo(-0.0d);
+    }
+
+    @Test
     public void testMappersReturnNewInstance() {
         assertThat(ObjectMappers.newClientObjectMapper()).isNotSameAs(ObjectMappers.newClientObjectMapper());
     }
@@ -92,6 +130,19 @@ public final class ObjectMappersTest {
         LocalDate localDate = LocalDate.of(2001, 2, 3);
         assertThat(ser(localDate)).isEqualTo("\"2001-02-03\"");
         assertThat(serDe(localDate, LocalDate.class)).isEqualTo(localDate);
+    }
+
+    private static void testSerStrictDoubleWithoutConcreteValueThrowsException(Object object) {
+        assertThatThrownBy(() -> MAPPER.writeValueAsString(object))
+                .isInstanceOf(JsonGenerationException.class)
+                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double values are allowed.");
+
+    }
+
+    private static <T> void testDeStrictDoubleWithoutConcreteValueThrowsException(String object, Class<T> clazz) {
+        assertThatThrownBy(() -> MAPPER.readValue(object, clazz))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double values are allowed.");
     }
 
     private static String ser(Object object) throws IOException {

@@ -95,7 +95,7 @@ public final class ObjectMappers {
     /**
      * Configures provided ObjectMapper with default modules and settings.
      * <p>
-     * Modules: Guava, JDK7, JDK8, Afterburner, JavaTime
+     * Modules: Guava, JDK7, JDK8, Afterburner, JavaTime, and StrictDouble.
      * <p>
      * Settings:
      * <ul>
@@ -103,6 +103,7 @@ public final class ObjectMappers {
      *   <li>Dates remain in received timezone.
      *   <li>Exceptions will not be wrapped with Jackson exceptions.
      *   <li>Deserializing a null for a primitive field will throw an exception.
+     *   <li>Serialize/Deserializing a double with "NaN" or "Infinity" or "-Infinity" will throw an exception.
      * </ul>
      */
     public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
@@ -112,6 +113,7 @@ public final class ObjectMappers {
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
                 .registerModule(new AfterburnerModule())
                 .registerModule(new JavaTimeModule())
+                .registerModule(new StrictDoubleModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
                 .disable(DeserializationFeature.WRAP_EXCEPTIONS)
