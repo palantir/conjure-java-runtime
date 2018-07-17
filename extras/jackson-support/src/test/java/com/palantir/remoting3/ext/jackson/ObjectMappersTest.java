@@ -85,6 +85,8 @@ public final class ObjectMappersTest {
 
         assertThat(MAPPER.writeValueAsString(Double.valueOf("10.0"))).isEqualTo("10.0");
         assertThat(MAPPER.writeValueAsString(10.0)).isEqualTo("10.0");
+        assertThat(MAPPER.writeValueAsString(+0.0d)).isEqualTo("0.0");
+        assertThat(MAPPER.writeValueAsString(-0.0d)).isEqualTo("-0.0");
     }
 
     @Test
@@ -97,8 +99,13 @@ public final class ObjectMappersTest {
         testDeStrictDoubleWithoutConcreteValueThrowsException("\"+Infinity\"", double.class);
         testDeStrictDoubleWithoutConcreteValueThrowsException("\"-Infinity\"", double.class);
 
-        assertThat(MAPPER.readValue("10.0", Double.class)).isEqualTo(Double.valueOf(10.0d));
-        assertThat(MAPPER.readValue("10.0", double.class)).isEqualTo(Double.valueOf(10.0d));
+        assertThat(MAPPER.readValue("10.0", Double.class)).isEqualTo(10.0d);
+        assertThat(MAPPER.readValue("10.0", double.class)).isEqualTo(10.0d);
+
+        assertThat(MAPPER.readValue("0.0", Double.class)).isEqualTo(0.0d);
+        assertThat(MAPPER.readValue("-0.0", Double.class)).isEqualTo(-0.0d);
+        assertThat(MAPPER.readValue("0.0", double.class)).isEqualTo(0.0d);
+        assertThat(MAPPER.readValue("-0.0", double.class)).isEqualTo(-0.0d);
     }
 
     @Test
