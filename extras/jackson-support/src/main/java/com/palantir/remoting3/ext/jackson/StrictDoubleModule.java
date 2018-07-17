@@ -42,9 +42,9 @@ import java.lang.reflect.Type;
  *
  * @see <a href="https://github.com/FasterXML/jackson-databind/issues/911">https://github.com/FasterXML/jackson-databind/issues/911</a> for more details.
  */
-public class StrictDoubleModule extends SimpleModule {
+final class StrictDoubleModule extends SimpleModule {
 
-    public StrictDoubleModule() {
+    StrictDoubleModule() {
         super(StrictDoubleModule.class.getCanonicalName());
 
         addDeserializer(Double.class, new StrictDoubleDeserializer(Double.class, null));
@@ -53,7 +53,7 @@ public class StrictDoubleModule extends SimpleModule {
         addSerializer(double.class, new StrictDoubleSerializer(double.class));
     }
 
-    static class StrictDoubleDeserializer extends NumberDeserializers.DoubleDeserializer {
+    static final class StrictDoubleDeserializer extends NumberDeserializers.DoubleDeserializer {
 
         StrictDoubleDeserializer(Class<Double> cls, Double nvl) {
             super(cls, nvl);
@@ -76,7 +76,11 @@ public class StrictDoubleModule extends SimpleModule {
         }
     }
 
-    static class StrictDoubleSerializer extends StdScalarSerializer<Double> {
+    /**
+     * Based on {@link com.fasterxml.jackson.databind.ser.std.NumberSerializers.DoubleSerializer}
+     * and {@link com.fasterxml.jackson.databind.ser.std.NumberSerializers.Base}.
+     */
+    static final class StrictDoubleSerializer extends StdScalarSerializer<Double> {
         protected StrictDoubleSerializer(Class<Double> clazz) {
             super(clazz);
         }
