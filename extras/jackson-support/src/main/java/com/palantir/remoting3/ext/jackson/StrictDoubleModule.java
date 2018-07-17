@@ -64,7 +64,7 @@ public class StrictDoubleModule extends SimpleModule {
             Double doubleValue = super.deserialize(parser, ctxt);
             if (Double.isInfinite(doubleValue.doubleValue()) || Double.isNaN(doubleValue.doubleValue())) {
                 throw new JsonParseException(parser,
-                        "NaN or Infinity is not allowed and only concrete double value is allowed.");
+                        "NaN or Infinity is not allowed and only concrete double values are allowed.");
             }
             return doubleValue;
         }
@@ -96,7 +96,7 @@ public class StrictDoubleModule extends SimpleModule {
         public void serialize(Double value, JsonGenerator gen, SerializerProvider provider) throws IOException {
             if (Double.isInfinite(value.doubleValue()) || Double.isNaN(value.doubleValue())) {
                 throw new JsonGenerationException(
-                        "NaN or Infinity is not allowed and only concrete double value is allowed.", gen);
+                        "NaN or Infinity is not allowed and only concrete double values are allowed.", gen);
             }
             gen.writeNumber(value.doubleValue());
         }

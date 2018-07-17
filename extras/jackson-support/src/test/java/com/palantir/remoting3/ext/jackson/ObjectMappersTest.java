@@ -128,14 +128,14 @@ public final class ObjectMappersTest {
     private static void testSerStrictDoubleWithoutConcreteValueThrowsException(Object object) {
         assertThatThrownBy(() -> MAPPER.writeValueAsString(object))
                 .isInstanceOf(JsonGenerationException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
+                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double values are allowed.");
 
     }
 
     private static <T> void testDeStrictDoubleWithoutConcreteValueThrowsException(String object, Class<T> clazz) {
         assertThatThrownBy(() -> MAPPER.readValue(object, clazz))
                 .isInstanceOf(JsonParseException.class)
-                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double value is allowed.");
+                .hasMessageContaining("NaN or Infinity is not allowed and only concrete double values are allowed.");
     }
 
     private static String ser(Object object) throws IOException {
