@@ -164,7 +164,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                         .build();
                 RemotingOkHttpCall retryCall =
                         client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
-                log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()));
+                log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()),
+                        exception);
                 scheduleExecution(() -> retryCall.enqueue(callback), backoff.get());
             }
 
@@ -235,7 +236,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 Duration backoff = exception.getRetryAfter().orElse(nonAdvertizedBackoff.get());
-                log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.toMillis()));
+                log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.toMillis()),
+                        exception);
                 scheduleExecution(() -> doClone().enqueue(callback), backoff);
                 return null;
             }
@@ -273,7 +275,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                                     + "server-side QoS condition: 503", exception));
                 } else {
                     log.debug("Rescheduling call after backoff",
-                            SafeArg.of("backoffMillis", backoff.get().toMillis()));
+                            SafeArg.of("backoffMillis", backoff.get().toMillis()), exception);
                     // Redirect to the "next" URL, whichever that may be, after backing off.
                     Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
                     if (!redirectTo.isPresent()) {
