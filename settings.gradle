@@ -1,4 +1,4 @@
-rootProject.name = 'http-remoting'
+rootProject.name = 'conjure-java-runtime'
 
 include 'error-handling'
 include 'extras:jackson-support'
