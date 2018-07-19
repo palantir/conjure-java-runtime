@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
-import com.palantir.remoting3.jaxrs.feignimpl.HeaderAccessUtils;
+import com.palantir.conjure.java.jaxrs.feignimpl.HeaderAccessUtils;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
 import java.lang.reflect.Type;

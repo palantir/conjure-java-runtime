@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
-import com.palantir.remoting3.jaxrs.feignimpl.HeaderAccessUtils;
+import com.palantir.conjure.java.jaxrs.feignimpl.HeaderAccessUtils;
 import feign.codec.Decoder;
 import java.io.IOException;
 import java.io.PushbackInputStream;
