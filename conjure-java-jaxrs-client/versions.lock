@@ -115,26 +115,26 @@
             "locked": "8.17.0"
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc2",
+            "locked": "2.0.0-rc3",
             "transitive": [
                 "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0-rc2",
+            "locked": "2.0.0-rc3",
             "transitive": [
                 "com.palantir.conjure.java.runtime:client-config"
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc2",
+            "locked": "2.0.0-rc3",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"
             ]
         },
         "com.palantir.conjure.java.api:tracing": {
-            "locked": "2.0.0-rc2",
+            "locked": "2.0.0-rc3",
             "transitive": [
                 "com.palantir.conjure.java.runtime:tracing"
             ]
@@ -380,26 +380,26 @@
             "locked": "8.17.0"
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc2",
+            "locked": "2.0.0-rc3",
             "transitive": [
                 "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0-rc2",
+            "locked": "2.0.0-rc3",
             "transitive": [
                 "com.palantir.conjure.java.runtime:client-config"
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc2",
+            "locked": "2.0.0-rc3",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"
             ]
         },
         "com.palantir.conjure.java.api:tracing": {
-            "locked": "2.0.0-rc2",
+            "locked": "2.0.0-rc3",
             "transitive": [
                 "com.palantir.conjure.java.runtime:tracing"
             ]

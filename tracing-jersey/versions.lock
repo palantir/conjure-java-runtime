@@ -51,7 +51,7 @@
             ]
         },
         "com.palantir.conjure.java.api:tracing": {
-            "locked": "2.0.0-rc2",
+            "locked": "2.0.0-rc3",
             "transitive": [
                 "com.palantir.conjure.java.runtime:tracing"
             ]
@@ -237,7 +237,7 @@
             ]
         },
         "com.palantir.conjure.java.api:tracing": {
-            "locked": "2.0.0-rc2",
+            "locked": "2.0.0-rc3",
             "transitive": [
                 "com.palantir.conjure.java.runtime:tracing"
             ]

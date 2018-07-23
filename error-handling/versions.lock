@@ -72,7 +72,7 @@
             ]
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc2"
+            "locked": "2.0.0-rc3"
         },
         "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization": {
             "project": true
@@ -166,7 +166,7 @@
             ]
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc2"
+            "locked": "2.0.0-rc3"
         },
         "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization": {
             "project": true
