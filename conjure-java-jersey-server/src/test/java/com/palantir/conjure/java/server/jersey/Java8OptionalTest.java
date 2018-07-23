@@ -133,7 +133,7 @@ public final class Java8OptionalTest {
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
+            env.jersey().register(ConjureJavaJerseyFeature.INSTANCE);
             env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
             env.jersey().register(new OptionalTestResource());
         }

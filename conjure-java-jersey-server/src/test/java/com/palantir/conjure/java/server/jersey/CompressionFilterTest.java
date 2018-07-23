@@ -161,7 +161,7 @@ public final class CompressionFilterTest {
     public static class TestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
+            env.jersey().register(ConjureJavaJerseyFeature.INSTANCE);
             env.jersey().register(new CompressionFilter(3));
             env.jersey().register(new TestResource());
         }

@@ -22,7 +22,7 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 
 
-public enum HttpRemotingJerseyFeature implements Feature {
+public enum ConjureJavaJerseyFeature implements Feature {
     INSTANCE;
 
     /**

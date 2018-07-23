@@ -92,7 +92,7 @@ public final class RequestLimitingInterceptorTest {
         public final void run(Configuration config, final Environment env) {
             env.jersey().register(new RequestLimitingInterceptor(10));
             env.jersey().register(new RequestLimitingTestResource());
-            env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
+            env.jersey().register(ConjureJavaJerseyFeature.INSTANCE);
         }
     }
 
