@@ -316,7 +316,7 @@ consume for clients and support transmitting exception parameters in a safe way.
 The workflow is:
 
  - Server code throws an instance of `ServiceException`, containing some `ErrorType`
- - The `com.palantir.remoting3.servers.jersey.ServiceExceptionMapper` exception mapper
+ - The `com.palantir.conjure.java.server.jersey.ServiceExceptionMapper` exception mapper
    - determines the response code for this service exception
    - converts this into a `SerializableError`
    - serializes this into the response body as JSON
