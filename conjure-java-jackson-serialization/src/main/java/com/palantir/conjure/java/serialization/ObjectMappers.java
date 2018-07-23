@@ -31,17 +31,6 @@ public final class ObjectMappers {
     private ObjectMappers() {}
 
     /**
-     * Returns result of {@link #newClientObjectMapper()}. This method maintains source and binary
-     * compatibility with previous releases of the 2.x branch.
-     *
-     * @deprecated use {@link #newClientObjectMapper()} instead.
-     */
-    @Deprecated
-    public static ObjectMapper guavaJdk7Jdk8() {
-        return newClientObjectMapper();
-    }
-
-    /**
      * Returns a default ObjectMapper with settings adjusted for use in clients.
      * <p>
      * Settings:
