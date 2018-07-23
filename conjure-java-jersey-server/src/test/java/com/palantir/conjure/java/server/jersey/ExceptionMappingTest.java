@@ -116,11 +116,6 @@ public final class ExceptionMappingTest {
         SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
         assertThat(error.errorCode(), is("errorCode"));
         assertThat(error.errorName(), is("errorName"));
-
-        // Check that message is passed through even if different from errorCode.
-        Map<String, Object> rawError =
-                ObjectMappers.newClientObjectMapper().readValue(body, new TypeReference<Map<String, Object>>() {});
-        assertThat(rawError.get("message"), equalTo("message"));
     }
 
     @Test

@@ -64,7 +64,9 @@ public final class JerseyExceptionMapperTest extends JerseyTest {
     public void testRuntimeException() {
         Response response = target("/angry/runtime").request().get();
         assertThat(response.getStatus()).isEqualTo(500);
-        assertThat(response.readEntity(String.class)).contains(RuntimeException.class.getName());
+        SerializableError entity = response.readEntity(SerializableError.class);
+        assertThat(entity.errorCode()).isEqualTo("INTERNAL");
+        assertThat(entity.errorName()).isEqualTo("Default:Internal");
     }
 
     @Path("angry")

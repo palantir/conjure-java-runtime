@@ -43,8 +43,7 @@ public final class JsonExceptionMapperTest {
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
-        assertThat(entity)
-                .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
+        assertThat(entity).contains("\"errorInstanceId\" : ");
     }
 
     @Test
