@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.palantir.conjure.java.clients.UserAgent;
-import com.palantir.conjure.java.clients.UserAgents;
+import com.palantir.conjure.java.api.config.service.UserAgent;
+import com.palantir.conjure.java.api.config.service.UserAgents;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Request;

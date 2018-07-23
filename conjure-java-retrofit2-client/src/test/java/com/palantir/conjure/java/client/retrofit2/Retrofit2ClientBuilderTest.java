@@ -20,8 +20,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.conjure.java.clients.UserAgent;
-import com.palantir.conjure.java.clients.UserAgents;
+import com.palantir.conjure.java.api.config.service.UserAgent;
+import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import java.io.IOException;
 import okhttp3.HttpUrl;

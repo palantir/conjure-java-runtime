@@ -21,8 +21,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.palantir.conjure.java.clients.UserAgent;
-import com.palantir.conjure.java.clients.UserAgents;
+import com.palantir.conjure.java.api.config.service.UserAgent;
+import com.palantir.conjure.java.api.config.service.UserAgents;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Request;
