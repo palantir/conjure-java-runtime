@@ -17,9 +17,9 @@
 package com.palantir.conjure.java.jaxrs;
 
 import com.google.common.reflect.Reflection;
-import com.palantir.conjure.java.clients.UserAgents;
 import com.palantir.conjure.java.clients.ClientConfiguration;
 import com.palantir.conjure.java.clients.UserAgent;
+import com.palantir.conjure.java.clients.UserAgents;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;

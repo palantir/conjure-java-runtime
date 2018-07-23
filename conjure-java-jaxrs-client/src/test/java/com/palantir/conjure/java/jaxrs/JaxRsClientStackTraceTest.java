@@ -20,11 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.palantir.conjure.java.clients.ClientConfiguration;
 import com.palantir.conjure.java.ext.jackson.ObjectMappers;
 import com.palantir.remoting.api.errors.ErrorType;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting.api.errors.ServiceException;
-import com.palantir.conjure.java.clients.ClientConfiguration;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Before;

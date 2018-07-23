@@ -18,9 +18,9 @@ package com.palantir.conjure.java.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.palantir.conjure.java.clients.UserAgents;
 import com.palantir.conjure.java.clients.ClientConfiguration;
 import com.palantir.conjure.java.clients.UserAgent;
+import com.palantir.conjure.java.clients.UserAgents;
 import com.palantir.conjure.java.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.conjure.java.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.conjure.java.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;

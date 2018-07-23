@@ -23,8 +23,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.common.collect.Lists;
-import com.palantir.conjure.java.clients.NodeSelectionStrategy;
 import com.palantir.conjure.java.clients.ClientConfiguration;
+import com.palantir.conjure.java.clients.NodeSelectionStrategy;
 import feign.RetryableException;
 import java.io.IOException;
 import java.time.Duration;

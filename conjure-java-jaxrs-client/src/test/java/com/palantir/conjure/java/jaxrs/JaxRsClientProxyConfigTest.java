@@ -19,8 +19,8 @@ package com.palantir.conjure.java.jaxrs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.clients.ClientConfiguration;
+import com.palantir.remoting.api.config.service.BasicCredentials;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;

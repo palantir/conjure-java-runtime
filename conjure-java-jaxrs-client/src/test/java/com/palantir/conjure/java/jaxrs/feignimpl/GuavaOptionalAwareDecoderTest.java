@@ -21,41 +21,41 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.jaxrs.JaxRsClient;
-import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.conjure.java.jaxrs.TestBase;
+import com.palantir.remoting.api.errors.RemoteException;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
-import java.util.Optional;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public final class Java8OptionalAwareDecoderTest extends TestBase {
+public final class GuavaOptionalAwareDecoderTest extends TestBase {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(Java8TestServer.class,
+    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
             "src/test/resources/test-server.yml");
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private Java8TestServer.TestService service;
+    private GuavaTestServer.TestService service;
 
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.create(Java8TestServer.TestService.class, AGENT, createTestConfig(endpointUri));
+        service = JaxRsClient.create(GuavaTestServer.TestService.class, AGENT, createTestConfig(endpointUri));
     }
 
     @Test
     public void testOptional() {
         assertThat(service.getOptional("something"), is(Optional.of(ImmutableMap.of("something", "something"))));
-        assertThat(service.getOptional(null), is(Optional.<ImmutableMap<String, String>>empty()));
+        assertThat(service.getOptional(null), is(Optional.<ImmutableMap<String, String>>absent()));
     }
 
     @Test
@@ -109,7 +109,7 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     }
 
     @Test
-    public void testOptionalThrowsFordidden() {
+    public void testOptionalThrowsForbbbden() {
         try {
             service.getOptionalThrowsForbidden(null);
             fail();
@@ -121,21 +121,47 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
 
     @Test
     public void testOptionalString() {
-        assertThat(service.getOptionalString(null), is(Optional.empty()));
+        assertThat(service.getOptionalString(null), is(Optional.absent()));
         assertThat(service.getOptionalString("foo"), is(Optional.of("foo")));
     }
 
     @Test
     public void testComplexType() {
-        Java8ComplexType value = new Java8ComplexType(
+        GuavaOptionalComplexType value = new GuavaOptionalComplexType(
                 Optional.of(
-                        new Java8ComplexType(
-                                Optional.empty(),
-                                Optional.empty(),
+                        new GuavaOptionalComplexType(
+                                Optional.absent(),
+                                Optional.absent(),
                                 Paths.get("bar"))),
                 Optional.of("baz"),
                 Paths.get("foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
-        assertThat(service.getJava8ComplexType(value), is(value));
+        assertThat(service.getGuavaComplexType(value), is(value));
+    }
+
+    @Test
+    public void testCborResponse() {
+        GuavaOptionalComplexType value = new GuavaOptionalComplexType(
+                Optional.of(
+                        new GuavaOptionalComplexType(
+                                Optional.<GuavaOptionalComplexType>absent(),
+                                Optional.<String>absent(),
+                                Paths.get("bar"))),
+                Optional.of("baz"),
+                Paths.get("foo"));
+        assertThat(service.getCborResponse(value), is(value));
+    }
+
+    @Test
+    public void testCborRequest() {
+        GuavaOptionalComplexType value = new GuavaOptionalComplexType(
+                Optional.of(
+                        new GuavaOptionalComplexType(
+                                Optional.<GuavaOptionalComplexType>absent(),
+                                Optional.<String>absent(),
+                                Paths.get("bar"))),
+                Optional.of("baz"),
+                Paths.get("foo"));
+        assertThat(service.postCborRequest(value), is(value));
     }
 }
