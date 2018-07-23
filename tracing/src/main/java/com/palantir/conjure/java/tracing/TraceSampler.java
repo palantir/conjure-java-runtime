@@ -18,7 +18,7 @@ package com.palantir.conjure.java.tracing;
 
 /**
  * Nullary predicate that returns true iff the trace under consideration should be presented to the configured {@link
- * com.palantir.remoting.api.tracing.SpanObserver observers}. Implementations must be thread-safe. The sampler is
+ * com.palantir.conjure.java.api.tracing.SpanObserver observers}. Implementations must be thread-safe. The sampler is
  * invoked synchronously on the thread calling into {@link Tracer} and must only do non-trivial work (e.g., at most
  * drawing a random number).
  */

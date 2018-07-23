@@ -20,12 +20,12 @@ import static org.junit.Assert.assertEquals;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.palantir.conjure.java.api.config.service.ServiceConfigurationFactory;
+import com.palantir.conjure.java.api.config.service.ServicesConfigBlock;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.client.jaxrs.TestService;
 import com.palantir.conjure.java.clients.ClientConfigurations;
-import com.palantir.remoting.api.config.service.ServiceConfigurationFactory;
-import com.palantir.remoting.api.config.service.ServicesConfigBlock;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;

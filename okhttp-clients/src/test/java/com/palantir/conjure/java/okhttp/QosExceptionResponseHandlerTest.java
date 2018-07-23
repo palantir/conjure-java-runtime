@@ -19,7 +19,7 @@ package com.palantir.conjure.java.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.net.HttpHeaders;
-import com.palantir.remoting.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;

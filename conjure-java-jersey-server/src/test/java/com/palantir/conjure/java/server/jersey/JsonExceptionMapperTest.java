@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.remoting.api.errors.ErrorType;
 import javax.ws.rs.core.Response;
 import org.junit.Test;
 
@@ -43,7 +43,6 @@ public final class JsonExceptionMapperTest {
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
-        assertThat(entity).contains("\"exceptionClass\" : \"java.lang.NullPointerException\"");
         assertThat(entity)
                 .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
     }

@@ -20,9 +20,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
+import com.palantir.conjure.java.api.tracing.OpenSpan;
+import com.palantir.conjure.java.api.tracing.TraceHttpHeaders;
 import com.palantir.conjure.java.tracing.Tracer;
-import com.palantir.remoting.api.tracing.OpenSpan;
-import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

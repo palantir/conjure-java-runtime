@@ -17,9 +17,9 @@
 package com.palantir.conjure.java.okhttp;
 
 import com.google.common.net.HttpHeaders;
+import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
-import com.palantir.remoting.api.errors.QosException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;

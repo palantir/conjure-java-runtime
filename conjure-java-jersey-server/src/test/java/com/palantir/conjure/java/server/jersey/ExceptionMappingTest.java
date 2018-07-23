@@ -24,13 +24,13 @@ import static org.junit.Assert.assertThat;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.remoting.api.errors.ErrorType;
-import com.palantir.remoting.api.errors.QosException;
-import com.palantir.remoting.api.errors.RemoteException;
-import com.palantir.remoting.api.errors.SerializableError;
-import com.palantir.remoting.api.errors.ServiceException;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -137,10 +137,7 @@ public final class ExceptionMappingTest {
         Map<String, Object> rawError =
                 ObjectMappers.newClientObjectMapper().readValue(body, new TypeReference<Map<String, Object>>() {});
         assertThat(rawError.get("errorCode"), equalTo(ErrorType.INVALID_ARGUMENT.code().toString()));
-        assertThat(rawError.get("exceptionClass"), equalTo(ErrorType.INVALID_ARGUMENT.code().toString()));
         assertThat(rawError.get("errorName"), equalTo(ErrorType.INVALID_ARGUMENT.name()));
-        assertThat(rawError.get("message"),
-                equalTo("Refer to the server logs with this errorInstanceId: " + rawError.get("errorInstanceId")));
         assertThat(rawError.get("parameters"), equalTo(ImmutableMap.of("arg", "value")));
     }
 
@@ -186,7 +183,7 @@ public final class ExceptionMappingTest {
             throw new RemoteException(SerializableError.builder()
                     .errorCode("errorCode")
                     .errorName("errorName")
-                    .message("message").build(),
+                    .build(),
                     REMOTE_EXCEPTION_STATUS_CODE);
         }
 

@@ -18,9 +18,9 @@ package com.palantir.conjure.java.clients;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HostAndPort;
+import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
+import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
-import com.palantir.remoting.api.config.service.ProxyConfiguration;
-import com.palantir.remoting.api.config.service.ServiceConfiguration;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;

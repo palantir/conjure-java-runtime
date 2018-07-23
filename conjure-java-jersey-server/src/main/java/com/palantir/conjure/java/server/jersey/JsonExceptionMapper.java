@@ -18,10 +18,10 @@ package com.palantir.conjure.java.server.jersey;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.remoting.api.errors.ErrorType;
-import com.palantir.remoting.api.errors.SerializableError;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -63,24 +63,21 @@ abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapp
             log.error("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         }
 
-        return createResponse(errorType, errorInstanceId, exception.getClass().getName());
+        return createResponse(errorType, errorInstanceId);
     }
 
-    static Response createResponse(ErrorType errorType, String errorInstanceId, String exceptionClass) {
+    static Response createResponse(ErrorType errorType, String errorInstanceId) {
         return createResponse(errorType.httpErrorCode(), errorType.code().name(), errorType.name(),
-                errorInstanceId, exceptionClass);
+                errorInstanceId);
     }
 
-    static Response createResponse(int httpErrorCode, String errorCode, String errorName, String errorInstanceId,
-            String exceptionClass) {
+    static Response createResponse(int httpErrorCode, String errorCode, String errorName, String errorInstanceId) {
         ResponseBuilder builder = Response.status(httpErrorCode);
         try {
             builder.entity(SerializableError.builder()
                     .errorCode(errorCode)
                     .errorName(errorName)
                     .errorInstanceId(errorInstanceId)
-                    .exceptionClass(exceptionClass)
-                    .message("Refer to the server logs with this errorInstanceId: " + errorInstanceId)
                     .build())
                     .type(MediaType.APPLICATION_JSON);
         } catch (RuntimeException e) {

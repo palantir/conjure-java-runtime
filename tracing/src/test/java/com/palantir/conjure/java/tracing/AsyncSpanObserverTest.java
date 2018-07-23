@@ -21,9 +21,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import com.palantir.remoting.api.tracing.Span;
-import com.palantir.remoting.api.tracing.SpanObserver;
-import com.palantir.remoting.api.tracing.SpanType;
+import com.palantir.conjure.java.api.tracing.Span;
+import com.palantir.conjure.java.api.tracing.SpanObserver;
+import com.palantir.conjure.java.api.tracing.SpanType;
 import org.jmock.lib.concurrent.DeterministicScheduler;
 import org.junit.Before;
 import org.junit.Test;

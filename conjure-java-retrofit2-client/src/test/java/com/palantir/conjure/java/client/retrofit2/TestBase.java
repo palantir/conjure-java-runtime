@@ -17,11 +17,11 @@
 package com.palantir.conjure.java.client.retrofit2;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.clients.ClientConfiguration;
 import com.palantir.conjure.java.clients.ClientConfigurations;
 import com.palantir.conjure.java.clients.UserAgent;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
-import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import java.nio.file.Paths;
 
 // TODO(rfink): Use static utility class instead?

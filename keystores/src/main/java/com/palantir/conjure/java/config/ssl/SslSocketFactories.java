@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.config.ssl;
 
 import com.google.common.base.Throwables;
-import com.palantir.remoting.api.config.ssl.SslConfiguration;
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;

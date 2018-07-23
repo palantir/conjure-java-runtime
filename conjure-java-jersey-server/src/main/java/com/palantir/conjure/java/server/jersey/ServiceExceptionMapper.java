@@ -16,9 +16,9 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.remoting.api.errors.SerializableError;
-import com.palantir.remoting.api.errors.ServiceException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -48,11 +48,8 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
 
         ResponseBuilder builder = Response.status(httpStatus);
         try {
-            // We explicitly set the message to a more UI- and backcompat-friendly string that includes the error ID.
-            SerializableError error = SerializableError.builder()
-                    .from(SerializableError.forException(exception))
-                    .message("Refer to the server logs with this errorInstanceId: " + exception.getErrorInstanceId())
-                    .build();
+            SerializableError error =
+                    SerializableError.builder().from(SerializableError.forException(exception)).build();
             builder.type(MediaType.APPLICATION_JSON);
             builder.entity(error);
         } catch (RuntimeException e) {

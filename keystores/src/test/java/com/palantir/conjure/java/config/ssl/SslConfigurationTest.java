@@ -18,8 +18,8 @@ package com.palantir.conjure.java.config.ssl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import java.nio.file.Paths;
 import org.junit.Test;
 

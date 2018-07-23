@@ -18,11 +18,11 @@ package com.palantir.conjure.java.okhttp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
+import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
-import com.palantir.remoting.api.errors.RemoteException;
-import com.palantir.remoting.api.errors.SerializableError;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;

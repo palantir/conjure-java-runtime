@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.remoting.api.errors.ErrorType;
 import java.util.UUID;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -31,7 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @deprecated Services should throw {@link com.palantir.remoting.api.errors.ServiceException}s instead.
+ * @deprecated Services should throw {@link com.palantir.conjure.java.api.errors.ServiceException}s instead.
  */
 @Provider
 @Deprecated
@@ -52,17 +52,17 @@ final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicat
 
         if (exception instanceof ForbiddenException) {
             return JsonExceptionMapper.createResponse(
-                    ErrorType.PERMISSION_DENIED, errorInstanceId, exception.getClass().getName());
+                    ErrorType.PERMISSION_DENIED, errorInstanceId);
         } else if (exception instanceof NotFoundException) {
             return JsonExceptionMapper.createResponse(
-                    ErrorType.NOT_FOUND, errorInstanceId, exception.getClass().getName());
+                    ErrorType.NOT_FOUND, errorInstanceId);
         } else if (exception instanceof BadRequestException || exception instanceof ParamException) {
             return JsonExceptionMapper.createResponse(
-                    ErrorType.INVALID_ARGUMENT, errorInstanceId, exception.getClass().getName());
+                    ErrorType.INVALID_ARGUMENT, errorInstanceId);
         } else {
             return JsonExceptionMapper.createResponse(
                     exception.getResponse().getStatus(), exception.getClass().getName(),
-                    exception.getClass().getSimpleName(), errorInstanceId, exception.getClass().getName());
+                    exception.getClass().getSimpleName(), errorInstanceId);
         }
     }
 }

@@ -16,10 +16,10 @@
 
 package com.palantir.conjure.java.tracing.okhttp3;
 
+import com.palantir.conjure.java.api.tracing.OpenSpan;
+import com.palantir.conjure.java.api.tracing.SpanType;
+import com.palantir.conjure.java.api.tracing.TraceHttpHeaders;
 import com.palantir.conjure.java.tracing.Tracer;
-import com.palantir.remoting.api.tracing.OpenSpan;
-import com.palantir.remoting.api.tracing.SpanType;
-import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Request;

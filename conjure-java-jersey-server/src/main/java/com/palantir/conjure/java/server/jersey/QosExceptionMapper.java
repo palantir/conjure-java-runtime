@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.server.jersey;
 
 import com.google.common.net.HttpHeaders;
-import com.palantir.remoting.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosException;
 import java.time.temporal.ChronoUnit;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;

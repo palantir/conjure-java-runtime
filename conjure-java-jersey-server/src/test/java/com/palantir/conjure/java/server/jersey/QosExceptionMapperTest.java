@@ -19,7 +19,7 @@ package com.palantir.conjure.java.server.jersey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import com.palantir.remoting.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosException;
 import java.net.URL;
 import java.time.Duration;
 import javax.ws.rs.core.Response;

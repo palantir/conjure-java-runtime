@@ -16,9 +16,9 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.remoting.api.errors.RemoteException;
-import com.palantir.remoting.api.errors.SerializableError;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;

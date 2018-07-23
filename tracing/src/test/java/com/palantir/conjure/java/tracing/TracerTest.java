@@ -25,10 +25,10 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
-import com.palantir.remoting.api.tracing.OpenSpan;
-import com.palantir.remoting.api.tracing.Span;
-import com.palantir.remoting.api.tracing.SpanObserver;
-import com.palantir.remoting.api.tracing.SpanType;
+import com.palantir.conjure.java.api.tracing.OpenSpan;
+import com.palantir.conjure.java.api.tracing.Span;
+import com.palantir.conjure.java.api.tracing.SpanObserver;
+import com.palantir.conjure.java.api.tracing.SpanType;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.After;

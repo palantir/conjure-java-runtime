@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import com.palantir.remoting.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ErrorType;
 import javax.ws.rs.ext.Provider;
 
 @Provider

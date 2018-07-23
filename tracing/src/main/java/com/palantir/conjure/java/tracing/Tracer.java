@@ -18,12 +18,12 @@ package com.palantir.conjure.java.tracing;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.api.tracing.OpenSpan;
+import com.palantir.conjure.java.api.tracing.Span;
+import com.palantir.conjure.java.api.tracing.SpanObserver;
+import com.palantir.conjure.java.api.tracing.SpanType;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
-import com.palantir.remoting.api.tracing.OpenSpan;
-import com.palantir.remoting.api.tracing.Span;
-import com.palantir.remoting.api.tracing.SpanObserver;
-import com.palantir.remoting.api.tracing.SpanType;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;

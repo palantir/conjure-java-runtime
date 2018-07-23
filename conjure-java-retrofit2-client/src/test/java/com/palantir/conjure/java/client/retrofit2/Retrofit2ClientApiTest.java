@@ -24,10 +24,10 @@ import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
+import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.clients.ClientConfiguration;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.remoting.api.errors.RemoteException;
-import com.palantir.remoting.api.errors.SerializableError;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;

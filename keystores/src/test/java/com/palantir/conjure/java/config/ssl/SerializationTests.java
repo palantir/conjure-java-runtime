@@ -20,8 +20,8 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import java.io.IOException;
 import org.junit.Test;
 

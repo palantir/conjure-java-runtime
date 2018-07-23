@@ -17,11 +17,11 @@
 package com.palantir.conjure.java.tracing.jersey;
 
 import com.google.common.base.Strings;
+import com.palantir.conjure.java.api.tracing.Span;
+import com.palantir.conjure.java.api.tracing.SpanType;
+import com.palantir.conjure.java.api.tracing.TraceHttpHeaders;
 import com.palantir.conjure.java.tracing.Tracer;
 import com.palantir.conjure.java.tracing.Tracers;
-import com.palantir.remoting.api.tracing.Span;
-import com.palantir.remoting.api.tracing.SpanType;
-import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import java.io.IOException;
 import java.util.Optional;
 import javax.ws.rs.container.ContainerRequestContext;

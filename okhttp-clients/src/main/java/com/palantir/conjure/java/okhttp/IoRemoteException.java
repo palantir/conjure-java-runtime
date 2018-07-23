@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.palantir.remoting.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.RemoteException;
 import java.io.IOException;
 
 // TODO(rfink): Can we hide this as an implementation detail of RemotingOkHttpCall?

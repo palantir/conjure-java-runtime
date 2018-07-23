@@ -19,10 +19,10 @@ package com.palantir.conjure.java.server.jersey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codahale.metrics.MetricRegistry;
+import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.remoting.api.errors.ErrorType;
-import com.palantir.remoting.api.errors.SerializableError;
-import com.palantir.remoting.api.errors.ServiceException;
 import io.dropwizard.jersey.DropwizardResourceConfig;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
