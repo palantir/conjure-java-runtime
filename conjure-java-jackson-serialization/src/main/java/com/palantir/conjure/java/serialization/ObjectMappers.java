@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.serialization;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
@@ -116,6 +117,7 @@ public final class ObjectMappers {
                 .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
                 .disable(DeserializationFeature.WRAP_EXCEPTIONS)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES);
+                .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+                .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS);
     }
 }
