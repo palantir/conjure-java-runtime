@@ -21,8 +21,8 @@ dependencies {
     compile "org.slf4j:slf4j-api"
     compile "com.netflix.feign:feign-slf4j"
 
+    testCompile project(":conjure-java-retrofit2-client")
     testCompile project(":jersey-servers")
-    testCompile project(":retrofit2-clients")
     testCompile "com.squareup.okhttp3:mockwebserver"
     testCompile "io.dropwizard:dropwizard-testing"
     testCompile "junit:junit"
