@@ -23,9 +23,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
-import com.palantir.conjure.java.jaxrs.JaxRsClient;
-import com.palantir.conjure.java.jaxrs.TestBase;
-import com.palantir.conjure.java.jaxrs.feignimpl.GuavaTestServer;
+import com.palantir.conjure.java.client.JaxRsClient;
+import com.palantir.conjure.java.client.TestBase;
+import com.palantir.conjure.java.client.feignimpl.GuavaTestServer;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;

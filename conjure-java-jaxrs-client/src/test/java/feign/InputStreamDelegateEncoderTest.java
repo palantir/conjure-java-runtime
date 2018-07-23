@@ -20,9 +20,9 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.verify;
 
-import com.palantir.conjure.java.jaxrs.JaxRsClient;
-import com.palantir.conjure.java.jaxrs.TestBase;
-import com.palantir.conjure.java.jaxrs.feignimpl.GuavaTestServer;
+import com.palantir.conjure.java.client.JaxRsClient;
+import com.palantir.conjure.java.client.TestBase;
+import com.palantir.conjure.java.client.feignimpl.GuavaTestServer;
 import feign.codec.Encoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
