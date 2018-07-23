@@ -44,9 +44,6 @@ public final class WebApplicationExceptionMapperTest {
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"PERMISSION_DENIED\"");
         assertThat(entity).contains("\"errorName\" : \"Default:PermissionDenied\"");
-        assertThat(entity).contains("\"exceptionClass\" : \"javax.ws.rs.ForbiddenException\"");
-        assertThat(entity)
-                .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(403);
         assertThat(entity).doesNotContain("secret");
 
@@ -54,9 +51,6 @@ public final class WebApplicationExceptionMapperTest {
         entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"NOT_FOUND\"");
         assertThat(entity).contains("\"errorName\" : \"Default:NotFound\"");
-        assertThat(entity).contains("\"exceptionClass\" : \"javax.ws.rs.NotFoundException\"");
-        assertThat(entity)
-                .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(404);
         assertThat(entity).doesNotContain("secret");
 
@@ -64,10 +58,6 @@ public final class WebApplicationExceptionMapperTest {
         entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
-        assertThat(entity)
-                .contains("\"exceptionClass\" : \"javax.ws.rs.BadRequestException\"");
-        assertThat(entity)
-                .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(400);
         assertThat(entity).doesNotContain("secret");
 
@@ -75,10 +65,6 @@ public final class WebApplicationExceptionMapperTest {
         entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
-        assertThat(entity)
-                .contains("\"exceptionClass\" : \"org.glassfish.jersey.server.ParamException$CookieParamException\"");
-        assertThat(entity)
-                .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(400);
         assertThat(entity).doesNotContain("secret");
     }
@@ -91,10 +77,6 @@ public final class WebApplicationExceptionMapperTest {
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"javax.ws.rs.WebApplicationException\"");
         assertThat(entity).contains("\"errorName\" : \"WebApplicationException\"");
-        assertThat(entity)
-                .contains("\"exceptionClass\" : \"javax.ws.rs.WebApplicationException\"");
-        assertThat(entity)
-                .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(503);
         assertThat(entity).doesNotContain("secret");
 
@@ -103,10 +85,6 @@ public final class WebApplicationExceptionMapperTest {
         assertThat(entity)
                 .contains("\"errorCode\" : \"javax.ws.rs.ServiceUnavailableException\"");
         assertThat(entity).contains("\"errorName\" : \"ServiceUnavailableException\"");
-        assertThat(entity)
-                .contains("\"exceptionClass\" : \"javax.ws.rs.ServiceUnavailableException\"");
-        assertThat(entity)
-                .contains("\"message\" : \"Refer to the server logs with this errorInstanceId:");
         assertThat(response.getStatus()).isEqualTo(503);
         assertThat(entity).doesNotContain("secret");
     }
