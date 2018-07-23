@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.client.jaxrs;
+package com.palantir.conjure.java.serialization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.scala.DefaultScalaModule;
 import com.fasterxml.jackson.module.scala.introspect.ScalaAnnotationIntrospector$;
-import com.palantir.conjure.java.serialization.ObjectMappers;
 
 public final class ScalaObjectMappers {
 

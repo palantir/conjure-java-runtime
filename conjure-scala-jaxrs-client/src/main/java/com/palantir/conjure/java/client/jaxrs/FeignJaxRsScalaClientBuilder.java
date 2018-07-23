@@ -18,6 +18,7 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.clients.ClientConfiguration;
+import com.palantir.conjure.java.serialization.ScalaObjectMappers;
 
 public final class FeignJaxRsScalaClientBuilder extends AbstractFeignJaxRsClientBuilder {
 
