@@ -53,7 +53,7 @@ The `JaxRsClient#create` factory comes in two flavours: one for creating immutab
 `ClientConfiguration`, and one for creating mutable clients whose configuration (e.g., server URLs, timeouts, SSL
 configuration, etc.) changes when the underlying `ClientConfiguration` changes.
 
-## retrofit2-clients
+## conjure-java-retrofit2-client
 Similar to `conjure-java-jaxrs-client`, but generates clients using the Retrofit library. Example:
 
 ```java
@@ -106,7 +106,7 @@ try {
 }
 ```
 
-The `tracing` library can be used independently of `conjure-java-jaxrs-client` or `retrofit2-clients`:
+The `tracing` library can be used independently of `conjure-java-jaxrs-client` or `conjure-java-retrofit2-client`:
 
 ```groovy
 // build.gradle
