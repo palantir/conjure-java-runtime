@@ -70,7 +70,7 @@ public final class TraceEnrichingFilter implements ContainerRequestFilter, Conta
         }
 
         // Give asynchronous downstream handlers access to the trace id
-        requestContext.setProperty("com.palantir.remoting3.traceId", Tracer.getTraceId());
+        requestContext.setProperty("com.palantir.conjure.java.traceId", Tracer.getTraceId());
     }
 
     // Handles outgoing response
