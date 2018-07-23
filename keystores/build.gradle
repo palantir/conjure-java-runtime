@@ -5,7 +5,7 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind"
     compile "com.google.guava:guava"
-    compile "com.palantir.remoting-api:ssl-config"
+    compile "com.palantir.conjure.java.api:ssl-config"
 
     testCompile project(":conjure-java-jackson-serialization")
     testCompile("com.netflix.feign:feign-jaxrs") {

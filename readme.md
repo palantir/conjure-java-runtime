@@ -12,7 +12,7 @@ Core libraries:
 - conjure-java-jaxrs-client: Clients for JAX-RS-defined service interfaces
 - conjure-java-retrofit2-client: Clients for Retrofit-defined service interfaces
 - conjure-java-jersey-server: Configuration library for Dropwizard/Jersey servers
-- [http-remoting-api](https://github.com/palantir/http-remoting-api): API classes for service configuration, tracing, and error propagation
+- [conjure-java-api](https://github.com/palantir/http-remoting-api/tree/feature-conjure): API classes for service configuration, tracing, and error propagation
 
 # Usage
 
@@ -126,7 +126,7 @@ try {
 ```
 
 
-## service-config (http-remoting-api)
+## service-config (conjure-java-api)
 Provides utilities for setting up service clients from file-based configuration. Example:
 
 ```yaml
@@ -150,7 +150,7 @@ MyService client = JaxRsClient.create(MyService.class, "my-agent", ClientConfigu
 ```
 
 
-## keystores and ssl-config (http-remoting-api)
+## keystores and ssl-config (conjure-java-api)
 
 Provides utilities for interacting with Java trust stores and key stores and acquiring `SSLSocketFactory` instances
 using those stores, as well as a configuration class for use in server configuration files.
@@ -219,7 +219,7 @@ The `pkcs1-reader-sun` does not include any extra dependencies, but assumes the 
 available as part of most popular JVM implementations, including the Oracle and OpenJDK JVMs for
 Java 7 and Java 8.
 
-## errors (http-remoting-api)
+## errors (conjure-java-api)
 Provides utilities for relaying service errors across service boundaries (see below).
 
 
