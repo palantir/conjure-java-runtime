@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.retrofit2;
+package com.palantir.conjure.java.client.retrofit2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.conjure.java.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalDoubleStringConverter;
-import com.palantir.conjure.java.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalIntStringConverter;
-import com.palantir.conjure.java.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalLongStringConverter;
+import com.palantir.conjure.java.client.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalDoubleStringConverter;
+import com.palantir.conjure.java.client.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalIntStringConverter;
+import com.palantir.conjure.java.client.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalLongStringConverter;
 import java.lang.annotation.Annotation;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;

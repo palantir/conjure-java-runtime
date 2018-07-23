@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.retrofit2;
+package com.palantir.conjure.java.client.retrofit2;
 
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.clients.ClientConfiguration;
@@ -40,7 +40,7 @@ public final class Retrofit2Client {
             UserAgent userAgent,
             HostMetricsRegistry hostMetricsRegistry,
             ClientConfiguration config) {
-        return new com.palantir.conjure.java.retrofit2.Retrofit2ClientBuilder(config)
+        return new Retrofit2ClientBuilder(config)
                 .hostMetricsRegistry(hostMetricsRegistry)
                 .build(serviceClass, userAgent);
     }
@@ -60,7 +60,7 @@ public final class Retrofit2Client {
      */
     @Deprecated
     public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration config) {
-        return new com.palantir.conjure.java.retrofit2.Retrofit2ClientBuilder(config).build(serviceClass, userAgent);
+        return new Retrofit2ClientBuilder(config).build(serviceClass, userAgent);
     }
 
     /**

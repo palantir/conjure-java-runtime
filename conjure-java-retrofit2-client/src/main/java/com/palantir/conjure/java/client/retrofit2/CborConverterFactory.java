@@ -2,7 +2,7 @@
  * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
  */
 
-package com.palantir.conjure.java.retrofit2;
+package com.palantir.conjure.java.client.retrofit2;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;

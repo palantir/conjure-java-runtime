@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.retrofit2;
+package com.palantir.conjure.java.client.retrofit2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.retrofit2;
+package com.palantir.conjure.java.client.retrofit2;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNull;
@@ -36,7 +36,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class Retrofit2ClientProxyTest extends com.palantir.conjure.java.retrofit2.TestBase {
+public final class Retrofit2ClientProxyTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -48,15 +48,15 @@ public final class Retrofit2ClientProxyTest extends com.palantir.conjure.java.re
         server.enqueue(new MockResponse().setBody("\"server\""));
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        com.palantir.conjure.java.retrofit2.TestService directService = com.palantir.conjure.java.retrofit2.Retrofit2Client
+        TestService directService = Retrofit2Client
                 .create(
-                com.palantir.conjure.java.retrofit2.TestService.class, AGENT, createTestConfig("http://localhost:" + server.getPort()));
+                TestService.class, AGENT, createTestConfig("http://localhost:" + server.getPort()));
         ClientConfiguration proxiedConfig = ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server.getPort()))
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .build();
-        com.palantir.conjure.java.retrofit2.TestService
-                proxiedService = com.palantir.conjure.java.retrofit2.Retrofit2Client.create(com.palantir.conjure.java.retrofit2.TestService.class, AGENT, proxiedConfig);
+        TestService
+                proxiedService = Retrofit2Client.create(TestService.class, AGENT, proxiedConfig);
 
         assertThat(directService.get().execute().body(), is("server"));
         assertThat(proxiedService.get().execute().body(), is("proxyServer"));
@@ -74,8 +74,8 @@ public final class Retrofit2ClientProxyTest extends com.palantir.conjure.java.re
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .proxyCredentials(BasicCredentials.of("fakeUser", "fakePassword"))
                 .build();
-        com.palantir.conjure.java.retrofit2.TestService
-                proxiedService = com.palantir.conjure.java.retrofit2.Retrofit2Client.create(com.palantir.conjure.java.retrofit2.TestService.class, AGENT, proxiedConfig);
+        TestService
+                proxiedService = Retrofit2Client.create(TestService.class, AGENT, proxiedConfig);
 
         assertThat(proxiedService.get().execute().body(), is("proxyServer"));
         RecordedRequest firstRequest = proxyServer.takeRequest();

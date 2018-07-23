@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.retrofit2;
+package com.palantir.conjure.java.client.retrofit2;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -31,17 +31,17 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class TracerTest extends com.palantir.conjure.java.retrofit2.TestBase {
+public final class TracerTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    private com.palantir.conjure.java.retrofit2.TestService service;
+    private TestService service;
 
     @Before
     public void before() {
         String uri = "http://localhost:" + server.getPort();
-        service = com.palantir.conjure.java.retrofit2.Retrofit2Client.create(com.palantir.conjure.java.retrofit2.TestService.class, AGENT, createTestConfig(uri));
+        service = Retrofit2Client.create(TestService.class, AGENT, createTestConfig(uri));
         server.enqueue(new MockResponse().setBody("\"server\""));
     }
 

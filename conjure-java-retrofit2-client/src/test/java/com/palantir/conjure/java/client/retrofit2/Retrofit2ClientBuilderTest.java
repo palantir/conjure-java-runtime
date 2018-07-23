@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.retrofit2;
+package com.palantir.conjure.java.client.retrofit2;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
@@ -32,7 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public final class Retrofit2ClientBuilderTest extends com.palantir.conjure.java.retrofit2.TestBase {
+public final class Retrofit2ClientBuilderTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -52,8 +52,8 @@ public final class Retrofit2ClientBuilderTest extends com.palantir.conjure.java.
 
     private void assertRequestUrlYieldsHttpPath(String basePath, String expectedQueryPath) throws Exception {
         HttpUrl url = server.url(basePath);
-        com.palantir.conjure.java.retrofit2.TestService
-                service = com.palantir.conjure.java.retrofit2.Retrofit2Client.create(com.palantir.conjure.java.retrofit2.TestService.class, AGENT, createTestConfig(url.toString()));
+        TestService
+                service = Retrofit2Client.create(TestService.class, AGENT, createTestConfig(url.toString()));
 
         server.enqueue(new MockResponse().setBody("\"server\""));
         assertThat(service.get().execute().body(), is("server"));
@@ -66,8 +66,8 @@ public final class Retrofit2ClientBuilderTest extends com.palantir.conjure.java.
 
     @Test
     public void testUserAgent_defaultHeaderIsSent() throws InterruptedException, IOException {
-        com.palantir.conjure.java.retrofit2.TestService service = com.palantir.conjure.java.retrofit2.Retrofit2Client.create(
-                com.palantir.conjure.java.retrofit2.TestService.class, AGENT, createTestConfig(
+        TestService service = Retrofit2Client.create(
+                TestService.class, AGENT, createTestConfig(
                         String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.get().execute();
@@ -78,8 +78,8 @@ public final class Retrofit2ClientBuilderTest extends com.palantir.conjure.java.
 
     @Test
     public void testUserAgent_usesUnknownAgentIfBogusAgentIsGiven() throws InterruptedException, IOException {
-        com.palantir.conjure.java.retrofit2.TestService service = com.palantir.conjure.java.retrofit2.Retrofit2Client.create(
-                com.palantir.conjure.java.retrofit2.TestService.class, "bogus user agent", createTestConfig(
+        TestService service = Retrofit2Client.create(
+                TestService.class, "bogus user agent", createTestConfig(
                         String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.get().execute();
@@ -90,8 +90,8 @@ public final class Retrofit2ClientBuilderTest extends com.palantir.conjure.java.
 
     @Test
     public void testUserAgent_augmentedByHttpRemotingAndServiceComponents() throws Exception {
-        com.palantir.conjure.java.retrofit2.TestService service = com.palantir.conjure.java.retrofit2.Retrofit2Client.create(
-                com.palantir.conjure.java.retrofit2.TestService.class, AGENT, createTestConfig(
+        TestService service = Retrofit2Client.create(
+                TestService.class, AGENT, createTestConfig(
                         String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.get().execute();

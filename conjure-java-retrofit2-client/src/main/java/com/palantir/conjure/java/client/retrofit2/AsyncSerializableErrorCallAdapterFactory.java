@@ -23,7 +23,7 @@
  * - Made the BodyCallAdapter create RemoteExceptions.
  * - Made the BodyCallAdapter tell the AsyncCallTag that this is an async call.
  */
-package com.palantir.conjure.java.retrofit2;
+package com.palantir.conjure.java.client.retrofit2;
 
 import com.palantir.conjure.java.okhttp.IoRemoteException;
 import java.lang.annotation.Annotation;
