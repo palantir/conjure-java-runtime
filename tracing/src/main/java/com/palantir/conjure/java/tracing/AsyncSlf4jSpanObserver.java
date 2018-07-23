@@ -18,10 +18,14 @@ package com.palantir.conjure.java.tracing;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.google.common.collect.Lists;
-import com.palantir.conjure.java.ext.jackson.ObjectMappers;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting.api.tracing.Span;
 import java.net.Inet4Address;
@@ -40,7 +44,16 @@ import org.slf4j.LoggerFactory;
  * with log-level {@link Logger#info INFO}. Logging is performed asynchronously on a given executor service.
  */
 public final class AsyncSlf4jSpanObserver extends AsyncSpanObserver {
-    private static final ObjectMapper mapper = ObjectMappers.newClientObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper()
+            .registerModule(new GuavaModule())
+            .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
+            .registerModule(new AfterburnerModule())
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+            .disable(DeserializationFeature.WRAP_EXCEPTIONS)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
     private final Logger logger;
     private final ZipkinCompatEndpoint endpoint;

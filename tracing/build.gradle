@@ -3,7 +3,6 @@ apply plugin: 'org.inferred.processors'
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
-    compile project(":extras:jackson-support")
     compile "com.fasterxml.jackson.core:jackson-databind"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-guava"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
