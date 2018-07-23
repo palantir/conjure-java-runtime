@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import javax.ws.rs.core.HttpHeaders;
 import okhttp3.Response;
 
 enum IoExceptionResponseHandler implements ResponseHandler<IOException> {
@@ -41,10 +42,12 @@ enum IoExceptionResponseHandler implements ResponseHandler<IOException> {
             String body = response.body() != null && response.body().byteStream() != null
                     ? toString(response.body().byteStream())
                     : "<empty>";
+
             return Optional.of(new SafeIoException(
                     String.format("Error %s. (Failed to parse response body as SerializableError.)", response.code()),
                     SafeArg.of("code", response.code()),
-                    UnsafeArg.of("body", body)));
+                    UnsafeArg.of("body", body),
+                    SafeArg.of("contentType", response.header(HttpHeaders.CONTENT_TYPE))));
         } catch (IOException e) {
             return Optional.of(new IOException("Failed to read response body", e));
         }
