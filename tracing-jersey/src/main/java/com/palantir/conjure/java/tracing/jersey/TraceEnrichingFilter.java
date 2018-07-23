@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.tracing;
+package com.palantir.conjure.java.tracing.jersey;
 
 import com.google.common.base.Strings;
+import com.palantir.conjure.java.tracing.Tracer;
+import com.palantir.conjure.java.tracing.Tracers;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanType;
 import com.palantir.remoting.api.tracing.TraceHttpHeaders;
