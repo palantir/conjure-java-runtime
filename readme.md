@@ -61,7 +61,7 @@ ClientConfiguration config = ... as above... ;
 MyService service = Retrofit2Client.create(MyService.class, "my user agent", config);
 ```
 
-## jersey-servers
+## conjure-java-jersey-server
 Provides Dropwizard/Jersey exception mappers for translating common JAX-RS exceptions to appropriate HTTP error codes. A
 Dropwizard server is configured for http-remoting as follows:
 
