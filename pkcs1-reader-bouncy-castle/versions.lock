@@ -15,8 +15,8 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.conjure.java.runtime:keystores",
-                "com.palantir.remoting-api:ssl-config"
+                "com.palantir.conjure.java.api:ssl-config",
+                "com.palantir.conjure.java.runtime:keystores"
             ]
         },
         "com.google.guava:guava": {
@@ -25,14 +25,14 @@
                 "com.palantir.conjure.java.runtime:keystores"
             ]
         },
-        "com.palantir.conjure.java.runtime:keystores": {
-            "project": true
-        },
-        "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.9.0",
+        "com.palantir.conjure.java.api:ssl-config": {
+            "locked": "2.0.0-rc2",
             "transitive": [
                 "com.palantir.conjure.java.runtime:keystores"
             ]
+        },
+        "com.palantir.conjure.java.runtime:keystores": {
+            "project": true
         },
         "org.bouncycastle:bcpkix-jdk15on": {
             "locked": "1.54"
@@ -60,8 +60,8 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.conjure.java.runtime:keystores",
-                "com.palantir.remoting-api:ssl-config"
+                "com.palantir.conjure.java.api:ssl-config",
+                "com.palantir.conjure.java.runtime:keystores"
             ]
         },
         "com.google.guava:guava": {
@@ -70,14 +70,14 @@
                 "com.palantir.conjure.java.runtime:keystores"
             ]
         },
-        "com.palantir.conjure.java.runtime:keystores": {
-            "project": true
-        },
-        "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.9.0",
+        "com.palantir.conjure.java.api:ssl-config": {
+            "locked": "2.0.0-rc2",
             "transitive": [
                 "com.palantir.conjure.java.runtime:keystores"
             ]
+        },
+        "com.palantir.conjure.java.runtime:keystores": {
+            "project": true
         },
         "org.bouncycastle:bcpkix-jdk15on": {
             "locked": "1.54"

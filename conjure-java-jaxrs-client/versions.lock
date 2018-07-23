@@ -26,12 +26,12 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.netflix.feign:feign-jackson",
+                "com.palantir.conjure.java.api:errors",
+                "com.palantir.conjure.java.api:ssl-config",
+                "com.palantir.conjure.java.api:tracing",
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.conjure.java.runtime:tracing",
-                "com.palantir.remoting-api:errors",
-                "com.palantir.remoting-api:ssl-config",
-                "com.palantir.remoting-api:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -72,8 +72,8 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.conjure.java.runtime:refresh-utils",
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors",
+                "com.palantir.conjure.java.runtime:refresh-utils"
             ]
         },
         "com.google.errorprone:error_prone_annotations": {
@@ -113,6 +113,31 @@
         },
         "com.netflix.feign:feign-slf4j": {
             "locked": "8.17.0"
+        },
+        "com.palantir.conjure.java.api:errors": {
+            "locked": "2.0.0-rc2",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:error-handling"
+            ]
+        },
+        "com.palantir.conjure.java.api:service-config": {
+            "locked": "2.0.0-rc2",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:client-config"
+            ]
+        },
+        "com.palantir.conjure.java.api:ssl-config": {
+            "locked": "2.0.0-rc2",
+            "transitive": [
+                "com.palantir.conjure.java.api:service-config",
+                "com.palantir.conjure.java.runtime:keystores"
+            ]
+        },
+        "com.palantir.conjure.java.api:tracing": {
+            "locked": "2.0.0-rc2",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:tracing"
+            ]
         },
         "com.palantir.conjure.java.runtime:client-config": {
             "project": true,
@@ -156,43 +181,20 @@
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
-        "com.palantir.remoting-api:errors": {
-            "locked": "1.9.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling"
-            ]
-        },
-        "com.palantir.remoting-api:service-config": {
-            "locked": "1.9.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:client-config"
-            ]
-        },
-        "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.9.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:keystores",
-                "com.palantir.remoting-api:service-config"
-            ]
-        },
-        "com.palantir.remoting-api:tracing": {
-            "locked": "1.9.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:tracing"
-            ]
-        },
         "com.palantir.safe-logging:preconditions": {
             "locked": "1.3.0",
             "transitive": [
+                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0",
             "transitive": [
+                "com.palantir.conjure.java.api:errors",
+                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:client-config",
                 "com.palantir.conjure.java.runtime:tracing",
-                "com.palantir.remoting-api:errors",
                 "com.palantir.safe-logging:preconditions",
                 "com.palantir.tritium:tritium-registry"
             ]
@@ -200,7 +202,7 @@
         "com.palantir.tokens:auth-tokens": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting-api:service-config"
+                "com.palantir.conjure.java.api:service-config"
             ]
         },
         "com.palantir.tritium:tritium-registry": {
@@ -240,8 +242,8 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling",
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors",
+                "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
@@ -289,12 +291,12 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.netflix.feign:feign-jackson",
+                "com.palantir.conjure.java.api:errors",
+                "com.palantir.conjure.java.api:ssl-config",
+                "com.palantir.conjure.java.api:tracing",
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.conjure.java.runtime:tracing",
-                "com.palantir.remoting-api:errors",
-                "com.palantir.remoting-api:ssl-config",
-                "com.palantir.remoting-api:tracing",
                 "com.palantir.tokens:auth-tokens"
             ]
         },
@@ -335,8 +337,8 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.conjure.java.runtime:refresh-utils",
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors",
+                "com.palantir.conjure.java.runtime:refresh-utils"
             ]
         },
         "com.google.errorprone:error_prone_annotations": {
@@ -376,6 +378,31 @@
         },
         "com.netflix.feign:feign-slf4j": {
             "locked": "8.17.0"
+        },
+        "com.palantir.conjure.java.api:errors": {
+            "locked": "2.0.0-rc2",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:error-handling"
+            ]
+        },
+        "com.palantir.conjure.java.api:service-config": {
+            "locked": "2.0.0-rc2",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:client-config"
+            ]
+        },
+        "com.palantir.conjure.java.api:ssl-config": {
+            "locked": "2.0.0-rc2",
+            "transitive": [
+                "com.palantir.conjure.java.api:service-config",
+                "com.palantir.conjure.java.runtime:keystores"
+            ]
+        },
+        "com.palantir.conjure.java.api:tracing": {
+            "locked": "2.0.0-rc2",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:tracing"
+            ]
         },
         "com.palantir.conjure.java.runtime:client-config": {
             "project": true,
@@ -419,43 +446,20 @@
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
-        "com.palantir.remoting-api:errors": {
-            "locked": "1.9.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling"
-            ]
-        },
-        "com.palantir.remoting-api:service-config": {
-            "locked": "1.9.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:client-config"
-            ]
-        },
-        "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.9.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:keystores",
-                "com.palantir.remoting-api:service-config"
-            ]
-        },
-        "com.palantir.remoting-api:tracing": {
-            "locked": "1.9.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:tracing"
-            ]
-        },
         "com.palantir.safe-logging:preconditions": {
             "locked": "1.3.0",
             "transitive": [
+                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0",
             "transitive": [
+                "com.palantir.conjure.java.api:errors",
+                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:client-config",
                 "com.palantir.conjure.java.runtime:tracing",
-                "com.palantir.remoting-api:errors",
                 "com.palantir.safe-logging:preconditions",
                 "com.palantir.tritium:tritium-registry"
             ]
@@ -463,7 +467,7 @@
         "com.palantir.tokens:auth-tokens": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting-api:service-config"
+                "com.palantir.conjure.java.api:service-config"
             ]
         },
         "com.palantir.tritium:tritium-registry": {
@@ -503,8 +507,8 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling",
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors",
+                "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {

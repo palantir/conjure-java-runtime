@@ -25,8 +25,8 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
-                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors",
+                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -62,7 +62,7 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors"
             ]
         },
         "com.google.guava:guava": {
@@ -71,22 +71,22 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava"
             ]
         },
+        "com.palantir.conjure.java.api:errors": {
+            "locked": "2.0.0-rc2"
+        },
         "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization": {
             "project": true
-        },
-        "com.palantir.remoting-api:errors": {
-            "locked": "1.9.0"
         },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0",
             "transitive": [
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors"
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors"
             ]
         },
         "org.slf4j:slf4j-api": {
@@ -119,8 +119,8 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
-                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors",
+                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -156,7 +156,7 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors"
             ]
         },
         "com.google.guava:guava": {
@@ -165,22 +165,22 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava"
             ]
         },
+        "com.palantir.conjure.java.api:errors": {
+            "locked": "2.0.0-rc2"
+        },
         "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization": {
             "project": true
-        },
-        "com.palantir.remoting-api:errors": {
-            "locked": "1.9.0"
         },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0",
             "transitive": [
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors"
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.remoting-api:errors"
+                "com.palantir.conjure.java.api:errors"
             ]
         },
         "org.slf4j:slf4j-api": {

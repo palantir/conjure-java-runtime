@@ -15,14 +15,14 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.remoting-api:ssl-config"
+                "com.palantir.conjure.java.api:ssl-config"
             ]
         },
         "com.google.guava:guava": {
             "locked": "20.0"
         },
-        "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.9.0"
+        "com.palantir.conjure.java.api:ssl-config": {
+            "locked": "2.0.0-rc2"
         }
     },
     "runtime": {
@@ -41,14 +41,14 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.remoting-api:ssl-config"
+                "com.palantir.conjure.java.api:ssl-config"
             ]
         },
         "com.google.guava:guava": {
             "locked": "20.0"
         },
-        "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.9.0"
+        "com.palantir.conjure.java.api:ssl-config": {
+            "locked": "2.0.0-rc2"
         }
     }
 }

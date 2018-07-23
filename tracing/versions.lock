@@ -21,7 +21,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
-                "com.palantir.remoting-api:tracing"
+                "com.palantir.conjure.java.api:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
@@ -39,8 +39,8 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava"
             ]
         },
-        "com.palantir.remoting-api:tracing": {
-            "locked": "1.9.0"
+        "com.palantir.conjure.java.api:tracing": {
+            "locked": "2.0.0-rc2"
         },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0"
@@ -71,7 +71,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
-                "com.palantir.remoting-api:tracing"
+                "com.palantir.conjure.java.api:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
@@ -89,8 +89,8 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava"
             ]
         },
-        "com.palantir.remoting-api:tracing": {
-            "locked": "1.9.0"
+        "com.palantir.conjure.java.api:tracing": {
+            "locked": "2.0.0-rc2"
         },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0"
