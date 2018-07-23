@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.tracing.jersey;
+package com.palantir.conjure.java.server.jersey;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -115,7 +115,7 @@ public final class TracerTest {
     public static class TracingTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(new TraceEnrichingFilter());
+            env.jersey().register(ConjureJavaJerseyFeature.INSTANCE);
             env.jersey().register(new TracingTestResource());
         }
     }

@@ -18,6 +18,7 @@ package com.palantir.conjure.java.server.jersey;
 
 import com.fasterxml.jackson.jaxrs.cbor.JacksonCBORProvider;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.conjure.java.tracing.jersey.TraceEnrichingFilter;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 
@@ -57,6 +58,9 @@ public enum ConjureJavaJerseyFeature implements Feature {
         // DateTime
         context.register(InstantParamConverterProvider.class);
         context.register(ZonedDateTimeParamConverterProvider.class);
+
+        // Tracing
+        context.register(new TraceEnrichingFilter());
 
         return true;
     }

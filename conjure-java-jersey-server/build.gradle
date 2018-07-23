@@ -3,6 +3,7 @@ apply from: "${rootDir}/gradle/publish-bom.gradle"
 
 dependencies {
     compile project(":error-handling")
+    compile project(":tracing-jersey")
 
     compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
