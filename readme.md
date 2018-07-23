@@ -111,7 +111,7 @@ The `tracing` library can be used independently of `conjure-java-jaxrs-client` o
 ```groovy
 // build.gradle
 dependencies {
-  compile "com.palantir.remoting3:tracing:$version"
+  compile "com.palantir.conjure.java.runtime:tracing:$version"
 }
 ```
 ```java
