@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.server.jersey;
+package com.palantir.conjure.java.tracing.jersey;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;

@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.server.jersey;
-
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+package com.palantir.conjure.java.tracing.jersey;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -44,14 +39,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.hamcrest.Matchers;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
-
-// CHECKSTYLE:OFF
-// CHECKSTYLE:ON
 
 public final class TracerTest {
 
@@ -86,11 +80,11 @@ public final class TracerTest {
                 .header(TraceHttpHeaders.PARENT_SPAN_ID, "parentSpanId")
                 .header(TraceHttpHeaders.SPAN_ID, "spanId")
                 .get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("traceId"));
-        assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), is("traceId"));
-        assertNull(response.getHeaderString(TraceHttpHeaders.SPAN_ID));
-        assertNull(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID));
+        Assert.assertThat(response.getStatus(), Matchers.is(Status.OK.getStatusCode()));
+        Assert.assertThat(response.readEntity(String.class), Matchers.is("traceId"));
+        Assert.assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), Matchers.is("traceId"));
+        Assert.assertNull(response.getHeaderString(TraceHttpHeaders.SPAN_ID));
+        Assert.assertNull(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID));
     }
 
     @Test
@@ -112,14 +106,16 @@ public final class TracerTest {
         // Invoke server and observe servers log messages; note that the server uses the same logger at INFO.
         log.setLevel(Level.INFO);
         target.path("trace").request().header(TraceHttpHeaders.TRACE_ID, "myTraceId").get();
-        assertThat(byteStream.toString(StandardCharsets.UTF_8.name()), startsWith("traceId: myTraceId"));
+        Assert.assertThat(
+                byteStream.toString(StandardCharsets.UTF_8.name()),
+                Matchers.startsWith("traceId: myTraceId"));
     }
 
 
     public static class TracingTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(ConjureJavaJerseyFeature.INSTANCE);
+            env.jersey().register(new TraceEnrichingFilter());
             env.jersey().register(new TracingTestResource());
         }
     }
