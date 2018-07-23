@@ -31,9 +31,7 @@
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.fasterxml.jackson.module:jackson-module-jaxb-annotations",
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing",
-                "com.palantir.remoting-api:errors",
-                "com.palantir.remoting-api:tracing"
+                "com.palantir.remoting-api:errors"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -46,15 +44,13 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
@@ -75,8 +71,7 @@
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-jaxb-annotations": {
@@ -95,8 +90,7 @@
             "locked": "20.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.conjure.java.runtime:error-handling",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
         "com.jcraft:jzlib": {
@@ -111,25 +105,15 @@
         "com.palantir.conjure.java.runtime:error-handling": {
             "project": true
         },
-        "com.palantir.conjure.java.runtime:tracing": {
-            "project": true
-        },
         "com.palantir.remoting-api:errors": {
             "locked": "1.9.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
-        "com.palantir.remoting-api:tracing": {
-            "locked": "1.9.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:tracing"
-            ]
-        },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0",
             "transitive": [
-                "com.palantir.conjure.java.runtime:tracing",
                 "com.palantir.remoting-api:errors"
             ]
         },
@@ -251,8 +235,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.conjure.java.runtime:error-handling"
             ]
         }
     },
@@ -288,9 +271,7 @@
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.fasterxml.jackson.module:jackson-module-jaxb-annotations",
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing",
-                "com.palantir.remoting-api:errors",
-                "com.palantir.remoting-api:tracing"
+                "com.palantir.remoting-api:errors"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -303,15 +284,13 @@
         "com.fasterxml.jackson.datatype:jackson-datatype-guava": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
@@ -332,8 +311,7 @@
         "com.fasterxml.jackson.module:jackson-module-afterburner": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization"
             ]
         },
         "com.fasterxml.jackson.module:jackson-module-jaxb-annotations": {
@@ -352,8 +330,7 @@
             "locked": "20.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.conjure.java.runtime:error-handling",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
         "com.jcraft:jzlib": {
@@ -368,25 +345,15 @@
         "com.palantir.conjure.java.runtime:error-handling": {
             "project": true
         },
-        "com.palantir.conjure.java.runtime:tracing": {
-            "project": true
-        },
         "com.palantir.remoting-api:errors": {
             "locked": "1.9.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
-        "com.palantir.remoting-api:tracing": {
-            "locked": "1.9.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:tracing"
-            ]
-        },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0",
             "transitive": [
-                "com.palantir.conjure.java.runtime:tracing",
                 "com.palantir.remoting-api:errors"
             ]
         },
@@ -508,8 +475,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.conjure.java.runtime:error-handling"
             ]
         }
     }
