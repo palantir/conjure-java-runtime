@@ -104,7 +104,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
             fail();
         } catch (RuntimeException e) {
             assertThat(e.getMessage(), is("Cannot use Java8 Optionals with PathParams. (Class: com.palantir.conjure."
-                    + "java.client.JaxRsClientJava8OptionalHandlingTest$CannotDecorateInterface,"
+                    + "java.client.jaxrs.JaxRsClientJava8OptionalHandlingTest$CannotDecorateInterface,"
                     + " Method: path, Param: arg0)"));
         }
     }
