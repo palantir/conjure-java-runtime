@@ -58,9 +58,6 @@ public enum ConjureJavaJerseyFeature implements Feature {
         context.register(InstantParamConverterProvider.class);
         context.register(ZonedDateTimeParamConverterProvider.class);
 
-        // Limits
-        context.register(new RequestLimitingInterceptor());
-
         return true;
     }
 }
