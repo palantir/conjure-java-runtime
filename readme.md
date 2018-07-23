@@ -9,9 +9,9 @@ service definitions as a server. Refer to the [API Contract](#api-contract) sect
 clients and servers. This library requires Java 8.
 
 Core libraries:
-- jaxrs-clients: Clients for JAX-RS-defined service interfaces
-- retrofit2-clients: Clients for Retrofit-defined service interfaces
-- jersey-servers: Configuration library for Dropwizard/Jersey servers
+- conjure-java-jaxrs-client: Clients for JAX-RS-defined service interfaces
+- conjure-java-retrofit2-client: Clients for Retrofit-defined service interfaces
+- conjure-java-jersey-server: Configuration library for Dropwizard/Jersey servers
 - [http-remoting-api](https://github.com/palantir/http-remoting-api): API classes for service configuration, tracing, and error propagation
 
 # Usage
@@ -24,18 +24,18 @@ repositories {
 }
 
 dependencies {
-  compile "com.palantir.remoting3:jaxrs-clients:$version"
-  compile "com.palantir.remoting3:retrofit2-clients:$version"
-  compile "com.palantir.remoting3:jersey-servers:$version"
+  compile "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client:$version"
+  compile "com.palantir.conjure.java.runtime:conjure-java-retrofit2-client:$version"
+  compile "com.palantir.conjure.java.runtime:conjure-java-jersey-server:$version"
   // optional support for PEM key store type using Bouncy Castle libraries:
-  //     compile "com.palantir.remoting3:pkcs1-reader-bouncy-castle:$version"
+  //     compile "com.palantir.conjure.java.runtime:pkcs1-reader-bouncy-castle:$version"
   // optional support for PEM key store type using Sun libraries:
-  //     compile "com.palantir.remoting3:pkcs1-reader-sun:$version"
+  //     compile "com.palantir.conjure.java.runtime:pkcs1-reader-sun:$version"
 }
 ```
 
 
-## jaxrs-clients
+## conjure-java-jaxrs-client
 Provides the `JaxRsClient` factory for creating Feign-based clients for JAX-RS APIs. SSL configuration is mandatory for
 all clients, plain-text HTTP is not supported. Example:
 
@@ -54,7 +54,7 @@ The `JaxRsClient#create` factory comes in two flavours: one for creating immutab
 configuration, etc.) changes when the underlying `ClientConfiguration` changes.
 
 ## retrofit2-clients
-Similar to `jaxrs-clients`, but generates clients using the Retrofit library. Example:
+Similar to `conjure-java-jaxrs-client`, but generates clients using the Retrofit library. Example:
 
 ```java
 ClientConfiguration config = ... as above... ;
@@ -106,7 +106,7 @@ try {
 }
 ```
 
-The `tracing` library can be used independently of `jaxrs-clients` or `retrofit2-clients`:
+The `tracing` library can be used independently of `conjure-java-jaxrs-client` or `retrofit2-clients`:
 
 ```groovy
 // build.gradle
