@@ -136,7 +136,7 @@ public final class SerializableErrorErrorDecoderTests {
     public void testRemoteExceptionIgnoresUnknownProperties() throws Exception {
         String stackTrace = "{\"methodName\" : \"methodName\", \"fileName\" : \"fileName\", \"lineNumber\" : 0,"
                 + "\"className\" : \"className\" , \"noSuchProperty\" : false }";
-        String error = "{\"message\": \"message\", \"exceptionClass\": \"exceptionClass\","
+        String error = "{\"errorCode\": \"code\", \"errorName\": \"foo\","
                 + "\"stackTrace\": [" + stackTrace + "], \"noSuchProperty\": \"foo\"}";
 
         CLIENT_MAPPER.readValue(error, SerializableError.class);
