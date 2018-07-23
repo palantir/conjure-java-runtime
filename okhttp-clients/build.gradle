@@ -4,7 +4,7 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
     compile project(':error-handling')
-    compile project(':http-clients')
+    compile project(':client-config')
     compile project(':tracing-okhttp3')
     compile 'com.google.guava:guava'
     compile 'com.palantir.safe-logging:preconditions'

@@ -4,7 +4,7 @@ dependencies {
     compile project(":error-handling")
     compile project(":conjure-java-jackson-serialization")
     compile project(":extras:refresh-utils")
-    compile project(":http-clients")
+    compile project(":client-config")
     compile project(":keystores")
     compile project(":okhttp-clients")
     compile project(":tracing-okhttp3")

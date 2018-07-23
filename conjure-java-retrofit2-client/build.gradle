@@ -1,3 +1,7 @@
+/*
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ */
+
 apply plugin: "org.inferred.processors"
 
 apply from: "${rootDir}/gradle/publish-jar.gradle"
@@ -6,7 +10,7 @@ apply from: "${rootDir}/gradle/publish-bom.gradle"
 dependencies {
     compile project(":conjure-java-jackson-serialization")
     compile project(":extras:refresh-utils")
-    compile project(":http-clients")
+    compile project(":client-config")
     compile project(":keystores")
     compile project(":tracing-okhttp3")
     compile project(":okhttp-clients")
