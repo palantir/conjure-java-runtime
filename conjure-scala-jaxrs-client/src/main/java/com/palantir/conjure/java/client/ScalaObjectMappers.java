@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.scala.DefaultScalaModule;
 import com.fasterxml.jackson.module.scala.introspect.ScalaAnnotationIntrospector$;
-import com.palantir.conjure.java.ext.jackson.ObjectMappers;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 
 public final class ScalaObjectMappers {
 

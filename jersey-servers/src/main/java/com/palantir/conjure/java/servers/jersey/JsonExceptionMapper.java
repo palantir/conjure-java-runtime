@@ -18,7 +18,7 @@ package com.palantir.conjure.java.servers.jersey;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.palantir.conjure.java.ext.jackson.ObjectMappers;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.ErrorType;
 import com.palantir.remoting.api.errors.SerializableError;

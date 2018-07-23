@@ -18,7 +18,7 @@ package com.palantir.conjure.java.errors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
-import com.palantir.conjure.java.ext.jackson.ObjectMappers;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import java.io.IOException;

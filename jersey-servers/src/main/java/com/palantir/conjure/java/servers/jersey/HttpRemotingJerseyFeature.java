@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.servers.jersey;
 
 import com.fasterxml.jackson.jaxrs.cbor.JacksonCBORProvider;
-import com.palantir.conjure.java.ext.jackson.ObjectMappers;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 

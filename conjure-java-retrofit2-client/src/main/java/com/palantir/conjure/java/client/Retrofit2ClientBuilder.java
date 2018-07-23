@@ -18,12 +18,12 @@ package com.palantir.conjure.java.retrofit2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.palantir.conjure.java.clients.UserAgents;
 import com.palantir.conjure.java.clients.ClientConfiguration;
 import com.palantir.conjure.java.clients.UserAgent;
-import com.palantir.conjure.java.ext.jackson.ObjectMappers;
+import com.palantir.conjure.java.clients.UserAgents;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import java.util.Optional;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;

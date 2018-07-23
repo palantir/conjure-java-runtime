@@ -18,7 +18,7 @@ package com.palantir.conjure.java.client.feignimpl;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.conjure.java.ext.jackson.ObjectMappers;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.servers.jersey.HttpRemotingJerseyFeature;
 import feign.Util;
 import io.dropwizard.Application;

@@ -3,6 +3,10 @@
  */
 
 /*
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ */
+
+/*
  * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +23,7 @@
  */
 
 /*
- * Derived from: https://github.com/FasterXML/jackson-databind/blob/2.7/src/main/java/com/fasterxml/jackson/databind/ext/PathDeserializer.java
+ * Derived from: https://github.com/FasterXML/jackson-datatype-jdk7/blob/master/src/main/java/com/fasterxml/jackson/datatype/jdk7/Jdk7Module.java
  *
  * Copyright 2016 The Apache Software Foundation (Jackson / FasterXML)
  *
@@ -36,32 +40,31 @@
  * under the License.
  */
 
-package com.palantir.conjure.java.ext.jackson;
+package com.palantir.conjure.java.serialization;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
-import java.io.IOException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
-public final class PathDeserializer extends StdScalarDeserializer<Path> {
-    private static final long serialVersionUID = 1;
+public final class ShimJdk7Module extends SimpleModule {
+    private static final long serialVersionUID = 1L;
 
-    public PathDeserializer() {
-        super(Path.class);
+    public ShimJdk7Module() {
+        super(ShimJdk7Module.class.getCanonicalName());
+
+        final JsonSerializer<Object> stringSer = ToStringSerializer.instance;
+        addSerializer(Path.class, stringSer);
+        addDeserializer(Path.class, new PathDeserializer());
     }
 
     @Override
-    public Path deserialize(JsonParser parser, DeserializationContext ctxt) throws IOException {
-        JsonToken token = parser.getCurrentToken();
-        if (token != null) {
-            if (token.isScalarValue()) {
-                return Paths.get(parser.getValueAsString());
-            }
-            // 16-Oct-2015: should we perhaps allow JSON Arrays (of Strings) as well?
-        }
-        throw ctxt.mappingException(Path.class, token);
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this == obj;
     }
 }

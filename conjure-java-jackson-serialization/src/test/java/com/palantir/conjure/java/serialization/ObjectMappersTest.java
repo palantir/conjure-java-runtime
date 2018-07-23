@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.ext.jackson;
+package com.palantir.conjure.java.serialization;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

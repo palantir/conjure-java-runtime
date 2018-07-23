@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.remoting.api.errors.ErrorType;
-import com.palantir.conjure.java.ext.jackson.ObjectMappers;
 import javax.ws.rs.core.Response;
 import org.junit.Test;
 
