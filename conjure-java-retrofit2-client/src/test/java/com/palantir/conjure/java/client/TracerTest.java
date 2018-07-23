@@ -20,9 +20,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
+import com.palantir.conjure.java.tracing.Tracer;
 import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.remoting.api.tracing.TraceHttpHeaders;
-import com.palantir.conjure.java.tracing.Tracer;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -31,17 +31,17 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-public final class TracerTest extends TestBase {
+public final class TracerTest extends com.palantir.conjure.java.retrofit2.TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    private TestService service;
+    private com.palantir.conjure.java.retrofit2.TestService service;
 
     @Before
     public void before() {
         String uri = "http://localhost:" + server.getPort();
-        service = Retrofit2Client.create(TestService.class, AGENT, createTestConfig(uri));
+        service = com.palantir.conjure.java.retrofit2.Retrofit2Client.create(com.palantir.conjure.java.retrofit2.TestService.class, AGENT, createTestConfig(uri));
         server.enqueue(new MockResponse().setBody("\"server\""));
     }
 

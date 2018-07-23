@@ -18,14 +18,14 @@ package com.palantir.conjure.java.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.palantir.conjure.java.clients.ClientConfiguration;
-import com.palantir.conjure.java.clients.UserAgent;
-import com.palantir.conjure.java.clients.UserAgents;
 import com.palantir.conjure.java.client.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.conjure.java.client.feignimpl.Java8OptionalAwareContract;
 import com.palantir.conjure.java.client.feignimpl.PathTemplateHeaderEnrichmentContract;
 import com.palantir.conjure.java.client.feignimpl.PathTemplateHeaderRewriter;
 import com.palantir.conjure.java.client.feignimpl.SlashEncodingContract;
+import com.palantir.conjure.java.clients.ClientConfiguration;
+import com.palantir.conjure.java.clients.UserAgent;
+import com.palantir.conjure.java.clients.UserAgents;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import feign.CborDelegateDecoder;

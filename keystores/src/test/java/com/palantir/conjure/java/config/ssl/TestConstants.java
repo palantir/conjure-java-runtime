@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.config.ssl;
 
-import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1Reader;
+import com.palantir.remoting.api.config.ssl.SslConfiguration;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ServiceLoader;

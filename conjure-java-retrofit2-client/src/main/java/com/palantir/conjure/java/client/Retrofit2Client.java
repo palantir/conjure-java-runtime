@@ -17,9 +17,9 @@
 package com.palantir.conjure.java.retrofit2;
 
 import com.google.common.reflect.Reflection;
-import com.palantir.conjure.java.clients.UserAgents;
 import com.palantir.conjure.java.clients.ClientConfiguration;
 import com.palantir.conjure.java.clients.UserAgent;
+import com.palantir.conjure.java.clients.UserAgents;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
@@ -40,7 +40,7 @@ public final class Retrofit2Client {
             UserAgent userAgent,
             HostMetricsRegistry hostMetricsRegistry,
             ClientConfiguration config) {
-        return new Retrofit2ClientBuilder(config)
+        return new com.palantir.conjure.java.retrofit2.Retrofit2ClientBuilder(config)
                 .hostMetricsRegistry(hostMetricsRegistry)
                 .build(serviceClass, userAgent);
     }
@@ -60,7 +60,7 @@ public final class Retrofit2Client {
      */
     @Deprecated
     public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration config) {
-        return new Retrofit2ClientBuilder(config).build(serviceClass, userAgent);
+        return new com.palantir.conjure.java.retrofit2.Retrofit2ClientBuilder(config).build(serviceClass, userAgent);
     }
 
     /**
