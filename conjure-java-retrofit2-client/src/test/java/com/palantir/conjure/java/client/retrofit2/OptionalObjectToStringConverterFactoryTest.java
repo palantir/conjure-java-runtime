@@ -89,7 +89,9 @@ public final class OptionalObjectToStringConverterFactoryTest {
 
     @Test
     public void testUnwrapsJava8OptionalInt() throws Exception {
-        Assertions.assertThat(Java8OptionalIntStringConverter.INSTANCE.convert(OptionalInt.of(12345))).isEqualTo("12345");
+        Assertions
+                .assertThat(Java8OptionalIntStringConverter.INSTANCE.convert(OptionalInt.of(12345)))
+                .isEqualTo("12345");
         assertThat(Java8OptionalIntStringConverter.INSTANCE.convert(OptionalInt.empty())).isEqualTo(null);
     }
 
