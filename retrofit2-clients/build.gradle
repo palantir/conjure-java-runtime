@@ -4,7 +4,7 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 apply from: "${rootDir}/gradle/publish-bom.gradle"
 
 dependencies {
-    compile project(":extras:jackson-support")
+    compile project(":conjure-java-jackson-serialization")
     compile project(":extras:refresh-utils")
     compile project(":http-clients")
     compile project(":keystores")
