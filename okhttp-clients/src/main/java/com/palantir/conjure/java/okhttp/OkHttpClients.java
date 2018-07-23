@@ -21,13 +21,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.palantir.conjure.java.clients.CipherSuites;
+import com.palantir.conjure.java.clients.ClientConfiguration;
 import com.palantir.conjure.java.clients.UserAgent;
 import com.palantir.conjure.java.clients.UserAgent.Agent;
 import com.palantir.conjure.java.clients.UserAgents;
 import com.palantir.conjure.java.tracing.Tracers;
 import com.palantir.conjure.java.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.remoting.api.config.service.BasicCredentials;
-import com.palantir.conjure.java.clients.ClientConfiguration;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -83,16 +83,16 @@ public final class OkHttpClients {
         dispatcher.setMaxRequestsPerHost(256);
         // metrics
         registry.gauge(
-                MetricName.builder().safeName("com.palantir.remoting3.dispatcher.calls.queued").build(),
+                MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.queued").build(),
                 dispatcher::queuedCallsCount);
         registry.gauge(
-                MetricName.builder().safeName("com.palantir.remoting3.dispatcher.calls.running").build(),
+                MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.running").build(),
                 dispatcher::runningCallsCount);
         registry.gauge(
-                MetricName.builder().safeName("com.palantir.remoting3.connection-pool.connections.total").build(),
+                MetricName.builder().safeName("com.palantir.conjure.java.connection-pool.connections.total").build(),
                 connectionPool::connectionCount);
         registry.gauge(
-                MetricName.builder().safeName("com.palantir.remoting3.connection-pool.connections.idle").build(),
+                MetricName.builder().safeName("com.palantir.conjure.java.connection-pool.connections.idle").build(),
                 connectionPool::idleConnectionCount);
     }
 
