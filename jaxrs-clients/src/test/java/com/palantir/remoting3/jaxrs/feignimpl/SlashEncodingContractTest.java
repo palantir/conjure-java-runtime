@@ -18,8 +18,10 @@ package com.palantir.remoting3.jaxrs.feignimpl;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import com.palantir.remoting3.jaxrs.TestBase;
@@ -65,6 +67,7 @@ public final class SlashEncodingContractTest extends TestBase {
 
     @Test
     public void testJerseyDeocodesPathAndQueryParams() {
+        when(resource.encoded(any(), any())).thenReturn("Hello, world");
         jerseyProxy.encoded(PATH_PARAM, QUERY_PARAM);
         verify(resource).encoded(PATH_PARAM, QUERY_PARAM);
     }
