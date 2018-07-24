@@ -43,7 +43,7 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
     protected Application configure() {
         forceSet(TestProperties.CONTAINER_PORT, "0");
         return DropwizardResourceConfig.forTesting(new MetricRegistry())
-                .register(ConjureJavaJerseyFeature.INSTANCE)
+                .register(ConjureJerseyFeature.INSTANCE)
                 .register(new EmptyOptionalTo204ExceptionMapper())
                 .register(OptionalReturnResource.class);
     }

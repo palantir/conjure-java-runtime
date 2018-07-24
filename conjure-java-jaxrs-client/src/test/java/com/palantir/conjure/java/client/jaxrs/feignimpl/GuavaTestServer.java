@@ -19,7 +19,7 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.conjure.java.server.jersey.ConjureJavaJerseyFeature;
+import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -45,7 +45,7 @@ import org.assertj.core.util.Strings;
 public class GuavaTestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
-        env.jersey().register(ConjureJavaJerseyFeature.INSTANCE);
+        env.jersey().register(ConjureJerseyFeature.INSTANCE);
         env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerObjectMapper()));
         env.jersey().register(new TestResource());
     }

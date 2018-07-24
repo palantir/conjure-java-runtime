@@ -23,7 +23,7 @@ import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 
 
-public enum ConjureJavaJerseyFeature implements Feature {
+public enum ConjureJerseyFeature implements Feature {
     INSTANCE;
 
     /**

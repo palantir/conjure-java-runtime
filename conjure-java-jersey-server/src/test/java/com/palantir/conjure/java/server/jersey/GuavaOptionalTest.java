@@ -74,7 +74,7 @@ public final class GuavaOptionalTest {
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration config, final Environment env) throws Exception {
-            env.jersey().register(ConjureJavaJerseyFeature.INSTANCE);
+            env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new OptionalTestResource());
         }
     }
