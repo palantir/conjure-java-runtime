@@ -61,7 +61,7 @@ public final class UserAgentTest extends TestBase {
 
     @Test
     public void testUserAgent_usesUnknownAgentWhenProvidedWithBogusAgentString() throws InterruptedException {
-        TestService service = JaxRsClient.create(TestService.class, "bogus version string",
+        TestService service = JaxRsClient.create(TestService.class, UserAgents.tryParse("bogus version string"),
                 createTestConfig(endpointUri));
         service.string();
 
