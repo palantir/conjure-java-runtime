@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.clients;
+package com.palantir.conjure.java.client;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

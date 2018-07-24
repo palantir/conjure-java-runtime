@@ -19,7 +19,7 @@ package com.palantir.conjure.java.okhttp;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.palantir.conjure.java.clients.ImmutablesStyle;
+import com.palantir.conjure.java.client.ImmutablesStyle;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import java.time.Clock;

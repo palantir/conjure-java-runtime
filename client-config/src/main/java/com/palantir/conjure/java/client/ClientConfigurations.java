@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.clients;
+package com.palantir.conjure.java.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HostAndPort;

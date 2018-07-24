@@ -26,7 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
-import com.palantir.conjure.java.clients.ClientConfiguration;
+import com.palantir.conjure.java.client.ClientConfiguration;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import java.io.IOException;
 import java.time.Duration;

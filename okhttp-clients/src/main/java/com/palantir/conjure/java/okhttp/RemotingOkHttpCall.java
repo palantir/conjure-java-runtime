@@ -19,7 +19,7 @@ package com.palantir.conjure.java.okhttp;
 import com.google.common.util.concurrent.SettableFuture;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
-import com.palantir.conjure.java.clients.ClientConfiguration;
+import com.palantir.conjure.java.client.ClientConfiguration;
 import com.palantir.logsafe.SafeArg;
 import java.io.IOException;
 import java.io.InterruptedIOException;

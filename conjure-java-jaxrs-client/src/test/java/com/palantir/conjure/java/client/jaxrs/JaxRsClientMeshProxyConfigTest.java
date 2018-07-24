@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.net.HostAndPort;
 import com.google.common.net.HttpHeaders;
-import com.palantir.conjure.java.clients.ClientConfiguration;
+import com.palantir.conjure.java.client.ClientConfiguration;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;

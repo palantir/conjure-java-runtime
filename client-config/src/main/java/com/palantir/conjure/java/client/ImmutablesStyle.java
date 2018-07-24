@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.clients;
+package com.palantir.conjure.java.client;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

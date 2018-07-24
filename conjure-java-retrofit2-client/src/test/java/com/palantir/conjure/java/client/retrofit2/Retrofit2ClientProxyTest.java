@@ -22,7 +22,7 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.config.service.BasicCredentials;
-import com.palantir.conjure.java.clients.ClientConfiguration;
+import com.palantir.conjure.java.client.ClientConfiguration;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
