@@ -15,23 +15,23 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.remoting-api:ssl-config",
-                "com.palantir.remoting3:keystores"
+                "com.palantir.conjure.java.api:ssl-config",
+                "com.palantir.conjure.java.runtime:keystores"
             ]
         },
         "com.google.guava:guava": {
             "locked": "20.0",
             "transitive": [
-                "com.palantir.remoting3:keystores"
+                "com.palantir.conjure.java.runtime:keystores"
             ]
         },
-        "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.9.0",
+        "com.palantir.conjure.java.api:ssl-config": {
+            "locked": "2.0.0-rc3",
             "transitive": [
-                "com.palantir.remoting3:keystores"
+                "com.palantir.conjure.java.runtime:keystores"
             ]
         },
-        "com.palantir.remoting3:keystores": {
+        "com.palantir.conjure.java.runtime:keystores": {
             "project": true
         },
         "org.bouncycastle:bcpkix-jdk15on": {
@@ -60,23 +60,23 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.remoting-api:ssl-config",
-                "com.palantir.remoting3:keystores"
+                "com.palantir.conjure.java.api:ssl-config",
+                "com.palantir.conjure.java.runtime:keystores"
             ]
         },
         "com.google.guava:guava": {
             "locked": "20.0",
             "transitive": [
-                "com.palantir.remoting3:keystores"
+                "com.palantir.conjure.java.runtime:keystores"
             ]
         },
-        "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.9.0",
+        "com.palantir.conjure.java.api:ssl-config": {
+            "locked": "2.0.0-rc3",
             "transitive": [
-                "com.palantir.remoting3:keystores"
+                "com.palantir.conjure.java.runtime:keystores"
             ]
         },
-        "com.palantir.remoting3:keystores": {
+        "com.palantir.conjure.java.runtime:keystores": {
             "project": true
         },
         "org.bouncycastle:bcpkix-jdk15on": {

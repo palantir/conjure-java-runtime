@@ -3,9 +3,9 @@ apply plugin: 'org.inferred.processors'
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
-    compile project(":extras:jackson-support")
+    compile project(":conjure-java-jackson-serialization")
     compile "com.google.guava:guava"
-    compile "com.palantir.remoting-api:errors"
+    compile "com.palantir.conjure.java.api:errors"
     compile "javax.ws.rs:javax.ws.rs-api"
     compile "org.slf4j:slf4j-api"
 

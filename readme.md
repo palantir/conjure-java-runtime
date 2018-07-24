@@ -9,10 +9,10 @@ service definitions as a server. Refer to the [API Contract](#api-contract) sect
 clients and servers. This library requires Java 8.
 
 Core libraries:
-- jaxrs-clients: Clients for JAX-RS-defined service interfaces
-- retrofit2-clients: Clients for Retrofit-defined service interfaces
-- jersey-servers: Configuration library for Dropwizard/Jersey servers
-- [http-remoting-api](https://github.com/palantir/http-remoting-api): API classes for service configuration, tracing, and error propagation
+- conjure-java-jaxrs-client: Clients for JAX-RS-defined service interfaces
+- conjure-java-retrofit2-client: Clients for Retrofit-defined service interfaces
+- conjure-java-jersey-server: Configuration library for Dropwizard/Jersey servers
+- [conjure-java-api](https://github.com/palantir/http-remoting-api/tree/feature-conjure): API classes for service configuration, tracing, and error propagation
 
 # Usage
 
@@ -24,18 +24,18 @@ repositories {
 }
 
 dependencies {
-  compile "com.palantir.remoting3:jaxrs-clients:$version"
-  compile "com.palantir.remoting3:retrofit2-clients:$version"
-  compile "com.palantir.remoting3:jersey-servers:$version"
+  compile "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client:$version"
+  compile "com.palantir.conjure.java.runtime:conjure-java-retrofit2-client:$version"
+  compile "com.palantir.conjure.java.runtime:conjure-java-jersey-server:$version"
   // optional support for PEM key store type using Bouncy Castle libraries:
-  //     compile "com.palantir.remoting3:pkcs1-reader-bouncy-castle:$version"
+  //     compile "com.palantir.conjure.java.runtime:pkcs1-reader-bouncy-castle:$version"
   // optional support for PEM key store type using Sun libraries:
-  //     compile "com.palantir.remoting3:pkcs1-reader-sun:$version"
+  //     compile "com.palantir.conjure.java.runtime:pkcs1-reader-sun:$version"
 }
 ```
 
 
-## jaxrs-clients
+## conjure-java-jaxrs-client
 Provides the `JaxRsClient` factory for creating Feign-based clients for JAX-RS APIs. SSL configuration is mandatory for
 all clients, plain-text HTTP is not supported. Example:
 
@@ -53,15 +53,15 @@ The `JaxRsClient#create` factory comes in two flavours: one for creating immutab
 `ClientConfiguration`, and one for creating mutable clients whose configuration (e.g., server URLs, timeouts, SSL
 configuration, etc.) changes when the underlying `ClientConfiguration` changes.
 
-## retrofit2-clients
-Similar to `jaxrs-clients`, but generates clients using the Retrofit library. Example:
+## conjure-java-retrofit2-client
+Similar to `conjure-java-jaxrs-client`, but generates clients using the Retrofit library. Example:
 
 ```java
 ClientConfiguration config = ... as above... ;
 MyService service = Retrofit2Client.create(MyService.class, "my user agent", config);
 ```
 
-## jersey-servers
+## conjure-java-jersey-server
 Provides Dropwizard/Jersey exception mappers for translating common JAX-RS exceptions to appropriate HTTP error codes. A
 Dropwizard server is configured for http-remoting as follows:
 
@@ -106,12 +106,12 @@ try {
 }
 ```
 
-The `tracing` library can be used independently of `jaxrs-clients` or `retrofit2-clients`:
+The `tracing` library can be used independently of `conjure-java-jaxrs-client` or `conjure-java-retrofit2-client`:
 
 ```groovy
 // build.gradle
 dependencies {
-  compile "com.palantir.remoting3:tracing:$version"
+  compile "com.palantir.conjure.java.runtime:tracing:$version"
 }
 ```
 ```java
@@ -126,7 +126,7 @@ try {
 ```
 
 
-## service-config (http-remoting-api)
+## service-config (conjure-java-api)
 Provides utilities for setting up service clients from file-based configuration. Example:
 
 ```yaml
@@ -150,7 +150,7 @@ MyService client = JaxRsClient.create(MyService.class, "my-agent", ClientConfigu
 ```
 
 
-## keystores and ssl-config (http-remoting-api)
+## keystores and ssl-config (conjure-java-api)
 
 Provides utilities for interacting with Java trust stores and key stores and acquiring `SSLSocketFactory` instances
 using those stores, as well as a configuration class for use in server configuration files.
@@ -219,7 +219,7 @@ The `pkcs1-reader-sun` does not include any extra dependencies, but assumes the 
 available as part of most popular JVM implementations, including the Oracle and OpenJDK JVMs for
 Java 7 and Java 8.
 
-## errors (http-remoting-api)
+## errors (conjure-java-api)
 Provides utilities for relaying service errors across service boundaries (see below).
 
 
@@ -316,7 +316,7 @@ consume for clients and support transmitting exception parameters in a safe way.
 The workflow is:
 
  - Server code throws an instance of `ServiceException`, containing some `ErrorType`
- - The `com.palantir.remoting3.servers.jersey.ServiceExceptionMapper` exception mapper
+ - The `com.palantir.conjure.java.server.jersey.ServiceExceptionMapper` exception mapper
    - determines the response code for this service exception
    - converts this into a `SerializableError`
    - serializes this into the response body as JSON

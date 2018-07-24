@@ -4,7 +4,7 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
     compile project(':error-handling')
-    compile project(':http-clients')
+    compile project(':client-config')
     compile project(':tracing-okhttp3')
     compile 'com.google.guava:guava'
     compile 'com.palantir.safe-logging:preconditions'
@@ -14,7 +14,7 @@ dependencies {
     compile 'io.dropwizard.metrics:metrics-core'
     compile 'org.slf4j:slf4j-api'
 
-    testCompile project(":jersey-servers")
+    testCompile project(":conjure-java-jersey-server")
     testCompile "com.squareup.okhttp3:mockwebserver"
     testCompile "javax.ws.rs:javax.ws.rs-api"
     testCompile "junit:junit"

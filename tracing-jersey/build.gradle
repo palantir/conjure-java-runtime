@@ -1,0 +1,18 @@
+/*
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ */
+
+apply plugin: 'org.inferred.processors'
+
+apply from: "${rootDir}/gradle/publish-jar.gradle"
+
+dependencies {
+    compile project(":tracing")
+
+    compile "org.glassfish.jersey.core:jersey-server"
+
+    testCompile "io.dropwizard:dropwizard-testing"
+    testCompile "junit:junit"
+    testCompile "org.hamcrest:hamcrest-all"
+    testCompile "org.mockito:mockito-core"
+}

@@ -5,9 +5,9 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind"
     compile "com.google.guava:guava"
-    compile "com.palantir.remoting-api:ssl-config"
+    compile "com.palantir.conjure.java.api:ssl-config"
 
-    testCompile project(":extras:jackson-support")
+    testCompile project(":conjure-java-jackson-serialization")
     testCompile("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"

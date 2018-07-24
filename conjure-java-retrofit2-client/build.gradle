@@ -1,0 +1,30 @@
+/*
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ */
+
+apply plugin: "org.inferred.processors"
+
+apply from: "${rootDir}/gradle/publish-jar.gradle"
+apply from: "${rootDir}/gradle/publish-bom.gradle"
+
+dependencies {
+    compile project(":conjure-java-jackson-serialization")
+    compile project(":extras:refresh-utils")
+    compile project(":client-config")
+    compile project(":keystores")
+    compile project(":tracing-okhttp3")
+    compile project(":okhttp-clients")
+
+    compile "com.fasterxml.jackson.module:jackson-module-afterburner"
+    compile "com.squareup.retrofit2:converter-jackson"
+    compile "com.squareup.retrofit2:retrofit"
+    compile "org.slf4j:slf4j-api"
+
+    testCompile "com.squareup.okhttp3:mockwebserver"
+    testCompile "junit:junit"
+    testCompile "org.assertj:assertj-core"
+    testCompile "org.hamcrest:hamcrest-all"
+    testCompile "org.mockito:mockito-core"
+
+    processor "org.immutables:value"
+}
