@@ -84,8 +84,9 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
 
     @Test
     public void testUserAgent_usesUnknownAgentIfBogusAgentIsGiven() throws InterruptedException, IOException {
-        TestService service = Retrofit2Client.create(TestService.class,
-                "bogus user agent",
+        TestService service = Retrofit2Client.create(
+                TestService.class,
+                UserAgents.tryParse("bogus user agent"),
                 new HostMetricsRegistry(),
                 createTestConfig(String.format("http://%s:%s/api/",
                         server.getHostName().toUpperCase(),
