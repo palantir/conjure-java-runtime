@@ -17,14 +17,13 @@
 package com.palantir.conjure.java.client.retrofit2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.ClientConfiguration;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import java.util.Optional;
+import com.palantir.logsafe.Preconditions;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -58,9 +57,8 @@ public final class Retrofit2ClientBuilder {
     }
 
     public <T> T build(Class<T> serviceClass, UserAgent userAgent) {
-        okhttp3.OkHttpClient client = Optional.ofNullable(hostMetricsRegistry)
-                .map(hostMetrics -> OkHttpClients.create(config, userAgent, hostMetrics, serviceClass))
-                .orElseGet(() -> OkHttpClients.create(config, userAgent, serviceClass));
+        Preconditions.checkNotNull(hostMetricsRegistry, "hostMetricsRegistry must be set");
+        okhttp3.OkHttpClient client = OkHttpClients.create(config, userAgent, hostMetricsRegistry, serviceClass);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
