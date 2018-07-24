@@ -18,8 +18,10 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
@@ -70,6 +72,7 @@ public final class SlashEncodingContractTest extends TestBase {
 
     @Test
     public void testJerseyDeocodesPathAndQueryParams() {
+        when(resource.encoded(any(), any())).thenReturn("Hello, world");
         jerseyProxy.encoded(PATH_PARAM, QUERY_PARAM);
         verify(resource).encoded(PATH_PARAM, QUERY_PARAM);
     }

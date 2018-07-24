@@ -144,6 +144,5 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Test
     public void testStandardClientsUseTextDelegateEncoder() {
         assertThat(service.getString("string"), is("string"));
-        assertThat(service.getString(null), is((String) null));
     }
 }
