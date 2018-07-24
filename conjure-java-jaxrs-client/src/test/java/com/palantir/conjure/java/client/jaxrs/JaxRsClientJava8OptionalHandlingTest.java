@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -45,7 +46,9 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
 
     @Before
     public void before() {
-        proxy = JaxRsClient.create(Service.class, AGENT,
+        proxy = JaxRsClient.create(Service.class,
+                AGENT,
+                new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
@@ -99,7 +102,10 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     @Test
     public void testCannotDecorateInterfaceWithOptionalPathParam() {
         try {
-            JaxRsClient.create(CannotDecorateInterface.class, AGENT,
+            JaxRsClient.create(
+                    CannotDecorateInterface.class,
+                    AGENT,
+                    new HostMetricsRegistry(),
                     createTestConfig("http://localhost:" + server.getPort()));
             fail();
         } catch (RuntimeException e) {

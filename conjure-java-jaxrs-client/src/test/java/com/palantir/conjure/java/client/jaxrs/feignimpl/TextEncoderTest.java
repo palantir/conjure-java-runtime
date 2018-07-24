@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThat;
 
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -41,7 +42,9 @@ public final class TextEncoderTest extends TestBase {
 
     @Before
     public void before() {
-        service = JaxRsClient.create(Service.class, AGENT,
+        service = JaxRsClient.create(Service.class,
+                AGENT,
+                new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("{}"));
     }

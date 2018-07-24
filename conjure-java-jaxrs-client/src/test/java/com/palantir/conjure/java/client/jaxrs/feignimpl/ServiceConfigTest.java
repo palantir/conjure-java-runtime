@@ -26,6 +26,7 @@ import com.palantir.conjure.java.client.ClientConfigurations;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.client.jaxrs.TestService;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
@@ -46,10 +47,14 @@ public final class ServiceConfigTest extends TestBase {
         ServiceConfigurationFactory factory =
                 ServiceConfigurationFactory.of(rule.getConfiguration().getServiceDiscoveryConfiguration());
 
-        TestService full = JaxRsClient.create(
-                TestService.class, AGENT, ClientConfigurations.of(factory.get("full")));
-        TestService minimal = JaxRsClient.create(
-                TestService.class, AGENT, ClientConfigurations.of(factory.get("minimal")));
+        TestService full = JaxRsClient.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfigurations.of(factory.get("full")));
+        TestService minimal = JaxRsClient.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfigurations.of(factory.get("minimal")));
 
         assertEquals("string", full.string());
         assertEquals("string", minimal.string());

@@ -23,6 +23,7 @@ import static org.mockito.Mockito.verify;
 
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -56,9 +57,13 @@ public final class SlashEncodingContractTest extends TestBase {
 
     @Before
     public void before() {
-        jerseyProxy = JaxRsClient.create(Service.class, AGENT,
+        jerseyProxy = JaxRsClient.create(Service.class,
+                AGENT,
+                new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + APP.getLocalPort()));
-        inMemoryProxy = JaxRsClient.create(Service.class, AGENT,
+        inMemoryProxy = JaxRsClient.create(Service.class,
+                AGENT,
+                new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }

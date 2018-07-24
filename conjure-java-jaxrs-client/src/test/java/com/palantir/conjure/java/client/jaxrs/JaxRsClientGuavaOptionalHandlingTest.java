@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import com.google.common.base.Optional;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -42,7 +43,9 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
 
     @Before
     public void before() {
-        proxy = JaxRsClient.create(Service.class, AGENT,
+        proxy = JaxRsClient.create(Service.class,
+                AGENT,
+                new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
@@ -72,7 +75,10 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
     @Test
     public void testCannotDecorateInterfaceWithOptionalPathParam() {
         try {
-            JaxRsClient.create(CannotDecorateInterface.class, AGENT,
+            JaxRsClient.create(
+                    CannotDecorateInterface.class,
+                    AGENT,
+                    new HostMetricsRegistry(),
                     createTestConfig("http://localhost:" + server.getPort()));
             fail();
         } catch (RuntimeException e) {
