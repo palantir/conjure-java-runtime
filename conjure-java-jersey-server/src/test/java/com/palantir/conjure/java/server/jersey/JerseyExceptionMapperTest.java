@@ -56,7 +56,8 @@ public final class JerseyExceptionMapperTest extends JerseyTest {
     @Test
     public void testWebException() {
         Response response = target("/angry/web").request().get();
-        assertThat(response.getStatus()).isEqualTo(403);
+        // not service exception type, treat it as  500
+        assertThat(response.getStatus()).isEqualTo(500);
         assertThat(response.readEntity(String.class)).doesNotContain("secret");
     }
 
