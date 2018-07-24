@@ -65,9 +65,11 @@ public final class Retrofit2ClientBuilder {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(addTrailingSlash(config.uris().get(0)))
-                .addConverterFactory(new CborConverterFactory(
-                        JacksonConverterFactory.create(OBJECT_MAPPER),
-                        CBOR_OBJECT_MAPPER))
+                .addConverterFactory(
+                        new CborConverterFactory(
+                                new RejectNullConverterFactory(
+                                        JacksonConverterFactory.create(OBJECT_MAPPER)),
+                                CBOR_OBJECT_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
                 .addCallAdapterFactory(AsyncSerializableErrorCallAdapterFactory.INSTANCE)
                 .build();
