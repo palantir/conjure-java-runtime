@@ -77,6 +77,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
      * Set the host metrics registry to use when constructing the OkHttp client.
      */
     public final AbstractFeignJaxRsClientBuilder hostMetricsRegistry(HostMetricsRegistry newHostMetricsRegistry) {
+        Preconditions.checkNotNull(newHostMetricsRegistry, "hostMetricsRegistry can't be null");
         hostMetricsRegistry = newHostMetricsRegistry;
         return this;
     }
