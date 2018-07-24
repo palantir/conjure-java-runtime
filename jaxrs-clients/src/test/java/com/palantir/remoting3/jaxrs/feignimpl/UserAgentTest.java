@@ -47,7 +47,7 @@ public final class UserAgentTest extends TestBase {
     @Before
     public void before() {
         endpointUri = "http://localhost:" + server.getPort();
-        server.enqueue(new MockResponse().setBody(""));
+        server.enqueue(new MockResponse().setBody("\"body\""));
     }
 
     @Test
