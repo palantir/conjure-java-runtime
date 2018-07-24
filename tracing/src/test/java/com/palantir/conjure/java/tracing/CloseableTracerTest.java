@@ -28,8 +28,8 @@ public final class CloseableTracerTest {
     @Test
     public void startsAndClosesSpan() {
         try (CloseableTracer tracer = CloseableTracer.startSpan("foo")) {
-            assertThat(Tracer.copyTrace().isEmpty()).isFalse();
+            assertThat(Tracer.copyTrace().top()).isNotEmpty();
         }
-        assertThat(Tracer.copyTrace().isEmpty()).isTrue();
+        assertThat(Tracer.copyTrace().top()).isEmpty();
     }
 }
