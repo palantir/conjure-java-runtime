@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.client;
+package com.palantir.conjure.java.client.config;
 
 public enum NodeSelectionStrategy {
 

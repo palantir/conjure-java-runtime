@@ -2,7 +2,7 @@
  * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
  */
 
-package com.palantir.conjure.java.client;
+package com.palantir.conjure.java.client.config;
 
 import com.google.common.collect.ImmutableList;
 

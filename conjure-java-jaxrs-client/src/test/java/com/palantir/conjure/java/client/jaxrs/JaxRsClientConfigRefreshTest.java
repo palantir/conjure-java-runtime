@@ -18,7 +18,7 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.palantir.conjure.java.client.ClientConfiguration;
+import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

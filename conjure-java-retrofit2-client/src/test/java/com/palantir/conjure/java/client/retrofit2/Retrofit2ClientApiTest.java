@@ -30,7 +30,7 @@ import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import com.palantir.logsafe.testing.Assertions;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
-import com.palantir.conjure.java.client.ClientConfiguration;
+import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import java.io.IOException;
 import java.time.Duration;
