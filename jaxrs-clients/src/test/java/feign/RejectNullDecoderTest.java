@@ -59,6 +59,16 @@ public final class RejectNullDecoderTest extends TestBase {
     }
 
     @Test
+    public void throws_nullpointerexception_when_body_is_empty_string() {
+        Response response = Response.create(200, "OK", headers, "", StandardCharsets.UTF_8);
+
+        assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("Unexpected null body")
+                .hasArgs(SafeArg.of("status", 200));
+    }
+
+    @Test
     public void works_fine_when_body_is_not_null() throws Exception {
         Response response = Response.create(200, "OK", headers, "[1, 2, 3]", StandardCharsets.UTF_8);
         Object decodedObject = textDelegateDecoder.decode(response, List.class);
