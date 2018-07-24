@@ -18,7 +18,6 @@ package com.palantir.conjure.java.client.retrofit2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.api.config.service.UserAgent;
-import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.ClientConfiguration;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
@@ -46,14 +45,6 @@ public final class Retrofit2ClientBuilder {
     public Retrofit2ClientBuilder hostMetricsRegistry(HostMetricsRegistry newHostMetricsRegistry) {
         hostMetricsRegistry = newHostMetricsRegistry;
         return this;
-    }
-
-    /**
-     * @deprecated Use {@link #build(Class, UserAgent)}.
-     */
-    @Deprecated
-    public <T> T build(Class<T> serviceClass, String userAgent) {
-        return build(serviceClass, UserAgents.tryParse(userAgent));
     }
 
     public <T> T build(Class<T> serviceClass, UserAgent userAgent) {
