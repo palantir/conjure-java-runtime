@@ -19,8 +19,8 @@ package com.palantir.conjure.java.client.jaxrs;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
-import com.palantir.conjure.java.client.ClientConfiguration;
-import com.palantir.conjure.java.client.ClientConfigurations;
+import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.config.ClientConfigurations;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import java.nio.file.Paths;
 

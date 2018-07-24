@@ -100,7 +100,9 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         String conjureVersion = OkHttpClients.class.getPackage().getImplementationVersion();
         UserAgent expected = AGENT
                 .addAgent(UserAgent.Agent.of("TestService", "0.0.0"))
-                .addAgent(UserAgent.Agent.of("conjure-java", conjureVersion != null ? conjureVersion : "0.0.0"));
+                .addAgent(UserAgent.Agent.of(
+                        UserAgents.REMOTING_AGENT_NAME,
+                        conjureVersion != null ? conjureVersion : "0.0.0"));
         assertThat(request.getHeader("User-Agent"), is(UserAgents.format(expected)));
     }
 }
