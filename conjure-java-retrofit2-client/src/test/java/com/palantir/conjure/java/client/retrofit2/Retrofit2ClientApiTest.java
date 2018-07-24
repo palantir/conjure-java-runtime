@@ -262,7 +262,12 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void completableFuture_should_throw_normal_IoException_for_client_side_errors() {
-        service = Retrofit2Client.create(TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
+        service = Retrofit2Client.create(
+                TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration
+                        .builder()
                         .from(createTestConfig("https://invalid.service.dev"))
                         .connectTimeout(Duration.ofMillis(10))
                         .build());
