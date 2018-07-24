@@ -29,6 +29,7 @@ import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.ClientConfiguration;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import com.palantir.logsafe.testing.Assertions;
@@ -68,7 +69,10 @@ public final class Retrofit2ClientApiTest extends TestBase {
     @Before
     public void before() {
         url = server.url("/");
-        service = Retrofit2Client.create(TestService.class, AGENT, createTestConfig(url.toString()));
+        service = Retrofit2Client.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig(url.toString()));
     }
 
     @Test
@@ -181,8 +185,12 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void connectionFailureWithCompletableFuture() {
-        service = Retrofit2Client.create(TestService.class, AGENT,
-                ClientConfiguration.builder()
+        service = Retrofit2Client.create(
+                TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration
+                        .builder()
                         .from(createTestConfig("https://invalid.service.dev"))
                         .connectTimeout(Duration.ofMillis(10))
                         .build());
@@ -254,8 +262,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void completableFuture_should_throw_normal_IoException_for_client_side_errors() {
-        service = Retrofit2Client.create(TestService.class, AGENT,
-                ClientConfiguration.builder()
+        service = Retrofit2Client.create(TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
                         .from(createTestConfig("https://invalid.service.dev"))
                         .connectTimeout(Duration.ofMillis(10))
                         .build());

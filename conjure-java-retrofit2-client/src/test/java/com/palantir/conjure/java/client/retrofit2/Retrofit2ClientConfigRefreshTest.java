@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.client.ClientConfiguration;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;
@@ -40,7 +41,10 @@ public final class Retrofit2ClientConfigRefreshTest extends TestBase {
         ClientConfiguration config2 = createTestConfig("http://localhost:" + server2.getPort());
 
         Refreshable<ClientConfiguration> refreshableConfig = Refreshable.of(config1);
-        TestService proxy = Retrofit2Client.create(TestService.class, AGENT, refreshableConfig);
+        TestService proxy = Retrofit2Client.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                refreshableConfig);
 
         // Call 1
         server1.enqueue(new MockResponse().setBody("\"server1\""));

@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.palantir.conjure.java.client.ClientConfiguration;
 import com.palantir.conjure.java.client.NodeSelectionStrategy;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -137,13 +138,11 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
             @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws Exception {
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService bogusHostProxy = Retrofit2Client.create(TestService.class, AGENT,
-                ClientConfiguration.builder()
-                        .from(createTestConfig(
-                                "http://foo-bar-bogus-host.unresolvable:80",
-                                "http://localhost:" + failoverTestCase.server1.getPort()))
-                        .maxNumRetries(2)
-                        .build());
+        TestService bogusHostProxy = Retrofit2Client.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration.builder().from(createTestConfig("http://foo-bar-bogus-host.unresolvable:80",
+                        "http://localhost:" + failoverTestCase.server1.getPort())).maxNumRetries(2).build());
         assertThat(bogusHostProxy.get().execute().body()).isEqualTo("foo");
         assertThat(failoverTestCase.server1.getRequestCount()).isEqualTo(1);
     }
@@ -154,10 +153,14 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(TestService.class, AGENT, ClientConfiguration.builder()
-                .from(createTestConfig("http://localhost:" + server1.getPort()))
-                .maxNumRetries(2)
-                .build());
+        TestService anotherProxy = Retrofit2Client.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration
+                        .builder()
+                        .from(createTestConfig("http://localhost:" + server1.getPort()))
+                        .maxNumRetries(2)
+                        .build());
 
         assertThat(anotherProxy.get().execute().body()).isEqualTo("foo");
     }
@@ -168,11 +171,15 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(TestService.class, AGENT, ClientConfiguration.builder()
-                .from(createTestConfig("http://localhost:" + server1.getPort()))
-                .maxNumRetries(2)
-                .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
-                .build());
+        TestService anotherProxy = Retrofit2Client.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration
+                        .builder()
+                        .from(createTestConfig("http://localhost:" + server1.getPort()))
+                        .maxNumRetries(2)
+                        .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
+                        .build());
 
         assertThat(anotherProxy.get().execute().body()).isEqualTo("foo");
     }
@@ -183,10 +190,14 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(TestService.class, AGENT, ClientConfiguration.builder()
-                .from(createTestConfig("http://localhost:" + server1.getPort()))
-                .maxNumRetries(2)
-                .build());
+        TestService anotherProxy = Retrofit2Client.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration
+                        .builder()
+                        .from(createTestConfig("http://localhost:" + server1.getPort()))
+                        .maxNumRetries(2)
+                        .build());
 
         CompletableFuture<String> future = new CompletableFuture<>();
         anotherProxy.get().enqueue(new Callback<String>() {
@@ -210,11 +221,15 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(TestService.class, AGENT, ClientConfiguration.builder()
-                .from(createTestConfig("http://localhost:" + server1.getPort()))
-                .maxNumRetries(2)
-                .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
-                .build());
+        TestService anotherProxy = Retrofit2Client.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration
+                        .builder()
+                        .from(createTestConfig("http://localhost:" + server1.getPort()))
+                        .maxNumRetries(2)
+                        .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
+                        .build());
 
         CompletableFuture<String> future = new CompletableFuture<>();
         anotherProxy.get().enqueue(new Callback<String>() {
@@ -236,11 +251,15 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
     public void testCache_recovery() throws Exception {
         MockWebServer server1 = new MockWebServer();
 
-        TestService anotherProxy = Retrofit2Client.create(TestService.class, AGENT, ClientConfiguration.builder()
-                .from(createTestConfig("http://localhost:" + server1.getPort()))
-                .maxNumRetries(1)
-                .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
-                .build());
+        TestService anotherProxy = Retrofit2Client.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration
+                        .builder()
+                        .from(createTestConfig("http://localhost:" + server1.getPort()))
+                        .maxNumRetries(1)
+                        .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
+                        .build());
 
         server1.shutdown();
 
@@ -276,10 +295,15 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         }
 
         public TestService getProxy() {
-            return Retrofit2Client.create(TestService.class, AGENT,
-                    ClientConfiguration.builder()
-                            .from(createTestConfig(
-                                    String.format("http://%s:%s/api/", server1.getHostName(), server1.getPort()),
+            return Retrofit2Client.create(
+                    TestService.class,
+                    AGENT,
+                    new HostMetricsRegistry(),
+                    ClientConfiguration
+                            .builder()
+                            .from(createTestConfig(String.format("http://%s:%s/api/",
+                                    server1.getHostName(),
+                                    server1.getPort()),
                                     String.format("http://%s:%s/api/", server2.getHostName(), server2.getPort())))
                             .maxNumRetries(2)  // need 2 retries because URL order is not deterministic
                             .nodeSelectionStrategy(nodeSelectionStrategy)

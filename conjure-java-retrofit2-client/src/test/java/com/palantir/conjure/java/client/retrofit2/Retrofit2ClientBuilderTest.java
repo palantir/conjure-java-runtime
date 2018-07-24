@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.service.UserAgents;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import java.io.IOException;
 import okhttp3.HttpUrl;
@@ -52,8 +53,10 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
 
     private void assertRequestUrlYieldsHttpPath(String basePath, String expectedQueryPath) throws Exception {
         HttpUrl url = server.url(basePath);
-        TestService
-                service = Retrofit2Client.create(TestService.class, AGENT, createTestConfig(url.toString()));
+        TestService service = Retrofit2Client.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig(url.toString()));
 
         server.enqueue(new MockResponse().setBody("\"server\""));
         assertThat(service.get().execute().body(), is("server"));
@@ -66,9 +69,12 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
 
     @Test
     public void testUserAgent_defaultHeaderIsSent() throws InterruptedException, IOException {
-        TestService service = Retrofit2Client.create(
-                TestService.class, AGENT, createTestConfig(
-                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
+        TestService service = Retrofit2Client.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig(String.format("http://%s:%s/api/",
+                        server.getHostName().toUpperCase(),
+                        server.getPort())));
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.get().execute();
 
@@ -78,9 +84,12 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
 
     @Test
     public void testUserAgent_usesUnknownAgentIfBogusAgentIsGiven() throws InterruptedException, IOException {
-        TestService service = Retrofit2Client.create(
-                TestService.class, "bogus user agent", createTestConfig(
-                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
+        TestService service = Retrofit2Client.create(TestService.class,
+                "bogus user agent",
+                new HostMetricsRegistry(),
+                createTestConfig(String.format("http://%s:%s/api/",
+                        server.getHostName().toUpperCase(),
+                        server.getPort())));
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.get().execute();
 
@@ -90,9 +99,12 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
 
     @Test
     public void testUserAgent_augmentedByHttpRemotingAndServiceComponents() throws Exception {
-        TestService service = Retrofit2Client.create(
-                TestService.class, AGENT, createTestConfig(
-                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
+        TestService service = Retrofit2Client.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig(String.format("http://%s:%s/api/",
+                        server.getHostName().toUpperCase(),
+                        server.getPort())));
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.get().execute();
 
