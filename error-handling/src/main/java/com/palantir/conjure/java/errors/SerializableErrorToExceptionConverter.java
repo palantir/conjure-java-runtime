@@ -21,7 +21,6 @@ import com.google.common.io.CharStreams;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.logsafe.SafeArg;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -66,7 +65,7 @@ public final class SerializableErrorToExceptionConverter {
                 String message = String.format(
                         "Error %s. Failed to parse error body and deserialize exception: %s. Body:%n%s",
                         status, e.getMessage(), bodyAsString);
-                log.warn("Failed to deserialize exception: {}", SafeArg.of("message", message), e);
+                log.warn("Failed to deserialize exception: {}", message, e);
                 return new RuntimeException(message);
             }
         } else {
