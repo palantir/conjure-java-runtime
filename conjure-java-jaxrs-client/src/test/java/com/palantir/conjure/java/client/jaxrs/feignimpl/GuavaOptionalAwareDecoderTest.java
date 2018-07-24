@@ -78,31 +78,9 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     }
 
     @Test
-    public void testThrowsNotAuthorized() {
+    public void testThrowsPermissionDenied() {
         try {
-            service.getThrowsNotAuthorized(null);
-            fail();
-        } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotAuthorizedException"));
-            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotAuthorizedException"));
-        }
-    }
-
-    @Test
-    public void testOptionalThrowsNotAuthorized() {
-        try {
-            service.getOptionalThrowsNotAuthorized(null);
-            fail();
-        } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotAuthorizedException"));
-            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotAuthorizedException"));
-        }
-    }
-
-    @Test
-    public void testThrowsFordidden() {
-        try {
-            service.getThrowsForbidden(null);
+            service.getThrowsPermissionDenied(null);
             fail();
         } catch (RemoteException e) {
             assertThat(e.getMessage(), containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)"));
@@ -111,9 +89,9 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     }
 
     @Test
-    public void testOptionalThrowsForbbbden() {
+    public void testOptionalThrowsPermissionDenied() {
         try {
-            service.getOptionalThrowsForbidden(null);
+            service.getOptionalThrowsPermissionDenied(null);
             fail();
         } catch (RemoteException e) {
             assertThat(e.getMessage(), containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)"));
