@@ -16,12 +16,12 @@
 
 package feign;
 
-import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.testing.Assertions;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting3.jaxrs.TestBase;
 import feign.codec.Decoder;
@@ -42,7 +42,7 @@ public final class RejectNullDecoderTest extends TestBase {
     public void throws_nullpointerexception_when_body_is_null() {
         Response response = Response.create(200, "OK", headers, null, StandardCharsets.UTF_8);
 
-        assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
+        Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("Unexpected null body")
                 .hasArgs(SafeArg.of("status", 200));
@@ -52,7 +52,7 @@ public final class RejectNullDecoderTest extends TestBase {
     public void throws_nullpointerexception_when_body_is_string_null() {
         Response response = Response.create(200, "OK", headers, "null", StandardCharsets.UTF_8);
 
-        assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
+        Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("Unexpected null body")
                 .hasArgs(SafeArg.of("status", 200));
@@ -62,7 +62,7 @@ public final class RejectNullDecoderTest extends TestBase {
     public void throws_nullpointerexception_when_body_is_empty_string() {
         Response response = Response.create(200, "OK", headers, "", StandardCharsets.UTF_8);
 
-        assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
+        Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("Unexpected null body")
                 .hasArgs(SafeArg.of("status", 200));

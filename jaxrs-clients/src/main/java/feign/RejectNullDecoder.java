@@ -22,7 +22,7 @@ import feign.codec.Decoder;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-public class RejectNullDecoder implements Decoder {
+public final class RejectNullDecoder implements Decoder {
     private final Decoder delegate;
 
     public RejectNullDecoder(Decoder delegate) {
