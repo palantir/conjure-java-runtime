@@ -39,10 +39,21 @@ public final class RejectNullDecoderTest extends TestBase {
             new JacksonDecoder(ObjectMappers.newClientObjectMapper()));
 
     @Test
-    public void throws_safe_nullpointerexception_when_body_is_null() {
+    public void throws_nullpointerexception_when_body_is_null() {
         Response response = Response.create(200, "OK", headers, null, StandardCharsets.UTF_8);
 
         assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("Unexpected null body")
+                .hasArgs(SafeArg.of("status", 200));
+    }
+
+    @Test
+    public void throws_nullpointerexception_when_body_is_string_null() {
+        Response response = Response.create(200, "OK", headers, "null", StandardCharsets.UTF_8);
+
+        assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
+                .isInstanceOf(NullPointerException.class)
                 .hasMessage("Unexpected null body")
                 .hasArgs(SafeArg.of("status", 200));
     }
