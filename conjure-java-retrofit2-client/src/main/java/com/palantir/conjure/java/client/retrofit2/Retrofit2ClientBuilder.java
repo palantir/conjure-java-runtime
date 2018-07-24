@@ -18,7 +18,7 @@ package com.palantir.conjure.java.client.retrofit2;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.api.config.service.UserAgent;
-import com.palantir.conjure.java.client.ClientConfiguration;
+import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import com.palantir.conjure.java.serialization.ObjectMappers;

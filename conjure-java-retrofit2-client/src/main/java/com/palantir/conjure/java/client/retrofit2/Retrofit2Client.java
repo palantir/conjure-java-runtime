@@ -18,7 +18,7 @@ package com.palantir.conjure.java.client.retrofit2;
 
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.api.config.service.UserAgent;
-import com.palantir.conjure.java.client.ClientConfiguration;
+import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;

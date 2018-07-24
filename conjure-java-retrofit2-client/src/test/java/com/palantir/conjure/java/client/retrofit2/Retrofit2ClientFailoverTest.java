@@ -19,8 +19,8 @@ package com.palantir.conjure.java.client.retrofit2;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.palantir.conjure.java.client.ClientConfiguration;
-import com.palantir.conjure.java.client.NodeSelectionStrategy;
+import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import java.io.IOException;
 import java.time.Duration;
