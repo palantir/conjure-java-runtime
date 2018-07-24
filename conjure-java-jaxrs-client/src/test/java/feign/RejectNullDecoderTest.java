@@ -20,10 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.palantir.conjure.java.client.jaxrs.TestBase;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.testing.Assertions;
-import com.palantir.remoting3.ext.jackson.ObjectMappers;
-import com.palantir.remoting3.jaxrs.TestBase;
 import feign.codec.Decoder;
 import feign.jackson.JacksonDecoder;
 import java.nio.charset.StandardCharsets;
