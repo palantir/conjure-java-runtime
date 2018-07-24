@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -46,13 +47,18 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\""));
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        TestService directService = JaxRsClient.create(TestService.class, AGENT,
+        TestService directService = JaxRsClient.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
         ClientConfiguration proxiedConfig = ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server.getPort()))
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .build();
-        TestService proxiedService = JaxRsClient.create(TestService.class, AGENT, proxiedConfig);
+        TestService proxiedService = JaxRsClient.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                proxiedConfig);
 
         assertThat(directService.string()).isEqualTo("server");
         assertThat(proxiedService.string()).isEqualTo("proxyServer");
@@ -70,7 +76,8 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .proxyCredentials(BasicCredentials.of("fakeUser", "fakePassword"))
                 .build();
-        TestService proxiedService = JaxRsClient.create(TestService.class, AGENT, proxiedConfig);
+        TestService proxiedService =
+                JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), proxiedConfig);
 
         assertThat(proxiedService.string()).isEqualTo("proxyServer");
         RecordedRequest firstRequest = proxyServer.takeRequest();

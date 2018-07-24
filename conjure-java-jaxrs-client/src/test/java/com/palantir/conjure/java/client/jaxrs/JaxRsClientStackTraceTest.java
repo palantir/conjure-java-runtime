@@ -24,6 +24,7 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -40,8 +41,7 @@ public final class JaxRsClientStackTraceTest extends TestBase {
 
     @Before
     public void before() throws Exception {
-        proxy = JaxRsClient.create(TestService.class, AGENT,
-                ClientConfiguration.builder()
+        proxy = JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(1)
                         .build());

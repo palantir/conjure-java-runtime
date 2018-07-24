@@ -18,7 +18,6 @@ package com.palantir.conjure.java.client.retrofit2;
 
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.api.config.service.UserAgent;
-import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
@@ -46,27 +45,9 @@ public final class Retrofit2Client {
     }
 
     /**
-     * Creates a {@code T client} for the given service configuration. The HTTP {@code User-Agent} header of every
-     * request is set to the given non-empty {@code userAgent} string.
-     */
-    public static <T> T create(Class<T> serviceClass, UserAgent userAgent, ClientConfiguration config) {
-        return create(serviceClass, UserAgents.format(userAgent), config);
-    }
-
-    /**
-     * Like {@link #create(Class, UserAgent, ClientConfiguration)}, but with a custom user agent string.
-     *
-     * @deprecated Use {@link #create(Class, UserAgent, ClientConfiguration)}
-     */
-    @Deprecated
-    public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration config) {
-        return new Retrofit2ClientBuilder(config).build(serviceClass, userAgent);
-    }
-
-    /**
-     * Similar to {@link #create(Class, UserAgent, ClientConfiguration)}, but creates a mutable client that updates its
-     * configuration transparently whenever the given {@link Refreshable refreshable} {@link ClientConfiguration}
-     * changes.
+     * Similar to {@link #create(Class, UserAgent, HostMetricsRegistry, ClientConfiguration)}, but creates a mutable
+     * client that updates its configuration transparently whenever the given {@link Refreshable refreshable}
+     * {@link ClientConfiguration} changes.
      */
     public static <T> T create(
             Class<T> serviceClass,
@@ -76,26 +57,5 @@ public final class Retrofit2Client {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 config,
                 serviceConfiguration -> create(serviceClass, userAgent, hostMetricsRegistry, serviceConfiguration)));
-    }
-
-    /**
-     * Similar to {@link #create(Class, UserAgent, ClientConfiguration)}, but creates a mutable client that updates its
-     * configuration transparently whenever the given {@link Refreshable refreshable} {@link ClientConfiguration}
-     * changes.
-     */
-    public static <T> T create(Class<T> serviceClass, UserAgent userAgent, Refreshable<ClientConfiguration> config) {
-        return create(serviceClass, UserAgents.format(userAgent), config);
-    }
-
-    /**
-     * Like {@link #create(Class, UserAgent, Refreshable)}, but with a custom user agent string.
-     *
-     * @deprecated Use {@link #create(Class, UserAgent, Refreshable)}
-     */
-    @Deprecated
-    public static <T> T create(Class<T> serviceClass, String userAgent, Refreshable<ClientConfiguration> config) {
-        return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
-                config,
-                serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration)));
     }
 }

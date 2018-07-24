@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
@@ -49,7 +50,8 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.create(GuavaTestServer.TestService.class, AGENT, createTestConfig(endpointUri));
+        service = JaxRsClient.create(
+                GuavaTestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }
 
     @Test

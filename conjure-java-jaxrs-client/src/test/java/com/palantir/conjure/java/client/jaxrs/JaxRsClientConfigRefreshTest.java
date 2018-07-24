@@ -18,8 +18,10 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;
@@ -40,7 +42,10 @@ public final class JaxRsClientConfigRefreshTest extends TestBase {
         ClientConfiguration config2 = createTestConfig("http://localhost:" + server2.getPort());
 
         Refreshable<ClientConfiguration> refreshableConfig = Refreshable.of(config1);
-        TestService proxy = JaxRsClient.create(TestService.class, "agent", refreshableConfig);
+        TestService proxy = JaxRsClient.create(TestService.class,
+                UserAgents.tryParse("agent"),
+                new HostMetricsRegistry(),
+                refreshableConfig);
 
         // Call 1
         server1.enqueue(new MockResponse().setBody("\"server1\""));

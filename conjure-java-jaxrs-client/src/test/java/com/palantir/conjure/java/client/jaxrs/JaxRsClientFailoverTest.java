@@ -25,6 +25,7 @@ import static org.junit.Assert.fail;
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import feign.RetryableException;
 import java.io.IOException;
 import java.time.Duration;
@@ -144,13 +145,11 @@ public final class JaxRsClientFailoverTest extends TestBase {
             @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws Exception {
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService bogusHostProxy = JaxRsClient.create(TestService.class, AGENT,
-                ClientConfiguration.builder()
-                        .from(createTestConfig(
-                                "http://foo-bar-bogus-host.unresolvable:80",
-                                "http://localhost:" + failoverTestCase.server1.getPort()))
-                        .maxNumRetries(2)
-                        .build());
+        TestService bogusHostProxy = JaxRsClient.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration.builder().from(createTestConfig("http://foo-bar-bogus-host.unresolvable:80",
+                        "http://localhost:" + failoverTestCase.server1.getPort())).maxNumRetries(2).build());
         assertThat(bogusHostProxy.string(), is("foo"));
         assertThat(failoverTestCase.server1.getRequestCount(), is(1));
     }
@@ -161,10 +160,14 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = JaxRsClient.create(TestService.class, AGENT, ClientConfiguration.builder()
-                .from(createTestConfig("http://localhost:" + server1.getPort()))
-                .maxNumRetries(2)
-                .build());
+        TestService anotherProxy = JaxRsClient.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration
+                        .builder()
+                        .from(createTestConfig("http://localhost:" + server1.getPort()))
+                        .maxNumRetries(2)
+                        .build());
 
         assertThat(anotherProxy.string(), is("foo"));
     }
@@ -175,11 +178,15 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = JaxRsClient.create(TestService.class, AGENT, ClientConfiguration.builder()
-                .from(createTestConfig("http://localhost:" + server1.getPort()))
-                .maxNumRetries(2)
-                .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
-                .build());
+        TestService anotherProxy = JaxRsClient.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration
+                        .builder()
+                        .from(createTestConfig("http://localhost:" + server1.getPort()))
+                        .maxNumRetries(2)
+                        .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
+                        .build());
 
         assertThat(anotherProxy.string(), is("foo"));
     }
@@ -188,11 +195,15 @@ public final class JaxRsClientFailoverTest extends TestBase {
     public void testCache_recovery() throws Exception {
         MockWebServer server1 = new MockWebServer();
 
-        TestService anotherProxy = JaxRsClient.create(TestService.class, AGENT, ClientConfiguration.builder()
-                .from(createTestConfig("http://localhost:" + server1.getPort()))
-                .maxNumRetries(1)
-                .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
-                .build());
+        TestService anotherProxy = JaxRsClient.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration
+                        .builder()
+                        .from(createTestConfig("http://localhost:" + server1.getPort()))
+                        .maxNumRetries(1)
+                        .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
+                        .build());
 
         server1.shutdown();
 
@@ -242,10 +253,8 @@ public final class JaxRsClientFailoverTest extends TestBase {
         }
 
         public TestService getProxy() {
-            return JaxRsClient.create(TestService.class, AGENT,
-                    ClientConfiguration.builder()
-                            .from(createTestConfig(
-                                    "http://localhost:" + server1.getPort(),
+            return JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
+                            .from(createTestConfig("http://localhost:" + server1.getPort(),
                                     "http://localhost:" + server2.getPort()))
                             .maxNumRetries(2)
                             .nodeSelectionStrategy(nodeSelectionStrategy)

@@ -22,6 +22,7 @@ import static org.junit.Assert.assertThat;
 
 import com.palantir.conjure.java.api.tracing.OpenSpan;
 import com.palantir.conjure.java.api.tracing.TraceHttpHeaders;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.tracing.Tracer;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
@@ -41,7 +42,7 @@ public final class TracerTest extends TestBase {
     @Before
     public void before() {
         String uri = "http://localhost:" + server.getPort();
-        service = JaxRsClient.create(TestService.class, AGENT, createTestConfig(uri));
+        service = JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(uri));
         server.enqueue(new MockResponse().setBody("\"server\""));
     }
 

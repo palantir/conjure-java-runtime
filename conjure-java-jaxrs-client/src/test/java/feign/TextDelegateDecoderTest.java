@@ -31,6 +31,7 @@ import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaTestServer;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -66,7 +67,11 @@ public final class TextDelegateDecoderTest extends TestBase {
         textDelegateDecoder = new TextDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.create(GuavaTestServer.TestService.class, AGENT, createTestConfig(endpointUri));
+        service = JaxRsClient.create(
+                GuavaTestServer.TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig(endpointUri));
     }
 
     @Test

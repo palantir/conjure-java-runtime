@@ -17,9 +17,11 @@
 package com.palantir.conjure.java.client.jaxrs;
 
 import com.google.common.reflect.Reflection;
+import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 
 /**
  * Variant of {@link JaxRsClient} with additional scala serialization support.
@@ -28,18 +30,27 @@ public final class JaxRsScalaClient {
 
     private JaxRsScalaClient() {}
 
-    /** See {@link JaxRsClient}. */
-    public static <T> T create(Class<T> serviceClass, String userAgent, ClientConfiguration config) {
-        return new FeignJaxRsScalaClientBuilder(config).build(serviceClass, userAgent);
+    /**
+     * See {@link JaxRsClient}.
+     */
+    public static <T> T create(
+            Class<T> serviceClass,
+            UserAgent userAgent,
+            HostMetricsRegistry hostMetricsRegistry,
+            ClientConfiguration config) {
+        return new FeignJaxRsScalaClientBuilder(config)
+                .hostMetricsRegistry(hostMetricsRegistry)
+                .build(serviceClass, userAgent);
     }
 
     /** See {@link JaxRsClient}. */
     public static <T> T create(
             Class<T> serviceClass,
-            String userAgent,
+            UserAgent userAgent,
+            HostMetricsRegistry hostMetricsRegistry,
             Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 config,
-                serviceConfiguration -> create(serviceClass, userAgent, serviceConfiguration)));
+                serviceConfiguration -> create(serviceClass, userAgent, hostMetricsRegistry, serviceConfiguration)));
     }
 }

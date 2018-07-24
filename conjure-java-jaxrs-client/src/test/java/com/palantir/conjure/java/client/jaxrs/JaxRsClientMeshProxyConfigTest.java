@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.net.HostAndPort;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;
@@ -41,7 +42,10 @@ public final class JaxRsClientMeshProxyConfigTest extends TestBase {
                 .maxNumRetries(0)
                 .build();
 
-        TestService proxiedService = JaxRsClient.create(TestService.class, AGENT, proxiedConfig);
+        TestService proxiedService = JaxRsClient.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                proxiedConfig);
 
         assertThat(proxiedService.string()).isEqualTo("server");
         assertThat(server.takeRequest().getHeader(HttpHeaders.HOST)).isEqualTo("foo.com");

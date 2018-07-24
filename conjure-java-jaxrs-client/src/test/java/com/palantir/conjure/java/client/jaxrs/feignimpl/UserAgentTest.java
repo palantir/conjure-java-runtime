@@ -25,6 +25,7 @@ import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.client.jaxrs.TestService;
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -52,7 +53,8 @@ public final class UserAgentTest extends TestBase {
 
     @Test
     public void testUserAgent_default() throws InterruptedException {
-        TestService service = JaxRsClient.create(TestService.class, AGENT, createTestConfig(endpointUri));
+        TestService service =
+                JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
         service.string();
 
         RecordedRequest request = server.takeRequest();
@@ -61,7 +63,10 @@ public final class UserAgentTest extends TestBase {
 
     @Test
     public void testUserAgent_usesUnknownAgentWhenProvidedWithBogusAgentString() throws InterruptedException {
-        TestService service = JaxRsClient.create(TestService.class, "bogus version string",
+        TestService service = JaxRsClient.create(
+                TestService.class,
+                UserAgents.tryParse("bogus version string"),
+                new HostMetricsRegistry(),
                 createTestConfig(endpointUri));
         service.string();
 
@@ -71,7 +76,8 @@ public final class UserAgentTest extends TestBase {
 
     @Test
     public void testUserAgent_augmentedByHttpRemotingAndServiceComponents() throws Exception {
-        TestService service = JaxRsClient.create(TestService.class, AGENT, createTestConfig(endpointUri));
+        TestService service =
+                JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
         service.string();
 
         RecordedRequest request = server.takeRequest();

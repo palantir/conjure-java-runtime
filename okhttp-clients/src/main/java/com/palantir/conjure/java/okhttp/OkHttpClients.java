@@ -31,7 +31,6 @@ import com.palantir.conjure.java.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -107,11 +106,6 @@ public final class OkHttpClients {
     private static final ScheduledExecutorService schedulingExecutor = Tracers.wrap(new ScheduledThreadPoolExecutor(
             NUM_SCHEDULING_THREADS, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
 
-    /**
-     * The per service and host metrics recorded for each HTTP call.
-     */
-    private static final HostMetricsRegistry defaultHostMetrics = new HostMetricsRegistry();
-
     private OkHttpClients() {}
 
     /**
@@ -121,37 +115,6 @@ public final class OkHttpClients {
     public static OkHttpClient create(
             ClientConfiguration config, UserAgent userAgent, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
         return createInternal(config, userAgent, hostMetrics, serviceClass, true /* randomize URLs */);
-    }
-
-    /**
-     * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
-     * ClientConfiguration#uris URIs} are initialized in random order.
-     *
-     * @deprecated Use {@link #create(ClientConfiguration, UserAgent, HostMetricsRegistry, Class)}
-     */
-    @Deprecated
-    public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return create(config, userAgent, defaultHostMetrics, serviceClass);
-    }
-
-    /**
-     * Deprecated variant of {@link #create(ClientConfiguration, UserAgent, Class)}.
-     *
-     * @deprecated Use {@link #create(ClientConfiguration, UserAgent, Class)}
-     */
-    @Deprecated
-    public static OkHttpClient create(ClientConfiguration config, String userAgent, Class<?> serviceClass) {
-        return create(config, UserAgents.tryParse(userAgent), serviceClass);
-    }
-
-    /**
-     * Return the per service and host metrics for all clients created by {@link OkHttpClients}.
-     *
-     * @deprecated Pass in a {@link HostMetricsRegistry} when creating a client.
-     */
-    @Deprecated
-    public static Collection<HostMetrics> hostMetrics() {
-        return defaultHostMetrics.getMetrics();
     }
 
     @VisibleForTesting
