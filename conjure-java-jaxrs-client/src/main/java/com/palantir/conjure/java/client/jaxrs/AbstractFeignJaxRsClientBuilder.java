@@ -17,9 +17,7 @@
 package com.palantir.conjure.java.client.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 import com.palantir.conjure.java.api.config.service.UserAgent;
-import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.ClientConfiguration;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareContract;
@@ -28,6 +26,7 @@ import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderRewrit
 import com.palantir.conjure.java.client.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
+import com.palantir.logsafe.Preconditions;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
 import feign.Contract;
@@ -46,7 +45,6 @@ import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JAXRSContract;
 import feign.okhttp.OkHttpClient;
-import java.util.Optional;
 
 /**
  * Not meant to be implemented outside of this library.
@@ -82,20 +80,11 @@ abstract class AbstractFeignJaxRsClientBuilder {
         return this;
     }
 
-    /**
-     * @deprecated Use {@link #build(Class, UserAgent)}.
-     */
-    @Deprecated
-    public final <T> T build(Class<T> serviceClass, String userAgent) {
-        return build(serviceClass, UserAgents.tryParse(userAgent));
-    }
-
     public final <T> T build(Class<T> serviceClass, UserAgent userAgent) {
         ObjectMapper objectMapper = getObjectMapper();
         ObjectMapper cborObjectMapper = getCborObjectMapper();
-        okhttp3.OkHttpClient okHttpClient = Optional.ofNullable(hostMetricsRegistry)
-                .map(hostMetrics -> OkHttpClients.create(config, userAgent, hostMetrics, serviceClass))
-                .orElseGet(() -> OkHttpClients.create(config, userAgent, serviceClass));
+        Preconditions.checkNotNull(hostMetricsRegistry, "hostMetricsRegistry must be set");
+        okhttp3.OkHttpClient okHttpClient = OkHttpClients.create(config, userAgent, hostMetricsRegistry, serviceClass);
 
         return Feign.builder()
                 .contract(createContract())
