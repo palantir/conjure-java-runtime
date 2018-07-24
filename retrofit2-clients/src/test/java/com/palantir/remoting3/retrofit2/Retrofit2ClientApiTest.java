@@ -19,11 +19,15 @@ package com.palantir.remoting3.retrofit2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.google.common.net.HttpHeaders;
+import com.palantir.logsafe.exceptions.SafeNullPointerException;
+import com.palantir.logsafe.testing.Assertions;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting.api.errors.SerializableError;
 import com.palantir.remoting3.clients.ClientConfiguration;
@@ -105,6 +109,21 @@ public final class Retrofit2ClientApiTest extends TestBase {
         server.enqueue(new MockResponse().setBody(dateString));
         assertThat(service.getComplexJava8Type(java8Optional(date)).execute().body()).isEqualTo(java8Optional(date));
         assertThat(server.takeRequest().getBody().readUtf8()).isEqualTo(dateString);
+    }
+
+    @Test
+    public void should_reject_body_containing_json_null() {
+        server.enqueue(new MockResponse().setBody("null"));
+        Assertions.assertThatLoggableExceptionThrownBy(() -> service.getRelative().execute().body())
+                .hasMessage("Unexpected null body")
+                .isInstanceOf(SafeNullPointerException.class);
+    }
+
+    @Test
+    public void should_reject_body_containing_empty_string() {
+        server.enqueue(new MockResponse().setBody(""));
+        assertThatThrownBy(() -> service.getRelative().execute().body())
+                .isInstanceOf(MismatchedInputException.class);
     }
 
     @Test

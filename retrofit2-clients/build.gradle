@@ -21,6 +21,7 @@ dependencies {
     testCompile "org.assertj:assertj-core"
     testCompile "org.hamcrest:hamcrest-all"
     testCompile "org.mockito:mockito-core"
+    testCompile "com.palantir.safe-logging:preconditions-assertj"
 
     processor "org.immutables:value"
 }
