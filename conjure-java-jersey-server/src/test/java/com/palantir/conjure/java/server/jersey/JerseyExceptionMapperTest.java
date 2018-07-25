@@ -56,13 +56,21 @@ public final class JerseyExceptionMapperTest extends JerseyTest {
     @Test
     public void testWebException() {
         Response response = target("/angry/web").request().get();
-        assertThat(response.getStatus()).isEqualTo(403);
+        // not service exception type, treat it as 500
+        assertThat(response.getStatus()).isEqualTo(500);
         assertThat(response.readEntity(String.class)).doesNotContain("secret");
+
+        // verify that it is of SerializableError type
+        response = target("/angry/web").request().get();
+        SerializableError entity = response.readEntity(SerializableError.class);
+        assertThat(entity.errorCode()).isEqualTo("INTERNAL");
+        assertThat(entity.errorName()).isEqualTo("Default:Internal");
     }
 
     @Test
     public void testRuntimeException() {
         Response response = target("/angry/runtime").request().get();
+        response = target("/angry/runtime").request().get();
         assertThat(response.getStatus()).isEqualTo(500);
         SerializableError entity = response.readEntity(SerializableError.class);
         assertThat(entity.errorCode()).isEqualTo("INTERNAL");

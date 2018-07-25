@@ -42,9 +42,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
-import javax.ws.rs.NotFoundException;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.ServerErrorException;
@@ -78,36 +76,32 @@ public final class ExceptionMappingTest {
         target = client.target(endpointUri);
     }
 
-    /**
-     * These tests confirm that {@link WebApplicationException}s are handled by the {@link
-     * WebApplicationExceptionMapper} rather than the {@link RuntimeExceptionMapper}
-     */
     @Test
-    public void testForbiddenException() throws NoSuchMethodException, SecurityException {
-        Response response = target.path("throw-forbidden-exception").request().get();
+    public void testPermissionDeniedException() throws SecurityException {
+        Response response = target.path("throw-permission-denied").request().get();
         assertThat(response.getStatus(), is(Status.FORBIDDEN.getStatusCode()));
     }
 
     @Test
-    public void testNotFoundException() throws NoSuchMethodException, SecurityException {
+    public void testNotFoundException() throws SecurityException {
         Response response = target.path("throw-not-found-exception").request().get();
         assertThat(response.getStatus(), is(Status.NOT_FOUND.getStatusCode()));
     }
 
     @Test
-    public void testServerErrorException() throws NoSuchMethodException, SecurityException {
+    public void testServerErrorException() throws SecurityException {
         Response response = target.path("throw-server-error-exception").request().get();
         assertThat(response.getStatus(), is(SERVER_EXCEPTION_STATUS.getStatusCode()));
     }
 
     @Test
-    public void testWebApplicationException() throws NoSuchMethodException, SecurityException {
+    public void testWebApplicationException() throws SecurityException {
         Response response = target.path("throw-web-application-exception").request().get();
         assertThat(response.getStatus(), is(WEB_EXCEPTION_STATUS.getStatusCode()));
     }
 
     @Test
-    public void testRemoteException() throws NoSuchMethodException, SecurityException, IOException {
+    public void testRemoteException() throws SecurityException, IOException {
         Response response = target.path("throw-remote-exception").request().get();
         assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
         String body =
@@ -119,7 +113,7 @@ public final class ExceptionMappingTest {
     }
 
     @Test
-    public void testServiceException() throws NoSuchMethodException, SecurityException, IOException {
+    public void testServiceException() throws SecurityException, IOException {
         Response response = target.path("throw-service-exception").request().get();
         assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
         String body =
@@ -154,13 +148,13 @@ public final class ExceptionMappingTest {
 
     public static final class ExceptionTestResource implements ExceptionTestService {
         @Override
-        public String throwForbiddenException() {
-            throw new ForbiddenException();
+        public String throwPermissionDenied() {
+            throw new ServiceException(ErrorType.PERMISSION_DENIED);
         }
 
         @Override
         public String throwNotFoundException() {
-            throw new NotFoundException();
+            throw new ServiceException(ErrorType.NOT_FOUND);
         }
 
         @Override
@@ -202,8 +196,8 @@ public final class ExceptionMappingTest {
     @Produces(MediaType.APPLICATION_JSON)
     public interface ExceptionTestService {
         @GET
-        @Path("/throw-forbidden-exception")
-        String throwForbiddenException();
+        @Path("/throw-permission-denied")
+        String throwPermissionDenied();
 
         @GET
         @Path("/throw-not-found-exception")
