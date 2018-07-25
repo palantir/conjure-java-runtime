@@ -164,13 +164,13 @@ public class GuavaTestServer extends Application<Configuration> {
         ImmutableMap<String, String> getThrowsNotFound(@QueryParam("value") @Nullable String value);
 
         @GET
-        @Path("/throwsNotAuthorized")
+        @Path("/throwsPermissionDenied")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         ImmutableMap<String, String> getThrowsPermissionDenied(@QueryParam("value") @Nullable String value);
 
         @GET
-        @Path("/optionalThrowsNotAuthorized")
+        @Path("/optionalThrowsPermissionDenied")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         Optional<ImmutableMap<String, String>> getOptionalThrowsPermissionDenied(

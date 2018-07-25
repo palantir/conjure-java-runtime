@@ -64,7 +64,7 @@ public final class JerseyExceptionMapperTest extends JerseyTest {
         response = target("/angry/web").request().get();
         SerializableError entity = response.readEntity(SerializableError.class);
         assertThat(entity.errorCode()).isEqualTo("INTERNAL");
-        assertThat(entity.parameters()).isEqualTo("Default:Internal");
+        assertThat(entity.errorName()).isEqualTo("Default:Internal");
     }
 
     @Test

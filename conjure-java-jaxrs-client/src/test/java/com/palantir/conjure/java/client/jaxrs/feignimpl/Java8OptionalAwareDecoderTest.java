@@ -81,7 +81,7 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     }
 
     @Test
-    public void testThrowsNotAuthorized() {
+    public void testThrowsPermissionDenied() {
         try {
             service.getThrowsPermissionDenied(null);
             fail();
@@ -92,7 +92,7 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     }
 
     @Test
-    public void testOptionalThrowsNotAuthorized() {
+    public void testOptionalThrowsPermissionDenied() {
         try {
             service.getOptionalThrowsPermissionDenied(null);
             fail();
