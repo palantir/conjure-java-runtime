@@ -67,7 +67,7 @@ public final class Retrofit2ClientBuilder {
                 .baseUrl(addTrailingSlash(config.uris().get(0)))
                 .addConverterFactory(
                         new CborConverterFactory(
-                                new RejectNullConverterFactory(
+                                new NeverReturnNullConverterFactory(
                                         new CoerceNullCollectionsConverterFactory(
                                                 JacksonConverterFactory.create(OBJECT_MAPPER))),
                                 CBOR_OBJECT_MAPPER))

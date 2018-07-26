@@ -26,11 +26,11 @@ import retrofit2.Converter;
 import retrofit2.Converter.Factory;
 import retrofit2.Retrofit;
 
-final class RejectNullConverterFactory extends Factory {
+final class NeverReturnNullConverterFactory extends Factory {
 
     private final Factory delegate;
 
-    RejectNullConverterFactory(Factory delegate) {
+    NeverReturnNullConverterFactory(Factory delegate) {
         this.delegate = delegate;
     }
 
