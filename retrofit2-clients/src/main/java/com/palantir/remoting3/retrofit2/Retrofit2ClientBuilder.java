@@ -68,10 +68,12 @@ public final class Retrofit2ClientBuilder {
                 .addConverterFactory(
                         new CborConverterFactory(
                                 new RejectNullConverterFactory(
-                                        JacksonConverterFactory.create(OBJECT_MAPPER)),
+                                        new CoerceNullCollectionsConverterFactory(
+                                                JacksonConverterFactory.create(OBJECT_MAPPER))),
                                 CBOR_OBJECT_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
                 .addCallAdapterFactory(AsyncSerializableErrorCallAdapterFactory.INSTANCE)
+                .addCallAdapterFactory(CoerceNullCollectionsCallAdapterFactory.INSTANCE)
                 .build();
         return retrofit.create(serviceClass);
     }
