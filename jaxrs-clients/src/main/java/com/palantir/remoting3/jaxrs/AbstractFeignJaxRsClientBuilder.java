@@ -30,6 +30,7 @@ import com.palantir.remoting3.okhttp.HostMetricsRegistry;
 import com.palantir.remoting3.okhttp.OkHttpClients;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
+import feign.CoerceNullCollectionsDecoder;
 import feign.Contract;
 import feign.Feign;
 import feign.GuavaOptionalAwareDecoder;
@@ -37,7 +38,7 @@ import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
 import feign.Java8OptionalAwareDecoder;
 import feign.Logger;
-import feign.RejectNullDecoder;
+import feign.NeverReturnNullDecoder;
 import feign.Request;
 import feign.Retryer;
 import feign.TextDelegateDecoder;
@@ -130,13 +131,14 @@ abstract class AbstractFeignJaxRsClientBuilder {
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
-        return new Java8OptionalAwareDecoder(
-                new GuavaOptionalAwareDecoder(
-                        new InputStreamDelegateDecoder(
-                                new TextDelegateDecoder(
-                                        new CborDelegateDecoder(
-                                                cborObjectMapper,
-                                                new RejectNullDecoder(
-                                                        new JacksonDecoder(objectMapper)))))));
+        return new NeverReturnNullDecoder(
+                new CoerceNullCollectionsDecoder(
+                    new Java8OptionalAwareDecoder(
+                        new GuavaOptionalAwareDecoder(
+                                new InputStreamDelegateDecoder(
+                                        new TextDelegateDecoder(
+                                                new CborDelegateDecoder(
+                                                        cborObjectMapper,
+                                                            new JacksonDecoder(objectMapper))))))));
     }
 }

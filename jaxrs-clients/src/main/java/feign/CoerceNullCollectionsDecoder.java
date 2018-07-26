@@ -16,26 +16,40 @@
 
 package feign;
 
-import com.palantir.logsafe.Preconditions;
-import com.palantir.logsafe.SafeArg;
 import feign.codec.Decoder;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public final class RejectNullDecoder implements Decoder {
+/**
+ * We want to be lenient and interpret "null" or empty responses (including 204) as the empty value if the expected
+ * type is a collection. Jackson can only do this for fields inside an object, but for top-level fields we have to do
+ * this manually.
+ */
+// TODO(dsanduleac): link to spec
+public final class CoerceNullCollectionsDecoder implements Decoder {
     private final Decoder delegate;
 
-    public RejectNullDecoder(Decoder delegate) {
+    public CoerceNullCollectionsDecoder(Decoder delegate) {
         this.delegate = delegate;
     }
 
     @Override
     public Object decode(Response response, Type type) throws FeignException, IOException {
         Object object = delegate.decode(response, type);
-        Preconditions.checkNotNull(object,
-                "Unexpected null body",
-                SafeArg.of("status", response.status()));
-
+        if ((response.status() == 200 || response.status() == 204) && object == null) {
+            Class<?> rawType = Types.getRawType(type);
+            if (List.class.isAssignableFrom(rawType)) {
+                return Collections.emptyList();
+            } else if (Set.class.isAssignableFrom(rawType)) {
+                return Collections.emptySet();
+            } else if (Map.class.isAssignableFrom(rawType)) {
+                return Collections.emptyMap();
+            }
+        }
         return object;
     }
 }
