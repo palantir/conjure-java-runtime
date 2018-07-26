@@ -24,6 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * We want to be lenient and interpret "null" or empty responses (including 204) as the empty value if the expected
+ * type is a collection. Jackson can only do this for fields inside an object, but for top-level fields we have to do
+ * this manually.
+ */
+// TODO(dsanduleac): link to spec
 public final class CoerceNullCollectionsDecoder implements Decoder {
     private final Decoder delegate;
 
