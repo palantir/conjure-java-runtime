@@ -72,8 +72,8 @@ public final class Retrofit2ClientBuilder {
                                                 JacksonConverterFactory.create(OBJECT_MAPPER))),
                                 CBOR_OBJECT_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
-                .addCallAdapterFactory(AsyncSerializableErrorCallAdapterFactory.INSTANCE)
-                .addCallAdapterFactory(CoerceNullCollectionsCallAdapterFactory.INSTANCE)
+                .addCallAdapterFactory(new CoerceNullCollectionsCallAdapterFactory(
+                        AsyncSerializableErrorCallAdapterFactory.INSTANCE))
                 .build();
         return retrofit.create(serviceClass);
     }

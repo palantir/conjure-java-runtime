@@ -4,6 +4,9 @@
 
 package com.palantir.remoting3.retrofit2;
 
+import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
@@ -17,6 +20,7 @@ import javax.annotation.Nullable;
 import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
+import retrofit2.CallAdapter.Factory;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -32,26 +36,54 @@ import retrofit2.Retrofit;
  */
 // TODO(dsanduleac): link to spec
 final class CoerceNullCollectionsCallAdapterFactory extends CallAdapter.Factory {
-    static final CoerceNullCollectionsCallAdapterFactory INSTANCE = new CoerceNullCollectionsCallAdapterFactory();
+
+    private final CallAdapter.Factory adapterDelegate;
+
+    CoerceNullCollectionsCallAdapterFactory(Factory adapterDelegate) {
+        this.adapterDelegate = adapterDelegate;
+    }
 
     @Nullable
     @Override
     public CallAdapter<?, ?> get(
             Type returnType, Annotation[] annotations, Retrofit retrofit) {
-        if (getRawType(returnType) != Call.class) {
-            return null;
+        if (!(returnType instanceof ParameterizedType)) {
+            // TODO(dsanduleac): can we relax this? Right now we only support Call / CompletableFuture
+            throw new SafeIllegalStateException("Function must return a ParametrizedType",
+                    SafeArg.of("type", returnType));
         }
+
         Type innerType = getParameterUpperBound(0, (ParameterizedType) returnType);
         Class rawType = getRawType(innerType);
 
-        if (List.class.isAssignableFrom(rawType)) {
-            return new DefaultingOnNullAdapter<>(returnType, Collections::emptyList);
-        } else if (Set.class.isAssignableFrom(rawType)) {
-            return new DefaultingOnNullAdapter<>(returnType, Collections::emptySet);
-        } else if (Map.class.isAssignableFrom(rawType)) {
-            return new DefaultingOnNullAdapter<>(returnType, Collections::emptyMap);
+        CallAdapter<?, ?> delegateAdapter = adapterDelegate.get(returnType, annotations, retrofit);
+
+        if (delegateAdapter == null) {
+            Preconditions.checkState(getRawType(returnType) == Call.class,
+                    "Lacking a delegate adapter, this CallAdapter only supports a returnType of 'Call'",
+                    SafeArg.of("returnType", returnType));
+            // This is essentially DefaultCallAdapterFactory but we can't access it :(
+            delegateAdapter = new CallAdapter<Object, Object>() {
+                @Override
+                public Type responseType() {
+                    return innerType;
+                }
+
+                @Override
+                public Object adapt(Call<Object> call) {
+                    return call;
+                }
+            };
         }
-        return null;
+
+        if (List.class.isAssignableFrom(rawType)) {
+            return new DefaultingOnNullAdapter<>(delegateAdapter, Collections::emptyList);
+        } else if (Set.class.isAssignableFrom(rawType)) {
+            return new DefaultingOnNullAdapter<>(delegateAdapter, Collections::emptySet);
+        } else if (Map.class.isAssignableFrom(rawType)) {
+            return new DefaultingOnNullAdapter<>(delegateAdapter, Collections::emptyMap);
+        }
+        return delegateAdapter;
     }
 
     /**
@@ -59,23 +91,24 @@ final class CoerceNullCollectionsCallAdapterFactory extends CallAdapter.Factory 
      * executing/enqueing the call, it replaces the resulting {@link Response}'s deserialized body with the given
      * default value if the body was {@code null}.
      */
-    private static final class DefaultingOnNullAdapter<R> implements CallAdapter<R, Call<R>> {
-        private final Type responseType;
+    private static final class DefaultingOnNullAdapter<R> implements CallAdapter<R, Object> {
         private final Supplier<R> defaultValue;
+        private final CallAdapter delegate;
 
-        private DefaultingOnNullAdapter(Type responseType, Supplier<R> defaultValue) {
-            this.responseType = responseType;
+        private DefaultingOnNullAdapter(CallAdapter delegate, Supplier<R> defaultValue) {
+            this.delegate = delegate;
             this.defaultValue = defaultValue;
         }
 
         @Override
         public Type responseType() {
-            return responseType;
+            return delegate.responseType();
         }
 
         @Override
-        public Call<R> adapt(Call<R> call) {
-            return new DefaultingCall<>(call, defaultValue);
+        public Object adapt(Call<R> call) {
+            DefaultingCall<R> defaultingCall = new DefaultingCall<>(call, defaultValue);
+            return delegate.adapt(defaultingCall);
         }
     }
 

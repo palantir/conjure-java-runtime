@@ -16,11 +16,8 @@
 
 package com.palantir.remoting3.retrofit2;
 
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
@@ -63,11 +60,7 @@ public final class CoerceNullCollectionsConverterFactory extends Converter.Facto
                     object = responseBodyConverter.convert(value);
                 }
                 if (object == null) {
-                    if (!(type instanceof ParameterizedType)) {
-                        throw new SafeIllegalStateException("Function must return a ParametrizedType",
-                                SafeArg.of("type", type));
-                    }
-                    Class<?> rawType = getRawType(getParameterUpperBound(0, (ParameterizedType) type));
+                    Class<?> rawType = getRawType(type);
                     if (List.class.isAssignableFrom(rawType)) {
                         return Collections.emptyList();
                     } else if (Set.class.isAssignableFrom(rawType)) {
