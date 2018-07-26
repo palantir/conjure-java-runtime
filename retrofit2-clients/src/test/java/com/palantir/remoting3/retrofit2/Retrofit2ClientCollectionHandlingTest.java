@@ -24,6 +24,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import javax.ws.rs.Path;
 import okhttp3.HttpUrl;
@@ -82,6 +84,15 @@ public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
 
         @GET("/map")
         Call<Map<String, String>> getMap();
+
+        @GET("/listFuture")
+        CompletableFuture<List<String>> getListFuture();
+
+        @GET("/setFuture")
+        CompletableFuture<Set<String>> getSetFuture();
+
+        @GET("/mapFuture")
+        CompletableFuture<Map<String, String>> getMapFuture();
     }
 
     @Test
@@ -99,9 +110,29 @@ public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
         assertCallBody(proxy.getMap(), map -> assertThat(map).isEmpty());
     }
 
+    @Test
+    public void testListFuture() throws Exception {
+        assertFuture(proxy.getListFuture(), list -> assertThat(list).isEmpty());
+    }
+
+    @Test
+    public void testSetFuture() throws Exception {
+        assertFuture(proxy.getSetFuture(), set -> assertThat(set).isEmpty());
+    }
+
+    @Test
+    public void testMapFuture() throws Exception {
+        assertFuture(proxy.getMapFuture(), map -> assertThat(map).isEmpty());
+    }
+
     private static <T> void assertCallBody(Call<T> call, Consumer<T> assertions) throws IOException {
         Response<T> response = call.execute();
         assertThat(response.isSuccessful()).isTrue();
         assertions.accept(response.body());
+    }
+
+    private static <T> void assertFuture(CompletableFuture<T> future, Consumer<T> assertions) throws Exception {
+        T value = future.get(1, TimeUnit.SECONDS);
+        assertions.accept(value);
     }
 }
