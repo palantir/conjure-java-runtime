@@ -32,6 +32,7 @@ import com.google.common.net.HttpHeaders;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import com.palantir.remoting3.jaxrs.TestBase;
 import com.palantir.remoting3.jaxrs.feignimpl.GuavaTestServer;
+import feign.codec.DecodeException;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -140,6 +141,8 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Test
     public void testStandardClientsUseTextDelegateEncoder() {
         assertThat(service.getString("string"), is("string"));
-        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> service.getString(null));
+        assertThatExceptionOfType(DecodeException.class)
+                .isThrownBy(() -> service.getString(null))
+                .withCauseInstanceOf(NullPointerException.class);
     }
 }
