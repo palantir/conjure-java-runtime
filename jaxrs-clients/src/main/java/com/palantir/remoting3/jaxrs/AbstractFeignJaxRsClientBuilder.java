@@ -140,5 +140,5 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 new CborDelegateDecoder(
                                                         cborObjectMapper,
                                                             new JacksonDecoder(objectMapper))))))));
-        }
+    }
 }
