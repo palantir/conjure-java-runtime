@@ -38,7 +38,7 @@ import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
 import feign.Java8OptionalAwareDecoder;
 import feign.Logger;
-import feign.RejectNullDecoder;
+import feign.NeverReturnNullDecoder;
 import feign.Request;
 import feign.Retryer;
 import feign.TextDelegateDecoder;
@@ -131,7 +131,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
-        return new RejectNullDecoder(
+        return new NeverReturnNullDecoder(
                 new CoerceNullCollectionsDecoder(
                     new Java8OptionalAwareDecoder(
                         new GuavaOptionalAwareDecoder(
