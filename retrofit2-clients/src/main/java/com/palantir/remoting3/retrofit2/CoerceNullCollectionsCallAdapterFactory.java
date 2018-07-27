@@ -37,16 +37,15 @@ import retrofit2.Retrofit;
 // TODO(dsanduleac): link to spec
 final class CoerceNullCollectionsCallAdapterFactory extends CallAdapter.Factory {
 
-    private final CallAdapter.Factory adapterDelegate;
+    private final CallAdapter.Factory delegate;
 
-    CoerceNullCollectionsCallAdapterFactory(Factory adapterDelegate) {
-        this.adapterDelegate = adapterDelegate;
+    CoerceNullCollectionsCallAdapterFactory(Factory delegate) {
+        this.delegate = delegate;
     }
 
     @Nullable
     @Override
-    public CallAdapter<?, ?> get(
-            Type returnType, Annotation[] annotations, Retrofit retrofit) {
+    public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
         if (!(returnType instanceof ParameterizedType)) {
             // TODO(dsanduleac): can we relax this? Right now we only support Call / CompletableFuture
             throw new SafeIllegalStateException("Function must return a ParametrizedType",
@@ -56,34 +55,46 @@ final class CoerceNullCollectionsCallAdapterFactory extends CallAdapter.Factory 
         Type innerType = getParameterUpperBound(0, (ParameterizedType) returnType);
         Class rawType = getRawType(innerType);
 
-        CallAdapter<?, ?> delegateAdapter = adapterDelegate.get(returnType, annotations, retrofit);
-
-        if (delegateAdapter == null) {
-            Preconditions.checkState(getRawType(returnType) == Call.class,
-                    "Lacking a delegate adapter, this CallAdapter only supports a returnType of 'Call'",
-                    SafeArg.of("returnType", returnType));
-            // This is essentially DefaultCallAdapterFactory but we can't access it :(
-            delegateAdapter = new CallAdapter<Object, Object>() {
-                @Override
-                public Type responseType() {
-                    return innerType;
-                }
-
-                @Override
-                public Object adapt(Call<Object> call) {
-                    return call;
-                }
-            };
-        }
+        CallAdapter<?, ?> maybeCallAdapter = delegate.get(returnType, annotations, retrofit);
+        CallAdapter<?, ?> callAdapter = maybeCallAdapter == null
+                ? fallbackCallAdapter(returnType, innerType)
+                : maybeCallAdapter;
 
         if (List.class.isAssignableFrom(rawType)) {
-            return new DefaultingOnNullAdapter<>(delegateAdapter, Collections::emptyList);
+            return new DefaultingOnNullAdapter<>(callAdapter, Collections::emptyList);
         } else if (Set.class.isAssignableFrom(rawType)) {
-            return new DefaultingOnNullAdapter<>(delegateAdapter, Collections::emptySet);
+            return new DefaultingOnNullAdapter<>(callAdapter, Collections::emptySet);
         } else if (Map.class.isAssignableFrom(rawType)) {
-            return new DefaultingOnNullAdapter<>(delegateAdapter, Collections::emptyMap);
+            return new DefaultingOnNullAdapter<>(callAdapter, Collections::emptyMap);
         }
-        return delegateAdapter;
+        return callAdapter;
+    }
+
+    private static CallAdapter<?, ?> fallbackCallAdapter(Type returnType, Type innerType) {
+        Preconditions.checkState(
+                getRawType(returnType) == Call.class,
+                "Lacking a delegate adapter, this CallAdapter only supports a returnType of 'Call'",
+                SafeArg.of("returnType", returnType));
+        return new IdentityCallAdapter(innerType);
+    }
+
+    /** This is essentially {@link retrofit2.DefaultCallAdapterFactory} but we can't access it. */
+    private static final class IdentityCallAdapter implements CallAdapter<Object, Object> {
+        private Type responseType;
+
+        IdentityCallAdapter(Type responseType) {
+            this.responseType = responseType;
+        }
+
+        @Override
+        public Type responseType() {
+            return responseType;
+        }
+
+        @Override
+        public Object adapt(Call<Object> call) {
+            return call;
+        }
     }
 
     /**
