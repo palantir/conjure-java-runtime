@@ -30,14 +30,15 @@ import retrofit2.Converter;
 import retrofit2.Retrofit;
 
 /**
- * We want to be lenient and interpret "null" or empty responses (including 204) as the empty value if the expected
- * type is a collection. Jackson can only do this for fields inside an object, but for top-level fields we have to do
- * this manually.
+ * Handles 2xx HTTP responses and interprets "null" or empty responses as the empty value if the expected
+ * type is a collection.
  * <p>
- * {@link Converter.Factory} doesn't support handling the 204 response case, because retrofit will conveniently never
- * call converters for 204/205 responses (see {@link retrofit2.OkHttpCall#parseResponse(Response)}) but instead
- * returns a {code null} body.
- * To handle 204s, we rely on {@link CoerceNullCollectionsCallAdapterFactory}.
+ * Note that {@link retrofit2.OkHttpCall#parseResponse(Response)} does not call this
+ * ConverterFactory if the response is 204 or 205 - those cases are handled by
+ * {@link CoerceNullCollectionsCallAdapterFactory}.
+ * <p>
+ * (Jackson can only do this coercion for fields inside an object, but for top-level fields we have to do
+ * this manually.)
  */
 // TODO(dsanduleac): link to spec
 public final class CoerceNullCollectionsConverterFactory extends Converter.Factory {
@@ -50,33 +51,42 @@ public final class CoerceNullCollectionsConverterFactory extends Converter.Facto
     @Override
     public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
         Converter<ResponseBody, ?> responseBodyConverter = delegate.responseBodyConverter(type, annotations, retrofit);
-        return new Converter<ResponseBody, Object>() {
-            @Override
-            public Object convert(ResponseBody value) throws IOException {
-                Object object;
-                if (value.contentLength() == 0) {
-                    object = null;
-                } else {
-                    object = responseBodyConverter.convert(value);
-                }
-                if (object == null) {
-                    Class<?> rawType = getRawType(type);
-                    if (List.class.isAssignableFrom(rawType)) {
-                        return Collections.emptyList();
-                    } else if (Set.class.isAssignableFrom(rawType)) {
-                        return Collections.emptySet();
-                    } else if (Map.class.isAssignableFrom(rawType)) {
-                        return Collections.emptyMap();
-                    }
-                }
-                return object;
-            }
-        };
+        return new CoerceNullCollectionsConverter(responseBodyConverter, type);
     }
 
     @Override
-    public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] parameterAnnotations,
-            Annotation[] methodAnnotations, Retrofit retrofit) {
+    public Converter<?, RequestBody> requestBodyConverter(
+            Type type, Annotation[] parameterAnnotations, Annotation[] methodAnnotations, Retrofit retrofit) {
         return delegate.requestBodyConverter(type, parameterAnnotations, methodAnnotations, retrofit);
+    }
+
+    private static class CoerceNullCollectionsConverter implements Converter<ResponseBody, Object> {
+        private final Converter<ResponseBody, ?> responseBodyConverter;
+        private final Type type;
+
+        CoerceNullCollectionsConverter(Converter<ResponseBody, ?> responseBodyConverter, Type type) {
+            this.responseBodyConverter = responseBodyConverter;
+            this.type = type;
+        }
+
+        @Override
+        public Object convert(ResponseBody value) throws IOException {
+            Object object = (value.contentLength() == 0) ? null : responseBodyConverter.convert(value);
+            if (object != null) {
+                return object;
+            }
+
+            // responseBodyConverter returns null if the value was the literal 'null', so we can do our coercion
+            Class<?> rawType = getRawType(type);
+            if (List.class.isAssignableFrom(rawType)) {
+                return Collections.emptyList();
+            } else if (Set.class.isAssignableFrom(rawType)) {
+                return Collections.emptySet();
+            } else if (Map.class.isAssignableFrom(rawType)) {
+                return Collections.emptyMap();
+            } else {
+                return null;
+            }
+        }
     }
 }
