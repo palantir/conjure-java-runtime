@@ -6,7 +6,6 @@ package com.palantir.remoting3.retrofit2;
 
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
@@ -46,20 +45,18 @@ final class CoerceNullCollectionsCallAdapterFactory extends CallAdapter.Factory 
     @Nullable
     @Override
     public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
-        if (!(returnType instanceof ParameterizedType)) {
-            // TODO(dsanduleac): can we relax this? Right now we only support Call / CompletableFuture
-            throw new SafeIllegalStateException("Function must return a ParametrizedType",
-                    SafeArg.of("type", returnType));
-        }
-
+        // we only support Call<T> and CompletableFuture<T>
+        Preconditions.checkState(returnType instanceof ParameterizedType,
+                "Function must return a ParametrizedType",
+                SafeArg.of("type", returnType));
         Type innerType = getParameterUpperBound(0, (ParameterizedType) returnType);
-        Class rawType = getRawType(innerType);
 
         CallAdapter<?, ?> maybeCallAdapter = delegate.get(returnType, annotations, retrofit);
         CallAdapter<?, ?> callAdapter = maybeCallAdapter == null
                 ? fallbackCallAdapter(returnType, innerType)
                 : maybeCallAdapter;
 
+        Class rawType = getRawType(innerType);
         if (List.class.isAssignableFrom(rawType)) {
             return new DefaultingOnNullAdapter<>(callAdapter, Collections::emptyList);
         } else if (Set.class.isAssignableFrom(rawType)) {
