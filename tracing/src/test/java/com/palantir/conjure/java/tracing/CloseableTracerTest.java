@@ -18,12 +18,17 @@ package com.palantir.conjure.java.tracing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class CloseableTracerTest {
+    @Before
+    public void before() {
+        Tracer.getAndClearTrace();
+    }
 
     @Test
     public void startsAndClosesSpan() {

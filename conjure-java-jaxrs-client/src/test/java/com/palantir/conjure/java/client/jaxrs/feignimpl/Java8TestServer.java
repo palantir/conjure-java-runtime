@@ -32,7 +32,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -137,6 +140,21 @@ public class Java8TestServer extends Application<Configuration> {
         public Java8ComplexType getJava8ComplexType(Java8ComplexType value) {
             return value;
         }
+
+        @Override
+        public List<String> getNullList() {
+            return null;
+        }
+
+        @Override
+        public Set<String> getNullSet() {
+            return null;
+        }
+
+        @Override
+        public Map<String, String> getNullMap() {
+            return null;
+        }
     }
 
     @Path("/")
@@ -204,5 +222,20 @@ public class Java8TestServer extends Application<Configuration> {
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         Java8ComplexType getJava8ComplexType(Java8ComplexType value);
+
+        @POST
+        @Path("/list")
+        @Produces(MediaType.APPLICATION_JSON)
+        List<String> getNullList();
+
+        @POST
+        @Path("/set")
+        @Produces(MediaType.APPLICATION_JSON)
+        Set<String> getNullSet();
+
+        @POST
+        @Path("/map")
+        @Produces(MediaType.APPLICATION_JSON)
+        Map<String, String> getNullMap();
     }
 }

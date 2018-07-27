@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
@@ -127,7 +126,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     public void should_reject_body_containing_empty_string() {
         server.enqueue(new MockResponse().setBody(""));
         assertThatThrownBy(() -> service.getRelative().execute().body())
-                .isInstanceOf(MismatchedInputException.class);
+                .isInstanceOf(SafeNullPointerException.class);
     }
 
     @Test
