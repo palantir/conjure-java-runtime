@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.palantir.conjure.java.tracing.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;

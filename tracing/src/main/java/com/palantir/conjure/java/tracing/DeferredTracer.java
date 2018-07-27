@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.palantir.conjure.java.tracing;
 
 import com.palantir.conjure.java.tracing.Tracers.ThrowingCallable;
