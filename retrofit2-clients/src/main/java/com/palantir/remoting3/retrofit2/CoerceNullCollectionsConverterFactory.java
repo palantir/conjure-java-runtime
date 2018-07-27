@@ -41,7 +41,7 @@ import retrofit2.Retrofit;
  * this manually.)
  */
 // TODO(dsanduleac): link to spec
-public final class CoerceNullCollectionsConverterFactory extends Converter.Factory {
+final class CoerceNullCollectionsConverterFactory extends Converter.Factory {
     private final Converter.Factory delegate;
 
     CoerceNullCollectionsConverterFactory(Converter.Factory delegate) {
