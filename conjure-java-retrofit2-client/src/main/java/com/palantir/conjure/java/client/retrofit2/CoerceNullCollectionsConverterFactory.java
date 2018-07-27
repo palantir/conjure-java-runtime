@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting3.retrofit2;
+package com.palantir.conjure.java.client.retrofit2;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;

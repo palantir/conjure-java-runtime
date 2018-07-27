@@ -2,7 +2,7 @@
  * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  */
 
-package com.palantir.remoting3.retrofit2;
+package com.palantir.conjure.java.client.retrofit2;
 
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
