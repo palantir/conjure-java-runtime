@@ -18,6 +18,7 @@ package com.palantir.conjure.java.client.retrofit2;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,7 +70,8 @@ public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
     @Before
     public void before() {
         url = server.url("/");
-        proxy = Retrofit2Client.create(Service.class, AGENT, createTestConfig(url.toString()));
+        proxy = Retrofit2Client.create(
+                Service.class, AGENT, new HostMetricsRegistry(), createTestConfig(url.toString()));
         MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
         server.enqueue(mockResponse);
     }

@@ -18,6 +18,7 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -60,7 +61,10 @@ public final class JaxRsClientCollectionHandlingTest extends TestBase {
 
     @Before
     public void before() {
-        proxy = JaxRsClient.create(Service.class, AGENT,
+        proxy = JaxRsClient.create(
+                Service.class,
+                AGENT,
+                new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
         MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
         server.enqueue(mockResponse);
