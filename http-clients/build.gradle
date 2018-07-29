@@ -4,6 +4,7 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 dependencies {
     compile project(":keystores")
     compile 'com.palantir.remoting-api:service-config'
+    compile 'com.palantir.conjure.java.api:service-config'
     compile 'com.palantir.safe-logging:safe-logging'
 
     testCompile "junit:junit"
