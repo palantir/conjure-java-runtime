@@ -83,7 +83,7 @@ public interface UserAgent {
                 .map(nodeId -> com.palantir.conjure.java.api.config.service.UserAgent.of(primary().asConjure(), nodeId))
                 .orElseGet(() -> com.palantir.conjure.java.api.config.service.UserAgent.of(primary().asConjure()));
 
-        for (final Agent agent : informational()) {
+        for (Agent agent : informational()) {
             userAgent = userAgent.addAgent(agent.asConjure());
         }
         return userAgent;
