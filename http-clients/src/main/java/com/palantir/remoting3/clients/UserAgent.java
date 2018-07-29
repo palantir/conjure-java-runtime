@@ -78,6 +78,17 @@ public interface UserAgent {
         }
     }
 
+    default com.palantir.conjure.java.api.config.service.UserAgent asConjure() {
+        com.palantir.conjure.java.api.config.service.UserAgent userAgent = nodeId()
+                .map(nodeId -> com.palantir.conjure.java.api.config.service.UserAgent.of(primary().asConjure(), nodeId))
+                .orElseGet(() -> com.palantir.conjure.java.api.config.service.UserAgent.of(primary().asConjure()));
+
+        for (final Agent agent : informational()) {
+            userAgent = userAgent.addAgent(agent.asConjure());
+        }
+        return userAgent;
+    }
+
     /** Specifies an agent that participates (client-side) in an RPC call in terms of its name and version. */
     @Value.Immutable
     @ImmutablesStyle
@@ -92,6 +103,10 @@ public interface UserAgent {
             checkArgument(UserAgents.isValidName(name()), "Illegal agent name format: %s", name());
             // Should never hit the following.
             checkArgument(UserAgents.isValidVersion(version()), "Illegal version format: %s. This is a bug", version());
+        }
+
+        default com.palantir.conjure.java.api.config.service.UserAgent.Agent asConjure() {
+            return com.palantir.conjure.java.api.config.service.UserAgent.Agent.of(name(), version());
         }
 
         static Agent of(String name, String version) {
