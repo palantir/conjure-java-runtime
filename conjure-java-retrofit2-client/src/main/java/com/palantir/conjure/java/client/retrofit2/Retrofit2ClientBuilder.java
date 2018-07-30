@@ -19,7 +19,7 @@ package com.palantir.conjure.java.client.retrofit2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
-import com.palantir.conjure.java.okhttp.HostMetricsSink;
+import com.palantir.conjure.java.okhttp.HostEventsSink;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;
@@ -32,7 +32,7 @@ public final class Retrofit2ClientBuilder {
 
     private final ClientConfiguration config;
 
-    private HostMetricsSink hostEventsSink;
+    private HostEventsSink hostEventsSink;
 
     public Retrofit2ClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Cannot construct retrofit client with empty URI list");
@@ -42,7 +42,7 @@ public final class Retrofit2ClientBuilder {
     /**
      * Set the host metrics registry to use when constructing the OkHttp client.
      */
-    public Retrofit2ClientBuilder hostEventsSink(HostMetricsSink newHostEventsSink) {
+    public Retrofit2ClientBuilder hostEventsSink(HostEventsSink newHostEventsSink) {
         Preconditions.checkNotNull(newHostEventsSink, "hostEventsSink can't be null");
         hostEventsSink = newHostEventsSink;
         return this;

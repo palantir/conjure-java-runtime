@@ -21,7 +21,7 @@ import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
-import com.palantir.conjure.java.okhttp.HostMetricsSink;
+import com.palantir.conjure.java.okhttp.HostEventsSink;
 
 /**
  * Static factory methods for producing creating JAX-RS HTTP proxies.
@@ -37,7 +37,7 @@ public final class JaxRsClient {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsSink hostEventsSink,
+            HostEventsSink hostEventsSink,
             ClientConfiguration config) {
         // TODO(rfink): Add http-remoting agent as informational
         return new FeignJaxRsClientBuilder(config)
@@ -46,14 +46,14 @@ public final class JaxRsClient {
     }
 
     /**
-     * Similar to {@link #create(Class, UserAgent, HostMetricsSink, ClientConfiguration)}, but creates a mutable
+     * Similar to {@link #create(Class, UserAgent, HostEventsSink, ClientConfiguration)}, but creates a mutable
      * client that updates its configuration transparently whenever the given {@link Refreshable refreshable}
      * {@link ClientConfiguration} changes.
      */
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsSink hostEventsSink,
+            HostEventsSink hostEventsSink,
             Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 config,
