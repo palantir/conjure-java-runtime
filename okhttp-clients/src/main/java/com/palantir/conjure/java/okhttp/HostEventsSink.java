@@ -5,7 +5,10 @@
 package com.palantir.conjure.java.okhttp;
 
 /**
- * A destination for recording host events.
+ * A listener for responses / exceptions coming from remote hosts when using clients created from {@link OkHttpClients}.
+ * <p>
+ * We provide a {@link HostMetricsRegistry} implementation of this that turns these events into {@link HostMetrics}
+ * for each remote host.
  */
 public interface HostEventsSink {
     void record(String serviceName, String hostname, int port, int statusCode, long micros);
