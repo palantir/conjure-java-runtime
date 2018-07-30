@@ -113,20 +113,20 @@ public final class OkHttpClients {
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
     public static OkHttpClient create(
-            ClientConfiguration config, UserAgent userAgent, HostMetricsSink hostMetrics, Class<?> serviceClass) {
+            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
         return createInternal(config, userAgent, hostMetrics, serviceClass, true /* randomize URLs */);
     }
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
-            ClientConfiguration config, UserAgent userAgent, HostMetricsSink hostMetrics, Class<?> serviceClass) {
+            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
         return createInternal(config, userAgent, hostMetrics, serviceClass, false);
     }
 
     private static RemotingOkHttpClient createInternal(
             ClientConfiguration config,
             UserAgent userAgent,
-            HostMetricsSink hostMetrics,
+            HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();

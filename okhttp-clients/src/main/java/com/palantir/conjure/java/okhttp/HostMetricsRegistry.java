@@ -30,7 +30,7 @@ import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HostMetricsRegistry implements HostMetricsSink {
+public final class HostMetricsRegistry implements HostEventsSink {
 
     private static final Logger log = LoggerFactory.getLogger(HostMetricsRegistry.class);
 
