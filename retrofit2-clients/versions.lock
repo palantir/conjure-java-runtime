@@ -25,6 +25,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting-api:ssl-config",
                 "com.palantir.remoting-api:tracing",
@@ -91,6 +92,18 @@
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:refresh-utils",
                 "com.palantir.remoting3:tracing"
+            ]
+        },
+        "com.palantir.conjure.java.api:service-config": {
+            "locked": "2.0.0-rc4",
+            "transitive": [
+                "com.palantir.remoting3:http-clients"
+            ]
+        },
+        "com.palantir.conjure.java.api:ssl-config": {
+            "locked": "2.0.0-rc4",
+            "transitive": [
+                "com.palantir.conjure.java.api:service-config"
             ]
         },
         "com.palantir.remoting-api:errors": {
@@ -164,12 +177,14 @@
         "com.palantir.safe-logging:preconditions": {
             "locked": "1.3.0",
             "transitive": [
+                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.remoting3:okhttp-clients"
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0",
             "transitive": [
+                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing",
@@ -180,6 +195,7 @@
         "com.palantir.tokens:auth-tokens": {
             "locked": "3.0.0",
             "transitive": [
+                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.remoting-api:service-config"
             ]
         },
@@ -270,6 +286,7 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
+                "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting-api:ssl-config",
                 "com.palantir.remoting-api:tracing",
@@ -336,6 +353,18 @@
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:refresh-utils",
                 "com.palantir.remoting3:tracing"
+            ]
+        },
+        "com.palantir.conjure.java.api:service-config": {
+            "locked": "2.0.0-rc4",
+            "transitive": [
+                "com.palantir.remoting3:http-clients"
+            ]
+        },
+        "com.palantir.conjure.java.api:ssl-config": {
+            "locked": "2.0.0-rc4",
+            "transitive": [
+                "com.palantir.conjure.java.api:service-config"
             ]
         },
         "com.palantir.remoting-api:errors": {
@@ -409,12 +438,14 @@
         "com.palantir.safe-logging:preconditions": {
             "locked": "1.3.0",
             "transitive": [
+                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.remoting3:okhttp-clients"
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0",
             "transitive": [
+                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing",
@@ -425,6 +456,7 @@
         "com.palantir.tokens:auth-tokens": {
             "locked": "3.0.0",
             "transitive": [
+                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.remoting-api:service-config"
             ]
         },
