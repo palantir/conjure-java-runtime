@@ -24,7 +24,7 @@ import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareContra
 import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderRewriter;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.SlashEncodingContract;
-import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import com.palantir.conjure.java.okhttp.HostMetricsSink;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import com.palantir.logsafe.Preconditions;
 import feign.CborDelegateDecoder;
@@ -62,7 +62,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
      */
     private final String primaryUri;
 
-    private HostMetricsRegistry hostMetricsRegistry;
+    private HostMetricsSink hostMetricsRegistry;
 
     AbstractFeignJaxRsClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Must provide at least one service URI");
@@ -77,7 +77,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
     /**
      * Set the host metrics registry to use when constructing the OkHttp client.
      */
-    public final AbstractFeignJaxRsClientBuilder hostMetricsRegistry(HostMetricsRegistry newHostMetricsRegistry) {
+    public final AbstractFeignJaxRsClientBuilder hostMetricsRegistry(HostMetricsSink newHostMetricsRegistry) {
         Preconditions.checkNotNull(newHostMetricsRegistry, "hostMetricsRegistry can't be null");
         hostMetricsRegistry = newHostMetricsRegistry;
         return this;

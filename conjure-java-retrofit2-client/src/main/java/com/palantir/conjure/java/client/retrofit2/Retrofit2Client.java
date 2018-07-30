@@ -21,7 +21,7 @@ import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
-import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import com.palantir.conjure.java.okhttp.HostMetricsSink;
 
 /**
  * Static factory methods for producing creating Retrofit2 HTTP proxies.
@@ -37,7 +37,7 @@ public final class Retrofit2Client {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsRegistry hostMetricsRegistry,
+            HostMetricsSink hostMetricsRegistry,
             ClientConfiguration config) {
         return new Retrofit2ClientBuilder(config)
                 .hostMetricsRegistry(hostMetricsRegistry)
@@ -45,14 +45,14 @@ public final class Retrofit2Client {
     }
 
     /**
-     * Similar to {@link #create(Class, UserAgent, HostMetricsRegistry, ClientConfiguration)}, but creates a mutable
+     * Similar to {@link #create(Class, UserAgent, HostMetricsSink, ClientConfiguration)}, but creates a mutable
      * client that updates its configuration transparently whenever the given {@link Refreshable refreshable}
      * {@link ClientConfiguration} changes.
      */
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsRegistry hostMetricsRegistry,
+            HostMetricsSink hostMetricsRegistry,
             Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 config,
