@@ -30,7 +30,7 @@ import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class HostMetricsRegistry {
+public final class HostMetricsRegistry implements HostMetricsSink {
 
     private static final Logger log = LoggerFactory.getLogger(HostMetricsRegistry.class);
 
@@ -48,7 +48,8 @@ public final class HostMetricsRegistry {
                 });
     }
 
-    void record(String serviceName, String hostname, int port, int statusCode, long micros) {
+    @Override
+    public void record(String serviceName, String hostname, int port, int statusCode, long micros) {
         try {
             hostMetrics.getUnchecked(
                     ImmutableServiceHostAndPort.of(serviceName, hostname, port)).record(statusCode, micros);
@@ -59,7 +60,8 @@ public final class HostMetricsRegistry {
         }
     }
 
-    void recordIoException(String serviceName, String hostname, int port) {
+    @Override
+    public void recordIoException(String serviceName, String hostname, int port) {
         try {
             hostMetrics.getUnchecked(ImmutableServiceHostAndPort.of(serviceName, hostname, port)).recordIoException();
         } catch (Exception e) {
