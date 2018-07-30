@@ -32,7 +32,7 @@ public final class Retrofit2ClientBuilder {
 
     private final ClientConfiguration config;
 
-    private HostMetricsSink hostMetricsRegistry;
+    private HostMetricsSink hostEventsSink;
 
     public Retrofit2ClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Cannot construct retrofit client with empty URI list");
@@ -42,15 +42,15 @@ public final class Retrofit2ClientBuilder {
     /**
      * Set the host metrics registry to use when constructing the OkHttp client.
      */
-    public Retrofit2ClientBuilder hostMetricsRegistry(HostMetricsSink newHostMetricsRegistry) {
-        Preconditions.checkNotNull(newHostMetricsRegistry, "hostMetricsRegistry can't be null");
-        hostMetricsRegistry = newHostMetricsRegistry;
+    public Retrofit2ClientBuilder hostEventsSink(HostMetricsSink newHostEventsSink) {
+        Preconditions.checkNotNull(newHostEventsSink, "hostEventsSink can't be null");
+        hostEventsSink = newHostEventsSink;
         return this;
     }
 
     public <T> T build(Class<T> serviceClass, UserAgent userAgent) {
-        Preconditions.checkNotNull(hostMetricsRegistry, "hostMetricsRegistry must be set");
-        okhttp3.OkHttpClient client = OkHttpClients.create(config, userAgent, hostMetricsRegistry, serviceClass);
+        Preconditions.checkNotNull(hostEventsSink, "hostEventsSink must be set");
+        okhttp3.OkHttpClient client = OkHttpClients.create(config, userAgent, hostEventsSink, serviceClass);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)

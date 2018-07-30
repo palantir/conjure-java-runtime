@@ -65,7 +65,7 @@ public final class OkHttpClientsTest extends TestBase {
     @Rule
     public final MockWebServer server3 = new MockWebServer();
 
-    private final HostMetricsRegistry hostMetricsRegistry = new HostMetricsRegistry();
+    private final HostMetricsRegistry hostEventsSink = new HostMetricsRegistry();
 
     private String url;
     private String url2;
@@ -83,7 +83,7 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setBody("pong"));
         createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();
 
-        List<HostMetrics> hostMetrics = hostMetricsRegistry.getMetrics().stream()
+        List<HostMetrics> hostMetrics = hostEventsSink.getMetrics().stream()
                 .filter(metrics -> metrics.hostname().equals("localhost"))
                 .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
                 .filter(metrics -> metrics.port() == server.getPort())
@@ -99,7 +99,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThatExceptionOfType(IOException.class)
                 .isThrownBy(call::execute);
 
-        List<HostMetrics> hostMetrics = hostMetricsRegistry.getMetrics().stream()
+        List<HostMetrics> hostMetrics = hostEventsSink.getMetrics().stream()
                 .filter(metrics -> metrics.hostname().equals("bogus"))
                 .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
                 .collect(Collectors.toList());
@@ -381,7 +381,7 @@ public final class OkHttpClientsTest extends TestBase {
         OkHttpClient client = OkHttpClients.withStableUris(
                 ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
                 AGENT,
-                hostMetricsRegistry,
+                hostEventsSink,
                 OkHttpClientsTest.class);
         server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
         server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
@@ -488,7 +488,7 @@ public final class OkHttpClientsTest extends TestBase {
                         .backoffSlotSize(Duration.ofMillis(10))
                         .build(),
                 AGENT,
-                hostMetricsRegistry,
+                hostEventsSink,
                 OkHttpClientsTest.class);
 
         Request request = new Request.Builder()
@@ -516,7 +516,7 @@ public final class OkHttpClientsTest extends TestBase {
                                 .build()
                 ),
                 AGENT,
-                hostMetricsRegistry,
+                hostEventsSink,
                 OkHttpClientsTest.class);
 
         Request request = new Request.Builder()
@@ -540,7 +540,7 @@ public final class OkHttpClientsTest extends TestBase {
                             .maxNumRetries(0)
                             .build(),
                     AGENT,
-                    hostMetricsRegistry,
+                    hostEventsSink,
                     OkHttpClientsTest.class);
             Call call = client.newCall(new Request.Builder().url(url).build());
             String response = null;
@@ -568,7 +568,7 @@ public final class OkHttpClientsTest extends TestBase {
                 .meshProxy(HostAndPort.fromParts("localhost", server.getPort()))
                 .maxNumRetries(0)
                 .build();
-        OkHttpClient client = OkHttpClients.create(proxiedConfig, AGENT, hostMetricsRegistry, OkHttpClientsTest.class);
+        OkHttpClient client = OkHttpClients.create(proxiedConfig, AGENT, hostEventsSink, OkHttpClientsTest.class);
 
         assertThat(client.newCall(new Request.Builder().url(serviceUrl).build()).execute().body().string())
                 .isEqualTo("foo");
@@ -595,7 +595,7 @@ public final class OkHttpClientsTest extends TestBase {
                         .backoffSlotSize(backoffSlotSize)
                         .build(),
                 AGENT,
-                hostMetricsRegistry,
+                hostEventsSink,
                 OkHttpClientsTest.class);
     }
 }

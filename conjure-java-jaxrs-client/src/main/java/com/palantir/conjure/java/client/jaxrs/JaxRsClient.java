@@ -37,11 +37,11 @@ public final class JaxRsClient {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsSink hostMetricsRegistry,
+            HostMetricsSink hostEventsSink,
             ClientConfiguration config) {
         // TODO(rfink): Add http-remoting agent as informational
         return new FeignJaxRsClientBuilder(config)
-                .hostMetricsRegistry(hostMetricsRegistry)
+                .hostEventsSink(hostEventsSink)
                 .build(serviceClass, userAgent);
     }
 
@@ -53,10 +53,10 @@ public final class JaxRsClient {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsSink hostMetricsRegistry,
+            HostMetricsSink hostEventsSink,
             Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 config,
-                serviceConfiguration -> create(serviceClass, userAgent, hostMetricsRegistry, serviceConfiguration)));
+                serviceConfiguration -> create(serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
     }
 }

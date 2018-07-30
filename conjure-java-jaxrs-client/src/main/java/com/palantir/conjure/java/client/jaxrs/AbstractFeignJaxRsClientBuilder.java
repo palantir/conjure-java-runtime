@@ -62,7 +62,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
      */
     private final String primaryUri;
 
-    private HostMetricsSink hostMetricsRegistry;
+    private HostMetricsSink hostEventsSink;
 
     AbstractFeignJaxRsClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Must provide at least one service URI");
@@ -77,17 +77,17 @@ abstract class AbstractFeignJaxRsClientBuilder {
     /**
      * Set the host metrics registry to use when constructing the OkHttp client.
      */
-    public final AbstractFeignJaxRsClientBuilder hostMetricsRegistry(HostMetricsSink newHostMetricsRegistry) {
-        Preconditions.checkNotNull(newHostMetricsRegistry, "hostMetricsRegistry can't be null");
-        hostMetricsRegistry = newHostMetricsRegistry;
+    public final AbstractFeignJaxRsClientBuilder hostEventsSink(HostMetricsSink newHostEventsSink) {
+        Preconditions.checkNotNull(newHostEventsSink, "hostEventsSink can't be null");
+        hostEventsSink = newHostEventsSink;
         return this;
     }
 
     public final <T> T build(Class<T> serviceClass, UserAgent userAgent) {
         ObjectMapper objectMapper = getObjectMapper();
         ObjectMapper cborObjectMapper = getCborObjectMapper();
-        Preconditions.checkNotNull(hostMetricsRegistry, "hostMetricsRegistry must be set");
-        okhttp3.OkHttpClient okHttpClient = OkHttpClients.create(config, userAgent, hostMetricsRegistry, serviceClass);
+        Preconditions.checkNotNull(hostEventsSink, "hostEventsSink must be set");
+        okhttp3.OkHttpClient okHttpClient = OkHttpClients.create(config, userAgent, hostEventsSink, serviceClass);
 
         return Feign.builder()
                 .contract(createContract())
