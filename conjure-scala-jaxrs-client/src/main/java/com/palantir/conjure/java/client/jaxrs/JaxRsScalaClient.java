@@ -21,7 +21,7 @@ import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
-import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import com.palantir.conjure.java.okhttp.HostEventsSink;
 
 /**
  * Variant of {@link JaxRsClient} with additional scala serialization support.
@@ -36,10 +36,10 @@ public final class JaxRsScalaClient {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsRegistry hostMetricsRegistry,
+            HostEventsSink hostEventsSink,
             ClientConfiguration config) {
         return new FeignJaxRsScalaClientBuilder(config)
-                .hostMetricsRegistry(hostMetricsRegistry)
+                .hostEventsSink(hostEventsSink)
                 .build(serviceClass, userAgent);
     }
 
@@ -47,10 +47,10 @@ public final class JaxRsScalaClient {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsRegistry hostMetricsRegistry,
+            HostEventsSink hostEventsSink,
             Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 config,
-                serviceConfiguration -> create(serviceClass, userAgent, hostMetricsRegistry, serviceConfiguration)));
+                serviceConfiguration -> create(serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
     }
 }

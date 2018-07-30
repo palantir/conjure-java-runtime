@@ -34,12 +34,12 @@ final class InstrumentedInterceptor implements Interceptor {
     static final String CLIENT_RESPONSE_METRIC_NAME = "client.response";
     static final String SERVICE_NAME_TAG = "service-name";
 
-    private final HostMetricsRegistry hostMetrics;
+    private final HostEventsSink hostEventsSink;
     private final String serviceName;
     private final Timer responseTimer;
 
-    InstrumentedInterceptor(TaggedMetricRegistry registry, HostMetricsRegistry hostMetrics, String serviceName) {
-        this.hostMetrics = hostMetrics;
+    InstrumentedInterceptor(TaggedMetricRegistry registry, HostEventsSink hostEventsSink, String serviceName) {
+        this.hostEventsSink = hostEventsSink;
         this.serviceName = serviceName;
         this.responseTimer = registry.timer(name());
     }
@@ -55,21 +55,21 @@ final class InstrumentedInterceptor implements Interceptor {
         try {
             response = chain.proceed(chain.request());
         } catch (IOException e) {
-            hostMetrics.recordIoException(serviceName, hostname, port);
+            hostEventsSink.recordIoException(serviceName, hostname, port);
             throw e;
         }
 
         long micros = stopwatch.elapsed(TimeUnit.MICROSECONDS);
 
-        hostMetrics.record(serviceName, hostname, port, response.code(), micros);
+        hostEventsSink.record(serviceName, hostname, port, response.code(), micros);
         responseTimer.update(micros, TimeUnit.MICROSECONDS);
 
         return response;
     }
 
     static InstrumentedInterceptor create(
-            TaggedMetricRegistry registry, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
-        return new InstrumentedInterceptor(registry, hostMetrics, serviceClass.getSimpleName());
+            TaggedMetricRegistry registry, HostEventsSink hostEventsSink, Class<?> serviceClass) {
+        return new InstrumentedInterceptor(registry, hostEventsSink, serviceClass.getSimpleName());
     }
 
     private MetricName name() {

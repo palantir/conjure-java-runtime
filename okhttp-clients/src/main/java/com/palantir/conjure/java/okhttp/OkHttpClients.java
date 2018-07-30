@@ -113,20 +113,20 @@ public final class OkHttpClients {
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
     public static OkHttpClient create(
-            ClientConfiguration config, UserAgent userAgent, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
-        return createInternal(config, userAgent, hostMetrics, serviceClass, true /* randomize URLs */);
+            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
+        return createInternal(config, userAgent, hostEventsSink, serviceClass, true /* randomize URLs */);
     }
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
-            ClientConfiguration config, UserAgent userAgent, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
-        return createInternal(config, userAgent, hostMetrics, serviceClass, false);
+            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
+        return createInternal(config, userAgent, hostEventsSink, serviceClass, false);
     }
 
     private static RemotingOkHttpClient createInternal(
             ClientConfiguration config,
             UserAgent userAgent,
-            HostMetricsRegistry hostMetrics,
+            HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
@@ -154,7 +154,7 @@ public final class OkHttpClients {
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
 
         // Intercept calls to augment request meta data
-        client.addInterceptor(InstrumentedInterceptor.create(registry, hostMetrics, serviceClass));
+        client.addInterceptor(InstrumentedInterceptor.create(registry, hostEventsSink, serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
         client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
 

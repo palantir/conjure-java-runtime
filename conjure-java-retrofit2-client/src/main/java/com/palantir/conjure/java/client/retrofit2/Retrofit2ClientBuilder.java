@@ -19,7 +19,7 @@ package com.palantir.conjure.java.client.retrofit2;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
-import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import com.palantir.conjure.java.okhttp.HostEventsSink;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;
@@ -32,7 +32,7 @@ public final class Retrofit2ClientBuilder {
 
     private final ClientConfiguration config;
 
-    private HostMetricsRegistry hostMetricsRegistry;
+    private HostEventsSink hostEventsSink;
 
     public Retrofit2ClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Cannot construct retrofit client with empty URI list");
@@ -42,15 +42,15 @@ public final class Retrofit2ClientBuilder {
     /**
      * Set the host metrics registry to use when constructing the OkHttp client.
      */
-    public Retrofit2ClientBuilder hostMetricsRegistry(HostMetricsRegistry newHostMetricsRegistry) {
-        Preconditions.checkNotNull(newHostMetricsRegistry, "hostMetricsRegistry can't be null");
-        hostMetricsRegistry = newHostMetricsRegistry;
+    public Retrofit2ClientBuilder hostEventsSink(HostEventsSink newHostEventsSink) {
+        Preconditions.checkNotNull(newHostEventsSink, "hostEventsSink can't be null");
+        hostEventsSink = newHostEventsSink;
         return this;
     }
 
     public <T> T build(Class<T> serviceClass, UserAgent userAgent) {
-        Preconditions.checkNotNull(hostMetricsRegistry, "hostMetricsRegistry must be set");
-        okhttp3.OkHttpClient client = OkHttpClients.create(config, userAgent, hostMetricsRegistry, serviceClass);
+        Preconditions.checkNotNull(hostEventsSink, "hostEventsSink must be set");
+        okhttp3.OkHttpClient client = OkHttpClients.create(config, userAgent, hostEventsSink, serviceClass);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)

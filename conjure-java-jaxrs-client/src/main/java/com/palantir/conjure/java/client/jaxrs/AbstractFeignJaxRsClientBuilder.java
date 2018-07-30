@@ -24,7 +24,7 @@ import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareContra
 import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderRewriter;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.SlashEncodingContract;
-import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import com.palantir.conjure.java.okhttp.HostEventsSink;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import com.palantir.logsafe.Preconditions;
 import feign.CborDelegateDecoder;
@@ -62,7 +62,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
      */
     private final String primaryUri;
 
-    private HostMetricsRegistry hostMetricsRegistry;
+    private HostEventsSink hostEventsSink;
 
     AbstractFeignJaxRsClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Must provide at least one service URI");
@@ -77,17 +77,17 @@ abstract class AbstractFeignJaxRsClientBuilder {
     /**
      * Set the host metrics registry to use when constructing the OkHttp client.
      */
-    public final AbstractFeignJaxRsClientBuilder hostMetricsRegistry(HostMetricsRegistry newHostMetricsRegistry) {
-        Preconditions.checkNotNull(newHostMetricsRegistry, "hostMetricsRegistry can't be null");
-        hostMetricsRegistry = newHostMetricsRegistry;
+    public final AbstractFeignJaxRsClientBuilder hostEventsSink(HostEventsSink newHostEventsSink) {
+        Preconditions.checkNotNull(newHostEventsSink, "hostEventsSink can't be null");
+        hostEventsSink = newHostEventsSink;
         return this;
     }
 
     public final <T> T build(Class<T> serviceClass, UserAgent userAgent) {
         ObjectMapper objectMapper = getObjectMapper();
         ObjectMapper cborObjectMapper = getCborObjectMapper();
-        Preconditions.checkNotNull(hostMetricsRegistry, "hostMetricsRegistry must be set");
-        okhttp3.OkHttpClient okHttpClient = OkHttpClients.create(config, userAgent, hostMetricsRegistry, serviceClass);
+        Preconditions.checkNotNull(hostEventsSink, "hostEventsSink must be set");
+        okhttp3.OkHttpClient okHttpClient = OkHttpClients.create(config, userAgent, hostEventsSink, serviceClass);
 
         return Feign.builder()
                 .contract(createContract())
