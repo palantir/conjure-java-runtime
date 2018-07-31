@@ -18,8 +18,6 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.conjure.java.api.errors.ErrorType;
-import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
 import feign.Util;
@@ -38,7 +36,10 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
+import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -88,25 +89,43 @@ public class Java8TestServer extends Application<Configuration> {
         @Override
         public ImmutableMap<String, String> getThrowsNotFound(@Nullable String value) {
             if (Strings.isNullOrEmpty(value)) {
-                throw new ServiceException(ErrorType.NOT_FOUND);
+                throw new NotFoundException("Not found");
             } else {
                 return ImmutableMap.of(value, value);
             }
         }
 
         @Override
-        public ImmutableMap<String, String> getThrowsPermissionDenied(@Nullable String value) {
+        public ImmutableMap<String, String> getThrowsNotAuthorized(@Nullable String value) {
             if (Strings.isNullOrEmpty(value)) {
-                throw new ServiceException(ErrorType.PERMISSION_DENIED);
+                throw new NotAuthorizedException("Not authorized");
             } else {
                 return ImmutableMap.of(value, value);
             }
         }
 
         @Override
-        public Optional<ImmutableMap<String, String>> getOptionalThrowsPermissionDenied(@Nullable String value) {
+        public Optional<ImmutableMap<String, String>> getOptionalThrowsNotAuthorized(@Nullable String value) {
             if (Strings.isNullOrEmpty(value)) {
-                throw new ServiceException(ErrorType.PERMISSION_DENIED);
+                throw new NotAuthorizedException("Not authorized");
+            } else {
+                return Optional.of(ImmutableMap.of(value, value));
+            }
+        }
+
+        @Override
+        public ImmutableMap<String, String> getThrowsForbidden(@Nullable String value) {
+            if (Strings.isNullOrEmpty(value)) {
+                throw new ForbiddenException("Forbidden");
+            } else {
+                return ImmutableMap.of(value, value);
+            }
+        }
+
+        @Override
+        public Optional<ImmutableMap<String, String>> getOptionalThrowsForbidden(@Nullable String value) {
+            if (Strings.isNullOrEmpty(value)) {
+                throw new ForbiddenException("Forbidden");
             } else {
                 return Optional.of(ImmutableMap.of(value, value));
             }
@@ -181,17 +200,29 @@ public class Java8TestServer extends Application<Configuration> {
         ImmutableMap<String, String> getThrowsNotFound(@QueryParam("value") @Nullable String value);
 
         @GET
-        @Path("/throwsPermissionDenied")
+        @Path("/throwsNotAuthorized")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        ImmutableMap<String, String> getThrowsPermissionDenied(@QueryParam("value") @Nullable String value);
+        ImmutableMap<String, String> getThrowsNotAuthorized(@QueryParam("value") @Nullable String value);
 
         @GET
-        @Path("/optionalThrowsPermissionDenied")
+        @Path("/optionalThrowsNotAuthorized")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        Optional<ImmutableMap<String, String>> getOptionalThrowsPermissionDenied(
+        Optional<ImmutableMap<String, String>> getOptionalThrowsNotAuthorized(
                 @QueryParam("value") @Nullable String value);
+
+        @GET
+        @Path("/throwsForbidden")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        ImmutableMap<String, String> getThrowsForbidden(@QueryParam("value") @Nullable String value);
+
+        @GET
+        @Path("/optionalThrowsForbidden")
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
+        Optional<ImmutableMap<String, String>> getOptionalThrowsForbidden(@QueryParam("value") @Nullable String value);
 
         @GET
         @Path("/string")
