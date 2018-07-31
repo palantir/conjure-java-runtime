@@ -62,8 +62,9 @@ MyService service = Retrofit2Client.create(MyService.class, "my user agent", con
 ```
 
 ## conjure-java-jersey-server
-Provides Dropwizard/Jersey exception mappers for translating common runtime exceptions as well as Conjure Java's own 
-ServiceException to appropriate HTTP error codes. A Dropwizard server is configured for conjure-java as follows:
+Provides Dropwizard/Jersey exception mappers for translating common runtime exceptions as well as conjure-java-api's own 
+[ServiceException](https://github.com/palantir/http-remoting-api/blob/conjure/errors/src/main/java/com/palantir/conjure/java/api/errors/ServiceException.java)
+to appropriate HTTP error codes. A Dropwizard server is configured for conjure-java as follows:
 
 ```java
 public class MyServer extends Application<Configuration> {
@@ -225,7 +226,7 @@ Provides utilities for relaying service errors across service boundaries (see be
 
 # API Contract
 
-Conjure-java makes the following opinionated customizations to the standard Dropwizard/Feign/Retrofit behavior.
+conjure-java-runtime makes the following opinionated customizations to the standard Dropwizard/Feign/Retrofit behavior.
 
 #### Object serialization/deserialization
 
@@ -371,7 +372,7 @@ supported for media type `application/json`.
 
 #### Quality of service: retry, failover, throttling
 
-Conjure-java servers can use the `QosException` class to advertise the following conditions:
+conjure-java-runtime servers can use the `QosException` class to advertise the following conditions:
 
 * `throttle`: Returns a `Throttle` exception indicating that the calling
   client should throttle its requests.  The client may retry against an arbitrary node of this service.
@@ -385,7 +386,7 @@ The `QosExceptions` have a stable mapping to HTTP status codes and response head
 * `retryOther`: 308 Permanent Redirect, plus `Location` header indicating the target host
 * `unavailable`: 503 Unavailable
 
-Conjure-java clients (both Retrofit2 and JaxRs) handle the above error codes and take the appropriate action:
+conjure-java-runtime clients (both Retrofit2 and JaxRs) handle the above error codes and take the appropriate action:
 * `throttle`: reschedule the request with a delay: either the indicated `Retry-After` period, or a configured
   exponential backoff
 * `retryOther`: retry the request against the indicated service node; all request parameters and headers are maintained
