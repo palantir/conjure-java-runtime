@@ -79,7 +79,7 @@ public class MyServer extends Application<Configuration> {
 ## tracing
 Provides [Zipkin](https://github.com/openzipkin/zipkin)-style call tracing libraries. All `JaxRsClient` and
 `Retrofit2Client` instances are instrumented by default. Jersey server instrumentation is enabled via the
-`HttpRemotingJerseyFeature` (see above).
+`ConjureJerseyFeature` (see above).
 
 By default, the instrumentation forwards trace and span information through HTTP headers, but does not emit completed
 spans to a log file or to Zipkin.  Span observers are static (similar to SLF4J appenders) and can be configured as
@@ -264,7 +264,7 @@ void someMethod(String datasetId, String userName) {
 }
 ```
 
-The `HttpRemotingJerseyFeature` installs an exception mapper for `ServiceException`. The exception mapper sets the
+The `ConjureJerseyFeature` installs an exception mapper for `ServiceException`. The exception mapper sets the
 response media type to `application/json` and returns as response body a JSON representation of a `SerializableError`
 capturing the error code, error name, and error parameters. The resulting JSON response is:
 
@@ -300,7 +300,7 @@ Frontends receiving such errors should use a combination of error code, error na
 user friendly error information. For example, the above error could be surfaced as *"The requested dataset with id
 123abc could not be found"*.
 
-To support **legacy server implementations**, the `HttpRemotingJerseyFeature` also installs exception mappers for
+To support **legacy server implementations**, the `ConjureJerseyFeature` also installs exception mappers for
 `IllegalArgumentException`, `NoContentException`, `RuntimeException` and `WebApplicationException`. The exceptions
 typically yield `SerializableError`s with `exceptionClass=errorCode=<exception classname>` and
 `message=errorName=<exception message>`. Clients should refrain from displaying the `message` or `errorName` fields to
