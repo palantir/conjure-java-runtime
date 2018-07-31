@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.server.jersey;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
 import java.util.UUID;
 import javax.ws.rs.BadRequestException;
@@ -27,14 +28,19 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.ParamException;
+import org.glassfish.jersey.server.ServerRuntime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @deprecated Services should throw {@link com.palantir.conjure.java.api.errors.ServiceException}s instead.
+ * While we strongly recommend that users throw {@link ServiceException}s and not {@link WebApplicationException}s,
+ * these exceptions are part of the JAX-RS standard and a server such as Jersey will throw them even if user code
+ * doesn't.
+ * For instance, {@link ServerRuntime} will throw {@link NotFoundException} if a request couldn't be routed, and if we
+ * don't handle that in this way, then when using {@link ConjureJerseyFeature} it will get caught by
+ * {@link RuntimeExceptionMapper} and transformed into a 500 internal exception, which is not what we want.
  */
 @Provider
-@Deprecated
 final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
 
     private static final Logger log = LoggerFactory.getLogger(WebApplicationExceptionMapper.class);
