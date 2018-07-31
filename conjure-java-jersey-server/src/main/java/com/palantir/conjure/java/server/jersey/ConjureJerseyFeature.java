@@ -18,7 +18,7 @@ package com.palantir.conjure.java.server.jersey;
 
 import com.fasterxml.jackson.jaxrs.cbor.JacksonCBORProvider;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.conjure.java.tracing.jersey.TraceEnrichingFilter;
+import com.palantir.tracing.jersey.TraceEnrichingFilter;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 
