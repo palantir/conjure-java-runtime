@@ -64,7 +64,7 @@ MyService service = Retrofit2Client.create(MyService.class, "my user agent", con
 ## conjure-java-jersey-server
 Provides Dropwizard/Jersey configuration for handling conjure types, and also exception mappers for translating common
 runtime exceptions as well as our own `ServiceException` (see the [errors section](#errors-conjure-java-api))
-to appropriate HTTP error codes. A Dropwizard server is configured for conjure-java as follows:
+to appropriate HTTP error codes. A Dropwizard server is configured for conjure as follows:
 
 ```java
 public class MyServer extends Application<Configuration> {
