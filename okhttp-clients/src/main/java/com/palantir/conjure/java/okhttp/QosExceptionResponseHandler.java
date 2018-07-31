@@ -29,8 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A {@link ResponseHandler} that turns HTTP responses pertaining to conjure-java-api {@link QosException}s into {@link
- * QosException}s.
+ * A {@link ResponseHandler} that turns QOS-related HTTP responses into {@link QosException}s.
  */
 enum QosExceptionResponseHandler implements ResponseHandler<QosException> {
     INSTANCE;
