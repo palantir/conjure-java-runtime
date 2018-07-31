@@ -28,11 +28,11 @@
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:ssl-config",
-                "com.palantir.conjure.java.api:tracing",
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
                 "com.palantir.conjure.java.runtime:keystores",
-                "com.palantir.conjure.java.runtime:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing",
+                "com.palantir.tracing:tracing-api"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -45,15 +45,15 @@
             "locked": "2.9.5",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.9.5",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
@@ -66,7 +66,7 @@
             "locked": "2.9.5",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.google.code.findbugs:jsr305": {
@@ -90,7 +90,7 @@
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.conjure.java.runtime:refresh-utils",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.netflix.feign:feign-core": {
@@ -115,28 +115,22 @@
             "locked": "8.17.0"
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc3",
+            "locked": "2.0.0-rc5",
             "transitive": [
                 "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0-rc3",
+            "locked": "2.0.0-rc5",
             "transitive": [
                 "com.palantir.conjure.java.runtime:client-config"
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc3",
+            "locked": "2.0.0-rc5",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"
-            ]
-        },
-        "com.palantir.conjure.java.api:tracing": {
-            "locked": "2.0.0-rc3",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:tracing"
             ]
         },
         "com.palantir.conjure.java.runtime:client-config": {
@@ -169,18 +163,6 @@
         "com.palantir.conjure.java.runtime:refresh-utils": {
             "project": true
         },
-        "com.palantir.conjure.java.runtime:tracing": {
-            "project": true,
-            "transitive": [
-                "com.palantir.conjure.java.runtime:tracing-okhttp3"
-            ]
-        },
-        "com.palantir.conjure.java.runtime:tracing-okhttp3": {
-            "project": true,
-            "transitive": [
-                "com.palantir.conjure.java.runtime:okhttp-clients"
-            ]
-        },
         "com.palantir.safe-logging:preconditions": {
             "locked": "1.3.0",
             "transitive": [
@@ -194,8 +176,8 @@
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:client-config",
-                "com.palantir.conjure.java.runtime:tracing",
                 "com.palantir.safe-logging:preconditions",
+                "com.palantir.tracing:tracing",
                 "com.palantir.tritium:tritium-registry"
             ]
         },
@@ -203,6 +185,24 @@
             "locked": "3.0.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config"
+            ]
+        },
+        "com.palantir.tracing:tracing": {
+            "locked": "0.3.0",
+            "transitive": [
+                "com.palantir.tracing:tracing-okhttp3"
+            ]
+        },
+        "com.palantir.tracing:tracing-api": {
+            "locked": "0.3.0",
+            "transitive": [
+                "com.palantir.tracing:tracing"
+            ]
+        },
+        "com.palantir.tracing:tracing-okhttp3": {
+            "locked": "0.3.0",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.tritium:tritium-registry": {
@@ -222,7 +222,7 @@
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
-                "com.palantir.conjure.java.runtime:tracing-okhttp3",
+                "com.palantir.tracing:tracing-okhttp3",
                 "com.squareup.okhttp3:logging-interceptor"
             ]
         },
@@ -258,8 +258,8 @@
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.conjure.java.runtime:error-handling",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
-                "com.palantir.conjure.java.runtime:tracing",
                 "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing",
                 "io.dropwizard.metrics:metrics-core"
             ]
         }
@@ -293,11 +293,11 @@
                 "com.netflix.feign:feign-jackson",
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:ssl-config",
-                "com.palantir.conjure.java.api:tracing",
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
                 "com.palantir.conjure.java.runtime:keystores",
-                "com.palantir.conjure.java.runtime:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing",
+                "com.palantir.tracing:tracing-api"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -310,15 +310,15 @@
             "locked": "2.9.5",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
             "locked": "2.9.5",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
@@ -331,7 +331,7 @@
             "locked": "2.9.5",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.google.code.findbugs:jsr305": {
@@ -355,7 +355,7 @@
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.conjure.java.runtime:refresh-utils",
-                "com.palantir.conjure.java.runtime:tracing"
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.netflix.feign:feign-core": {
@@ -380,28 +380,22 @@
             "locked": "8.17.0"
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc3",
+            "locked": "2.0.0-rc5",
             "transitive": [
                 "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0-rc3",
+            "locked": "2.0.0-rc5",
             "transitive": [
                 "com.palantir.conjure.java.runtime:client-config"
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc3",
+            "locked": "2.0.0-rc5",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"
-            ]
-        },
-        "com.palantir.conjure.java.api:tracing": {
-            "locked": "2.0.0-rc3",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:tracing"
             ]
         },
         "com.palantir.conjure.java.runtime:client-config": {
@@ -434,18 +428,6 @@
         "com.palantir.conjure.java.runtime:refresh-utils": {
             "project": true
         },
-        "com.palantir.conjure.java.runtime:tracing": {
-            "project": true,
-            "transitive": [
-                "com.palantir.conjure.java.runtime:tracing-okhttp3"
-            ]
-        },
-        "com.palantir.conjure.java.runtime:tracing-okhttp3": {
-            "project": true,
-            "transitive": [
-                "com.palantir.conjure.java.runtime:okhttp-clients"
-            ]
-        },
         "com.palantir.safe-logging:preconditions": {
             "locked": "1.3.0",
             "transitive": [
@@ -459,8 +441,8 @@
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:client-config",
-                "com.palantir.conjure.java.runtime:tracing",
                 "com.palantir.safe-logging:preconditions",
+                "com.palantir.tracing:tracing",
                 "com.palantir.tritium:tritium-registry"
             ]
         },
@@ -468,6 +450,24 @@
             "locked": "3.0.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config"
+            ]
+        },
+        "com.palantir.tracing:tracing": {
+            "locked": "0.3.0",
+            "transitive": [
+                "com.palantir.tracing:tracing-okhttp3"
+            ]
+        },
+        "com.palantir.tracing:tracing-api": {
+            "locked": "0.3.0",
+            "transitive": [
+                "com.palantir.tracing:tracing"
+            ]
+        },
+        "com.palantir.tracing:tracing-okhttp3": {
+            "locked": "0.3.0",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.tritium:tritium-registry": {
@@ -487,7 +487,7 @@
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
-                "com.palantir.conjure.java.runtime:tracing-okhttp3",
+                "com.palantir.tracing:tracing-okhttp3",
                 "com.squareup.okhttp3:logging-interceptor"
             ]
         },
@@ -523,8 +523,8 @@
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.conjure.java.runtime:error-handling",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
-                "com.palantir.conjure.java.runtime:tracing",
                 "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing",
                 "io.dropwizard.metrics:metrics-core"
             ]
         }

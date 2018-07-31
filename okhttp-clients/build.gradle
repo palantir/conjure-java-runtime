@@ -5,7 +5,7 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 dependencies {
     compile project(':error-handling')
     compile project(':client-config')
-    compile project(':tracing-okhttp3')
+    compile "com.palantir.tracing:tracing-okhttp3"
     compile 'com.google.guava:guava'
     compile 'com.palantir.safe-logging:preconditions'
     compile 'com.palantir.tritium:tritium-registry'
