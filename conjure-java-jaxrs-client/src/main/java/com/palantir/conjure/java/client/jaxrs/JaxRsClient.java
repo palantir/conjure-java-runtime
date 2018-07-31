@@ -39,7 +39,7 @@ public final class JaxRsClient {
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
             ClientConfiguration config) {
-        // TODO(rfink): Add http-remoting agent as informational
+        // TODO(rfink): Add conjure-java agent as informational
         return new FeignJaxRsClientBuilder(config)
                 .hostEventsSink(hostEventsSink)
                 .build(serviceClass, userAgent);

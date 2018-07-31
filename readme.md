@@ -62,14 +62,14 @@ MyService service = Retrofit2Client.create(MyService.class, "my user agent", con
 ```
 
 ## conjure-java-jersey-server
-Provides Dropwizard/Jersey exception mappers for translating common JAX-RS exceptions to appropriate HTTP error codes. A
-Dropwizard server is configured for http-remoting as follows:
+Provides Dropwizard/Jersey exception mappers for translating common runtime exceptions as well as Conjure Java's own 
+ServiceException to appropriate HTTP error codes. A Dropwizard server is configured for conjure-java as follows:
 
 ```java
 public class MyServer extends Application<Configuration> {
     @Override
     public final void run(Configuration config, final Environment env) throws Exception {
-        env.jersey().register(HttpRemotingJerseyFeature.INSTANCE);
+        env.jersey().register(ConjureJerseyFeature.INSTANCE);
         env.jersey().register(new MyResource());
     }
 }
@@ -225,7 +225,7 @@ Provides utilities for relaying service errors across service boundaries (see be
 
 # API Contract
 
-http-remoting makes the following opinionated customizations to the standard Dropwizard/Feign/Retrofit behavior.
+Conjure-java makes the following opinionated customizations to the standard Dropwizard/Feign/Retrofit behavior.
 
 #### Object serialization/deserialization
 
@@ -371,7 +371,7 @@ supported for media type `application/json`.
 
 #### Quality of service: retry, failover, throttling
 
-http-remoting servers can use the `QosException` class to advertise the following conditions:
+Conjure-java servers can use the `QosException` class to advertise the following conditions:
 
 * `throttle`: Returns a `Throttle` exception indicating that the calling
   client should throttle its requests.  The client may retry against an arbitrary node of this service.
@@ -385,7 +385,7 @@ The `QosExceptions` have a stable mapping to HTTP status codes and response head
 * `retryOther`: 308 Permanent Redirect, plus `Location` header indicating the target host
 * `unavailable`: 503 Unavailable
 
-http-remoting clients (both Retrofit2 and JaxRs) handle the above error codes and take the appropriate action:
+Conjure-java clients (both Retrofit2 and JaxRs) handle the above error codes and take the appropriate action:
 * `throttle`: reschedule the request with a delay: either the indicated `Retry-After` period, or a configured
   exponential backoff
 * `retryOther`: retry the request against the indicated service node; all request parameters and headers are maintained
