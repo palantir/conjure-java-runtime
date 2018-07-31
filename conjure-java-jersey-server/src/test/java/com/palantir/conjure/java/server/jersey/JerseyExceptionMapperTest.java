@@ -56,25 +56,29 @@ public final class JerseyExceptionMapperTest extends JerseyTest {
     @Test
     public void testWebException() {
         Response response = target("/angry/web").request().get();
-        // not service exception type, treat it as 500
-        assertThat(response.getStatus()).isEqualTo(500);
+        assertThat(response.getStatus()).isEqualTo(403);
         assertThat(response.readEntity(String.class)).doesNotContain("secret");
-
-        // verify that it is of SerializableError type
-        response = target("/angry/web").request().get();
-        SerializableError entity = response.readEntity(SerializableError.class);
-        assertThat(entity.errorCode()).isEqualTo("INTERNAL");
-        assertThat(entity.errorName()).isEqualTo("Default:Internal");
     }
 
     @Test
     public void testRuntimeException() {
         Response response = target("/angry/runtime").request().get();
-        response = target("/angry/runtime").request().get();
         assertThat(response.getStatus()).isEqualTo(500);
         SerializableError entity = response.readEntity(SerializableError.class);
         assertThat(entity.errorCode()).isEqualTo("INTERNAL");
         assertThat(entity.errorName()).isEqualTo("Default:Internal");
+    }
+
+    /**
+     * Tests the exception that we get when we couldn't find a route to the target is correct.
+     */
+    @Test
+    public void testRoutingException() {
+        Response response = target("/angry/cant-route").request().get();
+        assertThat(response.getStatus()).isEqualTo(404);
+        SerializableError entity = response.readEntity(SerializableError.class);
+        assertThat(entity.errorCode()).isEqualTo("NOT_FOUND");
+        assertThat(entity.errorName()).isEqualTo("Default:NotFound");
     }
 
     @Path("angry")

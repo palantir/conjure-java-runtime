@@ -81,9 +81,31 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     }
 
     @Test
-    public void testThrowsPermissionDenied() {
+    public void testThrowsNotAuthorized() {
         try {
-            service.getThrowsPermissionDenied(null);
+            service.getThrowsNotAuthorized(null);
+            fail();
+        } catch (RemoteException e) {
+            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotAuthorizedException"));
+            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotAuthorizedException"));
+        }
+    }
+
+    @Test
+    public void testOptionalThrowsNotAuthorized() {
+        try {
+            service.getOptionalThrowsNotAuthorized(null);
+            fail();
+        } catch (RemoteException e) {
+            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotAuthorizedException"));
+            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotAuthorizedException"));
+        }
+    }
+
+    @Test
+    public void testThrowsFordidden() {
+        try {
+            service.getThrowsForbidden(null);
             fail();
         } catch (RemoteException e) {
             assertThat(e.getMessage(), containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)"));
@@ -92,9 +114,9 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     }
 
     @Test
-    public void testOptionalThrowsPermissionDenied() {
+    public void testOptionalThrowsFordidden() {
         try {
-            service.getOptionalThrowsPermissionDenied(null);
+            service.getOptionalThrowsForbidden(null);
             fail();
         } catch (RemoteException e) {
             assertThat(e.getMessage(), containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)"));
