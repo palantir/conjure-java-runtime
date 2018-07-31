@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An {@link ExceptionMapper} that turns conjure-java-api {@link QosException}s into appropriate HTTP error codes and
+ * An {@link ExceptionMapper} that turns {@link QosException}s into appropriate HTTP error codes and
  * headers. Three different cases are distinguished: <ol> <li>Retry any node of this service some time later: HTTP 429
  * Too Many Requests</li> <li>Retry a specific (other) node of this service: HTTP 308 Permanent Redirect + Location
  * header</li> <li>Don't retry any node of this service: HTTP 503 Unavailable</li> </ol>
