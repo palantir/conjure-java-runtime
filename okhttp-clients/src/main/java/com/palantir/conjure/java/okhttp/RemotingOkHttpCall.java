@@ -210,7 +210,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
-                callback.onFailure(call, new IOException("Failed to handle request, this is an http-remoting bug."));
+                callback.onFailure(call, new IOException("Failed to handle request, "
+                        + "this is an conjure-java-runtime bug."));
             }
         });
     }

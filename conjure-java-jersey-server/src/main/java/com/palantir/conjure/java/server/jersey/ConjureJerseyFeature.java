@@ -27,7 +27,8 @@ public enum ConjureJerseyFeature implements Feature {
     INSTANCE;
 
     /**
-     * Configures a Jersey server w.r.t. http-remoting conventions: registers tracer filters and exception mappers.
+     * Configures a Jersey server w.r.t. conjure-java-runtime conventions: registers tracer filters and exception
+     * mappers.
      */
     @Override
     public boolean configure(FeatureContext context) {

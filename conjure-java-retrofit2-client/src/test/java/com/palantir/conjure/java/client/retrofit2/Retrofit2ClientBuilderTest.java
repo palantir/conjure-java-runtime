@@ -114,7 +114,7 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         UserAgent expected = AGENT
                 .addAgent(UserAgent.Agent.of("TestService", "0.0.0"))
                 .addAgent(UserAgent.Agent.of(
-                        UserAgents.REMOTING_AGENT_NAME,
+                        UserAgents.CONJURE_AGENT_NAME,
                         conjureVersion != null ? conjureVersion : "0.0.0"));
         assertThat(request.getHeader("User-Agent"), is(UserAgents.format(expected)));
     }

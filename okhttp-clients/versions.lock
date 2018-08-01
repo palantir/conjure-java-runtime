@@ -90,19 +90,19 @@
             ]
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc5",
+            "locked": "2.0.0-rc6",
             "transitive": [
                 "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0-rc5",
+            "locked": "2.0.0-rc6",
             "transitive": [
                 "com.palantir.conjure.java.runtime:client-config"
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc5",
+            "locked": "2.0.0-rc6",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"
@@ -297,19 +297,19 @@
             ]
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc5",
+            "locked": "2.0.0-rc6",
             "transitive": [
                 "com.palantir.conjure.java.runtime:error-handling"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0-rc5",
+            "locked": "2.0.0-rc6",
             "transitive": [
                 "com.palantir.conjure.java.runtime:client-config"
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc5",
+            "locked": "2.0.0-rc6",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"

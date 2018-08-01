@@ -56,7 +56,8 @@ public final class OkHttpClients {
 
     private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler((thread, uncaughtException) ->
-                    log.error("An exception was uncaught in an execution thread. This implies a bug in http-remoting",
+                    log.error("An exception was uncaught in an execution thread. "
+                                    + "This implies a bug in conjure-java-runtime",
                             uncaughtException))
             .setNameFormat("remoting-okhttp-dispatcher-%d")
             .build();
@@ -104,7 +105,7 @@ public final class OkHttpClients {
      * Javadoc.
      */
     private static final ScheduledExecutorService schedulingExecutor = Tracers.wrap(new ScheduledThreadPoolExecutor(
-            NUM_SCHEDULING_THREADS, Util.threadFactory("http-remoting/OkHttp Scheduler", false)));
+            NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", false)));
 
     private OkHttpClients() {}
 
@@ -192,10 +193,9 @@ public final class OkHttpClients {
     }
 
     /**
-     * Adds informational {@link Agent}s to the given {@link UserAgent}, one
-     * for the http-remoting library and one for the given service class. Version strings are extracted from the
-     * packages' {@link Package#getImplementationVersion implementation version}, defaulting to 0.0.0 if no version can
-     * be found.
+     * Adds informational {@link Agent}s to the given {@link UserAgent}, one for the conjure-java-runtime library and
+     * one for the given service class. Version strings are extracted from the packages'
+     * {@link Package#getImplementationVersion implementation version}, defaulting to 0.0.0 if no version can be found.
      */
     private static UserAgent augmentUserAgent(UserAgent agent, Class<?> serviceClass) {
         UserAgent augmentedAgent = agent;
@@ -207,7 +207,7 @@ public final class OkHttpClients {
 
         String maybeRemotingVersion = OkHttpClients.class.getPackage().getImplementationVersion();
         augmentedAgent = augmentedAgent.addAgent(UserAgent.Agent.of(
-                UserAgents.REMOTING_AGENT_NAME,
+                UserAgents.CONJURE_AGENT_NAME,
                 maybeRemotingVersion != null ? maybeRemotingVersion : "0.0.0"));
         return augmentedAgent;
     }
