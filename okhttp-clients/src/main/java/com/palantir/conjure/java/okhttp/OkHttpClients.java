@@ -207,7 +207,7 @@ public final class OkHttpClients {
 
         String maybeRemotingVersion = OkHttpClients.class.getPackage().getImplementationVersion();
         augmentedAgent = augmentedAgent.addAgent(UserAgent.Agent.of(
-                UserAgents.REMOTING_AGENT_NAME,
+                UserAgents.CONJURE_AGENT_NAME,
                 maybeRemotingVersion != null ? maybeRemotingVersion : "0.0.0"));
         return augmentedAgent;
     }
