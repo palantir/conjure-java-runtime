@@ -228,19 +228,19 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "0.3.0",
+            "locked": "1.0.0",
             "transitive": [
                 "com.palantir.tracing:tracing-okhttp3"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "0.3.0",
+            "locked": "1.0.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-okhttp3": {
-            "locked": "0.3.0",
+            "locked": "1.0.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
                 "com.palantir.conjure.java.runtime:okhttp-clients"
@@ -555,19 +555,19 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "0.3.0",
+            "locked": "1.0.0",
             "transitive": [
                 "com.palantir.tracing:tracing-okhttp3"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "0.3.0",
+            "locked": "1.0.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-okhttp3": {
-            "locked": "0.3.0",
+            "locked": "1.0.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
                 "com.palantir.conjure.java.runtime:okhttp-clients"
