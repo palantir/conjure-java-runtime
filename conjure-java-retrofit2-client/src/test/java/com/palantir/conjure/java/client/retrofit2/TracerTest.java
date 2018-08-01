@@ -20,10 +20,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
-import com.palantir.conjure.java.api.tracing.OpenSpan;
-import com.palantir.conjure.java.api.tracing.TraceHttpHeaders;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import com.palantir.conjure.java.tracing.Tracer;
+import com.palantir.tracing.Tracer;
+import com.palantir.tracing.api.OpenSpan;
+import com.palantir.tracing.api.TraceHttpHeaders;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

@@ -22,7 +22,7 @@
             "locked": "20.0"
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc3"
+            "locked": "2.0.0-rc5"
         }
     },
     "runtime": {
@@ -48,7 +48,7 @@
             "locked": "20.0"
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc3"
+            "locked": "2.0.0-rc5"
         }
     }
 }
