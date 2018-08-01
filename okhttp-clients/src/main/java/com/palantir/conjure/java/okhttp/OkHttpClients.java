@@ -105,7 +105,7 @@ public final class OkHttpClients {
      * Javadoc.
      */
     private static final ScheduledExecutorService schedulingExecutor = Tracers.wrap(new ScheduledThreadPoolExecutor(
-            NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java/OkHttp Scheduler", false)));
+            NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", false)));
 
     private OkHttpClients() {}
 
