@@ -30,7 +30,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.RateLimiter;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.netflix.concurrency.limits.Limiter;
-import com.palantir.remoting3.okhttp.ConcurrencyLimiters.AsyncLimiter;
+import com.palantir.remoting3.okhttp.ConcurrencyLimiters.ConcurrencyLimiter;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -78,13 +78,13 @@ public final class ExponentialBackoffTest {
     @Test
     public void testBackingOff() throws ExecutionException, InterruptedException {
         int numThreads = 160;
-        int numRequestsPerSecond = 20;
+        int numRequestsPerSecond = 40;
         int numRetries = 3;
         ListeningExecutorService executorService = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(numThreads,
                 new ThreadFactoryBuilder().setNameFormat("test-name-%d").build()));
         RateLimiter rateLimiter = RateLimiter.create(numRequestsPerSecond);
 
-        AsyncLimiter limiter = new ConcurrencyLimiters().limiter("");
+        ConcurrencyLimiter limiter = new ConcurrencyLimiters().limiter("");
         Meter meter = new Meter();
         Histogram backoffHistogram = new Histogram(new ExponentiallyDecayingReservoir());
 
@@ -96,13 +96,13 @@ public final class ExponentialBackoffTest {
             public void run() {
                 for (int i = 0; i < 1001;) {
                     Limiter.Listener listener = Futures.getUnchecked(limiter.acquire());
-                    System.out.println(i);
+                    //System.out.println(i);
                     boolean gotRateLimited = !rateLimiter.tryAcquire();
                     if (!gotRateLimited) {
-                        Uninterruptibles.sleepUninterruptibly(10, TimeUnit.MILLISECONDS);
+                        Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
                         listener.onSuccess();
                         meter.mark();
-                        if (i++ % 10 == 0) {
+                        if (i++ % 1 == 0) {
                             System.out.println("i " + i + " avg " + meter.getMeanRate() + " avgbackoffs " + backoffHistogram.getSnapshot().getMean());
                         }
                         backoffHistogram.update(backoffIndex);

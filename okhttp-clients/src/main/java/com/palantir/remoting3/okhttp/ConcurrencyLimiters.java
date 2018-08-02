@@ -23,8 +23,8 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.netflix.concurrency.limits.Limiter;
+import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limit.TracingLimitDecorator;
-import com.netflix.concurrency.limits.limit.VegasLimit;
 import com.netflix.concurrency.limits.limiter.DefaultLimiter;
 import com.netflix.concurrency.limits.strategy.SimpleStrategy;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
@@ -38,12 +38,27 @@ import okhttp3.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Remoting calls may observe 429 or 503 responses from the server, at which point they back off in order to
+ * reduce excess load. Unfortunately this state on backing off is stored per-call, so 429s or 503s in one call do not
+ * cause any request rate slowdown in subsequent calls. This class affects this by adjusting the number of requests
+ * that might be dispatched to a given endpoint.
+ * <p>
+ * This is based on Netflix's <a href="https://github.com/Netflix/concurrency-limits/">Concurrency Limits</a> library,
+ * which provides a number of primitives for this.
+ * <p>
+ * In order to use this class, one should get a Limiter for their request, which returns a future. once the Future is
+ * done, the caller can assume that the request is schedulable. After the request completes, the caller <b>must</b>
+ * call one of the methods on {@link Limiter.Listener} in order to provide feedback about the request's success.
+ * If this is not done, throughput will be negatively affected. We attempt to eventually recover to avoid a total
+ * deadlock, but this is not guaranteed.
+ */
 final class ConcurrencyLimiters {
     private static final Logger log = LoggerFactory.getLogger(ConcurrencyLimiters.class);
     private static final String FALLBACK = "";
-    private final ConcurrentMap<String, AsyncLimiter> limiters = new ConcurrentHashMap<>();
 
-    private final Map<Limiter.Listener, Runnable> activeListeners = CacheBuilder.newBuilder()
+    // If a request is never marked as complete and is thrown away, recover on the next GC instead of deadlocking
+    private static final Map<Limiter.Listener, Runnable> activeListeners = CacheBuilder.newBuilder()
             .weakKeys()
             .<Limiter.Listener, Runnable>removalListener(notification -> {
                 if (notification.getCause().equals(RemovalCause.COLLECTED)) {
@@ -55,15 +70,20 @@ final class ConcurrencyLimiters {
             .build()
             .asMap();
 
-    @VisibleForTesting
-    AsyncLimiter limiter(String name) {
-        return limiters.computeIfAbsent(name, key ->
-                new AsyncLimiter(activeListeners, DefaultLimiter.newBuilder()
-                        .limit(TracingLimitDecorator.wrap(VegasLimit.newBuilder().initialLimit(1).build()))
-                        .build(new SimpleStrategy<>())));
+    private final ConcurrentMap<String, ConcurrencyLimiter> limiters = new ConcurrentHashMap<>();
+
+    private static Limiter<Void> newLimiter() {
+        return DefaultLimiter.newBuilder()
+                .limit(TracingLimitDecorator.wrap(AIMDLimit.newBuilder().initialLimit(1).build()))
+                .build(new SimpleStrategy<>());
     }
 
-    public AsyncLimiter limiter(Request request) {
+    @VisibleForTesting
+    ConcurrencyLimiter limiter(String name) {
+        return limiters.computeIfAbsent(name, key -> new ConcurrencyLimiter(activeListeners, newLimiter()));
+    }
+
+    ConcurrencyLimiter limiter(Request request) {
         final String limiterKey;
         String pathTemplate = request.header(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER);
         if (pathTemplate == null) {
@@ -74,12 +94,22 @@ final class ConcurrencyLimiters {
         return limiter(limiterKey);
     }
 
-    static final class AsyncLimiter {
+    /**
+     * The Netflix library provides either a blocking approach or a non-blocking approach which might say
+     * you can't be scheduled at this time. All of our HTTP calls are asynchronous, so we really want to get
+     * a {@link ListenableFuture} that we can add a callback to. This class then is a translation of
+     * {@link com.netflix.concurrency.limits.limiter.BlockingLimiter} to be asynchronous, maintaining a queue
+     * of currently waiting requests.
+     * <p>
+     * Upon a request finishing, we check if there are any waiting requests, and if there are we attempt to trigger
+     * some more.
+     */
+    static final class ConcurrencyLimiter {
         private final Map<Limiter.Listener, Runnable> activeListeners;
         private final Queue<SettableFuture<Limiter.Listener>> waitingRequests = new LinkedBlockingQueue<>();
         private final Limiter<Void> limiter;
 
-        public AsyncLimiter(
+        public ConcurrencyLimiter(
                 Map<Limiter.Listener, Runnable> activeListeners,
                 Limiter<Void> limiter) {
             this.activeListeners = activeListeners;

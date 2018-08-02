@@ -26,7 +26,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.QosException;
 import com.palantir.remoting.api.errors.RemoteException;
 import com.palantir.remoting3.clients.ClientConfiguration;
-import com.palantir.remoting3.okhttp.ConcurrencyLimiters.AsyncLimiter;
+import com.palantir.remoting3.okhttp.ConcurrencyLimiters.ConcurrencyLimiter;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.time.Duration;
@@ -66,7 +66,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private final RemotingOkHttpClient client;
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
-    private final AsyncLimiter limiter;
+    private final ConcurrencyLimiter limiter;
 
     private final int maxNumRelocations;
 
@@ -77,7 +77,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             RemotingOkHttpClient client,
             ScheduledExecutorService schedulingExecutor,
             ExecutorService executionExecutor,
-            AsyncLimiter limiter,
+            ConcurrencyLimiter limiter,
             int maxNumRelocations) {
         super(delegate);
         this.backoffStrategy = backoffStrategy;
@@ -153,7 +153,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         Futures.addCallback(listenerFuture, new FutureCallback<Listener>() {
             @Override
             public void onSuccess(Listener listener) {
-                enqueueInternal(callback, listener);
+                enqueue(new RequestCompletion(schedulingExecutor, executionExecutor, callback, listener));
             }
 
             @Override
@@ -165,7 +165,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }, MoreExecutors.directExecutor());
     }
 
-    private void enqueueInternal(Callback callback, Listener listener) {
+    private void enqueue(RequestCompletion completion) {
         super.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {
@@ -174,16 +174,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 // Fail call if backoffs are exhausted or if no retry URL can be determined.
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
-                    callback.onFailure(call, new IOException("Failed to complete the request due to an "
+                    completion.onError(call, new IOException("Failed to complete the request due to an "
                             + "IOException", exception));
-                    listener.onDropped();
                     return;
                 }
                 Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
                 if (!redirectTo.isPresent()) {
-                    callback.onFailure(call, new IOException("Failed to determine valid failover URL"
+                    completion.onError(call, new IOException("Failed to determine valid failover URL"
                             + "for '" + request().url() + "' and base URLs " + urls.getBaseUrls()));
-                    listener.onDropped();
                     return;
                 }
 
@@ -194,18 +192,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
                         client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
                 log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()),
                         exception);
-                scheduleExecution(() -> {
-                    listener.onDropped();
-                    retryCall.enqueue(callback);
-                }, backoff.get());
+                completion.retry(retryCall, backoff.get());
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 // Relay successful responses
                 if (response.code() / 100 <= 2) {
-                    callback.onResponse(call, response);
-                    listener.onSuccess();
+                    completion.onSuccess(call, response);
                     return;
                 }
 
@@ -217,89 +211,125 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     // so error handlers can read the body without breaking subsequent handlers
                     errorResponseSupplier = () -> buildFrom(response, body);
                 } catch (IOException e) {
-                    onFailure(call, e);
-                    listener.onSuccess();
+                    completion.onError(call, e);
                     return;
                 }
 
                 // Handle to handle QoS situations: retry, failover, etc.
                 Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
                 if (qosError.isPresent()) {
-                    qosError.get().accept(createQosVisitor(callback, call, listener));
+                    qosError.get().accept(createQosVisitor(call, completion));
                     return;
                 }
-
-                listener.onSuccess();
 
                 // Handle responses that correspond to RemoteExceptions / SerializableErrors
                 Optional<RemoteException> httpError = remoteExceptionHandler.handle(errorResponseSupplier.get());
                 if (httpError.isPresent()) {
-                    callback.onFailure(call, new IoRemoteException(httpError.get()));
+                    completion.onError(call, new IoRemoteException(httpError.get()));
                     return;
                 }
 
                 // Catch-all: handle all other responses
                 Optional<IOException> ioException = ioExceptionHandler.handle(errorResponseSupplier.get());
                 if (ioException.isPresent()) {
-                    callback.onFailure(call, ioException.get());
+                    completion.onError(call, ioException.get());
                     return;
                 }
 
-                callback.onFailure(call, new IOException("Failed to handle request, this is an http-remoting bug."));
+                completion.onError(call, new IOException("Failed to handle request, this is an http-remoting bug."));
             }
         });
 
     }
 
-    @SuppressWarnings("FutureReturnValueIgnored")
-    private void scheduleExecution(Runnable execution, Duration backoff) {
-        // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
-        schedulingExecutor.schedule(
-                () -> executionExecutor.submit(execution),
-                backoff.toMillis(),
-                TimeUnit.MILLISECONDS);
+    private static class RequestCompletion {
+        private final ScheduledExecutorService schedulingExecutor;
+        private final ExecutorService executionExecutor;
+        private final Callback callback;
+        private final Listener listener;
+
+        private RequestCompletion(
+                ScheduledExecutorService schedulingExecutor, ExecutorService executionExecutor,
+                Callback callback, Listener listener) {
+            this.schedulingExecutor = schedulingExecutor;
+            this.executionExecutor = executionExecutor;
+            this.callback = callback;
+            this.listener = listener;
+        }
+
+        void onError(Call call, IOException exception) {
+            listener.onIgnore();
+            callback.onFailure(call, exception);
+        }
+
+        private void onOverloaded(Call call, IOException exception) {
+            listener.onDropped();
+            callback.onFailure(call, exception);
+        }
+
+        private void onSuccess(Call call, Response response) throws IOException {
+            listener.onSuccess();
+            callback.onResponse(call, response);
+        }
+
+        private void retry(Call retryCall) {
+            listener.onIgnore();
+            retryCall.enqueue(callback);
+        }
+
+        private void retry(Call retryCall, Duration delay) {
+            scheduleExecution(() -> {
+                listener.onDropped();
+                retryCall.enqueue(callback);
+            }, delay);
+        }
+
+        @SuppressWarnings("FutureReturnValueIgnored")
+        private void scheduleExecution(Runnable execution, Duration backoff) {
+            // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
+            schedulingExecutor.schedule(
+                    () -> executionExecutor.submit(execution),
+                    backoff.toMillis(),
+                    TimeUnit.MILLISECONDS);
+        }
     }
 
-    private QosException.Visitor<Void> createQosVisitor(Callback callback, Call call, Listener listener) {
+    private QosException.Visitor<Void> createQosVisitor(Call call, RequestCompletion completion) {
         return new QosException.Visitor<Void>() {
             @Override
             public Void visit(QosException.Throttle exception) {
-                Optional<Duration> nonAdvertizedBackoff = backoffStrategy.nextBackoff();
-                if (!nonAdvertizedBackoff.isPresent()) {
-                    callback.onFailure(call, new IOException("Failed to reschedule call since "
+                Optional<Duration> nonAdvertisedBackoff = backoffStrategy.nextBackoff();
+                if (!nonAdvertisedBackoff.isPresent()) {
+                    completion.onOverloaded(call, new IOException("Failed to reschedule call since "
                             + "the number of configured backoffs are exhausted", exception));
                     return null;
                 }
 
-                Duration backoff = exception.getRetryAfter().orElse(nonAdvertizedBackoff.get());
+                Duration backoff = exception.getRetryAfter().orElse(nonAdvertisedBackoff.get());
                 log.debug("Rescheduling call after backoff",
                         SafeArg.of("backoffMillis", backoff.toMillis()), exception);
-                scheduleExecution(() -> {
-                    listener.onDropped();
-                    doClone().enqueue(callback);
-                }, backoff);
+                completion.retry(doClone(), backoff);
                 return null;
             }
 
             @Override
             public Void visit(QosException.RetryOther exception) {
-                listener.onIgnore();
                 if (maxNumRelocations <= 0) {
-                    callback.onFailure(call, new IOException("Exceeded the maximum number of allowed redirects for "
-                            + "initial URL: " + call.request().url()));
+                    completion.onError(call, new IOException("Exceeded the maximum number of allowed redirects "
+                            + "for initial URL: " + call.request().url()));
                 } else {
                     // Redirect to the URL specified by the exception.
                     Optional<HttpUrl> redirectTo = urls.redirectTo(request().url(),
                             exception.getRedirectTo().toString());
                     if (!redirectTo.isPresent()) {
-                        callback.onFailure(call, new IOException("Failed to determine valid redirect URL for '"
+                        completion.onError(call, new IOException("Failed to determine valid redirect URL for '"
                                 + exception.getRedirectTo() + "' and base URLs " + urls.getBaseUrls()));
                     } else {
                         Request redirectedRequest = request().newBuilder()
                                 .url(redirectTo.get())
                                 .build();
-                        client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
-                                .enqueue(callback);
+                        completion.retry(client.newCallWithMutableState(
+                                redirectedRequest, backoffStrategy, maxNumRelocations - 1));
                     }
                 }
                 return null;
@@ -310,8 +340,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
                     log.debug("Max number of retries exceeded, failing call");
-                    listener.onDropped();
-                    callback.onFailure(call,
+                    completion.onError(call,
                             new IOException("Failed to complete the request due to a "
                                     + "server-side QoS condition: 503", exception));
                 } else {
@@ -320,18 +349,15 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     // Redirect to the "next" URL, whichever that may be, after backing off.
                     Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
                     if (!redirectTo.isPresent()) {
-                        listener.onDropped();
-                        callback.onFailure(call, new IOException("Failed to determine valid redirect URL for base "
-                                + "URLs " + urls.getBaseUrls()));
+                        completion.onError(call, new IOException(
+                                "Failed to determine valid redirect URL for base URLs " + urls.getBaseUrls()));
                     } else {
                         Request redirectedRequest = request().newBuilder()
                                 .url(redirectTo.get())
                                 .build();
-                        scheduleExecution(() -> {
-                            listener.onDropped();
-                            client.newCallWithMutableState(redirectedRequest, backoffStrategy,
-                                    maxNumRelocations).enqueue(callback);
-                        }, backoff.get());
+                        completion.retry(client.newCallWithMutableState(
+                                redirectedRequest, backoffStrategy, maxNumRelocations),
+                                backoff.get());
                     }
                 }
                 return null;
