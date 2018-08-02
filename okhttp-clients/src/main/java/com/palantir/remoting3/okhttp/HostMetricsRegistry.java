@@ -48,7 +48,7 @@ public final class HostMetricsRegistry {
                 });
     }
 
-    void record(String serviceName, String hostname, int port, int statusCode, long micros) {
+    public void record(String serviceName, String hostname, int port, int statusCode, long micros) {
         try {
             hostMetrics.getUnchecked(
                     ImmutableServiceHostAndPort.of(serviceName, hostname, port)).record(statusCode, micros);
@@ -59,7 +59,7 @@ public final class HostMetricsRegistry {
         }
     }
 
-    void recordIoException(String serviceName, String hostname, int port) {
+    public void recordIoException(String serviceName, String hostname, int port) {
         try {
             hostMetrics.getUnchecked(ImmutableServiceHostAndPort.of(serviceName, hostname, port)).recordIoException();
         } catch (Exception e) {
