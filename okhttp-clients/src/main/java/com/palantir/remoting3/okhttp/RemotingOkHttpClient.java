@@ -35,6 +35,8 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
 
+    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters();
+
     RemotingOkHttpClient(
             OkHttpClient delegate,
             Supplier<BackoffStrategy> backoffStrategy,
@@ -62,6 +64,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 this,
                 schedulingExecutor,
                 executionExecutor,
+                limiters.limiter(request),
                 maxNumRelocations);
     }
 }
