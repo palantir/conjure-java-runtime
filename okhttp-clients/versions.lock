@@ -150,19 +150,19 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.0.0",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.tracing:tracing-okhttp3"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.0.0",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-okhttp3": {
-            "locked": "1.0.0"
+            "locked": "1.1.0"
         },
         "com.palantir.tritium:tritium-registry": {
             "locked": "0.8.0"
@@ -357,19 +357,19 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.0.0",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.tracing:tracing-okhttp3"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.0.0",
+            "locked": "1.1.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-okhttp3": {
-            "locked": "1.0.0"
+            "locked": "1.1.0"
         },
         "com.palantir.tritium:tritium-registry": {
             "locked": "0.8.0"
