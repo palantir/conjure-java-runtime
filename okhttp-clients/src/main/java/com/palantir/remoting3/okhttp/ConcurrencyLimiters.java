@@ -17,8 +17,6 @@
 package com.palantir.remoting3.okhttp;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.RemovalCause;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.netflix.concurrency.limits.Limiter;
@@ -27,15 +25,13 @@ import com.netflix.concurrency.limits.limit.TracingLimitDecorator;
 import com.netflix.concurrency.limits.limiter.DefaultLimiter;
 import com.netflix.concurrency.limits.strategy.SimpleStrategy;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
-import java.util.Map;
+import java.util.ArrayDeque;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingQueue;
+import javax.annotation.concurrent.GuardedBy;
 import okhttp3.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Flow control in Conjure is a collaborative effort between servers and clients. Servers advertise an overloaded state
@@ -58,25 +54,10 @@ import org.slf4j.LoggerFactory;
  * In order to use this class, one should acquire a Limiter for their request, which returns a future. once the Future
  * is completed, the caller can assume that the request is schedulable. After the request completes, the caller
  * <b>must</b> call one of the methods on {@link Limiter.Listener} in order to provide feedback about the request's
- * success. If this is not done, throughput will be negatively affected. We attempt to eventually recover to avoid a
- * total deadlock, but this is not guaranteed.
+ * success. If this is not done, a deadlock could result.
  */
 final class ConcurrencyLimiters {
-    private static final Logger log = LoggerFactory.getLogger(ConcurrencyLimiters.class);
     private static final String FALLBACK = "";
-
-    // If a request is never marked as complete and is thrown away, recover on the next GC instead of deadlocking
-    private static final Map<Limiter.Listener, Runnable> activeListeners = CacheBuilder.newBuilder()
-            .weakKeys()
-            .<Limiter.Listener, Runnable>removalListener(notification -> {
-                if (notification.getCause().equals(RemovalCause.COLLECTED)) {
-                    log.warn("Concurrency limiter was leaked."
-                            + " This implies a remoting bug or classpath issue, and may cause degraded performance");
-                    notification.getValue().run();
-                }
-            })
-            .build()
-            .asMap();
 
     private final ConcurrentMap<String, ConcurrencyLimiter> limiters = new ConcurrentHashMap<>();
 
@@ -109,7 +90,8 @@ final class ConcurrencyLimiters {
      * some more.
      */
     static final class ConcurrencyLimiter {
-        private final Queue<SettableFuture<Limiter.Listener>> waitingRequests = new LinkedBlockingQueue<>();
+        @GuardedBy("this")
+        private final Queue<SettableFuture<Limiter.Listener>> waitingRequests = new ArrayDeque<>();
         private final Limiter<Void> limiter;
 
         @VisibleForTesting
@@ -117,57 +99,45 @@ final class ConcurrencyLimiters {
             this.limiter = limiter;
         }
 
-        public ListenableFuture<Limiter.Listener> acquire() {
+        synchronized ListenableFuture<Limiter.Listener> acquire() {
             SettableFuture<Limiter.Listener> future = SettableFuture.create();
             waitingRequests.add(future);
             processQueue();
             return future;
         }
 
-        private void processQueue() {
+        private synchronized void processQueue() {
             while (!waitingRequests.isEmpty()) {
                 Optional<Limiter.Listener> maybeAcquired = limiter.acquire(null);
                 if (!maybeAcquired.isPresent()) {
                     return;
                 }
                 Limiter.Listener acquired = maybeAcquired.get();
-                SettableFuture<Limiter.Listener> head = waitingRequests.poll();
-                if (head == null) {
-                    acquired.onIgnore();
-                } else {
-                    head.set(wrap(acquired));
-                }
+                SettableFuture<Limiter.Listener> head = waitingRequests.remove();
+                head.set(wrap(acquired));
             }
         }
 
         private Limiter.Listener wrap(Limiter.Listener listener) {
-            Limiter.Listener res = new Limiter.Listener() {
+            return new Limiter.Listener() {
                 @Override
                 public void onSuccess() {
                     listener.onSuccess();
-                    activeListeners.remove(this);
                     processQueue();
                 }
 
                 @Override
                 public void onIgnore() {
                     listener.onIgnore();
-                    activeListeners.remove(this);
                     processQueue();
                 }
 
                 @Override
                 public void onDropped() {
                     listener.onDropped();
-                    activeListeners.remove(this);
                     processQueue();
                 }
             };
-            activeListeners.put(res, () -> {
-                listener.onIgnore();
-                processQueue();
-            });
-            return res;
         }
 
     }
