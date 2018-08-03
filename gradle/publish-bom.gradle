@@ -36,11 +36,6 @@ private Object mergeRecommendations(Configuration conf) {
     Map fromUpstreamBom = dependencyRecommendations.mavenBomProvider.recommendations
 
     (fromUpstreamBom.keySet() + ownDeps.keySet())
-            .collectEntries {
-                def versionFromUpstream = VersionNumber.parse(fromUpstreamBom[it])
-                def ownDepsVersion = VersionNumber.parse(ownDeps[it])
-                def higherVersion = versionFromUpstream > ownDepsVersion ? fromUpstreamBom[it] : ownDeps[it]
-                [(it): higherVersion]
-            }
+            .collectEntries { [(it): ownDeps[it] ?: fromUpstreamBom[it]] }
             .collect { key, value -> key + ":" + value }
 }
