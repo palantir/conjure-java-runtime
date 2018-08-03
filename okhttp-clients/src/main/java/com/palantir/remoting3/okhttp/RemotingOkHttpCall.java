@@ -160,7 +160,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
             public void onFailure(Throwable t) {
                 callback.onFailure(
                         RemotingOkHttpCall.this,
-                        new IOException(new AssertionError("This should never happen", t)));
+                        new IOException(new AssertionError("This should never happen, since it implies "
+                                + "we failed when using the concurrency limiter", t)));
             }
         }, MoreExecutors.directExecutor());
     }

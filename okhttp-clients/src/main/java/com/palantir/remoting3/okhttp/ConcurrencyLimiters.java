@@ -39,19 +39,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Remoting calls may observe 429 or 503 responses from the server, at which point they back off in order to
- * reduce excess load. Unfortunately this state on backing off is stored per-call, so 429s or 503s in one call do not
- * cause any request rate slowdown in subsequent calls. This class affects this by adjusting the number of requests
- * that might be dispatched to a given endpoint.
+ * Flow control in Conjure is a collaborative effort between servers and clients. Servers advertise an overloaded state
+ * via 429/503 responses, and clients throttle the number of requests that they send concurrently as a response to this.
+ * The latter is implemented as a combination of two techniques, yielding a mechanism similar to flow control in TCP/IP.
+ * <ol>
+ *     <li>
+ *         Clients use the frequency of 429/503 responses (as well as the request latency) to determine an estimate
+ *         for the number of permissible concurrent requests
+ *    </li>
+ *     <li>
+ *         Each such request gets scheduled according to an exponential backoff algorithm.
+ *     </li>
+ * </ol>
  * <p>
- * This is based on Netflix's <a href="https://github.com/Netflix/concurrency-limits/">Concurrency Limits</a> library,
- * which provides a number of primitives for this.
+ * This class provides an asynchronous implementation of Netflix's
+ * <a href="https://github.com/Netflix/concurrency-limits/">concurrency-limits</a> library for determining the
+ * above mentioned concurrency estimates.
  * <p>
- * In order to use this class, one should get a Limiter for their request, which returns a future. once the Future is
- * done, the caller can assume that the request is schedulable. After the request completes, the caller <b>must</b>
- * call one of the methods on {@link Limiter.Listener} in order to provide feedback about the request's success.
- * If this is not done, throughput will be negatively affected. We attempt to eventually recover to avoid a total
- * deadlock, but this is not guaranteed.
+ * In order to use this class, one should acquire a Limiter for their request, which returns a future. once the Future
+ * is completed, the caller can assume that the request is schedulable. After the request completes, the caller
+ * <b>must</b> call one of the methods on {@link Limiter.Listener} in order to provide feedback about the request's
+ * success. If this is not done, throughput will be negatively affected. We attempt to eventually recover to avoid a
+ * total deadlock, but this is not guaranteed.
  */
 final class ConcurrencyLimiters {
     private static final Logger log = LoggerFactory.getLogger(ConcurrencyLimiters.class);
@@ -72,15 +81,11 @@ final class ConcurrencyLimiters {
 
     private final ConcurrentMap<String, ConcurrencyLimiter> limiters = new ConcurrentHashMap<>();
 
-    private static Limiter<Void> newLimiter() {
-        return DefaultLimiter.newBuilder()
-                .limit(TracingLimitDecorator.wrap(AIMDLimit.newBuilder().initialLimit(1).build()))
-                .build(new SimpleStrategy<>());
-    }
-
     @VisibleForTesting
     ConcurrencyLimiter limiter(String name) {
-        return limiters.computeIfAbsent(name, key -> new ConcurrencyLimiter(activeListeners, newLimiter()));
+        return limiters.computeIfAbsent(name, key -> new ConcurrencyLimiter(DefaultLimiter.newBuilder()
+                .limit(TracingLimitDecorator.wrap(AIMDLimit.newBuilder().initialLimit(1).build()))
+                .build(new SimpleStrategy<>())));
     }
 
     ConcurrencyLimiter limiter(Request request) {
@@ -105,14 +110,10 @@ final class ConcurrencyLimiters {
      * some more.
      */
     static final class ConcurrencyLimiter {
-        private final Map<Limiter.Listener, Runnable> activeListeners;
         private final Queue<SettableFuture<Limiter.Listener>> waitingRequests = new LinkedBlockingQueue<>();
         private final Limiter<Void> limiter;
 
-        public ConcurrencyLimiter(
-                Map<Limiter.Listener, Runnable> activeListeners,
-                Limiter<Void> limiter) {
-            this.activeListeners = activeListeners;
+        public ConcurrencyLimiter(Limiter<Void> limiter) {
             this.limiter = limiter;
         }
 
