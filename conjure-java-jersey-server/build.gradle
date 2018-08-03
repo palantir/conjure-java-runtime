@@ -2,7 +2,7 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 apply from: "${rootDir}/gradle/publish-bom.gradle"
 
 dependencyRecommendations {
-    mavenBom module: 'org.glassfish.jersey:jersey-bom'
+    mavenBom module: 'org.glassfish.jersey:jersey-bom@pom'
 }
 
 dependencies {

@@ -1,10 +1,46 @@
-publishing {
-    publications {
-        nebulaBom(MavenPublication) {
-            nebulaDependencyManagement.fromConfigurations { configurations.compile }
-            artifactId = project.name + '-bom'
-        }
+configurations {
+    bom {
+        extendsFrom compile
     }
 }
 
 bintray { pkg { publications += ['nebulaBom'] } }
+
+afterEvaluate {
+    publishing {
+        publications {
+            nebulaBom(MavenPublication) {
+                artifactId = project.name + '-bom'
+                def sourceProject = project
+
+                // TODO(dsanduleac): ideally we'd grab _all_ forces from constraints, but right now neither
+                // nebula.dependency-lock nor gradle's IMPROVED_POM_SUPPORT make their recommendations available in a
+                // queryable format (constraints - e.g. `Configuration#getAllDependencyConstraints()`).
+                // So instead, we have to merge our _used_ versions (from configuration.bom) with the recommendations
+                // coming from whatever BOMs we depend on, if any.
+                Object merged = mergeRecommendations(configurations.bom)
+
+                nebulaDependencyManagement.withDependencies {
+                    // Groovy Strings are not Strings, so need the explicit toString here
+                    merged + "${sourceProject.group}:${sourceProject.name}:${sourceProject.version}".toString()
+                }
+            }
+        }
+    }
+}
+
+private Object mergeRecommendations(Configuration conf) {
+    Map ownDeps = conf.resolvedConfiguration.resolvedArtifacts.collectEntries {
+        [(it.moduleVersion.id.group + ":" + it.name): it.moduleVersion.id.version]
+    }
+    Map fromUpstreamBom = dependencyRecommendations.mavenBomProvider.recommendations
+
+    (fromUpstreamBom.keySet() + ownDeps.keySet())
+            .collectEntries {
+                def versionFromUpstream = VersionNumber.parse(fromUpstreamBom[it])
+                def ownDepsVersion = VersionNumber.parse(ownDeps[it])
+                def higherVersion = versionFromUpstream > ownDepsVersion ? fromUpstreamBom[it] : ownDeps[it]
+                [(it): higherVersion]
+            }
+            .collect { key, value -> key + ":" + value }
+}
