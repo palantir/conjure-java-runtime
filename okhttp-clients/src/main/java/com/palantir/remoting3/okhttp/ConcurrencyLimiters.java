@@ -19,7 +19,6 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalCause;
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.netflix.concurrency.limits.Limiter;
@@ -113,17 +112,15 @@ final class ConcurrencyLimiters {
         private final Queue<SettableFuture<Limiter.Listener>> waitingRequests = new LinkedBlockingQueue<>();
         private final Limiter<Void> limiter;
 
-        public ConcurrencyLimiter(Limiter<Void> limiter) {
+        @VisibleForTesting
+        ConcurrencyLimiter(Limiter<Void> limiter) {
             this.limiter = limiter;
         }
 
         public ListenableFuture<Limiter.Listener> acquire() {
-            Optional<Limiter.Listener> maybeListener = limiter.acquire(null);
-            if (maybeListener.isPresent()) {
-                return Futures.immediateFuture(wrap(activeListeners, maybeListener.get()));
-            }
             SettableFuture<Limiter.Listener> future = SettableFuture.create();
             waitingRequests.add(future);
+            processQueue();
             return future;
         }
 
@@ -138,13 +135,12 @@ final class ConcurrencyLimiters {
                 if (head == null) {
                     acquired.onIgnore();
                 } else {
-                    head.set(acquired);
+                    head.set(wrap(acquired));
                 }
             }
         }
 
-        private Limiter.Listener wrap(
-                Map<Limiter.Listener, Runnable> activeListeners, Limiter.Listener listener) {
+        private Limiter.Listener wrap(Limiter.Listener listener) {
             Limiter.Listener res = new Limiter.Listener() {
                 @Override
                 public void onSuccess() {
