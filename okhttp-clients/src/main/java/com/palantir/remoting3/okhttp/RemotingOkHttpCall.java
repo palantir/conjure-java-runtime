@@ -157,11 +157,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Throwable throwable) {
                 callback.onFailure(
                         RemotingOkHttpCall.this,
                         new IOException(new AssertionError("This should never happen, since it implies "
-                                + "we failed when using the concurrency limiter", t)));
+                                + "we failed when using the concurrency limiter", throwable)));
             }
         }, MoreExecutors.directExecutor());
     }
@@ -243,7 +243,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     }
 
-    private static class RequestCompletion {
+    private static final class RequestCompletion {
         private final ScheduledExecutorService schedulingExecutor;
         private final ExecutorService executionExecutor;
         private final Callback callback;
