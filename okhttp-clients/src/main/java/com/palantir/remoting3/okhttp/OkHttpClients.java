@@ -59,6 +59,7 @@ public final class OkHttpClients {
                     log.error("An exception was uncaught in an execution thread. This implies a bug in http-remoting",
                             uncaughtException))
             .setNameFormat("remoting-okhttp-dispatcher-%d")
+            .setDaemon(true)
             .build();
     /**
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
