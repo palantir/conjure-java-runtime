@@ -46,9 +46,6 @@ final class RoundRobinUrlInterceptor implements Interceptor {
                         + " amongst known base URLs: " + urls.getBaseUrls()));
         Request request = originalRequest.newBuilder()
                 .url(rebasedUrl)
-                // Request.this.tag field by default points to request itself if it was not set in RequestBuilder.
-                // We don't want to reference old request in new one - that is why we need to reset tag to null.
-                .tag(originalRequest.equals(originalRequest.tag()) ? null : originalRequest.tag())
                 .build();
         return chain.proceed(request);
     }
