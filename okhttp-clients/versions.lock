@@ -84,16 +84,12 @@
             "locked": "20.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.conjure.java.runtime:error-handling",
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc6",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling"
-            ]
+            "locked": "2.0.0-rc6"
         },
         "com.palantir.conjure.java.api:service-config": {
             "locked": "2.0.0-rc6",
@@ -112,12 +108,6 @@
             "project": true
         },
         "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization": {
-            "project": true,
-            "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling"
-            ]
-        },
-        "com.palantir.conjure.java.runtime:error-handling": {
             "project": true
         },
         "com.palantir.conjure.java.runtime:keystores": {
@@ -192,14 +182,12 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.conjure.java.api:errors",
-                "com.palantir.conjure.java.runtime:error-handling"
+                "com.palantir.conjure.java.api:errors"
             ]
         },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling",
                 "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing",
                 "io.dropwizard.metrics:metrics-core"
@@ -291,16 +279,12 @@
             "locked": "20.0",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.conjure.java.runtime:error-handling",
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc6",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling"
-            ]
+            "locked": "2.0.0-rc6"
         },
         "com.palantir.conjure.java.api:service-config": {
             "locked": "2.0.0-rc6",
@@ -319,12 +303,6 @@
             "project": true
         },
         "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization": {
-            "project": true,
-            "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling"
-            ]
-        },
-        "com.palantir.conjure.java.runtime:error-handling": {
             "project": true
         },
         "com.palantir.conjure.java.runtime:keystores": {
@@ -399,14 +377,12 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.conjure.java.api:errors",
-                "com.palantir.conjure.java.runtime:error-handling"
+                "com.palantir.conjure.java.api:errors"
             ]
         },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling",
                 "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing",
                 "io.dropwizard.metrics:metrics-core"

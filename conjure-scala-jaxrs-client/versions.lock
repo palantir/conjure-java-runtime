@@ -101,7 +101,6 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
-                "com.palantir.conjure.java.runtime:error-handling",
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.conjure.java.runtime:refresh-utils",
@@ -144,7 +143,7 @@
         "com.palantir.conjure.java.api:errors": {
             "locked": "2.0.0-rc6",
             "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling"
+                "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
@@ -171,18 +170,11 @@
             "project": true,
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
-                "com.palantir.conjure.java.runtime:error-handling"
+                "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client": {
             "project": true
-        },
-        "com.palantir.conjure.java.runtime:error-handling": {
-            "project": true,
-            "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
-                "com.palantir.conjure.java.runtime:okhttp-clients"
-            ]
         },
         "com.palantir.conjure.java.runtime:keystores": {
             "project": true,
@@ -290,8 +282,7 @@
             "locked": "2.0.1",
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
-                "com.palantir.conjure.java.runtime:error-handling"
+                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
@@ -318,7 +309,6 @@
             "transitive": [
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
-                "com.palantir.conjure.java.runtime:error-handling",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing",
@@ -428,7 +418,6 @@
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
-                "com.palantir.conjure.java.runtime:error-handling",
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.conjure.java.runtime:refresh-utils",
@@ -471,7 +460,7 @@
         "com.palantir.conjure.java.api:errors": {
             "locked": "2.0.0-rc6",
             "transitive": [
-                "com.palantir.conjure.java.runtime:error-handling"
+                "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
@@ -498,18 +487,11 @@
             "project": true,
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
-                "com.palantir.conjure.java.runtime:error-handling"
+                "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client": {
             "project": true
-        },
-        "com.palantir.conjure.java.runtime:error-handling": {
-            "project": true,
-            "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
-                "com.palantir.conjure.java.runtime:okhttp-clients"
-            ]
         },
         "com.palantir.conjure.java.runtime:keystores": {
             "project": true,
@@ -617,8 +599,7 @@
             "locked": "2.0.1",
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
-                "com.palantir.conjure.java.runtime:error-handling"
+                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
@@ -645,7 +626,6 @@
             "transitive": [
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
-                "com.palantir.conjure.java.runtime:error-handling",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing",

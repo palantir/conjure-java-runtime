@@ -2,11 +2,11 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 apply from: "${rootDir}/gradle/publish-bom.gradle"
 
 dependencies {
-    compile project(":error-handling")
-
+    compile project(':conjure-java-jackson-serialization')
     compile "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
     compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.jcraft:jzlib"
+    compile "com.palantir.conjure.java.api:errors"
     compile "com.palantir.safe-logging:safe-logging"
     compile "com.palantir.tracing:tracing-jersey"
     compile "org.glassfish.jersey.core:jersey-server"

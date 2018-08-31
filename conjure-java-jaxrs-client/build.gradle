@@ -1,7 +1,6 @@
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
-    compile project(":error-handling")
     compile project(":conjure-java-jackson-serialization")
     compile project(":extras:refresh-utils")
     compile project(":client-config")
