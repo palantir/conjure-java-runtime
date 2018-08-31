@@ -3,10 +3,11 @@ apply plugin: "org.inferred.processors"
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
-    compile project(':error-handling')
+    compile project(':conjure-java-jackson-serialization')
     compile project(':client-config')
     compile "com.palantir.tracing:tracing-okhttp3"
     compile 'com.google.guava:guava'
+    compile "com.palantir.conjure.java.api:errors"
     compile 'com.palantir.safe-logging:preconditions'
     compile 'com.palantir.tritium:tritium-registry'
     compile 'com.squareup.okhttp3:logging-interceptor'
