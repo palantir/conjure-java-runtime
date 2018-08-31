@@ -16,11 +16,8 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
-import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
@@ -46,8 +43,6 @@ import org.slf4j.LoggerFactory;
 abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapper<T> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
-
-    static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     /** Returns the {@link ErrorType} that this exception corresponds to. */
     abstract ErrorType getErrorType(T exception);
