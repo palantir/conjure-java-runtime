@@ -89,6 +89,9 @@
                 "com.palantir.remoting3:tracing"
             ]
         },
+        "com.netflix.concurrency-limits:concurrency-limits-core": {
+            "locked": "0.0.48"
+        },
         "com.palantir.remoting-api:errors": {
             "locked": "1.9.0",
             "transitive": [
@@ -196,6 +199,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.netflix.concurrency-limits:concurrency-limits-core",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tokens:auth-tokens",
@@ -293,6 +297,9 @@
                 "com.palantir.remoting3:tracing"
             ]
         },
+        "com.netflix.concurrency-limits:concurrency-limits-core": {
+            "locked": "0.0.48"
+        },
         "com.palantir.remoting-api:errors": {
             "locked": "1.9.0",
             "transitive": [
@@ -400,6 +407,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.netflix.concurrency-limits:concurrency-limits-core",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tokens:auth-tokens",
