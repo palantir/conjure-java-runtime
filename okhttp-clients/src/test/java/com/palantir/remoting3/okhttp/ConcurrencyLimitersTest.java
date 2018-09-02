@@ -25,7 +25,7 @@ import java.util.concurrent.Future;
 import org.junit.Test;
 
 public final class ConcurrencyLimitersTest {
-    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(1);
+    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters();
     private final ConcurrencyLimiter limiter = limiters.limiter("limiter");
 
     @Test
@@ -33,6 +33,7 @@ public final class ConcurrencyLimitersTest {
         assertThat(limiter.acquire().isDone()).isTrue();
     }
 
+    // initial limit is set to 1 with our default Vegas limit
     @Test
     public void testBlocked() throws ExecutionException, InterruptedException {
         Limiter.Listener listener = limiter.acquire().get();

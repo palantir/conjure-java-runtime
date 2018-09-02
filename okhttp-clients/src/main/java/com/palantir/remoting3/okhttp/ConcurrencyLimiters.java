@@ -57,16 +57,6 @@ final class ConcurrencyLimiters {
     private static final String FALLBACK = "";
 
     private final ConcurrentMap<String, ConcurrencyLimiter> limiters = new ConcurrentHashMap<>();
-    private final int initialLimit;
-
-    @VisibleForTesting
-    ConcurrencyLimiters(int initialLimit) {
-        this.initialLimit = initialLimit;
-    }
-
-    public ConcurrencyLimiters() {
-        this(1);
-    }
 
     @VisibleForTesting
     ConcurrencyLimiter limiter(String name) {
