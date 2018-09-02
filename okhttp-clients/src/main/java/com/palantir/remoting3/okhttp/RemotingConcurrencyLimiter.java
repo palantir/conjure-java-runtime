@@ -43,7 +43,8 @@ import javax.annotation.concurrent.GuardedBy;
  * <ol>
  * <li>Fix concurrency bug - upstream has a race between starting finishing the window and running requests.</li>
  * <li>Store the last update time as well as the next update time.</li>
- * <li>Use the last update time to pre-emptively close the window when a request is dropped, instead of waiting.</li>
+ * <li>Use the last update time to pre-emptively close the window when a request is dropped, instead of waiting.
+ *     Do this before handing back any tokens.</li>
  * <li>Remove the builder, and instead have a static factory method.</li>
  * <li>Change code style to match Palantir baseline.</li>
  * </ol>
@@ -117,10 +118,10 @@ final class RemotingConcurrencyLimiter implements Limiter<Void> {
 
             @Override
             public void onDropped() {
-                inFlight.decrementAndGet();
-                token.release();
                 sample.getAndUpdate(current -> current.addDroppedSample(currentMaxInFlight));
                 maybeUpdateWindow(System.nanoTime(), () -> startTime > lastUpdateTime, unused -> true);
+                inFlight.decrementAndGet();
+                token.release();
             }
 
         });
@@ -156,7 +157,7 @@ final class RemotingConcurrencyLimiter implements Limiter<Void> {
         }
     }
 
-    private boolean isWindowReady(ImmutableSampleWindow sample) {
-        return sample.getCandidateRttNanos() < Long.MAX_VALUE && sample.getSampleCount() > windowSize;
+    private boolean isWindowReady(ImmutableSampleWindow window) {
+        return window.getCandidateRttNanos() < Long.MAX_VALUE && window.getSampleCount() > windowSize;
     }
 }

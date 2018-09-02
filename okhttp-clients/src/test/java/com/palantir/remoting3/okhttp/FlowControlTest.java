@@ -51,12 +51,12 @@ import org.slf4j.LoggerFactory;
  * to try different strategies.
  * <p>
  * It is run in CI, but only to prevent code breakages - this is in general an expensive test which should be run
- * as a dev tool.
+ * as a dev tool. If you want to run for dev purposes, please increase REQUESTS_PER_THREAD.
  */
 public final class FlowControlTest {
     private static final Logger log = LoggerFactory.getLogger(FlowControlTest.class);
     private static final Duration GRACE = Duration.ofMinutes(2);
-    private static final int REQUESTS_PER_THREAD = System.getenv("CI") == null ? 1000 : 1;
+    private static final int REQUESTS_PER_THREAD = 5;
     private static final ConcurrencyLimiters limiters = new ConcurrencyLimiters();
     private static ListeningExecutorService executorService;
 
@@ -107,7 +107,7 @@ public final class FlowControlTest {
                         avgRetries));
     }
 
-    private static class Worker implements Runnable {
+    private static final class Worker implements Runnable {
         private final Supplier<BackoffStrategy> backoffFactory;
         private final ConcurrencyLimiter limiter;
         private final Duration successDuration;
