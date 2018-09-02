@@ -62,7 +62,7 @@ final class RemotingConcurrencyLimiter implements Limiter<Void> {
     private volatile long lastUpdateTime = nanoClock.getAsLong();
     private volatile long nextUpdateTime = 0;
 
-    RemotingConcurrencyLimiter(Strategy<Void> strategy, long minRttThreshold, long minWindowTime,
+    private RemotingConcurrencyLimiter(Strategy<Void> strategy, long minRttThreshold, long minWindowTime,
             long maxWindowTime, int windowSize, Limit limit) {
         this.strategy = strategy;
         this.minRttThreshold = minRttThreshold;
@@ -72,14 +72,14 @@ final class RemotingConcurrencyLimiter implements Limiter<Void> {
         this.limit = limit;
     }
 
-    static RemotingConcurrencyLimiter createDefault(int initialLimit) {
+    static RemotingConcurrencyLimiter createDefault() {
         return new RemotingConcurrencyLimiter(
                 new SimpleStrategy<>(),
-                TimeUnit.MICROSECONDS.toNanos(100),
-                TimeUnit.SECONDS.toNanos(1),
-                TimeUnit.SECONDS.toNanos(1),
-                100,
-                VegasLimit.newBuilder().initialLimit(initialLimit).build());
+                TimeUnit.MICROSECONDS.toNanos(100), // Netflix default
+                TimeUnit.SECONDS.toNanos(1), // Netflix default
+                TimeUnit.SECONDS.toNanos(1), // Netflix default
+                100, // Netflix default
+                VegasLimit.newDefault());
     }
 
     @Override

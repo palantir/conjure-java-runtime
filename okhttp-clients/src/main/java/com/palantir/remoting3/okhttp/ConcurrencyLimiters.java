@@ -71,7 +71,7 @@ final class ConcurrencyLimiters {
     @VisibleForTesting
     ConcurrencyLimiter limiter(String name) {
         return limiters.computeIfAbsent(name, key ->
-                new ConcurrencyLimiter(RemotingConcurrencyLimiter.createDefault(initialLimit)));
+                new ConcurrencyLimiter(RemotingConcurrencyLimiter.createDefault()));
     }
 
     ConcurrencyLimiter limiter(Request request) {
