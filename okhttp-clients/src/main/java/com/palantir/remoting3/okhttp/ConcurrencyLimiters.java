@@ -20,8 +20,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.netflix.concurrency.limits.Limiter;
-import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limit.TracingLimitDecorator;
+import com.netflix.concurrency.limits.limit.VegasLimit;
 import com.netflix.concurrency.limits.limiter.DefaultLimiter;
 import com.netflix.concurrency.limits.strategy.SimpleStrategy;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
@@ -57,26 +57,44 @@ import okhttp3.Request;
  * success. If this is not done, a deadlock could result.
  */
 final class ConcurrencyLimiters {
+    private static final Void NO_CONTEXT = null;
     private static final String FALLBACK = "";
 
     private final ConcurrentMap<String, ConcurrencyLimiter> limiters = new ConcurrentHashMap<>();
+    private final int initialLimit;
+
+    @VisibleForTesting
+    ConcurrencyLimiters(int initialLimit) {
+        this.initialLimit = initialLimit;
+    }
+
+    public ConcurrencyLimiters() {
+        this(1);
+    }
 
     @VisibleForTesting
     ConcurrencyLimiter limiter(String name) {
         return limiters.computeIfAbsent(name, key -> new ConcurrencyLimiter(DefaultLimiter.newBuilder()
-                .limit(TracingLimitDecorator.wrap(AIMDLimit.newBuilder().initialLimit(1).build()))
+                //.windowSize(10)
+                //.minWindowTime(100, TimeUnit.MILLISECONDS)
+                .limit(TracingLimitDecorator.wrap(VegasLimit.newBuilder()
+                        .initialLimit(1)
+                        .decrease(x -> x / 2)
+                        .build()))
                 .build(new SimpleStrategy<>())));
     }
 
     ConcurrencyLimiter limiter(Request request) {
-        final String limiterKey;
+        return limiter(limiterKey(request));
+    }
+
+    private static String limiterKey(Request request) {
         String pathTemplate = request.header(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER);
         if (pathTemplate == null) {
-            limiterKey = FALLBACK;
+            return FALLBACK;
         } else {
-            limiterKey = request.method() + " " + pathTemplate;
+            return request.method() + " " + pathTemplate;
         }
-        return limiter(limiterKey);
     }
 
     /**
@@ -108,7 +126,7 @@ final class ConcurrencyLimiters {
 
         private synchronized void processQueue() {
             while (!waitingRequests.isEmpty()) {
-                Optional<Limiter.Listener> maybeAcquired = limiter.acquire(null);
+                Optional<Limiter.Listener> maybeAcquired = limiter.acquire(NO_CONTEXT);
                 if (!maybeAcquired.isPresent()) {
                     return;
                 }

@@ -25,7 +25,7 @@ import java.util.concurrent.Future;
 import org.junit.Test;
 
 public final class ConcurrencyLimitersTest {
-    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters();
+    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(1);
     private final ConcurrencyLimiter limiter = limiters.limiter("limiter");
 
     @Test

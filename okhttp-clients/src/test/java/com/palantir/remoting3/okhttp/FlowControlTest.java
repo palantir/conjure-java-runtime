@@ -16,6 +16,8 @@
 
 package com.palantir.remoting3.okhttp;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.codahale.metrics.Meter;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -25,6 +27,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.netflix.concurrency.limits.Limiter;
 import com.palantir.remoting3.okhttp.ConcurrencyLimiters.ConcurrencyLimiter;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,10 +48,12 @@ import org.slf4j.LoggerFactory;
  * This class is a simulation of the flow control primitives used by this library, in order to allow the developer
  * to try different strategies.
  * <p>
- * It is run in CI, but only to prevent code breakages - this is in general a
+ * It is run in CI, but only to prevent code breakages - this is in general an expensive test which should be run
+ * as a dev tool.
  */
 public final class FlowControlTest {
     private static final Logger log = LoggerFactory.getLogger(FlowControlTest.class);
+    private static final Duration GRACE = Duration.ofMinutes(2);
     private static final int REQUESTS_PER_THREAD = System.getenv("CI") == null ? 1000 : 1;
     private static final ConcurrencyLimiters limiters = new ConcurrencyLimiters();
     private static ListeningExecutorService executorService;
@@ -68,13 +73,18 @@ public final class FlowControlTest {
     @Test
     public void test16ThreadsRateLimit20() throws ExecutionException, InterruptedException {
         Meter rate = new Meter();
-        List<ListenableFuture<?>> tasks = createWorkers(rate, 16, 20, Duration.ofMillis(100))
+        int rateLimit = 20;
+        List<ListenableFuture<?>> tasks = createWorkers(rate, 21, rateLimit, Duration.ofMillis(50))
                 .map(executorService::submit)
                 .collect(Collectors.toList());
         ListenableFuture<?> task = Futures.allAsList(tasks);
+        Instant start = Instant.now();
         while (!task.isDone()) {
             sleep(1000);
             log.info("Average rate is {}, 1 minute rate is {}", rate.getMeanRate(), rate.getOneMinuteRate());
+            if (Duration.between(start, Instant.now()).compareTo(GRACE) > 0) {
+                assertThat(rate.getMeanRate()).isGreaterThan(0.75 * rateLimit);
+            }
         }
         task.get();
     }
@@ -131,8 +141,8 @@ public final class FlowControlTest {
                         throw new RuntimeException("Failed on request " + i);
                     } else {
                         sleep(sleep.get().toMillis());
+                        listener.onDropped();
                     }
-                    listener.onDropped();
                 }
             }
         }

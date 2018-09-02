@@ -153,7 +153,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         Futures.addCallback(listenerFuture, new FutureCallback<Listener>() {
             @Override
             public void onSuccess(Listener listener) {
-                enqueue(new RequestCompletion(schedulingExecutor, executionExecutor, callback, listener));
+                enqueue(new RequestCompletion(callback, listener));
             }
 
             @Override
@@ -172,7 +172,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             public void onFailure(Call call, IOException exception) {
                 urls.markAsFailed(request().url());
 
-                // Fail call if backoffs are exhausted or if no retry URL can be determined.
+                // Fail call if backoffs are exhausted or if no redirected URL can be determined.
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
                     completion.onError(call, new IOException("Failed to complete the request due to an "
@@ -216,7 +216,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
-                // Handle to handle QoS situations: retry, failover, etc.
+                // Handle to handle QoS situations: redirected, failover, etc.
                 Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
                 if (qosError.isPresent()) {
                     qosError.get().accept(createQosVisitor(call, completion));
@@ -243,17 +243,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     }
 
-    private static final class RequestCompletion {
-        private final ScheduledExecutorService schedulingExecutor;
-        private final ExecutorService executionExecutor;
+    private final class RequestCompletion {
         private final Callback callback;
         private final Listener listener;
 
-        private RequestCompletion(
-                ScheduledExecutorService schedulingExecutor, ExecutorService executionExecutor,
-                Callback callback, Listener listener) {
-            this.schedulingExecutor = schedulingExecutor;
-            this.executionExecutor = executionExecutor;
+        private RequestCompletion(Callback callback, Listener listener) {
             this.callback = callback;
             this.listener = listener;
         }
@@ -273,7 +267,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             callback.onResponse(call, response);
         }
 
-        private void retry(Call retryCall) {
+        private void redirected(Call retryCall) {
             listener.onIgnore();
             retryCall.enqueue(callback);
         }
@@ -329,7 +323,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                         Request redirectedRequest = request().newBuilder()
                                 .url(redirectTo.get())
                                 .build();
-                        completion.retry(client.newCallWithMutableState(
+                        completion.redirected(client.newCallWithMutableState(
                                 redirectedRequest, backoffStrategy, maxNumRelocations - 1));
                     }
                 }
