@@ -18,6 +18,8 @@ package com.palantir.remoting3.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.codahale.metrics.ExponentiallyDecayingReservoir;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -73,8 +75,9 @@ public final class FlowControlTest {
     @Test
     public void test16ThreadsRateLimit20() throws ExecutionException, InterruptedException {
         Meter rate = new Meter();
+        Histogram avgRetries = new Histogram(new ExponentiallyDecayingReservoir());
         int rateLimit = 20;
-        List<ListenableFuture<?>> tasks = createWorkers(rate, 21, rateLimit, Duration.ofMillis(50))
+        List<ListenableFuture<?>> tasks = createWorkers(rate, avgRetries, 21, rateLimit, Duration.ofMillis(50))
                 .map(executorService::submit)
                 .collect(Collectors.toList());
         ListenableFuture<?> task = Futures.allAsList(tasks);
@@ -82,6 +85,8 @@ public final class FlowControlTest {
         while (!task.isDone()) {
             sleep(1000);
             log.info("Average rate is {}, 1 minute rate is {}", rate.getMeanRate(), rate.getOneMinuteRate());
+            log.info("Average number of retries is {}, max is {}",
+                    avgRetries.getSnapshot().getMean(), avgRetries.getSnapshot().getMax());
             if (Duration.between(start, Instant.now()).compareTo(GRACE) > 0) {
                 assertThat(rate.getMeanRate()).isGreaterThan(0.75 * rateLimit);
             }
@@ -89,7 +94,8 @@ public final class FlowControlTest {
         task.get();
     }
 
-    private Stream<Worker> createWorkers(Meter rate, int numThreads, int rateLimit, Duration delay) {
+    private Stream<Worker> createWorkers(
+            Meter rate, Histogram avgRetries, int numThreads, int rateLimit, Duration delay) {
         RateLimiter rateLimiter = RateLimiter.create(rateLimit);
         return IntStream.range(0, numThreads)
                 .mapToObj(unused -> new Worker(
@@ -97,7 +103,8 @@ public final class FlowControlTest {
                         limiter,
                         delay,
                         rateLimiter,
-                        rate));
+                        rate,
+                        avgRetries));
     }
 
     private static class Worker implements Runnable {
@@ -106,20 +113,24 @@ public final class FlowControlTest {
         private final Duration successDuration;
         private final RateLimiter rateLimiter;
         private final Meter meter;
+        private final Histogram avgRetries;
 
         private BackoffStrategy backoff;
+        private int numRetries = 0;
 
         private Worker(
                 Supplier<BackoffStrategy> backoffFactory,
                 ConcurrencyLimiter limiter,
                 Duration successDuration,
                 RateLimiter rateLimiter,
-                Meter meter) {
+                Meter meter,
+                Histogram avgRetries) {
             this.backoffFactory = backoffFactory;
             this.limiter = limiter;
             this.successDuration = successDuration;
             this.rateLimiter = rateLimiter;
             this.meter = meter;
+            this.avgRetries = avgRetries;
         }
 
         @Override
@@ -131,11 +142,14 @@ public final class FlowControlTest {
                     meter.mark();
                     sleep(successDuration.toMillis());
                     listener.onSuccess();
+                    avgRetries.update(numRetries);
+                    numRetries = 0;
                     backoff = null;
                     i++;
                 } else {
                     initializeBackoff();
                     Optional<Duration> sleep = backoff.nextBackoff();
+                    numRetries++;
                     if (!sleep.isPresent()) {
                         listener.onIgnore();
                         throw new RuntimeException("Failed on request " + i);

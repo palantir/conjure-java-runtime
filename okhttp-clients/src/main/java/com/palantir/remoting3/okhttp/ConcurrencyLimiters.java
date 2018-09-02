@@ -20,10 +20,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.netflix.concurrency.limits.Limiter;
-import com.netflix.concurrency.limits.limit.TracingLimitDecorator;
-import com.netflix.concurrency.limits.limit.VegasLimit;
-import com.netflix.concurrency.limits.limiter.DefaultLimiter;
-import com.netflix.concurrency.limits.strategy.SimpleStrategy;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.util.ArrayDeque;
 import java.util.Optional;
@@ -74,14 +70,8 @@ final class ConcurrencyLimiters {
 
     @VisibleForTesting
     ConcurrencyLimiter limiter(String name) {
-        return limiters.computeIfAbsent(name, key -> new ConcurrencyLimiter(DefaultLimiter.newBuilder()
-                //.windowSize(10)
-                //.minWindowTime(100, TimeUnit.MILLISECONDS)
-                .limit(TracingLimitDecorator.wrap(VegasLimit.newBuilder()
-                        .initialLimit(1)
-                        .decrease(x -> x / 2)
-                        .build()))
-                .build(new SimpleStrategy<>())));
+        return limiters.computeIfAbsent(name, key ->
+                new ConcurrencyLimiter(RemotingConcurrencyLimiter.createDefault(initialLimit)));
     }
 
     ConcurrencyLimiter limiter(Request request) {
