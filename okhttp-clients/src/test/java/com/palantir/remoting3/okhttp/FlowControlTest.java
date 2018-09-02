@@ -77,7 +77,7 @@ public final class FlowControlTest {
         Meter rate = new Meter();
         Histogram avgRetries = new Histogram(new ExponentiallyDecayingReservoir());
         int rateLimit = 20;
-        List<ListenableFuture<?>> tasks = createWorkers(rate, avgRetries, 21, rateLimit, Duration.ofMillis(50))
+        List<ListenableFuture<?>> tasks = createWorkers(rate, avgRetries, 16, rateLimit, Duration.ofMillis(50))
                 .map(executorService::submit)
                 .collect(Collectors.toList());
         ListenableFuture<?> task = Futures.allAsList(tasks);
