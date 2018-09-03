@@ -1,4 +1,4 @@
-apply from: "${rootDir}/gradle/publish.gradle"
+apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind"

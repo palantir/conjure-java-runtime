@@ -40,7 +40,7 @@ Provides the `JaxRsClient` factory for creating Feign-based clients for JAX-RS A
 all clients, plain-text HTTP is not supported. Example:
 
 ```java
-SslConfiguration sslConfig = SslConfiguration.of(Paths.get("path/to/trustStore""));
+SslConfiguration sslConfig = SslConfiguration.of(Paths.get("path/to/trustStore"));
 UserAgent userAgent = UserAgent.of(UserAgent.Agent.of("my-user-agent", "1.0.0"));
 ClientConfiguration config = ClientConfigurations.of(
         ImmutableList.copyOf("https://url-to-server:6789"),

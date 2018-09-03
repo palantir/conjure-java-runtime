@@ -90,26 +90,26 @@
             ]
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "1.7.0",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting3:error-handling"
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.7.0",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting3:http-clients"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.7.0",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.7.0",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting3:tracing"
             ]
@@ -165,17 +165,17 @@
             "locked": "0.8.0"
         },
         "com.squareup.okhttp3:logging-interceptor": {
-            "locked": "3.9.0"
+            "locked": "3.11.0"
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.9.0",
+            "locked": "3.11.0",
             "transitive": [
                 "com.palantir.remoting3:tracing-okhttp3",
                 "com.squareup.okhttp3:logging-interceptor"
             ]
         },
         "com.squareup.okio:okio": {
-            "locked": "1.13.0",
+            "locked": "1.14.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]
@@ -294,26 +294,26 @@
             ]
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "1.7.0",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting3:error-handling"
             ]
         },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.7.0",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting3:http-clients"
             ]
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.7.0",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.7.0",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting3:tracing"
             ]
@@ -369,17 +369,17 @@
             "locked": "0.8.0"
         },
         "com.squareup.okhttp3:logging-interceptor": {
-            "locked": "3.9.0"
+            "locked": "3.11.0"
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.9.0",
+            "locked": "3.11.0",
             "transitive": [
                 "com.palantir.remoting3:tracing-okhttp3",
                 "com.squareup.okhttp3:logging-interceptor"
             ]
         },
         "com.squareup.okio:okio": {
-            "locked": "1.13.0",
+            "locked": "1.14.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]

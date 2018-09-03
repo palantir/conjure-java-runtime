@@ -1,3 +1,5 @@
+rootProject.name = 'http-remoting'
+
 include 'error-handling'
 include 'extras:jackson-support'
 include 'extras:refresh-utils'

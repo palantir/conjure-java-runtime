@@ -72,7 +72,7 @@
             ]
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "1.7.0"
+            "locked": "1.9.0"
         },
         "com.palantir.remoting3:jackson-support": {
             "project": true
@@ -166,7 +166,7 @@
             ]
         },
         "com.palantir.remoting-api:errors": {
-            "locked": "1.7.0"
+            "locked": "1.9.0"
         },
         "com.palantir.remoting3:jackson-support": {
             "project": true

@@ -1,15 +1,13 @@
+// This file is managed by the excavator 'consistent-publish-scripts' check, changes will be overwritten.
 apply plugin: 'com.jfrog.bintray'
-apply plugin: 'nebula.maven-base-publish'
+apply plugin: 'nebula.maven-publish'
 apply plugin: 'nebula.maven-resolved-dependencies'
 apply plugin: 'nebula.javadoc-jar'
 apply plugin: 'nebula.source-jar'
 
 jar {
     manifest {
-        attributes(
-                "Implementation-Title"   : project.name,
-                "Implementation-Version" : project.version,
-                "Implementation-Vendor"  : "Palantir Technologies Inc.")
+        attributes("Implementation-Version" : project.version)
     }
 }
 
@@ -19,13 +17,14 @@ bintray {
     publish = true
     pkg {
         repo = 'releases'
-        name = 'http-remoting'
+        name = rootProject.name
         userOrg = 'palantir'
         licenses = ['Apache-2.0']
         publications = ['nebula']
     }
 }
 
-bintrayUpload.dependsOn { generatePomFileForNebulaPublication }
-bintrayUpload.dependsOn { sourceJar }
-bintrayUpload.dependsOn { build }
+publish.dependsOn bintrayUpload
+bintrayUpload.onlyIf {
+    versionDetails().isCleanTag
+}

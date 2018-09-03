@@ -1,6 +1,6 @@
 apply plugin: "org.inferred.processors"
 
-apply from: "${rootDir}/gradle/publish.gradle"
+apply from: "${rootDir}/gradle/publish-jar.gradle"
 apply from: "${rootDir}/gradle/publish-bom.gradle"
 
 dependencies {
@@ -21,6 +21,7 @@ dependencies {
     testCompile "org.assertj:assertj-core"
     testCompile "org.hamcrest:hamcrest-all"
     testCompile "org.mockito:mockito-core"
+    testCompile "com.palantir.safe-logging:preconditions-assertj"
 
     processor "org.immutables:value"
 }

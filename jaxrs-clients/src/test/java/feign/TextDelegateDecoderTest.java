@@ -16,6 +16,7 @@
 
 package feign;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -31,6 +32,7 @@ import com.google.common.net.HttpHeaders;
 import com.palantir.remoting3.jaxrs.JaxRsClient;
 import com.palantir.remoting3.jaxrs.TestBase;
 import com.palantir.remoting3.jaxrs.feignimpl.GuavaTestServer;
+import feign.codec.DecodeException;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -139,6 +141,8 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Test
     public void testStandardClientsUseTextDelegateEncoder() {
         assertThat(service.getString("string"), is("string"));
-        assertThat(service.getString(null), is((String) null));
+        assertThatExceptionOfType(DecodeException.class)
+                .isThrownBy(() -> service.getString(null))
+                .withCauseInstanceOf(NullPointerException.class);
     }
 }

@@ -19,6 +19,7 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.palantir.remoting.api.config.service.BasicCredentials;
 import com.palantir.remoting3.clients.CipherSuites;
 import com.palantir.remoting3.clients.ClientConfiguration;
@@ -27,14 +28,15 @@ import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.tracing.Tracers;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
@@ -43,28 +45,55 @@ import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
 import okhttp3.internal.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class OkHttpClients {
+    private static final Logger log = LoggerFactory.getLogger(OkHttpClients.class);
 
     @VisibleForTesting
     static final int NUM_SCHEDULING_THREADS = 5;
 
+    private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
+            .setUncaughtExceptionHandler((thread, uncaughtException) ->
+                    log.error("An exception was uncaught in an execution thread. This implies a bug in http-remoting",
+                            uncaughtException))
+            .setNameFormat("remoting-okhttp-dispatcher-%d")
+            .build();
     /**
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
+     * Same as OkHttp's default, but with a logging uncaught exception handler.
      */
-    private static final ExecutorService executionExecutor = Tracers.wrap(new Dispatcher().executorService());
+    private static final ExecutorService executionExecutor =
+            Tracers.wrap(Executors.newCachedThreadPool(executionThreads));
 
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
+
+    /** Global {@link TaggedMetricRegistry} for per-client and dispatcher-wide metrics. */
+    private static TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
+
+    /** Shared connection pool. */
+    private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
 
     static {
         dispatcher = new Dispatcher(executionExecutor);
         dispatcher.setMaxRequests(256);
         dispatcher.setMaxRequestsPerHost(256);
+        // metrics
+        registry.gauge(
+                MetricName.builder().safeName("com.palantir.remoting3.dispatcher.calls.queued").build(),
+                dispatcher::queuedCallsCount);
+        registry.gauge(
+                MetricName.builder().safeName("com.palantir.remoting3.dispatcher.calls.running").build(),
+                dispatcher::runningCallsCount);
+        registry.gauge(
+                MetricName.builder().safeName("com.palantir.remoting3.connection-pool.connections.total").build(),
+                connectionPool::connectionCount);
+        registry.gauge(
+                MetricName.builder().safeName("com.palantir.remoting3.connection-pool.connections.idle").build(),
+                connectionPool::idleConnectionCount);
     }
-
-    /** Shared connection pool. */
-    private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
 
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
@@ -80,7 +109,7 @@ public final class OkHttpClients {
     /**
      * The per service and host metrics recorded for each HTTP call.
      */
-    private static final HostMetricsRegistry hostMetrics = new HostMetricsRegistry();
+    private static final HostMetricsRegistry defaultHostMetrics = new HostMetricsRegistry();
 
     private OkHttpClients() {}
 
@@ -88,8 +117,20 @@ public final class OkHttpClients {
      * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
+    public static OkHttpClient create(
+            ClientConfiguration config, UserAgent userAgent, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
+        return createInternal(config, userAgent, hostMetrics, serviceClass, true /* randomize URLs */);
+    }
+
+    /**
+     * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
+     * ClientConfiguration#uris URIs} are initialized in random order.
+     *
+     * @deprecated Use {@link #create(ClientConfiguration, UserAgent, HostMetricsRegistry, Class)}
+     */
+    @Deprecated
     public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, true /* randomize URLs */);
+        return create(config, userAgent, defaultHostMetrics, serviceClass);
     }
 
     /**
@@ -104,24 +145,27 @@ public final class OkHttpClients {
 
     /**
      * Return the per service and host metrics for all clients created by {@link OkHttpClients}.
+     *
+     * @deprecated Pass in a {@link HostMetricsRegistry} when creating a client.
      */
+    @Deprecated
     public static Collection<HostMetrics> hostMetrics() {
-        return hostMetrics.getMetrics();
+        return defaultHostMetrics.getMetrics();
     }
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
-            ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
-        return createInternal(config, userAgent, serviceClass, false);
+            ClientConfiguration config, UserAgent userAgent, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
+        return createInternal(config, userAgent, hostMetrics, serviceClass, false);
     }
 
     private static RemotingOkHttpClient createInternal(
             ClientConfiguration config,
             UserAgent userAgent,
+            HostMetricsRegistry hostMetrics,
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
-        TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
         // Routing
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(config.uris(), randomizeUrlOrder,
@@ -130,8 +174,15 @@ public final class OkHttpClients {
             // TODO(rfink): Should this go into the call itself?
             client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
         } else {
-            // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in the request
-            client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
+            switch (config.nodeSelectionStrategy()) {
+                case ROUND_ROBIN:
+                    client.addInterceptor(RoundRobinUrlInterceptor.create(urlSelector));
+                    break;
+                case PIN_UNTIL_ERROR:
+                    // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in
+                    // the request
+                    client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
+            }
         }
         client.followRedirects(false);  // We implement our own redirect logic.
 
@@ -173,23 +224,7 @@ public final class OkHttpClients {
                 () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize(), new Random()),
                 urlSelector,
                 schedulingExecutor,
-                executionExecutor,
-                largestOf(config.connectTimeout(), config.readTimeout(), config.writeTimeout())
-        );
-    }
-
-    /**
-     * Treat {@link Duration#ZERO} as infinity to match okhttp3.
-     */
-    @VisibleForTesting
-    static Duration largestOf(Duration... durations) {
-        if (Arrays.stream(durations).anyMatch(Duration::isZero)) {
-            return Duration.ZERO;
-        }
-
-        return Arrays.stream(durations)
-                .max(Duration::compareTo)
-                .orElseThrow(() -> new IllegalArgumentException("largestOf must be called with at least one argument"));
+                executionExecutor);
     }
 
     /**

@@ -22,7 +22,9 @@ import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
+import com.palantir.remoting3.okhttp.HostMetricsRegistry;
 import com.palantir.remoting3.okhttp.OkHttpClients;
+import java.util.Optional;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -32,9 +34,19 @@ public final class Retrofit2ClientBuilder {
 
     private final ClientConfiguration config;
 
+    private HostMetricsRegistry hostMetricsRegistry;
+
     public Retrofit2ClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Cannot construct retrofit client with empty URI list");
         this.config = config;
+    }
+
+    /**
+     * Set the host metrics registry to use when constructing the OkHttp client.
+     */
+    public Retrofit2ClientBuilder hostMetricsRegistry(HostMetricsRegistry newHostMetricsRegistry) {
+        hostMetricsRegistry = newHostMetricsRegistry;
+        return this;
     }
 
     /**
@@ -46,15 +58,22 @@ public final class Retrofit2ClientBuilder {
     }
 
     public <T> T build(Class<T> serviceClass, UserAgent userAgent) {
-        okhttp3.OkHttpClient client = OkHttpClients.create(config, userAgent, serviceClass);
+        okhttp3.OkHttpClient client = Optional.ofNullable(hostMetricsRegistry)
+                .map(hostMetrics -> OkHttpClients.create(config, userAgent, hostMetrics, serviceClass))
+                .orElseGet(() -> OkHttpClients.create(config, userAgent, serviceClass));
+
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(addTrailingSlash(config.uris().get(0)))
-                .addConverterFactory(new CborConverterFactory(
-                        JacksonConverterFactory.create(OBJECT_MAPPER),
-                        CBOR_OBJECT_MAPPER))
+                .addConverterFactory(
+                        new CborConverterFactory(
+                                new NeverReturnNullConverterFactory(
+                                        new CoerceNullCollectionsConverterFactory(
+                                                JacksonConverterFactory.create(OBJECT_MAPPER))),
+                                CBOR_OBJECT_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
-                .addCallAdapterFactory(AsyncSerializableErrorCallAdapterFactory.INSTANCE)
+                .addCallAdapterFactory(new CoerceNullCollectionsCallAdapterFactory(
+                        AsyncSerializableErrorCallAdapterFactory.INSTANCE))
                 .build();
         return retrofit.create(serviceClass);
     }

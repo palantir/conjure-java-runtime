@@ -16,7 +16,6 @@
 
 package com.palantir.remoting3.okhttp;
 
-import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
@@ -35,24 +34,18 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     private final UrlSelector urls;
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
-    /**
-     * The timeout for synchronous {@link okhttp3.Call#execute call execution}. Typically, this should be larger than
-     * the maximum of the OkHttp connect/read/write timeout.
-     */
-    private final Duration syncCallTimeout;
 
     RemotingOkHttpClient(
             OkHttpClient delegate,
             Supplier<BackoffStrategy> backoffStrategy,
             UrlSelector urls,
             ScheduledExecutorService schedulingExecutor,
-            ExecutorService executionExecutor, Duration syncCallTimeout) {
+            ExecutorService executionExecutor) {
         super(delegate);
         this.backoffStrategyFactory = backoffStrategy;
         this.urls = urls;
         this.schedulingExecutor = schedulingExecutor;
         this.executionExecutor = executionExecutor;
-        this.syncCallTimeout = syncCallTimeout;
     }
 
     @Override
@@ -69,7 +62,6 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 this,
                 schedulingExecutor,
                 executionExecutor,
-                syncCallTimeout,
                 maxNumRelocations);
     }
 }

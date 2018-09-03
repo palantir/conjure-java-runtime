@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,22 +22,26 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
-final class CurrentUrlInterceptor implements Interceptor {
+/**
+ * An {@link Interceptor} implementation that rebases the request's URL in a round robin fashion. The rebased URL will
+ * be the next URL after the last recorded URL used when multiple URLs are supplied via the {@link UrlSelector}.
+ */
+final class RoundRobinUrlInterceptor implements Interceptor {
 
     private final UrlSelector urls;
 
-    private CurrentUrlInterceptor(UrlSelector urls) {
+    private RoundRobinUrlInterceptor(UrlSelector urls) {
         this.urls = urls;
     }
 
-    static CurrentUrlInterceptor create(UrlSelector urls) {
-        return new CurrentUrlInterceptor(urls);
+    static RoundRobinUrlInterceptor create(UrlSelector urls) {
+        return new RoundRobinUrlInterceptor(urls);
     }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request originalRequest = chain.request();
-        HttpUrl rebasedUrl = urls.redirectToCurrent(originalRequest.url()).orElseThrow(() -> new IOException(
+        HttpUrl rebasedUrl = urls.redirectToNextRoundRobin(originalRequest.url()).orElseThrow(() -> new IOException(
                 "Failed to determine suitable target URL for request URL " + originalRequest.url()
                         + " amongst known base URLs: " + urls.getBaseUrls()));
         Request request = originalRequest.newBuilder()
