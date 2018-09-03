@@ -10,6 +10,8 @@ jobs:
     resource_class: xlarge
     environment:
       GRADLE_OPTS: -Dorg.gradle.console=plain -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
+      CIRCLE_TEST_REPORTS: /home/circleci/junit
+      CIRCLE_ARTIFACTS: /home/circleci/artifacts
 
     steps:
       - checkout
@@ -18,7 +20,7 @@ jobs:
       - restore_cache:
           key: gradle-cache-{{ checksum "versions.props" }}-{{ checksum "build.gradle" }}
 
-      - run: ./gradlew --parallel resolveConfigurations
+      - run: ./gradlew --profile --parallel resolveConfigurations
 
       - save_cache:
           key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
@@ -29,29 +31,27 @@ jobs:
           paths:
             - ~/.gradle/caches
 
-      - run: ./gradlew --parallel --continue build
+      - run: ./gradlew --profile --parallel --continue build
 
       - run:
           command: |
             mkdir -p ~/junit
             find . -type f -regex ".*/build/.*TEST.*xml" -exec cp --parents {} ~/junit/ \;
           when: always
-      - store_test_results:
-          path: ~/junit
 
       - deploy:
           command: |
             # publishing snapshots to bintray does not work, so we only publish from tag builds (not develop)
             if [[ "${CIRCLE_TAG}" =~ [0-9]+(\.[0-9]+)+(-[a-zA-Z]+[0-9]*)* ]]; then
-              ./gradlew --stacktrace --continue publish
+              ./gradlew --profile --stacktrace --continue publish
             else
-              ./gradlew --parallel --continue publishToMavenLocal
-              mkdir -p ~/poms
-              find . -name 'pom-default.xml' -exec cp --parents {} ~/poms \;
+              ./gradlew --profile --parallel --continue publishToMavenLocal
+              mkdir -p $CIRCLE_ARTIFACTS/poms
+              find . -name 'pom-default.xml' -exec cp --parents {} $CIRCLE_ARTIFACTS/poms \;
             fi
 
-      - store_artifacts:
-          path: ~/poms
+      - store_test_results: { path: ~/junit }
+      - store_artifacts: { path: ~/artifacts }
 
 workflows:
   version: 2
