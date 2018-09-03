@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * When code in the server throws an {@link Exception} that reaches Jersey, this {@link ExceptionMapper} converts that
  * exception into an HTTP {@link Response} for return to the caller/browser.
  */
-abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapper<T> {
+abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapper<T> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
 
