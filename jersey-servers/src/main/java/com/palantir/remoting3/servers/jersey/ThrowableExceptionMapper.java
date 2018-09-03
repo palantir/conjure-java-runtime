@@ -20,10 +20,10 @@ import com.palantir.remoting.api.errors.ErrorType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-final class AssertionErrorExceptionMapper extends JsonExceptionMapper<AssertionError> {
+final class ThrowableExceptionMapper extends JsonExceptionMapper<Throwable> {
 
     @Override
-    ErrorType getErrorType(AssertionError exception) {
+    ErrorType getErrorType(Throwable exception) {
         return ErrorType.INTERNAL;
     }
 }
