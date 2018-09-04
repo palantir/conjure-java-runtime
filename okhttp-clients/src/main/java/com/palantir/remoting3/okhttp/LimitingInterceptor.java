@@ -52,7 +52,7 @@ public final class LimitingInterceptor implements Interceptor {
         return response;
     }
 
-    private static class QosVisitor implements QosException.Visitor<Void> {
+    private static final class QosVisitor implements QosException.Visitor<Void> {
         private final Limiter.Listener listener;
 
         QosVisitor(Limiter.Listener listener) {
@@ -100,7 +100,7 @@ public final class LimitingInterceptor implements Interceptor {
     /**
      * Same as {@link AIMDLimit} except increases the limit whenever there are no failures in the given window.
      */
-    private class AimdLimit implements Limit {
+    private static final class AimdLimit implements Limit {
         private final double backoffRatio;
         private int limit;
 
