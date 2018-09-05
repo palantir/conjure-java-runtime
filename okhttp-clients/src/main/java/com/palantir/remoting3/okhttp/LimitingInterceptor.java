@@ -98,7 +98,8 @@ public final class LimitingInterceptor implements Interceptor {
     }
 
     /**
-     * Same as {@link AIMDLimit} except increases the limit whenever there are no failures in the given window.
+     * Same as {@link AIMDLimit} except increases the limit whenever maxInFlight is equal to limit, rather than greater
+     * than limit.
      */
     private static final class AimdLimit implements Limit {
         private final double backoffRatio;
@@ -118,7 +119,7 @@ public final class LimitingInterceptor implements Interceptor {
         public void update(SampleWindow sample) {
             if (sample.didDrop()) {
                 limit = Math.max(1, Math.min(limit - 1, (int) (limit * backoffRatio)));
-            } else {
+            } else if (sample.getMaxInFlight() == limit) {
                 limit = limit + 1;
             }
         }
