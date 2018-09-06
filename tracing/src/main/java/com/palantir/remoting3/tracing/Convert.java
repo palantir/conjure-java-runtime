@@ -16,8 +16,8 @@
 
 package com.palantir.remoting3.tracing;
 
-import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.tracing.TraceSampler;
+import com.palantir.tracing.api.OpenSpan;
 import com.palantir.tracing.api.Span;
 import com.palantir.tracing.api.SpanObserver;
 import com.palantir.tracing.api.SpanType;
@@ -48,12 +48,32 @@ final class Convert {
             return null;
         }
 
-        return new SpanObserver() {
-            @Override
-            public void consume(Span span) {
-                old.consume(toRemotingSpan(span));
-            }
-        };
+        return span -> old.consume(toRemotingSpan(span));
+    }
+
+    static Span span(com.palantir.remoting.api.tracing.Span old) {
+        if (old == null) {
+            return null;
+        }
+
+        return Span.builder()
+                .traceId(old.getTraceId())
+                .parentSpanId(old.getParentSpanId())
+                .spanId(old.getSpanId())
+                .type(Convert.spanType(old.type()))
+                .operation(old.getOperation())
+                .startTimeMicroSeconds(old.getStartTimeMicroSeconds())
+                .durationNanoSeconds(old.getDurationNanoSeconds())
+                .metadata(old.getMetadata())
+                .build();
+    }
+
+    static TraceSampler traceSampler(com.palantir.remoting3.tracing.TraceSampler sampler) {
+        if (sampler == null) {
+            return null;
+        }
+
+        return () -> sampler.sample();
     }
 
     static com.palantir.remoting.api.tracing.Span toRemotingSpan(Span span) {
@@ -73,12 +93,12 @@ final class Convert {
                 .build();
     }
 
-    static OpenSpan toRemotingOpenSpan(com.palantir.tracing.api.OpenSpan openSpan) {
+    static com.palantir.remoting.api.tracing.OpenSpan toRemotingOpenSpan(OpenSpan openSpan) {
         if (openSpan == null) {
             return null;
         }
 
-        return OpenSpan.builder()
+        return com.palantir.remoting.api.tracing.OpenSpan.builder()
                 .parentSpanId(openSpan.getParentSpanId())
                 .spanId(openSpan.getSpanId())
                 .type(toRemotingSpanType(openSpan.type()))
@@ -110,41 +130,6 @@ final class Convert {
             return null;
         }
 
-        return new com.palantir.remoting.api.tracing.SpanObserver() {
-            @Override
-            public void consume(com.palantir.remoting.api.tracing.Span span) {
-                unsubscribe.consume(Convert.span(span));
-            }
-        };
-    }
-
-    static Span span(com.palantir.remoting.api.tracing.Span old) {
-        if (old == null) {
-            return null;
-        }
-
-        return Span.builder()
-                .traceId(old.getTraceId())
-                .parentSpanId(old.getParentSpanId())
-                .spanId(old.getSpanId())
-                .type(Convert.spanType(old.type()))
-                .operation(old.getOperation())
-                .startTimeMicroSeconds(old.getStartTimeMicroSeconds())
-                .durationNanoSeconds(old.getDurationNanoSeconds())
-                .metadata(old.getMetadata())
-                .build();
-    }
-
-    static TraceSampler traceSampler(com.palantir.remoting3.tracing.TraceSampler sampler) {
-        if (sampler == null) {
-            return null;
-        }
-
-        return new TraceSampler() {
-            @Override
-            public boolean sample() {
-                return sampler.sample();
-            }
-        };
+        return span -> unsubscribe.consume(Convert.span(span));
     }
 }

@@ -70,7 +70,7 @@ public final class Tracer {
 
 
     /**
-     * Completes the current span (if it exists) and notifies all {@link #observers subscribers} about the completed
+     * Completes the current span (if it exists) and notifies all observers subscribers about the completed
      * span.
      * <p>
      * Does not construct the Span object if no subscriber will see it.
@@ -87,7 +87,7 @@ public final class Tracer {
     }
 
     /**
-     * Completes and returns the current span (if it exists) and notifies all {@link #observers subscribers} about the
+     * Completes and returns the current span (if it exists) and notifies all observers subscribers about the
      * completed span.
      */
     public static Optional<Span> completeSpan() {
