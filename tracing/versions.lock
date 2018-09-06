@@ -72,7 +72,7 @@
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.11.0-rc2-1-gcc62050"
+            "locked": "1.9.0"
         },
         "com.palantir.remoting3:jackson-support": {
             "project": true
@@ -84,12 +84,11 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.1.0"
+            "locked": "1.2.0"
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
-                "com.palantir.remoting-api:tracing",
                 "com.palantir.tracing:tracing"
             ]
         },
@@ -173,7 +172,7 @@
             ]
         },
         "com.palantir.remoting-api:tracing": {
-            "locked": "1.11.0-rc2-1-gcc62050"
+            "locked": "1.9.0"
         },
         "com.palantir.remoting3:jackson-support": {
             "project": true
@@ -185,12 +184,11 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.1.0"
+            "locked": "1.2.0"
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
-                "com.palantir.remoting-api:tracing",
                 "com.palantir.tracing:tracing"
             ]
         },

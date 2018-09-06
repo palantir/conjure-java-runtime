@@ -15,7 +15,6 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.remoting-api:ssl-config",
                 "com.palantir.remoting3:keystores"
             ]
@@ -26,14 +25,8 @@
                 "com.palantir.remoting3:keystores"
             ]
         },
-        "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc7",
-            "transitive": [
-                "com.palantir.remoting-api:ssl-config"
-            ]
-        },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.11.0-rc2-1-gcc62050",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting3:keystores"
             ]
@@ -67,7 +60,6 @@
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.9.5",
             "transitive": [
-                "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.remoting-api:ssl-config",
                 "com.palantir.remoting3:keystores"
             ]
@@ -78,14 +70,8 @@
                 "com.palantir.remoting3:keystores"
             ]
         },
-        "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc7",
-            "transitive": [
-                "com.palantir.remoting-api:ssl-config"
-            ]
-        },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.11.0-rc2-1-gcc62050",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting3:keystores"
             ]

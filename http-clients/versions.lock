@@ -17,7 +17,6 @@
             "locked": "2.9.5",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
-                "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.remoting-api:ssl-config",
                 "com.palantir.remoting3:keystores",
                 "com.palantir.tokens:auth-tokens"
@@ -29,36 +28,17 @@
                 "com.palantir.tokens:auth-tokens"
             ]
         },
-        "com.google.errorprone:error_prone_annotations": {
-            "locked": "2.1.3",
-            "transitive": [
-                "com.palantir.safe-logging:preconditions"
-            ]
-        },
         "com.google.guava:guava": {
             "locked": "20.0",
             "transitive": [
                 "com.palantir.remoting3:keystores"
             ]
         },
-        "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0-rc7",
-            "transitive": [
-                "com.palantir.remoting-api:service-config"
-            ]
-        },
-        "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc7",
-            "transitive": [
-                "com.palantir.conjure.java.api:service-config",
-                "com.palantir.remoting-api:ssl-config"
-            ]
-        },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.11.0-rc2-1-gcc62050"
+            "locked": "1.9.0"
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.11.0-rc2-1-gcc62050",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
@@ -67,23 +47,12 @@
         "com.palantir.remoting3:keystores": {
             "project": true
         },
-        "com.palantir.safe-logging:preconditions": {
-            "locked": "1.3.0",
-            "transitive": [
-                "com.palantir.conjure.java.api:service-config"
-            ]
-        },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "1.3.0",
-            "transitive": [
-                "com.palantir.conjure.java.api:service-config",
-                "com.palantir.safe-logging:preconditions"
-            ]
+            "locked": "1.3.0"
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.remoting-api:service-config"
             ]
         },
@@ -112,7 +81,6 @@
             "locked": "2.9.5",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
-                "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.remoting-api:ssl-config",
                 "com.palantir.remoting3:keystores",
                 "com.palantir.tokens:auth-tokens"
@@ -124,36 +92,17 @@
                 "com.palantir.tokens:auth-tokens"
             ]
         },
-        "com.google.errorprone:error_prone_annotations": {
-            "locked": "2.1.3",
-            "transitive": [
-                "com.palantir.safe-logging:preconditions"
-            ]
-        },
         "com.google.guava:guava": {
             "locked": "20.0",
             "transitive": [
                 "com.palantir.remoting3:keystores"
             ]
         },
-        "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0-rc7",
-            "transitive": [
-                "com.palantir.remoting-api:service-config"
-            ]
-        },
-        "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc7",
-            "transitive": [
-                "com.palantir.conjure.java.api:service-config",
-                "com.palantir.remoting-api:ssl-config"
-            ]
-        },
         "com.palantir.remoting-api:service-config": {
-            "locked": "1.11.0-rc2-1-gcc62050"
+            "locked": "1.9.0"
         },
         "com.palantir.remoting-api:ssl-config": {
-            "locked": "1.11.0-rc2-1-gcc62050",
+            "locked": "1.9.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config",
                 "com.palantir.remoting3:keystores"
@@ -162,23 +111,12 @@
         "com.palantir.remoting3:keystores": {
             "project": true
         },
-        "com.palantir.safe-logging:preconditions": {
-            "locked": "1.3.0",
-            "transitive": [
-                "com.palantir.conjure.java.api:service-config"
-            ]
-        },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "1.3.0",
-            "transitive": [
-                "com.palantir.conjure.java.api:service-config",
-                "com.palantir.safe-logging:preconditions"
-            ]
+            "locked": "1.3.0"
         },
         "com.palantir.tokens:auth-tokens": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.conjure.java.api:service-config",
                 "com.palantir.remoting-api:service-config"
             ]
         },

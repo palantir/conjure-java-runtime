@@ -25,7 +25,6 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
-                "com.palantir.conjure.java.api:errors",
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:jackson-support"
             ]
@@ -63,14 +62,7 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.conjure.java.api:errors",
                 "com.palantir.remoting-api:errors"
-            ]
-        },
-        "com.google.errorprone:error_prone_annotations": {
-            "locked": "2.1.3",
-            "transitive": [
-                "com.palantir.safe-logging:preconditions"
             ]
         },
         "com.google.guava:guava": {
@@ -79,36 +71,21 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava"
             ]
         },
-        "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc7",
-            "transitive": [
-                "com.palantir.remoting-api:errors"
-            ]
-        },
         "com.palantir.remoting-api:errors": {
-            "locked": "1.11.0-rc2-1-gcc62050"
+            "locked": "1.9.0"
         },
         "com.palantir.remoting3:jackson-support": {
             "project": true
         },
-        "com.palantir.safe-logging:preconditions": {
-            "locked": "1.3.0",
-            "transitive": [
-                "com.palantir.conjure.java.api:errors"
-            ]
-        },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0",
             "transitive": [
-                "com.palantir.conjure.java.api:errors",
-                "com.palantir.remoting-api:errors",
-                "com.palantir.safe-logging:preconditions"
+                "com.palantir.remoting-api:errors"
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.conjure.java.api:errors",
                 "com.palantir.remoting-api:errors"
             ]
         },
@@ -142,7 +119,6 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.fasterxml.jackson.datatype:jackson-datatype-jsr310",
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
-                "com.palantir.conjure.java.api:errors",
                 "com.palantir.remoting-api:errors",
                 "com.palantir.remoting3:jackson-support"
             ]
@@ -180,14 +156,7 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
-                "com.palantir.conjure.java.api:errors",
                 "com.palantir.remoting-api:errors"
-            ]
-        },
-        "com.google.errorprone:error_prone_annotations": {
-            "locked": "2.1.3",
-            "transitive": [
-                "com.palantir.safe-logging:preconditions"
             ]
         },
         "com.google.guava:guava": {
@@ -196,36 +165,21 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava"
             ]
         },
-        "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc7",
-            "transitive": [
-                "com.palantir.remoting-api:errors"
-            ]
-        },
         "com.palantir.remoting-api:errors": {
-            "locked": "1.11.0-rc2-1-gcc62050"
+            "locked": "1.9.0"
         },
         "com.palantir.remoting3:jackson-support": {
             "project": true
         },
-        "com.palantir.safe-logging:preconditions": {
-            "locked": "1.3.0",
-            "transitive": [
-                "com.palantir.conjure.java.api:errors"
-            ]
-        },
         "com.palantir.safe-logging:safe-logging": {
             "locked": "1.3.0",
             "transitive": [
-                "com.palantir.conjure.java.api:errors",
-                "com.palantir.remoting-api:errors",
-                "com.palantir.safe-logging:preconditions"
+                "com.palantir.remoting-api:errors"
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.0.1",
             "transitive": [
-                "com.palantir.conjure.java.api:errors",
                 "com.palantir.remoting-api:errors"
             ]
         },
