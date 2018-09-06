@@ -23,7 +23,7 @@ public final class TestConvert {
     private TestConvert() {}
 
     /** Warning - this is NOT a lossless copy, it loses the stack of OpenSpans in the original trace */
-    public static Trace toRemotingTraceIncompleteCopy(com.palantir.tracing.Trace newTrace) {
+    public static Trace toRemotingTraceIncomplete(com.palantir.tracing.Trace newTrace) {
         if (newTrace == null) {
             return null;
         }

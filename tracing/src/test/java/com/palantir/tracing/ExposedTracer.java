@@ -21,8 +21,8 @@ import com.palantir.remoting3.tracing.TestConvert;
 public final class ExposedTracer {
     private ExposedTracer() {}
 
-    public static com.palantir.remoting3.tracing.Trace copyTrace() {
-        return TestConvert.toRemotingTraceIncompleteCopy(Tracer.copyTrace());
+    public static com.palantir.remoting3.tracing.Trace copyTraceIncomplete() {
+        return TestConvert.toRemotingTraceIncomplete(Tracer.copyTrace());
     }
 
     public static void setTrace(boolean isObservable, String traceId) {

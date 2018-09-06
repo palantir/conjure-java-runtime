@@ -375,7 +375,7 @@ public final class TracersTest {
     }
 
     private static List<OpenSpan> getCurrentFullTrace() {
-        Trace trace = ExposedTracer.copyTrace();
+        Trace trace = ExposedTracer.copyTraceIncomplete();
         List<OpenSpan> spans = Lists.newArrayList();
         while (!trace.isEmpty()) {
             spans.add(trace.pop().get());

@@ -22,13 +22,17 @@ package com.palantir.tracing;
 public final class ExposedTrace {
     private ExposedTrace() {}
 
-    /** @deprecated this is purely for migration purposes, do not use this. */
+    /**
+     * @deprecated this is purely for migration purposes, do not use this.
+     */
     @Deprecated
     public static boolean isObservable(Trace trace) {
         return trace.isObservable();
     }
 
-    /** @deprecated this is purely for migration purposes, do not use this. */
+    /**
+     * @deprecated this is purely for migration purposes, do not use this.
+     */
     @Deprecated
     public static String getTraceId(Trace trace) {
         return trace.getTraceId();
