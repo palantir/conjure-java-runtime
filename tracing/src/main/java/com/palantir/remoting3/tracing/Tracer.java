@@ -131,7 +131,7 @@ public final class Tracer {
 
     /** Sets the sampler (for all threads). */
     public static void setSampler(TraceSampler sampler) {
-        com.palantir.tracing.Tracer.setSampler(sampler.asConjure());
+        com.palantir.tracing.Tracer.setSampler(Convert.traceSampler(sampler));
     }
 
     /** Returns the globally unique identifier for this thread's trace. */

@@ -24,6 +24,4 @@ package com.palantir.remoting3.tracing;
  */
 public interface TraceSampler {
     boolean sample();
-
-    com.palantir.tracing.TraceSampler asConjure();
 }

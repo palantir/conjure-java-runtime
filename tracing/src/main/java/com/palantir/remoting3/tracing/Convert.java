@@ -18,6 +18,7 @@ package com.palantir.remoting3.tracing;
 
 import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.tracing.ExposedTrace;
+import com.palantir.tracing.TraceSampler;
 import com.palantir.tracing.api.Span;
 import com.palantir.tracing.api.SpanObserver;
 import com.palantir.tracing.api.SpanType;
@@ -141,5 +142,18 @@ public final class Convert {
                 .durationNanoSeconds(old.getDurationNanoSeconds())
                 .metadata(old.getMetadata())
                 .build();
+    }
+
+    public static TraceSampler traceSampler(com.palantir.remoting3.tracing.TraceSampler sampler) {
+        if (sampler == null) {
+            return null;
+        }
+        
+        return new TraceSampler() {
+            @Override
+            public boolean sample() {
+                return sampler.sample();
+            }
+        };
     }
 }

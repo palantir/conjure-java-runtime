@@ -38,9 +38,4 @@ public final class RandomSampler implements TraceSampler {
         return ThreadLocalRandom.current().nextFloat() < rate;
     }
 
-    @Override
-    public com.palantir.tracing.TraceSampler asConjure() {
-        return new com.palantir.tracing.RandomSampler(rate);
-    }
-
 }

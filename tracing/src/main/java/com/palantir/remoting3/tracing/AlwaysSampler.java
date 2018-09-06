@@ -23,9 +23,4 @@ public enum AlwaysSampler implements TraceSampler {
     public boolean sample() {
         return true;
     }
-
-    @Override
-    public com.palantir.tracing.TraceSampler asConjure() {
-        return com.palantir.tracing.AlwaysSampler.INSTANCE;
-    }
 }
