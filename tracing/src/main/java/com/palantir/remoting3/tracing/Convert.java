@@ -123,7 +123,8 @@ public final class Convert {
             return null;
         }
 
-        // Warning - this is NOT a lossless copy - the newTrace actually contains a stack of OpenSpans, which we can't access.
+        // Warning - this is NOT a lossless copy - the newTrace actually contains a stack of OpenSpans,
+        // which we can't access.
         return new Trace(ExposedTrace.isObservable(newTrace), ExposedTrace.getTraceId(newTrace));
     }
 

@@ -118,7 +118,8 @@ public final class Tracer {
      * with the given name, or null if there is no such observer.
      */
     public static synchronized SpanObserver subscribe(String name, SpanObserver observer) {
-        return Convert.toRemotingSpanObserver(com.palantir.tracing.Tracer.subscribe(name, Convert.spanObserver(observer)));
+        return Convert.toRemotingSpanObserver(
+                com.palantir.tracing.Tracer.subscribe(name, Convert.spanObserver(observer)));
     }
 
     /**
