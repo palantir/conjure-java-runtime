@@ -33,7 +33,6 @@ import com.palantir.remoting.api.tracing.SpanType;
 import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import com.palantir.remoting3.tracing.TraceSampler;
 import com.palantir.remoting3.tracing.Tracer;
-import com.palantir.remoting3.tracing.Tracers;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
