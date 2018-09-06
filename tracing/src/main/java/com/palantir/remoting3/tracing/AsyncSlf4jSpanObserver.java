@@ -16,24 +16,11 @@
 
 package com.palantir.remoting3.tracing;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.google.common.collect.Lists;
-import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting.api.tracing.Span;
-import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import com.palantir.remoting.api.tracing.SpanObserver;
 import com.palantir.tracing.AsyncSpanObserver;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,12 +34,7 @@ public final class AsyncSlf4jSpanObserver implements SpanObserver {
 
     @Override
     public void consume(Span span) {
-        this.delegate.doConsume(span.asConjure());
-    }
-
-    @Override
-    public com.palantir.tracing.api.SpanObserver asConjure() {
-        return this.delegate;
+        this.delegate.doConsume(Convert.span(span));
     }
 
     private AsyncSlf4jSpanObserver(String serviceName, InetAddress ip, Logger logger, ExecutorService executorService) {

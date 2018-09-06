@@ -29,6 +29,7 @@ import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanObserver;
 import com.palantir.remoting.api.tracing.SpanType;
+import com.palantir.tracing.ExposedTracer;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.After;
@@ -179,7 +180,7 @@ public final class TracerTest {
 
     @Test
     public void testTraceCopyIsIndependent() throws Exception {
-        Trace trace = Tracer.copyTrace();
+        Trace trace = ExposedTracer.copyTrace();
         trace.push(mock(OpenSpan.class));
         assertThat(Tracer.completeSpan().isPresent()).isFalse();
     }
@@ -187,7 +188,7 @@ public final class TracerTest {
     @Test
     public void testSetTraceSetsCurrentTraceAndMdcTraceIdKey() throws Exception {
         Tracer.startSpan("operation");
-        Tracer.setTrace(new Trace(true, "newTraceId"));
+        ExposedTracer.setTrace(true, "newTraceId");
         assertThat(Tracer.getTraceId()).isEqualTo("newTraceId");
         assertThat(Tracer.completeSpan()).isEmpty();
         assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo("newTraceId");

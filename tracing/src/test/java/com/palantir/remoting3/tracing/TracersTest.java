@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.Lists;
 import com.palantir.remoting.api.tracing.OpenSpan;
+import com.palantir.tracing.ExposedTracer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,46 +46,46 @@ public final class TracersTest {
 
     @Test
     public void testExecutorServiceWrapsCallables() throws Exception {
-        ExecutorService wrappedService = Tracers.wrap(Executors.newSingleThreadExecutor());
+        ExecutorService wrappedService = com.palantir.remoting3.tracing.Tracers.wrap(Executors.newSingleThreadExecutor());
 
         // Empty trace
         wrappedService.submit(traceExpectingCallable()).get();
         wrappedService.submit(traceExpectingRunnable()).get();
 
         // Non-empty trace
-        Tracer.startSpan("foo");
-        Tracer.startSpan("bar");
-        Tracer.startSpan("baz");
+        com.palantir.remoting3.tracing.Tracer.startSpan("foo");
+        com.palantir.remoting3.tracing.Tracer.startSpan("bar");
+        com.palantir.remoting3.tracing.Tracer.startSpan("baz");
         wrappedService.submit(traceExpectingCallable()).get();
         wrappedService.submit(traceExpectingRunnable()).get();
-        Tracer.completeSpan();
-        Tracer.completeSpan();
-        Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
     }
 
     @Test
     public void testScheduledExecutorServiceWrapsCallables() throws Exception {
-        ScheduledExecutorService wrappedService = Tracers.wrap(Executors.newSingleThreadScheduledExecutor());
+        ScheduledExecutorService wrappedService = com.palantir.remoting3.tracing.Tracers.wrap(Executors.newSingleThreadScheduledExecutor());
 
         // Empty trace
         wrappedService.schedule(traceExpectingCallable(), 0, TimeUnit.SECONDS).get();
         wrappedService.schedule(traceExpectingRunnable(), 0, TimeUnit.SECONDS).get();
 
         // Non-empty trace
-        Tracer.startSpan("foo");
-        Tracer.startSpan("bar");
-        Tracer.startSpan("baz");
+        com.palantir.remoting3.tracing.Tracer.startSpan("foo");
+        com.palantir.remoting3.tracing.Tracer.startSpan("bar");
+        com.palantir.remoting3.tracing.Tracer.startSpan("baz");
         wrappedService.schedule(traceExpectingCallable(), 0, TimeUnit.SECONDS).get();
         wrappedService.schedule(traceExpectingRunnable(), 0, TimeUnit.SECONDS).get();
-        Tracer.completeSpan();
-        Tracer.completeSpan();
-        Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
     }
 
     @Test
     public void testScheduledExecutorServiceWrapsCallablesWithNewTraces() throws Exception {
         ScheduledExecutorService wrappedService =
-                Tracers.wrapWithNewTrace(Executors.newSingleThreadScheduledExecutor());
+                com.palantir.remoting3.tracing.Tracers.wrapWithNewTrace(Executors.newSingleThreadScheduledExecutor());
 
         Callable<Void> callable = newTraceExpectingCallable();
         Runnable runnable = newTraceExpectingRunnable();
@@ -97,20 +98,20 @@ public final class TracersTest {
         wrappedService.schedule(runnable, 0, TimeUnit.SECONDS).get();
 
         // Non-empty trace
-        Tracer.startSpan("foo");
-        Tracer.startSpan("bar");
-        Tracer.startSpan("baz");
+        com.palantir.remoting3.tracing.Tracer.startSpan("foo");
+        com.palantir.remoting3.tracing.Tracer.startSpan("bar");
+        com.palantir.remoting3.tracing.Tracer.startSpan("baz");
         wrappedService.schedule(callable, 0, TimeUnit.SECONDS).get();
         wrappedService.schedule(runnable, 0, TimeUnit.SECONDS).get();
-        Tracer.completeSpan();
-        Tracer.completeSpan();
-        Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
     }
 
     @Test
     public void testExecutorServiceWrapsCallablesWithNewTraces() throws Exception {
         ExecutorService wrappedService =
-                Tracers.wrapWithNewTrace(Executors.newSingleThreadExecutor());
+                com.palantir.remoting3.tracing.Tracers.wrapWithNewTrace(Executors.newSingleThreadExecutor());
 
         Callable<Void> callable = newTraceExpectingCallable();
         Runnable runnable = newTraceExpectingRunnable();
@@ -123,82 +124,82 @@ public final class TracersTest {
         wrappedService.submit(runnable).get();
 
         // Non-empty trace
-        Tracer.startSpan("foo");
-        Tracer.startSpan("bar");
-        Tracer.startSpan("baz");
+        com.palantir.remoting3.tracing.Tracer.startSpan("foo");
+        com.palantir.remoting3.tracing.Tracer.startSpan("bar");
+        com.palantir.remoting3.tracing.Tracer.startSpan("baz");
         wrappedService.submit(callable).get();
         wrappedService.submit(runnable).get();
-        Tracer.completeSpan();
-        Tracer.completeSpan();
-        Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
+        com.palantir.remoting3.tracing.Tracer.completeSpan();
     }
 
     @Test
     public void testWrappingRunnable_runnableTraceIsIsolated() throws Exception {
-        Tracer.startSpan("outside");
-        Runnable runnable = Tracers.wrap(new Runnable() {
+        com.palantir.remoting3.tracing.Tracer.startSpan("outside");
+        Runnable runnable = com.palantir.remoting3.tracing.Tracers.wrap(new Runnable() {
             @Override
             public void run() {
-                Tracer.startSpan("inside"); // never completed
+                com.palantir.remoting3.tracing.Tracer.startSpan("inside"); // never completed
             }
         });
         runnable.run();
-        assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("outside");
+        assertThat(com.palantir.remoting3.tracing.Tracer.completeSpan().get().getOperation()).isEqualTo("outside");
     }
 
     @Test
     public void testWrappingRunnable_traceStateIsCapturedAtConstructionTime() throws Exception {
-        Tracer.startSpan("before-construction");
-        Runnable runnable = Tracers.wrap(new Runnable() {
+        com.palantir.remoting3.tracing.Tracer.startSpan("before-construction");
+        Runnable runnable = com.palantir.remoting3.tracing.Tracers.wrap(new Runnable() {
             @Override
             public void run() {
-                assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("before-construction");
+                assertThat(com.palantir.remoting3.tracing.Tracer.completeSpan().get().getOperation()).isEqualTo("before-construction");
             }
         });
-        Tracer.startSpan("after-construction");
+        com.palantir.remoting3.tracing.Tracer.startSpan("after-construction");
         runnable.run();
     }
 
     @Test
     public void testWrappingCallable_callableTraceIsIsolated() throws Exception {
-        Tracer.startSpan("outside");
-        Callable<Void> runnable = Tracers.wrap(new Callable<Void>() {
+        com.palantir.remoting3.tracing.Tracer.startSpan("outside");
+        Callable<Void> runnable = com.palantir.remoting3.tracing.Tracers.wrap(new Callable<Void>() {
             @Override
             public Void call() {
-                Tracer.startSpan("inside"); // never completed
+                com.palantir.remoting3.tracing.Tracer.startSpan("inside"); // never completed
                 return null;
             }
         });
         runnable.call();
-        assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("outside");
+        assertThat(com.palantir.remoting3.tracing.Tracer.completeSpan().get().getOperation()).isEqualTo("outside");
     }
 
     @Test
     public void testWrappingCallable_traceStateIsCapturedAtConstructionTime() throws Exception {
-        Tracer.startSpan("before-construction");
-        Callable<Void> callable = Tracers.wrap(new Callable<Void>() {
+        com.palantir.remoting3.tracing.Tracer.startSpan("before-construction");
+        Callable<Void> callable = com.palantir.remoting3.tracing.Tracers.wrap(new Callable<Void>() {
             @Override
             public Void call() {
-                assertThat(Tracer.completeSpan().get().getOperation()).isEqualTo("before-construction");
+                assertThat(com.palantir.remoting3.tracing.Tracer.completeSpan().get().getOperation()).isEqualTo("before-construction");
                 return null;
             }
         });
-        Tracer.startSpan("after-construction");
+        com.palantir.remoting3.tracing.Tracer.startSpan("after-construction");
         callable.call();
     }
 
     @Test
     public void testWrapCallableWithNewTrace_traceStateInsideCallableIsIsolated() throws Exception {
-        String traceIdBeforeConstruction = Tracer.getTraceId();
+        String traceIdBeforeConstruction = com.palantir.remoting3.tracing.Tracer.getTraceId();
 
-        Callable<String> wrappedCallable = Tracers.wrapWithNewTrace(() -> {
-            return Tracer.getTraceId();
+        Callable<String> wrappedCallable = com.palantir.remoting3.tracing.Tracers.wrapWithNewTrace(() -> {
+            return com.palantir.remoting3.tracing.Tracer.getTraceId();
         });
 
         String traceIdFirstCall = wrappedCallable.call();
         String traceIdSecondCall = wrappedCallable.call();
 
-        String traceIdAfterCalls = Tracer.getTraceId();
+        String traceIdAfterCalls = com.palantir.remoting3.tracing.Tracer.getTraceId();
 
         assertThat(traceIdFirstCall)
                 .isNotEqualTo(traceIdBeforeConstruction)
@@ -215,25 +216,25 @@ public final class TracersTest {
 
     @Test
     public void testWrapCallableWithNewTrace_traceStateRestoredWhenThrows() throws Exception {
-        String traceIdBeforeConstruction = Tracer.getTraceId();
+        String traceIdBeforeConstruction = com.palantir.remoting3.tracing.Tracer.getTraceId();
 
-        Callable<String> wrappedCallable = Tracers.wrapWithNewTrace(() -> {
+        Callable<String> wrappedCallable = com.palantir.remoting3.tracing.Tracers.wrapWithNewTrace(() -> {
             throw new IllegalStateException();
         });
 
         assertThatThrownBy(() -> wrappedCallable.call()).isInstanceOf(IllegalStateException.class);
 
-        assertThat(Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);
+        assertThat(com.palantir.remoting3.tracing.Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);
     }
 
     @Test
     public void testWrapRunnableWithNewTrace_traceStateInsideRunnableIsIsolated() throws Exception {
-        String traceIdBeforeConstruction = Tracer.getTraceId();
+        String traceIdBeforeConstruction = com.palantir.remoting3.tracing.Tracer.getTraceId();
 
         List<String> traceIds = Lists.newArrayList();
 
-        Runnable wrappedRunnable = Tracers.wrapWithNewTrace(() -> {
-            traceIds.add(Tracer.getTraceId());
+        Runnable wrappedRunnable = com.palantir.remoting3.tracing.Tracers.wrapWithNewTrace(() -> {
+            traceIds.add(com.palantir.remoting3.tracing.Tracer.getTraceId());
         });
 
         wrappedRunnable.run();
@@ -242,7 +243,7 @@ public final class TracersTest {
         String traceIdFirstCall = traceIds.get(0);
         String traceIdSecondCall = traceIds.get(1);
 
-        String traceIdAfterCalls = Tracer.getTraceId();
+        String traceIdAfterCalls = com.palantir.remoting3.tracing.Tracer.getTraceId();
 
         assertThat(traceIdFirstCall)
                 .isNotEqualTo(traceIdBeforeConstruction)
@@ -259,30 +260,30 @@ public final class TracersTest {
 
     @Test
     public void testWrapRunnableWithNewTrace_traceStateRestoredWhenThrows() throws Exception {
-        String traceIdBeforeConstruction = Tracer.getTraceId();
+        String traceIdBeforeConstruction = com.palantir.remoting3.tracing.Tracer.getTraceId();
 
         Runnable rawRunnable = () -> {
             throw new IllegalStateException();
         };
-        Runnable wrappedRunnable = Tracers.wrapWithNewTrace(rawRunnable);
+        Runnable wrappedRunnable = com.palantir.remoting3.tracing.Tracers.wrapWithNewTrace(rawRunnable);
 
         assertThatThrownBy(() -> wrappedRunnable.run()).isInstanceOf(IllegalStateException.class);
 
-        assertThat(Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);
+        assertThat(com.palantir.remoting3.tracing.Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);
     }
 
     @Test
     public void testWrapRunnableWithAlternateTraceId_traceStateInsideRunnableUsesGivenTraceId() {
-        String traceIdBeforeConstruction = Tracer.getTraceId();
+        String traceIdBeforeConstruction = com.palantir.remoting3.tracing.Tracer.getTraceId();
         AtomicReference<String> traceId = new AtomicReference<>();
         String traceIdToUse = "someTraceId";
-        Runnable wrappedRunnable = Tracers.wrapWithAlternateTraceId(traceIdToUse, () -> {
-            traceId.set(Tracer.getTraceId());
+        Runnable wrappedRunnable = com.palantir.remoting3.tracing.Tracers.wrapWithAlternateTraceId(traceIdToUse, () -> {
+            traceId.set(com.palantir.remoting3.tracing.Tracer.getTraceId());
         });
 
         wrappedRunnable.run();
 
-        String traceIdAfterCall = Tracer.getTraceId();
+        String traceIdAfterCall = com.palantir.remoting3.tracing.Tracer.getTraceId();
 
         assertThat(traceId.get())
                 .isNotEqualTo(traceIdBeforeConstruction)
@@ -294,35 +295,35 @@ public final class TracersTest {
 
     @Test
     public void testWrapRunnableWithAlternateTraceId_traceStateRestoredWhenThrows() {
-        String traceIdBeforeConstruction = Tracer.getTraceId();
+        String traceIdBeforeConstruction = com.palantir.remoting3.tracing.Tracer.getTraceId();
         Runnable rawRunnable = () -> {
             throw new IllegalStateException();
         };
-        Runnable wrappedRunnable = Tracers.wrapWithAlternateTraceId("someTraceId", rawRunnable);
+        Runnable wrappedRunnable = com.palantir.remoting3.tracing.Tracers.wrapWithAlternateTraceId("someTraceId", rawRunnable);
 
         assertThatThrownBy(() -> wrappedRunnable.run()).isInstanceOf(IllegalStateException.class);
-        assertThat(Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);
+        assertThat(com.palantir.remoting3.tracing.Tracer.getTraceId()).isEqualTo(traceIdBeforeConstruction);
     }
 
     @Test
     public void testTraceIdGeneration() throws Exception {
-        assertThat(Tracers.randomId()).hasSize(16); // fails with p=1/16 if generated string is not padded
-        assertThat(Tracers.longToPaddedHex(0)).isEqualTo("0000000000000000");
-        assertThat(Tracers.longToPaddedHex(42)).isEqualTo("000000000000002a");
-        assertThat(Tracers.longToPaddedHex(-42)).isEqualTo("ffffffffffffffd6");
-        assertThat(Tracers.longToPaddedHex(123456789L)).isEqualTo("00000000075bcd15");
+        assertThat(com.palantir.remoting3.tracing.Tracers.randomId()).hasSize(16); // fails with p=1/16 if generated string is not padded
+        assertThat(com.palantir.remoting3.tracing.Tracers.longToPaddedHex(0)).isEqualTo("0000000000000000");
+        assertThat(com.palantir.remoting3.tracing.Tracers.longToPaddedHex(42)).isEqualTo("000000000000002a");
+        assertThat(com.palantir.remoting3.tracing.Tracers.longToPaddedHex(-42)).isEqualTo("ffffffffffffffd6");
+        assertThat(com.palantir.remoting3.tracing.Tracers.longToPaddedHex(123456789L)).isEqualTo("00000000075bcd15");
     }
 
     private static Callable<Void> newTraceExpectingCallable() {
         final Set<String> seenTraceIds = new HashSet<>();
-        seenTraceIds.add(Tracer.getTraceId());
+        seenTraceIds.add(com.palantir.remoting3.tracing.Tracer.getTraceId());
 
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                String newTraceId = Tracer.getTraceId();
+                String newTraceId = com.palantir.remoting3.tracing.Tracer.getTraceId();
 
-                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(newTraceId);
+                assertThat(MDC.get(com.palantir.remoting3.tracing.Tracers.TRACE_ID_KEY)).isEqualTo(newTraceId);
                 assertThat(seenTraceIds).doesNotContain(newTraceId);
                 seenTraceIds.add(newTraceId);
                 return null;
@@ -332,14 +333,14 @@ public final class TracersTest {
 
     private static Runnable newTraceExpectingRunnable() {
         final Set<String> seenTraceIds = new HashSet<>();
-        seenTraceIds.add(Tracer.getTraceId());
+        seenTraceIds.add(com.palantir.remoting3.tracing.Tracer.getTraceId());
 
         return new Runnable() {
             @Override
             public void run() {
-                String newTraceId = Tracer.getTraceId();
+                String newTraceId = com.palantir.remoting3.tracing.Tracer.getTraceId();
 
-                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(newTraceId);
+                assertThat(MDC.get(com.palantir.remoting3.tracing.Tracers.TRACE_ID_KEY)).isEqualTo(newTraceId);
                 assertThat(seenTraceIds).doesNotContain(newTraceId);
                 seenTraceIds.add(newTraceId);
             }
@@ -347,26 +348,26 @@ public final class TracersTest {
     }
 
     private static Callable<Void> traceExpectingCallable() {
-        final String expectedTraceId = Tracer.getTraceId();
+        final String expectedTraceId = com.palantir.remoting3.tracing.Tracer.getTraceId();
         final List<OpenSpan> expectedTrace = getCurrentFullTrace();
         return new Callable<Void>() {
             @Override
             public Void call() throws Exception {
-                assertThat(Tracer.getTraceId()).isEqualTo(expectedTraceId);
+                assertThat(com.palantir.remoting3.tracing.Tracer.getTraceId()).isEqualTo(expectedTraceId);
                 assertThat(getCurrentFullTrace()).isEqualTo(expectedTrace);
-                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(expectedTraceId);
+                assertThat(MDC.get(com.palantir.remoting3.tracing.Tracers.TRACE_ID_KEY)).isEqualTo(expectedTraceId);
                 return null;
             }
         };
     }
 
     private static Runnable traceExpectingRunnable() {
-        final String expectedTraceId = Tracer.getTraceId();
+        final String expectedTraceId = com.palantir.remoting3.tracing.Tracer.getTraceId();
         final List<OpenSpan> expectedTrace = getCurrentFullTrace();
         return new Runnable() {
             @Override
             public void run() {
-                assertThat(Tracer.getTraceId()).isEqualTo(expectedTraceId);
+                assertThat(com.palantir.remoting3.tracing.Tracer.getTraceId()).isEqualTo(expectedTraceId);
                 assertThat(getCurrentFullTrace()).isEqualTo(expectedTrace);
                 assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(expectedTraceId);
             }
@@ -374,7 +375,7 @@ public final class TracersTest {
     }
 
     private static List<OpenSpan> getCurrentFullTrace() {
-        Trace trace = Tracer.copyTrace();
+        Trace trace = ExposedTracer.copyTrace();
         List<OpenSpan> spans = Lists.newArrayList();
         while (!trace.isEmpty()) {
             spans.add(trace.pop().get());

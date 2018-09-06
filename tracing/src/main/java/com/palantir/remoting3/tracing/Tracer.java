@@ -59,22 +59,22 @@ public final class Tracer {
      * when the current trace is empty.
      */
     public static OpenSpan startSpan(String operation, String parentSpanId, SpanType type) {
-        return toRemotingOpenSpan(com.palantir.tracing.Tracer.startSpan(
-                operation, parentSpanId, type.asConjure()));
+        return Convert.toRemotingOpenSpan(com.palantir.tracing.Tracer.startSpan(
+                operation, parentSpanId, Convert.spanType(type)));
     }
 
     /**
      * Like {@link #startSpan(String)}, but opens a span of the explicitly given {@link SpanType span type}.
      */
     public static OpenSpan startSpan(String operation, SpanType type) {
-        return toRemotingOpenSpan(com.palantir.tracing.Tracer.startSpan(operation, type.asConjure()));
+        return Convert.toRemotingOpenSpan(com.palantir.tracing.Tracer.startSpan(operation, Convert.spanType(type)));
     }
 
     /**
      * Opens a new {@link SpanType#LOCAL LOCAL} span for this thread's call trace, labeled with the provided operation.
      */
     public static OpenSpan startSpan(String operation) {
-        return toRemotingOpenSpan(com.palantir.tracing.Tracer.startSpan(operation));
+        return Convert.toRemotingOpenSpan(com.palantir.tracing.Tracer.startSpan(operation));
     }
 
 
@@ -100,14 +100,14 @@ public final class Tracer {
      * completed span.
      */
     public static Optional<Span> completeSpan() {
-        return com.palantir.tracing.Tracer.completeSpan().map(Tracer::toRemotingSpan);
+        return com.palantir.tracing.Tracer.completeSpan().map(Convert::toRemotingSpan);
     }
 
     /**
      * Like {@link #completeSpan()}, but adds {@code metadata} to the current span being completed.
      */
     public static Optional<Span> completeSpan(Map<String, String> metadata) {
-        return com.palantir.tracing.Tracer.completeSpan(metadata).map(Tracer::toRemotingSpan);
+        return com.palantir.tracing.Tracer.completeSpan(metadata).map(Convert::toRemotingSpan);
     }
 
     /**
@@ -117,7 +117,7 @@ public final class Tracer {
      * with the given name, or null if there is no such observer.
      */
     public static synchronized SpanObserver subscribe(String name, SpanObserver observer) {
-        return toRemotingSpanObserver(com.palantir.tracing.Tracer.subscribe(name, observer.asConjure()));
+        return Convert.toRemotingSpanObserver(com.palantir.tracing.Tracer.subscribe(name, Convert.spanObserver(observer)));
     }
 
     /**
@@ -125,7 +125,7 @@ public final class Tracer {
      * observer if it existed, or null otherwise.
      */
     public static synchronized SpanObserver unsubscribe(String name) {
-        return toRemotingSpanObserver(com.palantir.tracing.Tracer.unsubscribe(name));
+        return Convert.toRemotingSpanObserver(com.palantir.tracing.Tracer.unsubscribe(name));
     }
 
     /** Sets the sampler (for all threads). */
@@ -140,7 +140,7 @@ public final class Tracer {
 
     /** Clears the current trace id and returns (a copy of) it. */
     public static Trace getAndClearTrace() {
-        return com.palantir.tracing.Tracer.getAndClearTrace();
+        return Convert.toRemotingTrace(com.palantir.tracing.Tracer.getAndClearTrace());
     }
 
     /**
@@ -149,55 +149,5 @@ public final class Tracer {
      */
     public static boolean isTraceObservable() {
         return com.palantir.tracing.Tracer.isTraceObservable();
-    }
-
-    private static Span toRemotingSpan(com.palantir.tracing.api.Span span) {
-        return Span.builder()
-                .traceId(span.getTraceId())
-                .parentSpanId(span.getParentSpanId())
-                .spanId(span.getSpanId())
-                .type(toRemotingSpanType(span.type()))
-                .operation(span.getOperation())
-                .startTimeMicroSeconds(span.getStartTimeMicroSeconds())
-                .durationNanoSeconds(span.getDurationNanoSeconds())
-                .build();
-    }
-
-    private static OpenSpan toRemotingOpenSpan(com.palantir.tracing.api.OpenSpan openSpan) {
-        return OpenSpan.builder()
-                .parentSpanId(openSpan.getParentSpanId())
-                .spanId(openSpan.getSpanId())
-                .type(toRemotingSpanType(openSpan.type()))
-                .operation(openSpan.getOperation())
-                .startTimeMicroSeconds(openSpan.getStartTimeMicroSeconds())
-                .startClockNanoSeconds(openSpan.getStartClockNanoSeconds())
-                .build();
-    }
-
-    private static SpanType toRemotingSpanType(com.palantir.tracing.api.SpanType type) {
-        switch (type) {
-            case CLIENT_OUTGOING:
-                return SpanType.CLIENT_OUTGOING;
-            case SERVER_INCOMING:
-                return SpanType.SERVER_INCOMING;
-            case LOCAL:
-                return SpanType.LOCAL;
-        }
-
-        throw new UnsupportedOperationException("Unable to convert to Remoting SpanType");
-    }
-
-    private static SpanObserver toRemotingSpanObserver(com.palantir.tracing.api.SpanObserver spanObserver) {
-        return new SpanObserver() {
-            @Override
-            public void consume(Span span) {
-                spanObserver.consume(span.asConjure());
-            }
-
-            @Override
-            public com.palantir.tracing.api.SpanObserver asConjure() {
-                return spanObserver;
-            }
-        };
     }
 }

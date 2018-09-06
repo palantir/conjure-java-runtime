@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-package com.palantir.remoting3.tracing;
+package com.palantir.tracing;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import com.palantir.remoting3.tracing.Convert;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+public final class ExposedTracer {
 
-@RunWith(MockitoJUnitRunner.class)
-public final class CloseableTracerTest {
-    @Before
-    public void before() {
-        Tracer.getAndClearTrace();
+    private ExposedTracer() {}
+
+    public static com.palantir.remoting3.tracing.Trace copyTrace() {
+        return Convert.toRemotingTrace(Tracer.copyTrace());
     }
 
-    @Test
-    public void startsAndClosesSpan() {
-        try (CloseableTracer tracer = CloseableTracer.startSpan("foo")) {
-            assertThat(Tracer.copyTrace().isEmpty()).isFalse();
-        }
-        assertThat(Tracer.copyTrace().isEmpty()).isTrue();
+    public static void setTrace(boolean isObservable, String traceId) {
+        Tracer.setTrace(new Trace(isObservable, traceId));
     }
 }

@@ -28,7 +28,7 @@ import java.util.Optional;
  * Represents a trace as an ordered list of non-completed spans. Supports adding and removing of spans. This class is
  * not thread-safe and is intended to be used in a thread-local context.
  */
-final class Trace {
+public final class Trace {
 
     private final Deque<OpenSpan> stack;
     private final boolean isObservable;

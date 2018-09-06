@@ -16,11 +16,9 @@
 
 package com.palantir.remoting3.tracing;
 
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
 
 /** Utility methods for making {@link ExecutorService} and {@link Runnable} instances tracing-aware. */
 public final class Tracers {
@@ -33,7 +31,7 @@ public final class Tracers {
 
     /** Returns a random ID suitable for span and trace IDs. */
     public static String randomId() {
-        return longToPaddedHex(ThreadLocalRandom.current().nextLong());
+        return com.palantir.tracing.Tracers.randomId();
     }
 
     /**
@@ -67,12 +65,7 @@ public final class Tracers {
      * #wrap wrapped} in order to be trace-aware.
      */
     public static ExecutorService wrap(ExecutorService executorService) {
-        return new WrappingExecutorService(executorService) {
-            @Override
-            protected <T> Callable<T> wrapTask(Callable<T> callable) {
-                return wrap(callable);
-            }
-        };
+        return com.palantir.tracing.Tracers.wrap(executorService);
     }
 
     /**
@@ -82,12 +75,7 @@ public final class Tracers {
      * trace will be generated for each execution, effectively bypassing the intent of this method.
      */
     public static ScheduledExecutorService wrap(ScheduledExecutorService executorService) {
-        return new WrappingScheduledExecutorService(executorService) {
-            @Override
-            protected <T> Callable<T> wrapTask(Callable<T> callable) {
-                return wrap(callable);
-            }
-        };
+        return com.palantir.tracing.Tracers.wrap(executorService);
     }
 
     /**
@@ -95,12 +83,12 @@ public final class Tracers {
      * it's construction during its {@link Callable#call() execution}.
      */
     public static <V> Callable<V> wrap(Callable<V> delegate) {
-        return new TracingAwareCallable<>(delegate);
+        return com.palantir.tracing.Tracers.wrap(delegate);
     }
 
     /** Like {@link #wrap(Callable)}, but for Runnables. */
     public static Runnable wrap(Runnable delegate) {
-        return new TracingAwareRunnable(delegate);
+        return com.palantir.tracing.Tracers.wrap(delegate);
     }
 
     /**
@@ -111,12 +99,7 @@ public final class Tracers {
      * wrapping.
      */
     public static ExecutorService wrapWithNewTrace(ExecutorService executorService) {
-        return new WrappingExecutorService(executorService) {
-            @Override
-            protected <T> Callable<T> wrapTask(Callable<T> callable) {
-                return wrapWithNewTrace(callable);
-            }
-        };
+        return com.palantir.tracing.Tracers.wrapWithNewTrace(executorService);
     }
 
     /**
@@ -127,12 +110,7 @@ public final class Tracers {
      * wrapping.
      */
     public static ScheduledExecutorService wrapWithNewTrace(ScheduledExecutorService executorService) {
-        return new WrappingScheduledExecutorService(executorService) {
-            @Override
-            protected <T> Callable<T> wrapTask(Callable<T> callable) {
-                return wrapWithNewTrace(callable);
-            }
-        };
+        return com.palantir.tracing.Tracers.wrapWithNewTrace(executorService);
     }
 
     /**
@@ -142,36 +120,14 @@ public final class Tracers {
      * will have a fresh trace.
      */
     public static <V> Callable<V> wrapWithNewTrace(Callable<V> delegate) {
-        return () -> {
-            // clear the existing trace and keep it around for restoration when we're done
-            Trace originalTrace = Tracer.getAndClearTrace();
-
-            try {
-                Tracer.initTrace(Optional.empty(), Tracers.randomId());
-                return delegate.call();
-            } finally {
-                // restore the trace
-                Tracer.setTrace(originalTrace);
-            }
-        };
+        return com.palantir.tracing.Tracers.wrapWithNewTrace(delegate);
     }
 
     /**
      * Like {@link #wrapWithNewTrace(Callable)}, but for Runnables.
      */
     public static Runnable wrapWithNewTrace(Runnable delegate) {
-        return () -> {
-            // clear the existing trace and keep it around for restoration when we're done
-            Trace originalTrace = Tracer.getAndClearTrace();
-
-            try {
-                Tracer.initTrace(Optional.empty(), Tracers.randomId());
-                delegate.run();
-            } finally {
-                // restore the trace
-                Tracer.setTrace(originalTrace);
-            }
-        };
+        return com.palantir.tracing.Tracers.wrapWithNewTrace(delegate);
     }
 
     /**
@@ -181,64 +137,6 @@ public final class Tracers {
      * will use a new {@link Trace tracing state} with the same given traceId.
      */
     public static Runnable wrapWithAlternateTraceId(String traceId, Runnable delegate) {
-        return () -> {
-            // clear the existing trace and keep it around for restoration when we're done
-            Trace originalTrace = Tracer.getAndClearTrace();
-
-            try {
-                Tracer.initTrace(Optional.empty(), traceId);
-                delegate.run();
-            } finally {
-                // restore the trace
-                Tracer.setTrace(originalTrace);
-            }
-        };
-    }
-
-    /**
-     * Wraps a given callable such that its execution operates with the {@link Trace thread-local Trace} of the thread
-     * that constructs the {@link TracingAwareCallable} instance rather than the thread that executes the callable.
-     * <p>
-     * The constructor is typically called by a tracing-aware executor service on the same thread on which a user
-     * creates {@link Callable delegate}, and the {@link #call()} method is executed on an arbitrary (likely different)
-     * thread with different {@link Trace tracing state}. In order to execute the task with the original (and
-     * intuitively expected) tracing state, we remember the original state and set it for the duration of the
-     * {@link #call() execution}.
-     */
-    private static class TracingAwareCallable<V> implements Callable<V> {
-        private final Callable<V> delegate;
-        private final DeferredTracer deferredTracer;
-
-        TracingAwareCallable(Callable<V> delegate) {
-            this.delegate = delegate;
-            this.deferredTracer = new DeferredTracer();
-        }
-
-        @Override
-        public V call() throws Exception {
-            return this.deferredTracer.withTrace(delegate::call);
-        }
-    }
-
-    /**
-     * Wraps a given runnable such that its execution operates with the {@link Trace thread-local Trace} of the thread
-     * that constructs the {@link TracingAwareRunnable} instance rather than the thread that executes the runnable.
-     */
-    private static class TracingAwareRunnable implements Runnable {
-        private final Runnable delegate;
-        private DeferredTracer deferredTracer;
-
-        TracingAwareRunnable(Runnable delegate) {
-            this.delegate = delegate;
-            this.deferredTracer = new DeferredTracer();
-        }
-
-        @Override
-        public void run() {
-            deferredTracer.withTrace(() -> {
-                delegate.run();
-                return null;
-            });
-        }
+        return com.palantir.tracing.Tracers.wrapWithAlternateTraceId(traceId, delegate);
     }
 }
