@@ -44,6 +44,10 @@ public final class Convert {
     }
 
     static SpanObserver spanObserver(com.palantir.remoting.api.tracing.SpanObserver old) {
+        if (old == null) {
+            return null;
+        }
+
         return new SpanObserver() {
             @Override
             public void consume(Span span) {
@@ -53,6 +57,10 @@ public final class Convert {
     }
 
     static com.palantir.remoting.api.tracing.Span toRemotingSpan(Span span) {
+        if (span == null) {
+            return null;
+        }
+
         return com.palantir.remoting.api.tracing.Span.builder()
                 .traceId(span.getTraceId())
                 .parentSpanId(span.getParentSpanId())
@@ -65,6 +73,10 @@ public final class Convert {
     }
 
     static OpenSpan toRemotingOpenSpan(com.palantir.tracing.api.OpenSpan openSpan) {
+        if (openSpan == null) {
+            return null;
+        }
+
         return OpenSpan.builder()
                 .parentSpanId(openSpan.getParentSpanId())
                 .spanId(openSpan.getSpanId())
@@ -76,6 +88,10 @@ public final class Convert {
     }
 
     static com.palantir.remoting.api.tracing.SpanType toRemotingSpanType(SpanType type) {
+        if (type == null) {
+            return null;
+        }
+
         switch (type) {
             case CLIENT_OUTGOING:
                 return com.palantir.remoting.api.tracing.SpanType.CLIENT_OUTGOING;
@@ -89,6 +105,10 @@ public final class Convert {
     }
 
     public static com.palantir.remoting.api.tracing.SpanObserver toRemotingSpanObserver(SpanObserver unsubscribe) {
+        if (unsubscribe == null) {
+            return null;
+        }
+
         return new com.palantir.remoting.api.tracing.SpanObserver() {
             @Override
             public void consume(com.palantir.remoting.api.tracing.Span span) {
@@ -98,11 +118,19 @@ public final class Convert {
     }
 
     public static Trace toRemotingTrace(com.palantir.tracing.Trace newTrace) {
+        if (newTrace == null) {
+            return null;
+        }
+
         // Warning - this is NOT a lossless copy - the newTrace actually contains a stack of OpenSpans, which we can't access.
         return new Trace(ExposedTrace.isObservable(newTrace), ExposedTrace.getTraceId(newTrace));
     }
 
     public static Span span(com.palantir.remoting.api.tracing.Span old) {
+        if (old == null) {
+            return null;
+        }
+
         return Span.builder()
                 .traceId(old.getTraceId())
                 .parentSpanId(old.getParentSpanId())
