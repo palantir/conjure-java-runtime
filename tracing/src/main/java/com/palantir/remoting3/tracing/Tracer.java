@@ -16,18 +16,13 @@
 
 package com.palantir.remoting3.tracing;
 
-import com.google.common.collect.ImmutableList;
 import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanObserver;
 import com.palantir.remoting.api.tracing.SpanType;
 import com.palantir.tracing.ExposedTrace;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The singleton entry point for handling Zipkin-style traces and spans. Provides functionality for starting and
@@ -37,14 +32,9 @@ import org.slf4j.LoggerFactory;
  */
 public final class Tracer {
 
-    private static final Logger log = LoggerFactory.getLogger(Tracer.class);
-
     private Tracer() {}
 
-    // Only access in a class-synchronized fashion
-    private static final Map<String, SpanObserver> observers = new HashMap<>();
-    // we want iterating through tracers to be very fast, and it's faster to iterate through a list than a Map.values()
-    private static volatile List<SpanObserver> observersList = ImmutableList.of();
+    // All mutable state (ThreadLocal, subscribers etc) has been moved to {@link com.palantir.tracing.Tracer}.
 
     /**
      * Initializes the current thread's trace, erasing any previously accrued open spans. The new trace is {@link
