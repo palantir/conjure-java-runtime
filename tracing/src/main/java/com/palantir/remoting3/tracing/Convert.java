@@ -17,6 +17,7 @@
 package com.palantir.remoting3.tracing;
 
 import com.palantir.remoting.api.tracing.OpenSpan;
+import com.palantir.tracing.ExposedTrace;
 import com.palantir.tracing.api.Span;
 import com.palantir.tracing.api.SpanObserver;
 import com.palantir.tracing.api.SpanType;
@@ -27,6 +28,10 @@ public final class Convert {
     private Convert() {}
 
     static SpanType spanType(com.palantir.remoting.api.tracing.SpanType old) {
+        if (old == null) {
+            return null;
+        }
+
         switch (old) {
             case SERVER_INCOMING:
                 return SpanType.SERVER_INCOMING;
@@ -93,8 +98,8 @@ public final class Convert {
     }
 
     public static Trace toRemotingTrace(com.palantir.tracing.Trace newTrace) {
-        // TODO
-        return null;
+        // Warning - this is NOT a lossless copy - the newTrace actually contains a stack of OpenSpans, which we can't access.
+        return new Trace(ExposedTrace.isObservable(newTrace), ExposedTrace.getTraceId(newTrace));
     }
 
     public static Span span(com.palantir.remoting.api.tracing.Span old) {

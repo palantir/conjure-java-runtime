@@ -21,6 +21,7 @@ import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanObserver;
 import com.palantir.remoting.api.tracing.SpanType;
+import com.palantir.tracing.ExposedTrace;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,7 +118,8 @@ public final class Tracer {
      * with the given name, or null if there is no such observer.
      */
     public static synchronized SpanObserver subscribe(String name, SpanObserver observer) {
-        return Convert.toRemotingSpanObserver(com.palantir.tracing.Tracer.subscribe(name, Convert.spanObserver(observer)));
+        com.palantir.tracing.Tracer.subscribe(name, Convert.spanObserver(observer));
+        return observer;
     }
 
     /**
@@ -140,7 +142,8 @@ public final class Tracer {
 
     /** Clears the current trace id and returns (a copy of) it. */
     public static Trace getAndClearTrace() {
-        return Convert.toRemotingTrace(com.palantir.tracing.Tracer.getAndClearTrace());
+        com.palantir.tracing.Trace trace = com.palantir.tracing.Tracer.getAndClearTrace();
+        return new Trace(ExposedTrace.isObservable(trace), ExposedTrace.getTraceId(trace));
     }
 
     /**
