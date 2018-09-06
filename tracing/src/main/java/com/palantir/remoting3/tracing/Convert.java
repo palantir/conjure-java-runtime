@@ -69,6 +69,7 @@ final class Convert {
                 .operation(span.getOperation())
                 .startTimeMicroSeconds(span.getStartTimeMicroSeconds())
                 .durationNanoSeconds(span.getDurationNanoSeconds())
+                .metadata(span.getMetadata())
                 .build();
     }
 
