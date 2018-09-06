@@ -17,14 +17,13 @@
 package com.palantir.remoting3.tracing;
 
 import com.palantir.remoting.api.tracing.OpenSpan;
-import com.palantir.tracing.ExposedTrace;
 import com.palantir.tracing.TraceSampler;
 import com.palantir.tracing.api.Span;
 import com.palantir.tracing.api.SpanObserver;
 import com.palantir.tracing.api.SpanType;
 
 /** Utility functions to convert old remoting-api classes to the new tracing-java ones and vice-versa. */
-public final class Convert {
+final class Convert {
 
     private Convert() {}
 
@@ -105,7 +104,7 @@ public final class Convert {
         throw new UnsupportedOperationException("Unable to convert to Remoting SpanType");
     }
 
-    public static com.palantir.remoting.api.tracing.SpanObserver toRemotingSpanObserver(SpanObserver unsubscribe) {
+    static com.palantir.remoting.api.tracing.SpanObserver toRemotingSpanObserver(SpanObserver unsubscribe) {
         if (unsubscribe == null) {
             return null;
         }
@@ -118,17 +117,7 @@ public final class Convert {
         };
     }
 
-    public static Trace toRemotingTrace(com.palantir.tracing.Trace newTrace) {
-        if (newTrace == null) {
-            return null;
-        }
-
-        // Warning - this is NOT a lossless copy - the newTrace actually contains a stack of OpenSpans,
-        // which we can't access.
-        return new Trace(ExposedTrace.isObservable(newTrace), ExposedTrace.getTraceId(newTrace));
-    }
-
-    public static Span span(com.palantir.remoting.api.tracing.Span old) {
+    static Span span(com.palantir.remoting.api.tracing.Span old) {
         if (old == null) {
             return null;
         }
@@ -145,7 +134,7 @@ public final class Convert {
                 .build();
     }
 
-    public static TraceSampler traceSampler(com.palantir.remoting3.tracing.TraceSampler sampler) {
+    static TraceSampler traceSampler(com.palantir.remoting3.tracing.TraceSampler sampler) {
         if (sampler == null) {
             return null;
         }

@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package com.palantir.tracing;
+package com.palantir.remoting3.tracing;
 
-import com.palantir.remoting3.tracing.TestConvert;
+import com.palantir.tracing.ExposedTrace;
 
-public final class ExposedTracer {
-    private ExposedTracer() {}
+public final class TestConvert {
 
-    public static com.palantir.remoting3.tracing.Trace copyTrace() {
-        return TestConvert.toRemotingTraceIncompleteCopy(Tracer.copyTrace());
-    }
+    private TestConvert() {}
 
-    public static void setTrace(boolean isObservable, String traceId) {
-        Tracer.setTrace(new Trace(isObservable, traceId));
+    /** Warning - this is NOT a lossless copy, it loses the stack of OpenSpans in the original trace */
+    public static Trace toRemotingTraceIncompleteCopy(com.palantir.tracing.Trace newTrace) {
+        if (newTrace == null) {
+            return null;
+        }
+
+        return new Trace(ExposedTrace.isObservable(newTrace), ExposedTrace.getTraceId(newTrace));
     }
 }
