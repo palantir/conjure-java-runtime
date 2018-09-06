@@ -196,7 +196,7 @@ public final class TracerTest {
         ExposedTracer.setTrace(true, "newTraceId");
         assertThat(Tracer.getTraceId()).isEqualTo("newTraceId");
         assertThat(Tracer.completeSpan()).isEmpty();
-        assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo("newTraceId");
+        assertThat(MDC.get(com.palantir.tracing.Tracers.TRACE_ID_KEY)).isEqualTo("newTraceId");
     }
 
     @Test
@@ -252,11 +252,11 @@ public final class TracerTest {
     @Test
     public void testClearAndGetTraceClearsMdc() {
         String startTrace = Tracer.getTraceId();
-        assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(startTrace);
+        assertThat(MDC.get(com.palantir.tracing.Tracers.TRACE_ID_KEY)).isEqualTo(startTrace);
 
         Trace oldTrace = Tracer.getAndClearTrace();
         assertThat(oldTrace.getTraceId()).isEqualTo(startTrace);
-        assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isNull(); // after clearing, it's empty
+        assertThat(MDC.get(com.palantir.tracing.Tracers.TRACE_ID_KEY)).isNull(); // after clearing, it's empty
     }
 
     private static Span startAndCompleteSpan() {

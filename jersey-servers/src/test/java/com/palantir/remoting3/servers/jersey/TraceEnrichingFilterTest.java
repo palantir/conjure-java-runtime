@@ -187,7 +187,7 @@ public final class TraceEnrichingFilterTest {
     public void testFilter_setsMdcIfTraceIdHeaderIsPresent() throws Exception {
         when(request.getHeaderString(TraceHttpHeaders.TRACE_ID)).thenReturn("traceId");
         TraceEnrichingFilter.INSTANCE.filter(request);
-        assertThat(MDC.get(Tracers.TRACE_ID_KEY), is("traceId"));
+        assertThat(MDC.get(com.palantir.tracing.Tracers.TRACE_ID_KEY), is("traceId"));
         verify(request).setProperty("com.palantir.remoting3.traceId", "traceId");
     }
 
@@ -202,7 +202,7 @@ public final class TraceEnrichingFilterTest {
     @Test
     public void testFilter_setsMdcIfTraceIdHeaderIsNotePresent() throws Exception {
         TraceEnrichingFilter.INSTANCE.filter(request);
-        assertThat(MDC.get(Tracers.TRACE_ID_KEY).length(), is(16));
+        assertThat(MDC.get(com.palantir.tracing.Tracers.TRACE_ID_KEY).length(), is(16));
         verify(request).setProperty(eq("com.palantir.remoting3.traceId"), anyString());
     }
 
