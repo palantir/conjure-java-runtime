@@ -92,13 +92,21 @@ public final class Convert {
         };
     }
 
-    public static Trace toRemotingTrace(com.palantir.tracing.Trace andClearTrace) {
+    public static Trace toRemotingTrace(com.palantir.tracing.Trace newTrace) {
         // TODO
         return null;
     }
 
-    public static Span span(com.palantir.remoting.api.tracing.Span span) {
-        // TODO
-        return null;
+    public static Span span(com.palantir.remoting.api.tracing.Span old) {
+        return Span.builder()
+                .traceId(old.getTraceId())
+                .parentSpanId(old.getParentSpanId())
+                .spanId(old.getSpanId())
+                .type(Convert.spanType(old.type()))
+                .operation(old.getOperation())
+                .startTimeMicroSeconds(old.getStartTimeMicroSeconds())
+                .durationNanoSeconds(old.getDurationNanoSeconds())
+                .metadata(old.getMetadata())
+                .build();
     }
 }
