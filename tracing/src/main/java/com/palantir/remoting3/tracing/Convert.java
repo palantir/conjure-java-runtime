@@ -148,7 +148,7 @@ public final class Convert {
         if (sampler == null) {
             return null;
         }
-        
+
         return new TraceSampler() {
             @Override
             public boolean sample() {
