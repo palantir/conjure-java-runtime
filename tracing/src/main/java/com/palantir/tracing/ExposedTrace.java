@@ -16,14 +16,20 @@
 
 package com.palantir.tracing;
 
-/** Purely for migration purposes - nobody should compile against these. */
+/**
+ * These utilities are in tracing-java's package (com.palantir.tracing) so they can access some package-private methods.
+ */
 public final class ExposedTrace {
     private ExposedTrace() {}
 
+    /** @deprecated this is purely for migration purposes, do not use this. */
+    @Deprecated
     public static boolean isObservable(Trace trace) {
         return trace.isObservable();
     }
 
+    /** @deprecated this is purely for migration purposes, do not use this. */
+    @Deprecated
     public static String getTraceId(Trace trace) {
         return trace.getTraceId();
     }
