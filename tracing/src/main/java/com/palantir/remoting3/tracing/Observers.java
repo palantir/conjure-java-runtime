@@ -30,10 +30,23 @@ public final class Observers {
      */
     public static SpanObserver asyncDecorator(
             final SpanObserver observer, ExecutorService executorService, int maxInflights) {
-        return new AsyncSpanObserver(executorService, maxInflights) {
+        return new SpanObserver() {
+            private final com.palantir.tracing.AsyncSpanObserver delegate =
+                    new com.palantir.tracing.AsyncSpanObserver(executorService, maxInflights) {
+                @Override
+                public void doConsume(com.palantir.tracing.api.Span span) {
+                    observer.asConjure().consume(span);
+                }
+            };
+
             @Override
-            public void doConsume(Span span) {
-                observer.consume(span);
+            public void consume(Span span) {
+                this.delegate.doConsume(span.asConjure());
+            }
+
+            @Override
+            public com.palantir.tracing.api.SpanObserver asConjure() {
+                return this.delegate;
             }
         };
     }

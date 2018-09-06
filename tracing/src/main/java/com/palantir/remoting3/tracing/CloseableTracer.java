@@ -38,12 +38,12 @@ public final class CloseableTracer implements AutoCloseable {
      * Opens a new {@link SpanType#LOCAL LOCAL} span for this thread's call trace, labeled with the provided operation.
      */
     public static CloseableTracer startSpan(String operation) {
-        Tracer.startSpan(operation);
+        com.palantir.tracing.Tracer.startSpan(operation);
         return INSTANCE;
     }
 
     @Override
     public void close() {
-        Tracer.fastCompleteSpan();
+        com.palantir.tracing.Tracer.fastCompleteSpan();
     }
 }
