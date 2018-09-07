@@ -17,7 +17,8 @@
 package com.palantir.tracing;
 
 /**
- * These utilities are in tracing-java's package (com.palantir.tracing) so they can access some package-private methods.
+ * These utilities are defined in a remoting3 jar but in tracing-java's package
+ * (com.palantir.tracing) so they can access some package-private methods.
  */
 public final class ExposedTrace {
     private ExposedTrace() {}

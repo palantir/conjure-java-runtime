@@ -185,7 +185,7 @@ public final class TracerTest {
 
     @Test
     public void testTraceCopyIsIndependent() throws Exception {
-        Trace trace = ExposedTracer.copyTraceIncomplete();
+        Trace trace = Convert.toRemotingTraceIncomplete(ExposedTracer.copyTrace());
         trace.push(mock(OpenSpan.class));
         assertThat(Tracer.completeSpan().isPresent()).isFalse();
     }

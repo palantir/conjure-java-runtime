@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.tracing;
 
+import com.palantir.tracing.ExposedTrace;
 import com.palantir.tracing.TraceSampler;
 import com.palantir.tracing.api.OpenSpan;
 import com.palantir.tracing.api.Span;
@@ -131,5 +132,14 @@ final class Convert {
         }
 
         return span -> unsubscribe.consume(Convert.span(span));
+    }
+
+    /** Warning - this is NOT a lossless copy, it loses the stack of OpenSpans in the original trace. */
+    static Trace toRemotingTraceIncomplete(com.palantir.tracing.Trace newTrace) {
+        if (newTrace == null) {
+            return null;
+        }
+
+        return new Trace(ExposedTrace.isObservable(newTrace), ExposedTrace.getTraceId(newTrace));
     }
 }

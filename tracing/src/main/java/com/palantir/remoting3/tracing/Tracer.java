@@ -20,7 +20,6 @@ import com.palantir.remoting.api.tracing.OpenSpan;
 import com.palantir.remoting.api.tracing.Span;
 import com.palantir.remoting.api.tracing.SpanObserver;
 import com.palantir.remoting.api.tracing.SpanType;
-import com.palantir.tracing.ExposedTrace;
 import java.util.Map;
 import java.util.Optional;
 
@@ -133,7 +132,7 @@ public final class Tracer {
     /** Clears the current trace id and returns (a copy of) it. */
     public static Trace getAndClearTrace() {
         com.palantir.tracing.Trace trace = com.palantir.tracing.Tracer.getAndClearTrace();
-        return new Trace(ExposedTrace.isObservable(trace), ExposedTrace.getTraceId(trace));
+        return Convert.toRemotingTraceIncomplete(trace);
     }
 
     /**
