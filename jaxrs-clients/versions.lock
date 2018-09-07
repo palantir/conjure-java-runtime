@@ -32,7 +32,9 @@
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing",
+                "com.palantir.tracing:tracing-api"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -45,7 +47,8 @@
             "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
-                "com.palantir.remoting3:tracing"
+                "com.palantir.remoting3:tracing",
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
@@ -53,7 +56,8 @@
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
@@ -66,7 +70,8 @@
             "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
-                "com.palantir.remoting3:tracing"
+                "com.palantir.remoting3:tracing",
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.google.code.findbugs:jsr305": {
@@ -90,7 +95,8 @@
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:refresh-utils",
-                "com.palantir.remoting3:tracing"
+                "com.palantir.remoting3:tracing",
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.netflix.feign:feign-core": {
@@ -195,6 +201,7 @@
                 "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.safe-logging:preconditions",
+                "com.palantir.tracing:tracing",
                 "com.palantir.tritium:tritium-registry"
             ]
         },
@@ -202,6 +209,18 @@
             "locked": "3.0.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config"
+            ]
+        },
+        "com.palantir.tracing:tracing": {
+            "locked": "1.2.0",
+            "transitive": [
+                "com.palantir.remoting3:tracing"
+            ]
+        },
+        "com.palantir.tracing:tracing-api": {
+            "locked": "1.2.0",
+            "transitive": [
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tritium:tritium-registry": {
@@ -259,6 +278,7 @@
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing",
                 "io.dropwizard.metrics:metrics-core"
             ]
         }
@@ -296,7 +316,9 @@
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing",
+                "com.palantir.tracing:tracing-api"
             ]
         },
         "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor": {
@@ -309,7 +331,8 @@
             "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
-                "com.palantir.remoting3:tracing"
+                "com.palantir.remoting3:tracing",
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
@@ -317,7 +340,8 @@
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
                 "com.palantir.remoting3:tracing",
-                "com.palantir.tokens:auth-tokens"
+                "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310": {
@@ -330,7 +354,8 @@
             "locked": "2.9.5",
             "transitive": [
                 "com.palantir.remoting3:jackson-support",
-                "com.palantir.remoting3:tracing"
+                "com.palantir.remoting3:tracing",
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.google.code.findbugs:jsr305": {
@@ -354,7 +379,8 @@
                 "com.palantir.remoting3:keystores",
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:refresh-utils",
-                "com.palantir.remoting3:tracing"
+                "com.palantir.remoting3:tracing",
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.netflix.feign:feign-core": {
@@ -459,6 +485,7 @@
                 "com.palantir.remoting3:http-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.safe-logging:preconditions",
+                "com.palantir.tracing:tracing",
                 "com.palantir.tritium:tritium-registry"
             ]
         },
@@ -466,6 +493,18 @@
             "locked": "3.0.0",
             "transitive": [
                 "com.palantir.remoting-api:service-config"
+            ]
+        },
+        "com.palantir.tracing:tracing": {
+            "locked": "1.2.0",
+            "transitive": [
+                "com.palantir.remoting3:tracing"
+            ]
+        },
+        "com.palantir.tracing:tracing-api": {
+            "locked": "1.2.0",
+            "transitive": [
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tritium:tritium-registry": {
@@ -523,6 +562,7 @@
                 "com.palantir.remoting3:okhttp-clients",
                 "com.palantir.remoting3:tracing",
                 "com.palantir.tokens:auth-tokens",
+                "com.palantir.tracing:tracing",
                 "io.dropwizard.metrics:metrics-core"
             ]
         }
