@@ -33,6 +33,7 @@ import com.palantir.remoting.api.tracing.SpanType;
 import com.palantir.remoting.api.tracing.TraceHttpHeaders;
 import com.palantir.remoting3.tracing.TraceSampler;
 import com.palantir.remoting3.tracing.Tracer;
+import com.palantir.remoting3.tracing.Tracers;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -186,7 +187,7 @@ public final class TraceEnrichingFilterTest {
     public void testFilter_setsMdcIfTraceIdHeaderIsPresent() throws Exception {
         when(request.getHeaderString(TraceHttpHeaders.TRACE_ID)).thenReturn("traceId");
         TraceEnrichingFilter.INSTANCE.filter(request);
-        assertThat(MDC.get(com.palantir.tracing.Tracers.TRACE_ID_KEY), is("traceId"));
+        assertThat(MDC.get(Tracers.TRACE_ID_KEY), is("traceId"));
         verify(request).setProperty("com.palantir.remoting3.traceId", "traceId");
     }
 
@@ -201,7 +202,7 @@ public final class TraceEnrichingFilterTest {
     @Test
     public void testFilter_setsMdcIfTraceIdHeaderIsNotePresent() throws Exception {
         TraceEnrichingFilter.INSTANCE.filter(request);
-        assertThat(MDC.get(com.palantir.tracing.Tracers.TRACE_ID_KEY).length(), is(16));
+        assertThat(MDC.get(Tracers.TRACE_ID_KEY).length(), is(16));
         verify(request).setProperty(eq("com.palantir.remoting3.traceId"), anyString());
     }
 

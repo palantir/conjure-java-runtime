@@ -323,7 +323,7 @@ public final class TracersTest {
             public Void call() throws Exception {
                 String newTraceId = Tracer.getTraceId();
 
-                assertThat(MDC.get(com.palantir.tracing.Tracers.TRACE_ID_KEY)).isEqualTo(newTraceId);
+                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(newTraceId);
                 assertThat(seenTraceIds).doesNotContain(newTraceId);
                 seenTraceIds.add(newTraceId);
                 return null;
@@ -340,7 +340,7 @@ public final class TracersTest {
             public void run() {
                 String newTraceId = Tracer.getTraceId();
 
-                assertThat(MDC.get(com.palantir.tracing.Tracers.TRACE_ID_KEY)).isEqualTo(newTraceId);
+                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(newTraceId);
                 assertThat(seenTraceIds).doesNotContain(newTraceId);
                 seenTraceIds.add(newTraceId);
             }
@@ -355,7 +355,7 @@ public final class TracersTest {
             public Void call() throws Exception {
                 assertThat(Tracer.getTraceId()).isEqualTo(expectedTraceId);
                 assertThat(getCurrentFullTrace()).isEqualTo(expectedTrace);
-                assertThat(MDC.get(com.palantir.tracing.Tracers.TRACE_ID_KEY)).isEqualTo(expectedTraceId);
+                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(expectedTraceId);
                 return null;
             }
         };
@@ -369,8 +369,7 @@ public final class TracersTest {
             public void run() {
                 assertThat(Tracer.getTraceId()).isEqualTo(expectedTraceId);
                 assertThat(getCurrentFullTrace()).isEqualTo(expectedTrace);
-                assertThat(MDC.get(com.palantir.tracing.Tracers.TRACE_ID_KEY)).isEqualTo(
-                        expectedTraceId);
+                assertThat(MDC.get(Tracers.TRACE_ID_KEY)).isEqualTo(expectedTraceId);
             }
         };
     }

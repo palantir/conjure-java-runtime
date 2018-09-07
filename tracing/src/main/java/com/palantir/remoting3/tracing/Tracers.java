@@ -22,6 +22,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 /** Utility methods for making {@link ExecutorService} and {@link Runnable} instances tracing-aware. */
 public final class Tracers {
+    /** The key under which trace ids are inserted into SLF4J {@link org.slf4j.MDC MDCs}. */
+    public static final String TRACE_ID_KEY = "traceId";
 
     private Tracers() {}
 
