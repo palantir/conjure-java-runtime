@@ -17,16 +17,12 @@
 package com.palantir.remoting3.okhttp;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.SettableFuture;
 import com.netflix.concurrency.limits.Limiter;
+import com.netflix.concurrency.limits.limiter.BlockingLimiter;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
-import java.util.ArrayDeque;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.annotation.concurrent.GuardedBy;
 import okhttp3.Request;
 
 /**
@@ -56,15 +52,16 @@ final class ConcurrencyLimiters {
     private static final Void NO_CONTEXT = null;
     private static final String FALLBACK = "";
 
-    private final ConcurrentMap<String, ConcurrencyLimiter> limiters = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Limiter<Void>> limiters = new ConcurrentHashMap<>();
 
     @VisibleForTesting
-    ConcurrencyLimiter limiter(String name) {
+    Limiter.Listener limiter(String name) {
         return limiters.computeIfAbsent(name, key ->
-                new ConcurrencyLimiter(RemotingConcurrencyLimiter.createDefault()));
+                new IdempotentLimiter(new BlockingLimiter<>(RemotingConcurrencyLimiter.createDefault())))
+                .acquire(NO_CONTEXT).get();
     }
 
-    ConcurrencyLimiter limiter(Request request) {
+    Limiter.Listener limiter(Request request) {
         return limiter(limiterKey(request));
     }
 
@@ -77,66 +74,49 @@ final class ConcurrencyLimiters {
         }
     }
 
-    /**
-     * The Netflix library provides either a blocking approach or a non-blocking approach which might say
-     * you can't be scheduled at this time. All of our HTTP calls are asynchronous, so we really want to get
-     * a {@link ListenableFuture} that we can add a callback to. This class then is a translation of
-     * {@link com.netflix.concurrency.limits.limiter.BlockingLimiter} to be asynchronous, maintaining a queue
-     * of currently waiting requests.
-     * <p>
-     * Upon a request finishing, we check if there are any waiting requests, and if there are we attempt to trigger
-     * some more.
-     */
-    static final class ConcurrencyLimiter {
-        @GuardedBy("this")
-        private final Queue<SettableFuture<Limiter.Listener>> waitingRequests = new ArrayDeque<>();
-        private final Limiter<Void> limiter;
+    private static final class IdempotentLimiter implements Limiter<Void> {
+        private final Limiter<Void> delegate;
 
-        @VisibleForTesting
-        ConcurrencyLimiter(Limiter<Void> limiter) {
-            this.limiter = limiter;
+        private IdempotentLimiter(Limiter<Void> delegate) {
+            this.delegate = delegate;
         }
 
-        synchronized ListenableFuture<Limiter.Listener> acquire() {
-            SettableFuture<Limiter.Listener> future = SettableFuture.create();
-            waitingRequests.add(future);
-            processQueue();
-            return future;
+        @Override
+        public Optional<Listener> acquire(Void context) {
+            return delegate.acquire(context).map(IdempotentListener::new);
+        }
+    }
+
+    private static final class IdempotentListener implements Limiter.Listener {
+        private final Limiter.Listener delegate;
+        private boolean consumed = false;
+
+        private IdempotentListener(Limiter.Listener delegate) {
+            this.delegate = delegate;
         }
 
-        private synchronized void processQueue() {
-            while (!waitingRequests.isEmpty()) {
-                Optional<Limiter.Listener> maybeAcquired = limiter.acquire(NO_CONTEXT);
-                if (!maybeAcquired.isPresent()) {
-                    return;
-                }
-                Limiter.Listener acquired = maybeAcquired.get();
-                SettableFuture<Limiter.Listener> head = waitingRequests.remove();
-                head.set(wrap(acquired));
+        @Override
+        public void onSuccess() {
+            if (!consumed) {
+                delegate.onSuccess();
             }
+            consumed = true;
         }
 
-        private Limiter.Listener wrap(Limiter.Listener listener) {
-            return new Limiter.Listener() {
-                @Override
-                public void onSuccess() {
-                    listener.onSuccess();
-                    processQueue();
-                }
-
-                @Override
-                public void onIgnore() {
-                    listener.onIgnore();
-                    processQueue();
-                }
-
-                @Override
-                public void onDropped() {
-                    listener.onDropped();
-                    processQueue();
-                }
-            };
+        @Override
+        public void onIgnore() {
+            if (!consumed) {
+                delegate.onIgnore();
+            }
+            consumed = true;
         }
 
+        @Override
+        public void onDropped() {
+            if (!consumed) {
+                delegate.onDropped();
+            }
+            consumed = true;
+        }
     }
 }
