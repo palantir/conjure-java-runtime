@@ -16,12 +16,9 @@
 
 package com.palantir.remoting3.servers.jersey;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting.api.errors.ErrorType;
 import com.palantir.remoting.api.errors.SerializableError;
-import com.palantir.remoting3.ext.jackson.ObjectMappers;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -43,11 +40,9 @@ import org.slf4j.LoggerFactory;
  * When code in the server throws an {@link Exception} that reaches Jersey, this {@link ExceptionMapper} converts that
  * exception into an HTTP {@link Response} for return to the caller/browser.
  */
-abstract class JsonExceptionMapper<T extends Exception> implements ExceptionMapper<T> {
+abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapper<T> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
-
-    static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     /** Returns the {@link ErrorType} that this exception corresponds to. */
     abstract ErrorType getErrorType(T exception);

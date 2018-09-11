@@ -4,8 +4,6 @@
 
 package com.palantir.remoting3.tracing;
 
-import com.palantir.remoting3.tracing.Tracers.ThrowingCallable;
-
 /**
  * Utility class for capturing the current trace at time of construction, and then
  * running callables at some later time with that captured trace.
@@ -26,23 +24,17 @@ import com.palantir.remoting3.tracing.Tracers.ThrowingCallable;
  * </pre>
  */
 public final class DeferredTracer {
-    private final Trace trace;
+    private final com.palantir.tracing.DeferredTracer delegate;
 
     public DeferredTracer() {
-        this.trace = Tracer.copyTrace();
+        this.delegate = new com.palantir.tracing.DeferredTracer();
     }
 
     /**
      * Runs the given callable with the current trace at
      * the time of construction of this {@link DeferredTracer}.
      */
-    public <T, E extends Throwable> T withTrace(ThrowingCallable<T, E> inner) throws E {
-        Trace originalTrace = Tracer.copyTrace();
-        Tracer.setTrace(trace);
-        try {
-            return inner.call();
-        } finally {
-            Tracer.setTrace(originalTrace);
-        }
+    public <T, E extends Throwable> T withTrace(com.palantir.tracing.Tracers.ThrowingCallable<T, E> inner) throws E {
+        return this.delegate.withTrace(inner);
     }
 }

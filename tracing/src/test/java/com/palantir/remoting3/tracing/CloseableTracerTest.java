@@ -17,24 +17,45 @@
 package com.palantir.remoting3.tracing;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+import com.palantir.remoting.api.tracing.Span;
+import com.palantir.remoting.api.tracing.SpanObserver;
+import com.palantir.remoting.api.tracing.SpanType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class CloseableTracerTest {
+
+    @Mock
+    SpanObserver spanObserver;
+
+    @Captor
+    ArgumentCaptor<Span> captor;
+
     @Before
     public void before() {
         Tracer.getAndClearTrace();
+        Tracer.setSampler(AlwaysSampler.INSTANCE);
+        Tracer.subscribe("foo", spanObserver);
     }
 
     @Test
     public void startsAndClosesSpan() {
         try (CloseableTracer tracer = CloseableTracer.startSpan("foo")) {
-            assertThat(Tracer.copyTrace().isEmpty()).isFalse();
+            // do some work
         }
-        assertThat(Tracer.copyTrace().isEmpty()).isTrue();
+
+        verify(spanObserver, times(1)).consume(captor.capture());
+        Span span = captor.getValue();
+        assertThat(span.getOperation()).isEqualTo("foo");
+        assertThat(span.type()).isEqualTo(SpanType.LOCAL);
     }
 }

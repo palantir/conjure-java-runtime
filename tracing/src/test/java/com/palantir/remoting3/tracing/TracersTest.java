@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.Lists;
 import com.palantir.remoting.api.tracing.OpenSpan;
+import com.palantir.tracing.ExposedTracer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -307,10 +308,10 @@ public final class TracersTest {
     @Test
     public void testTraceIdGeneration() throws Exception {
         assertThat(Tracers.randomId()).hasSize(16); // fails with p=1/16 if generated string is not padded
-        assertThat(Tracers.longToPaddedHex(0)).isEqualTo("0000000000000000");
-        assertThat(Tracers.longToPaddedHex(42)).isEqualTo("000000000000002a");
-        assertThat(Tracers.longToPaddedHex(-42)).isEqualTo("ffffffffffffffd6");
-        assertThat(Tracers.longToPaddedHex(123456789L)).isEqualTo("00000000075bcd15");
+        assertThat(Utilities.longToPaddedHex(0)).isEqualTo("0000000000000000");
+        assertThat(Utilities.longToPaddedHex(42)).isEqualTo("000000000000002a");
+        assertThat(Utilities.longToPaddedHex(-42)).isEqualTo("ffffffffffffffd6");
+        assertThat(Utilities.longToPaddedHex(123456789L)).isEqualTo("00000000075bcd15");
     }
 
     private static Callable<Void> newTraceExpectingCallable() {
@@ -374,7 +375,7 @@ public final class TracersTest {
     }
 
     private static List<OpenSpan> getCurrentFullTrace() {
-        Trace trace = Tracer.copyTrace();
+        Trace trace = Convert.toRemotingTraceIncomplete(ExposedTracer.copyTrace());
         List<OpenSpan> spans = Lists.newArrayList();
         while (!trace.isEmpty()) {
             spans.add(trace.pop().get());
