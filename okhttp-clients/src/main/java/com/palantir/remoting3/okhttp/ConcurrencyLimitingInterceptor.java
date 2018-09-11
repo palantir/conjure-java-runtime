@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * This has a timeout of 1 minute (before an error is logged) in order to try to catch people who have leaked responses
  * (which here will deadlock otherwise). It indicates an application bug every time, but might affect users poorly.
+ * I'm happy to remove it, but think there should probably be another solution?
  */
 final class ConcurrencyLimitingInterceptor implements Interceptor {
     private static final Logger log = LoggerFactory.getLogger(ConcurrencyLimitingInterceptor.class);
@@ -129,7 +130,7 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
         @Override
         public void timedOut() {
             log.warn("A call appears to have been leaked. We think this is an application bug caused by not properly "
-                    + "cleaning up the response object.");
+                    + "cleaning up the response object. Make sure you close() it!");
             tag.invalidate();
         }
     }
