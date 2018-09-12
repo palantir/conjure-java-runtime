@@ -1,5 +1,4 @@
-// TODO(dsanduleac): change to conjure-java-runtime when we rename the repo
-rootProject.name = 'http-remoting'
+rootProject.name = 'conjure-java-runtime'
 
 include 'conjure-java-jaxrs-client'
 include 'conjure-java-retrofit2-client'
