@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * Copyright 2018 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,32 +30,9 @@ import okhttp3.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Flow control in Conjure is a collaborative effort between servers and clients. Servers advertise an overloaded state
- * via 429/503 responses, and clients throttle the number of requests that they send concurrently as a response to this.
- * The latter is implemented as a combination of two techniques, yielding a mechanism similar to flow control in TCP/IP.
- * <ol>
- *     <li>
- *         Clients use the frequency of 429/503 responses (as well as the request latency) to determine an estimate
- *         for the number of permissible concurrent requests
- *    </li>
- *     <li>
- *         Each such request gets scheduled according to an exponential backoff algorithm.
- *     </li>
- * </ol>
- * <p>
- * This class provides an asynchronous implementation of Netflix's
- * <a href="https://github.com/Netflix/concurrency-limits/">concurrency-limits</a> library for determining the
- * above mentioned concurrency estimates.
- * <p>
- * In order to use this class, one should acquire a Limiter for their request, which returns a future. once the Future
- * is completed, the caller can assume that the request is schedulable. After the request completes, the caller
- * <b>must</b> call one of the methods on {@link Limiter.Listener} in order to provide feedback about the request's
- * success. If this is not done, a deadlock could result.
- */
 final class ConcurrencyLimiters {
     private static final Logger log = LoggerFactory.getLogger(ConcurrencyLimiters.class);
-    private static final Duration TIMEOUT = Duration.ofMinutes(1);
+    private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(1);
     private static final Void NO_CONTEXT = null;
     private static final String FALLBACK = "";
 
@@ -76,7 +53,7 @@ final class ConcurrencyLimiters {
             log.warn("Timed out waiting to get permits for concurrency. In most cases this would indicate "
                             + "some kind of deadlock. We expect that either this is caused by not closing response "
                             + "bodies (there should be OkHttp log lines indicating this), or service overloading.",
-                    SafeArg.of("timeout", TIMEOUT));
+                    SafeArg.of("timeout", DEFAULT_TIMEOUT));
             limiters.replace(name, limiter, newLimiter());
             return limiter(name);
         });
@@ -84,9 +61,9 @@ final class ConcurrencyLimiters {
 
     private static Limiter<Void> newLimiter() {
         Limiter<Void> limiter = SimpleLimiter.newBuilder()
-                .limit(RemotingWindowedLimit.newBuilder().build(VegasLimit.newDefault()))
+                .limit(new RemotingWindowedLimit(VegasLimit.newDefault()))
                 .build();
-        return BlockingLimiter.wrap(limiter, TIMEOUT);
+        return BlockingLimiter.wrap(limiter, DEFAULT_TIMEOUT);
     }
 
     private static String limiterKey(Request request) {

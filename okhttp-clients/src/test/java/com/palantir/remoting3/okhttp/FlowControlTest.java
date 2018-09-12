@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * Copyright 2018 Palantir Technologies, Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 public final class FlowControlTest {
     private static final Logger log = LoggerFactory.getLogger(FlowControlTest.class);
     private static final Duration GRACE = Duration.ofMinutes(2);
-    private static final int REQUESTS_PER_THREAD = 1000;
+    private static final int REQUESTS_PER_THREAD = 5;
     private static ListeningExecutorService executorService;
 
     private final ConcurrencyLimiters limiters = new ConcurrencyLimiters();
@@ -74,8 +74,8 @@ public final class FlowControlTest {
     public void test16ThreadsRateLimit20() throws ExecutionException, InterruptedException {
         Meter rate = new Meter();
         Histogram avgRetries = new Histogram(new ExponentiallyDecayingReservoir());
-        int rateLimit = 100;
-        List<ListenableFuture<?>> tasks = createWorkers(rate, avgRetries, 16, rateLimit, Duration.ofMillis(40))
+        int rateLimit = 20;
+        List<ListenableFuture<?>> tasks = createWorkers(rate, avgRetries, 16, rateLimit, Duration.ofMillis(50))
                 .map(executorService::submit)
                 .collect(Collectors.toList());
         ListenableFuture<?> task = Futures.allAsList(tasks);
@@ -152,6 +152,7 @@ public final class FlowControlTest {
                         listener.onIgnore();
                         throw new RuntimeException("Failed on request " + i);
                     } else {
+                        sleep(1);
                         listener.onDropped();
                         sleep(sleep.get().toMillis());
                     }

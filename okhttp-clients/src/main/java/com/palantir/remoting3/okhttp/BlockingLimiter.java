@@ -28,12 +28,12 @@ import java.util.Optional;
  * 
  * @param <ContextT>
  */
-public final class BlockingLimiter<ContextT> implements Limiter<ContextT> {
-    public static <ContextT> BlockingLimiter<ContextT> wrap(Limiter<ContextT> delegate) {
+final class BlockingLimiter<ContextT> implements Limiter<ContextT> {
+    static <ContextT> BlockingLimiter<ContextT> wrap(Limiter<ContextT> delegate) {
         return new BlockingLimiter<>(Clock.systemUTC(), delegate, Optional.empty());
     }
 
-    public static <ContextT> BlockingLimiter<ContextT> wrap(Limiter<ContextT> delegate, Duration timeout) {
+    static <ContextT> BlockingLimiter<ContextT> wrap(Limiter<ContextT> delegate, Duration timeout) {
         return new BlockingLimiter<>(Clock.systemUTC(), delegate, Optional.of(timeout));
     }
 
@@ -56,9 +56,8 @@ public final class BlockingLimiter<ContextT> implements Limiter<ContextT> {
         Optional<Instant> timeoutTime = timeout.map(timeout -> clock.instant().plus(timeout));
         synchronized (lock) {
             while (true) {
-                Optional<Duration> durationRemaining = timeoutTime.map(t -> Duration.between(clock.instant(), t));
-                if (durationRemaining.isPresent()
-                        && (durationRemaining.get().isNegative() || durationRemaining.get().isZero())) {
+                Optional<Duration> remaining = timeoutTime.map(t -> Duration.between(clock.instant(), t));
+                if (remaining.isPresent() && (remaining.get().compareTo(Duration.ZERO) <= 0)) {
                     return Optional.empty();
                 }
 
@@ -71,8 +70,8 @@ public final class BlockingLimiter<ContextT> implements Limiter<ContextT> {
                 
                 // We have reached the limit so block until a token is released
                 try {
-                    if (durationRemaining.isPresent() && !durationRemaining.get().isZero()) {
-                        lock.wait(durationRemaining.get().toMillis());
+                    if (remaining.isPresent()) {
+                        lock.wait(remaining.get().toMillis());
                     } else {
                         lock.wait();
                     }
@@ -83,7 +82,7 @@ public final class BlockingLimiter<ContextT> implements Limiter<ContextT> {
             }
         }
     }
-    
+
     private void unblock() {
         synchronized (lock) {
             lock.notifyAll();

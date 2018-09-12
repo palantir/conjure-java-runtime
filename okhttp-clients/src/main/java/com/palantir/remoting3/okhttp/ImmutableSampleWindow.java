@@ -21,11 +21,11 @@ import java.util.concurrent.TimeUnit;
  * Class used to track immutable samples in an AtomicReference
  */
 final class ImmutableSampleWindow {
-    final long minRtt;
-    final int maxInFlight;
-    final int sampleCount;
-    final long sum;
-    final boolean didDrop;
+    private final long minRtt;
+    private final int maxInFlight;
+    private final int sampleCount;
+    private final long sum;
+    private final boolean didDrop;
     
     public ImmutableSampleWindow() {
         this.minRtt = Long.MAX_VALUE;
@@ -44,7 +44,12 @@ final class ImmutableSampleWindow {
     }
     
     public ImmutableSampleWindow addSample(long rtt, int maxInFlight) {
-        return new ImmutableSampleWindow(Math.min(rtt, minRtt), sum + rtt, Math.max(maxInFlight, this.maxInFlight), sampleCount+1, didDrop);
+        return new ImmutableSampleWindow(
+                Math.min(rtt, minRtt),
+                sum + rtt,
+                Math.max(maxInFlight, this.maxInFlight),
+                sampleCount + 1,
+                didDrop);
     }
     
     public ImmutableSampleWindow addDroppedSample(int maxInFlight) {
@@ -55,8 +60,8 @@ final class ImmutableSampleWindow {
         return minRtt;
     }
 
-    public long getAverateRttNanos() {
-        return sampleCount == 0 ? 0 : sum / sampleCount;
+    public long getAverageRttNanos() {
+        return sampleCount == 0 ? 1 : sum / sampleCount;
     }
     
     public int getMaxInFlight() {
@@ -75,7 +80,7 @@ final class ImmutableSampleWindow {
     public String toString() {
         return "ImmutableSampleWindow ["
                 + "minRtt=" + TimeUnit.NANOSECONDS.toMicros(minRtt) / 1000.0 
-                + ", avgRtt=" + TimeUnit.NANOSECONDS.toMicros(getAverateRttNanos()) / 1000.0
+                + ", avgRtt=" + TimeUnit.NANOSECONDS.toMicros(getAverageRttNanos()) / 1000.0
                 + ", maxInFlight=" + maxInFlight 
                 + ", sampleCount=" + sampleCount 
                 + ", didDrop=" + didDrop + "]";

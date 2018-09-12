@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Palantir Technologies, Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.palantir.remoting3.okhttp;
 
 import com.google.common.collect.ImmutableSet;
@@ -9,24 +25,27 @@ import okhttp3.ResponseBody;
 import okio.BufferedSource;
 
 /**
- * WIP docs for benefit of reviewer.
- *
- * An interceptor for limiting the concurrency of requests to an endpoint.
- *
- * Requests must be tagged (before reaching this point) with a ConcurrencyLimitTag. At this point, we block on
- * receiving a permit to run the request, and store the listener in the tag.
- *
- * When we see evidence of being dropped, we write this into the tag, and when the request retries again the permit
- * will be returned to the pool before acquiring a new one.
- *
- * Users must also wrap the final callback they use; this is used in two ways; first it clears the state in case of
- * failure, secondly on success it will wait until the response is closed before handing back permits. In other words,
- * if you have a server with a concurrency limit (e.g. it is CPU bound), clients should respect the server's
- * concurrency limit.
- *
- * This has a timeout of 1 minute (before an error is logged) in order to try to catch people who have leaked responses
- * (which here will deadlock otherwise). It indicates an application bug every time, but might affect users poorly.
- * I'm happy to remove it, but think there should probably be another solution?
+ * Flow control in Conjure is a collaborative effort between servers and clients. Servers advertise an overloaded state
+ * via 429/503 responses, and clients throttle the number of requests that they send concurrently as a response to this.
+ * The latter is implemented as a combination of two techniques, yielding a mechanism similar to flow control in TCP/IP.
+ * <ol>
+ *     <li>
+ *         Clients use the frequency of 429/503 responses (as well as the request latency) to determine an estimate
+ *         for the number of permissible concurrent requests
+ *    </li>
+ *     <li>
+ *         Each such request gets scheduled according to an exponential backoff algorithm.
+ *     </li>
+ * </ol>
+ * <p>
+ * This class provides an asynchronous implementation of Netflix's
+ * <a href="https://github.com/Netflix/concurrency-limits/">concurrency-limits</a> library for determining the
+ * above mentioned concurrency estimates.
+ * <p>
+ * In order to use this class, one should acquire a Limiter for their request, which returns a future. once the Future
+ * is completed, the caller can assume that the request is schedulable. After the request completes, the caller
+ * <b>must</b> call one of the methods on {@link Limiter.Listener} in order to provide feedback about the request's
+ * success. If this is not done, a deadlock could result.
  */
 final class ConcurrencyLimitingInterceptor implements Interceptor {
     private static final ImmutableSet<Integer> DROPPED_CODES = ImmutableSet.of(429, 503);

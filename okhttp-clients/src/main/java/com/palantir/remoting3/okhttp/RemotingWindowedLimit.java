@@ -16,67 +16,19 @@
 package com.palantir.remoting3.okhttp;
 
 import com.netflix.concurrency.limits.Limit;
-import com.netflix.concurrency.limits.internal.Preconditions;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-public final class RemotingWindowedLimit implements Limit {
-    private static final long DEFAULT_MIN_WINDOW_TIME = TimeUnit.SECONDS.toNanos(1);
-    private static final long DEFAULT_MAX_WINDOW_TIME = TimeUnit.SECONDS.toNanos(1);
-    private static final long DEFAULT_MIN_RTT_THRESHOLD = TimeUnit.MICROSECONDS.toNanos(100);
+public class RemotingWindowedLimit implements Limit {
+    private static final long MIN_WINDOW_TIME = TimeUnit.SECONDS.toNanos(1);
+    private static final long MAX_WINDOW_TIME = TimeUnit.SECONDS.toNanos(1);
+    private static final long MIN_RTT_THRESHOLD = TimeUnit.MICROSECONDS.toNanos(100);
 
     /**
      * Minimum observed samples to filter out sample windows with not enough significant samples
      */
-    private static final int DEFAULT_WINDOW_SIZE = 100;
-
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-        private long maxWindowTime = DEFAULT_MAX_WINDOW_TIME;
-        private long minWindowTime = DEFAULT_MIN_WINDOW_TIME;
-        private int windowSize = DEFAULT_WINDOW_SIZE;
-        private long minRttThreshold = DEFAULT_MIN_RTT_THRESHOLD;
-
-        /**
-         * Minimum window duration for sampling a new minRtt
-         */
-        public Builder minWindowTime(long minWindowTime, TimeUnit units) {
-            Preconditions.checkArgument(units.toMillis(minWindowTime) >= 100, "minWindowTime must be >= 100 ms");
-            this.minWindowTime = units.toNanos(minWindowTime);
-            return this;
-        }
-
-        /**
-         * Maximum window duration for sampling a new minRtt
-         */
-        public Builder maxWindowTime(long maxWindowTime, TimeUnit units) {
-            Preconditions.checkArgument(maxWindowTime >= units.toMillis(100), "minWindowTime must be >= 100 ms");
-            this.maxWindowTime = units.toNanos(maxWindowTime);
-            return this;
-        }
-
-        /**
-         * Minimum sampling window size for finding a new minimum rtt
-         */
-        public Builder windowSize(int windowSize) {
-            Preconditions.checkArgument(windowSize >= 10, "Window size must be >= 10");
-            this.windowSize = windowSize;
-            return this;
-        }
-
-        public Builder minRttThreshold(long threshold, TimeUnit units) {
-            this.minRttThreshold = units.toNanos(threshold);
-            return this;
-        }
-
-        public RemotingWindowedLimit build(Limit delegate) {
-            return new RemotingWindowedLimit(this, delegate);
-        }
-    }
+    private static final int WINDOW_SIZE = 100;
 
     private final Limit delegate;
 
@@ -85,14 +37,6 @@ public final class RemotingWindowedLimit implements Limit {
      */
     private volatile long nextUpdateTime = 0;
 
-    private final long minWindowTime;
-
-    private final long maxWindowTime;
-
-    private final int windowSize;
-
-    private final long minRttThreshold;
-
     private final Object lock = new Object();
 
     /**
@@ -100,12 +44,8 @@ public final class RemotingWindowedLimit implements Limit {
      */
     private final AtomicReference<ImmutableSampleWindow> sample = new AtomicReference<>(new ImmutableSampleWindow());
 
-    private RemotingWindowedLimit(Builder builder, Limit delegate) {
+    public RemotingWindowedLimit(Limit delegate) {
         this.delegate = delegate;
-        this.minWindowTime = builder.minWindowTime;
-        this.maxWindowTime = builder.maxWindowTime;
-        this.windowSize = builder.windowSize;
-        this.minRttThreshold = builder.minRttThreshold;
     }
 
     @Override
@@ -117,36 +57,36 @@ public final class RemotingWindowedLimit implements Limit {
     public void onSample(long startTime, long rtt, int inflight, boolean didDrop) {
         long endTime = startTime + rtt;
 
-        if (rtt < minRttThreshold) {
+        if (rtt < MIN_RTT_THRESHOLD) {
             return;
         }
 
+        final ImmutableSampleWindow currentSample;
         if (didDrop) {
-            sample.updateAndGet(current -> current.addDroppedSample(inflight));
+            currentSample = sample.updateAndGet(current -> current.addDroppedSample(inflight));
         } else {
-            sample.updateAndGet(window -> window.addSample(rtt, inflight));
+            currentSample = sample.updateAndGet(window -> window.addSample(rtt, inflight));
         }
 
-        if (endTime > nextUpdateTime || didDrop) {
+        if (endTime > nextUpdateTime || currentSample.didDrop()) {
             synchronized (lock) {
                 // Double check under the lock
-                if (endTime > nextUpdateTime || didDrop) {
+                if (endTime > nextUpdateTime || sample.get().didDrop()) {
                     ImmutableSampleWindow current = sample.get();
                     if (isWindowReady(current)) {
                         sample.set(new ImmutableSampleWindow());
-
-                        nextUpdateTime = endTime + Math.min(Math.max(current.getCandidateRttNanos() * 2, minWindowTime), maxWindowTime);
-                        delegate.onSample(
-                                startTime, current.getAverateRttNanos() + 1, current.getMaxInFlight() + 1, current.didDrop());
+                        nextUpdateTime = endTime + Math.min(
+                                Math.max(current.getCandidateRttNanos() * 2, MIN_WINDOW_TIME),
+                                MAX_WINDOW_TIME);
+                        delegate.onSample(startTime, current.getAverageRttNanos(), current.getMaxInFlight(), didDrop);
                     }
                 }
             }
         }
     }
 
-    private boolean isWindowReady(ImmutableSampleWindow sample) {
-        return (sample.didDrop() && sample.getAverateRttNanos() > 0)
-                || (sample.getCandidateRttNanos() < Long.MAX_VALUE && sample.getSampleCount() > windowSize);
+    private static boolean isWindowReady(ImmutableSampleWindow sample) {
+        return sample.didDrop() || sample.getSampleCount() > WINDOW_SIZE;
     }
 
     @Override
