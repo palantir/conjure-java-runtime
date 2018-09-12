@@ -109,19 +109,19 @@ public final class ExceptionMappingTest {
     @Test
     public void testRemoteException() throws IOException {
         Response response = target.path("throw-remote-exception").request().get();
-        assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
+        assertThat(response.getStatus(), is(ErrorType.INTERNAL.httpErrorCode()));
         String body =
                 new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
 
         SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
-        assertThat(error.errorCode(), is("errorCode"));
-        assertThat(error.errorName(), is("errorName"));
+        assertThat(error.errorCode(), is(ErrorType.INTERNAL.code().toString()));
+        assertThat(error.errorName(), is(ErrorType.INTERNAL.name()));
     }
 
     @Test
     public void testServiceException() throws IOException {
         Response response = target.path("throw-service-exception").request().get();
-        assertThat(response.getStatus(), is(REMOTE_EXCEPTION_STATUS_CODE));
+        assertThat(response.getStatus(), is(ErrorType.INVALID_ARGUMENT.httpErrorCode()));
         String body =
                 new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
 

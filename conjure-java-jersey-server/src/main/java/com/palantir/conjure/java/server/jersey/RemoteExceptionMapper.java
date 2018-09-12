@@ -16,12 +16,11 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
-import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -40,35 +39,25 @@ import org.slf4j.LoggerFactory;
  * response is then thrown as a {@link RemoteException} at the call point in server A.  If server A does not catch this
  * exception and it raises up the call stack back into Jersey, execution enters this {@link RemoteExceptionMapper}.
  * <p>
- * To preserve debuggability, the exception and HTTP status code from B's exception are logged at WARN level and
- * returned back to the caller/browser.
+ * To preserve debuggability, the exception and HTTP status code from B's exception are logged at WARN level, but not
+ * propagated to caller to avoid an unintentional dependency on the remote exception.
  */
 @Provider
 final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
     private static final Logger log = LoggerFactory.getLogger(RemoteExceptionMapper.class);
+    private static final ServiceExceptionMapper mapper = new ServiceExceptionMapper();
 
     @Override
     public Response toResponse(RemoteException exception) {
         Status status = Status.fromStatusCode(exception.getStatus());
+        ServiceException servieException = new ServiceException(ErrorType.INTERNAL, exception);
 
-        // log at WARN instead of ERROR because although this indicates an issue in a remote server, it is not
-        log.warn("Forwarding response and status code from remote server back to caller",
+        // log at WARN instead of ERROR because although this indicates an issue in a remote server
+        log.warn("Encountered a remote exception. Wrapping as an internal service exception before responding",
                 SafeArg.of("statusCode", status.getStatusCode()),
-                exception);
+                servieException);
 
-        SerializableError error = exception.getError();
-        ResponseBuilder builder = Response.status(status);
-        try {
-            builder.type(MediaType.APPLICATION_JSON);
-            builder.entity(error);
-        } catch (RuntimeException e) {
-            log.warn("Unable to translate exception to json for request", e);
-            // simply write out the exception message
-            builder = Response.status(status);
-            builder.type(MediaType.TEXT_PLAIN);
-            builder.entity(error.errorCode() + ": " + error.errorName());
-        }
-        return builder.build();
+        return mapper.toResponse(servieException);
     }
 }
