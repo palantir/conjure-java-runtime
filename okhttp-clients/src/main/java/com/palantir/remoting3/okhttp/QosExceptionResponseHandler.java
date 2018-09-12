@@ -16,12 +16,10 @@
 
 package com.palantir.remoting3.okhttp;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.remoting.api.errors.QosException;
-import com.palantir.remoting3.okhttp.ConcurrencyLimitingInterceptor.ConcurrencyLimitTag;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
@@ -37,8 +35,6 @@ import org.slf4j.LoggerFactory;
 enum QosExceptionResponseHandler implements ResponseHandler<QosException> {
     INSTANCE;
 
-    public static final ImmutableSet<Integer> QOS_CODES = ImmutableSet.of(308, 429, 503);
-
     private static final Logger log = LoggerFactory.getLogger(QosExceptionResponseHandler.class);
 
     @Override
@@ -47,10 +43,8 @@ enum QosExceptionResponseHandler implements ResponseHandler<QosException> {
             case 308:
                 return handle308(response);
             case 429:
-                wasDropped(response);
                 return Optional.of(handle429(response));
             case 503:
-                wasDropped(response);
                 return Optional.of(handle503());
         }
 
@@ -87,10 +81,6 @@ enum QosExceptionResponseHandler implements ResponseHandler<QosException> {
                     SafeArg.of("duration", duration));
             return QosException.throttle(Duration.ofSeconds(Long.parseLong(duration)));
         }
-    }
-
-    private static void wasDropped(Response response) {
-        Optional.ofNullable(response.request().tag(ConcurrencyLimitTag.class)).ifPresent(ConcurrencyLimitTag::wasDropped);
     }
 
     private static QosException handle503() {

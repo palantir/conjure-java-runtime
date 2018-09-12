@@ -29,7 +29,7 @@ import okio.Sink;
 import okio.Timeout;
 
 @SuppressWarnings("DesignForExtension")
-class ForwardingBufferedSource implements BufferedSource {
+abstract class ForwardingBufferedSource implements BufferedSource {
     private final BufferedSource delegate;
 
     ForwardingBufferedSource(BufferedSource delegate) {

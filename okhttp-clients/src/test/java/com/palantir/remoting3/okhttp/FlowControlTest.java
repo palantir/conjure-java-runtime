@@ -27,15 +27,14 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.RateLimiter;
 import com.netflix.concurrency.limits.Limiter;
-import com.palantir.remoting3.okhttp.ConcurrencyLimiters.ConcurrencyLimiter;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -56,11 +55,10 @@ import org.slf4j.LoggerFactory;
 public final class FlowControlTest {
     private static final Logger log = LoggerFactory.getLogger(FlowControlTest.class);
     private static final Duration GRACE = Duration.ofMinutes(2);
-    private static final int REQUESTS_PER_THREAD = 5;
-    private static final ConcurrencyLimiters limiters = new ConcurrencyLimiters();
+    private static final int REQUESTS_PER_THREAD = 1000;
     private static ListeningExecutorService executorService;
 
-    private final ConcurrencyLimiter limiter = limiters.limiter(UUID.randomUUID().toString());
+    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters();
 
     @BeforeClass
     public static void beforeClass() {
@@ -76,8 +74,8 @@ public final class FlowControlTest {
     public void test16ThreadsRateLimit20() throws ExecutionException, InterruptedException {
         Meter rate = new Meter();
         Histogram avgRetries = new Histogram(new ExponentiallyDecayingReservoir());
-        int rateLimit = 20;
-        List<ListenableFuture<?>> tasks = createWorkers(rate, avgRetries, 16, rateLimit, Duration.ofMillis(50))
+        int rateLimit = 100;
+        List<ListenableFuture<?>> tasks = createWorkers(rate, avgRetries, 16, rateLimit, Duration.ofMillis(40))
                 .map(executorService::submit)
                 .collect(Collectors.toList());
         ListenableFuture<?> task = Futures.allAsList(tasks);
@@ -100,7 +98,7 @@ public final class FlowControlTest {
         return IntStream.range(0, numThreads)
                 .mapToObj(unused -> new Worker(
                         () -> new ExponentialBackoff(4, Duration.ofMillis(250), ThreadLocalRandom.current()),
-                        limiter,
+                        limiters,
                         delay,
                         rateLimiter,
                         rate,
@@ -109,7 +107,7 @@ public final class FlowControlTest {
 
     private static final class Worker implements Runnable {
         private final Supplier<BackoffStrategy> backoffFactory;
-        private final ConcurrencyLimiter limiter;
+        private final ConcurrencyLimiters limiters;
         private final Duration successDuration;
         private final RateLimiter rateLimiter;
         private final Meter meter;
@@ -120,13 +118,13 @@ public final class FlowControlTest {
 
         private Worker(
                 Supplier<BackoffStrategy> backoffFactory,
-                ConcurrencyLimiter limiter,
+                ConcurrencyLimiters limiters,
                 Duration successDuration,
                 RateLimiter rateLimiter,
                 Meter meter,
                 Histogram avgRetries) {
             this.backoffFactory = backoffFactory;
-            this.limiter = limiter;
+            this.limiters = limiters;
             this.successDuration = successDuration;
             this.rateLimiter = rateLimiter;
             this.meter = meter;
@@ -136,8 +134,8 @@ public final class FlowControlTest {
         @Override
         public void run() {
             for (int i = 0; i < REQUESTS_PER_THREAD;) {
-                Limiter.Listener listener = Futures.getUnchecked(limiter.acquire());
-                boolean gotRateLimited = !rateLimiter.tryAcquire();
+                Limiter.Listener listener = limiters.limiter("");
+                boolean gotRateLimited = !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS);
                 if (!gotRateLimited) {
                     meter.mark();
                     sleep(successDuration.toMillis());
@@ -154,8 +152,8 @@ public final class FlowControlTest {
                         listener.onIgnore();
                         throw new RuntimeException("Failed on request " + i);
                     } else {
-                        sleep(sleep.get().toMillis());
                         listener.onDropped();
+                        sleep(sleep.get().toMillis());
                     }
                 }
             }

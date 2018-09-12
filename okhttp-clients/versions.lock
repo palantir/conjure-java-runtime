@@ -96,7 +96,7 @@
             ]
         },
         "com.netflix.concurrency-limits:concurrency-limits-core": {
-            "locked": "0.0.48"
+            "locked": "0.1.1"
         },
         "com.palantir.remoting-api:errors": {
             "locked": "1.9.0",
@@ -324,7 +324,7 @@
             ]
         },
         "com.netflix.concurrency-limits:concurrency-limits-core": {
-            "locked": "0.0.48"
+            "locked": "0.1.1"
         },
         "com.palantir.remoting-api:errors": {
             "locked": "1.9.0",

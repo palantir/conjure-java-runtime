@@ -58,7 +58,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     RemotingOkHttpCall newCallWithMutableState(
             Request request, BackoffStrategy backoffStrategy, int maxNumRelocations) {
         return new RemotingOkHttpCall(
-                getDelegate().newCall(ConcurrencyLimitingInterceptor.wrapRequest(request)),
+                getDelegate().newCall(request),
                 backoffStrategy,
                 urls,
                 this,

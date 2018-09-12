@@ -139,8 +139,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     @Override
-    public void enqueue(Callback rawCallback) {
-        Callback callback = ConcurrencyLimitingInterceptor.wrapCallback(rawCallback);
+    public void enqueue(Callback callback) {
         super.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {
