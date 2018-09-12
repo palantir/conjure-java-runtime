@@ -19,6 +19,10 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.collect.ImmutableSet;
 import com.netflix.concurrency.limits.Limiter;
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
@@ -78,28 +82,47 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
         }
         ResponseBody currentBody = response.body();
         ResponseBody newResponseBody =
-                ResponseBody.create(currentBody.contentType(), currentBody.contentLength(),
-                        new ReleaseConcurrencyLimitBufferedSource(currentBody.source(), listener));
+                ResponseBody.create(
+                        currentBody.contentType(),
+                        currentBody.contentLength(),
+                        wrapSource(currentBody.source(), listener));
         return response.newBuilder()
                 .body(newResponseBody)
                 .build();
     }
 
-    private static final class ReleaseConcurrencyLimitBufferedSource extends ForwardingBufferedSource {
+    private static BufferedSource wrapSource(BufferedSource currentSource, Limiter.Listener listener) {
+        return (BufferedSource) Proxy.newProxyInstance(
+                BufferedSource.class.getClassLoader(),
+                new Class<?>[] { BufferedSource.class },
+                new ReleaseConcurrencyLimitProxy(currentSource, listener));
+    }
+
+    /**
+     * This proxy enables e.g. Okio to make additive additions to their API without breaking us.
+     */
+    private static final class ReleaseConcurrencyLimitProxy implements InvocationHandler {
         private final BufferedSource delegate;
         private final Limiter.Listener listener;
+        private boolean closed = false;
 
-        private ReleaseConcurrencyLimitBufferedSource(BufferedSource delegate, Limiter.Listener listener) {
-            super(delegate);
-            this.listener = listener;
+        private ReleaseConcurrencyLimitProxy(BufferedSource delegate, Limiter.Listener listener) {
             this.delegate = delegate;
+            this.listener = listener;
         }
 
         @Override
-        public void close() throws IOException {
-            listener.onSuccess();
-            delegate.close();
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (method.getName().equals("close") && !closed) {
+                closed = true;
+                listener.onSuccess();
+            }
+
+            try {
+                return method.invoke(delegate, args);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
         }
     }
-
 }
