@@ -88,6 +88,9 @@
                 "com.palantir.tracing:tracing"
             ]
         },
+        "com.netflix.concurrency-limits:concurrency-limits-core": {
+            "locked": "0.1.1"
+        },
         "com.palantir.conjure.java.api:errors": {
             "locked": "2.0.0-rc6"
         },
@@ -140,19 +143,19 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing-okhttp3"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-okhttp3": {
-            "locked": "1.1.0"
+            "locked": "1.2.0"
         },
         "com.palantir.tritium:tritium-registry": {
             "locked": "0.8.0"
@@ -188,6 +191,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.netflix.concurrency-limits:concurrency-limits-core",
                 "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing",
                 "io.dropwizard.metrics:metrics-core"
@@ -283,6 +287,9 @@
                 "com.palantir.tracing:tracing"
             ]
         },
+        "com.netflix.concurrency-limits:concurrency-limits-core": {
+            "locked": "0.1.1"
+        },
         "com.palantir.conjure.java.api:errors": {
             "locked": "2.0.0-rc6"
         },
@@ -335,19 +342,19 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing-okhttp3"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-okhttp3": {
-            "locked": "1.1.0"
+            "locked": "1.2.0"
         },
         "com.palantir.tritium:tritium-registry": {
             "locked": "0.8.0"
@@ -383,6 +390,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.netflix.concurrency-limits:concurrency-limits-core",
                 "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing",
                 "io.dropwizard.metrics:metrics-core"
