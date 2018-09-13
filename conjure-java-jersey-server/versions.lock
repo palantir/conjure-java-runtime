@@ -115,19 +115,19 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing-jersey"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-jersey": {
-            "locked": "1.1.0"
+            "locked": "1.2.0"
         },
         "javax.annotation:javax.annotation-api": {
             "locked": "1.2",
@@ -369,19 +369,19 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing-jersey"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-jersey": {
-            "locked": "1.1.0"
+            "locked": "1.2.0"
         },
         "javax.annotation:javax.annotation-api": {
             "locked": "1.2",

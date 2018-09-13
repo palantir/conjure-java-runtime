@@ -92,6 +92,12 @@
                 "com.palantir.tracing:tracing"
             ]
         },
+        "com.netflix.concurrency-limits:concurrency-limits-core": {
+            "locked": "0.1.1",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:okhttp-clients"
+            ]
+        },
         "com.netflix.feign:feign-core": {
             "locked": "8.17.0",
             "transitive": [
@@ -181,19 +187,19 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing-okhttp3"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-okhttp3": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
@@ -247,6 +253,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.netflix.concurrency-limits:concurrency-limits-core",
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.tokens:auth-tokens",
@@ -348,6 +355,12 @@
                 "com.palantir.tracing:tracing"
             ]
         },
+        "com.netflix.concurrency-limits:concurrency-limits-core": {
+            "locked": "0.1.1",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:okhttp-clients"
+            ]
+        },
         "com.netflix.feign:feign-core": {
             "locked": "8.17.0",
             "transitive": [
@@ -437,19 +450,19 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing-okhttp3"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-okhttp3": {
-            "locked": "1.1.0",
+            "locked": "1.2.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
@@ -503,6 +516,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.netflix.concurrency-limits:concurrency-limits-core",
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.tokens:auth-tokens",

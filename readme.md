@@ -330,7 +330,16 @@ HTTP headers into all requests which get propagated by Jetty servers into subseq
 Endpoints returning plain strings should produce media type `text/plain`. Return type `Optional<String>` is only
 supported for media type `application/json`.
 
-#### Quality of service: retry, failover, throttling
+#### Quality of service: retry, failover, throttling, backpressure
+
+Flow control in Conjure is a collaborative effort between servers and clients.
+
+Clients estimate the server's queue size using response delay and proactively throttle outgoing requests to minimize bottleneck queueing.  Servers may also advertise an overloaded state using 429/503 responses, which clients interpret with more drastic throttling. This results in a mechanism similar to TCP/IP flow-control and minimizes both client and server-side errors.
+
+1. Client throttling is implemented using the TCP Vegas algorithm from Netflix's [concurrency-limits](https://github.com/Netflix/concurrency-limits/) library, which uses 200 -> 399 responses for determining new limits.
+1. Explicit 429/503 responses will result in a reduction in concurrency, and will be retried a fixed number of times, scheduled with an exponential backoff algorithm.
+
+All other responses codes are not factored into timings. Concurrency permits are only released when the response body is closed, so large streaming responses are correctly tracked.
 
 conjure-java-runtime servers can use the `QosException` class to advertise the following conditions:
 
@@ -359,7 +368,7 @@ a `retryOther`/308 redirect, then any subsequent calls will be made against that
 a DNS error and the retried call succeeds against the URL from the list, then subsequent calls are made aginst that URL.
 
 The number of retries for `503` and connection errors can be configured via `ClientConfiguration#maxNumRetries` or
-`ServiceConfiguration#maxNumRetries`, defaulting to the number of URIs provided in `#uris`.
+`ServiceConfiguration#maxNumRetries`, defaulting to 4.
 
 # License
 This repository is made available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
