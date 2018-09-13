@@ -32,7 +32,7 @@ public final class ConcurrencyLimitersTest {
     public void testTimeout() {
         Instant start = Instant.now();
         Thread exhauster = exhaust();
-        limiters.limiter(KEY);
+        limiters.acquireLimiter(KEY);
         Instant end = Instant.now();
         exhauster.interrupt();
         assertThat(Duration.between(start, end)).isGreaterThan(TIMEOUT);
@@ -41,7 +41,7 @@ public final class ConcurrencyLimitersTest {
     private Thread exhaust() {
         Thread thread = new Thread(() -> {
             while (true) {
-                limiters.limiter(KEY);
+                limiters.acquireLimiter(KEY);
             }
         });
         thread.start();

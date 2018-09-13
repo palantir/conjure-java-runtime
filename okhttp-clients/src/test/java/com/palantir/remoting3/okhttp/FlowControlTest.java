@@ -135,7 +135,7 @@ public final class FlowControlTest {
         @Override
         public void run() {
             for (int i = 0; i < REQUESTS_PER_THREAD;) {
-                Limiter.Listener listener = limiters.limiter("");
+                Limiter.Listener listener = limiters.acquireLimiter("");
                 boolean gotRateLimited = !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS);
                 if (!gotRateLimited) {
                     meter.mark();

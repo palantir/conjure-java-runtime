@@ -69,7 +69,7 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        Limiter.Listener listener = limiters.limiter(chain.request());
+        Limiter.Listener listener = limiters.acquireLimiter(chain.request());
         try {
             Response response = chain.proceed(chain.request());
             if (DROPPED_CODES.contains(response.code())) {

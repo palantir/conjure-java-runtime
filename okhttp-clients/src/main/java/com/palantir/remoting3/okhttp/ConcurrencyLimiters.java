@@ -57,12 +57,16 @@ class ConcurrencyLimiters {
         this(taggedMetricRegistry, DEFAULT_TIMEOUT);
     }
 
-    Limiter.Listener limiter(Request request) {
-        return limiter(limiterKey(request));
+    /**
+     * Blocks until the request should be allowed to proceed.
+     * Caller must notify the listener to release the permit.
+     */
+    Limiter.Listener acquireLimiter(Request request) {
+        return acquireLimiter(limiterKey(request));
     }
 
     @VisibleForTesting
-    Limiter.Listener limiter(String name) {
+    Limiter.Listener acquireLimiter(String name) {
         Limiter<Void> limiter = limiters.computeIfAbsent(name, key -> newLimiter());
         Optional<Limiter.Listener> listener = limiter.acquire(NO_CONTEXT);
         return listener.orElseGet(() -> {
@@ -74,7 +78,7 @@ class ConcurrencyLimiters {
                             + "bodies (there should be OkHttp log lines indicating this), or service overloading.",
                     SafeArg.of("timeout", timeout));
             limiters.replace(name, limiter, newLimiter());
-            return limiter(name);
+            return acquireLimiter(name);
         });
     }
 
