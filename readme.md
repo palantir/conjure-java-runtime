@@ -63,7 +63,7 @@ MyService service = Retrofit2Client.create(MyService.class, "my user agent", con
 
 ## conjure-java-jersey-server
 Provides Dropwizard/Jersey configuration for handling conjure types, and also exception mappers for translating common
-runtime exceptions as well as our own `ServiceException` (see the [errors section](#errors-conjure-java-api))
+runtime exceptions as well as our own `ServiceException` (see the [errors section](#errors-conjure-java-runtime-api))
 to appropriate HTTP error codes. A Dropwizard server is configured for conjure as follows:
 
 ```java
@@ -83,7 +83,7 @@ Provides [Zipkin](https://github.com/openzipkin/zipkin)-style call tracing libra
 
 Please refer to [tracing-java](https://github.com/palantir/tracing-java) for more details on the `tracing` library usage.
 
-## service-config (conjure-java-api)
+## service-config (conjure-java-runtime-api)
 Provides utilities for setting up service clients from file-based configuration. Example:
 
 ```yaml
@@ -107,7 +107,7 @@ MyService client = JaxRsClient.create(MyService.class, "my-agent", ClientConfigu
 ```
 
 
-## keystores and ssl-config (conjure-java-api)
+## keystores and ssl-config (conjure-java-runtime-api)
 
 Provides utilities for interacting with Java trust stores and key stores and acquiring `SSLSocketFactory` instances
 using those stores, as well as a configuration class for use in server configuration files.
@@ -176,7 +176,7 @@ The `pkcs1-reader-sun` does not include any extra dependencies, but assumes the 
 available as part of most popular JVM implementations, including the Oracle and OpenJDK JVMs for
 Java 7 and Java 8.
 
-## errors (conjure-java-api)
+## errors (conjure-java-runtime-api)
 Provides utilities for relaying service errors across service boundaries (see below).
 
 
