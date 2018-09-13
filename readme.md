@@ -1,5 +1,5 @@
-[![CircleCI Build Status](https://circleci.com/gh/palantir/http-remoting/tree/develop.svg?style=shield)](https://circleci.com/gh/palantir/http-remoting)
-[![Download](https://api.bintray.com/packages/palantir/releases/http-remoting/images/download.svg) ](https://bintray.com/palantir/releases/http-remoting/_latestVersion)
+[![CircleCI Build Status](https://circleci.com/gh/palantir/conjure-java-runtime/tree/develop.svg?style=shield)](https://circleci.com/gh/palantir/conjure-java-runtime)
+[![Download](https://api.bintray.com/packages/palantir/releases/conjure-java-runtime/images/download.svg) ](https://bintray.com/palantir/releases/conjure-java-runtime/_latestVersion)
 
 # Conjure Java Runtime Utilities
 This repository provides an opinionated set of libraries for defining and creating RESTish/RPC servers and clients based
@@ -12,7 +12,7 @@ Core libraries:
 - conjure-java-jaxrs-client: Clients for JAX-RS-defined service interfaces
 - conjure-java-retrofit2-client: Clients for Retrofit-defined service interfaces
 - conjure-java-jersey-server: Configuration library for Dropwizard/Jersey servers
-- [conjure-java-api](https://github.com/palantir/http-remoting-api/tree/feature-conjure): API classes for service configuration, tracing, and error propagation
+- [conjure-java-runtime-api](https://github.com/palantir/conjure-java-runtime-api): API classes for service configuration, tracing, and error propagation
 
 # Usage
 
