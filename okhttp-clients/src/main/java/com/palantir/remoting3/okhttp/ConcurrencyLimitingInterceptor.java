@@ -19,6 +19,7 @@ package com.palantir.remoting3.okhttp;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.netflix.concurrency.limits.Limiter;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -62,8 +63,8 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
         this.limiters = limiters;
     }
 
-    ConcurrencyLimitingInterceptor() {
-        this(new ConcurrencyLimiters());
+    ConcurrencyLimitingInterceptor(TaggedMetricRegistry taggedMetricRegistry) {
+        this(new ConcurrencyLimiters(taggedMetricRegistry));
     }
 
     @Override

@@ -16,16 +16,20 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.netflix.concurrency.limits.Limiter;
 import com.netflix.concurrency.limits.limit.VegasLimit;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import okhttp3.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,17 +40,21 @@ class ConcurrencyLimiters {
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(1);
     private static final Void NO_CONTEXT = null;
     private static final String FALLBACK = "";
+    private static final MetricName SLOW_ACQUIRE =
+            MetricName.builder().safeName("conjure-java-client.qos.request-permit.slow-acquire").build();
 
+    private final Timer slowAcquire;
     private final ConcurrentMap<String, Limiter<Void>> limiters = new ConcurrentHashMap<>();
     private final Duration timeout;
 
     @VisibleForTesting
-    ConcurrencyLimiters(Duration timeout) {
+    ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry, Duration timeout) {
+        this.slowAcquire = taggedMetricRegistry.timer(SLOW_ACQUIRE);
         this.timeout = timeout;
     }
 
-    ConcurrencyLimiters() {
-        this(DEFAULT_TIMEOUT);
+    ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry) {
+        this(taggedMetricRegistry, DEFAULT_TIMEOUT);
     }
 
     Limiter.Listener limiter(Request request) {
@@ -71,9 +79,9 @@ class ConcurrencyLimiters {
     }
 
     private Limiter<Void> newLimiter() {
-        Limiter<Void> limiter = SimpleLimiter.newBuilder()
+        Limiter<Void> limiter = new InstrumentedLimiter(SimpleLimiter.newBuilder()
                 .limit(new RemotingWindowedLimit(VegasLimit.newDefault()))
-                .build();
+                .build(), slowAcquire);
         return RemotingBlockingLimiter.wrap(limiter, timeout);
     }
 
@@ -83,6 +91,30 @@ class ConcurrencyLimiters {
             return FALLBACK;
         } else {
             return request.method() + " " + pathTemplate;
+        }
+    }
+
+    private static final class InstrumentedLimiter implements Limiter<Void> {
+        private final Limiter<Void> delegate;
+        private final Timer timer;
+
+        private InstrumentedLimiter(Limiter<Void> delegate, Timer timer) {
+            this.delegate = delegate;
+            this.timer = timer;
+        }
+
+        @Override
+        public Optional<Listener> acquire(Void context) {
+            long start = System.nanoTime();
+            try {
+                return delegate.acquire(context);
+            } finally {
+                long end = System.nanoTime();
+                long durationNanos = end - start;
+                if (TimeUnit.NANOSECONDS.toMillis(durationNanos) > 1) {
+                    timer.update(durationNanos, TimeUnit.NANOSECONDS);
+                }
+            }
         }
     }
 }

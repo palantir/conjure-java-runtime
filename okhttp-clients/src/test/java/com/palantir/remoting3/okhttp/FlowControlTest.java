@@ -27,6 +27,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.RateLimiter;
 import com.netflix.concurrency.limits.Limiter;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -58,7 +59,7 @@ public final class FlowControlTest {
     private static final int REQUESTS_PER_THREAD = 5;
     private static ListeningExecutorService executorService;
 
-    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters();
+    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(new DefaultTaggedMetricRegistry());
 
     @BeforeClass
     public static void beforeClass() {
