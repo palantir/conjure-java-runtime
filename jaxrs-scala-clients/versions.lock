@@ -114,6 +114,12 @@
                 "com.palantir.tracing:tracing"
             ]
         },
+        "com.netflix.concurrency-limits:concurrency-limits-core": {
+            "locked": "0.1.1",
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
+            ]
+        },
         "com.netflix.feign:feign-core": {
             "locked": "8.17.0",
             "transitive": [
@@ -334,6 +340,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.netflix.concurrency-limits:concurrency-limits-core",
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:jaxrs-clients",
@@ -460,6 +467,12 @@
                 "com.palantir.tracing:tracing"
             ]
         },
+        "com.netflix.concurrency-limits:concurrency-limits-core": {
+            "locked": "0.1.1",
+            "transitive": [
+                "com.palantir.remoting3:okhttp-clients"
+            ]
+        },
         "com.netflix.feign:feign-core": {
             "locked": "8.17.0",
             "transitive": [
@@ -680,6 +693,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.netflix.concurrency-limits:concurrency-limits-core",
                 "com.netflix.feign:feign-slf4j",
                 "com.palantir.remoting3:error-handling",
                 "com.palantir.remoting3:jaxrs-clients",

@@ -44,7 +44,7 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_FAILED_URL_COOLDOWN = Duration.ZERO;
     private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = false;
     private static final NodeSelectionStrategy DEFAULT_NODE_SELECTION_STRATEGY = NodeSelectionStrategy.PIN_UNTIL_ERROR;
-    private static final int DEFAULT_MAX_NUM_RETRIES = 3;
+    private static final int DEFAULT_MAX_NUM_RETRIES = 4;
 
     private ClientConfigurations() {}
 
@@ -87,7 +87,7 @@ public final class ClientConfigurations {
                 .enableGcmCipherSuites(DEFAULT_ENABLE_GCM_CIPHERS)
                 .proxy(ProxySelector.getDefault())
                 .proxyCredentials(Optional.empty())
-                .maxNumRetries(uris.size())
+                .maxNumRetries(DEFAULT_MAX_NUM_RETRIES)
                 .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
                 .nodeSelectionStrategy(DEFAULT_NODE_SELECTION_STRATEGY)
                 .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)

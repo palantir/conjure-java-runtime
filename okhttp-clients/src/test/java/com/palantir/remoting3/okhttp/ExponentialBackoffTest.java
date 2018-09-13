@@ -31,7 +31,7 @@ public final class ExponentialBackoffTest {
     private static final Duration ONE_SECOND = Duration.ofSeconds(1);
 
     @Test
-    public void testNoRetry() throws Exception {
+    public void testNoRetry() {
         Random random = mock(Random.class);
         ExponentialBackoff backoff = new ExponentialBackoff(0, ONE_SECOND, random);
 
@@ -39,7 +39,7 @@ public final class ExponentialBackoffTest {
     }
 
     @Test
-    public void testRetriesCorrectNumberOfTimesAndFindsRandomBackoffWithInExponentialInterval() throws Exception {
+    public void testRetriesCorrectNumberOfTimesAndFindsRandomBackoffWithInExponentialInterval() {
         Random random = mock(Random.class);
         ExponentialBackoff backoff = new ExponentialBackoff(3, ONE_SECOND, random);
 
