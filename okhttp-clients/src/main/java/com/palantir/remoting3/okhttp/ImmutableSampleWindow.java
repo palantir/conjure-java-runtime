@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Palantir Technologies, Inc. All rights reserved.
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Copyright 2018 Netflix, Inc.
  *
@@ -26,7 +26,7 @@ package com.palantir.remoting3.okhttp;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Class used to track immutable samples in an AtomicReference
+ * Class used to track immutable samples in an AtomicReference.
  */
 final class ImmutableSampleWindow {
     private final long minRtt;
@@ -34,7 +34,7 @@ final class ImmutableSampleWindow {
     private final int sampleCount;
     private final long sum;
     private final boolean didDrop;
-    
+
     ImmutableSampleWindow() {
         this.minRtt = Long.MAX_VALUE;
         this.maxInFlight = 0;
@@ -42,7 +42,7 @@ final class ImmutableSampleWindow {
         this.sum = 0;
         this.didDrop = false;
     }
-    
+
     ImmutableSampleWindow(long minRtt, long sum, int maxInFlight, int sampleCount, boolean didDrop) {
         this.minRtt = minRtt;
         this.sum = sum;
@@ -50,20 +50,20 @@ final class ImmutableSampleWindow {
         this.sampleCount = sampleCount;
         this.didDrop = didDrop;
     }
-    
-    public ImmutableSampleWindow addSample(long rtt, int maxInFlight) {
+
+    public ImmutableSampleWindow addSample(long rtt, int currentMaxInFlight) {
         return new ImmutableSampleWindow(
                 Math.min(rtt, minRtt),
                 sum + rtt,
-                Math.max(maxInFlight, this.maxInFlight),
+                Math.max(currentMaxInFlight, maxInFlight),
                 sampleCount + 1,
                 didDrop);
     }
-    
-    public ImmutableSampleWindow addDroppedSample(int maxInFlight) {
-        return new ImmutableSampleWindow(minRtt, sum, Math.max(maxInFlight, this.maxInFlight), sampleCount, true);
+
+    public ImmutableSampleWindow addDroppedSample(int currentMaxInFlight) {
+        return new ImmutableSampleWindow(minRtt, sum, Math.max(currentMaxInFlight, maxInFlight), sampleCount, true);
     }
-    
+
     public long getCandidateRttNanos() {
         return minRtt;
     }
@@ -71,7 +71,7 @@ final class ImmutableSampleWindow {
     public long getAverageRttNanos() {
         return sampleCount == 0 ? 0 : sum / sampleCount;
     }
-    
+
     public int getMaxInFlight() {
         return maxInFlight;
     }
@@ -87,10 +87,10 @@ final class ImmutableSampleWindow {
     @Override
     public String toString() {
         return "ImmutableSampleWindow ["
-                + "minRtt=" + TimeUnit.NANOSECONDS.toMicros(minRtt) / 1000.0 
+                + "minRtt=" + TimeUnit.NANOSECONDS.toMicros(minRtt) / 1000.0
                 + ", avgRtt=" + TimeUnit.NANOSECONDS.toMicros(getAverageRttNanos()) / 1000.0
-                + ", maxInFlight=" + maxInFlight 
-                + ", sampleCount=" + sampleCount 
+                + ", maxInFlight=" + maxInFlight
+                + ", sampleCount=" + sampleCount
                 + ", didDrop=" + didDrop + "]";
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Palantir Technologies, Inc. All rights reserved.
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Copyright 2018 Netflix, Inc.
  *
@@ -34,10 +34,8 @@ import java.util.Optional;
  * {@link Limiter} that blocks the caller when the limit has been reached.  The caller is
  * blocked until the limiter has been released.  This limiter is commonly used in batch
  * clients that use the limiter as a back-pressure mechanism.
- *
+ * <p>
  * TODO(j-baker): Remove once https://github.com/Netflix/concurrency-limits/pull/78 is merged and released.
- * 
- * @param <ContextT>
  */
 final class RemotingBlockingLimiter<ContextT> implements Limiter<ContextT> {
     static <ContextT> RemotingBlockingLimiter<ContextT> wrap(Limiter<ContextT> delegate, Duration timeout) {
@@ -49,7 +47,7 @@ final class RemotingBlockingLimiter<ContextT> implements Limiter<ContextT> {
     private final Duration timeout;
 
     /**
-     * Lock used to block and unblock callers as the limit is reached
+     * Lock used to block and unblock callers as the limit is reached.
      */
     private final Object lock = new Object();
 
@@ -58,7 +56,7 @@ final class RemotingBlockingLimiter<ContextT> implements Limiter<ContextT> {
         this.delegate = limiter;
         this.timeout = timeout;
     }
-    
+
     private Optional<Listener> tryAcquire(ContextT context) {
         Instant timeoutTime = clock.instant().plus(timeout);
         synchronized (lock) {
@@ -74,7 +72,7 @@ final class RemotingBlockingLimiter<ContextT> implements Limiter<ContextT> {
                 if (listener.isPresent()) {
                     return listener;
                 }
-                
+
                 // We have reached the limit so block until a token is released
                 try {
                     lock.wait(remaining.toMillis());
@@ -91,30 +89,30 @@ final class RemotingBlockingLimiter<ContextT> implements Limiter<ContextT> {
             lock.notifyAll();
         }
     }
-    
+
     @Override
     public Optional<Listener> acquire(ContextT context) {
-        return tryAcquire(context).map(delegate -> new Listener() {
+        return tryAcquire(context).map(delegateListener -> new Listener() {
             @Override
             public void onSuccess() {
-                delegate.onSuccess();
+                delegateListener.onSuccess();
                 unblock();
             }
 
             @Override
             public void onIgnore() {
-                delegate.onIgnore();
+                delegateListener.onIgnore();
                 unblock();
             }
 
             @Override
             public void onDropped() {
-                delegate.onDropped();
+                delegateListener.onDropped();
                 unblock();
             }
         });
     }
-    
+
     @Override
     public String toString() {
         return "RemotingBlockingLimiter [" + delegate + "]";

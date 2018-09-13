@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Palantir Technologies, Inc. All rights reserved.
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public final class ConcurrencyLimitingInterceptorTest {
     }
 
     @Test
-    public void ignoresIfIOException() throws IOException {
+    public void ignoresIfIoException() throws IOException {
         IOException exception = new IOException();
         when(chain.proceed(request)).thenThrow(exception);
         assertThatThrownBy(() -> interceptor.intercept(chain)).isEqualTo(exception);
@@ -109,9 +109,9 @@ public final class ConcurrencyLimitingInterceptorTest {
         String data = "data";
         ResponseBody body = ResponseBody.create(MediaType.parse("application/json"), data);
         when(chain.proceed(request)).thenReturn(response.newBuilder().body(body).build());
-        Response response = interceptor.intercept(chain);
+        Response wrappedResponse = interceptor.intercept(chain);
         verifyZeroInteractions(listener);
-        assertThat(response.body().string()).isEqualTo(data);
+        assertThat(wrappedResponse.body().string()).isEqualTo(data);
         verify(listener).onSuccess();
     }
 
@@ -121,7 +121,7 @@ public final class ConcurrencyLimitingInterceptorTest {
         when(chain.proceed(request)).thenReturn(response.newBuilder().body(body).build());
         IOException exception = new IOException();
         when(mockSource.readByteArray()).thenThrow(exception);
-        Response response = interceptor.intercept(chain);
-        assertThatThrownBy(() -> response.body().source().readByteArray()).isEqualTo(exception);
+        Response erroneousResponse = interceptor.intercept(chain);
+        assertThatThrownBy(() -> erroneousResponse.body().source().readByteArray()).isEqualTo(exception);
     }
 }

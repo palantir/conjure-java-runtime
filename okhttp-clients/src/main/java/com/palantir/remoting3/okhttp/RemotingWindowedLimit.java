@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Palantir Technologies, Inc. All rights reserved.
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Copyright 2018 Netflix, Inc.
  *
@@ -35,21 +35,21 @@ class RemotingWindowedLimit implements Limit {
     private static final long MIN_RTT_THRESHOLD = TimeUnit.MICROSECONDS.toNanos(100);
 
     /**
-     * Minimum observed samples to filter out sample windows with not enough significant samples
+     * Minimum observed samples to filter out sample windows with not enough significant samples.
      */
     private static final int WINDOW_SIZE = 100;
 
     private final Limit delegate;
 
     /**
-     * End time for the sampling window at which point the limit should be updated
+     * End time for the sampling window at which point the limit should be updated.
      */
     private volatile long nextUpdateTime = 0;
 
     private final Object lock = new Object();
 
     /**
-     * Object tracking stats for the current sample window
+     * Object tracking stats for the current sample window.
      */
     private final AtomicReference<ImmutableSampleWindow> sample = new AtomicReference<>(new ImmutableSampleWindow());
 
@@ -87,7 +87,7 @@ class RemotingWindowedLimit implements Limit {
                         nextUpdateTime = endTime + Math.min(
                                 Math.max(current.getCandidateRttNanos() * 2, MIN_WINDOW_TIME),
                                 MAX_WINDOW_TIME);
-                        // + 1 ensures that the average rtt in nanos is never 0, which has a precond check in VegasLimit.
+                        // +1 ensures that average rtt in nanos is never 0, which has a precond check in VegasLimit.
                         delegate.onSample(
                                 startTime, current.getAverageRttNanos() + 1, current.getMaxInFlight(), didDrop);
                     }
