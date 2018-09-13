@@ -1,7 +1,7 @@
 [![CircleCI Build Status](https://circleci.com/gh/palantir/conjure-java-runtime/tree/develop.svg?style=shield)](https://circleci.com/gh/palantir/conjure-java-runtime)
 [![Download](https://api.bintray.com/packages/palantir/releases/conjure-java-runtime/images/download.svg) ](https://bintray.com/palantir/releases/conjure-java-runtime/_latestVersion)
 
-# Conjure Java Runtime Utilities (formerly http-remoting)
+# Conjure Java Runtime (formerly http-remoting)
 This repository provides an opinionated set of libraries for defining and creating RESTish/RPC servers and clients based
 on [Feign](https://github.com/OpenFeign/feign) or [Retrofit](http://square.github.io/retrofit/) as a client and
 [Dropwizard](http://www.dropwizard.io/)/[Jersey](https://jersey.java.net/) with [JAX-RS](https://jax-rs-spec.java.net/)
