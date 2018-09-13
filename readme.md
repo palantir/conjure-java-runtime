@@ -46,7 +46,8 @@ ClientConfiguration config = ClientConfigurations.of(
         ImmutableList.copyOf("https://url-to-server:6789"),
         SslSocketFactories.createSslSocketFactory(sslConfig),
         SslSocketFactories.createX509TrustManager(sslConfig));
-MyService service = JaxRsClient.create(MyService.class, userAgent, config);
+HostMetricsRegistry hostMetricsRegistry = new HostMetricsRegistry();  // can call .getMetrics() and then collect them to a central metrics repository
+MyService service = JaxRsClient.create(MyService.class, userAgent, hostMetricsRegistry, config);
 ```
 
 The `JaxRsClient#create` factory comes in two flavours: one for creating immutable clients given a fixed
@@ -57,8 +58,10 @@ configuration, etc.) changes when the underlying `ClientConfiguration` changes.
 Similar to `conjure-java-jaxrs-client`, but generates clients using the Retrofit library. Example:
 
 ```java
-ClientConfiguration config = ... as above... ;
-MyService service = Retrofit2Client.create(MyService.class, "my user agent", config);
+ClientConfiguration config = ... as above ... ;
+UserAgent userAgent = ... as above ... ;
+HostMetricsRegistry hostMetricsRegistry = new HostMetricsRegistry();  // can call .getMetrics() and then collect them to a central metrics repository
+MyService service = Retrofit2Client.create(MyService.class, userAgent, hostMetricsRegistry, config);
 ```
 
 ## conjure-java-jersey-server
