@@ -106,7 +106,8 @@ services:
 ```java
 ServiceConfigBlock config = readFromYaml("config.yml");
 ServiceConfigurationFactory factory = ServiceConfigurationFactory.of(config);
-MyService client = JaxRsClient.create(MyService.class, "my-agent", ClientConfigurations.of(factory.get("myService")));
+HostMetricsRegistry hostMetricsRegistry = new HostMetricsRegistry();
+MyService client = JaxRsClient.create(MyService.class, UserAgents.parse("my-agent"), hostMetricsRegistry, ClientConfigurations.of(factory.get("myService")));
 ```
 
 
