@@ -1,6 +1,8 @@
 /*
  * Copyright 2018 Palantir Technologies, Inc. All rights reserved.
  *
+ * Copyright 2018 Netflix, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This limiter has been forked from Netflix's implementation. Changes are:
+ * 1. Palantir license.
+ * 2. Codestyle.
+ * 3. Made package private.
+ * 4. Modified to support a 'timeout', rather than blocking forever.
+ * 5. Renamed to RemotingBlockingLimiter and changed package in order to avoid ambiguity.
  */
 package com.palantir.remoting3.okhttp;
 
@@ -25,39 +34,37 @@ import java.util.Optional;
  * {@link Limiter} that blocks the caller when the limit has been reached.  The caller is
  * blocked until the limiter has been released.  This limiter is commonly used in batch
  * clients that use the limiter as a back-pressure mechanism.
+ *
+ * TODO(j-baker): Remove once https://github.com/Netflix/concurrency-limits/pull/78 is merged and released.
  * 
  * @param <ContextT>
  */
-final class BlockingLimiter<ContextT> implements Limiter<ContextT> {
-    static <ContextT> BlockingLimiter<ContextT> wrap(Limiter<ContextT> delegate) {
-        return new BlockingLimiter<>(Clock.systemUTC(), delegate, Optional.empty());
-    }
-
-    static <ContextT> BlockingLimiter<ContextT> wrap(Limiter<ContextT> delegate, Duration timeout) {
-        return new BlockingLimiter<>(Clock.systemUTC(), delegate, Optional.of(timeout));
+final class RemotingBlockingLimiter<ContextT> implements Limiter<ContextT> {
+    static <ContextT> RemotingBlockingLimiter<ContextT> wrap(Limiter<ContextT> delegate, Duration timeout) {
+        return new RemotingBlockingLimiter<>(Clock.systemUTC(), delegate, timeout);
     }
 
     private final Limiter<ContextT> delegate;
     private final Clock clock;
-    private final Optional<Duration> timeout;
+    private final Duration timeout;
 
     /**
      * Lock used to block and unblock callers as the limit is reached
      */
     private final Object lock = new Object();
 
-    private BlockingLimiter(Clock clock, Limiter<ContextT> limiter, Optional<Duration> timeout) {
+    private RemotingBlockingLimiter(Clock clock, Limiter<ContextT> limiter, Duration timeout) {
         this.clock = clock;
         this.delegate = limiter;
         this.timeout = timeout;
     }
     
     private Optional<Listener> tryAcquire(ContextT context) {
-        Optional<Instant> timeoutTime = timeout.map(timeout -> clock.instant().plus(timeout));
+        Instant timeoutTime = clock.instant().plus(timeout);
         synchronized (lock) {
             while (true) {
-                Optional<Duration> remaining = timeoutTime.map(t -> Duration.between(clock.instant(), t));
-                if (remaining.isPresent() && (remaining.get().compareTo(Duration.ZERO) <= 0)) {
+                Duration remaining = Duration.between(clock.instant(), timeoutTime);
+                if (remaining.compareTo(Duration.ZERO) <= 0) {
                     return Optional.empty();
                 }
 
@@ -70,11 +77,7 @@ final class BlockingLimiter<ContextT> implements Limiter<ContextT> {
                 
                 // We have reached the limit so block until a token is released
                 try {
-                    if (remaining.isPresent()) {
-                        lock.wait(remaining.get().toMillis());
-                    } else {
-                        lock.wait();
-                    }
+                    lock.wait(remaining.toMillis());
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     return Optional.empty();
@@ -114,6 +117,6 @@ final class BlockingLimiter<ContextT> implements Limiter<ContextT> {
     
     @Override
     public String toString() {
-        return "BlockingLimiter [" + delegate + "]";
+        return "RemotingBlockingLimiter [" + delegate + "]";
     }
 }

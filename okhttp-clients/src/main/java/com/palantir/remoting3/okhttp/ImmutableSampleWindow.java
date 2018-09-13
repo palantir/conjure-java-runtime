@@ -1,6 +1,8 @@
 /*
  * Copyright 2018 Palantir Technologies, Inc. All rights reserved.
  *
+ * Copyright 2018 Netflix, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,6 +14,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Changes made:
+ *
+ * 1. Package was changed.
+ * 2. Fields made private.
+ * 3. Fixed a typo.
  */
 package com.palantir.remoting3.okhttp;
 
@@ -27,7 +35,7 @@ final class ImmutableSampleWindow {
     private final long sum;
     private final boolean didDrop;
     
-    public ImmutableSampleWindow() {
+    ImmutableSampleWindow() {
         this.minRtt = Long.MAX_VALUE;
         this.maxInFlight = 0;
         this.sampleCount = 0;
@@ -35,7 +43,7 @@ final class ImmutableSampleWindow {
         this.didDrop = false;
     }
     
-    public ImmutableSampleWindow(long minRtt, long sum, int maxInFlight, int sampleCount, boolean didDrop) {
+    ImmutableSampleWindow(long minRtt, long sum, int maxInFlight, int sampleCount, boolean didDrop) {
         this.minRtt = minRtt;
         this.sum = sum;
         this.maxInFlight = maxInFlight;
@@ -61,7 +69,7 @@ final class ImmutableSampleWindow {
     }
 
     public long getAverageRttNanos() {
-        return sampleCount == 0 ? 1 : sum / sampleCount;
+        return sampleCount == 0 ? 0 : sum / sampleCount;
     }
     
     public int getMaxInFlight() {

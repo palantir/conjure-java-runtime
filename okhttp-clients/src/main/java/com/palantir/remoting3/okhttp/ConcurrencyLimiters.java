@@ -30,13 +30,24 @@ import okhttp3.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class ConcurrencyLimiters {
+@SuppressWarnings("DesignForExtension")
+class ConcurrencyLimiters {
     private static final Logger log = LoggerFactory.getLogger(ConcurrencyLimiters.class);
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(1);
     private static final Void NO_CONTEXT = null;
     private static final String FALLBACK = "";
 
     private final ConcurrentMap<String, Limiter<Void>> limiters = new ConcurrentHashMap<>();
+    private final Duration timeout;
+
+    @VisibleForTesting
+    ConcurrencyLimiters(Duration timeout) {
+        this.timeout = timeout;
+    }
+
+    ConcurrencyLimiters() {
+        this(DEFAULT_TIMEOUT);
+    }
 
     Limiter.Listener limiter(Request request) {
         return limiter(limiterKey(request));
@@ -53,17 +64,17 @@ final class ConcurrencyLimiters {
             log.warn("Timed out waiting to get permits for concurrency. In most cases this would indicate "
                             + "some kind of deadlock. We expect that either this is caused by not closing response "
                             + "bodies (there should be OkHttp log lines indicating this), or service overloading.",
-                    SafeArg.of("timeout", DEFAULT_TIMEOUT));
+                    SafeArg.of("timeout", timeout));
             limiters.replace(name, limiter, newLimiter());
             return limiter(name);
         });
     }
 
-    private static Limiter<Void> newLimiter() {
+    private Limiter<Void> newLimiter() {
         Limiter<Void> limiter = SimpleLimiter.newBuilder()
                 .limit(new RemotingWindowedLimit(VegasLimit.newDefault()))
                 .build();
-        return BlockingLimiter.wrap(limiter, DEFAULT_TIMEOUT);
+        return RemotingBlockingLimiter.wrap(limiter, timeout);
     }
 
     private static String limiterKey(Request request) {

@@ -1,0 +1,127 @@
+/*
+ * Copyright 2018 Palantir Technologies, Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.palantir.remoting3.okhttp;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import com.netflix.concurrency.limits.Limiter;
+import java.io.IOException;
+import okhttp3.Interceptor;
+import okhttp3.MediaType;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.BufferedSource;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+@RunWith(MockitoJUnitRunner.class)
+public final class ConcurrencyLimitingInterceptorTest {
+    private static final Request request = new Request.Builder()
+            .url("https://localhost:1234/call")
+            .get()
+            .build();
+    private static final Response response = new Response.Builder()
+            .code(200)
+            .request(request)
+            .message("message")
+            .protocol(Protocol.HTTP_2)
+            .build();
+
+    @Mock private BufferedSource mockSource;
+    @Mock private Interceptor.Chain chain;
+    @Mock private ConcurrencyLimiters limiters;
+    @Mock private Limiter.Listener listener;
+
+    private ConcurrencyLimitingInterceptor interceptor;
+
+    @Before
+    public void before() {
+        interceptor = new ConcurrencyLimitingInterceptor(limiters);
+        when(chain.request()).thenReturn(request);
+        when(limiters.limiter(request)).thenReturn(listener);
+    }
+
+    @Test
+    public void dropsIfRateLimited() throws IOException {
+        Response rateLimited = response.newBuilder().code(429).build();
+        when(chain.proceed(request)).thenReturn(rateLimited);
+        assertThat(interceptor.intercept(chain)).isEqualTo(rateLimited);
+        verify(listener).onDropped();
+    }
+
+    @Test
+    public void dropsIfUnavailable() throws IOException {
+        Response unavailable = response.newBuilder().code(503).build();
+        when(chain.proceed(request)).thenReturn(unavailable);
+        assertThat(interceptor.intercept(chain)).isEqualTo(unavailable);
+        verify(listener).onDropped();
+    }
+
+    @Test
+    public void ignoresIfRedirect() throws IOException {
+        Response redirect = response.newBuilder().code(308).build();
+        when(chain.proceed(request)).thenReturn(redirect);
+        assertThat(interceptor.intercept(chain)).isEqualTo(redirect);
+        verify(listener).onIgnore();
+    }
+
+    @Test
+    public void ignoresIfUnsuccessful() throws IOException {
+        Response unsuccessful = response.newBuilder().code(500).build();
+        when(chain.proceed(request)).thenReturn(unsuccessful);
+        assertThat(interceptor.intercept(chain)).isEqualTo(unsuccessful);
+        verify(listener).onIgnore();
+    }
+
+    @Test
+    public void ignoresIfIOException() throws IOException {
+        IOException exception = new IOException();
+        when(chain.proceed(request)).thenThrow(exception);
+        assertThatThrownBy(() -> interceptor.intercept(chain)).isEqualTo(exception);
+        verify(listener).onIgnore();
+    }
+
+    @Test
+    public void wrapsResponseBody() throws IOException {
+        String data = "data";
+        ResponseBody body = ResponseBody.create(MediaType.parse("application/json"), data);
+        when(chain.proceed(request)).thenReturn(response.newBuilder().body(body).build());
+        Response response = interceptor.intercept(chain);
+        verifyZeroInteractions(listener);
+        assertThat(response.body().string()).isEqualTo(data);
+        verify(listener).onSuccess();
+    }
+
+    @Test
+    public void proxyHandlesExceptions() throws IOException {
+        ResponseBody body = ResponseBody.create(MediaType.parse("application/json"), -1, mockSource);
+        when(chain.proceed(request)).thenReturn(response.newBuilder().body(body).build());
+        IOException exception = new IOException();
+        when(mockSource.readByteArray()).thenThrow(exception);
+        Response response = interceptor.intercept(chain);
+        assertThatThrownBy(() -> response.body().source().readByteArray()).isEqualTo(exception);
+    }
+}

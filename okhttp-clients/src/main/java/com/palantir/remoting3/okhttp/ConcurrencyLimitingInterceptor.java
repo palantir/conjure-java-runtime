@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.netflix.concurrency.limits.Limiter;
 import java.io.IOException;
@@ -54,7 +55,16 @@ import okio.BufferedSource;
 final class ConcurrencyLimitingInterceptor implements Interceptor {
     private static final ImmutableSet<Integer> DROPPED_CODES = ImmutableSet.of(429, 503);
 
-    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters();
+    private final ConcurrencyLimiters limiters;
+
+    @VisibleForTesting
+    ConcurrencyLimitingInterceptor(ConcurrencyLimiters limiters) {
+        this.limiters = limiters;
+    }
+
+    ConcurrencyLimitingInterceptor() {
+        this(new ConcurrencyLimiters());
+    }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
