@@ -14,13 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * This limiter has been forked from Netflix's implementation. Changes are:
- * 1. Palantir license.
- * 2. Codestyle.
- * 3. Made package private.
- * 4. Modified to support a 'timeout', rather than blocking forever.
- * 5. Renamed to RemotingBlockingLimiter and changed package in order to avoid ambiguity.
  */
 package com.palantir.remoting3.okhttp;
 
@@ -34,6 +27,15 @@ import java.util.Optional;
  * {@link Limiter} that blocks the caller when the limit has been reached.  The caller is
  * blocked until the limiter has been released.  This limiter is commonly used in batch
  * clients that use the limiter as a back-pressure mechanism.
+ *
+ * This limiter has been forked from Netflix's {@link com.netflix.concurrency.limits.limiter.BlockingLimiter}.
+ *
+ * Changes are:
+ * 1. Modified to support a 'timeout', rather than blocking forever.
+ * 2. Codestyle.
+ * 3. Made package private.
+ * 4. Palantir license.
+ * 5. Renamed to RemotingBlockingLimiter and changed package in order to avoid ambiguity.
  * <p>
  * TODO(j-baker): Remove once https://github.com/Netflix/concurrency-limits/pull/78 is merged and released.
  */

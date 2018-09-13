@@ -14,12 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Changes made:
- *
- * 1. Package was changed.
- * 2. Fields made private.
- * 3. Fixed a typo.
  */
 package com.palantir.remoting3.okhttp;
 
@@ -28,7 +22,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * Class used to track immutable samples in an AtomicReference.
  *
- * See {@link com.netflix.concurrency.limits.limit.ImmutableSampleWindow}
+ * Changes made to {@link com.netflix.concurrency.limits.limit.ImmutableSampleWindow}
+ *
+ * 1. Package was changed.
+ * 2. Fields made private.
+ * 3. Fixed a typo (getAverateRttNanos -> getAverageRttNanos)
  */
 final class ImmutableSampleWindow {
     private final long minRtt;

@@ -14,13 +14,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Changes made from WindowedLimit:
- *
- * 1. Change package and make package private.
- * 2. Code style.
- * 3. Modify to reduce window size whenever a dropped sample is seen, rather than awaiting the whole window.
- * 4. Inlined constants.
  */
 package com.palantir.remoting3.okhttp;
 
@@ -29,6 +22,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+/**
+ * Changes made from {@link com.netflix.concurrency.limits.limit.WindowedLimit}:
+ *
+ *  1. Modify to reduce window size whenever a dropped sample is seen, rather than awaiting the whole window.
+ *  2. Change package and make package private.
+ *  3. Code style.
+ *  4. Inlined constants.
+ */
 class RemotingWindowedLimit implements Limit {
     private static final long MIN_WINDOW_TIME = TimeUnit.SECONDS.toNanos(1);
     private static final long MAX_WINDOW_TIME = TimeUnit.SECONDS.toNanos(1);
