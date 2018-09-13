@@ -43,14 +43,14 @@ import okio.BufferedSource;
  *     </li>
  * </ol>
  * <p>
- * This class provides an asynchronous implementation of Netflix's
+ * This class utilises Netflix's
  * <a href="https://github.com/Netflix/concurrency-limits/">concurrency-limits</a> library for determining the
  * above mentioned concurrency estimates.
  * <p>
- * In order to use this class, one should acquire a Limiter for their request, which returns a future. once the Future
- * is completed, the caller can assume that the request is schedulable. After the request completes, the caller
- * <b>must</b> call one of the methods on {@link Limiter.Listener} in order to provide feedback about the request's
- * success. If this is not done, a deadlock could result.
+ * 429 and 503 response codes are used for backpressure, whilst 200 -> 399 request codes are used for determining
+ * new limits and all other codes are not factored in to timings.
+ * <p>
+ * Concurrency permits are only released when the response body is closed.
  */
 final class ConcurrencyLimitingInterceptor implements Interceptor {
     private static final ImmutableSet<Integer> DROPPED_CODES = ImmutableSet.of(429, 503);
