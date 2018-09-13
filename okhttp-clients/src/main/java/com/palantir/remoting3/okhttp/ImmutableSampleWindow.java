@@ -27,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Class used to track immutable samples in an AtomicReference.
+ *
+ * See {@link com.netflix.concurrency.limits.limit.ImmutableSampleWindow}
  */
 final class ImmutableSampleWindow {
     private final long minRtt;
