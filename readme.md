@@ -1,4 +1,4 @@
-[![CircleCI Build Status](https://circleci.com/gh/palantir/http-remoting/tree/develop.svg?style=shield)](https://circleci.com/gh/palantir/http-remoting)
+[![CircleCI Build Status](https://circleci.com/gh/palantir/conjure-java-runtime/tree/remoting.svg?style=shield)](https://circleci.com/gh/palantir/conjure-java-runtime/tree/remoting)
 [![Download](https://api.bintray.com/packages/palantir/releases/http-remoting/images/download.svg) ](https://bintray.com/palantir/releases/http-remoting/_latestVersion)
 
 # HTTP Remoting Utilities
