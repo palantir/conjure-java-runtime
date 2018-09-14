@@ -18,8 +18,9 @@ package com.palantir.conjure.java.server.jersey;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
-import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.SafeArg;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -46,18 +47,35 @@ import org.slf4j.LoggerFactory;
 final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
     private static final Logger log = LoggerFactory.getLogger(RemoteExceptionMapper.class);
-    private static final ServiceExceptionMapper mapper = new ServiceExceptionMapper();
 
     @Override
     public Response toResponse(RemoteException exception) {
         Status status = Status.fromStatusCode(exception.getStatus());
-        ServiceException servieException = new ServiceException(ErrorType.INTERNAL, exception);
 
         // log at WARN instead of ERROR because although this indicates an issue in a remote server
-        log.warn("Encountered a remote exception. Wrapping as an internal service exception before responding",
+        log.warn("Encountered a remote exception. Mapping to an internal error before propagating",
                 SafeArg.of("statusCode", status.getStatusCode()),
-                servieException);
+                exception);
 
-        return mapper.toResponse(servieException);
+        ErrorType errorType = ErrorType.INTERNAL;
+        Response.ResponseBuilder builder = Response.status(errorType.httpErrorCode());
+        try {
+            // Override only the name and code of the error
+            SerializableError error = SerializableError.builder()
+                    .from(exception.getError())
+                    .errorName(errorType.name())
+                    .errorCode(errorType.code().toString())
+                    .build();
+            builder.type(MediaType.APPLICATION_JSON);
+            builder.entity(error);
+        } catch (RuntimeException e) {
+            log.warn("Unable to translate exception to json",
+                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()), e);
+            // simply write out the exception message
+            builder.type(MediaType.TEXT_PLAIN);
+            builder.entity("Unable to translate exception to json. Refer to the server logs with this errorInstanceId: "
+                    + exception.getError().errorInstanceId());
+        }
+        return builder.build();
     }
 }

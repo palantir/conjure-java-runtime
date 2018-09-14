@@ -114,6 +114,7 @@ public final class ExceptionMappingTest {
                 new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
 
         SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
+        assertThat(error.errorInstanceId(), is("errorInstanceId"));
         assertThat(error.errorCode(), is(ErrorType.INTERNAL.code().toString()));
         assertThat(error.errorName(), is(ErrorType.INTERNAL.name()));
     }
@@ -188,6 +189,7 @@ public final class ExceptionMappingTest {
         @Override
         public String throwRemoteException() {
             throw new RemoteException(SerializableError.builder()
+                    .errorInstanceId("errorInstanceId")
                     .errorCode("errorCode")
                     .errorName("errorName")
                     .build(),
