@@ -59,7 +59,9 @@ public final class FlowControlTest {
     private static final int REQUESTS_PER_THREAD = 5;
     private static ListeningExecutorService executorService;
 
-    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(new DefaultTaggedMetricRegistry());
+    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(
+            new DefaultTaggedMetricRegistry(),
+            FlowControlTest.class);
 
     @BeforeClass
     public static void beforeClass() {

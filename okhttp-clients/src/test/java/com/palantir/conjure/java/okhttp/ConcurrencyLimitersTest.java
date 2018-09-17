@@ -26,7 +26,8 @@ import org.junit.Test;
 public final class ConcurrencyLimitersTest {
     private static final String KEY = "";
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
-    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(new DefaultTaggedMetricRegistry(), TIMEOUT);
+    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(
+            new DefaultTaggedMetricRegistry(), TIMEOUT, ConcurrencyLimitersTest.class);
 
     @Test
     public void testTimeout() {

@@ -46,15 +46,17 @@ class ConcurrencyLimiters {
     private final Timer slowAcquire;
     private final ConcurrentMap<String, Limiter<Void>> limiters = new ConcurrentHashMap<>();
     private final Duration timeout;
+    private final Class<?> serviceClass;
 
     @VisibleForTesting
-    ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry, Duration timeout) {
+    ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry, Duration timeout, Class<?> serviceClass) {
         this.slowAcquire = taggedMetricRegistry.timer(SLOW_ACQUIRE);
         this.timeout = timeout;
+        this.serviceClass = serviceClass;
     }
 
-    ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry) {
-        this(taggedMetricRegistry, DEFAULT_TIMEOUT);
+    ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry, Class<?> serviceClass) {
+        this(taggedMetricRegistry, DEFAULT_TIMEOUT, serviceClass);
     }
 
     /**
@@ -66,8 +68,8 @@ class ConcurrencyLimiters {
     }
 
     @VisibleForTesting
-    Limiter.Listener acquireLimiter(String name) {
-        Limiter<Void> limiter = limiters.computeIfAbsent(name, key -> newLimiter());
+    Limiter.Listener acquireLimiter(String limiterKey) {
+        Limiter<Void> limiter = limiters.computeIfAbsent(limiterKey, key -> newLimiter());
         Optional<Limiter.Listener> listener = limiter.acquire(NO_CONTEXT);
         return listener.orElseGet(() -> {
             if (Thread.currentThread().isInterrupted()) {
@@ -76,9 +78,11 @@ class ConcurrencyLimiters {
             log.warn("Timed out waiting to get permits for concurrency. In most cases this would indicate "
                             + "some kind of deadlock. We expect that either this is caused by not closing response "
                             + "bodies (there should be OkHttp log lines indicating this), or service overloading.",
+                    SafeArg.of("serviceClass", serviceClass),
+                    SafeArg.of("limiterKey", limiterKey),
                     SafeArg.of("timeout", timeout));
-            limiters.replace(name, limiter, newLimiter());
-            return acquireLimiter(name);
+            limiters.replace(limiterKey, limiter, newLimiter());
+            return acquireLimiter(limiterKey);
         });
     }
 
