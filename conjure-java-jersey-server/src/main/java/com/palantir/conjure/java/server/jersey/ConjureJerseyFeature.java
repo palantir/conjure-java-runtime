@@ -60,6 +60,7 @@ public enum ConjureJerseyFeature implements Feature {
         // DateTime
         context.register(InstantParamConverterProvider.class);
         context.register(ZonedDateTimeParamConverterProvider.class);
+        context.register(OffsetDateTimeParamConverterProvider.class);
 
         // Tracing
         context.register(new TraceEnrichingFilter());
