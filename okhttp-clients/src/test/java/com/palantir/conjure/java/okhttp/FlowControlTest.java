@@ -59,7 +59,9 @@ public final class FlowControlTest {
     private static final int REQUESTS_PER_THREAD = 5;
     private static ListeningExecutorService executorService;
 
-    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(new DefaultTaggedMetricRegistry());
+    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(
+            new DefaultTaggedMetricRegistry(),
+            FlowControlTest.class);
 
     @BeforeClass
     public static void beforeClass() {
@@ -135,7 +137,7 @@ public final class FlowControlTest {
         @Override
         public void run() {
             for (int i = 0; i < REQUESTS_PER_THREAD;) {
-                Limiter.Listener listener = limiters.acquireLimiter("");
+                Limiter.Listener listener = limiters.acquireLimiterInternal("", 0);
                 boolean gotRateLimited = !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS);
                 if (!gotRateLimited) {
                     meter.mark();

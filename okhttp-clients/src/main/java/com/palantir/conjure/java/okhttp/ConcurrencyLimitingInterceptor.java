@@ -63,8 +63,8 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
         this.limiters = limiters;
     }
 
-    ConcurrencyLimitingInterceptor(TaggedMetricRegistry taggedMetricRegistry) {
-        this(new ConcurrencyLimiters(taggedMetricRegistry));
+    ConcurrencyLimitingInterceptor(TaggedMetricRegistry taggedMetricRegistry, Class<?> serviceClass) {
+        this(new ConcurrencyLimiters(taggedMetricRegistry, serviceClass));
     }
 
     @Override
