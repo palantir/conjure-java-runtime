@@ -83,7 +83,17 @@ class ConcurrencyLimiters {
     Limiter.Listener acquireLimiterInternal(String limiterKey, int attemptsSoFar) {
         Limiter<Void> limiter = limiters.computeIfAbsent(limiterKey, key -> newLimiter());
         Optional<Limiter.Listener> listener = limiter.acquire(NO_CONTEXT);
-        return listener.orElseGet(() -> {
+
+        if (listener.isPresent()) {
+            if (attemptsSoFar > 0) {
+                log.info("Eventually acquired concurrency permit",
+                        SafeArg.of("serviceClass", serviceClass),
+                        SafeArg.of("limiterKey", limiterKey),
+                        SafeArg.of("attemptsSoFar", attemptsSoFar + 1));
+            }
+
+            return listener.get();
+        } else {
             if (Thread.currentThread().isInterrupted()) {
                 throw new RuntimeException("Thread was interrupted");
             }
@@ -92,11 +102,11 @@ class ConcurrencyLimiters {
                             + "bodies (there should be OkHttp log lines indicating this), or service overloading.",
                     SafeArg.of("serviceClass", serviceClass),
                     SafeArg.of("limiterKey", limiterKey),
-                    SafeArg.of("timeout", timeout),
-                    SafeArg.of("attemptsSoFar", attemptsSoFar));
+                    SafeArg.of("attemptsSoFar", attemptsSoFar + 1),
+                    SafeArg.of("timeout", timeout));
             limiters.replace(limiterKey, limiter, newLimiter());
             return acquireLimiterInternal(limiterKey, attemptsSoFar + 1);
-        });
+        }
     }
 
     private Limiter<Void> newLimiter() {
