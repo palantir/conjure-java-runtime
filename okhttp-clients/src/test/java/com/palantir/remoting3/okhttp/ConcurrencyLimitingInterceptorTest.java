@@ -124,4 +124,12 @@ public final class ConcurrencyLimitingInterceptorTest {
         Response erroneousResponse = interceptor.intercept(chain);
         assertThatThrownBy(() -> erroneousResponse.body().source().readByteArray()).isEqualTo(exception);
     }
+
+    @Test
+    public void marksSuccessIfNoContent() throws IOException {
+        Response noContent = response.newBuilder().code(204).build();
+        when(chain.proceed(request)).thenReturn(noContent);
+        assertThat(interceptor.intercept(chain)).isEqualTo(noContent);
+        verify(listener).onSuccess();
+    }
 }
