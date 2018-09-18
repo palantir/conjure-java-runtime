@@ -89,7 +89,7 @@ public final class DateTimeTest {
 
     public static final class DateTimeTestResource implements DateTimeTestService {
         @Override
-        public String getZonedDateTime(OffsetDateTime value) {
+        public String getOffsetDateTime(OffsetDateTime value) {
             return value.toString();
         }
 
@@ -110,7 +110,7 @@ public final class DateTimeTest {
     public interface DateTimeTestService {
         @GET
         @Path("/offsetDateTime")
-        String getZonedDateTime(@QueryParam("value") OffsetDateTime value);
+        String getOffsetDateTime(@QueryParam("value") OffsetDateTime value);
 
         @GET
         @Path("/zonedDateTime")
