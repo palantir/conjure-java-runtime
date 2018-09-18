@@ -89,6 +89,7 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
 
     private static Response wrapResponse(Limiter.Listener listener, Response response) {
         if (response.body() == null) {
+            listener.onSuccess();
             return response;
         }
         ResponseBody currentBody = response.body();
