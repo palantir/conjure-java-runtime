@@ -60,7 +60,8 @@ public final class DateTimeTest {
 
     @Test
     public void testOffsetDateTimeParam() throws SecurityException {
-        Response response = target.path("offsetDateTime").queryParam("value", "2017-01-02T03:04:05.06Z").request().get();
+        Response response = target.path("offsetDateTime")
+                .queryParam("value", "2017-01-02T03:04:05.06Z").request().get();
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
         assertThat(response.readEntity(String.class), is("2017-01-02T03:04:05.060Z"));
     }
