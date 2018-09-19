@@ -16,6 +16,7 @@
 
 package com.palantir.remoting3.okhttp;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.netflix.concurrency.limits.Limiter;
@@ -42,14 +43,18 @@ class ConcurrencyLimiters {
     private static final String FALLBACK = "";
     private static final MetricName SLOW_ACQUIRE =
             MetricName.builder().safeName("conjure-java-client.qos.request-permit.slow-acquire").build();
+    private static final MetricName LEAK_SUSPECTED =
+            MetricName.builder().safeName("conjure-java-client.qos.request-permit.leak-suspected").build();
 
     private final Timer slowAcquire;
+    private final Meter leakSuspected;
     private final ConcurrentMap<String, Limiter<Void>> limiters = new ConcurrentHashMap<>();
     private final Duration timeout;
 
     @VisibleForTesting
     ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry, Duration timeout) {
         this.slowAcquire = taggedMetricRegistry.timer(SLOW_ACQUIRE);
+        this.leakSuspected = taggedMetricRegistry.meter(LEAK_SUSPECTED);
         this.timeout = timeout;
     }
 
@@ -77,6 +82,7 @@ class ConcurrencyLimiters {
                             + "some kind of deadlock. We expect that either this is caused by not closing response "
                             + "bodies (there should be OkHttp log lines indicating this), or service overloading.",
                     SafeArg.of("timeout", timeout));
+            leakSuspected.mark();
             limiters.replace(name, limiter, newLimiter());
             return acquireLimiter(name);
         });
