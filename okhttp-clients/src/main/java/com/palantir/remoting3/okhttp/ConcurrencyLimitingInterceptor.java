@@ -87,8 +87,13 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
         }
     }
 
-    private static Response wrapResponse(Limiter.Listener listener, Response response) {
+    private static Response wrapResponse(Limiter.Listener listener, Response response) throws IOException {
+        // OkHttp guarantees not-null to execute() and callbacks, but not at this level.
         if (response.body() == null) {
+            listener.onIgnore();
+            return response;
+        } else if (response.body().source().exhausted()) {
+            // this case exists for Feign, which does not properly close empty responses
             listener.onSuccess();
             return response;
         }
