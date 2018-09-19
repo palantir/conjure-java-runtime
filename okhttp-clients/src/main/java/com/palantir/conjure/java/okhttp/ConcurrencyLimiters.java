@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.netflix.concurrency.limits.Limiter;
@@ -42,8 +43,11 @@ class ConcurrencyLimiters {
     private static final String FALLBACK = "";
     private static final MetricName SLOW_ACQUIRE =
             MetricName.builder().safeName("conjure-java-client.qos.request-permit.slow-acquire").build();
+    private static final MetricName LEAK_SUSPECTED =
+            MetricName.builder().safeName("conjure-java-client.qos.request-permit.leak-suspected").build();
 
     private final Timer slowAcquire;
+    private final Meter leakSuspected;
     private final ConcurrentMap<String, Limiter<Void>> limiters = new ConcurrentHashMap<>();
     private final Duration timeout;
     private final Class<?> serviceClass;
@@ -51,6 +55,7 @@ class ConcurrencyLimiters {
     @VisibleForTesting
     ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry, Duration timeout, Class<?> serviceClass) {
         this.slowAcquire = taggedMetricRegistry.timer(SLOW_ACQUIRE);
+        this.leakSuspected = taggedMetricRegistry.meter(LEAK_SUSPECTED);
         this.timeout = timeout;
         this.serviceClass = serviceClass;
     }
@@ -104,6 +109,7 @@ class ConcurrencyLimiters {
                     SafeArg.of("limiterKey", limiterKey),
                     SafeArg.of("attemptsSoFar", attemptsSoFar + 1),
                     SafeArg.of("timeout", timeout));
+            leakSuspected.mark();
             limiters.replace(limiterKey, limiter, newLimiter());
             return acquireLimiterInternal(limiterKey, attemptsSoFar + 1);
         }
