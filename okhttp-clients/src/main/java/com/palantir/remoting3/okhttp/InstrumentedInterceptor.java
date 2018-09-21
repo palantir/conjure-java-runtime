@@ -34,11 +34,11 @@ final class InstrumentedInterceptor implements Interceptor {
     static final String CLIENT_RESPONSE_METRIC_NAME = "client.response";
     static final String SERVICE_NAME_TAG = "service-name";
 
-    private final HostMetricsRegistry hostMetrics;
+    private final HostEventsSink hostMetrics;
     private final String serviceName;
     private final Timer responseTimer;
 
-    InstrumentedInterceptor(TaggedMetricRegistry registry, HostMetricsRegistry hostMetrics, String serviceName) {
+    InstrumentedInterceptor(TaggedMetricRegistry registry, HostEventsSink hostMetrics, String serviceName) {
         this.hostMetrics = hostMetrics;
         this.serviceName = serviceName;
         this.responseTimer = registry.timer(name());
@@ -68,7 +68,7 @@ final class InstrumentedInterceptor implements Interceptor {
     }
 
     static InstrumentedInterceptor create(
-            TaggedMetricRegistry registry, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
+            TaggedMetricRegistry registry, HostEventsSink hostMetrics, Class<?> serviceClass) {
         return new InstrumentedInterceptor(registry, hostMetrics, serviceClass.getSimpleName());
     }
 

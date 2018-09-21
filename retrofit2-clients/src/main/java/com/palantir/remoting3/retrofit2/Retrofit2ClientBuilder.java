@@ -22,7 +22,7 @@ import com.palantir.remoting3.clients.ClientConfiguration;
 import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.ext.jackson.ObjectMappers;
-import com.palantir.remoting3.okhttp.HostMetricsRegistry;
+import com.palantir.remoting3.okhttp.HostEventsSink;
 import com.palantir.remoting3.okhttp.OkHttpClients;
 import java.util.Optional;
 import retrofit2.Retrofit;
@@ -34,7 +34,7 @@ public final class Retrofit2ClientBuilder {
 
     private final ClientConfiguration config;
 
-    private HostMetricsRegistry hostMetricsRegistry;
+    private HostEventsSink hostEventsSink;
 
     public Retrofit2ClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Cannot construct retrofit client with empty URI list");
@@ -44,8 +44,8 @@ public final class Retrofit2ClientBuilder {
     /**
      * Set the host metrics registry to use when constructing the OkHttp client.
      */
-    public Retrofit2ClientBuilder hostMetricsRegistry(HostMetricsRegistry newHostMetricsRegistry) {
-        hostMetricsRegistry = newHostMetricsRegistry;
+    public Retrofit2ClientBuilder hostMetricsRegistry(HostEventsSink newHostEventsSink) {
+        hostEventsSink = newHostEventsSink;
         return this;
     }
 
@@ -58,8 +58,8 @@ public final class Retrofit2ClientBuilder {
     }
 
     public <T> T build(Class<T> serviceClass, UserAgent userAgent) {
-        okhttp3.OkHttpClient client = Optional.ofNullable(hostMetricsRegistry)
-                .map(hostMetrics -> OkHttpClients.create(config, userAgent, hostMetrics, serviceClass))
+        okhttp3.OkHttpClient client = Optional.ofNullable(hostEventsSink)
+                .map(hostEvents -> OkHttpClients.create(config, userAgent, hostEvents, serviceClass))
                 .orElseGet(() -> OkHttpClients.create(config, userAgent, serviceClass));
 
         Retrofit retrofit = new Retrofit.Builder()

@@ -118,7 +118,7 @@ public final class OkHttpClients {
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
     public static OkHttpClient create(
-            ClientConfiguration config, UserAgent userAgent, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
+            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostMetrics, Class<?> serviceClass) {
         return createInternal(config, userAgent, hostMetrics, serviceClass, true /* randomize URLs */);
     }
 
@@ -126,7 +126,7 @@ public final class OkHttpClients {
      * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
      * ClientConfiguration#uris URIs} are initialized in random order.
      *
-     * @deprecated Use {@link #create(ClientConfiguration, UserAgent, HostMetricsRegistry, Class)}
+     * @deprecated Use {@link #create(ClientConfiguration, UserAgent, HostEventsSink, Class)}
      */
     @Deprecated
     public static OkHttpClient create(ClientConfiguration config, UserAgent userAgent, Class<?> serviceClass) {
@@ -146,7 +146,7 @@ public final class OkHttpClients {
     /**
      * Return the per service and host metrics for all clients created by {@link OkHttpClients}.
      *
-     * @deprecated Pass in a {@link HostMetricsRegistry} when creating a client.
+     * @deprecated Pass in a {@link HostEventsSink} when creating a client.
      */
     @Deprecated
     public static Collection<HostMetrics> hostMetrics() {
@@ -155,14 +155,14 @@ public final class OkHttpClients {
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
-            ClientConfiguration config, UserAgent userAgent, HostMetricsRegistry hostMetrics, Class<?> serviceClass) {
+            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostMetrics, Class<?> serviceClass) {
         return createInternal(config, userAgent, hostMetrics, serviceClass, false);
     }
 
     private static RemotingOkHttpClient createInternal(
             ClientConfiguration config,
             UserAgent userAgent,
-            HostMetricsRegistry hostMetrics,
+            HostEventsSink hostMetrics,
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
         OkHttpClient.Builder client = new OkHttpClient.Builder();
