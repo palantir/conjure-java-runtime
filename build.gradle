@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        mavenLocal()
         jcenter()
         maven { url "http://palantir.bintray.com/releases" }
     }
@@ -12,6 +13,7 @@ buildscript {
         classpath 'com.netflix.nebula:nebula-publishing-plugin:5.1.5'
         classpath 'com.palantir.baseline:gradle-baseline-java:0.17.1'
         classpath 'com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.3.0'
+        classpath 'com.palantir.gradle.lockfiles:gradle-lock-files:0.3.0-8-gb435117.dirty'
     }
 }
 
@@ -23,6 +25,8 @@ plugins {
 apply plugin: 'com.palantir.baseline-config' // provides baselineUpdateConfig task
 apply plugin: 'com.palantir.baseline-idea'
 apply plugin: 'com.palantir.circle.style'
+
+apply plugin: 'com.palantir.lock-files'
 
 repositories {
     maven { url  "http://palantir.bintray.com/releases" }
