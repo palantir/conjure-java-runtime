@@ -22,7 +22,7 @@ import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.ext.refresh.Refreshable;
 import com.palantir.remoting3.ext.refresh.RefreshableProxyInvocationHandler;
-import com.palantir.remoting3.okhttp.HostMetricsRegistry;
+import com.palantir.remoting3.okhttp.HostEventsSink;
 
 /**
  * Static factory methods for producing creating Retrofit2 HTTP proxies.
@@ -38,10 +38,10 @@ public final class Retrofit2Client {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsRegistry hostMetricsRegistry,
+            HostEventsSink hostEventsSink,
             ClientConfiguration config) {
         return new Retrofit2ClientBuilder(config)
-                .hostMetricsRegistry(hostMetricsRegistry)
+                .hostMetricsRegistry(hostEventsSink)
                 .build(serviceClass, userAgent);
     }
 
@@ -71,11 +71,11 @@ public final class Retrofit2Client {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsRegistry hostMetricsRegistry,
+            HostEventsSink hostEventsSink,
             Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 config,
-                serviceConfiguration -> create(serviceClass, userAgent, hostMetricsRegistry, serviceConfiguration)));
+                serviceConfiguration -> create(serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
     }
 
     /**

@@ -26,7 +26,7 @@ import com.palantir.remoting3.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
 import com.palantir.remoting3.jaxrs.feignimpl.PathTemplateHeaderRewriter;
 import com.palantir.remoting3.jaxrs.feignimpl.SlashEncodingContract;
-import com.palantir.remoting3.okhttp.HostMetricsRegistry;
+import com.palantir.remoting3.okhttp.HostEventsSink;
 import com.palantir.remoting3.okhttp.OkHttpClients;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
@@ -64,7 +64,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
      */
     private final String primaryUri;
 
-    private HostMetricsRegistry hostMetricsRegistry;
+    private HostEventsSink hostEventsSink;
 
     AbstractFeignJaxRsClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Must provide at least one service URI");
@@ -79,8 +79,8 @@ abstract class AbstractFeignJaxRsClientBuilder {
     /**
      * Set the host metrics registry to use when constructing the OkHttp client.
      */
-    public final AbstractFeignJaxRsClientBuilder hostMetricsRegistry(HostMetricsRegistry newHostMetricsRegistry) {
-        hostMetricsRegistry = newHostMetricsRegistry;
+    public final AbstractFeignJaxRsClientBuilder hostMetricsRegistry(HostEventsSink newHostEventsSink) {
+        hostEventsSink = newHostEventsSink;
         return this;
     }
 
@@ -95,8 +95,8 @@ abstract class AbstractFeignJaxRsClientBuilder {
     public final <T> T build(Class<T> serviceClass, UserAgent userAgent) {
         ObjectMapper objectMapper = getObjectMapper();
         ObjectMapper cborObjectMapper = getCborObjectMapper();
-        okhttp3.OkHttpClient okHttpClient = Optional.ofNullable(hostMetricsRegistry)
-                .map(hostMetrics -> OkHttpClients.create(config, userAgent, hostMetrics, serviceClass))
+        okhttp3.OkHttpClient okHttpClient = Optional.ofNullable(hostEventsSink)
+                .map(hostEvents -> OkHttpClients.create(config, userAgent, hostEvents, serviceClass))
                 .orElseGet(() -> OkHttpClients.create(config, userAgent, serviceClass));
 
         return Feign.builder()

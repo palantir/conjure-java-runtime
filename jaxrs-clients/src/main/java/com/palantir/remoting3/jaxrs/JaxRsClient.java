@@ -22,7 +22,7 @@ import com.palantir.remoting3.clients.UserAgent;
 import com.palantir.remoting3.clients.UserAgents;
 import com.palantir.remoting3.ext.refresh.Refreshable;
 import com.palantir.remoting3.ext.refresh.RefreshableProxyInvocationHandler;
-import com.palantir.remoting3.okhttp.HostMetricsRegistry;
+import com.palantir.remoting3.okhttp.HostEventsSink;
 
 /**
  * Static factory methods for producing creating JAX-RS HTTP proxies.
@@ -38,11 +38,11 @@ public final class JaxRsClient {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsRegistry hostMetricsRegistry,
+            HostEventsSink hostEventsSink,
             ClientConfiguration config) {
         // TODO(rfink): Add http-remoting agent as informational
         return new FeignJaxRsClientBuilder(config)
-                .hostMetricsRegistry(hostMetricsRegistry)
+                .hostMetricsRegistry(hostEventsSink)
                 .build(serviceClass, userAgent);
     }
 
@@ -73,11 +73,11 @@ public final class JaxRsClient {
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
-            HostMetricsRegistry hostMetricsRegistry,
+            HostEventsSink hostEventsSink,
             Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
                 config,
-                serviceConfiguration -> create(serviceClass, userAgent, hostMetricsRegistry, serviceConfiguration)));
+                serviceConfiguration -> create(serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
     }
 
     /**
