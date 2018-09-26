@@ -40,10 +40,14 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
         int httpStatus = exception.getErrorType().httpErrorCode();
         if (httpStatus / 100 == 4 /* client error */) {
             log.info("Error handling request",
-                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), exception);
+                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
+                    SafeArg.of("errorName", exception.getErrorType().name()),
+                    exception);
         } else {
             log.error("Error handling request",
-                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), exception);
+                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
+                    SafeArg.of("errorName", exception.getErrorType().name()),
+                    exception);
         }
 
         ResponseBuilder builder = Response.status(httpStatus);

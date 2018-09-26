@@ -53,9 +53,15 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
         ErrorType errorType = getErrorType(exception);
 
         if (errorType.httpErrorCode() / 100 == 4 /* client error */) {
-            log.info("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
+            log.info("Error handling request",
+                    SafeArg.of("errorInstanceId", errorInstanceId),
+                    SafeArg.of("errorName", errorType.name()),
+                    exception);
         } else {
-            log.error("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
+            log.error("Error handling request",
+                    SafeArg.of("errorInstanceId", errorInstanceId),
+                    SafeArg.of("errorName", errorType.name()),
+                    exception);
         }
 
         return createResponse(errorType, errorInstanceId);
@@ -77,7 +83,9 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
                     .type(MediaType.APPLICATION_JSON);
         } catch (RuntimeException e) {
             log.warn("Unable to translate exception to json",
-                    SafeArg.of("errorInstanceId", errorInstanceId), e);
+                    SafeArg.of("errorInstanceId", errorInstanceId),
+                    SafeArg.of("errorName", errorName),
+                    e);
             builder = Response.status(httpErrorCode);
             builder.type(MediaType.TEXT_PLAIN);
             builder.entity("Unable to translate exception to json. Refer to the server logs with this errorInstanceId: "
