@@ -10,5 +10,5 @@ dependencies {
     testCompile "org.assertj:assertj-core"
     testCompile "org.mockito:mockito-core"
 
-    processor "org.immutables:value"
+    annotationProcessor "org.immutables:value"
 }
