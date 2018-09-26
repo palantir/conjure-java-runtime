@@ -20,7 +20,9 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.netflix.concurrency.limits.Limiter;
+import com.netflix.concurrency.limits.limit.Gradient2Limit;
 import com.netflix.concurrency.limits.limit.VegasLimit;
+import com.netflix.concurrency.limits.limiter.BlockingLimiter;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
@@ -119,7 +121,7 @@ class ConcurrencyLimiters {
         Limiter<Void> limiter = SimpleLimiter.newBuilder()
                 .limit(new ConjureWindowedLimit(VegasLimit.newDefault()))
                 .build();
-        return ConjureBlockingLimiter.wrap(limiter, timeout);
+        return BlockingLimiter.wrap(limiter, timeout);
     }
 
     private static String limiterKey(Request request) {
