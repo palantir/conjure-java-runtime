@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.client.retrofit2;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import java.time.LocalDate;
 import java.util.concurrent.CompletableFuture;
 import retrofit2.Call;
@@ -58,6 +59,9 @@ public interface TestService {
     @Headers("Content-Type: application/cbor")
     Call<Void> makeCborRequest(@Body LocalDate localDate);
 
-    @POST("makeFutureRequest")
-    CompletableFuture<String> makeFutureRequest();
+    @POST("makeCompletableFutureRequest")
+    CompletableFuture<String> makeCompletableFutureRequest();
+
+    @POST("makeListenableFutureRequest")
+    ListenableFuture<String> makeListenableFutureRequest();
 }
