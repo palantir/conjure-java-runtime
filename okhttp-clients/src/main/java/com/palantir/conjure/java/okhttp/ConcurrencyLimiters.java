@@ -24,6 +24,7 @@ import com.netflix.concurrency.limits.limit.VegasLimit;
 import com.netflix.concurrency.limits.limiter.BlockingLimiter;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.tracing.CloseableTracer;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -69,9 +70,10 @@ class ConcurrencyLimiters {
      * Blocks until the request should be allowed to proceed.
      * Caller must notify the listener to release the permit.
      */
+    @SuppressWarnings("unused")
     Limiter.Listener acquireLimiter(Request request) {
         long start = System.nanoTime();
-        try {
+        try (CloseableTracer unused = CloseableTracer.startSpan("acquireLimiter")) {
             return acquireLimiterInternal(limiterKey(request), 0);
         } finally {
             long end = System.nanoTime();
