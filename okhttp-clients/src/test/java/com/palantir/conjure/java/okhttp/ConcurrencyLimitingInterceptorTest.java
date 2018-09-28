@@ -58,7 +58,7 @@ public final class ConcurrencyLimitingInterceptorTest {
     private ConcurrencyLimitingInterceptor interceptor;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         interceptor = new ConcurrencyLimitingInterceptor(limiters);
         when(chain.request()).thenReturn(request);
         when(limiters.acquireLimiter(request)).thenReturn(listener);

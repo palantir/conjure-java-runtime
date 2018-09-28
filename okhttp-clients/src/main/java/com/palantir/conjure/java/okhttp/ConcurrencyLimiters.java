@@ -21,11 +21,14 @@ import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.netflix.concurrency.limits.Limiter;
 import com.netflix.concurrency.limits.limit.VegasLimit;
+import com.netflix.concurrency.limits.limiter.BlockingLimiter;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.tracing.CloseableTracer;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,9 +71,10 @@ class ConcurrencyLimiters {
      * Blocks until the request should be allowed to proceed.
      * Caller must notify the listener to release the permit.
      */
-    Limiter.Listener acquireLimiter(Request request) {
+    @SuppressWarnings("unused")
+    Limiter.Listener acquireLimiter(Request request) throws IOException {
         long start = System.nanoTime();
-        try {
+        try (CloseableTracer unused = CloseableTracer.startSpan("acquireLimiter")) {
             return acquireLimiterInternal(limiterKey(request), 0);
         } finally {
             long end = System.nanoTime();
@@ -85,7 +89,7 @@ class ConcurrencyLimiters {
     }
 
     @VisibleForTesting
-    Limiter.Listener acquireLimiterInternal(String limiterKey, int attemptsSoFar) {
+    Limiter.Listener acquireLimiterInternal(String limiterKey, int attemptsSoFar) throws IOException {
         Limiter<Void> limiter = limiters.computeIfAbsent(limiterKey, key -> newLimiter());
         Optional<Limiter.Listener> listener = limiter.acquire(NO_CONTEXT);
 
@@ -99,8 +103,9 @@ class ConcurrencyLimiters {
 
             return listener.get();
         } else {
+            // it returns empty if we've timed out, or we've been interrupted
             if (Thread.currentThread().isInterrupted()) {
-                throw new RuntimeException("Thread was interrupted");
+                throw new IOException("Thread was interrupted");
             }
             log.warn("Timed out waiting to get permits for concurrency. In most cases this would indicate "
                             + "some kind of deadlock. We expect that either this is caused by not closing response "
@@ -119,7 +124,7 @@ class ConcurrencyLimiters {
         Limiter<Void> limiter = SimpleLimiter.newBuilder()
                 .limit(new ConjureWindowedLimit(VegasLimit.newDefault()))
                 .build();
-        return ConjureBlockingLimiter.wrap(limiter, timeout);
+        return BlockingLimiter.wrap(limiter, timeout);
     }
 
     private static String limiterKey(Request request) {
