@@ -22,14 +22,22 @@
  * - Removed the ResponseCallAdapter
  * - Made the BodyCallAdapter create RemoteExceptions.
  * - Made the BodyCallAdapter tell the AsyncCallTag that this is an async call.
+ * - Added support for Listenable futures in a similar pattern.
  */
 package com.palantir.conjure.java.client.retrofit2;
 
+import com.google.common.util.concurrent.AbstractFuture;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.palantir.conjure.java.okhttp.IoRemoteException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Callback;
@@ -43,27 +51,87 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
 
     @Override
     public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
-        if (getRawType(returnType) != CompletableFuture.class) {
+        Type outerType = getRawType(returnType);
+        if (outerType != CompletableFuture.class && outerType != ListenableFuture.class) {
             return null;
         }
         if (!(returnType instanceof ParameterizedType)) {
-            throw new IllegalStateException("CompletableFuture return type must be parameterized"
-                    + " as CompletableFuture<Foo> or CompletableFuture<? extends Foo>");
+            throw new IllegalStateException("CompletableFuture/ListenableFuture return type must be parameterized"
+                    + " as <Foo> or <? extends Foo>");
         }
         Type innerType = getParameterUpperBound(0, (ParameterizedType) returnType);
 
         if (getRawType(innerType) != Response.class) {
             // Generic type is not Response<T>. Use it for body-only adapter.
-            return new BodyCallAdapter(innerType);
+            return getCallAdapter(outerType, innerType);
         }
 
         return null;
     }
 
-    private static class BodyCallAdapter<R> implements CallAdapter<R, CompletableFuture<R>> {
+    private static <R> CallAdapter<R, ?> getCallAdapter(Type outerType, Type innerType) {
+        if (outerType == ListenableFuture.class) {
+            return new ListenableFutureBodyCallAdapter<>(innerType);
+        } else if (outerType == CompletableFuture.class) {
+            return new CompletableFutureBodyCallAdapter<>(innerType);
+        } else {
+            return null;
+        }
+    }
+
+    private static final class ListenableFutureCallback<R> extends AbstractFuture<R> implements Callback<R> {
+        private final Call<R> delegate;
+
+        private ListenableFutureCallback(Call<R> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            delegate.cancel();
+            return super.cancel(mayInterruptIfRunning);
+        }
+
+        @Override
+        public void onResponse(Call<R> call, Response<R> response) {
+            set(response.body());
+        }
+
+        @Override
+        public void onFailure(Call<R> call, Throwable throwable) {
+            // TODO(rfink): Would be good to not leak okhttp internals here
+            if (throwable instanceof IoRemoteException) {
+                setException(((IoRemoteException) throwable).getWrappedException());
+            } else {
+                setException(throwable);
+            }
+        }
+    }
+
+    private static final class ListenableFutureBodyCallAdapter<R> implements CallAdapter<R, ListenableFuture<R>> {
         private final Type responseType;
 
-        BodyCallAdapter(Type responseType) {
+        ListenableFutureBodyCallAdapter(Type responseType) {
+            this.responseType = responseType;
+        }
+
+        @Override
+        public Type responseType() {
+            return responseType;
+        }
+
+        @Override
+        public ListenableFuture<R> adapt(final Call<R> call) {
+            ListenableFutureCallback<R> callback = new ListenableFutureCallback<>(call);
+            call.enqueue(callback);
+            return callback;
+        }
+    }
+
+    private static final class CompletableFutureBodyCallAdapter<R> implements CallAdapter<R, CompletableFuture<R>> {
+        private final Type responseType;
+
+        CompletableFutureBodyCallAdapter(Type responseType) {
             this.responseType = responseType;
         }
 
