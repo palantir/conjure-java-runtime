@@ -233,7 +233,8 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void future_should_throw_RemoteException_for_server_serializable_errors_completable() throws Exception {
-        future_should_throw_RemoteException_for_server_serializable_errors(() -> service.makeCompletableFutureRequest());
+        future_should_throw_RemoteException_for_server_serializable_errors(
+                () -> service.makeCompletableFutureRequest());
     }
 
     private void future_should_throw_RemoteException_for_server_serializable_errors(
