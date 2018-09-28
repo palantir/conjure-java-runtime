@@ -19,6 +19,7 @@ package com.palantir.conjure.java.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public final class ConcurrencyLimitersTest {
             new DefaultTaggedMetricRegistry(), TIMEOUT, ConcurrencyLimitersTest.class);
 
     @Test
-    public void testTimeout() {
+    public void testTimeout() throws IOException {
         Instant start = Instant.now();
         Thread exhauster = exhaust();
         limiters.acquireLimiterInternal(KEY, 0);
@@ -42,7 +43,11 @@ public final class ConcurrencyLimitersTest {
     private Thread exhaust() {
         Thread thread = new Thread(() -> {
             while (true) {
-                limiters.acquireLimiterInternal(KEY, 0);
+                try {
+                    limiters.acquireLimiterInternal(KEY, 0);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
         thread.start();

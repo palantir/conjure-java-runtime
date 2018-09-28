@@ -28,6 +28,7 @@ import com.palantir.tracing.CloseableTracer;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,7 +72,7 @@ class ConcurrencyLimiters {
      * Caller must notify the listener to release the permit.
      */
     @SuppressWarnings("unused")
-    Limiter.Listener acquireLimiter(Request request) {
+    Limiter.Listener acquireLimiter(Request request) throws IOException {
         long start = System.nanoTime();
         try (CloseableTracer unused = CloseableTracer.startSpan("acquireLimiter")) {
             return acquireLimiterInternal(limiterKey(request), 0);
@@ -88,7 +89,7 @@ class ConcurrencyLimiters {
     }
 
     @VisibleForTesting
-    Limiter.Listener acquireLimiterInternal(String limiterKey, int attemptsSoFar) {
+    Limiter.Listener acquireLimiterInternal(String limiterKey, int attemptsSoFar) throws IOException {
         Limiter<Void> limiter = limiters.computeIfAbsent(limiterKey, key -> newLimiter());
         Optional<Limiter.Listener> listener = limiter.acquire(NO_CONTEXT);
 
@@ -102,8 +103,9 @@ class ConcurrencyLimiters {
 
             return listener.get();
         } else {
+            // it returns empty if we've timed out, or we've been interrupted
             if (Thread.currentThread().isInterrupted()) {
-                throw new RuntimeException("Thread was interrupted");
+                throw new IOException("Thread was interrupted");
             }
             log.warn("Timed out waiting to get permits for concurrency. In most cases this would indicate "
                             + "some kind of deadlock. We expect that either this is caused by not closing response "
