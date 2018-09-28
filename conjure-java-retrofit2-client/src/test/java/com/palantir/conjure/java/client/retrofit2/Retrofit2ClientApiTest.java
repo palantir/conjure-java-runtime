@@ -155,12 +155,12 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void makeFutureRequest_completable() {
-        makeFutureRequest(service::makeCompletableFutureRequest);
+        makeFutureRequest(() -> service.makeCompletableFutureRequest());
     }
 
     @Test
     public void makeFutureRequest_listenable() {
-        makeFutureRequest(service::makeListenableFutureRequest);
+        makeFutureRequest(() -> service.makeListenableFutureRequest());
     }
 
     private void makeFutureRequest(Supplier<Future<String>> futureSupplier) {
@@ -172,12 +172,12 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void makeFutureRequestError_completable() throws JsonProcessingException {
-        makeFutureRequestError(service::makeCompletableFutureRequest);
+        makeFutureRequestError(() -> service.makeCompletableFutureRequest());
     }
 
     @Test
     public void makeFutureRequestError_listenable() throws JsonProcessingException {
-        makeFutureRequestError(service::makeListenableFutureRequest);
+        makeFutureRequestError(() -> service.makeListenableFutureRequest());
     }
 
     private void makeFutureRequestError(Supplier<Future<String>> futureSupplier) throws JsonProcessingException {
@@ -203,12 +203,12 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void connectionFailureWithFuture_completable() {
-        connectionFailureWithFuture(service::makeCompletableFutureRequest);
+        connectionFailureWithFuture(() -> service.makeCompletableFutureRequest());
     }
 
     @Test
     public void connectionFailureWithFuture_listenable() {
-        connectionFailureWithFuture(service::makeListenableFutureRequest);
+        connectionFailureWithFuture(() -> service.makeListenableFutureRequest());
     }
 
     private void connectionFailureWithFuture(Supplier<Future<String>> futureSupplier) {
@@ -228,12 +228,12 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void future_should_throw_RemoteException_for_server_serializable_errors_listenable() throws Exception {
-        future_should_throw_RemoteException_for_server_serializable_errors(service::makeListenableFutureRequest);
+        future_should_throw_RemoteException_for_server_serializable_errors(() -> service.makeListenableFutureRequest());
     }
 
     @Test
     public void future_should_throw_RemoteException_for_server_serializable_errors_completable() throws Exception {
-        future_should_throw_RemoteException_for_server_serializable_errors(service::makeCompletableFutureRequest);
+        future_should_throw_RemoteException_for_server_serializable_errors(() -> service.makeCompletableFutureRequest());
     }
 
     private void future_should_throw_RemoteException_for_server_serializable_errors(
@@ -256,12 +256,12 @@ public final class Retrofit2ClientApiTest extends TestBase {
     }
     @Test
     public void future_should_throw_normal_IoException_for_client_side_errors_completable() {
-        future_should_throw_normal_IoException_for_client_side_errors(service::makeCompletableFutureRequest);
+        future_should_throw_normal_IoException_for_client_side_errors(() -> service.makeCompletableFutureRequest());
     }
 
     @Test
     public void future_should_throw_normal_IoException_for_client_side_errors_listenable() {
-        future_should_throw_normal_IoException_for_client_side_errors(service::makeListenableFutureRequest);
+        future_should_throw_normal_IoException_for_client_side_errors(() -> service.makeListenableFutureRequest());
     }
 
     private void future_should_throw_normal_IoException_for_client_side_errors(
