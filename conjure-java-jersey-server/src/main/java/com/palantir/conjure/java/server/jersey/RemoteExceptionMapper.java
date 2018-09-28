@@ -70,7 +70,9 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
             builder.entity(error);
         } catch (RuntimeException e) {
             log.warn("Unable to translate exception to json",
-                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()), e);
+                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
+                    SafeArg.of("errorName", exception.getError().errorName()),
+                    e);
             // simply write out the exception message
             builder.type(MediaType.TEXT_PLAIN);
             builder.entity("Unable to translate exception to json. Refer to the server logs with this errorInstanceId: "
