@@ -51,7 +51,7 @@ public final class TracerTest extends TestBase {
     public void testClientIsInstrumentedWithTracer() throws InterruptedException, IOException {
         OpenSpan parentTrace = Tracer.startSpan("");
 
-        Tracer.subscribe(TracerTest.class.getName(), (span) -> {
+        Tracer.subscribe(TracerTest.class.getName(), span -> {
             assertThat(span.getOperation(), either(is("acquireLimiter")).or(is("GET /{param}")));
         });
 
