@@ -85,6 +85,7 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
+                "com.google.guava:guava",
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
                 "com.palantir.conjure.java.runtime:refresh-utils"
@@ -93,11 +94,12 @@
         "com.google.errorprone:error_prone_annotations": {
             "locked": "2.1.3",
             "transitive": [
+                "com.google.guava:guava",
                 "com.palantir.safe-logging:preconditions"
             ]
         },
         "com.google.guava:guava": {
-            "locked": "20.0",
+            "locked": "23.6.1-jre",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
@@ -105,6 +107,12 @@
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.conjure.java.runtime:refresh-utils",
                 "com.palantir.tracing:tracing"
+            ]
+        },
+        "com.google.j2objc:j2objc-annotations": {
+            "locked": "1.1",
+            "transitive": [
+                "com.google.guava:guava"
             ]
         },
         "com.netflix.concurrency-limits:concurrency-limits-core": {
@@ -290,6 +298,18 @@
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client"
+            ]
+        },
+        "org.checkerframework:checker-compat-qual": {
+            "locked": "2.0.0",
+            "transitive": [
+                "com.google.guava:guava"
+            ]
+        },
+        "org.codehaus.mojo:animal-sniffer-annotations": {
+            "locked": "1.14",
+            "transitive": [
+                "com.google.guava:guava"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
@@ -410,6 +430,7 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
+                "com.google.guava:guava",
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
                 "com.palantir.conjure.java.runtime:refresh-utils"
@@ -418,11 +439,12 @@
         "com.google.errorprone:error_prone_annotations": {
             "locked": "2.1.3",
             "transitive": [
+                "com.google.guava:guava",
                 "com.palantir.safe-logging:preconditions"
             ]
         },
         "com.google.guava:guava": {
-            "locked": "20.0",
+            "locked": "23.6.1-jre",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
@@ -430,6 +452,12 @@
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.conjure.java.runtime:refresh-utils",
                 "com.palantir.tracing:tracing"
+            ]
+        },
+        "com.google.j2objc:j2objc-annotations": {
+            "locked": "1.1",
+            "transitive": [
+                "com.google.guava:guava"
             ]
         },
         "com.netflix.concurrency-limits:concurrency-limits-core": {
@@ -615,6 +643,18 @@
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client"
+            ]
+        },
+        "org.checkerframework:checker-compat-qual": {
+            "locked": "2.0.0",
+            "transitive": [
+                "com.google.guava:guava"
+            ]
+        },
+        "org.codehaus.mojo:animal-sniffer-annotations": {
+            "locked": "1.14",
+            "transitive": [
+                "com.google.guava:guava"
             ]
         },
         "org.jvnet:animal-sniffer-annotation": {
