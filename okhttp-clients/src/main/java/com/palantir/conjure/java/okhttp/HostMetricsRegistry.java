@@ -56,7 +56,8 @@ public final class HostMetricsRegistry implements HostEventsSink {
         } catch (Exception e) {
             log.warn("Unable to record metrics for host and port",
                     UnsafeArg.of("hostname", hostname),
-                    SafeArg.of("port", port));
+                    SafeArg.of("port", port),
+                    e);
         }
     }
 
@@ -67,7 +68,8 @@ public final class HostMetricsRegistry implements HostEventsSink {
         } catch (Exception e) {
             log.warn("Unable to record IO exception for host and port",
                     UnsafeArg.of("hostname", hostname),
-                    SafeArg.of("port", port));
+                    SafeArg.of("port", port),
+                    e);
         }
     }
 
