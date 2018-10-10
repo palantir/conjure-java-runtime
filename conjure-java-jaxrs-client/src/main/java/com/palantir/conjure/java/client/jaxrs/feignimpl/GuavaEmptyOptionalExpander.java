@@ -16,21 +16,21 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import feign.Param.Expander;
 import java.util.Objects;
 
 /**
- * Expands Optional by using the empty string for {@link Optional#absent()} and the {@link Object#toString()} of
- * the value otherwise.
+ * Expands Optional by using the empty string for {@link com.google.common.base.Optional#absent()} and
+ * the {@link Object#toString()} of the value otherwise.
  */
 public final class GuavaEmptyOptionalExpander implements Expander {
 
     @Override
     public String expand(Object value) {
-        Preconditions.checkArgument(value instanceof Optional, "Value must be an Optional. Was: %s", value.getClass());
-        Optional<?> optional = (Optional<?>) value;
+        Preconditions.checkArgument(value instanceof com.google.common.base.Optional,
+                "Value must be an Optional. Was: %s", value.getClass());
+        com.google.common.base.Optional<?> optional = (com.google.common.base.Optional<?>) value;
         return optional.isPresent() ? Objects.toString(optional.get()) : "";
     }
 
