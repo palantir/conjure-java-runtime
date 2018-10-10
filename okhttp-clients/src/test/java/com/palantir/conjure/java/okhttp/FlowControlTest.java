@@ -28,6 +28,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.RateLimiter;
 import com.netflix.concurrency.limits.Limiter;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -59,7 +60,9 @@ public final class FlowControlTest {
     private static final int REQUESTS_PER_THREAD = 5;
     private static ListeningExecutorService executorService;
 
-    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(new DefaultTaggedMetricRegistry());
+    private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(
+            new DefaultTaggedMetricRegistry(),
+            FlowControlTest.class);
 
     @BeforeClass
     public static void beforeClass() {
@@ -134,30 +137,34 @@ public final class FlowControlTest {
 
         @Override
         public void run() {
-            for (int i = 0; i < REQUESTS_PER_THREAD;) {
-                Limiter.Listener listener = limiters.acquireLimiter("");
-                boolean gotRateLimited = !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS);
-                if (!gotRateLimited) {
-                    meter.mark();
-                    sleep(successDuration.toMillis());
-                    listener.onSuccess();
-                    avgRetries.update(numRetries);
-                    numRetries = 0;
-                    backoff = null;
-                    i++;
-                } else {
-                    initializeBackoff();
-                    Optional<Duration> sleep = backoff.nextBackoff();
-                    numRetries++;
-                    if (!sleep.isPresent()) {
-                        listener.onIgnore();
-                        throw new RuntimeException("Failed on request " + i);
+            try {
+                for (int i = 0; i < REQUESTS_PER_THREAD;) {
+                    Limiter.Listener listener = limiters.acquireLimiterInternal("", 0);
+                    boolean gotRateLimited = !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS);
+                    if (!gotRateLimited) {
+                        meter.mark();
+                        sleep(successDuration.toMillis());
+                        listener.onSuccess();
+                        avgRetries.update(numRetries);
+                        numRetries = 0;
+                        backoff = null;
+                        i++;
                     } else {
-                        sleep(1);
-                        listener.onDropped();
-                        sleep(sleep.get().toMillis());
+                        initializeBackoff();
+                        Optional<Duration> sleep = backoff.nextBackoff();
+                        numRetries++;
+                        if (!sleep.isPresent()) {
+                            listener.onIgnore();
+                            throw new RuntimeException("Failed on request " + i);
+                        } else {
+                            sleep(1);
+                            listener.onDropped();
+                            sleep(sleep.get().toMillis());
+                        }
                     }
                 }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         }
 

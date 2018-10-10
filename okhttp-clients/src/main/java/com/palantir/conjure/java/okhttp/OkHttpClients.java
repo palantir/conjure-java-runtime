@@ -156,7 +156,7 @@ public final class OkHttpClients {
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
 
         // Intercept calls to augment request meta data
-        client.addInterceptor(new ConcurrencyLimitingInterceptor(registry));
+        client.addInterceptor(new ConcurrencyLimitingInterceptor(registry, serviceClass));
         client.addInterceptor(InstrumentedInterceptor.create(registry, hostEventsSink, serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
         client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));

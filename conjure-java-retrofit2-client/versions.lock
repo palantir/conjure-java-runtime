@@ -93,25 +93,25 @@
             ]
         },
         "com.netflix.concurrency-limits:concurrency-limits-core": {
-            "locked": "0.1.1",
+            "locked": "0.1.3",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc6",
+            "locked": "2.0.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0-rc6",
+            "locked": "2.0.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:client-config"
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc6",
+            "locked": "2.0.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"
@@ -144,6 +144,7 @@
         "com.palantir.safe-logging:preconditions": {
             "locked": "1.3.0",
             "transitive": [
+                "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
@@ -337,25 +338,25 @@
             ]
         },
         "com.netflix.concurrency-limits:concurrency-limits-core": {
-            "locked": "0.1.1",
+            "locked": "0.1.3",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0-rc6",
+            "locked": "2.0.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0-rc6",
+            "locked": "2.0.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:client-config"
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0-rc6",
+            "locked": "2.0.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"
@@ -388,6 +389,7 @@
         "com.palantir.safe-logging:preconditions": {
             "locked": "1.3.0",
             "transitive": [
+                "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]

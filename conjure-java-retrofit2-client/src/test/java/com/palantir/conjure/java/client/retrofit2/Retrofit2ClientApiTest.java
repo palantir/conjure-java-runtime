@@ -21,10 +21,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
-import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
@@ -36,10 +37,11 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import javax.ws.rs.core.MediaType;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -152,15 +154,33 @@ public final class Retrofit2ClientApiTest extends TestBase {
     }
 
     @Test
-    public void makeFutureRequest() {
-        String value = "value";
-        server.enqueue(new MockResponse().setBody("\"" + value + "\""));
-        CompletableFuture<String> future = service.makeFutureRequest();
-        assertThat(future.join()).isEqualTo("value");
+    public void makeFutureRequest_completable() {
+        makeFutureRequest(() -> service.makeCompletableFutureRequest());
     }
 
     @Test
-    public void makeFutureRequestError() throws JsonProcessingException {
+    public void makeFutureRequest_listenable() {
+        makeFutureRequest(() -> service.makeListenableFutureRequest());
+    }
+
+    private void makeFutureRequest(Supplier<Future<String>> futureSupplier) {
+        String value = "value";
+        server.enqueue(new MockResponse().setBody("\"" + value + "\""));
+        Future<String> future = futureSupplier.get();
+        assertThat(Futures.getUnchecked(future)).isEqualTo("value");
+    }
+
+    @Test
+    public void makeFutureRequestError_completable() throws JsonProcessingException {
+        makeFutureRequestError(() -> service.makeCompletableFutureRequest());
+    }
+
+    @Test
+    public void makeFutureRequestError_listenable() throws JsonProcessingException {
+        makeFutureRequestError(() -> service.makeListenableFutureRequest());
+    }
+
+    private void makeFutureRequestError(Supplier<Future<String>> futureSupplier) throws JsonProcessingException {
         SerializableError error = SerializableError.builder()
                 .errorCode("errorCode")
                 .errorName("errorName")
@@ -171,19 +191,27 @@ public final class Retrofit2ClientApiTest extends TestBase {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(error)));
 
-        CompletableFuture<String> future = service.makeFutureRequest();
+        Future<String> future = futureSupplier.get();
 
         try {
-            future.join();
-            fail();
-        } catch (CompletionException e) {
+            Futures.getUnchecked(future);
+        } catch (UncheckedExecutionException e) {
             assertThat(e.getCause()).isInstanceOf(RemoteException.class);
             assertThat(((RemoteException) e.getCause()).getError()).isEqualTo(error);
         }
     }
 
     @Test
-    public void connectionFailureWithCompletableFuture() {
+    public void connectionFailureWithFuture_completable() {
+        connectionFailureWithFuture(() -> service.makeCompletableFutureRequest());
+    }
+
+    @Test
+    public void connectionFailureWithFuture_listenable() {
+        connectionFailureWithFuture(() -> service.makeListenableFutureRequest());
+    }
+
+    private void connectionFailureWithFuture(Supplier<Future<String>> futureSupplier) {
         service = Retrofit2Client.create(
                 TestService.class,
                 AGENT,
@@ -194,25 +222,68 @@ public final class Retrofit2ClientApiTest extends TestBase {
                         .connectTimeout(Duration.ofMillis(10))
                         .build());
 
-        assertThatExceptionOfType(CompletionException.class).isThrownBy(() -> service.makeFutureRequest().join());
+        assertThatExceptionOfType(UncheckedExecutionException.class)
+                .isThrownBy(() -> Futures.getUnchecked(futureSupplier.get()));
     }
 
     @Test
-    public void completableFuture_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
+    public void future_should_throw_RemoteException_for_server_serializable_errors_listenable() throws Exception {
+        future_should_throw_RemoteException_for_server_serializable_errors(() -> service.makeListenableFutureRequest());
+    }
+
+    @Test
+    public void future_should_throw_RemoteException_for_server_serializable_errors_completable() throws Exception {
+        future_should_throw_RemoteException_for_server_serializable_errors(
+                () -> service.makeCompletableFutureRequest());
+    }
+
+    private void future_should_throw_RemoteException_for_server_serializable_errors(
+            Supplier<Future<String>> futureSupplier) throws Exception {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
                 .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(ERROR)));
 
-        CompletableFuture<String> future = service.makeFutureRequest();
+        Future<String> future = futureSupplier.get();
 
         try {
-            future.join();
+            Futures.getUnchecked(future);
             failBecauseExceptionWasNotThrown(CompletionException.class);
-        } catch (CompletionException e) {
+        } catch (UncheckedExecutionException e) {
             assertThat(e.getCause()).isInstanceOf(RemoteException.class);
             RemoteException remoteException = (RemoteException) e.getCause();
             assertThat(remoteException.getError()).isEqualTo(ERROR);
+        }
+    }
+    @Test
+    public void future_should_throw_normal_IoException_for_client_side_errors_completable() {
+        future_should_throw_normal_IoException_for_client_side_errors(() -> service.makeCompletableFutureRequest());
+    }
+
+    @Test
+    public void future_should_throw_normal_IoException_for_client_side_errors_listenable() {
+        future_should_throw_normal_IoException_for_client_side_errors(() -> service.makeListenableFutureRequest());
+    }
+
+    private void future_should_throw_normal_IoException_for_client_side_errors(
+            Supplier<Future<String>> futureSupplier) {
+        service = Retrofit2Client.create(
+                TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration
+                        .builder()
+                        .from(createTestConfig("https://invalid.service.dev"))
+                        .connectTimeout(Duration.ofMillis(10))
+                        .build());
+
+        Future<String> future = futureSupplier.get();
+
+        try {
+            Futures.getUnchecked(future);
+        } catch (UncheckedExecutionException e) {
+            assertThat(e.getCause()).isInstanceOf(IOException.class);
+            assertThat(e.getCause().getMessage()).isEqualTo("Failed to complete the request due to an IOException");
         }
     }
 
@@ -257,28 +328,6 @@ public final class Retrofit2ClientApiTest extends TestBase {
             }
         });
         assertThat(assertionsPassed.await(1, TimeUnit.SECONDS)).as("Callback was executed").isTrue();
-    }
-
-    @Test
-    public void completableFuture_should_throw_normal_IoException_for_client_side_errors() {
-        service = Retrofit2Client.create(
-                TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
-                        .from(createTestConfig("https://invalid.service.dev"))
-                        .connectTimeout(Duration.ofMillis(10))
-                        .build());
-
-        CompletableFuture<String> completableFuture = service.makeFutureRequest();
-
-        try {
-            completableFuture.join();
-        } catch (CompletionException e) {
-            assertThat(e.getCause()).isInstanceOf(IOException.class);
-            assertThat(e.getCause().getMessage()).isEqualTo("Failed to complete the request due to an IOException");
-        }
     }
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {

@@ -25,6 +25,7 @@ import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -58,7 +59,15 @@ public final class DateTimeTest {
     }
 
     @Test
-    public void testZonedDateTimeParam() throws NoSuchMethodException, SecurityException {
+    public void testOffsetDateTimeParam() throws SecurityException {
+        Response response = target.path("offsetDateTime")
+                .queryParam("value", "2017-01-02T03:04:05.06Z").request().get();
+        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
+        assertThat(response.readEntity(String.class), is("2017-01-02T03:04:05.060Z"));
+    }
+
+    @Test
+    public void testZonedDateTimeParam() throws SecurityException {
         Response response = target.path("zonedDateTime").queryParam("value", "2017-01-02T03:04:05.06Z").request().get();
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
         assertThat(response.readEntity(String.class), is("2017-01-02T03:04:05.060Z"));
@@ -73,13 +82,18 @@ public final class DateTimeTest {
 
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
+        public final void run(Configuration config, final Environment env) {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new DateTimeTestResource());
         }
     }
 
     public static final class DateTimeTestResource implements DateTimeTestService {
+        @Override
+        public String getOffsetDateTime(OffsetDateTime value) {
+            return value.toString();
+        }
+
         @Override
         public String getZonedDateTime(ZonedDateTime value) {
             return value.toString();
@@ -95,6 +109,10 @@ public final class DateTimeTest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public interface DateTimeTestService {
+        @GET
+        @Path("/offsetDateTime")
+        String getOffsetDateTime(@QueryParam("value") OffsetDateTime value);
+
         @GET
         @Path("/zonedDateTime")
         String getZonedDateTime(@QueryParam("value") ZonedDateTime value);

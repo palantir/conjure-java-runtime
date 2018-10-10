@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
+import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
@@ -51,8 +52,7 @@ public final class TracerTest extends TestBase {
         OpenSpan parentTrace = Tracer.startSpan("");
 
         Tracer.subscribe(TracerTest.class.getName(), (span) -> {
-            // only span we expect to see in this test
-            assertThat(span.getOperation(), is("GET /{param}"));
+            assertThat(span.getOperation(), either(is("acquireLimiter")).or(is("GET /{param}")));
         });
 
         String traceId = Tracer.getTraceId();

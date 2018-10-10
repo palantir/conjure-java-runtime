@@ -16,15 +16,19 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.netflix.concurrency.limits.Limiter;
 import com.netflix.concurrency.limits.limit.VegasLimit;
+import com.netflix.concurrency.limits.limiter.BlockingLimiter;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.tracing.CloseableTracer;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,51 +46,85 @@ class ConcurrencyLimiters {
     private static final String FALLBACK = "";
     private static final MetricName SLOW_ACQUIRE =
             MetricName.builder().safeName("conjure-java-client.qos.request-permit.slow-acquire").build();
+    private static final MetricName LEAK_SUSPECTED =
+            MetricName.builder().safeName("conjure-java-client.qos.request-permit.leak-suspected").build();
 
     private final Timer slowAcquire;
+    private final Meter leakSuspected;
     private final ConcurrentMap<String, Limiter<Void>> limiters = new ConcurrentHashMap<>();
     private final Duration timeout;
+    private final Class<?> serviceClass;
 
     @VisibleForTesting
-    ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry, Duration timeout) {
+    ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry, Duration timeout, Class<?> serviceClass) {
         this.slowAcquire = taggedMetricRegistry.timer(SLOW_ACQUIRE);
+        this.leakSuspected = taggedMetricRegistry.meter(LEAK_SUSPECTED);
         this.timeout = timeout;
+        this.serviceClass = serviceClass;
     }
 
-    ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry) {
-        this(taggedMetricRegistry, DEFAULT_TIMEOUT);
+    ConcurrencyLimiters(TaggedMetricRegistry taggedMetricRegistry, Class<?> serviceClass) {
+        this(taggedMetricRegistry, DEFAULT_TIMEOUT, serviceClass);
     }
 
     /**
      * Blocks until the request should be allowed to proceed.
      * Caller must notify the listener to release the permit.
      */
-    Limiter.Listener acquireLimiter(Request request) {
-        return acquireLimiter(limiterKey(request));
+    @SuppressWarnings("unused")
+    Limiter.Listener acquireLimiter(Request request) throws IOException {
+        long start = System.nanoTime();
+        try (CloseableTracer unused = CloseableTracer.startSpan("acquireLimiter")) {
+            return acquireLimiterInternal(limiterKey(request), 0);
+        } finally {
+            long end = System.nanoTime();
+            long durationNanos = end - start;
+
+            // acquire calls that take less than a millisecond are considered to be successful, so we exclude
+            // them from the 'slow acquire' metric
+            if (TimeUnit.NANOSECONDS.toMillis(durationNanos) > 1) {
+                slowAcquire.update(durationNanos, TimeUnit.NANOSECONDS);
+            }
+        }
     }
 
     @VisibleForTesting
-    Limiter.Listener acquireLimiter(String name) {
-        Limiter<Void> limiter = limiters.computeIfAbsent(name, key -> newLimiter());
+    Limiter.Listener acquireLimiterInternal(String limiterKey, int attemptsSoFar) throws IOException {
+        Limiter<Void> limiter = limiters.computeIfAbsent(limiterKey, key -> newLimiter());
         Optional<Limiter.Listener> listener = limiter.acquire(NO_CONTEXT);
-        return listener.orElseGet(() -> {
+
+        if (listener.isPresent()) {
+            if (attemptsSoFar > 0) {
+                log.info("Eventually acquired concurrency permit",
+                        SafeArg.of("serviceClass", serviceClass),
+                        SafeArg.of("limiterKey", limiterKey),
+                        SafeArg.of("attemptsSoFar", attemptsSoFar + 1));
+            }
+
+            return listener.get();
+        } else {
+            // it returns empty if we've timed out, or we've been interrupted
             if (Thread.currentThread().isInterrupted()) {
-                throw new RuntimeException("Thread was interrupted");
+                throw new IOException("Thread was interrupted");
             }
             log.warn("Timed out waiting to get permits for concurrency. In most cases this would indicate "
                             + "some kind of deadlock. We expect that either this is caused by not closing response "
                             + "bodies (there should be OkHttp log lines indicating this), or service overloading.",
+                    SafeArg.of("serviceClass", serviceClass),
+                    SafeArg.of("limiterKey", limiterKey),
+                    SafeArg.of("attemptsSoFar", attemptsSoFar + 1),
                     SafeArg.of("timeout", timeout));
-            limiters.replace(name, limiter, newLimiter());
-            return acquireLimiter(name);
-        });
+            leakSuspected.mark();
+            limiters.replace(limiterKey, limiter, newLimiter());
+            return acquireLimiterInternal(limiterKey, attemptsSoFar + 1);
+        }
     }
 
     private Limiter<Void> newLimiter() {
-        Limiter<Void> limiter = new InstrumentedLimiter(SimpleLimiter.newBuilder()
+        Limiter<Void> limiter = SimpleLimiter.newBuilder()
                 .limit(new ConjureWindowedLimit(VegasLimit.newDefault()))
-                .build(), slowAcquire);
-        return ConjureBlockingLimiter.wrap(limiter, timeout);
+                .build();
+        return BlockingLimiter.wrap(limiter, timeout);
     }
 
     private static String limiterKey(Request request) {
@@ -95,30 +133,6 @@ class ConcurrencyLimiters {
             return FALLBACK;
         } else {
             return request.method() + " " + pathTemplate;
-        }
-    }
-
-    private static final class InstrumentedLimiter implements Limiter<Void> {
-        private final Limiter<Void> delegate;
-        private final Timer timer;
-
-        private InstrumentedLimiter(Limiter<Void> delegate, Timer timer) {
-            this.delegate = delegate;
-            this.timer = timer;
-        }
-
-        @Override
-        public Optional<Listener> acquire(Void context) {
-            long start = System.nanoTime();
-            try {
-                return delegate.acquire(context);
-            } finally {
-                long end = System.nanoTime();
-                long durationNanos = end - start;
-                if (TimeUnit.NANOSECONDS.toMillis(durationNanos) > 1) {
-                    timer.update(durationNanos, TimeUnit.NANOSECONDS);
-                }
-            }
         }
     }
 }

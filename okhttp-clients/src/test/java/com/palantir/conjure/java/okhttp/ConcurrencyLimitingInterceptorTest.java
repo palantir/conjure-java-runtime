@@ -58,7 +58,7 @@ public final class ConcurrencyLimitingInterceptorTest {
     private ConcurrencyLimitingInterceptor interceptor;
 
     @Before
-    public void before() {
+    public void before() throws IOException {
         interceptor = new ConcurrencyLimitingInterceptor(limiters);
         when(chain.request()).thenReturn(request);
         when(limiters.acquireLimiter(request)).thenReturn(listener);
@@ -123,5 +123,23 @@ public final class ConcurrencyLimitingInterceptorTest {
         when(mockSource.readByteArray()).thenThrow(exception);
         Response erroneousResponse = interceptor.intercept(chain);
         assertThatThrownBy(() -> erroneousResponse.body().source().readByteArray()).isEqualTo(exception);
+    }
+
+    @Test
+    public void ignoresIfNoContent() throws IOException {
+        Response noContent = response.newBuilder().code(204).build();
+        when(chain.proceed(request)).thenReturn(noContent);
+        assertThat(interceptor.intercept(chain)).isEqualTo(noContent);
+        verify(listener).onIgnore();
+    }
+
+    @Test
+    public void marksSuccessIfContentEmpty() throws IOException {
+        Response empty = response.newBuilder().code(204)
+                .body(ResponseBody.create(MediaType.parse("application/json"), new byte[0]))
+                .build();
+        when(chain.proceed(request)).thenReturn(empty);
+        assertThat(interceptor.intercept(chain)).isEqualTo(empty);
+        verify(listener).onSuccess();
     }
 }
