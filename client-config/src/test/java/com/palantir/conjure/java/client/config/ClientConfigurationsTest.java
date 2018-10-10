@@ -92,6 +92,7 @@ public final class ClientConfigurationsTest {
     }
 
     @Test
+    @SuppressWarnings("CheckReturnValue")
     public void roundRobin_noCooldown() throws Exception {
         ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
                 .uris(uris)
