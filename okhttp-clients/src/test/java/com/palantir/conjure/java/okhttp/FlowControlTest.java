@@ -54,6 +54,7 @@ import org.slf4j.LoggerFactory;
  * It is run in CI, but only to prevent code breakages - this is in general an expensive test which should be run
  * as a dev tool. If you want to run for dev purposes, please increase REQUESTS_PER_THREAD.
  */
+@SuppressWarnings("Slf4jLogsafeArgs") // until https://github.com/palantir/gradle-baseline/issues/407 is resolved
 public final class FlowControlTest {
     private static final Logger log = LoggerFactory.getLogger(FlowControlTest.class);
     private static final Duration GRACE = Duration.ofMinutes(2);

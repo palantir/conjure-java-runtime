@@ -104,8 +104,9 @@ public final class OkHttpClients {
      * #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
      * Javadoc.
      */
-    private static final ScheduledExecutorService schedulingExecutor = Tracers.wrap(new ScheduledThreadPoolExecutor(
-            NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", false)));
+    private static final ScheduledExecutorService schedulingExecutor = Tracers.wrap(Executors.newScheduledThreadPool(
+            NUM_SCHEDULING_THREADS,
+            Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", false)));
 
     private OkHttpClients() {}
 

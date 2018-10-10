@@ -19,15 +19,13 @@ package com.palantir.conjure.java.config.ssl.pkcs1;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.spec.RSAPrivateKeySpec;
-import sun.security.util.DerInputStream;
-import sun.security.util.DerValue;
 
 public final class SunPkcs1Reader implements Pkcs1Reader {
 
     @Override
     public RSAPrivateKeySpec readPrivateKey(byte[] privateKeyDerBytes) throws IOException {
-        DerInputStream derStream = new DerInputStream(privateKeyDerBytes);
-        DerValue[] derValues = derStream.getSequence(0);
+        sun.security.util.DerInputStream derStream = new sun.security.util.DerInputStream(privateKeyDerBytes);
+        sun.security.util.DerValue[] derValues = derStream.getSequence(0);
 
         BigInteger modulus = derValues[1].getBigInteger();
         BigInteger privateExponent = derValues[3].getBigInteger();

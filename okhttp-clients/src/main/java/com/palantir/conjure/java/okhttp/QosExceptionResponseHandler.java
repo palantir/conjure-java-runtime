@@ -65,7 +65,8 @@ enum QosExceptionResponseHandler implements ResponseHandler<QosException> {
             return Optional.of(QosException.retryOther(new URL(locationHeader)));
         } catch (MalformedURLException e) {
             log.error("Failed to parse location header, not performing redirect",
-                    UnsafeArg.of("locationHeader", locationHeader));
+                    UnsafeArg.of("locationHeader", locationHeader),
+                    e);
             return Optional.empty();
         }
     }

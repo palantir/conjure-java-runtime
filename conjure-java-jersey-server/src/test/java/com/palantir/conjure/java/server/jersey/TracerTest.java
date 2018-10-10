@@ -16,11 +16,6 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.OutputStreamAppender;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.api.TraceHttpHeaders;
 import io.dropwizard.Application;
@@ -57,7 +52,7 @@ public final class TracerTest {
             new DropwizardAppRule<>(TracingTestServer.class, "src/test/resources/test-server.yml");
 
     private WebTarget target;
-    private Level previousLoggerLevel;
+    private ch.qos.logback.classic.Level previousLoggerLevel;
 
     @Before
     public void before() {
@@ -90,12 +85,15 @@ public final class TracerTest {
     @Test
     public void testLogAppenderCanAccessTraceId() throws Exception {
         // Augment logger with custom appender whose output we can read
-        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-        PatternLayoutEncoder ple = new PatternLayoutEncoder();
+        ch.qos.logback.classic.LoggerContext lc =
+                (ch.qos.logback.classic.LoggerContext) LoggerFactory.getILoggerFactory();
+        ch.qos.logback.classic.encoder.PatternLayoutEncoder ple =
+                new ch.qos.logback.classic.encoder.PatternLayoutEncoder();
         ple.setPattern("traceId: %X{traceId} %-5level [%thread]: %message%n");
         ple.setContext(lc);
         ple.start();
-        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
+        ch.qos.logback.core.OutputStreamAppender<ch.qos.logback.classic.spi.ILoggingEvent> appender =
+                new ch.qos.logback.core.OutputStreamAppender<>();
         appender.setEncoder(ple);
         appender.setContext(lc);
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -104,7 +102,7 @@ public final class TracerTest {
         log.addAppender(appender);
 
         // Invoke server and observe servers log messages; note that the server uses the same logger at INFO.
-        log.setLevel(Level.INFO);
+        log.setLevel(ch.qos.logback.classic.Level.INFO);
         target.path("trace").request().header(TraceHttpHeaders.TRACE_ID, "myTraceId").get();
         Assert.assertThat(
                 byteStream.toString(StandardCharsets.UTF_8.name()),
