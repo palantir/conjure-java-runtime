@@ -68,28 +68,102 @@
                 "com.palantir.tracing:tracing"
             ]
         },
+        "com.github.kevinstern:software-and-algorithms": {
+            "locked": "1.0",
+            "transitive": [
+                "com.google.errorprone:error_prone_check_api"
+            ]
+        },
+        "com.github.stephenc.jcip:jcip-annotations": {
+            "locked": "1.0-1",
+            "transitive": [
+                "com.google.errorprone:error_prone_core"
+            ]
+        },
+        "com.google.auto:auto-common": {
+            "locked": "0.10",
+            "transitive": [
+                "com.google.errorprone:error_prone_core"
+            ]
+        },
+        "com.google.code.findbugs:jFormatString": {
+            "locked": "3.0.0",
+            "transitive": [
+                "com.google.errorprone:error_prone_core"
+            ]
+        },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
+                "com.google.errorprone:error_prone_check_api",
+                "com.google.errorprone:error_prone_core",
+                "com.google.guava:guava",
                 "com.palantir.conjure.java.api:errors"
             ]
         },
-        "com.google.errorprone:error_prone_annotations": {
-            "locked": "2.1.3",
+        "com.google.errorprone:error_prone_annotation": {
+            "locked": "2.3.1",
             "transitive": [
+                "com.google.errorprone:error_prone_check_api",
+                "com.google.errorprone:error_prone_core"
+            ]
+        },
+        "com.google.errorprone:error_prone_annotations": {
+            "locked": "2.3.1",
+            "transitive": [
+                "com.google.errorprone:error_prone_check_api",
+                "com.google.errorprone:error_prone_core",
+                "com.google.guava:guava",
                 "com.palantir.safe-logging:preconditions"
             ]
         },
+        "com.google.errorprone:error_prone_check_api": {
+            "locked": "2.3.1",
+            "transitive": [
+                "com.google.errorprone:error_prone_core"
+            ]
+        },
+        "com.google.errorprone:error_prone_core": {
+            "locked": "2.3.1",
+            "transitive": [
+                "com.palantir.baseline:baseline-error-prone"
+            ]
+        },
+        "com.google.errorprone:error_prone_type_annotations": {
+            "locked": "2.3.1",
+            "transitive": [
+                "com.google.errorprone:error_prone_core"
+            ]
+        },
         "com.google.guava:guava": {
-            "locked": "20.0",
+            "locked": "23.6.1-jre",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.google.auto:auto-common",
+                "com.google.errorprone:error_prone_annotation",
+                "com.google.errorprone:error_prone_core",
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.tracing:tracing"
             ]
         },
+        "com.google.j2objc:j2objc-annotations": {
+            "locked": "1.1",
+            "transitive": [
+                "com.google.guava:guava"
+            ]
+        },
+        "com.googlecode.java-diff-utils:diffutils": {
+            "locked": "1.3.0",
+            "transitive": [
+                "com.google.errorprone:error_prone_check_api"
+            ]
+        },
         "com.netflix.concurrency-limits:concurrency-limits-core": {
             "locked": "0.1.3"
+        },
+        "com.palantir.baseline:baseline-error-prone": {
+            "locked": "0.35.0",
+            "requested": "0.35.0"
         },
         "com.palantir.conjure.java.api:errors": {
             "locked": "2.0.0"
@@ -187,6 +261,47 @@
             "locked": "2.0.1",
             "transitive": [
                 "com.palantir.conjure.java.api:errors"
+            ]
+        },
+        "org.checkerframework:checker-compat-qual": {
+            "locked": "2.0.0",
+            "transitive": [
+                "com.google.guava:guava"
+            ]
+        },
+        "org.checkerframework:checker-qual": {
+            "locked": "2.5.0",
+            "transitive": [
+                "org.checkerframework:dataflow",
+                "org.checkerframework:javacutil"
+            ]
+        },
+        "org.checkerframework:dataflow": {
+            "locked": "2.5.0",
+            "transitive": [
+                "com.google.errorprone:error_prone_check_api",
+                "com.google.errorprone:error_prone_core"
+            ]
+        },
+        "org.checkerframework:javacutil": {
+            "locked": "2.5.0",
+            "transitive": [
+                "org.checkerframework:dataflow"
+            ]
+        },
+        "org.codehaus.mojo:animal-sniffer-annotations": {
+            "locked": "1.14",
+            "transitive": [
+                "com.google.guava:guava"
+            ]
+        },
+        "org.immutables:value": {
+            "locked": "2.3.10"
+        },
+        "org.pcollections:pcollections": {
+            "locked": "2.1.2",
+            "transitive": [
+                "com.google.errorprone:error_prone_core"
             ]
         },
         "org.slf4j:slf4j-api": {
@@ -271,21 +386,29 @@
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
+                "com.google.guava:guava",
                 "com.palantir.conjure.java.api:errors"
             ]
         },
         "com.google.errorprone:error_prone_annotations": {
             "locked": "2.1.3",
             "transitive": [
+                "com.google.guava:guava",
                 "com.palantir.safe-logging:preconditions"
             ]
         },
         "com.google.guava:guava": {
-            "locked": "20.0",
+            "locked": "23.6.1-jre",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.tracing:tracing"
+            ]
+        },
+        "com.google.j2objc:j2objc-annotations": {
+            "locked": "1.1",
+            "transitive": [
+                "com.google.guava:guava"
             ]
         },
         "com.netflix.concurrency-limits:concurrency-limits-core": {
@@ -387,6 +510,18 @@
             "locked": "2.0.1",
             "transitive": [
                 "com.palantir.conjure.java.api:errors"
+            ]
+        },
+        "org.checkerframework:checker-compat-qual": {
+            "locked": "2.0.0",
+            "transitive": [
+                "com.google.guava:guava"
+            ]
+        },
+        "org.codehaus.mojo:animal-sniffer-annotations": {
+            "locked": "1.14",
+            "transitive": [
+                "com.google.guava:guava"
             ]
         },
         "org.slf4j:slf4j-api": {
