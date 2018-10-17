@@ -334,12 +334,9 @@ supported for media type `application/json`.
 
 Flow control in Conjure is a collaborative effort between servers and clients.
 
-Clients estimate the server's queue size using response delay and proactively throttle outgoing requests to minimize bottleneck queueing.  Servers may also advertise an overloaded state using 429/503 responses, which clients interpret with more drastic throttling. This results in a mechanism similar to TCP/IP flow-control and minimizes both client and server-side errors.
+Servers advertise an overloaded state using 429/503 responses, which clients interpret by throttling the number of in-flight requests they will send (currently according to an additive increase, multiplicative decrease based algorithm). Requests are retried a fixed number of times, scheduled with an exponential backoff algorithm.
 
-1. Client throttling is implemented using the TCP Vegas algorithm from Netflix's [concurrency-limits](https://github.com/Netflix/concurrency-limits/) library, which uses 200 -> 399 responses for determining new limits.
-1. Explicit 429/503 responses will result in a reduction in concurrency, and will be retried a fixed number of times, scheduled with an exponential backoff algorithm.
-
-All other responses codes are not factored into timings. Concurrency permits are only released when the response body is closed, so large streaming responses are correctly tracked.
+Concurrency permits are only released when the response body is closed, so large streaming responses are correctly tracked.
 
 conjure-java-runtime servers can use the `QosException` class to advertise the following conditions:
 
