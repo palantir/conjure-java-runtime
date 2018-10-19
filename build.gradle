@@ -13,12 +13,12 @@ buildscript {
         classpath 'com.netflix.nebula:nebula-publishing-plugin:5.1.5'
         classpath 'com.palantir.baseline:gradle-baseline-java:0.17.1'
         classpath 'com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.3.0'
+        classpath 'gradle.plugin.org.inferred:gradle-processors:2.0.0'
     }
 }
 
 plugins {
     id 'com.palantir.git-version' version '0.11.0'
-    id 'org.inferred.processors' version '1.2.15'
 }
 
 apply plugin: 'com.palantir.baseline-config' // provides baselineUpdateConfig task
