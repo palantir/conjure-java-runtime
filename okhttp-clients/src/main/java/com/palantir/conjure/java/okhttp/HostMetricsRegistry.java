@@ -16,9 +16,8 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
@@ -37,21 +36,17 @@ public final class HostMetricsRegistry implements HostEventsSink {
     private final LoadingCache<ServiceHostAndPort, DefaultHostMetrics> hostMetrics;
 
     public HostMetricsRegistry() {
-        this.hostMetrics = CacheBuilder.newBuilder()
+        this.hostMetrics = Caffeine.newBuilder()
                 .maximumSize(1_000)
+                .initialCapacity(64)
                 .expireAfterAccess(1, TimeUnit.DAYS)
-                .build(new CacheLoader<ServiceHostAndPort, DefaultHostMetrics>() {
-                    @Override
-                    public DefaultHostMetrics load(ServiceHostAndPort key) {
-                        return new DefaultHostMetrics(key.serviceName(), key.hostname(), key.port(), Clock.systemUTC());
-                    }
-                });
+                .build(key -> new DefaultHostMetrics(key.serviceName(), key.hostname(), key.port(), Clock.systemUTC()));
     }
 
     @Override
     public void record(String serviceName, String hostname, int port, int statusCode, long micros) {
         try {
-            hostMetrics.getUnchecked(
+            hostMetrics.get(
                     ImmutableServiceHostAndPort.of(serviceName, hostname, port)).record(statusCode, micros);
         } catch (Exception e) {
             log.warn("Unable to record metrics for host and port",
@@ -64,7 +59,7 @@ public final class HostMetricsRegistry implements HostEventsSink {
     @Override
     public void recordIoException(String serviceName, String hostname, int port) {
         try {
-            hostMetrics.getUnchecked(ImmutableServiceHostAndPort.of(serviceName, hostname, port)).recordIoException();
+            hostMetrics.get(ImmutableServiceHostAndPort.of(serviceName, hostname, port)).recordIoException();
         } catch (Exception e) {
             log.warn("Unable to record IO exception for host and port",
                     UnsafeArg.of("hostname", hostname),

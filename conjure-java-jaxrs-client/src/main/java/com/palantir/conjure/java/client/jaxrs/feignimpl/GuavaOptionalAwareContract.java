@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
 import feign.Contract;
@@ -31,9 +30,9 @@ import javax.ws.rs.QueryParam;
 /**
  * Decorates a {@link Contract} and uses {@link GuavaNullOptionalExpander} for any {@link QueryParam} parameters,
  * {@link GuavaEmptyOptionalExpander} for any {@link HeaderParam} parameters, and throws a {@link RuntimeException}
- * at first encounter of an {@link Optional} typed {@link PathParam}.
+ * at first encounter of an {@link com.google.common.base.Optional} typed {@link PathParam}.
  * <p>
- * {@link PathParam}s require a value, and so we explicitly disallow use with {@link Optional}.
+ * {@link PathParam}s require a value, and so we explicitly disallow use with {@link com.google.common.base.Optional}.
  */
 public final class GuavaOptionalAwareContract extends AbstractDelegatingContract {
 
@@ -47,7 +46,7 @@ public final class GuavaOptionalAwareContract extends AbstractDelegatingContract
         Annotation[][] annotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterTypes.length; i++) {
             Class<?> cls = parameterTypes[i];
-            if (cls.equals(Optional.class)) {
+            if (cls.equals(com.google.common.base.Optional.class)) {
                 FluentIterable<Class<?>> paramAnnotations =
                         FluentIterable.from(Lists.newArrayList(annotations[i])).transform(EXTRACT_CLASS);
                 if (paramAnnotations.contains(HeaderParam.class)) {
