@@ -69,6 +69,12 @@
                 "com.palantir.tracing:tracing"
             ]
         },
+        "com.github.ben-manes.caffeine:caffeine": {
+            "locked": "2.6.2",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:okhttp-clients"
+            ]
+        },
         "com.google.code.findbugs:jsr305": {
             "locked": "3.0.0",
             "transitive": [
@@ -351,6 +357,12 @@
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
                 "com.palantir.tracing:tracing"
+            ]
+        },
+        "com.github.ben-manes.caffeine:caffeine": {
+            "locked": "2.6.2",
+            "transitive": [
+                "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.google.code.findbugs:jsr305": {
