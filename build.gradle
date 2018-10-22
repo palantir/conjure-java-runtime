@@ -1,20 +1,16 @@
 buildscript {
     repositories {
         jcenter()
-        maven { url "http://palantir.bintray.com/releases" }
     }
 
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:4.9.5'
-        classpath 'com.netflix.nebula:nebula-publishing-plugin:5.1.5'
-        classpath 'com.palantir.baseline:gradle-baseline-java:0.36.1'
+        classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:7.0.1'
+        classpath 'com.netflix.nebula:nebula-publishing-plugin:9.1.1'
+        classpath 'com.palantir.baseline:gradle-baseline-java:0.37.4'
+        classpath 'com.palantir.gradle.gitversion:gradle-git-version:0.11.0'
+        classpath 'gradle.plugin.org.inferred:gradle-processors:2.0.0'
     }
-}
-
-plugins {
-    id 'com.palantir.git-version' version '0.11.0'
-    id 'org.inferred.processors' version '1.3.0'
 }
 
 apply plugin: 'com.palantir.baseline'
@@ -25,7 +21,6 @@ allprojects {
 
     repositories {
         jcenter()
-        maven { url "http://palantir.bintray.com/releases" }
     }
 }
 
@@ -57,12 +52,6 @@ subprojects {
     verifyDependencyLocksAreCurrent.dependsOn(generateLock)
     build.dependsOn(verifyDependencyLocksAreCurrent)
 
-    tasks.withType(Javadoc) {
-        // suppress Javadoc doclint warnings in Java 8+
-        if (!System.getProperty("java.version").startsWith("1.7")) {
-            options.addStringOption('Xdoclint:none', '-quiet')
-        }
-    }
     tasks.check.dependsOn(javadoc)
 
     test {
