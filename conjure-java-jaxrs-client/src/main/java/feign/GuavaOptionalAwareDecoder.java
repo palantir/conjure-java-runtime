@@ -18,15 +18,14 @@ package feign;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Optional;
 import feign.codec.Decoder;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
- * Decorates a Feign {@link Decoder} such that it returns {@link Optional#absent} when observing an HTTP 204 error code
- * for a method with {@link Type} {@link Optional}.
+ * Decorates a Feign {@link Decoder} such that it returns {@link com.google.common.base.Optional#absent}
+ * when observing an HTTP 204 error code for a method with {@link Type} {@link com.google.common.base.Optional}.
  */
 public final class GuavaOptionalAwareDecoder implements Decoder {
 
@@ -38,13 +37,13 @@ public final class GuavaOptionalAwareDecoder implements Decoder {
 
     @Override
     public Object decode(Response response, Type type) throws IOException, FeignException {
-        if (Types.getRawType(type).equals(Optional.class)) {
+        if (Types.getRawType(type).equals(com.google.common.base.Optional.class)) {
             if (response.status() == 204) {
-                return Optional.absent();
+                return com.google.common.base.Optional.absent();
             } else {
                 Object decoded = checkNotNull(delegate.decode(response, getInnerType(type)),
                         "Unexpected null content for response status %s", response.status());
-                return Optional.of(decoded);
+                return com.google.common.base.Optional.of(decoded);
             }
         } else {
             return delegate.decode(response, type);

@@ -17,24 +17,21 @@
 package com.palantir.conjure.java.config.ssl.pkcs1;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterators;
 import java.util.ServiceLoader;
+import java.util.function.Supplier;
 
 public final class Pkcs1Readers {
 
     private static final ServiceLoader<Pkcs1Reader> PKCS1_READER_LOADER = ServiceLoader.load(Pkcs1Reader.class);
-    private static final Supplier<Pkcs1Reader> PKCS1_READER_SUPPLIER = Suppliers.memoize(new Supplier<Pkcs1Reader>() {
-        @Override
-        public Pkcs1Reader get() {
-            Pkcs1Reader reader = Iterators.getNext(PKCS1_READER_LOADER.iterator(), null);
+    private static final Supplier<Pkcs1Reader> PKCS1_READER_SUPPLIER = Suppliers.memoize(() -> {
+        Pkcs1Reader reader = Iterators.getNext(PKCS1_READER_LOADER.iterator(), null);
 
-            Preconditions.checkState(reader != null, "No Pkcs1Reader services were present. Ensure that a Pkcs1Reader "
-                    + "with a properly configured META-INF/services/ entry is present on the classpath.");
+        Preconditions.checkState(reader != null, "No Pkcs1Reader services were present. Ensure that a Pkcs1Reader "
+                + "with a properly configured META-INF/services/ entry is present on the classpath.");
 
-            return reader;
-        }
+        return reader;
     });
 
     public static Pkcs1Reader getInstance() {

@@ -21,7 +21,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
@@ -56,8 +55,10 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
 
     @Test
     public void testOptional() {
-        assertThat(service.getOptional("something"), is(Optional.of(ImmutableMap.of("something", "something"))));
-        assertThat(service.getOptional(null), is(Optional.<ImmutableMap<String, String>>absent()));
+        assertThat(service.getOptional("something"),
+                is(com.google.common.base.Optional.of(ImmutableMap.of("something", "something"))));
+        assertThat(service.getOptional(null),
+                is(com.google.common.base.Optional.<ImmutableMap<String, String>>absent()));
     }
 
     @Test
@@ -123,19 +124,19 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
 
     @Test
     public void testOptionalString() {
-        assertThat(service.getOptionalString(null), is(Optional.absent()));
-        assertThat(service.getOptionalString("foo"), is(Optional.of("foo")));
+        assertThat(service.getOptionalString(null), is(com.google.common.base.Optional.absent()));
+        assertThat(service.getOptionalString("foo"), is(com.google.common.base.Optional.of("foo")));
     }
 
     @Test
     public void testComplexType() {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
-                Optional.of(
+                com.google.common.base.Optional.of(
                         new GuavaOptionalComplexType(
-                                Optional.absent(),
-                                Optional.absent(),
+                                com.google.common.base.Optional.absent(),
+                                com.google.common.base.Optional.absent(),
                                 Paths.get("bar"))),
-                Optional.of("baz"),
+                com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
         assertThat(service.getGuavaComplexType(value), is(value));
@@ -144,12 +145,12 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     @Test
     public void testCborResponse() {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
-                Optional.of(
+                com.google.common.base.Optional.of(
                         new GuavaOptionalComplexType(
-                                Optional.<GuavaOptionalComplexType>absent(),
-                                Optional.<String>absent(),
+                                com.google.common.base.Optional.absent(),
+                                com.google.common.base.Optional.absent(),
                                 Paths.get("bar"))),
-                Optional.of("baz"),
+                com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
         assertThat(service.getCborResponse(value), is(value));
     }
@@ -157,12 +158,12 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     @Test
     public void testCborRequest() {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
-                Optional.of(
+                com.google.common.base.Optional.of(
                         new GuavaOptionalComplexType(
-                                Optional.<GuavaOptionalComplexType>absent(),
-                                Optional.<String>absent(),
+                                com.google.common.base.Optional.absent(),
+                                com.google.common.base.Optional.absent(),
                                 Paths.get("bar"))),
-                Optional.of("baz"),
+                com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
         assertThat(service.postCborRequest(value), is(value));
     }

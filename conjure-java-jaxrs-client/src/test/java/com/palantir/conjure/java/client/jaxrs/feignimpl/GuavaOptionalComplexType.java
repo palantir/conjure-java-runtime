@@ -19,30 +19,29 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import java.nio.file.Path;
 
 
 public final class GuavaOptionalComplexType {
-    private final Optional<GuavaOptionalComplexType> nested;
-    private final Optional<String> string;
+    private final com.google.common.base.Optional<GuavaOptionalComplexType> nested;
+    private final com.google.common.base.Optional<String> string;
     private final Path path;
 
     @JsonCreator
     public GuavaOptionalComplexType(
-            @JsonProperty("nested") Optional<GuavaOptionalComplexType> nested,
-            @JsonProperty("string") Optional<String> string,
+            @JsonProperty("nested") com.google.common.base.Optional<GuavaOptionalComplexType> nested,
+            @JsonProperty("string") com.google.common.base.Optional<String> string,
             @JsonProperty("path") Path path) {
         this.nested = nested;
         this.string = string;
         this.path = path;
     }
 
-    public Optional<GuavaOptionalComplexType> getNested() {
+    public com.google.common.base.Optional<GuavaOptionalComplexType> getNested() {
         return nested;
     }
 
-    public Optional<String> getString() {
+    public com.google.common.base.Optional<String> getString() {
         return string;
     }
 

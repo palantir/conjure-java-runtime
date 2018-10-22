@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
@@ -52,11 +51,11 @@ public class GuavaTestServer extends Application<Configuration> {
 
     static class TestResource implements TestService {
         @Override
-        public Optional<ImmutableMap<String, String>> getOptional(@Nullable String value) {
+        public com.google.common.base.Optional<ImmutableMap<String, String>> getOptional(@Nullable String value) {
             if (Strings.isNullOrEmpty(value)) {
-                return Optional.absent();
+                return com.google.common.base.Optional.absent();
             } else {
-                return Optional.of(ImmutableMap.of(value, value));
+                return com.google.common.base.Optional.of(ImmutableMap.of(value, value));
             }
         }
 
@@ -88,11 +87,12 @@ public class GuavaTestServer extends Application<Configuration> {
         }
 
         @Override
-        public Optional<ImmutableMap<String, String>> getOptionalThrowsNotAuthorized(@Nullable String value) {
+        public com.google.common.base.Optional<ImmutableMap<String, String>> getOptionalThrowsNotAuthorized(
+                @Nullable String value) {
             if (Strings.isNullOrEmpty(value)) {
                 throw new NotAuthorizedException("Not authorized");
             } else {
-                return Optional.of(ImmutableMap.of(value, value));
+                return com.google.common.base.Optional.of(ImmutableMap.of(value, value));
             }
         }
 
@@ -106,11 +106,12 @@ public class GuavaTestServer extends Application<Configuration> {
         }
 
         @Override
-        public Optional<ImmutableMap<String, String>> getOptionalThrowsForbidden(@Nullable String value) {
+        public com.google.common.base.Optional<ImmutableMap<String, String>> getOptionalThrowsForbidden(
+                @Nullable String value) {
             if (Strings.isNullOrEmpty(value)) {
                 throw new ForbiddenException("Forbidden");
             } else {
-                return Optional.of(ImmutableMap.of(value, value));
+                return com.google.common.base.Optional.of(ImmutableMap.of(value, value));
             }
         }
 
@@ -139,8 +140,8 @@ public class GuavaTestServer extends Application<Configuration> {
         }
 
         @Override
-        public Optional<String> getOptionalString(@Nullable String value) {
-            return Optional.fromNullable(value);
+        public com.google.common.base.Optional<String> getOptionalString(@Nullable String value) {
+            return com.google.common.base.Optional.fromNullable(value);
         }
 
         @Override
@@ -168,7 +169,8 @@ public class GuavaTestServer extends Application<Configuration> {
         @Path("/optional")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        Optional<ImmutableMap<String, String>> getOptional(@QueryParam("value") @Nullable String value);
+        com.google.common.base.Optional<ImmutableMap<String, String>> getOptional(
+                @QueryParam("value") @Nullable String value);
 
         @GET
         @Path("/nonOptional")
@@ -192,7 +194,7 @@ public class GuavaTestServer extends Application<Configuration> {
         @Path("/optionalThrowsNotAuthorized")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        Optional<ImmutableMap<String, String>> getOptionalThrowsNotAuthorized(
+        com.google.common.base.Optional<ImmutableMap<String, String>> getOptionalThrowsNotAuthorized(
                 @QueryParam("value") @Nullable String value);
 
         @GET
@@ -205,7 +207,8 @@ public class GuavaTestServer extends Application<Configuration> {
         @Path("/optionalThrowsForbidden")
         @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
-        Optional<ImmutableMap<String, String>> getOptionalThrowsForbidden(@QueryParam("value") @Nullable String value);
+        com.google.common.base.Optional<ImmutableMap<String, String>> getOptionalThrowsForbidden(
+                @QueryParam("value") @Nullable String value);
 
         @GET
         @Path("/jsonString")
@@ -235,7 +238,7 @@ public class GuavaTestServer extends Application<Configuration> {
         @Path("/optionalString")
         @Consumes(MediaType.TEXT_PLAIN)
         @Produces(MediaType.TEXT_PLAIN)
-        Optional<String> getOptionalString(@QueryParam("value") @Nullable String value);
+        com.google.common.base.Optional<String> getOptionalString(@QueryParam("value") @Nullable String value);
 
         @POST
         @Path("/complexType")
