@@ -53,10 +53,10 @@
             "project": true
         },
         "org.bouncycastle:bcpkix-jdk15on": {
-            "locked": "1.54"
+            "locked": "1.60"
         },
         "org.bouncycastle:bcprov-jdk15on": {
-            "locked": "1.54",
+            "locked": "1.60",
             "transitive": [
                 "org.bouncycastle:bcpkix-jdk15on"
             ]
@@ -128,10 +128,10 @@
             "project": true
         },
         "org.bouncycastle:bcpkix-jdk15on": {
-            "locked": "1.54"
+            "locked": "1.60"
         },
         "org.bouncycastle:bcprov-jdk15on": {
-            "locked": "1.54",
+            "locked": "1.60",
             "transitive": [
                 "org.bouncycastle:bcpkix-jdk15on"
             ]
