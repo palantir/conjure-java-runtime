@@ -18,7 +18,8 @@ dependencies {
     testCompile "io.dropwizard:dropwizard-testing"
     testCompile "junit:junit"
 
-    processor "org.immutables:value"
+    annotationProcessor "org.immutables:value"
+    compileOnly 'org.immutables:value::annotations'
 }
 
 task generateCerts(type:Exec) {
