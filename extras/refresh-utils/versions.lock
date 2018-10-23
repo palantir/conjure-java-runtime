@@ -1,7 +1,7 @@
 {
     "compileClasspath": {
         "com.google.code.findbugs:jsr305": {
-            "locked": "3.0.0",
+            "locked": "3.0.2",
             "transitive": [
                 "com.google.guava:guava"
             ]
@@ -36,7 +36,7 @@
     },
     "runtime": {
         "com.google.code.findbugs:jsr305": {
-            "locked": "3.0.0",
+            "locked": "3.0.2",
             "transitive": [
                 "com.google.guava:guava"
             ]

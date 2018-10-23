@@ -28,24 +28,24 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class QosExceptionResponseHandlerTest extends TestBase {
 
     private static final Request REQUEST = new Request.Builder().url("http://127.0.0.1").build();
     private static final QosExceptionResponseHandler handler = QosExceptionResponseHandler.INSTANCE;
-    private static final URL URL = parseUrl("https://localhost");
+    private static final URL LOCAL_URL = parseUrl("https://localhost");
 
     @Test
     public void test308() throws Exception {
         Response response;
 
         // with header
-        response = response(REQUEST, 308).header(HttpHeaders.LOCATION, URL.toString()).build();
+        response = response(REQUEST, 308).header(HttpHeaders.LOCATION, LOCAL_URL.toString()).build();
         assertThat(handler.handle(response).get())
                 .isInstanceOfSatisfying(QosException.RetryOther.class,
-                        retryOther -> assertThat(retryOther.getRedirectTo()).isEqualTo(URL));
+                        retryOther -> assertThat(retryOther.getRedirectTo()).isEqualTo(LOCAL_URL));
 
         // with header
         response = response(REQUEST, 308).build();
