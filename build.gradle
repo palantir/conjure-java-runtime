@@ -31,6 +31,10 @@ subprojects {
     apply plugin: 'java'
 
     sourceCompatibility = 1.8
+    if (gradle.startParameter.taskNames.find {
+        it.endsWith('verifyDependencyLocksAreCurrent') || it.endsWith('build')}) {
+        gradle.startParameter.setTaskNames(gradle.startParameter.taskNames + ['generateLock'])
+    }
 
     apply plugin: 'nebula.dependency-lock'
     dependencyLock {
