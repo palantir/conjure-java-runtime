@@ -192,7 +192,8 @@ public final class Retrofit2ClientApiTest extends TestBase {
                 .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(error)));
 
         assertThatThrownBy(() -> Futures.getUnchecked(futureSupplier.get()))
-                .isInstanceOf(RemoteException.class)
+                .isInstanceOf(UncheckedExecutionException.class)
+                .hasCauseInstanceOf(RemoteException.class)
                 .satisfies(e -> assertThat(((RemoteException) e.getCause()).getError()).isEqualTo(error));
     }
 
@@ -273,8 +274,9 @@ public final class Retrofit2ClientApiTest extends TestBase {
                         .build());
 
         assertThatThrownBy(() -> Futures.getUnchecked(futureSupplier.get()))
-                .isInstanceOf(IOException.class)
-                .hasMessage("Failed to complete the request due to an IOException");
+                .isInstanceOf(UncheckedExecutionException.class)
+                .hasCauseInstanceOf(IOException.class)
+                .hasMessageContaining("Failed to complete the request due to an IOException");
     }
 
     @Test
