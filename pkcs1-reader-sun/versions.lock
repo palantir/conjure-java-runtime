@@ -1,26 +1,26 @@
 {
     "compileClasspath": {
         "com.fasterxml.jackson.core:jackson-annotations": {
-            "locked": "2.9.5",
+            "locked": "2.9.7",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
-            "locked": "2.9.5",
+            "locked": "2.9.7",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.9.5",
+            "locked": "2.9.7",
             "transitive": [
                 "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.conjure.java.runtime:keystores"
             ]
         },
         "com.google.code.findbugs:jsr305": {
-            "locked": "3.0.0",
+            "locked": "3.0.2",
             "transitive": [
                 "com.google.guava:guava"
             ]
@@ -67,26 +67,26 @@
     },
     "runtime": {
         "com.fasterxml.jackson.core:jackson-annotations": {
-            "locked": "2.9.5",
+            "locked": "2.9.7",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-core": {
-            "locked": "2.9.5",
+            "locked": "2.9.7",
             "transitive": [
                 "com.fasterxml.jackson.core:jackson-databind"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
-            "locked": "2.9.5",
+            "locked": "2.9.7",
             "transitive": [
                 "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.conjure.java.runtime:keystores"
             ]
         },
         "com.google.code.findbugs:jsr305": {
-            "locked": "3.0.0",
+            "locked": "3.0.2",
             "transitive": [
                 "com.google.guava:guava"
             ]
