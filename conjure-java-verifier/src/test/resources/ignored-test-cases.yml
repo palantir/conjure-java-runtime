@@ -1,0 +1,38 @@
+client:
+  autoDeserialize: {}
+
+#    receiveBooleanExample:
+#    - "{\"value\":0}" # jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
+#    - "{\"value\":\"true\"}" # jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
+#
+#    receiveStringExample:
+#    - "{\"value\":8}" # jackson coerces things to other types
+#    receiveIntegerExample:
+#    - "{\"value\":\"12\"}" # jackson coerces things to other types
+#    - "{\"value\":1.23}" # jackson coerces things to other types
+#
+#    receiveDoubleExample:
+#    - "{\"value\":\"1.23\"}" # jackson coerces things to other types
+#    receiveSetStringExample:
+#    - "{\"value\":[\"a\",\"a\"]}" # client turns this into a set of ["a"] without error
+#    receiveDateTimeAliasExample:
+#    - '"1523040070"' # jackson coerces things to other types
+#    - '"2017-01-02T04:04:05.000000000+01:00[Europe/Berlin]"' # java should deserialize this as OffsetDateTime
+#    receiveDateTimeExample:
+#    - "{\"value\":\"1523040070\"}" # jackson coerces things to other types
+#    - "{\"value\":1523040070}" # jackson coerces things to other types
+#
+#    receiveRawOptionalExample:
+#    - "null" # https://github.com/palantir/conjure-java-runtime/issues/813
+
+  singleHeaderService: {}
+#    headerOptionalString:
+#    - "null"
+
+  singlePathParamService: {}
+#    pathParamString:
+#    - "\"\""
+#    pathParamAliasString:
+#    - "\"\""
+
+  singleQueryParamService: {}

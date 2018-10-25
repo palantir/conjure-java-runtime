@@ -53,6 +53,7 @@ dependencies {
     // testCompile 'org.mockito:mockito-core'
     testCompile project(':conjure-java-jaxrs-client')
     testCompile project(':conjure-java-retrofit2-client')
+    testCompile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     // testCompile 'io.dropwizard:dropwizard-testing'
     testCompile sourceSets.generatedObjects.output
     testCompile sourceSets.generatedJersey.output
