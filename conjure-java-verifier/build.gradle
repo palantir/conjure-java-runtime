@@ -19,9 +19,10 @@ idea {
         generatedSourceDirs += sourceSets.generatedObjects.java.srcDirs
         generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
         generatedSourceDirs += sourceSets.generatedRetrofit.java.srcDirs
-        // scopes.COMPILE.plus += configurations.generatedObjectsCompile
-        // scopes.COMPILE.plus += configurations.generatedJerseyCompile
-        // scopes.COMPILE.plus += configurations.generatedRetrofitCompile
+        scopes.COMPILE.plus += [
+            configurations.generatedObjectsCompile,
+            configurations.generatedJerseyCompile,
+            configurations.generatedRetrofitCompile]
     }
 }
 
@@ -47,11 +48,11 @@ dependencies {
     generatedRetrofitCompile 'com.palantir.conjure.java:conjure-lib'
     generatedRetrofitCompile sourceSets.generatedObjects.output
 
-    // testCompile project(':conjure-java-core')
-    // testCompile 'junit:junit'
-    // testCompile 'org.assertj:assertj-core'
+    testCompile 'junit:junit'
+    testCompile 'org.assertj:assertj-core'
     // testCompile 'org.mockito:mockito-core'
-    // testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
+    testCompile project(':conjure-java-jaxrs-client')
+    testCompile project(':conjure-java-retrofit2-client')
     // testCompile 'io.dropwizard:dropwizard-testing'
     // testCompile sourceSets.generatedObjects.output
     // testCompile sourceSets.generatedJersey.output
@@ -75,7 +76,6 @@ task unpackGenerator(type: Sync) {
     from { tarTree(configurations.generator.singleFile) }
     into "${buildDir}/generator"
     ext.getExecutable = {
-        println "RESOLVED CONFIGURATION"
         fileTree("${buildDir}/generator/${configurations.generator.singleFile.name.replace('.tgz', '')}/bin")
             .filter({ !it.name.contains('.bat') })
             .singleFile
