@@ -66,6 +66,17 @@ task unpackVerificationServer(type: Sync) {
     rename { "server" }
 }
 
+task unpackGenerator(type: Sync) {
+    from { tarTree(configurations.generator.singleFile) }
+    into "${buildDir}/generator"
+
+    ext.getExecutable = {
+        fileTree("${buildDir}/generator/${configurations.generator.singleFile.name.replace('.tgz', '')}/bin")
+            .filter({ !it.name.contains('.bat') })
+            .singleFile
+    }
+}
+
 task copyTestCases(type: Sync) {
     from configurations.testCases, {
         rename { "test-cases.json" }
