@@ -90,20 +90,20 @@ task copyTestCases(type: Sync) {
 task conjureJavaObjects(type: Exec, dependsOn: unpackGenerator) {
     executable "${-> unpackGenerator.getExecutable()}"
     args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedObjects/java', '--objects'
+
     inputs.file "${-> configurations.verificationApi.singleFile}"
     outputs.dir "src/generatedObjects/java"
     doFirst { delete "src/generatedObjects/java/*" }
 }
 
-// task conjureJavaJersey(type: JavaExec) {
-//     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
-//     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
-//     args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedJersey/java', '--jersey'
+task conjureJavaJersey(type: Exec, dependsOn: unpackGenerator) {
+    executable "${-> unpackGenerator.getExecutable()}"
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedJersey/java', '--jersey'
 
-//     inputs.file "${-> configurations.verificationApi.singleFile}"
-//     outputs.dir "src/generatedJersey/java"
-//     doFirst { delete "src/generatedJersey/java/*" }
-// }
+    inputs.file "${-> configurations.verificationApi.singleFile}"
+    outputs.dir "src/generatedJersey/java"
+    doFirst { delete "src/generatedJersey/java/*" }
+}
 
 // compileGeneratedObjectsJava.dependsOn conjureJavaObjects
 // compileGeneratedObjectsJava.dependsOn conjureJavaJersey
