@@ -55,6 +55,7 @@ dependencies {
     testCompile project(':conjure-java-retrofit2-client')
     testCompile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     testCompile 'com.palantir.conjure.java:conjure-lib'
+    testCompile 'org.apache.commons:commons-lang3'
     testCompile sourceSets.generatedObjects.output
     testCompile sourceSets.generatedJersey.output
     testCompile sourceSets.generatedRetrofit.output
