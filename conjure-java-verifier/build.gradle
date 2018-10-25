@@ -54,8 +54,9 @@ dependencies {
     testCompile project(':conjure-java-jaxrs-client')
     testCompile project(':conjure-java-retrofit2-client')
     // testCompile 'io.dropwizard:dropwizard-testing'
-    // testCompile sourceSets.generatedObjects.output
-    // testCompile sourceSets.generatedJersey.output
+    testCompile sourceSets.generatedObjects.output
+    testCompile sourceSets.generatedJersey.output
+    testCompile sourceSets.generatedRetrofit.output
 
     // processor 'org.immutables:value'
 }
