@@ -24,6 +24,7 @@ configurations {
     testCases
     verificationApi
     verificationServer
+    generator
 }
 
 dependencies {
@@ -31,6 +32,8 @@ dependencies {
 
     verificationApi 'com.palantir.conjure.verification:verification-api'
     verificationServer "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
+
+    generator 'com.palantir.conjure.java:conjure-java'
 
     // generatedObjectsCompile 'com.palantir.conjure.java:conjure-lib'
     // generatedObjectsCompile project(':conjure-lib')
