@@ -1,0 +1,103 @@
+import static org.apache.tools.ant.taskdefs.condition.Os.*
+
+ext {
+    osClassifier = isFamily(FAMILY_MAC) ? "osx" : "linux"
+}
+
+// We locally-codegen verification-api.conjure.json into these source-sets
+// sourceSets {
+//     generatedObjects
+//     generatedJersey
+// }
+
+// idea {
+//     module {
+//         sourceDirs += sourceSets.generatedObjects.java.srcDirs
+//         sourceDirs += sourceSets.generatedJersey.java.srcDirs
+//         generatedSourceDirs += sourceSets.generatedObjects.java.srcDirs
+//         generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
+//         scopes.COMPILE.plus += [configurations.generatedObjectsCompile, configurations.generatedJerseyCompile]
+//     }
+// }
+
+configurations {
+    testCases
+    verificationApi
+    verificationServer
+}
+
+dependencies {
+    testCases 'com.palantir.conjure.verification:test-cases'
+
+    verificationApi 'com.palantir.conjure.verification:verification-api'
+    verificationServer "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
+
+    // generatedObjectsCompile 'com.palantir.conjure.java:conjure-lib'
+    // generatedObjectsCompile project(':conjure-lib')
+
+    // generatedJerseyCompile project(':conjure-java-core')
+    // generatedJerseyCompile project(':conjure-lib')
+    // generatedJerseyCompile sourceSets.generatedObjects.output
+
+    // testCompile project(':conjure-java-core')
+    // testCompile 'junit:junit'
+    // testCompile 'org.assertj:assertj-core'
+    // testCompile 'org.mockito:mockito-core'
+    // testCompile 'com.palantir.conjure.java.runtime:conjure-java-jaxrs-client'
+    // testCompile 'io.dropwizard:dropwizard-testing'
+    // testCompile sourceSets.generatedObjects.output
+    // testCompile sourceSets.generatedJersey.output
+
+    // processor 'org.immutables:value'
+}
+
+// tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureEach {
+//     options.errorprone {
+//         check('Slf4jLogsafeArgs', net.ltgt.gradle.errorprone.CheckSeverity.OFF)
+//     }
+// }
+
+task unpackVerificationServer(type: Sync) {
+    from { tarTree(configurations.verificationServer.singleFile) }
+    into "${buildDir}/verification-server"
+    rename { "server" }
+}
+
+task copyTestCases(type: Sync) {
+    from configurations.testCases, {
+        rename { "test-cases.json" }
+    }
+    from configurations.verificationApi, {
+        rename { "verification-api.json" }
+    }
+    into "$buildDir/test-cases"
+}
+
+// task conjureJavaObjects(type: JavaExec) {
+//     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
+//     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
+//     args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedObjects/java', '--objects'
+
+//     inputs.file "${-> configurations.verificationApi.singleFile}"
+//     outputs.dir "src/generatedObjects/java"
+//     doFirst { delete "src/generatedObjects/java/*" }
+// }
+
+// task conjureJavaJersey(type: JavaExec) {
+//     main = "com.palantir.conjure.java.cli.ConjureJavaCli"
+//     classpath = project(':conjure-java').sourceSets.main.runtimeClasspath
+//     args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedJersey/java', '--jersey'
+
+//     inputs.file "${-> configurations.verificationApi.singleFile}"
+//     outputs.dir "src/generatedJersey/java"
+//     doFirst { delete "src/generatedJersey/java/*" }
+// }
+
+// compileGeneratedObjectsJava.dependsOn conjureJavaObjects
+// compileGeneratedObjectsJava.dependsOn conjureJavaJersey
+
+// tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, unpackVerificationServer, copyTestCases
+test.dependsOn unpackVerificationServer, copyTestCases
+
+// checkstyleGeneratedObjects.enabled = false
+// checkstyleGeneratedJersey.enabled = false
