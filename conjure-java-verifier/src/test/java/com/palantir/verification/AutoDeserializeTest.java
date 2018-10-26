@@ -16,7 +16,8 @@
 
 package com.palantir.verification;
 
-import com.palantir.conjure.java.api.errors.RemoteException;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.palantir.conjure.verification.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.AutoDeserializeService;
 import com.palantir.conjure.verification.EndpointName;
@@ -24,8 +25,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
-import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -76,7 +77,7 @@ public class AutoDeserializeTest {
     }
 
     @Test
-    public void runTestCase() throws Exception {
+    public void runTestCase() throws Throwable {
         boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
         Method method = testService.getClass().getMethod(endpointName.get(), int.class);
         System.out.println(String.format("[%s%s test case %s]: %s(%s), expected client to %s",
@@ -87,29 +88,37 @@ public class AutoDeserializeTest {
                 jsonString,
                 shouldSucceed ? "succeed" : "fail"));
 
+        Optional<Throwable> expectationFailure = shouldSucceed ? expectSuccess(method) : expectFailure(method);
+
+        assertThat(expectationFailure.isPresent())
+                .describedAs("The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
+                .isEqualTo(shouldIgnore);
+
         Assume.assumeFalse(shouldIgnore);
-        if (shouldSucceed) {
-            expectSuccess(method);
-        } else {
-            expectFailure(method);
+
+        if (expectationFailure.isPresent()) {
+            throw expectationFailure.get();
         }
     }
 
-    private void expectSuccess(Method method) throws Exception {
+    private Optional<Throwable> expectSuccess(Method method) {
         try {
             Object resultFromServer = method.invoke(testService, index);
             log.info("Received result for endpoint {} and index {}: {}", endpointName, index, resultFromServer);
             confirmService.confirm(endpointName, index, resultFromServer);
-        } catch (RemoteException e) {
-            log.error("Caught exception with params: {}", e.getError().parameters(), e);
-            throw e;
+            return Optional.empty();
+        } catch (Exception e) {
+            return Optional.of(new AssertionError("Expected call to succeed, but caught exception", e));
         }
     }
 
-    private void expectFailure(Method method) {
-        Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
+    private Optional<Throwable> expectFailure(Method method) {
+        try {
             Object result = method.invoke(testService, index);
-            log.error("Result should have caused an exception but deserialized to: {}", result);
-        });
+            return Optional.of(new AssertionError(
+                    String.format("Result should have caused an exception but deserialized to: %s", result)));
+        } catch (Exception e) {
+            return Optional.empty(); // we expected the method to throw and it did, so this expectation was satisifed
+        }
     }
 }
