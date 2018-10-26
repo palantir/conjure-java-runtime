@@ -11,21 +11,6 @@ sourceSets {
     generatedRetrofit
 }
 
-idea {
-    module {
-        sourceDirs += sourceSets.generatedObjects.java.srcDirs
-        sourceDirs += sourceSets.generatedJersey.java.srcDirs
-        sourceDirs += sourceSets.generatedRetrofit.java.srcDirs
-        generatedSourceDirs += sourceSets.generatedObjects.java.srcDirs
-        generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
-        generatedSourceDirs += sourceSets.generatedRetrofit.java.srcDirs
-        scopes.COMPILE.plus += [
-            configurations.generatedObjectsCompile,
-            configurations.generatedJerseyCompile,
-            configurations.generatedRetrofitCompile]
-    }
-}
-
 configurations {
     testCases
     verificationApi
@@ -50,7 +35,6 @@ dependencies {
 
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
-    // testCompile 'org.mockito:mockito-core'
     testCompile project(':conjure-java-jaxrs-client')
     testCompile project(':conjure-java-retrofit2-client')
     testCompile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
@@ -59,8 +43,21 @@ dependencies {
     testCompile sourceSets.generatedObjects.output
     testCompile sourceSets.generatedJersey.output
     testCompile sourceSets.generatedRetrofit.output
+}
 
-    // processor 'org.immutables:value'
+idea {
+    module {
+        sourceDirs += sourceSets.generatedObjects.java.srcDirs
+        sourceDirs += sourceSets.generatedJersey.java.srcDirs
+        sourceDirs += sourceSets.generatedRetrofit.java.srcDirs
+        generatedSourceDirs += sourceSets.generatedObjects.java.srcDirs
+        generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
+        generatedSourceDirs += sourceSets.generatedRetrofit.java.srcDirs
+        scopes.COMPILE.plus += [
+            configurations.generatedObjectsCompile,
+            configurations.generatedJerseyCompile,
+            configurations.generatedRetrofitCompile]
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
