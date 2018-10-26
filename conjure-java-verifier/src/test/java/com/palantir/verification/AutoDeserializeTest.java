@@ -77,15 +77,17 @@ public class AutoDeserializeTest {
 
     @Test
     public void runTestCase() throws Exception {
-        Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
-
+        boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
         Method method = testService.getClass().getMethod(endpointName.get(), int.class);
-        System.out.println(String.format("Test case %s: Invoking %s(%s), expected %s",
+        System.out.println(String.format("[%s%s test case %s]: %s(%s), expected client to %s",
+                shouldIgnore ? "ignored " : "",
+                shouldSucceed ? "positive" : "negative",
                 index,
                 endpointName,
                 jsonString,
-                shouldSucceed ? "success" : "failure"));
+                shouldSucceed ? "succeed" : "fail"));
 
+        Assume.assumeFalse(shouldIgnore);
         if (shouldSucceed) {
             expectSuccess(method);
         } else {
