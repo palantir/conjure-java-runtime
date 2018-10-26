@@ -19,11 +19,11 @@ package com.palantir.verification;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import com.palantir.conjure.verification.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.AutoDeserializeService;
-import com.palantir.conjure.verification.SingleHeaderService;
-import com.palantir.conjure.verification.SinglePathParamService;
-import com.palantir.conjure.verification.SingleQueryParamService;
+import com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
+import com.palantir.conjure.verification.server.SingleHeaderService;
+import com.palantir.conjure.verification.server.SinglePathParamService;
+import com.palantir.conjure.verification.server.SingleQueryParamService;
 
 public final class VerificationClients {
     private VerificationClients() {}

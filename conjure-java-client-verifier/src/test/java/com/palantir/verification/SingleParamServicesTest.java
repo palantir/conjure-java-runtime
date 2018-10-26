@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.conjure.verification.EndpointName;
+import com.palantir.conjure.verification.server.EndpointName;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
