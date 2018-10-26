@@ -77,7 +77,8 @@ public class AutoDeserializeTest {
     }
 
     @Test
-    public void runTestCase() throws Throwable {
+    @SuppressWarnings("IllegalThrows")
+    public void runTestCase() throws Error, NoSuchMethodException {
         boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
         Method method = testService.getClass().getMethod(endpointName.get(), int.class);
         System.out.println(String.format("[%s%s test case %s]: %s(%s), expected client to %s",
@@ -88,7 +89,7 @@ public class AutoDeserializeTest {
                 jsonString,
                 shouldSucceed ? "succeed" : "fail"));
 
-        Optional<Throwable> expectationFailure = shouldSucceed ? expectSuccess(method) : expectFailure(method);
+        Optional<Error> expectationFailure = shouldSucceed ? expectSuccess(method) : expectFailure(method);
 
         assertThat(expectationFailure.isPresent())
                 .describedAs("The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
@@ -101,7 +102,7 @@ public class AutoDeserializeTest {
         }
     }
 
-    private Optional<Throwable> expectSuccess(Method method) {
+    private Optional<Error> expectSuccess(Method method) {
         try {
             Object resultFromServer = method.invoke(testService, index);
             log.info("Received result for endpoint {} and index {}: {}", endpointName, index, resultFromServer);
@@ -112,7 +113,7 @@ public class AutoDeserializeTest {
         }
     }
 
-    private Optional<Throwable> expectFailure(Method method) {
+    private Optional<Error> expectFailure(Method method) {
         try {
             Object result = method.invoke(testService, index);
             return Optional.of(new AssertionError(
