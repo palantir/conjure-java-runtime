@@ -43,13 +43,12 @@ allprojects {
     apply plugin: 'com.palantir.configuration-resolver'
     apply plugin: 'nebula.dependency-recommender'
     dependencyRecommendations {
-        strategy OverrideTransitives
         propertiesFile file: project.rootProject.file('versions.props')
     }
 }
 
 subprojects {
-    apply plugin: 'java'
+    apply plugin: 'java-library'
     apply plugin: 'com.palantir.baseline-checkstyle'
     apply plugin: 'com.palantir.baseline-eclipse'
     apply plugin: 'com.palantir.baseline-idea'
@@ -84,4 +83,15 @@ subprojects {
     tasks.withType(JavaCompile) {
         options.compilerArgs += ['-XepDisableWarningsInGeneratedCode']
     }
+
+//    dependencies {
+//        constraints {
+//            implementation('com.google.guava:guava') {
+//                version {
+//                    strictly '15.0'
+//                    because 'testing'
+//                }
+//            }
+//        }
+//    }
 }
