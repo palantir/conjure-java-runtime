@@ -1,128 +1,14 @@
-import static org.apache.tools.ant.taskdefs.condition.Os.*
-
-ext {
-    osClassifier = isFamily(FAMILY_MAC) ? "osx" : "linux"
-}
-
-// We locally-codegen verification-api.conjure.json into these source-sets
-sourceSets {
-    generatedObjects
-    generatedJersey
-    generatedRetrofit
-}
-
-configurations {
-    testCases
-    verificationApi
-    verificationServer
-    generator
-}
+apply from: "${rootDir}/gradle/verifier.gradle"
 
 dependencies {
     testCases 'com.palantir.conjure.verification:verification-server-test-cases'
-
     verificationApi 'com.palantir.conjure.verification:verification-server-api'
-    verificationServer "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
-
-    generator 'com.palantir.conjure.java:conjure-java'
-
-    generatedObjectsCompile 'com.palantir.conjure.java:conjure-lib'
-    generatedJerseyCompile 'com.palantir.conjure.java:conjure-lib'
-    generatedJerseyCompile sourceSets.generatedObjects.output
-    generatedRetrofitCompile 'com.squareup.retrofit2:retrofit'
-    generatedRetrofitCompile 'com.palantir.conjure.java:conjure-lib'
-    generatedRetrofitCompile sourceSets.generatedObjects.output
+    verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
     testCompile project(':conjure-java-jaxrs-client')
     testCompile project(':conjure-java-retrofit2-client')
     testCompile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
-    testCompile 'com.palantir.conjure.java:conjure-lib'
     testCompile 'org.apache.commons:commons-lang3'
-    testCompile sourceSets.generatedObjects.output
-    testCompile sourceSets.generatedJersey.output
-    testCompile sourceSets.generatedRetrofit.output
 }
-
-idea {
-    module {
-        sourceDirs += sourceSets.generatedObjects.java.srcDirs
-        sourceDirs += sourceSets.generatedJersey.java.srcDirs
-        sourceDirs += sourceSets.generatedRetrofit.java.srcDirs
-        generatedSourceDirs += sourceSets.generatedObjects.java.srcDirs
-        generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
-        generatedSourceDirs += sourceSets.generatedRetrofit.java.srcDirs
-        scopes.COMPILE.plus += [
-            configurations.generatedObjectsCompile,
-            configurations.generatedJerseyCompile,
-            configurations.generatedRetrofitCompile]
-    }
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.errorprone {
-        check('Slf4jLogsafeArgs', net.ltgt.gradle.errorprone.CheckSeverity.OFF)
-    }
-}
-
-task unpackVerificationServer(type: Sync) {
-    from { tarTree(configurations.verificationServer.singleFile) }
-    into "${buildDir}/verification-server"
-    rename { "server" }
-}
-
-task unpackGenerator(type: Sync) {
-    from { tarTree(configurations.generator.singleFile) }
-    into "${buildDir}/generator"
-    ext.getExecutable = {
-        fileTree("${buildDir}/generator/${configurations.generator.singleFile.name.replace('.tgz', '')}/bin")
-            .filter({ !it.name.contains('.bat') })
-            .singleFile
-    }
-}
-
-task copyTestCases(type: Sync) {
-    from configurations.testCases, {
-        rename { "test-cases.json" }
-    }
-    from configurations.verificationApi, {
-        rename { "verification-api.json" }
-    }
-    into "$buildDir/test-cases"
-}
-
-task conjureJavaObjects(type: Exec, dependsOn: unpackGenerator) {
-    executable "${-> unpackGenerator.getExecutable()}"
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedObjects/java', '--objects'
-
-    inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.dir "src/generatedObjects/java"
-    doFirst { delete "src/generatedObjects/java/*" }
-}
-
-task conjureJavaJersey(type: Exec, dependsOn: unpackGenerator) {
-    executable "${-> unpackGenerator.getExecutable()}"
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedJersey/java', '--jersey'
-
-    inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.dir "src/generatedJersey/java"
-    doFirst { delete "src/generatedJersey/java/*" }
-}
-
-task conjureJavaRetrofit(type: Exec, dependsOn: unpackGenerator) {
-    executable "${-> unpackGenerator.getExecutable()}"
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedRetrofit/java', '--retrofit'
-
-    inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.dir "src/generatedRetrofit/java"
-    doFirst { delete "src/generatedRetrofit/java/*" }
-}
-
-// ensure compiling the sourceSet automatically run these tasks
-compileGeneratedObjectsJava.dependsOn conjureJavaObjects
-compileGeneratedJerseyJava.dependsOn conjureJavaJersey
-compileGeneratedRetrofitJava.dependsOn conjureJavaRetrofit
-
-tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, conjureJavaRetrofit, unpackVerificationServer, copyTestCases
-test.dependsOn unpackVerificationServer, copyTestCases
