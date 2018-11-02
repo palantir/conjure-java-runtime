@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
@@ -31,6 +32,8 @@ import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -68,32 +71,34 @@ public final class OkHttpClients {
     private static final ExecutorService executionExecutor =
             Tracers.wrap(Executors.newCachedThreadPool(executionThreads));
 
-    /** Shared dispatcher with static executor service. */
-    private static final Dispatcher dispatcher;
-
     /** Global {@link TaggedMetricRegistry} for per-client and dispatcher-wide metrics. */
     private static TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
 
     /** Shared connection pool. */
     private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
 
+    /** All dispatchers for metrics. */
+    private static final Set<Dispatcher> dispatchers = Collections.newSetFromMap(Caffeine.newBuilder()
+            .weakKeys()
+            .<Dispatcher, Boolean>build()
+            .asMap());
+
+    private static final MetricName DISPATCHER_CALLS_QUEUED_METRIC =
+            MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.queued").build();
+    private static final MetricName DISPATCHER_CALLS_RUNNING_METRIC =
+            MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.running").build();
+    private static final MetricName CONNECTION_POOL_CONNECTIONS_TOTAL_METRIC =
+            MetricName.builder().safeName("com.palantir.conjure.java.connection-pool.connections.total").build();
+    private static final MetricName CONNECTION_POOL_CONNECTIONS_IDLE_METRIC =
+            MetricName.builder().safeName("com.palantir.conjure.java.connection-pool.connections.idle").build();
+
     static {
-        dispatcher = new Dispatcher(executionExecutor);
-        dispatcher.setMaxRequests(256);
-        dispatcher.setMaxRequestsPerHost(256);
-        // metrics
-        registry.gauge(
-                MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.queued").build(),
-                dispatcher::queuedCallsCount);
-        registry.gauge(
-                MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.running").build(),
-                dispatcher::runningCallsCount);
-        registry.gauge(
-                MetricName.builder().safeName("com.palantir.conjure.java.connection-pool.connections.total").build(),
-                connectionPool::connectionCount);
-        registry.gauge(
-                MetricName.builder().safeName("com.palantir.conjure.java.connection-pool.connections.idle").build(),
-                connectionPool::idleConnectionCount);
+        registry.gauge(DISPATCHER_CALLS_QUEUED_METRIC,
+                () -> dispatchers.stream().mapToInt(Dispatcher::queuedCallsCount).sum());
+        registry.gauge(DISPATCHER_CALLS_RUNNING_METRIC,
+                () -> dispatchers.stream().mapToInt(Dispatcher::runningCallsCount).sum());
+        registry.gauge(CONNECTION_POOL_CONNECTIONS_TOTAL_METRIC, connectionPool::connectionCount);
+        registry.gauge(CONNECTION_POOL_CONNECTIONS_IDLE_METRIC, connectionPool::idleConnectionCount);
     }
 
     /**
@@ -183,7 +188,7 @@ public final class OkHttpClients {
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
         client.connectionPool(connectionPool);
 
-        client.dispatcher(dispatcher);
+        client.dispatcher(createDispatcher());
 
         return new RemotingOkHttpClient(
                 client.build(),
@@ -223,6 +228,14 @@ public final class OkHttpClients {
                                 : CipherSuites.fastCipherSuites())
                         .build(),
                 ConnectionSpec.CLEARTEXT);
+    }
+
+    private static Dispatcher createDispatcher() {
+        Dispatcher dispatcher = new Dispatcher(executionExecutor);
+        dispatcher.setMaxRequests(256);
+        dispatcher.setMaxRequestsPerHost(256);
+        dispatchers.add(dispatcher);
+        return dispatcher;
     }
 
 }
