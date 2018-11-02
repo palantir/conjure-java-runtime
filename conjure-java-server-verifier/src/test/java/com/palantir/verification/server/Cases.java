@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.verification;
+package com.palantir.verification.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;

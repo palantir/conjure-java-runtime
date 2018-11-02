@@ -6,7 +6,6 @@ dependencies {
     verifier "com.palantir.conjure.verification:verification-client::${osClassifier}@tgz"
 
     testCompile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
-    // testCompile 'com.palantir.websecurity:dropwizard-web-security'
     testCompile 'io.dropwizard:dropwizard-testing'
     testCompile 'junit:junit'
     testCompile 'org.assertj:assertj-core'
