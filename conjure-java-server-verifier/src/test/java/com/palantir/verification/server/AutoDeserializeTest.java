@@ -16,6 +16,8 @@
 
 package com.palantir.verification.server;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.verification.client.EndpointName;
 import com.palantir.conjure.verification.client.VerificationClientRequest;
@@ -26,8 +28,8 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
-import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -83,42 +85,53 @@ public class AutoDeserializeTest {
 
     @Test
     public void runTestCase() throws Exception {
-        Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
-
-        System.out.println(String.format("Test case %s: Invoking %s(%s), expected %s",
+        boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
+        System.out.println(String.format("[%s%s test case %s]: %s(%s), expected client to %s",
+                shouldIgnore ? "ignored " : "",
+                shouldSucceed ? "positive" : "negative",
                 index,
                 endpointName,
                 jsonString,
-                shouldSucceed ? "success" : "failure"));
+                shouldSucceed ? "succeed" : "fail"));
 
-        if (shouldSucceed) {
-            expectSuccess();
-        } else {
-            expectFailure();
+        Optional<Error> expectationFailure = shouldSucceed ? expectSuccess() : expectFailure();
+
+        if (shouldIgnore) {
+            assertThat(expectationFailure).describedAs(
+                    "The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
+                    .isNotEmpty();
+        }
+
+        Assume.assumeFalse(shouldIgnore);
+
+        if (expectationFailure.isPresent()) {
+            throw expectationFailure.get();
         }
     }
 
-    private void expectSuccess() throws Exception {
+    private Optional<Error> expectSuccess() throws Exception {
         try {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
                     .testCase(index)
                     .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
                     .build());
+            return Optional.empty();
         } catch (RemoteException e) {
-            log.error("Caught exception with params: {}", e.getError().parameters(), e);
-            throw e;
+            return Optional.of(new AssertionError("Expected call to succeed, but caught exception", e));
         }
     }
 
-    private void expectFailure() {
-        Assertions.assertThatExceptionOfType(Exception.class).isThrownBy(() -> {
+    private Optional<Error> expectFailure() {
+        try {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
                     .testCase(index)
                     .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
                     .build());
-            log.error("Result should have caused an exception");
-        });
+            return Optional.of(new AssertionError("Result should have caused an exception"));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 }
