@@ -35,7 +35,6 @@ public final class ServerUnderTestApplication extends Application<Configuration>
                 .setSubtypeResolver(new DiscoverableSubtypeResolver())
                 .registerModule(new FuzzyEnumModule());
         bootstrap.setObjectMapper(remotingObjectMapper);
-        // bootstrap.addBundle(new WebSecurityBundle());
     }
 
     @Override
