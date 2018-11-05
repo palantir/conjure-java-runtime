@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.verification;
-
+package com.palantir.verification.server;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
@@ -26,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.ProcessBuilder.Redirect;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.concurrent.CountDownLatch;
@@ -35,15 +35,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Spins up the 'verification-server' executable which will bind to port 8000, and tears it down at the end of the test.
+ * Spins up the 'verification-client' executable which will bind to port 8000, and tears it down at the end of the test.
  */
-public final class VerificationServerRule extends ExternalResource {
+public final class VerificationClientRule extends ExternalResource {
 
-    private static final Logger log = LoggerFactory.getLogger(VerificationServerRule.class);
+    private static final Logger log = LoggerFactory.getLogger(VerificationClientRule.class);
     private static final SslConfiguration TRUST_STORE_CONFIGURATION = new SslConfiguration.Builder()
             .trustStorePath(Paths.get("../conjure-java-jaxrs-client/src/test/resources/trustStore.jks"))
             .build();
-    private static final int PORT = 16298;
+    private static final int PORT = 16297;
     private static final ClientConfiguration clientConfiguration = ClientConfigurations.of(
             ImmutableList.of("http://localhost:" + PORT + "/"),
             SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION),
@@ -62,9 +62,10 @@ public final class VerificationServerRule extends ExternalResource {
                 "build/test-cases/test-cases.json",
                 "build/test-cases/verification-api.json")
                 .redirectErrorStream(true)
-                .redirectOutput(ProcessBuilder.Redirect.PIPE);
+                .redirectOutput(Redirect.PIPE);
 
         processBuilder.environment().put("PORT", String.valueOf(PORT));
+
         process = processBuilder.start();
 
         log.info("Waiting for server to start up");
