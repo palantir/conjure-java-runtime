@@ -5,7 +5,7 @@
 version: 2
 jobs:
   build:
-    docker: [{ image: 'circleci/openjdk:8u181-jdk' }]
+    docker: [{ image: 'circleci/openjdk:8u171-jdk' }]
     resource_class: xlarge
     environment:
       GRADLE_OPTS: -Dorg.gradle.console=plain -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
