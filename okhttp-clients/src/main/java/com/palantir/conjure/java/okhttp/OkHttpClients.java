@@ -57,7 +57,8 @@ public final class OkHttpClients {
     private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler((thread, uncaughtException) ->
                     log.error("An exception was uncaught in an execution thread. "
-                                    + "This implies a bug in conjure-java-runtime",
+                                    + "This likely left a thread blocked, and is as such a serious bug "
+                                    + "which requires debugging.",
                             uncaughtException))
             .setNameFormat("remoting-okhttp-dispatcher-%d")
             .build();
