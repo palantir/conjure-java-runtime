@@ -80,11 +80,11 @@ public final class Jackson204Decoder implements Decoder {
         @Nullable
         @Override
         public Object load(@Nonnull Type type) {
-            return constructInstanceOutOfThinAir(Types.getRawType(type))
+            return constructInstanceOutOfThinAir(Types.getRawType(type), type, 10)
                     .orElse(null);
         }
 
-        private Optional<Object> constructInstanceOutOfThinAir(Class<?> clazz) {
+        private Optional<Object> constructInstanceOutOfThinAir(Class<?> clazz, Type originalType, int maxRecursion) {
             // this is our preferred way to construct instances
             Optional<Object> jacksonInstance = jacksonDeserializeFromNull(clazz);
             if (jacksonInstance.isPresent()) {
@@ -96,19 +96,30 @@ public final class Jackson204Decoder implements Decoder {
             if (jsonCreator.isPresent()) {
                 Method method = jsonCreator.get();
                 Class<?> parameterType = method.getParameters()[0].getType();
-                Optional<Object> parameter = constructInstanceOutOfThinAir(parameterType); // recurse!
-                // TODO(dfox): if someone has a recursive chain of factories, I think this is infinite :/
+                Optional<Object> parameter = constructInstanceOutOfThinAir(
+                        parameterType, originalType, decrement(maxRecursion, originalType));
 
                 if (parameter.isPresent()) {
                     return invokeStaticFactoryMethod(method, parameter.get());
                 } else {
-                    log.debug("Found a @JsonCreator, but couldn't figure out how to construct the argument");
+                    log.debug("Found a @JsonCreator, but couldn't construct the parameter",
+                            SafeArg.of("type", originalType),
+                            SafeArg.of("parameter", parameter));
                     return Optional.empty();
                 }
             }
 
-            log.debug("Jackson couldn't instantiate this and also couldn't find a usable @JsonCreator");
+            log.debug("Jackson couldn't instantiate an empty instance and also couldn't find a usable @JsonCreator",
+                    SafeArg.of("type", originalType));
             return Optional.empty();
+        }
+
+        private static int decrement(int maxRecursion, Type originalType) {
+            Preconditions.checkState(
+                    maxRecursion > 0,
+                    "Unable to construct an empty instance as @JsonCreator requires too much recursion",
+                    SafeArg.of("type", originalType));
+            return maxRecursion - 1;
         }
 
         private Optional<Object> jacksonDeserializeFromNull(Class<?> clazz) {
