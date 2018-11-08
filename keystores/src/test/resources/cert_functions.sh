@@ -547,6 +547,7 @@ create_jks_trust_store_from_pem() {
       -alias "$cert_path" \
       -keystore "$output_store_name.$JKS_EXT" \
       -storepass "$output_store_pass" \
+      -storetype "jks" \
       2>&1)
   check_exit_code "Failed to create JKS trust store from PEM certificate" "$output"
   set -e

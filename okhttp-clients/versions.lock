@@ -176,7 +176,7 @@
             ]
         },
         "io.dropwizard.metrics:metrics-core": {
-            "locked": "3.2.5",
+            "locked": "3.2.6",
             "transitive": [
                 "com.palantir.tritium:tritium-registry"
             ]
@@ -402,7 +402,7 @@
             ]
         },
         "io.dropwizard.metrics:metrics-core": {
-            "locked": "3.2.5",
+            "locked": "3.2.6",
             "transitive": [
                 "com.palantir.tritium:tritium-registry"
             ]
