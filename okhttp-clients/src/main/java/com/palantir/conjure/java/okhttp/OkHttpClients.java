@@ -81,7 +81,8 @@ public final class OkHttpClients {
     static {
         dispatcher = new Dispatcher(executionExecutor);
         dispatcher.setMaxRequests(256);
-        dispatcher.setMaxRequestsPerHost(256);
+        // Must be less than maxRequests so a single slow host does not block all requests
+        dispatcher.setMaxRequestsPerHost(64);
         // metrics
         registry.gauge(
                 MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.queued").build(),
