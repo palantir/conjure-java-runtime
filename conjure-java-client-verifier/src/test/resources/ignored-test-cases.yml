@@ -19,8 +19,63 @@ client:
    - '{"value":"1523040070"}' # jackson coerces things to other types
    - '{"value":1523040070}' # jackson coerces things to other types
 
-   receiveRawOptionalExample:
-   - "null" # https://github.com/palantir/conjure-java-runtime/issues/813
+   receiveOptionalIntegerExample:
+   - 'null'
+   - '{"value":"1234"}' # jackson coerces things to other types
+   receiveListBearerTokenAliasExample:
+   - 'null'
+   receiveListBinaryAliasExample:
+   - 'null'
+   receiveListBooleanAliasExample:
+   - 'null'
+   receiveListDateTimeAliasExample:
+   - 'null'
+   receiveListDoubleAliasExample:
+   - 'null'
+   receiveListIntegerAliasExample:
+   - 'null'
+   receiveListRidAliasExample:
+   - 'null'
+   receiveListSafeLongAliasExample:
+   - 'null'
+   receiveListStringAliasExample:
+   - 'null'
+   receiveListUuidAliasExample:
+   - 'null'
+   receiveListAnyAliasExample:
+   - 'null'
+   receiveSetBearerTokenAliasExample:
+   - 'null'
+   receiveSetBinaryAliasExample:
+   - 'null'
+   receiveSetBooleanAliasExample:
+   - 'null'
+   receiveSetDateTimeAliasExample:
+   - 'null'
+   receiveSetDoubleAliasExample:
+   - 'null'
+   receiveSetIntegerAliasExample:
+   - 'null'
+   receiveSetRidAliasExample:
+   - 'null'
+   receiveSetSafeLongAliasExample:
+   - 'null'
+   receiveSetStringAliasExample:
+   - 'null'
+   receiveSetUuidAliasExample:
+   - 'null'
+   receiveSetAnyAliasExample:
+   - 'null'
+
+   receiveMapBinaryAliasExample:
+   - '{}'
+   - '{"SGVsbG8sIFdvcmxk": true}'
+   receiveMapDoubleAliasExample:
+   - '{"10": true, "10e0": false}'
+   - '{"10": true, "10.0": false}'
+
+   receiveMapEnumExampleAlias:
+   - '{"ONE": "", "TWO": "", "BAD VARIANT": ""}'
 
   singleHeaderService: {}
 

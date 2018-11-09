@@ -30,9 +30,11 @@ import com.palantir.conjure.verification.client.IntegerAliasExample;
 import com.palantir.conjure.verification.client.IntegerExample;
 import com.palantir.conjure.verification.client.KebabCaseObjectExample;
 import com.palantir.conjure.verification.client.ListExample;
-import com.palantir.conjure.verification.client.LongOptionalExample;
+import com.palantir.conjure.verification.client.LongFieldNameOptionalExample;
 import com.palantir.conjure.verification.client.MapExample;
+import com.palantir.conjure.verification.client.OptionalBooleanExample;
 import com.palantir.conjure.verification.client.OptionalExample;
+import com.palantir.conjure.verification.client.OptionalIntegerExample;
 import com.palantir.conjure.verification.client.RawOptionalExample;
 import com.palantir.conjure.verification.client.ReferenceAliasExample;
 import com.palantir.conjure.verification.client.RidAliasExample;
@@ -124,7 +126,17 @@ public final class AutoDeserializeResource implements AutoDeserializeService {
     }
 
     @Override
-    public LongOptionalExample getLongOptionalExample(LongOptionalExample body) {
+    public OptionalBooleanExample getOptionalBooleanExample(OptionalBooleanExample body) {
+        return body;
+    }
+
+    @Override
+    public OptionalIntegerExample getOptionalIntegerExample(OptionalIntegerExample body) {
+        return body;
+    }
+
+    @Override
+    public LongFieldNameOptionalExample getLongFieldNameOptionalExample(LongFieldNameOptionalExample body) {
         return body;
     }
 

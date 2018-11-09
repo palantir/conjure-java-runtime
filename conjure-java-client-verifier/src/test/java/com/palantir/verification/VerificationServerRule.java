@@ -22,6 +22,7 @@ import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfigurations;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
+import com.palantir.logsafe.Preconditions;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,7 +95,9 @@ public final class VerificationServerRule extends ExternalResource {
         thread.setDaemon(true);
         thread.start();
 
-        latch.await(10, TimeUnit.SECONDS);
+        Preconditions.checkState(
+                latch.await(3, TimeUnit.SECONDS),
+                "verification-server failed to start up within 2 seconds");
     }
 
     @Override
