@@ -30,7 +30,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -43,12 +47,12 @@ import org.slf4j.LoggerFactory;
  *
  * Empty instances are cached and re-used to avoid reflection and exceptions on a hot codepath.
  */
-public final class Jackson204Decoder implements Decoder {
+public final class EmptyContainerDecoder implements Decoder {
 
     private final LoadingCache<Type, Object> blankInstanceCache;
     private final Decoder delegate;
 
-    public Jackson204Decoder(Decoder delegate, ObjectMapper mapper) {
+    public EmptyContainerDecoder(ObjectMapper mapper, Decoder delegate) {
         this.delegate = delegate;
         this.blankInstanceCache = Caffeine.newBuilder()
                 .maximumSize(10_000)
@@ -58,14 +62,16 @@ public final class Jackson204Decoder implements Decoder {
 
     @Override
     public Object decode(Response response, Type type) throws IOException {
-        if (response.status() == 204) {
+        Object delegateResult = delegate.decode(response, type);
+
+        if (response.status() == 204 || (response.status() == 200 && delegateResult == null)) {
             @Nullable Object object = blankInstanceCache.get(type);
             return Preconditions.checkNotNull(
                     object,
                     "Received HTTP 204 but unable to construct an empty instance for return type",
                     SafeArg.of("type", type));
         } else {
-            return delegate.decode(response, type);
+            return delegateResult;
         }
     }
 
@@ -80,11 +86,17 @@ public final class Jackson204Decoder implements Decoder {
         @Nullable
         @Override
         public Object load(@Nonnull Type type) {
-            return constructInstanceOutOfThinAir(Types.getRawType(type), type, 10)
+            return constructEmptyInstance(Types.getRawType(type), type, 10)
                     .orElse(null);
         }
 
-        private Optional<Object> constructInstanceOutOfThinAir(Class<?> clazz, Type originalType, int maxRecursion) {
+        private Optional<Object> constructEmptyInstance(Class<?> clazz, Type originalType, int maxRecursion) {
+            // handle Map, List, Set
+            Optional<Object> collection = coerceCollections(clazz);
+            if (collection.isPresent()) {
+                return collection;
+            }
+
             // this is our preferred way to construct instances
             Optional<Object> jacksonInstance = jacksonDeserializeFromNull(clazz);
             if (jacksonInstance.isPresent()) {
@@ -96,7 +108,7 @@ public final class Jackson204Decoder implements Decoder {
             if (jsonCreator.isPresent()) {
                 Method method = jsonCreator.get();
                 Class<?> parameterType = method.getParameters()[0].getType();
-                Optional<Object> parameter = constructInstanceOutOfThinAir(
+                Optional<Object> parameter = constructEmptyInstance(
                         parameterType, originalType, decrement(maxRecursion, originalType));
 
                 if (parameter.isPresent()) {
@@ -120,6 +132,18 @@ public final class Jackson204Decoder implements Decoder {
                     "Unable to construct an empty instance as @JsonCreator requires too much recursion",
                     SafeArg.of("type", originalType));
             return maxRecursion - 1;
+        }
+
+        private static Optional<Object> coerceCollections(Class<?> clazz) {
+            if (List.class.isAssignableFrom(clazz)) {
+                return Optional.of(Collections.emptyList());
+            } else if (Set.class.isAssignableFrom(clazz)) {
+                return Optional.of(Collections.emptySet());
+            } else if (Map.class.isAssignableFrom(clazz)) {
+                return Optional.of(Collections.emptyMap());
+            } else {
+                return Optional.empty();
+            }
         }
 
         private Optional<Object> jacksonDeserializeFromNull(Class<?> clazz) {

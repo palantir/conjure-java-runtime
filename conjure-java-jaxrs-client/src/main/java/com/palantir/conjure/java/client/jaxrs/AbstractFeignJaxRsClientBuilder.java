@@ -29,12 +29,12 @@ import com.palantir.conjure.java.okhttp.OkHttpClients;
 import com.palantir.logsafe.Preconditions;
 import feign.CborDelegateDecoder;
 import feign.CborDelegateEncoder;
-import feign.CoerceNullCollectionsDecoder;
 import feign.Contract;
 import feign.Feign;
 import feign.GuavaOptionalAwareDecoder;
 import feign.InputStreamDelegateDecoder;
 import feign.InputStreamDelegateEncoder;
+import feign.EmptyContainerDecoder;
 import feign.Java8OptionalAwareDecoder;
 import feign.Logger;
 import feign.NeverReturnNullDecoder;
@@ -122,13 +122,14 @@ abstract class AbstractFeignJaxRsClientBuilder {
 
     private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
         return new NeverReturnNullDecoder(
-                new CoerceNullCollectionsDecoder(
-                    new Java8OptionalAwareDecoder(
+                new Java8OptionalAwareDecoder(
                         new GuavaOptionalAwareDecoder(
-                                new InputStreamDelegateDecoder(
-                                        new TextDelegateDecoder(
-                                                new CborDelegateDecoder(
-                                                        cborObjectMapper,
-                                                            new JacksonDecoder(objectMapper))))))));
+                                new EmptyContainerDecoder(
+                                        objectMapper,
+                                        new InputStreamDelegateDecoder(
+                                                new TextDelegateDecoder(
+                                                        new CborDelegateDecoder(
+                                                                cborObjectMapper,
+                                                                new JacksonDecoder(objectMapper))))))));
     }
 }
