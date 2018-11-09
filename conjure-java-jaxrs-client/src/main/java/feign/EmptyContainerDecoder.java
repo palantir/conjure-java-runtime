@@ -55,7 +55,7 @@ public final class EmptyContainerDecoder implements Decoder {
     public EmptyContainerDecoder(ObjectMapper mapper, Decoder delegate) {
         this.delegate = delegate;
         this.blankInstanceCache = Caffeine.newBuilder()
-                .maximumSize(10_000)
+                .maximumSize(1000)
                 .expireAfterAccess(10, TimeUnit.MINUTES)
                 .build(new BlankInstanceLoader(mapper));
     }
