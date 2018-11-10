@@ -1,6 +1,4 @@
 /*
- * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
- *
  * Copied from Retrofit 2.3.0 and modified; original copyright notice below.
  *
  * See {@link https://github.com/square/retrofit/blob/master/retrofit-adapters/java8/src/main/java/retrofit2/adapter/java8/Java8CallAdapterFactory.java}
