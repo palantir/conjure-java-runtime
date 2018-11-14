@@ -154,8 +154,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
                 Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
                 if (!redirectTo.isPresent()) {
-                    callback.onFailure(call, new IOException("Failed to determine valid failover URL"
-                            + "for '" + request().url() + "' and base URLs " + urls.getBaseUrls()));
+                    callback.onFailure(call, new IOException("Failed to determine valid failover URL for '""
+                            + request().url() + "' and base URLs " + urls.getBaseUrls()));
                     return;
                 }
 
