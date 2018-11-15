@@ -12,6 +12,7 @@ dependencies {
     api "javax.ws.rs:javax.ws.rs-api"
     implementation "com.google.guava:guava"
     implementation "com.netflix.feign:feign-jackson"
+    implementation "com.netflix.feign:feign-core"
     implementation("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
