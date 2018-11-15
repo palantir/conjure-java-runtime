@@ -5,10 +5,13 @@ dependencies {
     verificationApi 'com.palantir.conjure.verification:verification-server-api'
     verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
-    testCompile 'junit:junit'
-    testCompile 'org.assertj:assertj-core'
-    testCompile project(':conjure-java-jaxrs-client')
-    testCompile project(':conjure-java-retrofit2-client')
-    testCompile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
-    testCompile 'org.apache.commons:commons-lang3'
+    testImplementation project(':conjure-java-jaxrs-client')
+    testImplementation project(':conjure-java-retrofit2-client')
+    testImplementation project(':conjure-java-jackson-serialization')
+    testImplementation project(':keystores')
+    testImplementation 'junit:junit'
+    testImplementation "org.slf4j:slf4j-api"
+    testImplementation 'org.assertj:assertj-core'
+    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    testImplementation 'org.apache.commons:commons-lang3'
 }

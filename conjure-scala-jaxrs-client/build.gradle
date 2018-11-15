@@ -1,6 +1,7 @@
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
-    compile project(':conjure-java-jaxrs-client')
-    compile 'com.fasterxml.jackson.module:jackson-module-scala_2.11'
+    api project(':conjure-java-jaxrs-client')
+    implementation project(':conjure-java-jackson-serialization')
+    implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.11'
 }
