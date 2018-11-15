@@ -33,10 +33,7 @@
             ]
         },
         "com.google.guava:guava": {
-            "locked": "23.6.1-jre",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:keystores"
-            ]
+            "locked": "23.6.1-jre"
         },
         "com.google.j2objc:j2objc-annotations": {
             "locked": "1.1",

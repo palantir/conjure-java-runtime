@@ -28,7 +28,6 @@
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.tracing:tracing",
                 "com.palantir.tracing:tracing-api"
             ]
@@ -87,7 +86,6 @@
             "locked": "23.6.1-jre",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.tracing:tracing"
             ]
         },
@@ -112,8 +110,7 @@
         "com.palantir.conjure.java.api:ssl-config": {
             "locked": "2.0.0",
             "transitive": [
-                "com.palantir.conjure.java.api:service-config",
-                "com.palantir.conjure.java.runtime:keystores"
+                "com.palantir.conjure.java.api:service-config"
             ]
         },
         "com.palantir.conjure.java.runtime:client-config": {
@@ -121,12 +118,6 @@
         },
         "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization": {
             "project": true
-        },
-        "com.palantir.conjure.java.runtime:keystores": {
-            "project": true,
-            "transitive": [
-                "com.palantir.conjure.java.runtime:client-config"
-            ]
         },
         "com.palantir.safe-logging:preconditions": {
             "locked": "1.5.1",
@@ -139,7 +130,6 @@
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
-                "com.palantir.conjure.java.runtime:client-config",
                 "com.palantir.safe-logging:preconditions",
                 "com.palantir.tracing:tracing",
                 "com.palantir.tritium:tritium-registry"
@@ -311,6 +301,7 @@
             "locked": "23.6.1-jre",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
+                "com.palantir.conjure.java.runtime:client-config",
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.tracing:tracing"
             ]
