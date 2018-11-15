@@ -32,7 +32,7 @@ subprojects {
 
     // Ensure test behaves as a real user of a library, not having access to the libaries' implementation dependencies
     configurations {
-        testImplementation.extendsFrom = [api]
+        testImplementation.extendsFrom = [testCompile, api]
         testRuntimeClasspath.extendsFrom implementation
     }
 
