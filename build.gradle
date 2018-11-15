@@ -40,7 +40,7 @@ subprojects {
     dependencyLock {
         includeTransitives = true
         lockFile = 'versions.lock'
-        configurationNames = ['runtime', 'compileClasspath']
+        configurationNames = ['runtimeClasspath', 'compileClasspath']
     }
 
     task verifyDependencyLocksAreCurrent {
