@@ -3,20 +3,22 @@ apply plugin: 'org.inferred.processors'
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
-    compile "com.fasterxml.jackson.core:jackson-databind"
-    compile "com.google.guava:guava"
-    compile "com.palantir.conjure.java.api:ssl-config"
+    api "com.fasterxml.jackson.core:jackson-databind"
+    api "com.palantir.conjure.java.api:ssl-config"
+    implementation "com.google.guava:guava"
 
-    testCompile project(":conjure-java-jackson-serialization")
-    testCompile("com.netflix.feign:feign-jaxrs") {
+    testImplementation project(":conjure-java-jackson-serialization")
+    testImplementation("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
     }
-    testCompile "com.netflix.feign:feign-okhttp"
-    testCompile "org.hamcrest:hamcrest-all"
-    testCompile "io.dropwizard:dropwizard-core"
-    testCompile "io.dropwizard:dropwizard-testing"
-    testCompile "junit:junit"
+    testImplementation("com.netflix.feign:feign-core")
+    testImplementation "com.netflix.feign:feign-okhttp"
+    testImplementation "com.squareup.okhttp3:okhttp"
+    testImplementation "org.hamcrest:hamcrest-all"
+    testImplementation "io.dropwizard:dropwizard-core"
+    testImplementation "io.dropwizard:dropwizard-testing"
+    testImplementation "junit:junit"
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'

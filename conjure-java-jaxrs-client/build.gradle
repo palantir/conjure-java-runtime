@@ -2,31 +2,36 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 apply from: "${rootDir}/gradle/publish-bom.gradle"
 
 dependencies {
-    compile project(":conjure-java-jackson-serialization")
-    compile project(":extras:refresh-utils")
-    compile project(":client-config")
-    compile project(":keystores")
-    compile project(":okhttp-clients")
+    api project(":extras:refresh-utils")
+    api project(":client-config")
+    api project(":okhttp-clients")
+    api "com.google.code.findbugs:jsr305"
+    api "javax.ws.rs:javax.ws.rs-api"
+    // TODO(dsanduleac): Should be implementation, but can't because we expose feign.TextDelegateEncoder
+    api "com.netflix.feign:feign-core"
 
-    compile "com.google.code.findbugs:jsr305"
-    compile "com.google.guava:guava"
-    compile "com.netflix.feign:feign-jackson"
-    compile("com.netflix.feign:feign-jaxrs") {
+    implementation project(":conjure-java-jackson-serialization")
+    implementation project(":keystores")
+    implementation "com.google.guava:guava"
+    implementation "com.github.ben-manes.caffeine:caffeine"
+    implementation "com.netflix.feign:feign-jackson"
+    implementation("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
     }
-    compile "com.netflix.feign:feign-okhttp"
-    compile "com.netflix.feign:feign-slf4j"
-    compile "com.palantir.tracing:tracing-okhttp3"
-    compile "javax.ws.rs:javax.ws.rs-api"
-    compile "org.slf4j:slf4j-api"
+    implementation "com.netflix.feign:feign-okhttp"
+    implementation "com.netflix.feign:feign-slf4j"
+    implementation "com.palantir.tracing:tracing-okhttp3"
+    implementation "org.slf4j:slf4j-api"
 
-    testCompile project(":conjure-java-retrofit2-client")
-    testCompile project(":conjure-java-jersey-server")
-    testCompile "com.squareup.okhttp3:mockwebserver"
-    testCompile "io.dropwizard:dropwizard-testing"
-    testCompile "junit:junit"
-    testCompile "org.hamcrest:hamcrest-all"
-    testCompile "org.mockito:mockito-core"
-    testCompile "com.palantir.safe-logging:preconditions-assertj"
+    testImplementation project(":conjure-java-retrofit2-client")
+    testImplementation project(":conjure-java-jersey-server")
+    testImplementation project(':keystores')
+    testImplementation "com.netflix.feign:feign-jackson"
+    testImplementation "com.squareup.okhttp3:mockwebserver"
+    testImplementation "io.dropwizard:dropwizard-testing"
+    testImplementation "junit:junit"
+    testImplementation "org.hamcrest:hamcrest-all"
+    testImplementation "org.mockito:mockito-core"
+    testImplementation "com.palantir.safe-logging:preconditions-assertj"
 }

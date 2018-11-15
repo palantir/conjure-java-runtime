@@ -10,7 +10,7 @@
             "locked": "1.7.12"
         }
     },
-    "runtime": {
+    "runtimeClasspath": {
         "com.ea.agentloader:ea-agent-loader": {
             "locked": "1.0.3"
         },

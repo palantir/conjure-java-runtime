@@ -8,24 +8,25 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 apply from: "${rootDir}/gradle/publish-bom.gradle"
 
 dependencies {
-    compile project(":conjure-java-jackson-serialization")
-    compile project(":extras:refresh-utils")
-    compile project(":client-config")
-    compile project(":keystores")
-    compile project(":okhttp-clients")
+    api project(":extras:refresh-utils")
+    api project(":client-config")
+    api project(":okhttp-clients")
+    api "com.squareup.retrofit2:retrofit"
 
-    compile "com.fasterxml.jackson.module:jackson-module-afterburner"
-    compile "com.palantir.tracing:tracing-okhttp3"
-    compile "com.squareup.retrofit2:converter-jackson"
-    compile "com.squareup.retrofit2:retrofit"
-    compile "org.slf4j:slf4j-api"
+    implementation project(":conjure-java-jackson-serialization")
+    implementation project(":keystores")
+    implementation "com.fasterxml.jackson.module:jackson-module-afterburner"
+    implementation "com.palantir.tracing:tracing-okhttp3"
+    implementation "com.squareup.retrofit2:converter-jackson"
+    implementation "org.slf4j:slf4j-api"
 
-    testCompile "com.squareup.okhttp3:mockwebserver"
-    testCompile "junit:junit"
-    testCompile "org.assertj:assertj-core"
-    testCompile "org.hamcrest:hamcrest-all"
-    testCompile "org.mockito:mockito-core"
-    testCompile "com.palantir.safe-logging:preconditions-assertj"
+    testImplementation project(":keystores")
+    testImplementation "com.squareup.okhttp3:mockwebserver"
+    testImplementation "junit:junit"
+    testImplementation "org.assertj:assertj-core"
+    testImplementation "org.hamcrest:hamcrest-all"
+    testImplementation "org.mockito:mockito-core"
+    testImplementation "com.palantir.safe-logging:preconditions-assertj"
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'

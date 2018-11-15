@@ -1,8 +1,9 @@
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
-    compile project(":keystores")
+    api project(":keystores")
 
-    testCompile "junit:junit"
-    testCompile "org.hamcrest:hamcrest-all"
+    testImplementation "junit:junit"
+    testImplementation "org.hamcrest:hamcrest-all"
+    testImplementation 'com.google.guava:guava'
 }
