@@ -10,9 +10,10 @@ dependencies {
 
     api "com.google.code.findbugs:jsr305"
     api "javax.ws.rs:javax.ws.rs-api"
+    // TODO(dsanduleac): Should be implementation, but can't because we expose feign.TextDelegateEncoder
+    api "com.netflix.feign:feign-core"
     implementation "com.google.guava:guava"
     implementation "com.netflix.feign:feign-jackson"
-    implementation "com.netflix.feign:feign-core"
     implementation("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
@@ -24,6 +25,7 @@ dependencies {
 
     testImplementation project(":conjure-java-retrofit2-client")
     testImplementation project(":conjure-java-jersey-server")
+    testImplementation "com.netflix.feign:feign-jackson"
     testImplementation "com.squareup.okhttp3:mockwebserver"
     testImplementation "io.dropwizard:dropwizard-testing"
     testImplementation "junit:junit"
