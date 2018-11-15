@@ -30,6 +30,12 @@ allprojects {
 subprojects {
     apply plugin: 'java-library'
 
+    // Ensure test behaves as a real user of a library, not having access to the libaries' implementation dependencies
+    configurations {
+        testImplementation.extendsFrom = [api]
+        testRuntimeClasspath.extendsFrom implementation
+    }
+
     sourceCompatibility = 1.8
     if (gradle.startParameter.taskNames.find {
         it.endsWith('verifyDependencyLocksAreCurrent') || it.endsWith('build')}) {
