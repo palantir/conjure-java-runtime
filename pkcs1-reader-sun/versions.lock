@@ -65,7 +65,7 @@
             ]
         }
     },
-    "runtime": {
+    "runtimeClasspath": {
         "com.fasterxml.jackson.core:jackson-annotations": {
             "locked": "2.9.7",
             "transitive": [

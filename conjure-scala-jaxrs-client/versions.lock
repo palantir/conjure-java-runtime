@@ -29,12 +29,10 @@
                 "com.fasterxml.jackson.module:jackson-module-afterburner",
                 "com.fasterxml.jackson.module:jackson-module-paranamer",
                 "com.fasterxml.jackson.module:jackson-module-scala_2.11",
-                "com.netflix.feign:feign-jackson",
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
                 "com.palantir.conjure.java.runtime:keystores",
-                "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing",
                 "com.palantir.tracing:tracing-api"
             ]
@@ -56,7 +54,6 @@
             "locked": "2.9.7",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing"
             ]
         },
@@ -108,7 +105,6 @@
             "locked": "23.6.1-jre",
             "transitive": [
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.conjure.java.runtime:refresh-utils",
@@ -128,33 +124,6 @@
             ]
         },
         "com.netflix.feign:feign-core": {
-            "locked": "8.18.0",
-            "transitive": [
-                "com.netflix.feign:feign-jackson",
-                "com.netflix.feign:feign-jaxrs",
-                "com.netflix.feign:feign-okhttp",
-                "com.netflix.feign:feign-slf4j"
-            ]
-        },
-        "com.netflix.feign:feign-jackson": {
-            "locked": "8.18.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client"
-            ]
-        },
-        "com.netflix.feign:feign-jaxrs": {
-            "locked": "8.18.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client"
-            ]
-        },
-        "com.netflix.feign:feign-okhttp": {
-            "locked": "8.18.0",
-            "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client"
-            ]
-        },
-        "com.netflix.feign:feign-slf4j": {
             "locked": "8.18.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client"
@@ -189,7 +158,6 @@
         "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization": {
             "project": true,
             "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
@@ -199,8 +167,7 @@
         "com.palantir.conjure.java.runtime:keystores": {
             "project": true,
             "transitive": [
-                "com.palantir.conjure.java.runtime:client-config",
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client"
+                "com.palantir.conjure.java.runtime:client-config"
             ]
         },
         "com.palantir.conjure.java.runtime:okhttp-clients": {
@@ -218,7 +185,6 @@
         "com.palantir.safe-logging:preconditions": {
             "locked": "1.5.1",
             "transitive": [
-                "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
@@ -255,7 +221,6 @@
         "com.palantir.tracing:tracing-okhttp3": {
             "locked": "1.2.0",
             "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
@@ -274,7 +239,6 @@
         "com.squareup.okhttp3:okhttp": {
             "locked": "3.11.0",
             "transitive": [
-                "com.netflix.feign:feign-okhttp",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.tracing:tracing-okhttp3",
                 "com.squareup.okhttp3:logging-interceptor"
@@ -318,12 +282,6 @@
                 "com.google.guava:guava"
             ]
         },
-        "org.jvnet:animal-sniffer-annotation": {
-            "locked": "1.0",
-            "transitive": [
-                "com.netflix.feign:feign-core"
-            ]
-        },
         "org.scala-lang:scala-library": {
             "locked": "2.11.12",
             "transitive": [
@@ -334,16 +292,13 @@
             "locked": "1.7.12",
             "transitive": [
                 "com.netflix.concurrency-limits:concurrency-limits-core",
-                "com.netflix.feign:feign-slf4j",
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
-                "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing",
                 "io.dropwizard.metrics:metrics-core"
             ]
         }
     },
-    "runtime": {
+    "runtimeClasspath": {
         "com.fasterxml.jackson.core:jackson-annotations": {
             "locked": "2.9.7",
             "transitive": [
@@ -477,7 +432,8 @@
                 "com.netflix.feign:feign-jackson",
                 "com.netflix.feign:feign-jaxrs",
                 "com.netflix.feign:feign-okhttp",
-                "com.netflix.feign:feign-slf4j"
+                "com.netflix.feign:feign-slf4j",
+                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client"
             ]
         },
         "com.netflix.feign:feign-jackson": {

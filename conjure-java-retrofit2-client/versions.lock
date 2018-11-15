@@ -29,7 +29,6 @@
                 "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
                 "com.palantir.conjure.java.runtime:keystores",
-                "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing",
                 "com.palantir.tracing:tracing-api",
                 "com.squareup.retrofit2:converter-jackson"
@@ -52,7 +51,6 @@
             "locked": "2.9.7",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
-                "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing"
             ]
         },
@@ -158,7 +156,6 @@
         "com.palantir.safe-logging:preconditions": {
             "locked": "1.5.1",
             "transitive": [
-                "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
@@ -267,13 +264,12 @@
             "transitive": [
                 "com.netflix.concurrency-limits:concurrency-limits-core",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
-                "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing",
                 "io.dropwizard.metrics:metrics-core"
             ]
         }
     },
-    "runtime": {
+    "runtimeClasspath": {
         "com.fasterxml.jackson.core:jackson-annotations": {
             "locked": "2.9.7",
             "transitive": [
