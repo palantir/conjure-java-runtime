@@ -12,7 +12,9 @@ dependencies {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
     }
+    testCompile("com.netflix.feign:feign-core")
     testCompile "com.netflix.feign:feign-okhttp"
+    testCompile "com.squareup.okhttp3:okhttp"
     testCompile "org.hamcrest:hamcrest-all"
     testCompile "io.dropwizard:dropwizard-core"
     testCompile "io.dropwizard:dropwizard-testing"
