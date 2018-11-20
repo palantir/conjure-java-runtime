@@ -30,7 +30,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class IoExceptionResponseHandlerTest {
@@ -41,17 +41,18 @@ public final class IoExceptionResponseHandlerTest {
     private static final IoExceptionResponseHandler handler = IoExceptionResponseHandler.INSTANCE;
 
     @Test
-    public void doesNotProduceExceptionOn101Or2xx() throws Exception {
+    public void doesNotProduceExceptionOn101Or2xx() {
         assertThat(handler.handle(response(200, MediaType.APPLICATION_JSON, "body"))).isEmpty();
         assertThat(handler.handle(response(101, MediaType.APPLICATION_JSON, "body"))).isEmpty();
     }
 
     @Test
-    public void extractsIoExceptionForAllErrorCodes() throws Exception {
+    public void extractsIoExceptionForAllErrorCodes() {
         for (int code : ImmutableList.of(300, 400, 404, 500)) {
             IOException exception = decode(MediaType.APPLICATION_JSON, code, "body").get();
             assertThat(exception.getMessage()).isEqualTo(
-                    "Error " + code + ". (Failed to parse response body as SerializableError.)");
+                    "Error " + code + ". (Failed to parse response body as SerializableError.): "
+                            + "{code=300, body=body, contentType=application/json}");
         }
     }
 
@@ -79,7 +80,7 @@ public final class IoExceptionResponseHandlerTest {
                 .message("unused")
                 .header(HttpHeaders.CONTENT_TYPE, mediaType);
         if (body != null) {
-            response.body(ResponseBody.create(okhttp3.MediaType.parse(mediaType.toString()), body));
+            response.body(ResponseBody.create(okhttp3.MediaType.parse(mediaType), body));
         }
         return response.build();
     }
