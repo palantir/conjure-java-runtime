@@ -22,7 +22,7 @@ import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import org.junit.Ignore;
+import org.junit.Test;
 
 public final class ConcurrencyLimitersTest {
     private static final String KEY = "";
@@ -30,7 +30,7 @@ public final class ConcurrencyLimitersTest {
     private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(
             new DefaultTaggedMetricRegistry(), TIMEOUT, ConcurrencyLimitersTest.class);
 
-    @Ignore
+    @Test
     public void testTimeout() throws IOException {
         Instant start = Instant.now();
         Thread exhauster = exhaust();
