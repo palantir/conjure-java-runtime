@@ -3,7 +3,6 @@
 # To manually manage the CircleCI configuration for this project, remove the .circleci/template.sh file.
 
 version: 2
-
 jobs:
   build:
     docker: [{ image: 'circleci/openjdk:8u171-node' }]
@@ -12,6 +11,7 @@ jobs:
       GRADLE_OPTS: -Dorg.gradle.console=plain -Dorg.gradle.internal.launcher.welcomeMessageEnabled=false
       CIRCLE_TEST_REPORTS: /home/circleci/junit
       CIRCLE_ARTIFACTS: /home/circleci/artifacts
+      _JAVA_OPTIONS: '-Xmx2048m'
     steps:
       - checkout
       - restore_cache: { key: 'gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}' }
@@ -51,7 +51,7 @@ jobs:
       - checkout
       - restore_cache: { key: 'gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}' }
       - restore_cache: { key: 'gradle-cache-{{ checksum "versions.props" }}-{{ checksum "build.gradle" }}' }
-      - run: ./gradlew --no-daemon --parallel --stacktrace  --continue --max-workers=8 --profile build
+      - run: ./gradlew --no-daemon --parallel --stacktrace  --continue --profile build
       - save_cache:
           key: 'gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}'
           paths: [ ~/.gradle/wrapper ]
