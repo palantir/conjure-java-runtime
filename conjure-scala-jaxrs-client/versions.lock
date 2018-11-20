@@ -152,13 +152,13 @@
             ]
         },
         "com.palantir.safe-logging:preconditions": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config"
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
@@ -172,13 +172,13 @@
             ]
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.11.0",
+            "locked": "3.12.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.squareup.okio:okio": {
-            "locked": "1.14.0",
+            "locked": "1.15.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]
@@ -435,7 +435,7 @@
             ]
         },
         "com.palantir.safe-logging:preconditions": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
@@ -443,7 +443,7 @@
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
@@ -485,13 +485,13 @@
             ]
         },
         "com.squareup.okhttp3:logging-interceptor": {
-            "locked": "3.11.0",
+            "locked": "3.12.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.11.0",
+            "locked": "3.12.0",
             "transitive": [
                 "com.netflix.feign:feign-okhttp",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
@@ -500,7 +500,7 @@
             ]
         },
         "com.squareup.okio:okio": {
-            "locked": "1.14.0",
+            "locked": "1.15.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]
