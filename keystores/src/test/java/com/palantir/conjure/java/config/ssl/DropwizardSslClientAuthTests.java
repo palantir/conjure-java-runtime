@@ -21,6 +21,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
+import com.palantir.conjure.java.http2.Http2Agent;
 import feign.Feign;
 import feign.RetryableException;
 import feign.jaxrs.JAXRSContract;
@@ -42,6 +43,11 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 public final class DropwizardSslClientAuthTests {
+
+    static {
+        Http2Agent.install();
+    }
+
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
             TestEchoServer.class,

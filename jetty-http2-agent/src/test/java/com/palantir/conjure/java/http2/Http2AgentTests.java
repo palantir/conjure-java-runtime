@@ -12,13 +12,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public final class Http2AgentTests {
 
-    @BeforeClass
-    public static void beforeClass() {
+    static {
         Http2Agent.install();
     }
 

@@ -512,7 +512,7 @@
             ]
         },
         "io.dropwizard.metrics:metrics-core": {
-            "locked": "3.2.5",
+            "locked": "3.2.6",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.tritium:tritium-registry"
