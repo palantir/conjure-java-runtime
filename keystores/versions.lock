@@ -55,7 +55,7 @@
             ]
         },
         "org.immutables:value": {
-            "locked": "2.7.1"
+            "locked": "2.7.3"
         }
     },
     "runtimeClasspath": {

@@ -121,7 +121,7 @@
             "project": true
         },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.tracing:tracing"
@@ -401,13 +401,13 @@
             "project": true
         },
         "com.palantir.safe-logging:preconditions": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:errors"
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.safe-logging:preconditions",

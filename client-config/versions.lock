@@ -55,13 +55,13 @@
             "project": true
         },
         "com.palantir.safe-logging:preconditions": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config"
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.safe-logging:preconditions"
@@ -86,7 +86,7 @@
             ]
         },
         "org.immutables:value": {
-            "locked": "2.7.1"
+            "locked": "2.7.3"
         }
     },
     "runtimeClasspath": {
@@ -157,13 +157,13 @@
             "project": true
         },
         "com.palantir.safe-logging:preconditions": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config"
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.safe-logging:preconditions"

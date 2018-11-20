@@ -134,13 +134,13 @@
             "project": true
         },
         "com.palantir.safe-logging:preconditions": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config"
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
@@ -170,7 +170,7 @@
             "locked": "1.2.0"
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.11.0",
+            "locked": "3.12.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.tracing:tracing-okhttp3",
@@ -178,16 +178,16 @@
             ]
         },
         "com.squareup.okio:okio": {
-            "locked": "1.14.0",
+            "locked": "1.15.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]
         },
         "com.squareup.retrofit2:converter-jackson": {
-            "locked": "2.4.0"
+            "locked": "2.5.0"
         },
         "com.squareup.retrofit2:retrofit": {
-            "locked": "2.4.0",
+            "locked": "2.5.0",
             "transitive": [
                 "com.squareup.retrofit2:converter-jackson"
             ]
@@ -211,7 +211,7 @@
             ]
         },
         "org.immutables:value": {
-            "locked": "2.7.1"
+            "locked": "2.7.3"
         },
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
@@ -378,7 +378,7 @@
             "project": true
         },
         "com.palantir.safe-logging:preconditions": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
@@ -386,7 +386,7 @@
             ]
         },
         "com.palantir.safe-logging:safe-logging": {
-            "locked": "1.5.1",
+            "locked": "1.7.0",
             "transitive": [
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
@@ -427,13 +427,13 @@
             ]
         },
         "com.squareup.okhttp3:logging-interceptor": {
-            "locked": "3.11.0",
+            "locked": "3.12.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.squareup.okhttp3:okhttp": {
-            "locked": "3.11.0",
+            "locked": "3.12.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.tracing:tracing-okhttp3",
@@ -442,16 +442,16 @@
             ]
         },
         "com.squareup.okio:okio": {
-            "locked": "1.14.0",
+            "locked": "1.15.0",
             "transitive": [
                 "com.squareup.okhttp3:okhttp"
             ]
         },
         "com.squareup.retrofit2:converter-jackson": {
-            "locked": "2.4.0"
+            "locked": "2.5.0"
         },
         "com.squareup.retrofit2:retrofit": {
-            "locked": "2.4.0",
+            "locked": "2.5.0",
             "transitive": [
                 "com.squareup.retrofit2:converter-jackson"
             ]
