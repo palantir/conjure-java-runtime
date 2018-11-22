@@ -115,7 +115,7 @@ public class AutoDeserializeTest {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
                     .testCase(index)
-                    .baseUrl(String.format("http://localhost:%d/test/api/body", serverUnderTestRule.getLocalPort()))
+                    .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
                     .build());
             return Optional.empty();
         } catch (RemoteException e) {
