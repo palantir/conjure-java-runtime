@@ -19,6 +19,7 @@ package com.palantir.verification.server;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.testing.Assertions;
 import com.palantir.conjure.verification.client.EndpointName;
 import com.palantir.conjure.verification.client.VerificationClientRequest;
 import com.palantir.conjure.verification.client.VerificationClientService;
@@ -127,9 +128,14 @@ public class AutoDeserializeTest {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
                     .testCase(index)
-                    .baseUrl(String.format("http://localhost:%d/test/api/body", serverUnderTestRule.getLocalPort()))
+                    .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
                     .build());
             return Optional.of(new AssertionError("Result should have caused an exception"));
+        } catch (RemoteException e) {
+            // It's not an expected failure to get a 404 or 403 back
+            Assertions.assertThat(e.getStatus()).isNotEqualTo(403);
+            Assertions.assertThat(e.getStatus()).isNotEqualTo(404);
+            return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }
