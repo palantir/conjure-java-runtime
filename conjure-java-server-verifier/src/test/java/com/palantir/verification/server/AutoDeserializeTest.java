@@ -19,7 +19,6 @@ package com.palantir.verification.server;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.api.errors.RemoteException;
-import com.palantir.conjure.java.api.testing.Assertions;
 import com.palantir.conjure.verification.client.EndpointName;
 import com.palantir.conjure.verification.client.VerificationClientRequest;
 import com.palantir.conjure.verification.client.VerificationClientService;
@@ -31,6 +30,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Test;
