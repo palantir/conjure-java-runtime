@@ -114,7 +114,7 @@ public class AutoDeserializeTest {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
                     .testCase(index)
-                    .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
+                    .baseUrl(String.format("http://localhost:%d/test/api/body", serverUnderTestRule.getLocalPort()))
                     .build());
             return Optional.empty();
         } catch (RemoteException e) {
@@ -127,7 +127,7 @@ public class AutoDeserializeTest {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
                     .testCase(index)
-                    .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
+                    .baseUrl(String.format("http://localhost:%d/test/api/body", serverUnderTestRule.getLocalPort()))
                     .build());
             return Optional.of(new AssertionError("Result should have caused an exception"));
         } catch (Exception e) {
