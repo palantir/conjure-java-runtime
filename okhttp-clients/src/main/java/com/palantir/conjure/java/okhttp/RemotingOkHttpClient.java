@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.google.common.util.concurrent.SettableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
@@ -34,23 +35,26 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     private final UrlSelector urls;
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
+    private final ConcurrencyLimiters concurrencyLimiters;
 
     RemotingOkHttpClient(
             OkHttpClient delegate,
             Supplier<BackoffStrategy> backoffStrategy,
             UrlSelector urls,
             ScheduledExecutorService schedulingExecutor,
-            ExecutorService executionExecutor) {
+            ExecutorService executionExecutor,
+            ConcurrencyLimiters concurrencyLimiters) {
         super(delegate);
         this.backoffStrategyFactory = backoffStrategy;
         this.urls = urls;
         this.schedulingExecutor = schedulingExecutor;
         this.executionExecutor = executionExecutor;
+        this.concurrencyLimiters = concurrencyLimiters;
     }
 
     @Override
     public RemotingOkHttpCall newCall(Request request) {
-        return newCallWithMutableState(request, backoffStrategyFactory.get(), MAX_NUM_RELOCATIONS);
+        return newCallWithMutableState(addRateLimitIdTag(request), backoffStrategyFactory.get(), MAX_NUM_RELOCATIONS);
     }
 
     RemotingOkHttpCall newCallWithMutableState(
@@ -62,6 +66,13 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 this,
                 schedulingExecutor,
                 executionExecutor,
+                concurrencyLimiters.acquireLimiter(request),
                 maxNumRelocations);
+    }
+
+    private Request addRateLimitIdTag(Request request) {
+        return request.newBuilder()
+                .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.of(SettableFuture.create()))
+                .build();
     }
 }

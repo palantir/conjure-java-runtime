@@ -18,10 +18,12 @@ package com.palantir.conjure.java.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.SettableFuture;
 import com.netflix.concurrency.limits.Limiter;
 import java.io.IOException;
 import okhttp3.Interceptor;
@@ -52,22 +54,25 @@ public final class ConcurrencyLimitingInterceptorTest {
 
     @Mock private BufferedSource mockSource;
     @Mock private Interceptor.Chain chain;
-    @Mock private ConcurrencyLimiters limiters;
     @Mock private Limiter.Listener listener;
 
     private ConcurrencyLimitingInterceptor interceptor;
 
     @Before
-    public void before() throws IOException {
-        interceptor = new ConcurrencyLimitingInterceptor(limiters);
-        when(chain.request()).thenReturn(request);
-        when(limiters.acquireLimiter(request)).thenReturn(listener);
+    public void before() {
+        interceptor = new ConcurrencyLimitingInterceptor();
+        SettableFuture<Limiter.Listener> listenerFuture = SettableFuture.create();
+        listenerFuture.set(listener);
+        Request taggedRequest = request.newBuilder()
+                .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.of(listenerFuture))
+                .build();
+        when(chain.request()).thenReturn(taggedRequest);
     }
 
     @Test
     public void dropsIfRateLimited() throws IOException {
         Response rateLimited = response.newBuilder().code(429).build();
-        when(chain.proceed(request)).thenReturn(rateLimited);
+        when(chain.proceed(any())).thenReturn(rateLimited);
         assertThat(interceptor.intercept(chain)).isEqualTo(rateLimited);
         verify(listener).onDropped();
     }
@@ -75,7 +80,7 @@ public final class ConcurrencyLimitingInterceptorTest {
     @Test
     public void dropsIfUnavailable() throws IOException {
         Response unavailable = response.newBuilder().code(503).build();
-        when(chain.proceed(request)).thenReturn(unavailable);
+        when(chain.proceed(any())).thenReturn(unavailable);
         assertThat(interceptor.intercept(chain)).isEqualTo(unavailable);
         verify(listener).onDropped();
     }
@@ -83,7 +88,7 @@ public final class ConcurrencyLimitingInterceptorTest {
     @Test
     public void ignoresIfRedirect() throws IOException {
         Response redirect = response.newBuilder().code(308).build();
-        when(chain.proceed(request)).thenReturn(redirect);
+        when(chain.proceed(any())).thenReturn(redirect);
         assertThat(interceptor.intercept(chain)).isEqualTo(redirect);
         verify(listener).onIgnore();
     }
@@ -91,7 +96,7 @@ public final class ConcurrencyLimitingInterceptorTest {
     @Test
     public void ignoresIfUnsuccessful() throws IOException {
         Response unsuccessful = response.newBuilder().code(500).build();
-        when(chain.proceed(request)).thenReturn(unsuccessful);
+        when(chain.proceed(any())).thenReturn(unsuccessful);
         assertThat(interceptor.intercept(chain)).isEqualTo(unsuccessful);
         verify(listener).onIgnore();
     }
@@ -99,7 +104,7 @@ public final class ConcurrencyLimitingInterceptorTest {
     @Test
     public void ignoresIfIoException() throws IOException {
         IOException exception = new IOException();
-        when(chain.proceed(request)).thenThrow(exception);
+        when(chain.proceed(any())).thenThrow(exception);
         assertThatThrownBy(() -> interceptor.intercept(chain)).isEqualTo(exception);
         verify(listener).onIgnore();
     }
@@ -108,7 +113,7 @@ public final class ConcurrencyLimitingInterceptorTest {
     public void wrapsResponseBody() throws IOException {
         String data = "data";
         ResponseBody body = ResponseBody.create(MediaType.parse("application/json"), data);
-        when(chain.proceed(request)).thenReturn(response.newBuilder().body(body).build());
+        when(chain.proceed(any())).thenReturn(response.newBuilder().body(body).build());
         Response wrappedResponse = interceptor.intercept(chain);
         verifyZeroInteractions(listener);
         assertThat(wrappedResponse.body().string()).isEqualTo(data);
@@ -118,7 +123,7 @@ public final class ConcurrencyLimitingInterceptorTest {
     @Test
     public void proxyHandlesExceptions() throws IOException {
         ResponseBody body = ResponseBody.create(MediaType.parse("application/json"), -1, mockSource);
-        when(chain.proceed(request)).thenReturn(response.newBuilder().body(body).build());
+        when(chain.proceed(any())).thenReturn(response.newBuilder().body(body).build());
         IOException exception = new IOException();
         when(mockSource.readByteArray()).thenThrow(exception);
         Response erroneousResponse = interceptor.intercept(chain);
@@ -128,7 +133,7 @@ public final class ConcurrencyLimitingInterceptorTest {
     @Test
     public void ignoresIfNoContent() throws IOException {
         Response noContent = response.newBuilder().code(204).build();
-        when(chain.proceed(request)).thenReturn(noContent);
+        when(chain.proceed(any())).thenReturn(noContent);
         assertThat(interceptor.intercept(chain)).isEqualTo(noContent);
         verify(listener).onIgnore();
     }
@@ -138,7 +143,7 @@ public final class ConcurrencyLimitingInterceptorTest {
         Response empty = response.newBuilder().code(204)
                 .body(ResponseBody.create(MediaType.parse("application/json"), new byte[0]))
                 .build();
-        when(chain.proceed(request)).thenReturn(empty);
+        when(chain.proceed(any())).thenReturn(empty);
         assertThat(interceptor.intercept(chain)).isEqualTo(empty);
         verify(listener).onSuccess();
     }

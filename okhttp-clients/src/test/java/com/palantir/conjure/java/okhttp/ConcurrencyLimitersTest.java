@@ -18,27 +18,32 @@ package com.palantir.conjure.java.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import org.junit.Test;
 
 public final class ConcurrencyLimitersTest {
     private static final String KEY = "";
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
     private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(
-            new DefaultTaggedMetricRegistry(), TIMEOUT, ConcurrencyLimitersTest.class);
+            Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+                    .setNameFormat("listener-reviver")
+                    .build()),
+            new DefaultTaggedMetricRegistry(),
+            TIMEOUT,
+            ConcurrencyLimitersTest.class);
 
     @Test
-    public void testTimeout() throws IOException {
-        // In java 11 Instant.now() can return up to microsecond precision values. We're truncating here to preserve
-        // java 8 behaviour of Instant.now() to simplify testing.
-        Instant start = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+    public void testTimeout() {
+        Instant start = Instant.now();
         Thread exhauster = exhaust();
-        limiters.acquireLimiterInternal(KEY, 0);
-        Instant end = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        Futures.getUnchecked(limiters.acquireLimiterInternal(KEY).acquire());
+        Instant end = Instant.now();
         exhauster.interrupt();
         assertThat(Duration.between(start, end)).isGreaterThanOrEqualTo(TIMEOUT);
     }
@@ -47,15 +52,15 @@ public final class ConcurrencyLimitersTest {
         Thread thread = new Thread(() -> {
             while (true) {
                 try {
-                    limiters.acquireLimiterInternal(KEY, 0);
-                } catch (IOException e) {
+                    limiters.acquireLimiterInternal(KEY).acquire().get();
+                } catch (ExecutionException | InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
         });
         thread.start();
         // wait until the other thread blocks
-        while (!thread.getState().equals(Thread.State.TIMED_WAITING)) {
+        while (!thread.getState().equals(Thread.State.WAITING)) {
             Thread.yield();
         }
         return thread;
