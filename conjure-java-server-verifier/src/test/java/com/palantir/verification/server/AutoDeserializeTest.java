@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import org.assertj.core.api.Assertions;
 import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -130,6 +131,11 @@ public class AutoDeserializeTest {
                     .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
                     .build());
             return Optional.of(new AssertionError("Result should have caused an exception"));
+        } catch (RemoteException e) {
+            // It's not an expected failure to get a 404 or 403 back
+            Assertions.assertThat(e.getStatus()).isNotEqualTo(403);
+            Assertions.assertThat(e.getStatus()).isNotEqualTo(404);
+            return Optional.empty();
         } catch (Exception e) {
             return Optional.empty();
         }

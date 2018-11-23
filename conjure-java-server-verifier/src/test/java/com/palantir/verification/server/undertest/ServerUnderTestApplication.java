@@ -17,14 +17,20 @@
 package com.palantir.verification.server.undertest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
+import com.google.common.reflect.AbstractInvocationHandler;
+import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
+import com.palantir.conjure.verification.client.AutoDeserializeService;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.jackson.DiscoverableSubtypeResolver;
 import io.dropwizard.jackson.FuzzyEnumModule;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 
 public final class ServerUnderTestApplication extends Application<Configuration> {
 
@@ -39,9 +45,22 @@ public final class ServerUnderTestApplication extends Application<Configuration>
 
     @Override
     public void run(Configuration configuration, Environment environment) {
-        environment.jersey().register(new AutoDeserializeResource());
+        environment.jersey().register(
+                Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()));
 
         // must register ConjureJerseyFeature to map conjure error types.
         environment.jersey().register(ConjureJerseyFeature.INSTANCE);
+    }
+
+    /**
+     * Simple {@link InvocationHandler} implementing all methods of {@link AutoDeserializeService} by returning the
+     * single parameter.
+     */
+    static class EchoResourceInvocationHandler extends AbstractInvocationHandler {
+        @Override
+        protected Object handleInvocation(Object proxy, Method method, Object[] args) {
+            Preconditions.checkArgument(args.length == 1, "Expected single argument. Method: %s", method);
+            return args[0];
+        }
     }
 }
