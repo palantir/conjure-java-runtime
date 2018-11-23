@@ -74,9 +74,6 @@ client:
    - '{"10": true, "10e0": false}'
    - '{"10": true, "10.0": false}'
 
-   receiveMapEnumExampleAlias:
-   - '{"ONE": "", "TWO": "", "BAD VARIANT": ""}'
-
   singleHeaderService: {}
 
   singlePathParamService:
