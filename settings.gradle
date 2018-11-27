@@ -1,5 +1,3 @@
-enableFeaturePreview('IMPROVED_POM_SUPPORT')
-enableFeaturePreview('STABLE_PUBLISHING')
 rootProject.name = 'conjure-java-runtime'
 
 include 'conjure-java-jaxrs-client'
