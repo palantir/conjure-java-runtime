@@ -22,6 +22,7 @@ import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import org.junit.Test;
 
 public final class ConcurrencyLimitersTest {
@@ -32,10 +33,10 @@ public final class ConcurrencyLimitersTest {
 
     @Test
     public void testTimeout() throws IOException {
-        Instant start = Instant.now();
+        Instant start = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         Thread exhauster = exhaust();
         limiters.acquireLimiterInternal(KEY, 0);
-        Instant end = Instant.now();
+        Instant end = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         exhauster.interrupt();
         assertThat(Duration.between(start, end)).isGreaterThanOrEqualTo(TIMEOUT);
     }
