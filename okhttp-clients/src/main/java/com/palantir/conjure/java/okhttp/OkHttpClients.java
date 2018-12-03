@@ -99,6 +99,13 @@ public final class OkHttpClients {
     }
 
     /**
+     * The {@link ScheduledExecutorService} used for recovering leaked limits.
+     */
+    private static final ScheduledExecutorService limitReviver = Tracers.wrap(
+            Executors.newSingleThreadScheduledExecutor(
+                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", false)));
+
+    /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
      * internal thread pool and from the thread pool used by {@link #executionExecutor}.
      * <p>
@@ -132,6 +139,7 @@ public final class OkHttpClients {
             HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
+        ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(limitReviver, registry, serviceClass);
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // Routing
@@ -157,7 +165,7 @@ public final class OkHttpClients {
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
 
         // Intercept calls to augment request meta data
-        client.addInterceptor(new ConcurrencyLimitingInterceptor(registry, serviceClass));
+        client.addInterceptor(new ConcurrencyLimitingInterceptor());
         client.addInterceptor(InstrumentedInterceptor.create(registry, hostEventsSink, serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
         client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
@@ -193,7 +201,8 @@ public final class OkHttpClients {
                         config.maxNumRetries(), config.backoffSlotSize(), ThreadLocalRandom.current()),
                 urlSelector,
                 schedulingExecutor,
-                executionExecutor);
+                executionExecutor,
+                concurrencyLimiters);
     }
 
     /**

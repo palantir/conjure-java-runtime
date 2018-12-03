@@ -22,6 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.SettableFuture;
 import com.netflix.concurrency.limits.Limiter;
 import java.io.IOException;
 import okhttp3.Interceptor;
@@ -39,29 +40,31 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class ConcurrencyLimitingInterceptorTest {
-    private static final Request request = new Request.Builder()
-            .url("https://localhost:1234/call")
-            .get()
-            .build();
-    private static final Response response = new Response.Builder()
-            .code(200)
-            .request(request)
-            .message("message")
-            .protocol(Protocol.HTTP_2)
-            .build();
+    private static final ConcurrencyLimitingInterceptor interceptor = new ConcurrencyLimitingInterceptor();
 
     @Mock private BufferedSource mockSource;
     @Mock private Interceptor.Chain chain;
-    @Mock private ConcurrencyLimiters limiters;
     @Mock private Limiter.Listener listener;
 
-    private ConcurrencyLimitingInterceptor interceptor;
+    private Request request;
+    private Response response;
 
     @Before
-    public void before() throws IOException {
-        interceptor = new ConcurrencyLimitingInterceptor(limiters);
+    public void before() {
+        SettableFuture<Limiter.Listener> listenerFuture = SettableFuture.create();
+        listenerFuture.set(listener);
+        request = new Request.Builder()
+                .url("https://localhost:1234/call")
+                .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.of(listenerFuture))
+                .get()
+                .build();
+        response = new Response.Builder()
+                .code(200)
+                .request(request)
+                .message("message")
+                .protocol(Protocol.HTTP_2)
+                .build();
         when(chain.request()).thenReturn(request);
-        when(limiters.acquireLimiter(request)).thenReturn(listener);
     }
 
     @Test
