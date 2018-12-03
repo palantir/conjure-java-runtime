@@ -84,13 +84,12 @@ final class RemotingOkHttpCall extends ForwardingCall {
         this.client = client;
         this.schedulingExecutor = schedulingExecutor;
         this.executionExecutor = executionExecutor;
-        this.limiter = limiter;
         this.maxNumRelocations = maxNumRelocations;
     }
 
     /**
-     * Process the call. If an IOException is encountered, mark the URL as failed, which indicates that it should be
-     * avoided for subsequent calls (if {@link UrlSelector} was initialized with a positive
+     * Process the call. If an IOException is encountered, mark the URL as failed, which indicates that it should
+     * be avoided for subsequent calls (if {@link UrlSelector} was initialized with a positive
      * {@link ClientConfiguration#failedUrlCooldown()}.
      */
     @Override

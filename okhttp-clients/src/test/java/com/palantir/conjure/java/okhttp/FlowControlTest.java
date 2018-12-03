@@ -48,11 +48,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is a simulation of the flow control primitives used by this library, in order to allow the developer to
- * try different strategies.
+ * This class is a simulation of the flow control primitives used by this library, in order to allow the developer
+ * to try different strategies.
  * <p>
- * It is run in CI, but only to prevent code breakages - this is in general an expensive test which should be run as a
- * dev tool. If you want to run for dev purposes, please increase REQUESTS_PER_THREAD.
+ * It is run in CI, but only to prevent code breakages - this is in general an expensive test which should be run
+ * as a dev tool. If you want to run for dev purposes, please increase REQUESTS_PER_THREAD.
  */
 public final class FlowControlTest {
     private static final Logger log = LoggerFactory.getLogger(FlowControlTest.class);
