@@ -21,6 +21,7 @@ import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.netflix.concurrency.limits.Limiter;
 import com.netflix.concurrency.limits.limit.AIMDLimit;
+import com.netflix.concurrency.limits.limiter.BlockingLimiter;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.tracing.CloseableTracer;
