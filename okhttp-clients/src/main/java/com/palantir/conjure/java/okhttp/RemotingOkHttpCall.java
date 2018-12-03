@@ -84,6 +84,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         this.client = client;
         this.schedulingExecutor = schedulingExecutor;
         this.executionExecutor = executionExecutor;
+        this.limiter = limiter;
         this.maxNumRelocations = maxNumRelocations;
     }
 
