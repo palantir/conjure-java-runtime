@@ -33,6 +33,8 @@ public final class ConcurrencyLimitersTest {
 
     @Test
     public void testTimeout() throws IOException {
+        // In java 11 Instant.now() can return up to microsecond precision values. We're truncating here to preserve
+        // java 8 behaviour of Instant.now() to simplify testing.
         Instant start = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         Thread exhauster = exhaust();
         limiters.acquireLimiterInternal(KEY, 0);
