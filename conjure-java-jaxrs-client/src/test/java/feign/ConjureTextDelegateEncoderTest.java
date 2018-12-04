@@ -30,7 +30,7 @@ import javax.ws.rs.core.MediaType;
 import org.junit.Before;
 import org.junit.Test;
 
-public final class TextDelegateEncoderTest {
+public final class ConjureTextDelegateEncoderTest {
 
     private RequestTemplate requestTemplate;
     private Map<String, Collection<String>> headers;
@@ -41,7 +41,7 @@ public final class TextDelegateEncoderTest {
     public void before() {
         delegate = mock(Encoder.class);
         headers = Maps.newHashMap();
-        textDelegateEncoder = new TextDelegateEncoder(delegate);
+        textDelegateEncoder = new ConjureTextDelegateEncoder(delegate);
         requestTemplate = new RequestTemplate();
     }
 

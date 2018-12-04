@@ -20,38 +20,38 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.HeaderAccessUtils;
-import feign.codec.Decoder;
-import feign.codec.StringDecoder;
-import java.io.IOException;
+import feign.codec.EncodeException;
+import feign.codec.Encoder;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Delegates to a {@link StringDecoder} if the response has a Content-Type of text/plain, or falls back to the given
- * delegate otherwise.
+ * Delegates to a {@link feign.codec.Encoder.Default} if the response has a Content-Type of text/plain, or falls back
+ * to the given delegate otherwise.
  */
-public final class TextDelegateDecoder implements Decoder {
-    private static final Decoder stringDecoder = new StringDecoder();
+public final class ConjureTextDelegateEncoder implements Encoder {
+    private static final Encoder defaultEncoder = new Encoder.Default();
 
-    private final Decoder delegate;
+    private final Encoder delegate;
 
-    public TextDelegateDecoder(Decoder delegate) {
+    public ConjureTextDelegateEncoder(Encoder delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public Object decode(Response response, Type type) throws IOException, FeignException {
+    public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
         Collection<String> contentTypes =
-                HeaderAccessUtils.caseInsensitiveGet(response.headers(), HttpHeaders.CONTENT_TYPE);
+                HeaderAccessUtils.caseInsensitiveGet(template.headers(), HttpHeaders.CONTENT_TYPE);
         if (contentTypes == null) {
             contentTypes = ImmutableSet.of();
         }
-        // In the case of multiple content types, or an unknown content type, we'll use the delegate instead.
-        if (contentTypes.size() == 1 && Iterables.getOnlyElement(contentTypes, "").startsWith(MediaType.TEXT_PLAIN)) {
-            return stringDecoder.decode(response, type);
-        }
 
-        return delegate.decode(response, type);
+        // In the case of multiple content types, or an unknown content type, we'll use the delegate instead.
+        if (contentTypes.size() == 1 && Iterables.getOnlyElement(contentTypes, "").equals(MediaType.TEXT_PLAIN)) {
+            defaultEncoder.encode(object, bodyType, template);
+        } else {
+            delegate.encode(object,  bodyType, template);
+        }
     }
 }

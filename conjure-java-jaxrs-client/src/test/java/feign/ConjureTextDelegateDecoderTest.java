@@ -47,7 +47,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public final class TextDelegateDecoderTest extends TestBase {
+public final class ConjureTextDelegateDecoderTest extends TestBase {
     private static final String DELEGATE_RESPONSE = "delegate response";
 
     @ClassRule
@@ -66,7 +66,7 @@ public final class TextDelegateDecoderTest extends TestBase {
     public void before() {
         delegate = mock(Decoder.class);
         headers = Maps.newHashMap();
-        textDelegateDecoder = new TextDelegateDecoder(delegate);
+        textDelegateDecoder = new ConjureTextDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(

@@ -28,11 +28,11 @@ import java.util.Optional;
  * Decorates a Feign {@link Decoder} such that it returns {@link Optional#empty} when observing an HTTP 204 error code
  * for a method with {@link Type} {@link Optional}.
  */
-public final class Java8OptionalAwareDecoder implements Decoder {
+public final class ConjureJava8OptionalAwareDecoder implements Decoder {
 
     private final Decoder delegate;
 
-    public Java8OptionalAwareDecoder(Decoder delegate) {
+    public ConjureJava8OptionalAwareDecoder(Decoder delegate) {
         this.delegate = delegate;
     }
 

@@ -38,7 +38,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public final class InputStreamDelegateDecoderTest extends TestBase {
+public final class ConjureInputStreamDelegateDecoderTest extends TestBase {
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
             "src/test/resources/test-server.yml");
@@ -50,7 +50,7 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
     @Before
     public void before() {
         delegate = Mockito.mock(Decoder.class);
-        inputStreamDelegateDecoder = new InputStreamDelegateDecoder(delegate);
+        inputStreamDelegateDecoder = new ConjureInputStreamDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(

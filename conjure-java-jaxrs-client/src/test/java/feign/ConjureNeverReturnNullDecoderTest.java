@@ -32,10 +32,10 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 
-public final class NeverReturnNullDecoderTest extends TestBase {
+public final class ConjureNeverReturnNullDecoderTest extends TestBase {
 
     private final Map<String, Collection<String>> headers = Maps.newHashMap();
-    private final Decoder textDelegateDecoder = new NeverReturnNullDecoder(
+    private final Decoder textDelegateDecoder = new ConjureNeverReturnNullDecoder(
             new JacksonDecoder(ObjectMappers.newClientObjectMapper()));
 
     @Test

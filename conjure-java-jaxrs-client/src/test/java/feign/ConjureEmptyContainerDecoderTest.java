@@ -47,12 +47,14 @@ import javax.annotation.Generated;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
 
-public class EmptyContainerDecoderTest {
+public class ConjureEmptyContainerDecoderTest {
 
     private static final ObjectMapper mapper = ObjectMappers.newClientObjectMapper();
-    private static final Response HTTP_204 = Response.create(204, "No Content", Collections.emptyMap(), new byte[] {});
+    private static final Response HTTP_204 =
+            Response.create(204, "No Content", Collections.emptyMap(), new byte[] {});
     private final Decoder delegate = mock(Decoder.class);
-    private final EmptyContainerDecoder emptyContainerDecoder = new EmptyContainerDecoder(mapper, delegate);
+    private final ConjureEmptyContainerDecoder emptyContainerDecoder =
+            new ConjureEmptyContainerDecoder(mapper, delegate);
 
     @Test
     public void http_200_uses_delegate_decoder() throws IOException {

@@ -47,12 +47,12 @@ import org.slf4j.LoggerFactory;
  *
  * Empty instances are cached and re-used to avoid reflection and exceptions on a hot codepath.
  */
-public final class EmptyContainerDecoder implements Decoder {
+public final class ConjureEmptyContainerDecoder implements Decoder {
 
     private final LoadingCache<Type, Object> blankInstanceCache;
     private final Decoder delegate;
 
-    public EmptyContainerDecoder(ObjectMapper mapper, Decoder delegate) {
+    public ConjureEmptyContainerDecoder(ObjectMapper mapper, Decoder delegate) {
         this.delegate = delegate;
         this.blankInstanceCache = Caffeine.newBuilder()
                 .maximumSize(1000)
