@@ -39,14 +39,14 @@ import java.util.Collection;
  * In the future we will likely codegen the client and thus remove the need for
  * scanning the headers on every request.
  */
-public final class CborDelegateEncoder implements Encoder {
+public final class ConjureCborDelegateEncoder implements Encoder {
 
     public static final String MIME_TYPE = "application/cbor";
 
     private final ObjectMapper cborObjectMapper;
     private final Encoder delegate;
 
-    public CborDelegateEncoder(ObjectMapper cborObjectMapper, Encoder delegate) {
+    public ConjureCborDelegateEncoder(ObjectMapper cborObjectMapper, Encoder delegate) {
         this.cborObjectMapper = cborObjectMapper;
         this.delegate = delegate;
     }

@@ -38,7 +38,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public final class InputStreamDelegateEncoderTest extends TestBase {
+public final class ConjureInputStreamDelegateEncoderTest extends TestBase {
     @Mock
     private Encoder delegate;
 
@@ -54,7 +54,7 @@ public final class InputStreamDelegateEncoderTest extends TestBase {
 
     @Before
     public void before() {
-        inputStreamDelegateEncoder = new InputStreamDelegateEncoder(delegate);
+        inputStreamDelegateEncoder = new ConjureInputStreamDelegateEncoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(

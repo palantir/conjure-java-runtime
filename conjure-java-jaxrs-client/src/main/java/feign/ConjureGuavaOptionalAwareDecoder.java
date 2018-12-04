@@ -27,11 +27,11 @@ import java.lang.reflect.Type;
  * Decorates a Feign {@link Decoder} such that it returns {@link com.google.common.base.Optional#absent}
  * when observing an HTTP 204 error code for a method with {@link Type} {@link com.google.common.base.Optional}.
  */
-public final class GuavaOptionalAwareDecoder implements Decoder {
+public final class ConjureGuavaOptionalAwareDecoder implements Decoder {
 
     private final Decoder delegate;
 
-    public GuavaOptionalAwareDecoder(Decoder delegate) {
+    public ConjureGuavaOptionalAwareDecoder(Decoder delegate) {
         this.delegate = delegate;
     }
 

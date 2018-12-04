@@ -22,10 +22,10 @@ import feign.codec.Decoder;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-public final class NeverReturnNullDecoder implements Decoder {
+public final class ConjureNeverReturnNullDecoder implements Decoder {
     private final Decoder delegate;
 
-    public NeverReturnNullDecoder(Decoder delegate) {
+    public ConjureNeverReturnNullDecoder(Decoder delegate) {
         this.delegate = delegate;
     }
 

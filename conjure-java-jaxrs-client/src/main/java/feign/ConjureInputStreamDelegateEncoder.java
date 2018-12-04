@@ -16,29 +16,33 @@
 
 package feign;
 
-import feign.codec.Decoder;
-import java.io.ByteArrayInputStream;
+import feign.codec.EncodeException;
+import feign.codec.Encoder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 
 /**
- * If the return type is InputStream, return it, otherwise delegate to provided decoder.
+ * If the body type is an InputStream, write it into the body, otherwise pass to delegate.
  */
-public final class InputStreamDelegateDecoder implements Decoder {
-    private final Decoder delegate;
+public final class ConjureInputStreamDelegateEncoder implements Encoder {
+    private final Encoder delegate;
 
-    public InputStreamDelegateDecoder(Decoder delegate) {
+    public ConjureInputStreamDelegateEncoder(Encoder delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public Object decode(Response response, Type type) throws IOException, FeignException {
-        if (type.equals(InputStream.class)) {
-            byte[] body = response.body() != null ? Util.toByteArray(response.body().asInputStream()) : new byte[0];
-            return new ByteArrayInputStream(body);
+    public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
+        if (bodyType.equals(InputStream.class)) {
+            try {
+                template.body(Util.toByteArray((InputStream) object), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         } else {
-            return delegate.decode(response, type);
+            delegate.encode(object, bodyType, template);
         }
     }
 }

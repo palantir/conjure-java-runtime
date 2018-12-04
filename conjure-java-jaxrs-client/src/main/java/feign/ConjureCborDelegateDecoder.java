@@ -36,12 +36,12 @@ import java.util.Collection;
  * Ideally we'll codegen a client which handles the content-type switching where necessary (multiple possible response
  * Content-Types from the server) and does not do the checking where this is known at compile time.
  */
-public final class CborDelegateDecoder implements Decoder {
+public final class ConjureCborDelegateDecoder implements Decoder {
 
     private final ObjectMapper cborObjectMapper;
     private final Decoder delegate;
 
-    public CborDelegateDecoder(ObjectMapper cborObjectMapper, Decoder delegate) {
+    public ConjureCborDelegateDecoder(ObjectMapper cborObjectMapper, Decoder delegate) {
         this.cborObjectMapper = cborObjectMapper;
         this.delegate = delegate;
     }
@@ -55,7 +55,7 @@ public final class CborDelegateDecoder implements Decoder {
         }
 
         if (contentTypes.size() == 1
-                && Iterables.getOnlyElement(contentTypes, "").startsWith(CborDelegateEncoder.MIME_TYPE)) {
+                && Iterables.getOnlyElement(contentTypes, "").startsWith(ConjureCborDelegateEncoder.MIME_TYPE)) {
 
             // some sillyness to test whether the input stram is empty
             // if it's empty, we want to return null rather than having jackson throw
