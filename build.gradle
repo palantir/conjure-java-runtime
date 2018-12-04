@@ -29,6 +29,7 @@ allprojects {
 
 subprojects {
     apply plugin: 'java-library'
+    apply plugin: 'com.palantir.baseline-class-uniqueness'
 
     sourceCompatibility = 1.8
     if (gradle.startParameter.taskNames.find {
