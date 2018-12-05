@@ -54,6 +54,8 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
         // log at WARN instead of ERROR because although this indicates an issue in a remote server
         log.warn("Encountered a remote exception. Mapping to an internal error before propagating",
+                SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
+                SafeArg.of("errorName", exception.getError().errorName()),
                 SafeArg.of("statusCode", status.getStatusCode()),
                 exception);
 
