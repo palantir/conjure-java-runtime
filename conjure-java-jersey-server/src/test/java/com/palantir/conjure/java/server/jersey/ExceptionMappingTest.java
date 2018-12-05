@@ -111,8 +111,7 @@ public final class ExceptionMappingTest {
     public void testRemoteException() throws IOException {
         Response response = target.path("throw-remote-exception").request().get();
         assertThat(response.getStatus(), is(ErrorType.INTERNAL.httpErrorCode()));
-        String body =
-                new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
+        String body = readBody(response);
 
         SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
         assertThat(error.errorInstanceId(), is("errorInstanceId"));
@@ -124,8 +123,7 @@ public final class ExceptionMappingTest {
     public void testRemoteAuthException() throws IOException {
         Response response = target.path("throw-remote-auth-exception").request().get();
         assertThat(response.getStatus(), is(ErrorType.PERMISSION_DENIED.httpErrorCode()));
-        String body =
-                new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
+        String body = readBody(response);
 
         SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
         assertThat(error.errorInstanceId(), is("errorInstanceId"));
@@ -137,8 +135,7 @@ public final class ExceptionMappingTest {
     public void testServiceException() throws IOException {
         Response response = target.path("throw-service-exception").request().get();
         assertThat(response.getStatus(), is(ErrorType.INVALID_ARGUMENT.httpErrorCode()));
-        String body =
-                new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
+        String body = readBody(response);
 
         SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
         assertThat(error.errorCode(), is(ErrorType.INVALID_ARGUMENT.code().toString()));
@@ -163,12 +160,15 @@ public final class ExceptionMappingTest {
     public void testAssertionErrorIsJsonException() throws IOException {
         Response response = target.path("throw-assertion-error").request().get();
         assertThat(response.getStatus(), is(SERVER_EXCEPTION_STATUS.getStatusCode()));
-        String body =
-                new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
+        String body = readBody(response);
 
         SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
         assertThat(error.errorCode(), is(ErrorType.INTERNAL.code().toString()));
         assertThat(error.errorName(), is(ErrorType.INTERNAL.name()));
+    }
+
+    private String readBody(Response response) throws IOException {
+        return new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
     }
 
     public static class ExceptionMappersTestServer extends Application<Configuration> {
