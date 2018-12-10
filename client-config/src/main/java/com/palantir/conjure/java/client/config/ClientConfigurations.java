@@ -96,6 +96,8 @@ public final class ClientConfigurations {
 
     public static ProxySelector createProxySelector(ProxyConfiguration proxyConfig) {
         switch (proxyConfig.type()) {
+            case SYSTEM:
+                return ProxySelector.getDefault();
             case DIRECT:
                 return fixedProxySelectorFor(Proxy.NO_PROXY);
             case HTTP:
