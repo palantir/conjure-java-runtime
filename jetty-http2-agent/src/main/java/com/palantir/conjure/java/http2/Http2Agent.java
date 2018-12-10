@@ -18,18 +18,27 @@ package com.palantir.conjure.java.http2;
 
 import java.lang.instrument.Instrumentation;
 
-/** Deprecated: this class no longer has any effect. */
+/**
+ * No-op.
+ * @deprecated this class no longer has any effect.
+ */
 @Deprecated
 public final class Http2Agent {
     private Http2Agent() {}
 
-    /** Deprecated: this method no longer has any effect and is safe to stop calling. */
+    /**
+     * No-op.
+     * @deprecated this method no longer has any effect and is safe to stop calling.
+     */
     @Deprecated
     public static synchronized void install() {
         // no-op
     }
 
-    /** Deprecated: this method no longer has any effect and is safe to stop calling. */
+    /**
+     * No-op.
+     * @deprecated this method no longer has any effect and is safe to stop calling.
+     */
     @Deprecated
     public static void agentmain(String args, Instrumentation inst) throws Exception {
         // no-op
