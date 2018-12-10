@@ -163,8 +163,9 @@ public final class OkHttpClients {
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
-        // TODO(dfox): only enable this if config.fallbackToCommonNameVerification() (needs http-remoting-api PR)
-        client.hostnameVerifier(Okhttp39HostnameVerifier.INSTANCE);
+        if (config.fallbackToCommonNameVerification()) {
+            client.hostnameVerifier(Okhttp39HostnameVerifier.INSTANCE);
+        }
 
         // Intercept calls to augment request meta data
         client.addInterceptor(new ConcurrencyLimitingInterceptor());
