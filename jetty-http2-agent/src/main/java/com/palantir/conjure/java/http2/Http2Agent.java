@@ -31,6 +31,7 @@ public final class Http2Agent {
      * @deprecated this method no longer has any effect and is safe to stop calling.
      */
     @Deprecated
+    @SuppressWarnings("checkstyle:RegexpSinglelineJava")
     public static synchronized void install() {
         // no-op
         new Exception("Http2Agent.install() no longer does anything, please remove all invocations from your codebase")
