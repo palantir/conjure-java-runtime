@@ -61,8 +61,12 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        ListenableFuture<Limiter.Listener> limiterFuture = chain.request().tag(ConcurrencyLimiterListener.class)
-                .limiterListener();
+        ConcurrencyLimiterListener limiterListenerTag = chain.request().tag(ConcurrencyLimiterListener.class);
+        if (limiterListenerTag == null) {
+            return chain.proceed(chain.request());
+        }
+
+        ListenableFuture<Limiter.Listener> limiterFuture = limiterListenerTag.limiterListener();
         Preconditions.checkState(limiterFuture.isDone(), "Limit listener future should have been fulfilled.");
         Limiter.Listener listener = Futures.getUnchecked(limiterFuture);
 
