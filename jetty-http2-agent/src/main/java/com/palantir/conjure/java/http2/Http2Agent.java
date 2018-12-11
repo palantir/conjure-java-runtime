@@ -33,6 +33,8 @@ public final class Http2Agent {
     @Deprecated
     public static synchronized void install() {
         // no-op
+        new Exception("Http2Agent.install() no longer does anything, please remove all invocations from your codebase")
+                .printStackTrace();
     }
 
     /**
