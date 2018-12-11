@@ -22,12 +22,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link OkHttpClient} that executes {@link okhttp3.Call}s as {@link RemotingOkHttpCall}s in order to retry a class
  * of retryable error states.
  */
 final class RemotingOkHttpClient extends ForwardingOkHttpClient {
+    private static final Logger log = LoggerFactory.getLogger(RemotingOkHttpClient.class);
 
     private static final int MAX_NUM_RELOCATIONS = 20;
 
@@ -55,6 +58,13 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     @Override
     public RemotingOkHttpCall newCall(Request request) {
         return newCallWithMutableState(addRateLimitIdTag(request), backoffStrategyFactory.get(), MAX_NUM_RELOCATIONS);
+    }
+
+    @Override
+    public Builder newBuilder() {
+        log.warn("Attempting to copy RemotingOkHttpClient. Some of the functionality like rate limiting and qos will "
+                + "not be available to the new client");
+        return super.newBuilder();
     }
 
     RemotingOkHttpCall newCallWithMutableState(
