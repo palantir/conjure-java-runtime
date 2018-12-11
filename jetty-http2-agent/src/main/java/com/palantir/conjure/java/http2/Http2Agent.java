@@ -17,6 +17,8 @@
 package com.palantir.conjure.java.http2;
 
 import java.lang.instrument.Instrumentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * No-op.
@@ -24,6 +26,8 @@ import java.lang.instrument.Instrumentation;
  */
 @Deprecated
 public final class Http2Agent {
+    private static final Logger log = LoggerFactory.getLogger(Http2Agent.class);
+
     private Http2Agent() {}
 
     /**
@@ -32,7 +36,7 @@ public final class Http2Agent {
      */
     @Deprecated
     public static synchronized void install() {
-        // no-op
+        log.warn("Http2Agent.install() no longer does anything, please remove all invocations from your codebase");
     }
 
     /**

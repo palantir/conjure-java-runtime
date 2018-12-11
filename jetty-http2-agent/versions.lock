@@ -1,3 +1,12 @@
 {
-    
+    "compileClasspath": {
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12"
+        }
+    },
+    "runtimeClasspath": {
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12"
+        }
+    }
 }
