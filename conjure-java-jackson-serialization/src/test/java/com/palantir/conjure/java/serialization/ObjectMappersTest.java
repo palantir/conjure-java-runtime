@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -31,6 +33,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import org.immutables.value.Value;
 import org.junit.Test;
 
 public final class ObjectMappersTest {
@@ -56,8 +59,26 @@ public final class ObjectMappersTest {
     }
 
     @Test
-    public void deserializeJdk8ModuleAbsentOptional() throws IOException {
+    public void deserializeJdk8ModuleNullOptional() throws IOException {
         assertThat(MAPPER.readValue("null", Optional.class)).isEqualTo(Optional.empty());
+    }
+
+    @Test
+    public void deserializeJdk8ModulePresentOptionalField() throws IOException {
+        assertThat(MAPPER.readValue("{\"value\":\"Test\"}", OptionalField.class))
+                .isEqualTo(ImmutableOptionalField.of(Optional.of("Test")));
+    }
+
+    @Test
+    public void deserializeJdk8ModuleNullOptionalField() throws IOException {
+        assertThat(MAPPER.readValue("{\"value\":null}", OptionalField.class))
+                .isEqualTo(ImmutableOptionalField.of(Optional.empty()));
+    }
+
+    @Test
+    public void deserializeJdk8ModuleAbsentOptionalField() throws IOException {
+        assertThat(MAPPER.readValue("{}", OptionalField.class))
+                .isEqualTo(ImmutableOptionalField.of(Optional.empty()));
     }
 
     @Test
@@ -68,6 +89,18 @@ public final class ObjectMappersTest {
     @Test
     public void serializeJdk8ModuleEmptyOptional() throws JsonProcessingException {
         assertThat(MAPPER.writeValueAsString(Optional.empty())).isEqualTo("null");
+    }
+
+    @Test
+    public void serializeJdk8ModulePresentOptionalField() throws JsonProcessingException {
+        assertThat(MAPPER.writeValueAsString(ImmutableOptionalField.of(Optional.of("Test"))))
+                .isEqualTo("{\"value\":\"Test\"}");
+    }
+
+    @Test
+    public void serializeJdk8ModuleEmptyOptionalField() throws JsonProcessingException {
+        assertThat(MAPPER.writeValueAsString(ImmutableOptionalField.of(Optional.empty())))
+                .isEqualTo("{}");
     }
 
     @Test
@@ -100,5 +133,13 @@ public final class ObjectMappersTest {
 
     private static <T> T serDe(Object object, Class<T> clazz) throws IOException {
         return MAPPER.readValue(ser(object), clazz);
+    }
+
+    @Value.Immutable
+    @JsonSerialize(as = ImmutableOptionalField.class)
+    @JsonDeserialize(as = ImmutableOptionalField.class)
+    interface OptionalField {
+        @Value.Parameter
+        Optional<String> value();
     }
 }

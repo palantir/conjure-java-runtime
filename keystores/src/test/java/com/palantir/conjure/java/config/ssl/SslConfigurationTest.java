@@ -54,10 +54,9 @@ public final class SslConfigurationTest {
     public void serDe_optional() throws Exception {
         SslConfiguration serialized = SslConfiguration.of(Paths.get("trustStore.jks"));
         String deserializedCamelCase = "{\"trustStorePath\":\"trustStore.jks\",\"trustStoreType\":\"JKS\","
-                + "\"keyStorePath\":null,\"keyStorePassword\":null,\"keyStoreType\":\"JKS\",\"keyStoreKeyAlias\":null}";
+                + "\"keyStoreType\":\"JKS\"}";
         String deserializedKebabCase = "{\"trust-store-path\":\"trustStore.jks\",\"trust-store-type\":\"JKS\","
-                + "\"key-store-path\":null,\"key-store-password\":null,\"key-store-type\":\"JKS\","
-                + "\"key-store-key-alias\":null}";
+                + "\"key-store-type\":\"JKS\"}";
 
         assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);

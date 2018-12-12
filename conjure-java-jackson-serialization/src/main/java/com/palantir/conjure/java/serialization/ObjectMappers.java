@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.serialization;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -99,9 +100,10 @@ public final class ObjectMappers {
         return mapper
                 .registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
-                .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
+                .registerModule(new Jdk8Module())
                 .registerModule(new AfterburnerModule())
                 .registerModule(new JavaTimeModule())
+                .setDefaultPropertyInclusion(Include.NON_ABSENT)
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
                 .disable(DeserializationFeature.WRAP_EXCEPTIONS)

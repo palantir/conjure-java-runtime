@@ -1,3 +1,4 @@
+apply plugin: "org.inferred.processors"
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
@@ -10,4 +11,7 @@ dependencies {
 
     testCompile "junit:junit"
     testCompile "org.assertj:assertj-core"
+
+    testAnnotationProcessor 'org.immutables:value'
+    testCompileOnly 'org.immutables:value::annotations'
 }
