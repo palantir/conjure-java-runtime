@@ -286,9 +286,9 @@ The workflow is:
  - If the client is itself a server, does not handle the exception and just re-throws the `RemoteException`, the `RemoteException` will be propagated i.e. re-serialized as its own erroneous response
 
 #### Serialization of Optional and Nullable objects
-`@Nullable` or `Optional<?>` fields in complex types are serialized using the standard Jackson mechanism:
+`@Nullable` or `Optional<?>` fields in complex types are serialized using the following mechanism:
 - a present value is serialized as itself (in particular, without being wrapped in a JSON object representing the `Optional` object)
-- an absent value is serialized as a JSON `null`.
+- an absent value is omitted
 For example, assume a Java type of the form
 ```java
 public final class ComplexType {
@@ -301,13 +301,13 @@ public final class ComplexType {
 ComplexType value = new ComplexType(
         Optional.of(
                 new ComplexType(
-                        Optional.<ComplexType>absent(),
-                        Optional.<String>absent(),
+                        Optional.<ComplexType>empty(),
+                        Optional.<String>empty(),
         Optional.of("baz"));
 ```
 The JSON-serialized representation of this object is:
 ```json
-{"nested":{"nested":null,"string":null},"string":"baz"}
+{"nested":{},"string":"baz"}
 ```
 
 #### Optional return values
