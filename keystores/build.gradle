@@ -8,7 +8,6 @@ dependencies {
     implementation "com.google.guava:guava"
 
     testImplementation project(":conjure-java-jackson-serialization")
-    testImplementation project(":jetty-http2-agent")
     testImplementation("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
