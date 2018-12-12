@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.okhttp;
 
 import com.google.common.util.concurrent.SettableFuture;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
@@ -63,7 +64,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     @Override
     public Builder newBuilder() {
         log.warn("Attempting to copy RemotingOkHttpClient. Some of the functionality like rate limiting and qos will "
-                + "not be available to the new client");
+                + "not be available to the new client", new SafeRuntimeException("stacktrace"));
         return super.newBuilder();
     }
 
