@@ -40,7 +40,7 @@
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0"
+            "locked": "2.2.0"
         },
         "org.checkerframework:checker-compat-qual": {
             "locked": "2.0.0",
@@ -99,7 +99,7 @@
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0"
+            "locked": "2.2.0"
         },
         "org.checkerframework:checker-compat-qual": {
             "locked": "2.0.0",

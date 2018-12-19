@@ -29,6 +29,7 @@
                 "com.palantir.conjure.java.api:ssl-config",
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
                 "com.palantir.conjure.java.runtime:keystores",
+                "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing",
                 "com.palantir.tracing:tracing-api",
                 "com.squareup.retrofit2:converter-jackson"
@@ -51,6 +52,7 @@
             "locked": "2.9.7",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jackson-serialization",
+                "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing"
             ]
         },
@@ -97,19 +99,19 @@
             ]
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0",
+            "locked": "2.2.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0",
+            "locked": "2.2.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:client-config"
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0",
+            "locked": "2.2.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"
@@ -149,7 +151,7 @@
             ]
         },
         "com.palantir.tokens:auth-tokens": {
-            "locked": "3.0.0",
+            "locked": "3.3.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config"
             ]
@@ -193,10 +195,7 @@
             ]
         },
         "javax.ws.rs:javax.ws.rs-api": {
-            "locked": "2.1",
-            "transitive": [
-                "com.palantir.conjure.java.api:errors"
-            ]
+            "locked": "2.1"
         },
         "org.checkerframework:checker-compat-qual": {
             "locked": "2.0.0",
@@ -216,6 +215,7 @@
         "org.slf4j:slf4j-api": {
             "locked": "1.7.12",
             "transitive": [
+                "com.palantir.tokens:auth-tokens",
                 "com.palantir.tracing:tracing"
             ]
         }
@@ -335,19 +335,19 @@
             ]
         },
         "com.palantir.conjure.java.api:errors": {
-            "locked": "2.0.0",
+            "locked": "2.2.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0",
+            "locked": "2.2.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:client-config"
             ]
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0",
+            "locked": "2.2.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"
@@ -397,7 +397,7 @@
             ]
         },
         "com.palantir.tokens:auth-tokens": {
-            "locked": "3.0.0",
+            "locked": "3.3.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config"
             ]
@@ -466,7 +466,7 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.1",
             "transitive": [
-                "com.palantir.conjure.java.api:errors"
+                "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "org.checkerframework:checker-compat-qual": {
