@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.client.retrofit2;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -42,7 +41,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
-import javax.ws.rs.core.MediaType;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -188,7 +186,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(error)));
 
         assertThatThrownBy(() -> Futures.getUnchecked(futureSupplier.get()))
@@ -237,7 +235,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
             Supplier<Future<String>> futureSupplier) throws Exception {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(ERROR)));
 
         Future<String> future = futureSupplier.get();
@@ -283,7 +281,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     public void sync_retrofit_call_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(ERROR)));
 
         Call<String> call = service.getRelative();
@@ -301,7 +299,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     public void async_retrofit_call_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
-                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
                 .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(ERROR)));
 
         CountDownLatch assertionsPassed = new CountDownLatch(1);
