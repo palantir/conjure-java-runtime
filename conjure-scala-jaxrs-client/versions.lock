@@ -528,7 +528,8 @@
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.1",
             "transitive": [
-                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client"
+                "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
+                "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "org.checkerframework:checker-compat-qual": {

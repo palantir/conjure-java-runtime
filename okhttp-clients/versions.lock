@@ -183,6 +183,9 @@
                 "com.palantir.tritium:tritium-registry"
             ]
         },
+        "javax.ws.rs:javax.ws.rs-api": {
+            "locked": "2.1"
+        },
         "org.checkerframework:checker-compat-qual": {
             "locked": "2.0.0",
             "transitive": [
@@ -403,6 +406,9 @@
             "transitive": [
                 "com.palantir.tritium:tritium-registry"
             ]
+        },
+        "javax.ws.rs:javax.ws.rs-api": {
+            "locked": "2.1"
         },
         "org.checkerframework:checker-compat-qual": {
             "locked": "2.0.0",
