@@ -9,14 +9,23 @@
         "com.fasterxml.jackson.core:jackson-core": {
             "locked": "2.9.7",
             "transitive": [
-                "com.fasterxml.jackson.core:jackson-databind"
+                "com.fasterxml.jackson.core:jackson-databind",
+                "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
             ]
         },
         "com.fasterxml.jackson.core:jackson-databind": {
             "locked": "2.9.7",
             "transitive": [
+                "com.fasterxml.jackson.datatype:jackson-datatype-jdk8",
                 "com.palantir.conjure.java.api:ssl-config",
-                "com.palantir.conjure.java.runtime:keystores"
+                "com.palantir.conjure.java.runtime:keystores",
+                "com.palantir.tokens:auth-tokens"
+            ]
+        },
+        "com.fasterxml.jackson.datatype:jackson-datatype-jdk8": {
+            "locked": "2.9.7",
+            "transitive": [
+                "com.palantir.tokens:auth-tokens"
             ]
         },
         "com.google.code.findbugs:jsr305": {
@@ -42,10 +51,10 @@
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0"
+            "locked": "2.1.0"
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0",
+            "locked": "2.1.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"
@@ -68,7 +77,7 @@
             ]
         },
         "com.palantir.tokens:auth-tokens": {
-            "locked": "3.0.0",
+            "locked": "3.3.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config"
             ]
@@ -87,6 +96,12 @@
         },
         "org.immutables:value": {
             "locked": "2.7.3"
+        },
+        "org.slf4j:slf4j-api": {
+            "locked": "1.7.12",
+            "transitive": [
+                "com.palantir.tokens:auth-tokens"
+            ]
         }
     },
     "runtimeClasspath": {
@@ -144,10 +159,10 @@
             ]
         },
         "com.palantir.conjure.java.api:service-config": {
-            "locked": "2.0.0"
+            "locked": "2.1.0"
         },
         "com.palantir.conjure.java.api:ssl-config": {
-            "locked": "2.0.0",
+            "locked": "2.1.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.conjure.java.runtime:keystores"
@@ -170,7 +185,7 @@
             ]
         },
         "com.palantir.tokens:auth-tokens": {
-            "locked": "3.0.0",
+            "locked": "3.3.0",
             "transitive": [
                 "com.palantir.conjure.java.api:service-config"
             ]
