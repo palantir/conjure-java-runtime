@@ -23,6 +23,7 @@ dependencies {
 
     generatedObjectsCompile 'com.palantir.conjure.java:conjure-lib'
     generatedJerseyCompile 'com.palantir.conjure.java:conjure-lib'
+    generatedJerseyCompile 'javax.ws.rs:javax.ws.rs-api'
     generatedJerseyCompile sourceSets.generatedObjects.output
     generatedRetrofitCompile 'com.squareup.retrofit2:retrofit'
     generatedRetrofitCompile 'com.palantir.conjure.java:conjure-lib'
