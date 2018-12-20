@@ -163,6 +163,9 @@ public final class OkHttpClients {
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
+        if (config.fallbackToCommonNameVerification()) {
+            client.hostnameVerifier(Okhttp39HostnameVerifier.INSTANCE);
+        }
 
         // Intercept calls to augment request meta data
         client.addInterceptor(new ConcurrencyLimitingInterceptor());
