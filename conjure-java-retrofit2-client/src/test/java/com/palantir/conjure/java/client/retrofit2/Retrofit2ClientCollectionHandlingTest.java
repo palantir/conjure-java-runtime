@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import javax.ws.rs.Path;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -76,7 +75,6 @@ public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
         server.enqueue(mockResponse);
     }
 
-    @Path("/")
     public interface Service {
         @GET("/list")
         Call<List<String>> getList();
