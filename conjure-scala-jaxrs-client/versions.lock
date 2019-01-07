@@ -337,7 +337,8 @@
                 "com.palantir.conjure.java.runtime:keystores",
                 "com.palantir.conjure.java.runtime:okhttp-clients",
                 "com.palantir.conjure.java.runtime:refresh-utils",
-                "com.palantir.tracing:tracing"
+                "com.palantir.tracing:tracing",
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "com.google.j2objc:j2objc-annotations": {
@@ -467,26 +468,26 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.2.0",
+            "locked": "2.1.0",
             "transitive": [
                 "com.palantir.tracing:tracing-okhttp3"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.2.0",
+            "locked": "2.1.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-okhttp3": {
-            "locked": "1.2.0",
+            "locked": "2.1.0",
             "transitive": [
                 "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client",
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
         },
         "com.palantir.tritium:tritium-registry": {
-            "locked": "0.8.0",
+            "locked": "0.11.2",
             "transitive": [
                 "com.palantir.conjure.java.runtime:okhttp-clients"
             ]
