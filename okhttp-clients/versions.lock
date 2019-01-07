@@ -133,8 +133,7 @@
                 "com.palantir.conjure.java.api:errors",
                 "com.palantir.conjure.java.api:service-config",
                 "com.palantir.safe-logging:preconditions",
-                "com.palantir.tracing:tracing",
-                "com.palantir.tritium:tritium-registry"
+                "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tokens:auth-tokens": {
@@ -144,22 +143,22 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.2.0",
+            "locked": "2.1.0",
             "transitive": [
                 "com.palantir.tracing:tracing-okhttp3"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.2.0",
+            "locked": "2.1.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-okhttp3": {
-            "locked": "1.2.0"
+            "locked": "2.1.0"
         },
         "com.palantir.tritium:tritium-registry": {
-            "locked": "0.8.0"
+            "locked": "0.11.2"
         },
         "com.squareup.okhttp3:logging-interceptor": {
             "locked": "3.12.0"
@@ -178,10 +177,7 @@
             ]
         },
         "io.dropwizard.metrics:metrics-core": {
-            "locked": "3.2.6",
-            "transitive": [
-                "com.palantir.tritium:tritium-registry"
-            ]
+            "locked": "3.2.6"
         },
         "javax.ws.rs:javax.ws.rs-api": {
             "locked": "2.1"
@@ -303,7 +299,8 @@
                 "com.fasterxml.jackson.datatype:jackson-datatype-guava",
                 "com.palantir.conjure.java.runtime:client-config",
                 "com.palantir.conjure.java.runtime:keystores",
-                "com.palantir.tracing:tracing"
+                "com.palantir.tracing:tracing",
+                "com.palantir.tritium:tritium-registry"
             ]
         },
         "com.google.j2objc:j2objc-annotations": {
@@ -368,22 +365,22 @@
             ]
         },
         "com.palantir.tracing:tracing": {
-            "locked": "1.2.0",
+            "locked": "2.1.0",
             "transitive": [
                 "com.palantir.tracing:tracing-okhttp3"
             ]
         },
         "com.palantir.tracing:tracing-api": {
-            "locked": "1.2.0",
+            "locked": "2.1.0",
             "transitive": [
                 "com.palantir.tracing:tracing"
             ]
         },
         "com.palantir.tracing:tracing-okhttp3": {
-            "locked": "1.2.0"
+            "locked": "2.1.0"
         },
         "com.palantir.tritium:tritium-registry": {
-            "locked": "0.8.0"
+            "locked": "0.11.2"
         },
         "com.squareup.okhttp3:logging-interceptor": {
             "locked": "3.12.0"
