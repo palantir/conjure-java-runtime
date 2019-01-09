@@ -19,6 +19,10 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
+/**
+ * No longer used.
+ * @deprecated no longer used
+ */
 @Deprecated
 public enum PathTemplateHeaderRewriter implements RequestInterceptor {
     INSTANCE;

@@ -10,8 +10,16 @@ import feign.MethodMetadata;
 import java.lang.reflect.Method;
 
 public final class PathTemplateHeaderEnrichmentContract extends AbstractDelegatingContract {
+    /**
+     * No longer used.
+     * @deprecated no longer used
+     */
     @Deprecated
     public static final char OPEN_BRACE_REPLACEMENT = '\0';
+    /**
+     * No longer used.
+     * @deprecated no longer used
+     */
     @Deprecated
     public static final char CLOSE_BRACE_REPLACEMENT = '\1';
 
