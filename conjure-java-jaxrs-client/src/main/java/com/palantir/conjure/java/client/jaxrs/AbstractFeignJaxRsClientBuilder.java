@@ -22,7 +22,6 @@ import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderRewriter;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.conjure.java.okhttp.HostEventsSink;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
@@ -98,7 +97,6 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 cborObjectMapper,
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
-                .requestInterceptor(PathTemplateHeaderRewriter.INSTANCE)
                 .client(new OkHttpClient(okHttpClient))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)

@@ -16,29 +16,19 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
+/**
+ * No longer used.
+ * @deprecated no longer used
+ */
+@Deprecated
 public enum PathTemplateHeaderRewriter implements RequestInterceptor {
     INSTANCE;
 
     @Override
     public void apply(RequestTemplate template) {
-        if (template.headers().containsKey(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER)) {
-            Collection<String> rewrittenHeaders = template.headers().get(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER)
-                    .stream()
-                    .map(headerValue ->
-                            headerValue.replace(PathTemplateHeaderEnrichmentContract.OPEN_BRACE_REPLACEMENT, '{')
-                                    .replace(PathTemplateHeaderEnrichmentContract.CLOSE_BRACE_REPLACEMENT, '}'))
-                    .collect(Collectors.toList());
-            Map<String, Collection<String>> headers = new HashMap<>(template.headers());
-            headers.put(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER, rewrittenHeaders);
-            template.headers(headers);
-        }
+        // nop
     }
 }
