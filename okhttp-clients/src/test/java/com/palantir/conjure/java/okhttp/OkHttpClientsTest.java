@@ -32,6 +32,7 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfigurations;
 import com.palantir.logsafe.exceptions.SafeIoException;
+import com.palantir.tracing.Tracer;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -575,6 +576,24 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(client.newCall(new Request.Builder().url(serviceUrl).build()).execute().body().string())
                 .isEqualTo("foo");
         assertThat(server.takeRequest().getHeader(HttpHeaders.HOST)).isEqualTo("foo.com");
+    }
+
+    @Test
+    public void verifyFailureHandledGracefully() throws Exception {
+        server.enqueue(new MockResponse().setBody("pong"));
+        server.enqueue(new MockResponse().setBody("pong"));
+        // Successful Request
+        createRetryingClient(0).newCall(new Request.Builder().url(url).build()).execute();
+
+        // This tracer might be a bit buggy
+        Tracer.subscribe(getClass().getName(), span -> {
+            throw new IllegalStateException("Tracing is difficult");
+        });
+        try {
+            createRetryingClient(0).newCall(new Request.Builder().url(url).build()).execute();
+        } finally {
+            Tracer.unsubscribe(getClass().getName());
+        }
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {
