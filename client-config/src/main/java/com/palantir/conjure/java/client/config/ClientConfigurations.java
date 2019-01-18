@@ -38,8 +38,8 @@ public final class ClientConfigurations {
 
     // Defaults for parameters that are optional in ServiceConfiguration.
     private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(10);
-    private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofMinutes(10);
-    private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(10);
+    private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofMinutes(5);
+    private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(250);
     private static final Duration DEFAULT_FAILED_URL_COOLDOWN = Duration.ZERO;
     private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = false;
