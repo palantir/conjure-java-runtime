@@ -27,8 +27,4 @@
 
     <!-- Generated code should not be subjected to checkstyle. -->
     <suppress files="[/\\].*[/\\]generated.*[/\\]" checks="." />
-
-    <suppress files=".*AsyncSerializableErrorCallAdapterFactory\.java" checks="RegexpHeader" />
-    <suppress files=".*DistinguishedNameParser\.java" checks="." />
-    <suppress files=".*Okhttp39HostnameVerifier\.java" checks="." />
 </suppressions>
