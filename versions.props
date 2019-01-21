@@ -15,6 +15,7 @@ com.palantir.tracing:* = 2.1.0
 com.palantir.tritium:tritium-registry = 0.11.2
 com.squareup.okhttp3:* = 3.12.0
 # dependency-upgrader:OFF
+# We cannot upgrade retrofit2 to 2.5.0 because of https://github.com/palantir/conjure-java-runtime/issues/930
 com.squareup.retrofit2:* = 2.4.0
 # dependency-upgrader:ON
 io.dropwizard.metrics:metrics-core = 3.2.6
