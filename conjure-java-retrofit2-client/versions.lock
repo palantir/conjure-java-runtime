@@ -186,10 +186,10 @@
             ]
         },
         "com.squareup.retrofit2:converter-jackson": {
-            "locked": "2.5.0"
+            "locked": "2.4.0"
         },
         "com.squareup.retrofit2:retrofit": {
-            "locked": "2.5.0",
+            "locked": "2.4.0",
             "transitive": [
                 "com.squareup.retrofit2:converter-jackson"
             ]
@@ -446,10 +446,10 @@
             ]
         },
         "com.squareup.retrofit2:converter-jackson": {
-            "locked": "2.5.0"
+            "locked": "2.4.0"
         },
         "com.squareup.retrofit2:retrofit": {
-            "locked": "2.5.0",
+            "locked": "2.4.0",
             "transitive": [
                 "com.squareup.retrofit2:converter-jackson"
             ]
