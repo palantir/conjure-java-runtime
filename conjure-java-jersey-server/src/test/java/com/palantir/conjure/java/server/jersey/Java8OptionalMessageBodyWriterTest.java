@@ -19,7 +19,9 @@ package com.palantir.conjure.java.server.jersey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codahale.metrics.MetricRegistry;
+import com.google.common.net.HttpHeaders;
 import io.dropwizard.jersey.DropwizardResourceConfig;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -33,6 +35,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import org.glassfish.jersey.test.JerseyTest;
 import org.glassfish.jersey.test.TestProperties;
 import org.junit.Test;
@@ -69,6 +72,11 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
                 .queryParam("id", "123.456").request()
                 .get(String.class))
                 .isEqualTo("123.456");
+
+        try (Response binaryResponse = target("/optional-return/binary").queryParam("id", "woo").request().get()) {
+            assertThat(binaryResponse.getHeaderString(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/octet-stream");
+            assertThat(binaryResponse.readEntity(String.class)).isEqualTo("woo");
+        }
     }
 
     @Test
@@ -83,6 +91,9 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
         assertThat(response.getStatus()).isEqualTo(204);
 
         response = target("/optional-return/double").request().get();
+        assertThat(response.getStatus()).isEqualTo(204);
+
+        response = target("/optional-return/binary").request().get();
         assertThat(response.getStatus()).isEqualTo(204);
     }
 
@@ -117,5 +128,13 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
             return id != null ? OptionalDouble.of(id) : OptionalDouble.empty();
         }
 
+        @Path("binary")
+        @Produces(MediaType.APPLICATION_OCTET_STREAM)
+        @GET
+        public Optional<StreamingOutput> showOptionalBinaryWithQueryParam(@QueryParam("id") String id) {
+            return Optional.ofNullable(id)
+                    .map(str -> str.getBytes(StandardCharsets.UTF_8))
+                    .map(bytes -> output -> output.write(bytes));
+        }
     }
 }
