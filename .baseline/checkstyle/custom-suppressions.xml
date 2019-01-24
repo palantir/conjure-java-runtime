@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<!-- IMPORTANT ECLIPSE NOTE: If you change this file, you must restart Eclipse
+ for your changes to take effect in its Checkstyle integration. -->
+<suppressions>
+    <suppress files=".*AsyncSerializableErrorCallAdapterFactory\.java" checks="RegexpHeader" />
+    <suppress files=".*DistinguishedNameParser\.java" checks="." />
+    <suppress files=".*Okhttp39HostnameVerifier\.java" checks="." />
+</suppressions>
