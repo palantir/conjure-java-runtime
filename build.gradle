@@ -6,7 +6,6 @@ buildscript {
 
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:7.0.1'
         classpath 'com.netflix.nebula:nebula-publishing-plugin:9.1.1'
         classpath 'com.palantir.baseline:gradle-baseline-java:0.48.0'
         classpath 'com.palantir.gradle.gitversion:gradle-git-version:0.11.0'
@@ -32,33 +31,6 @@ subprojects {
     apply plugin: 'com.palantir.baseline-class-uniqueness'
 
     sourceCompatibility = 1.8
-    if (gradle.startParameter.taskNames.find {
-        it.endsWith('verifyDependencyLocksAreCurrent') || it.endsWith('build')}) {
-        gradle.startParameter.setTaskNames(gradle.startParameter.taskNames + ['generateLock'])
-    }
-
-    apply plugin: 'nebula.dependency-lock'
-    dependencyLock {
-        includeTransitives = true
-        lockFile = 'versions.lock'
-        configurationNames = ['runtimeClasspath', 'compileClasspath']
-    }
-
-    task verifyDependencyLocksAreCurrent {
-        doLast {
-            def expectedDependencies = tasks.saveLock.getOutputLock()
-            def actualDependencies = tasks.saveLock.getGeneratedLock()
-            def digester = java.security.MessageDigest.getInstance('SHA')
-            logger.info("Verifying integrity of dependency locks: {} vs {}", expectedDependencies, actualDependencies)
-            if (digester.digest(expectedDependencies.bytes) != digester.digest(actualDependencies.bytes)) {
-                throw new GradleException("The dependencies of project " + project.name + " do not match the expected "
-                    + "dependencies recorded in " + expectedDependencies + ". "
-                    + "Run `./gradlew generateLock saveLock` and commit the updated version.lock files")
-            }
-        }
-    }
-    verifyDependencyLocksAreCurrent.dependsOn(generateLock)
-    build.dependsOn(verifyDependencyLocksAreCurrent)
 
     tasks.check.dependsOn(javadoc)
 
@@ -67,3 +39,25 @@ subprojects {
         maxHeapSize = "512m"
     }
 }
+
+allprojects {
+    // Allow transitives to not be forced
+    dependencyRecommendations { strategy ConflictResolved }
+
+    configurations.configureEach {
+        resolutionStrategy.preferProjectModules()
+    }
+}
+
+configurations {
+    unifiedClasspath {
+        resolutionStrategy.activateDependencyLocking()
+    }
+}
+
+dependencies {
+    subprojects.each { p ->
+        unifiedClasspath p
+    }
+}
+
