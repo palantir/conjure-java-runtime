@@ -27,8 +27,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Before;
@@ -43,30 +45,24 @@ public class ReproduceBugTest extends TestBase {
     private final HostMetricsRegistry hostEventsSink = new HostMetricsRegistry();
 
     private String slowUrl;
-    private String fastUrl = "http://www.echojs.com";
+    private String fastUrl = "http://www.echojs.com/";
 
     @Before
     public void before() {
         slowUrl = "http://localhost:" + server.getPort();
     }
 
-    private static final int CLIENTS = 10;
+    private static final int CLIENTS = 200;
 
     @Test
     public void dispatcher_behaves_weirdly() throws IOException, InterruptedException {
 
-        OkHttpClient client = OkHttpClients.withStableUris(
-                ClientConfiguration.builder()
-                        .from(createTestConfig(slowUrl, fastUrl))
-                        .build(),
-                AGENT,
-                hostEventsSink,
-                ReproduceBugTest.class);
-
+        OkHttpClient slowClient = slowClient();
+        OkHttpClient fastClient = fastClient();
 
         for (int i = 0; i < CLIENTS; i ++) {
             server.enqueue(new MockResponse()
-                    .setBodyDelay(10, TimeUnit.SECONDS)
+                    .setBodyDelay(10, TimeUnit.MINUTES)
                     .setResponseCode(200)
                     .setBody("I am slow"));
         }
@@ -76,13 +72,20 @@ public class ReproduceBugTest extends TestBase {
         ExecutorService executor = Executors.newFixedThreadPool(CLIENTS);
         IntStream.range(0, CLIENTS).forEach(i -> {
             executor.submit(() -> {
+                System.out.println(i + " starting...");
+                Call call = slowClient.newCall(new Request.Builder().url(slowUrl).build());
+                call.enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        System.out.println(i + ": failed");
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        System.out.println(i + ": " + response.body().string());
+                    }
+                });
                 started.countDown();
-                Call call = client.newCall(new Request.Builder().url(slowUrl).build());
-                try {
-                    System.out.println(i + ": " + call.execute().body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             });
         });
 
@@ -91,15 +94,37 @@ public class ReproduceBugTest extends TestBase {
         System.out.println(CLIENTS + " client threads started, Sending request to fast server");
         Stopwatch sw = Stopwatch.createStarted();
 
-        Call call = client.newCall(new Request.Builder().url(fastUrl).build());
+        Call call = fastClient.newCall(new Request.Builder().url(fastUrl).build());
         String fastResponse = call.execute().body().string();
 
         long time = sw.elapsed(TimeUnit.MILLISECONDS);
 
-        // TODO(dfox): why does this go to the slowServer???????
-        System.out.println("fastResponse: " + fastResponse + " " + time);
+        System.out.println("fast: " + fastResponse + " " + time);
         assertThat(time).isLessThan(3_000);
 
         executor.shutdown();
+        executor.shutdownNow();
+        executor.awaitTermination(15, TimeUnit.SECONDS); // get rid of the client threads before taking down the server
+    }
+
+    private OkHttpClient slowClient() {
+        return OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(slowUrl))
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                ReproduceBugTest.class);
+    }
+
+    // Need a separate fastClient to avoid http-remoting pinning us to the first URL
+    private OkHttpClient fastClient() {
+        return OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(fastUrl))
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                ReproduceBugTest.class);
     }
 }

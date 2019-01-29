@@ -67,7 +67,7 @@ public final class OkHttpClients {
      * Same as OkHttp's default, but with a logging uncaught exception handler.
      */
     private static final ExecutorService executionExecutor =
-            Tracers.wrap(Executors.newFixedThreadPool(256));
+            Tracers.wrap(Executors.newCachedThreadPool(executionThreads));
 
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
