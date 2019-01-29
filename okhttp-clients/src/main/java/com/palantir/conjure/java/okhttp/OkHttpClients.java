@@ -18,16 +18,13 @@ package com.palantir.conjure.java.okhttp;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.palantir.conjure.java.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.service.UserAgent.Agent;
 import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.config.CipherSuites;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.tracing.Tracers;
-import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -36,11 +33,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
-import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.TlsVersion;
@@ -70,7 +65,7 @@ public final class OkHttpClients {
             Tracers.wrap(Executors.newCachedThreadPool(executionThreads));
 
     /** Shared dispatcher with static executor service. */
-    private static final Dispatcher dispatcher;
+    static final Dispatcher dispatcher;
 
     /** Global {@link TaggedMetricRegistry} for per-client and dispatcher-wide metrics. */
     private static TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
@@ -128,84 +123,59 @@ public final class OkHttpClients {
     }
 
     @VisibleForTesting
-    static RemotingOkHttpClient withStableUris(
+    static OkHttpClient withStableUris(
             ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
         return createInternal(config, userAgent, hostEventsSink, serviceClass, false);
     }
 
-    private static RemotingOkHttpClient createInternal(
+    static OkHttpClient createInternal(
             ClientConfiguration config,
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
-        ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(limitReviver, registry, serviceClass);
+        // ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(limitReviver, registry, serviceClass);
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // Routing
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(config.uris(), randomizeUrlOrder,
                 config.failedUrlCooldown());
-        if (config.meshProxy().isPresent()) {
-            // TODO(rfink): Should this go into the call itself?
-            client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
-        } else {
-            switch (config.nodeSelectionStrategy()) {
-                case ROUND_ROBIN:
-                    client.addInterceptor(RoundRobinUrlInterceptor.create(urlSelector));
-                    break;
-                case PIN_UNTIL_ERROR:
+        // if (config.meshProxy().isPresent()) {
+        //     // TODO(rfink): Should this go into the call itself?
+        //     client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
+        // } else {
+        //     switch (config.nodeSelectionStrategy()) {
+        //         case ROUND_ROBIN:
+        //             client.addInterceptor(RoundRobinUrlInterceptor.create(urlSelector));
+        //             break;
+        //         case PIN_UNTIL_ERROR:
                     // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in
                     // the request
-                    client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
-            }
-        }
-        client.followRedirects(false);  // We implement our own redirect logic.
+        client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
+            // }
+        // }
+        // client.followRedirects(false);  // We implement our own redirect logic.
 
         // SSL
-        client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
-        if (config.fallbackToCommonNameVerification()) {
-            client.hostnameVerifier(Okhttp39HostnameVerifier.INSTANCE);
-        }
+        // client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
+        // if (config.fallbackToCommonNameVerification()) {
+        //     client.hostnameVerifier(Okhttp39HostnameVerifier.INSTANCE);
+        // }
 
         // Intercept calls to augment request meta data
-        client.addInterceptor(new ConcurrencyLimitingInterceptor());
-        client.addInterceptor(InstrumentedInterceptor.create(registry, hostEventsSink, serviceClass));
-        client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
-        client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
-
-        // timeouts
-        // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
-        // with its own default otherwise.
-        client.connectTimeout(config.connectTimeout().toMillis(), TimeUnit.MILLISECONDS);
-        client.readTimeout(config.readTimeout().toMillis(), TimeUnit.MILLISECONDS);
-        client.writeTimeout(config.writeTimeout().toMillis(), TimeUnit.MILLISECONDS);
-
-        // proxy
-        client.proxySelector(config.proxy());
-        if (config.proxyCredentials().isPresent()) {
-            BasicCredentials basicCreds = config.proxyCredentials().get();
-            final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
-            client.proxyAuthenticator((route, response) -> response.request().newBuilder()
-                    .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
-                    .build());
-        }
+        // client.addInterceptor(new ConcurrencyLimitingInterceptor());
+        // client.addInterceptor(InstrumentedInterceptor.create(registry, hostEventsSink, serviceClass));
+        // client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
+        // client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
 
         // cipher setup
-        client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
+        // client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
 
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
-        client.connectionPool(connectionPool);
+        // client.connectionPool(connectionPool);
 
         client.dispatcher(dispatcher);
-
-        return new RemotingOkHttpClient(
-                client.build(),
-                () -> new ExponentialBackoff(
-                        config.maxNumRetries(), config.backoffSlotSize(), ThreadLocalRandom.current()),
-                urlSelector,
-                schedulingExecutor,
-                executionExecutor,
-                concurrencyLimiters);
+        return client.build();
     }
 
     /**
