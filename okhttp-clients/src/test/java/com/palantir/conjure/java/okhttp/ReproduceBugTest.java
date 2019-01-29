@@ -19,6 +19,7 @@ package com.palantir.conjure.java.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.base.Stopwatch;
+import com.palantir.conjure.java.client.config.ClientConfiguration;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -42,21 +43,26 @@ public class ReproduceBugTest extends TestBase {
     private final HostMetricsRegistry hostEventsSink = new HostMetricsRegistry();
 
     private String slowUrl;
+    private String fastUrl = "http://www.echojs.com";
 
     @Before
     public void before() {
         slowUrl = "http://localhost:" + server.getPort();
-        System.out.println("slowUrl" + slowUrl);
     }
 
-    private static final int CLIENTS = 200;
+    private static final int CLIENTS = 10;
 
     @Test
     public void dispatcher_behaves_weirdly() throws IOException, InterruptedException {
 
-        OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.dispatcher(OkHttpClients.dispatcher);
-        OkHttpClient client = builder.build();
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(slowUrl, fastUrl))
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                ReproduceBugTest.class);
+
 
         for (int i = 0; i < CLIENTS; i ++) {
             server.enqueue(new MockResponse()
@@ -71,7 +77,7 @@ public class ReproduceBugTest extends TestBase {
         IntStream.range(0, CLIENTS).forEach(i -> {
             executor.submit(() -> {
                 started.countDown();
-                Call call = client.newCall(new Request.Builder().url(slowUrl + "/").build());
+                Call call = client.newCall(new Request.Builder().url(slowUrl).build());
                 try {
                     System.out.println(i + ": " + call.execute().body().string());
                 } catch (IOException e) {
@@ -82,15 +88,16 @@ public class ReproduceBugTest extends TestBase {
 
         assertThat(started.await(5, TimeUnit.SECONDS)).describedAs("All clients must start").isTrue();
 
-        System.out.println("Sending request to fast server");
+        System.out.println(CLIENTS + " client threads started, Sending request to fast server");
         Stopwatch sw = Stopwatch.createStarted();
 
-        Call call = client.newCall(new Request.Builder().url("http://www.echojs.com/").build());
+        Call call = client.newCall(new Request.Builder().url(fastUrl).build());
         String fastResponse = call.execute().body().string();
 
         long time = sw.elapsed(TimeUnit.MILLISECONDS);
 
-        System.out.println("poop: " + fastResponse + " " + time);
+        // TODO(dfox): why does this go to the slowServer???????
+        System.out.println("fastResponse: " + fastResponse + " " + time);
         assertThat(time).isLessThan(3_000);
 
         executor.shutdown();
