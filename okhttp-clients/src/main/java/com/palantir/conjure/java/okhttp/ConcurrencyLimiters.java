@@ -32,9 +32,7 @@ import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.time.Duration;
-import java.util.ArrayDeque;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -124,7 +122,7 @@ final class ConcurrencyLimiters {
      */
     final class ConcurrencyLimiter {
         @GuardedBy("this")
-        private final Queue<SettableFuture<Limiter.Listener>> waitingRequests = new ArrayDeque<>();
+        private final ThreadWorkQueue<SettableFuture<Limiter.Listener>> waitingRequests = new ThreadWorkQueue<>();
         @GuardedBy("this")
         private Limiter<Void> limiter;
         @GuardedBy("this")
