@@ -1,7 +1,7 @@
 publishing {
     publications {
         nebulaBom(MavenPublication) {
-            nebulaDependencyManagement.fromConfigurations { configurations.compile }
+            // TODO java platform plugin
             artifactId = project.name + '-bom'
         }
     }
