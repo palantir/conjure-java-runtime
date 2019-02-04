@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.config.ssl;
 
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -33,6 +34,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -249,8 +251,15 @@ public final class SslSocketFactoriesConnectionTests {
             runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
             fail();
         } catch (RuntimeException ex) {
-            assertThat(ex.getCause(), is(instanceOf(SSLHandshakeException.class)));
-            assertThat(ex.getMessage(), containsString("bad_certificate"));
+            if (System.getProperty("java.version").startsWith("1.8")) {
+                assertThat(ex.getCause(), is(instanceOf(SSLHandshakeException.class)));
+                assertThat(ex.getMessage(), containsString("bad_certificate"));
+            } else {
+                assertThat(ex.getCause(),
+                        anyOf(instanceOf(SSLException.class), instanceOf(SSLHandshakeException.class)));
+                assertThat(ex.getMessage(),
+                        anyOf(containsString("readHandshakeRecord"), containsString("certificate_unknown")));
+            }
         }
     }
 

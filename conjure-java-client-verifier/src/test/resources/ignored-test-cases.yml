@@ -1,0 +1,84 @@
+client:
+  autoDeserialize:
+
+   receiveBooleanExample:
+   - '{"value":0}' # jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
+   - '{"value":"true"}' # jackson is casting 0 -> false and 1 -> true... MapperFeature.ALLOW_COERCION_OF_SCALARS);) in 2.9 will save us
+
+   receiveStringExample:
+   - '{"value":8}' # jackson coerces things to other types
+   receiveIntegerExample:
+   - '{"value":"12"}' # jackson coerces things to other types
+
+   receiveSetStringExample:
+   - '{"value":["a","a"]}' # client turns this into a set of ["a"] without error
+   receiveDateTimeAliasExample:
+   - '"1523040070"' # jackson coerces things to other types
+   receiveDateTimeExample:
+   - '{"value":"1523040070"}' # jackson coerces things to other types
+   - '{"value":1523040070}' # jackson coerces things to other types
+
+   receiveOptionalIntegerExample:
+   - 'null'
+   - '{"value":"1234"}' # jackson coerces things to other types
+   receiveListBearerTokenAliasExample:
+   - 'null'
+   receiveListBinaryAliasExample:
+   - 'null'
+   receiveListBooleanAliasExample:
+   - 'null'
+   receiveListDateTimeAliasExample:
+   - 'null'
+   receiveListDoubleAliasExample:
+   - 'null'
+   receiveListIntegerAliasExample:
+   - 'null'
+   receiveListRidAliasExample:
+   - 'null'
+   receiveListSafeLongAliasExample:
+   - 'null'
+   receiveListStringAliasExample:
+   - 'null'
+   receiveListUuidAliasExample:
+   - 'null'
+   receiveListAnyAliasExample:
+   - 'null'
+   receiveSetBearerTokenAliasExample:
+   - 'null'
+   receiveSetBinaryAliasExample:
+   - 'null'
+   receiveSetBooleanAliasExample:
+   - 'null'
+   receiveSetDateTimeAliasExample:
+   - 'null'
+   receiveSetDoubleAliasExample:
+   - 'null'
+   receiveSetIntegerAliasExample:
+   - 'null'
+   receiveSetRidAliasExample:
+   - 'null'
+   receiveSetSafeLongAliasExample:
+   - 'null'
+   receiveSetStringAliasExample:
+   - 'null'
+   receiveSetUuidAliasExample:
+   - 'null'
+   receiveSetAnyAliasExample:
+   - 'null'
+
+   receiveMapBinaryAliasExample:
+   - '{}'
+   - '{"SGVsbG8sIFdvcmxk": true}'
+   receiveMapDoubleAliasExample:
+   - '{"10": true, "10e0": false}'
+   - '{"10": true, "10.0": false}'
+
+  singleHeaderService: {}
+
+  singlePathParamService:
+   pathParamString:
+   - '""'
+   pathParamAliasString:
+   - '""'
+
+  singleQueryParamService: {}

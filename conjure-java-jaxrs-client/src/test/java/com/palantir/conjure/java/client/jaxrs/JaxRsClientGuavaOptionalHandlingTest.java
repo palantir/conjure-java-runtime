@@ -20,7 +20,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import com.google.common.base.Optional;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -54,7 +53,7 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
     public interface CannotDecorateInterface {
         @GET
         @Path("{opt}/foo/{req}")
-        String path(@PathParam("opt") Optional<String> opt, @PathParam("req") String req);
+        String path(@PathParam("opt") com.google.common.base.Optional<String> opt, @PathParam("req") String req);
     }
 
     @Path("/")
@@ -65,11 +64,11 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
 
         @GET
         @Path("foo")
-        String query(@QueryParam("opt") Optional<String> opt, @QueryParam("req") String req);
+        String query(@QueryParam("opt") com.google.common.base.Optional<String> opt, @QueryParam("req") String req);
 
         @GET
         @Path("foo")
-        String header(@HeaderParam("opt") Optional<String> opt, @HeaderParam("req") String req);
+        String header(@HeaderParam("opt") com.google.common.base.Optional<String> opt, @HeaderParam("req") String req);
     }
 
     @Test
@@ -97,28 +96,28 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
 
     @Test
     public void testAbsentQuery() throws Exception {
-        proxy.query(Optional.absent(), "str2");
+        proxy.query(com.google.common.base.Optional.absent(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getRequestLine(), is("GET /foo?req=str2 HTTP/1.1"));
     }
 
     @Test
     public void testEmptyStringQuery() throws Exception {
-        proxy.query(Optional.<String>of(""), "str2");
+        proxy.query(com.google.common.base.Optional.of(""), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=&req=str2 HTTP/1.1"));
     }
 
     @Test
     public void testStringQuery() throws Exception {
-        proxy.query(Optional.<String>of("str"), "str2");
+        proxy.query(com.google.common.base.Optional.of("str"), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=str&req=str2 HTTP/1.1"));
     }
 
     @Test
     public void testAbsentHeader() throws Exception {
-        proxy.header(Optional.<String>absent(), "str2");
+        proxy.header(com.google.common.base.Optional.absent(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getHeader("opt"), is(""));
         assertThat(takeRequest.getHeader("req"), is("str2"));
@@ -126,7 +125,7 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
 
     @Test
     public void testEmptyStringHeader() throws Exception {
-        proxy.header(Optional.<String>of(""), "str2");
+        proxy.header(com.google.common.base.Optional.of(""), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getHeader("opt"), is(""));
         assertThat(takeRequest.getHeader("req"), is("str2"));
@@ -134,7 +133,7 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
 
     @Test
     public void testStringHeader() throws Exception {
-        proxy.header(Optional.<String>of("str"), "str2");
+        proxy.header(com.google.common.base.Optional.of("str"), "str2");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getHeader("opt"), is("str"));
         assertThat(takeRequest.getHeader("req"), is("str2"));

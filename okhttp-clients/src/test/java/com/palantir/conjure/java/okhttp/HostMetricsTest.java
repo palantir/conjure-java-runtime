@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class HostMetricsTest {
@@ -87,7 +87,7 @@ public final class HostMetricsTest {
         Instant previousUpdate = hostMetrics.lastUpdate();
         hostMetrics.record(200, 100);
 
-        assertThat(hostMetrics.lastUpdate()).isGreaterThan(previousUpdate);
+        assertThat(hostMetrics.lastUpdate()).isAfter(previousUpdate);
     }
 
     @Test
@@ -95,6 +95,6 @@ public final class HostMetricsTest {
         Instant previousUpdate = hostMetrics.lastUpdate();
         hostMetrics.recordIoException();
 
-        assertThat(hostMetrics.lastUpdate()).isGreaterThan(previousUpdate);
+        assertThat(hostMetrics.lastUpdate()).isAfter(previousUpdate);
     }
 }

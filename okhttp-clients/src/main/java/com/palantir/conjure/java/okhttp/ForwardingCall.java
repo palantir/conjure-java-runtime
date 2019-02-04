@@ -21,6 +21,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
 import okhttp3.Response;
+import okio.Timeout;
 
 /** A forwarding/delegating {@link okhttp3.Call}. Sub-classes should override individual methods. */
 @SuppressWarnings({"checkstyle:noclone", "checkstyle:superclone"})
@@ -65,6 +66,11 @@ abstract class ForwardingCall implements Call {
     @Override
     public Call clone() {
         return doClone();
+    }
+
+    @Override
+    public Timeout timeout() {
+        return delegate.timeout();
     }
 
     /**

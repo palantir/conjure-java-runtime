@@ -57,7 +57,8 @@ public final class OkHttpClients {
     private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler((thread, uncaughtException) ->
                     log.error("An exception was uncaught in an execution thread. "
-                                    + "This implies a bug in conjure-java-runtime",
+                                    + "This likely left a thread blocked, and is as such a serious bug "
+                                    + "which requires debugging.",
                             uncaughtException))
             .setNameFormat("remoting-okhttp-dispatcher-%d")
             .build();
@@ -80,7 +81,8 @@ public final class OkHttpClients {
     static {
         dispatcher = new Dispatcher(executionExecutor);
         dispatcher.setMaxRequests(256);
-        dispatcher.setMaxRequestsPerHost(256);
+        // Must be less than maxRequests so a single slow host does not block all requests
+        dispatcher.setMaxRequestsPerHost(64);
         // metrics
         registry.gauge(
                 MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.queued").build(),
@@ -97,6 +99,13 @@ public final class OkHttpClients {
     }
 
     /**
+     * The {@link ScheduledExecutorService} used for recovering leaked limits.
+     */
+    private static final ScheduledExecutorService limitReviver = Tracers.wrap(
+            Executors.newSingleThreadScheduledExecutor(
+                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", false)));
+
+    /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
      * internal thread pool and from the thread pool used by {@link #executionExecutor}.
      * <p>
@@ -104,7 +113,7 @@ public final class OkHttpClients {
      * #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
      * Javadoc.
      */
-    private static final ScheduledExecutorService schedulingExecutor = Tracers.wrap(new ScheduledThreadPoolExecutor(
+    private static final ScheduledExecutorService schedulingExecutor = Tracers.wrap(Executors.newScheduledThreadPool(
             NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", false)));
 
     private OkHttpClients() {}
@@ -130,6 +139,7 @@ public final class OkHttpClients {
             HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
+        ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(limitReviver, registry, serviceClass);
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // Routing
@@ -153,9 +163,12 @@ public final class OkHttpClients {
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
+        if (config.fallbackToCommonNameVerification()) {
+            client.hostnameVerifier(Okhttp39HostnameVerifier.INSTANCE);
+        }
 
         // Intercept calls to augment request meta data
-        client.addInterceptor(new ConcurrencyLimitingInterceptor(registry, serviceClass));
+        client.addInterceptor(new ConcurrencyLimitingInterceptor());
         client.addInterceptor(InstrumentedInterceptor.create(registry, hostEventsSink, serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
         client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
@@ -191,7 +204,8 @@ public final class OkHttpClients {
                         config.maxNumRetries(), config.backoffSlotSize(), ThreadLocalRandom.current()),
                 urlSelector,
                 schedulingExecutor,
-                executionExecutor);
+                executionExecutor,
+                concurrencyLimiters);
     }
 
     /**

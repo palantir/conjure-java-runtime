@@ -51,9 +51,10 @@ public final class ClientConfigurationsTest {
         assertThat(actual.trustManager()).isNotNull();
         assertThat(actual.uris()).isEqualTo(uris);
         assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(10));
-        assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(10));
-        assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(10));
+        assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(5));
+        assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.enableGcmCipherSuites()).isFalse();
+        assertThat(actual.fallbackToCommonNameVerification()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
     }
 
@@ -67,9 +68,10 @@ public final class ClientConfigurationsTest {
         assertThat(actual.trustManager()).isEqualTo(trustManager);
         assertThat(actual.uris()).isEqualTo(uris);
         assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(10));
-        assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(10));
-        assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(10));
+        assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(5));
+        assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.enableGcmCipherSuites()).isFalse();
+        assertThat(actual.fallbackToCommonNameVerification()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
     }
 
@@ -92,6 +94,7 @@ public final class ClientConfigurationsTest {
     }
 
     @Test
+    @SuppressWarnings("CheckReturnValue")
     public void roundRobin_noCooldown() throws Exception {
         ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
                 .uris(uris)

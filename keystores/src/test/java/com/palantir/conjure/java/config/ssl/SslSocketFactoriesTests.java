@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
 import java.util.Map;
+import javax.net.ssl.SSLSocketFactory;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -230,9 +231,12 @@ public final class SslSocketFactoriesTests {
                     .keyStoreType(TestConstants.SERVER_KEY_STORE_P12_TYPE)
                     .build();
 
-            SslSocketFactories.createSslSocketFactory(sslConfig);
-
-            fail();
+            SSLSocketFactory sslSocketFactory = SslSocketFactories.createSslSocketFactory(sslConfig);
+            if (System.getProperty("java.version").startsWith("1.8")) {
+                fail();
+            } else {
+                assertThat(sslSocketFactory, notNullValue());
+            }
         } catch (RuntimeException ex) {
             assertThat(ex.getCause(), is(instanceOf(IOException.class)));
         }

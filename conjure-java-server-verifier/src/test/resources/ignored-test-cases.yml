@@ -1,0 +1,5 @@
+server:
+  autoDeserialize:
+    getMapBinaryAliasExample:
+      - '{}'
+      - '{"SGVsbG8sIFdvcmxk": true}'

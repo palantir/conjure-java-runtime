@@ -21,7 +21,6 @@ package com.palantir.conjure.java.server.jersey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codahale.metrics.MetricRegistry;
-import com.google.common.base.Optional;
 import io.dropwizard.jersey.DropwizardResourceConfig;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -47,7 +46,7 @@ public final class GuavaOptionalMessageBodyWriterTest extends JerseyTest {
     }
 
     @Test
-    public void presentOptionalsReturnTheirValue() throws Exception {
+    public void presentOptionalsReturnTheirValue() {
         assertThat(target("/optional-return/")
                 .queryParam("id", "woo").request()
                 .get(String.class))
@@ -55,7 +54,7 @@ public final class GuavaOptionalMessageBodyWriterTest extends JerseyTest {
     }
 
     @Test
-    public void absentOptionalsThrowANotFound() throws Exception {
+    public void absentOptionalsThrowANotFound() {
         Response response = target("/optional-return/").request().get();
         assertThat(response.getStatus()).isEqualTo(204);
     }
@@ -64,13 +63,13 @@ public final class GuavaOptionalMessageBodyWriterTest extends JerseyTest {
     @Produces(MediaType.TEXT_PLAIN)
     public static final class OptionalReturnResource {
         @GET
-        public Optional<String> showWithQueryParam(@QueryParam("id") String id) {
-            return Optional.fromNullable(id);
+        public com.google.common.base.Optional<String> showWithQueryParam(@QueryParam("id") String id) {
+            return com.google.common.base.Optional.fromNullable(id);
         }
 
         @POST
-        public Optional<String> showWithFormParam(@FormParam("id") String id) {
-            return Optional.fromNullable(id);
+        public com.google.common.base.Optional<String> showWithFormParam(@FormParam("id") String id) {
+            return com.google.common.base.Optional.fromNullable(id);
         }
     }
 }

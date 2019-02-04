@@ -16,7 +16,12 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import com.netflix.concurrency.limits.Limiter;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
@@ -60,6 +65,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private final RemotingOkHttpClient client;
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
+    private final ConcurrencyLimiters.ConcurrencyLimiter limiter;
 
     private final int maxNumRelocations;
 
@@ -70,6 +76,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             RemotingOkHttpClient client,
             ScheduledExecutorService schedulingExecutor,
             ExecutorService executionExecutor,
+            ConcurrencyLimiters.ConcurrencyLimiter limiter,
             int maxNumRelocations) {
         super(delegate);
         this.backoffStrategy = backoffStrategy;
@@ -77,6 +84,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         this.client = client;
         this.schedulingExecutor = schedulingExecutor;
         this.executionExecutor = executionExecutor;
+        this.limiter = limiter;
         this.maxNumRelocations = maxNumRelocations;
     }
 
@@ -95,7 +103,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
                 future.set(response);
             }
         });
@@ -140,6 +148,25 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     @Override
     public void enqueue(Callback callback) {
+        ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
+        request().tag(ConcurrencyLimiterListener.class).limiterListener().setFuture(limiterListener);
+        Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {
+            @Override
+            public void onSuccess(Limiter.Listener listener) {
+                enqueueInternal(callback);
+            }
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                callback.onFailure(
+                        RemotingOkHttpCall.this,
+                        new IOException(new AssertionError("This should never happen, since it implies "
+                                + "we failed when using the concurrency limiter", throwable)));
+            }
+        }, MoreExecutors.directExecutor());
+    }
+
+    private void enqueueInternal(Callback callback) {
         super.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {
@@ -154,8 +181,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
                 Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
                 if (!redirectTo.isPresent()) {
-                    callback.onFailure(call, new IOException("Failed to determine valid failover URL"
-                            + "for '" + request().url() + "' and base URLs " + urls.getBaseUrls()));
+                    callback.onFailure(call, new IOException("Failed to determine valid failover URL for '"
+                            + request().url() + "' and base URLs " + urls.getBaseUrls()));
                     return;
                 }
 
@@ -299,6 +326,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
     @Override
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(), backoffStrategy, urls, client, schedulingExecutor,
-                executionExecutor, maxNumRelocations);
+                executionExecutor, limiter, maxNumRelocations);
     }
 }

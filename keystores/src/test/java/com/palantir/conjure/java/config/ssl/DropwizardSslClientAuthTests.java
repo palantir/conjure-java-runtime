@@ -42,6 +42,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 public final class DropwizardSslClientAuthTests {
+
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
             TestEchoServer.class,

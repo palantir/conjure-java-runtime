@@ -16,10 +16,10 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import java.time.Duration;
@@ -44,7 +44,7 @@ final class UrlSelectorImpl implements UrlSelector {
         this.currentUrl = new AtomicInteger(0);
 
         long coolDownMillis = failedUrlCooldown.toMillis();
-        this.failedUrls = CacheBuilder.newBuilder()
+        this.failedUrls = Caffeine.newBuilder()
                 .maximumSize(baseUrls.size())
                 .expireAfterWrite(coolDownMillis, TimeUnit.MILLISECONDS)
                 .build();

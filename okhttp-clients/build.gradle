@@ -3,26 +3,30 @@ apply plugin: "org.inferred.processors"
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
-    compile project(':conjure-java-jackson-serialization')
-    compile project(':client-config')
-    compile "com.palantir.tracing:tracing-okhttp3"
-    compile 'com.google.guava:guava'
-    compile 'com.netflix.concurrency-limits:concurrency-limits-core'
-    compile "com.palantir.conjure.java.api:errors"
-    compile 'com.palantir.safe-logging:preconditions'
-    compile 'com.palantir.tritium:tritium-registry'
-    compile 'com.squareup.okhttp3:logging-interceptor'
-    compile 'com.squareup.okhttp3:okhttp'
-    compile 'io.dropwizard.metrics:metrics-core'
-    compile 'org.slf4j:slf4j-api'
+    api project(':client-config')
+    api "com.palantir.conjure.java.api:errors"
+    api 'com.squareup.okhttp3:okhttp'
+    implementation project(':conjure-java-jackson-serialization')
+    implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation 'com.google.guava:guava'
+    implementation 'com.netflix.concurrency-limits:concurrency-limits-core'
+    implementation 'com.palantir.safe-logging:preconditions'
+    implementation 'com.palantir.tracing:tracing-okhttp3'
+    implementation 'com.palantir.tritium:tritium-registry'
+    implementation 'com.squareup.okhttp3:logging-interceptor'
+    implementation 'io.dropwizard.metrics:metrics-core'
+    implementation 'javax.ws.rs:javax.ws.rs-api'
+    implementation 'org.slf4j:slf4j-api'
 
-    testCompile project(":conjure-java-jersey-server")
-    testCompile "com.squareup.okhttp3:mockwebserver"
-    testCompile "javax.ws.rs:javax.ws.rs-api"
-    testCompile "junit:junit"
-    testCompile "org.assertj:assertj-core"
-    testCompile "org.jmock:jmock"
-    testCompile "org.mockito:mockito-core"
+    testImplementation project(":conjure-java-jersey-server")
+    testImplementation project(":keystores")
+    testImplementation "com.squareup.okhttp3:mockwebserver"
+    testImplementation "javax.ws.rs:javax.ws.rs-api"
+    testImplementation "junit:junit"
+    testImplementation "org.assertj:assertj-core"
+    testImplementation "org.jmock:jmock"
+    testImplementation "org.mockito:mockito-core"
 
-    processor "org.immutables:value"
+    annotationProcessor "org.immutables:value"
+    compileOnly 'org.immutables:value::annotations'
 }

@@ -20,7 +20,6 @@ package com.palantir.conjure.java.server.jersey;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -59,7 +58,7 @@ public final class GuavaOptionalTest {
     }
 
     @Test
-    public void testOptionalPresent() throws NoSuchMethodException, SecurityException {
+    public void testOptionalPresent() throws SecurityException {
         Response response = target.path("optional").queryParam("value", "val").request().get();
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
         assertThat(response.readEntity(String.class), is("valval"));
@@ -73,7 +72,7 @@ public final class GuavaOptionalTest {
 
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
+        public final void run(Configuration config, final Environment env) {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new OptionalTestResource());
         }
@@ -81,11 +80,11 @@ public final class GuavaOptionalTest {
 
     public static final class OptionalTestResource implements OptionalTestService {
         @Override
-        public Optional<String> getOptional(@Nullable String value) {
+        public com.google.common.base.Optional<String> getOptional(@Nullable String value) {
             if (Strings.isNullOrEmpty(value)) {
-                return Optional.absent();
+                return com.google.common.base.Optional.absent();
             } else {
-                return Optional.of(value + value);
+                return com.google.common.base.Optional.of(value + value);
             }
         }
     }
@@ -96,6 +95,6 @@ public final class GuavaOptionalTest {
     public interface OptionalTestService {
         @GET
         @Path("/optional")
-        Optional<String> getOptional(@QueryParam("value") @Nullable String value);
+        com.google.common.base.Optional<String> getOptional(@QueryParam("value") @Nullable String value);
     }
 }

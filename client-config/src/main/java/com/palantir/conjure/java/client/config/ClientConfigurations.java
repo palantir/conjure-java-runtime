@@ -38,11 +38,12 @@ public final class ClientConfigurations {
 
     // Defaults for parameters that are optional in ServiceConfiguration.
     private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(10);
-    private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofMinutes(10);
-    private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(10);
+    private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofMinutes(5);
+    private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(250);
     private static final Duration DEFAULT_FAILED_URL_COOLDOWN = Duration.ZERO;
     private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = false;
+    private static final boolean DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION = false;
     private static final NodeSelectionStrategy DEFAULT_NODE_SELECTION_STRATEGY = NodeSelectionStrategy.PIN_UNTIL_ERROR;
     private static final int DEFAULT_MAX_NUM_RETRIES = 4;
 
@@ -61,6 +62,8 @@ public final class ClientConfigurations {
                 .readTimeout(config.readTimeout().orElse(DEFAULT_READ_TIMEOUT))
                 .writeTimeout(config.writeTimeout().orElse(DEFAULT_WRITE_TIMEOUT))
                 .enableGcmCipherSuites(config.enableGcmCipherSuites().orElse(DEFAULT_ENABLE_GCM_CIPHERS))
+                .fallbackToCommonNameVerification(config.fallbackToCommonNameVerification()
+                        .orElse(DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION))
                 .proxy(config.proxy().map(ClientConfigurations::createProxySelector).orElse(ProxySelector.getDefault()))
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
                 .meshProxy(meshProxy(config.proxy()))
@@ -85,6 +88,7 @@ public final class ClientConfigurations {
                 .readTimeout(DEFAULT_READ_TIMEOUT)
                 .writeTimeout(DEFAULT_WRITE_TIMEOUT)
                 .enableGcmCipherSuites(DEFAULT_ENABLE_GCM_CIPHERS)
+                .fallbackToCommonNameVerification(DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION)
                 .proxy(ProxySelector.getDefault())
                 .proxyCredentials(Optional.empty())
                 .maxNumRetries(DEFAULT_MAX_NUM_RETRIES)

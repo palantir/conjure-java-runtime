@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import com.google.common.base.Optional;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -41,7 +40,7 @@ public final class GuavaOptionalParamConverterProvider implements ParamConverter
     @Override
     public <T> ParamConverter<T> getConverter(final Class<T> rawType, final Type genericType,
                                               final Annotation[] annotations) {
-        if (Optional.class.equals(rawType)) {
+        if (com.google.common.base.Optional.class.equals(rawType)) {
             final List<ClassTypePair> ctps = ReflectionHelper.getTypeArgumentAndClass(genericType);
             final ClassTypePair ctp = (ctps.size() == 1) ? ctps.get(0) : null;
 
@@ -49,7 +48,7 @@ public final class GuavaOptionalParamConverterProvider implements ParamConverter
                 return new ParamConverter<T>() {
                     @Override
                     public T fromString(final String value) {
-                        return rawType.cast(Optional.fromNullable(value));
+                        return rawType.cast(com.google.common.base.Optional.fromNullable(value));
                     }
 
                     @Override
@@ -65,7 +64,7 @@ public final class GuavaOptionalParamConverterProvider implements ParamConverter
                     return new ParamConverter<T>() {
                         @Override
                         public T fromString(final String value) {
-                            return rawType.cast(Optional.fromNullable(value)
+                            return rawType.cast(com.google.common.base.Optional.fromNullable(value)
                                     .transform(s -> converter.fromString(value)));
                         }
 

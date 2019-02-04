@@ -22,26 +22,25 @@ import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaOptionalAwareContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderRewriter;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.conjure.java.okhttp.HostEventsSink;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import com.palantir.logsafe.Preconditions;
-import feign.CborDelegateDecoder;
-import feign.CborDelegateEncoder;
-import feign.CoerceNullCollectionsDecoder;
+import feign.ConjureCborDelegateDecoder;
+import feign.ConjureCborDelegateEncoder;
+import feign.ConjureEmptyContainerDecoder;
+import feign.ConjureGuavaOptionalAwareDecoder;
+import feign.ConjureInputStreamDelegateDecoder;
+import feign.ConjureInputStreamDelegateEncoder;
+import feign.ConjureJava8OptionalAwareDecoder;
+import feign.ConjureNeverReturnNullDecoder;
+import feign.ConjureTextDelegateDecoder;
+import feign.ConjureTextDelegateEncoder;
 import feign.Contract;
 import feign.Feign;
-import feign.GuavaOptionalAwareDecoder;
-import feign.InputStreamDelegateDecoder;
-import feign.InputStreamDelegateEncoder;
-import feign.Java8OptionalAwareDecoder;
 import feign.Logger;
-import feign.NeverReturnNullDecoder;
 import feign.Request;
 import feign.Retryer;
-import feign.TextDelegateDecoder;
-import feign.TextDelegateEncoder;
 import feign.codec.Decoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
@@ -92,13 +91,12 @@ abstract class AbstractFeignJaxRsClientBuilder {
         return Feign.builder()
                 .contract(createContract())
                 .encoder(
-                        new InputStreamDelegateEncoder(
-                                new TextDelegateEncoder(
-                                        new CborDelegateEncoder(
+                        new ConjureInputStreamDelegateEncoder(
+                                new ConjureTextDelegateEncoder(
+                                        new ConjureCborDelegateEncoder(
                                                 cborObjectMapper,
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
-                .requestInterceptor(PathTemplateHeaderRewriter.INSTANCE)
                 .client(new OkHttpClient(okHttpClient))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
@@ -121,14 +119,15 @@ abstract class AbstractFeignJaxRsClientBuilder {
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
-        return new NeverReturnNullDecoder(
-                new CoerceNullCollectionsDecoder(
-                    new Java8OptionalAwareDecoder(
-                        new GuavaOptionalAwareDecoder(
-                                new InputStreamDelegateDecoder(
-                                        new TextDelegateDecoder(
-                                                new CborDelegateDecoder(
-                                                        cborObjectMapper,
-                                                            new JacksonDecoder(objectMapper))))))));
+        return new ConjureNeverReturnNullDecoder(
+                new ConjureJava8OptionalAwareDecoder(
+                        new ConjureGuavaOptionalAwareDecoder(
+                                new ConjureEmptyContainerDecoder(
+                                        objectMapper,
+                                        new ConjureInputStreamDelegateDecoder(
+                                                new ConjureTextDelegateDecoder(
+                                                        new ConjureCborDelegateDecoder(
+                                                                cborObjectMapper,
+                                                                new JacksonDecoder(objectMapper))))))));
     }
 }

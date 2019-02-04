@@ -58,6 +58,12 @@ public interface ClientConfiguration {
     /** See {@link com.palantir.conjure.java.api.config.service.PartialServiceConfiguration#enableGcmCipherSuites}. */
     boolean enableGcmCipherSuites();
 
+    /**
+     * See {@link
+     * com.palantir.conjure.java.api.config.service.PartialServiceConfiguration#fallbackToCommonNameVerification}.
+     */
+    boolean fallbackToCommonNameVerification();
+
     /** The proxy to use for the HTTP connection. */
     ProxySelector proxy();
 

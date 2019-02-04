@@ -53,7 +53,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
                             // for paths, we want to turn null -> empty string
                             @SuppressWarnings("unchecked")
                             Converter<Object, String> castConverter = (Converter<Object, String>) conv;
-                            return (val) -> Optional.ofNullable(castConverter.convert(val)).orElse("");
+                            return val -> Optional.ofNullable(castConverter.convert(val)).orElse("");
                         } else {
                             return conv;
                         }

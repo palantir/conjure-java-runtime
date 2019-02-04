@@ -38,7 +38,7 @@ class ConjureWindowedLimit implements Limit {
     /**
      * Minimum observed samples to filter out sample windows with not enough significant samples.
      */
-    private static final int WINDOW_SIZE = 100;
+    private static final int WINDOW_SIZE = 10;
 
     private final Limit delegate;
 

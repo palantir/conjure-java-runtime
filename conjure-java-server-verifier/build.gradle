@@ -1,0 +1,16 @@
+apply from: "${rootDir}/gradle/verifier.gradle"
+
+dependencies {
+    testCases 'com.palantir.conjure.verification:verification-client-test-cases'
+    verificationApi 'com.palantir.conjure.verification:verification-client-api'
+    verifier "com.palantir.conjure.verification:verification-client::${osClassifier}@tgz"
+
+    testImplementation project(':conjure-java-jaxrs-client')
+    testImplementation project(':conjure-java-jersey-server')
+    testImplementation project(':keystores')
+    testImplementation project(':conjure-java-jackson-serialization')
+    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    testImplementation 'io.dropwizard:dropwizard-testing'
+    testImplementation 'junit:junit'
+    testImplementation 'org.assertj:assertj-core'
+}

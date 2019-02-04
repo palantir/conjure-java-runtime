@@ -107,6 +107,7 @@ public final class ObjectMappers {
                 .disable(DeserializationFeature.WRAP_EXCEPTIONS)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
                 .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
-                .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS);
+                .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
+                .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
     }
 }

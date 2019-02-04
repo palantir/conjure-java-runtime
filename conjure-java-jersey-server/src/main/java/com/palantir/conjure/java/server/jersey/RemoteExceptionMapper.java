@@ -54,6 +54,8 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
         // log at WARN instead of ERROR because although this indicates an issue in a remote server
         log.warn("Encountered a remote exception. Mapping to an internal error before propagating",
+                SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
+                SafeArg.of("errorName", exception.getError().errorName()),
                 SafeArg.of("statusCode", status.getStatusCode()),
                 exception);
 
@@ -70,7 +72,9 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
             builder.entity(error);
         } catch (RuntimeException e) {
             log.warn("Unable to translate exception to json",
-                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()), e);
+                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
+                    SafeArg.of("errorName", exception.getError().errorName()),
+                    e);
             // simply write out the exception message
             builder.type(MediaType.TEXT_PLAIN);
             builder.entity("Unable to translate exception to json. Refer to the server logs with this errorInstanceId: "

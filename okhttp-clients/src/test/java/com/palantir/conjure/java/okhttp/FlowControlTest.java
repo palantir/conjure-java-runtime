@@ -26,6 +26,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.RateLimiter;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.netflix.concurrency.limits.Limiter;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.time.Duration;
@@ -56,10 +57,13 @@ import org.slf4j.LoggerFactory;
 public final class FlowControlTest {
     private static final Logger log = LoggerFactory.getLogger(FlowControlTest.class);
     private static final Duration GRACE = Duration.ofMinutes(2);
-    private static final int REQUESTS_PER_THREAD = 5;
+    private static final int REQUESTS_PER_THREAD = 50;
     private static ListeningExecutorService executorService;
 
     private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(
+            Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
+                    .setNameFormat("listener-reviver")
+                    .build()),
             new DefaultTaggedMetricRegistry(),
             FlowControlTest.class);
 
@@ -136,8 +140,8 @@ public final class FlowControlTest {
 
         @Override
         public void run() {
-            for (int i = 0; i < REQUESTS_PER_THREAD;) {
-                Limiter.Listener listener = limiters.acquireLimiterInternal("", 0);
+            for (int i = 0; i < REQUESTS_PER_THREAD; ) {
+                Limiter.Listener listener = Futures.getUnchecked(limiters.acquireLimiterInternal("").acquire());
                 boolean gotRateLimited = !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS);
                 if (!gotRateLimited) {
                     meter.mark();

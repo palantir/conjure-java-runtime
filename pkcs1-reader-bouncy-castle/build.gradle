@@ -1,9 +1,10 @@
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
-    compile project(":keystores")
-    compile "org.bouncycastle:bcpkix-jdk15on"
+    api project(":keystores")
+    implementation "org.bouncycastle:bcpkix-jdk15on"
 
-    testCompile "junit:junit"
-    testCompile "org.hamcrest:hamcrest-all"
+    testImplementation "junit:junit"
+    testImplementation "org.hamcrest:hamcrest-all"
+    testImplementation 'com.google.guava:guava'
 }

@@ -16,10 +16,11 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.netflix.concurrency.limits.Limiter;
-import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import com.palantir.logsafe.Preconditions;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -56,20 +57,19 @@ import okio.BufferedSource;
 final class ConcurrencyLimitingInterceptor implements Interceptor {
     private static final ImmutableSet<Integer> DROPPED_CODES = ImmutableSet.of(429, 503);
 
-    private final ConcurrencyLimiters limiters;
-
-    @VisibleForTesting
-    ConcurrencyLimitingInterceptor(ConcurrencyLimiters limiters) {
-        this.limiters = limiters;
-    }
-
-    ConcurrencyLimitingInterceptor(TaggedMetricRegistry taggedMetricRegistry, Class<?> serviceClass) {
-        this(new ConcurrencyLimiters(taggedMetricRegistry, serviceClass));
-    }
+    ConcurrencyLimitingInterceptor() { }
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        Limiter.Listener listener = limiters.acquireLimiter(chain.request());
+        ConcurrencyLimiterListener limiterListenerTag = chain.request().tag(ConcurrencyLimiterListener.class);
+        if (limiterListenerTag == null) {
+            return chain.proceed(chain.request());
+        }
+
+        ListenableFuture<Limiter.Listener> limiterFuture = limiterListenerTag.limiterListener();
+        Preconditions.checkState(limiterFuture.isDone(), "Limit listener future should have been fulfilled.");
+        Limiter.Listener listener = Futures.getUnchecked(limiterFuture);
+
         try {
             Response response = chain.proceed(chain.request());
             if (DROPPED_CODES.contains(response.code())) {
