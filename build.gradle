@@ -1,6 +1,5 @@
 buildscript {
     repositories {
-        mavenLocal()
         jcenter()
         maven { url "http://palantir.bintray.com/releases" }
     }
@@ -13,7 +12,7 @@ buildscript {
         classpath 'com.netflix.nebula:nebula-publishing-plugin:5.1.5'
         classpath 'com.palantir.baseline:gradle-baseline-java:0.17.1'
         classpath 'com.palantir.configurationresolver:gradle-configuration-resolver-plugin:0.3.0'
-        classpath 'com.palantir.gradle.lockfiles:gradle-lock-files:0.3.0-8-gb435117.dirty'
+        classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:0.14.0'
     }
 }
 
@@ -26,7 +25,7 @@ apply plugin: 'com.palantir.baseline-config' // provides baselineUpdateConfig ta
 apply plugin: 'com.palantir.baseline-idea'
 apply plugin: 'com.palantir.circle.style'
 
-apply plugin: 'com.palantir.lock-files'
+apply plugin: 'com.palantir.consistent-versions'
 
 repositories {
     maven { url  "http://palantir.bintray.com/releases" }
@@ -39,12 +38,6 @@ dependencies {
 allprojects {
     version gitVersion()
     group 'com.palantir.conjure.java.runtime'
-
-    apply plugin: 'com.palantir.configuration-resolver'
-    apply plugin: 'nebula.dependency-recommender'
-    dependencyRecommendations {
-        propertiesFile file: project.rootProject.file('versions.props')
-    }
 }
 
 subprojects {
@@ -74,24 +67,7 @@ subprojects {
         maxHeapSize = "512m"
     }
 
-    configurations.errorprone {
-        resolutionStrategy {
-            force 'com.google.guava:guava:21.0'
-        }
-    }
-
     tasks.withType(JavaCompile) {
         options.compilerArgs += ['-XepDisableWarningsInGeneratedCode']
     }
-
-//    dependencies {
-//        constraints {
-//            implementation('com.google.guava:guava') {
-//                version {
-//                    strictly '15.0'
-//                    because 'testing'
-//                }
-//            }
-//        }
-//    }
 }
