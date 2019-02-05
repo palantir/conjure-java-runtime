@@ -43,6 +43,17 @@ public final class ThreadWorkQueueTests {
                 .isThrownBy(queue::remove);
     }
 
+    @Test
+    public void testFifoEvenWhileTotallyDequeued() throws InterruptedException {
+        queue.add(1);
+        enqueueWithNewThread(2, 3);
+        assertThat(queue.remove()).isEqualTo(1);
+        assertThat(queue.remove()).isEqualTo(2);
+        queue.add(4);
+        assertThat(queue.remove()).isEqualTo(3);
+        assertThat(queue.remove()).isEqualTo(4);
+    }
+
     private List<Integer> dequeue() {
         List<Integer> result = new ArrayList<>();
         while (!queue.isEmpty()) {
