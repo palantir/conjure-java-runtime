@@ -268,14 +268,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 Optional<Duration> nonAdvertizedBackoff = backoffStrategy.nextBackoff();
                 if (!nonAdvertizedBackoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
-                            "Failed to complete the request due to QoS throttle",
+                            "Failed to complete the request due to QosException.Throttle",
                             exception,
                             UnsafeArg.of("requestUrl", call.request().url().toString())));
                     return null;
                 }
 
                 Duration backoff = exception.getRetryAfter().orElse(nonAdvertizedBackoff.get());
-                log.debug("Rescheduling call after receiving QoS throttle",
+                log.debug("Rescheduling call after receiving QosException.Throttle",
                         SafeArg.of("backoffMillis", backoff.toMillis()),
                         exception);
                 scheduleExecution(() -> doClone().enqueue(callback), backoff);
@@ -296,7 +296,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 Optional<HttpUrl> redirectTo = urls.redirectTo(request().url(), exception.getRedirectTo().toString());
                 if (!redirectTo.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
-                            "Failed to determine valid redirect URL after receiving QoS retry other",
+                            "Failed to determine valid redirect URL after receiving QosException.RetryOther",
                             exception,
                             UnsafeArg.of("requestUrl", call.request().url().toString()),
                             UnsafeArg.of("redirectToUrl", exception.getRedirectTo().toString()),
@@ -304,7 +304,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return null;
                 }
 
-                log.debug("Retrying call after receiving retry other",
+                log.debug("Retrying call after receiving QosException.RetryOther",
                         UnsafeArg.of("requestUrl", call.request().url()),
                         exception);
                 Request redirectedRequest = request().newBuilder()
@@ -320,7 +320,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
-                            "Failed to complete the request due to QoS unavailable",
+                            "Failed to complete the request due to QosException.Unavailable",
                             exception,
                             UnsafeArg.of("requestUrl", call.request().url().toString())));
                     return null;
@@ -330,13 +330,13 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
                 if (!redirectTo.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
-                            "Failed to determine valid redirect URL after receiving QoS unavailable",
+                            "Failed to determine valid redirect URL after receiving QosException.Unavailable",
                             UnsafeArg.of("requestUrl", call.request().url().toString()),
                             UnsafeArg.of("baseUrls", urls.getBaseUrls())));
                     return null;
                 }
 
-                log.debug("Retrying call after receiving QoS unavailable",
+                log.debug("Retrying call after receiving QosException.Unavailable",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
                         exception);
                 Request redirectedRequest = request().newBuilder()

@@ -232,7 +232,7 @@ public final class OkHttpClientsTest extends TestBase {
         call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
-                .hasLogMessage("Failed to complete the request due to QoS unavailable")
+                .hasLogMessage("Failed to complete the request due to QosException.Unavailable")
                 .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         server.enqueue(new MockResponse().setResponseCode(503));
@@ -241,7 +241,7 @@ public final class OkHttpClientsTest extends TestBase {
         call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
-                .hasLogMessage("Failed to complete the request due to QoS unavailable")
+                .hasLogMessage("Failed to complete the request due to QosException.Unavailable")
                 .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         assertThat(server.getRequestCount()).isEqualTo(4 /* original plus two retries */);
@@ -266,7 +266,7 @@ public final class OkHttpClientsTest extends TestBase {
         call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
-                .hasLogMessage("Failed to complete the request due to QoS throttle")
+                .hasLogMessage("Failed to complete the request due to QosException.Throttle")
                 .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         server.enqueue(new MockResponse().setResponseCode(429));
@@ -275,7 +275,7 @@ public final class OkHttpClientsTest extends TestBase {
         call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
-                .hasLogMessage("Failed to complete the request due to QoS throttle")
+                .hasLogMessage("Failed to complete the request due to QosException.Throttle")
                 .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         assertThat(server.getRequestCount()).isEqualTo(4 /* original plus two retries */);
@@ -289,7 +289,7 @@ public final class OkHttpClientsTest extends TestBase {
         Call call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
-                .hasLogMessage("Failed to complete the request due to QoS throttle")
+                .hasLogMessage("Failed to complete the request due to QosException.Throttle")
                 .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
         assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
@@ -326,7 +326,7 @@ public final class OkHttpClientsTest extends TestBase {
         call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
-                .hasLogMessage("Failed to complete the request due to QoS throttle")
+                .hasLogMessage("Failed to complete the request due to QosException.Throttle")
                 .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
     }
 
