@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -31,6 +32,7 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfigurations;
+import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -228,17 +230,19 @@ public final class OkHttpClientsTest extends TestBase {
 
         server.enqueue(new MockResponse().setResponseCode(503));
         call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(call::execute)
-                .isInstanceOf(IOException.class)
-                .hasMessage("Failed to complete the request due to a server-side QoS condition: 503");
+        assertThatLoggableExceptionThrownBy(call::execute)
+                .isInstanceOf(SafeIoException.class)
+                .hasLogMessage("Failed to complete the request due to QoS unavailable")
+                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));
         call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(call::execute)
-                .isInstanceOf(IOException.class)
-                .hasMessage("Failed to complete the request due to a server-side QoS condition: 503");
+        assertThatLoggableExceptionThrownBy(call::execute)
+                .isInstanceOf(SafeIoException.class)
+                .hasLogMessage("Failed to complete the request due to QoS unavailable")
+                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         assertThat(server.getRequestCount()).isEqualTo(4 /* original plus two retries */);
     }
@@ -260,17 +264,19 @@ public final class OkHttpClientsTest extends TestBase {
 
         server.enqueue(new MockResponse().setResponseCode(429));
         call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(call::execute)
-                .isInstanceOf(IOException.class)
-                .hasMessage("Failed to reschedule call since the number of configured backoffs are exhausted");
+        assertThatLoggableExceptionThrownBy(call::execute)
+                .isInstanceOf(SafeIoException.class)
+                .hasLogMessage("Failed to complete the request due to QoS throttle")
+                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         server.enqueue(new MockResponse().setResponseCode(429));
         server.enqueue(new MockResponse().setResponseCode(429));
         server.enqueue(new MockResponse().setResponseCode(429));
         call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(call::execute)
-                .isInstanceOf(IOException.class)
-                .hasMessage("Failed to reschedule call since the number of configured backoffs are exhausted");
+        assertThatLoggableExceptionThrownBy(call::execute)
+                .isInstanceOf(SafeIoException.class)
+                .hasLogMessage("Failed to complete the request due to QoS throttle")
+                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         assertThat(server.getRequestCount()).isEqualTo(4 /* original plus two retries */);
     }
@@ -281,9 +287,10 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
         server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
         Call call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(call::execute)
-                .isInstanceOf(IOException.class)
-                .hasMessage("Failed to reschedule call since the number of configured backoffs are exhausted");
+        assertThatLoggableExceptionThrownBy(call::execute)
+                .isInstanceOf(SafeIoException.class)
+                .hasLogMessage("Failed to complete the request due to QoS throttle")
+                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
         assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
 
@@ -317,9 +324,10 @@ public final class OkHttpClientsTest extends TestBase {
         // no backoff advertised, configured no retry: fails
         server.enqueue(new MockResponse().setResponseCode(429).setBody("foo"));
         call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(call::execute)
-                .isInstanceOf(IOException.class)
-                .hasMessage("Failed to reschedule call since the number of configured backoffs are exhausted");
+        assertThatLoggableExceptionThrownBy(call::execute)
+                .isInstanceOf(SafeIoException.class)
+                .hasLogMessage("Failed to complete the request due to QoS throttle")
+                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
     }
 
     @Test
@@ -372,9 +380,10 @@ public final class OkHttpClientsTest extends TestBase {
         }
 
         Call call = createRetryingClient(1).newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(call::execute)
-                .isInstanceOf(IOException.class)
-                .hasMessage("Exceeded the maximum number of allowed redirects for initial URL: %s/", url);
+        assertThatLoggableExceptionThrownBy(call::execute)
+                .isInstanceOf(SafeIoException.class)
+                .hasLogMessage("Exceeded the maximum number of allowed redirects")
+                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
         assertThat(server.getRequestCount()).isEqualTo(21);
     }
 
@@ -447,9 +456,10 @@ public final class OkHttpClientsTest extends TestBase {
 
         OkHttpClient client = createRetryingClient(1, url, url2, url3);
         Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
-        assertThatThrownBy(call::execute)
-                .isInstanceOf(IOException.class)
-                .hasMessage("Failed to complete the request due to an IOException");
+        assertThatLoggableExceptionThrownBy(call::execute)
+                .isInstanceOf(SafeIoException.class)
+                .hasLogMessage("Failed to complete the request due to an IOException")
+                .hasArgs(UnsafeArg.of("requestUrl", url2 + "/foo?bar"));
 
         assertThat(server3.getRequestCount()).isEqualTo(0);
     }
