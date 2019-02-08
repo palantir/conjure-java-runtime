@@ -196,13 +196,16 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 log.info("Retrying call after failure",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
+                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
                         exception);
                 Request redirectedRequest = request().newBuilder()
                         .url(redirectTo.get())
                         .build();
                 RemotingOkHttpCall retryCall =
                         client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
-                scheduleExecution(() -> retryCall.enqueue(callback), backoff.get());
+                scheduleExecution(
+                        () -> retryCall.enqueue(callback),
+                        backoff.get());
             }
 
             @Override
@@ -278,7 +281,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 log.debug("Rescheduling call after receiving QosException.Throttle",
                         SafeArg.of("backoffMillis", backoff.toMillis()),
                         exception);
-                scheduleExecution(() -> doClone().enqueue(callback), backoff);
+                scheduleExecution(
+                        () -> doClone().enqueue(callback),
+                        backoff);
                 return null;
             }
 
@@ -306,6 +311,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 log.debug("Retrying call after receiving QosException.RetryOther",
                         UnsafeArg.of("requestUrl", call.request().url()),
+                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
                         exception);
                 Request redirectedRequest = request().newBuilder()
                         .url(redirectTo.get())
@@ -338,12 +344,15 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 log.debug("Retrying call after receiving QosException.Unavailable",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
+                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
                         exception);
                 Request redirectedRequest = request().newBuilder()
                         .url(redirectTo.get())
                         .build();
-                scheduleExecution(() -> client.newCallWithMutableState(redirectedRequest, backoffStrategy,
-                        maxNumRelocations).enqueue(callback), backoff.get());
+                scheduleExecution(
+                        () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
+                                .enqueue(callback),
+                        backoff.get());
                 return null;
             }
         };
