@@ -62,11 +62,10 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
         ErrorType errorType = ErrorType.INTERNAL;
         Response.ResponseBuilder builder = Response.status(errorType.httpErrorCode());
         try {
-            // Override only the name and code of the error
             SerializableError error = SerializableError.builder()
-                    .from(exception.getError())
                     .errorName(errorType.name())
                     .errorCode(errorType.code().toString())
+                    .errorInstanceId(exception.getError().errorInstanceId())
                     .build();
             builder.type(MediaType.APPLICATION_JSON);
             builder.entity(error);
