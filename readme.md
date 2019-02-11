@@ -284,7 +284,7 @@ The workflow is:
  - The client sees a `RemoteException`, which contains the `SerializableError` which was sent over the wire
  - The client can inspect the `SerializableError` and choose to act
  - If the client is itself a server and does not handle the `RemoteException`, a `SerializableError` error will be sent
-   as the response with and `errorCode` of ``INTERNAL`, `errorName` of `Default:Internal`, the same `errorInstanceId` as
+   as the response with and `errorCode` of `INTERNAL`, `errorName` of `Default:Internal`, the same `errorInstanceId` as
    the original `RemoteException` and no `parameters`.
 
 #### Serialization of Optional and Nullable objects
