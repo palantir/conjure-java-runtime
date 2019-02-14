@@ -119,17 +119,17 @@ abstract class AbstractFeignJaxRsClientBuilder {
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
-        // The ConjureTextDelegateDecoder is allowed to return null
-        // This is to support older endpoints that are not conjure-generated
-        return new ConjureTextDelegateDecoder(
-                new ConjureNeverReturnNullDecoder(
-                new ConjureJava8OptionalAwareDecoder(
-                        new ConjureGuavaOptionalAwareDecoder(
-                                new ConjureEmptyContainerDecoder(
-                                        objectMapper,
-                                        new ConjureInputStreamDelegateDecoder(
-                                                new ConjureCborDelegateDecoder(
-                                                        cborObjectMapper,
-                                                        new JacksonDecoder(objectMapper))))))));
+        return new ConjureJava8OptionalAwareDecoder(
+                new ConjureGuavaOptionalAwareDecoder(
+                        // The ConjureTextDelegateDecoder is allowed to return null
+                        // This is to support older endpoints that are not conjure-generated
+                        new ConjureTextDelegateDecoder(
+                                new ConjureNeverReturnNullDecoder(
+                                        new ConjureEmptyContainerDecoder(
+                                                objectMapper,
+                                                new ConjureInputStreamDelegateDecoder(
+                                                        new ConjureCborDelegateDecoder(
+                                                                cborObjectMapper,
+                                                                new JacksonDecoder(objectMapper))))))));
     }
 }
