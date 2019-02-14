@@ -49,7 +49,11 @@ public final class ConjureTextDelegateDecoder implements Decoder {
         }
         // In the case of multiple content types, or an unknown content type, we'll use the delegate instead.
         if (contentTypes.size() == 1 && Iterables.getOnlyElement(contentTypes, "").startsWith(MediaType.TEXT_PLAIN)) {
-            return stringDecoder.decode(response, type);
+            Object decoded = stringDecoder.decode(response, type);
+            if (decoded == null) {
+                return "";
+            }
+            return decoded;
         }
 
         return delegate.decode(response, type);
