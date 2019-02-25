@@ -26,6 +26,8 @@ import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.time.Duration;
@@ -175,25 +177,35 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 // Fail call if backoffs are exhausted or if no retry URL can be determined.
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
-                    callback.onFailure(call, new IOException("Failed to complete the request due to an "
-                            + "IOException", exception));
-                    return;
-                }
-                Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
-                if (!redirectTo.isPresent()) {
-                    callback.onFailure(call, new IOException("Failed to determine valid failover URL for '"
-                            + request().url() + "' and base URLs " + urls.getBaseUrls()));
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to complete the request due to an IOException",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString())));
                     return;
                 }
 
+                Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
+                if (!redirectTo.isPresent()) {
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to determine valid failover URL",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString()),
+                            UnsafeArg.of("baseUrls", urls.getBaseUrls())));
+                    return;
+                }
+
+                log.info("Retrying call after failure",
+                        SafeArg.of("backoffMillis", backoff.get().toMillis()),
+                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
+                        exception);
                 Request redirectedRequest = request().newBuilder()
                         .url(redirectTo.get())
                         .build();
                 RemotingOkHttpCall retryCall =
                         client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
-                log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.get().toMillis()),
-                        exception);
-                scheduleExecution(() -> retryCall.enqueue(callback), backoff.get());
+                scheduleExecution(
+                        () -> retryCall.enqueue(callback),
+                        backoff.get());
             }
 
             @Override
@@ -258,38 +270,54 @@ final class RemotingOkHttpCall extends ForwardingCall {
             public Void visit(QosException.Throttle exception) {
                 Optional<Duration> nonAdvertizedBackoff = backoffStrategy.nextBackoff();
                 if (!nonAdvertizedBackoff.isPresent()) {
-                    callback.onFailure(call, new IOException("Failed to reschedule call since "
-                            + "the number of configured backoffs are exhausted", exception));
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to complete the request due to QosException.Throttle",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString())));
                     return null;
                 }
 
                 Duration backoff = exception.getRetryAfter().orElse(nonAdvertizedBackoff.get());
-                log.debug("Rescheduling call after backoff", SafeArg.of("backoffMillis", backoff.toMillis()),
+                log.debug("Rescheduling call after receiving QosException.Throttle",
+                        SafeArg.of("backoffMillis", backoff.toMillis()),
                         exception);
-                scheduleExecution(() -> doClone().enqueue(callback), backoff);
+                scheduleExecution(
+                        () -> doClone().enqueue(callback),
+                        backoff);
                 return null;
             }
 
             @Override
             public Void visit(QosException.RetryOther exception) {
                 if (maxNumRelocations <= 0) {
-                    callback.onFailure(call, new IOException("Exceeded the maximum number of allowed redirects for "
-                            + "initial URL: " + call.request().url()));
-                } else {
-                    // Redirect to the URL specified by the exception.
-                    Optional<HttpUrl> redirectTo = urls.redirectTo(request().url(),
-                            exception.getRedirectTo().toString());
-                    if (!redirectTo.isPresent()) {
-                        callback.onFailure(call, new IOException("Failed to determine valid redirect URL for '"
-                                + exception.getRedirectTo() + "' and base URLs " + urls.getBaseUrls()));
-                    } else {
-                        Request redirectedRequest = request().newBuilder()
-                                .url(redirectTo.get())
-                                .build();
-                        client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
-                                .enqueue(callback);
-                    }
+                    callback.onFailure(call, new SafeIoException(
+                            "Exceeded the maximum number of allowed redirects",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString())));
+                    return null;
                 }
+
+                // Redirect to the URL specified by the exception.
+                Optional<HttpUrl> redirectTo = urls.redirectTo(request().url(), exception.getRedirectTo().toString());
+                if (!redirectTo.isPresent()) {
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to determine valid redirect URL after receiving QosException.RetryOther",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString()),
+                            UnsafeArg.of("redirectToUrl", exception.getRedirectTo().toString()),
+                            UnsafeArg.of("baseUrls", urls.getBaseUrls())));
+                    return null;
+                }
+
+                log.debug("Retrying call after receiving QosException.RetryOther",
+                        UnsafeArg.of("requestUrl", call.request().url()),
+                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
+                        exception);
+                Request redirectedRequest = request().newBuilder()
+                        .url(redirectTo.get())
+                        .build();
+                client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
+                        .enqueue(callback);
                 return null;
             }
 
@@ -297,26 +325,34 @@ final class RemotingOkHttpCall extends ForwardingCall {
             public Void visit(QosException.Unavailable exception) {
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
-                    log.debug("Max number of retries exceeded, failing call");
-                    callback.onFailure(call,
-                            new IOException("Failed to complete the request due to a "
-                                    + "server-side QoS condition: 503", exception));
-                } else {
-                    log.debug("Rescheduling call after backoff",
-                            SafeArg.of("backoffMillis", backoff.get().toMillis()), exception);
-                    // Redirect to the "next" URL, whichever that may be, after backing off.
-                    Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
-                    if (!redirectTo.isPresent()) {
-                        callback.onFailure(call, new IOException("Failed to determine valid redirect URL for base "
-                                + "URLs " + urls.getBaseUrls()));
-                    } else {
-                        Request redirectedRequest = request().newBuilder()
-                                .url(redirectTo.get())
-                                .build();
-                        scheduleExecution(() -> client.newCallWithMutableState(redirectedRequest, backoffStrategy,
-                                maxNumRelocations).enqueue(callback), backoff.get());
-                    }
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to complete the request due to QosException.Unavailable",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString())));
+                    return null;
                 }
+
+                // Redirect to the "next" URL, whichever that may be, after backing off.
+                Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
+                if (!redirectTo.isPresent()) {
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to determine valid redirect URL after receiving QosException.Unavailable",
+                            UnsafeArg.of("requestUrl", call.request().url().toString()),
+                            UnsafeArg.of("baseUrls", urls.getBaseUrls())));
+                    return null;
+                }
+
+                log.debug("Retrying call after receiving QosException.Unavailable",
+                        SafeArg.of("backoffMillis", backoff.get().toMillis()),
+                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
+                        exception);
+                Request redirectedRequest = request().newBuilder()
+                        .url(redirectTo.get())
+                        .build();
+                scheduleExecution(
+                        () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
+                                .enqueue(callback),
+                        backoff.get());
                 return null;
             }
         };
