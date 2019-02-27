@@ -32,6 +32,7 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfigurations;
+import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
@@ -482,6 +483,53 @@ public final class OkHttpClientsTest extends TestBase {
         Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
         thread.interrupt();
         thread.join();
+    }
+
+    @Test
+    public void verifyNodeSeletionStrategy_pinUntilErrorUsesCurrentUrl() throws Exception {
+        server.enqueue(new MockResponse().setBody("foo"));
+        server.enqueue(new MockResponse().setBody("bar"));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url, url2, url3))
+                        .nodeSelectionStrategy(NodeSelectionStrategy.PIN_UNTIL_ERROR)
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+
+        Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThat(call.execute().body().string()).isEqualTo("foo");
+        Call call2 = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThat(call2.execute().body().string()).isEqualTo("bar");
+
+        assertThat(server.takeRequest().getPath()).isEqualTo("/foo?bar");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/foo?bar");
+    }
+
+    @Test
+    public void verifyNodeSeletionStrategy_roundRobinUsesNextUrl() throws Exception {
+        server2.enqueue(new MockResponse().setBody("foo"));
+        server3.enqueue(new MockResponse().setBody("bar"));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url, url2, url3))
+                        .nodeSelectionStrategy(NodeSelectionStrategy.ROUND_ROBIN)
+                        .failedUrlCooldown(Duration.ofSeconds(1))
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+
+        Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThat(call.execute().body().string()).isEqualTo("foo");
+        Call call2 = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThat(call2.execute().body().string()).isEqualTo("bar");
+
+        assertThat(server2.takeRequest().getPath()).isEqualTo("/foo?bar");
+        assertThat(server3.takeRequest().getPath()).isEqualTo("/foo?bar");
     }
 
     @Test
