@@ -148,16 +148,6 @@ public final class OkHttpClients {
         if (config.meshProxy().isPresent()) {
             // TODO(rfink): Should this go into the call itself?
             client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
-        } else {
-            switch (config.nodeSelectionStrategy()) {
-                case ROUND_ROBIN:
-                    client.addInterceptor(RoundRobinUrlInterceptor.create(urlSelector));
-                    break;
-                case PIN_UNTIL_ERROR:
-                    // Add CurrentUrlInterceptor: always selects the "current" URL, rather than the one specified in
-                    // the request
-                    client.addInterceptor(CurrentUrlInterceptor.create(urlSelector));
-            }
         }
         client.followRedirects(false);  // We implement our own redirect logic.
 
@@ -202,6 +192,7 @@ public final class OkHttpClients {
                 client.build(),
                 () -> new ExponentialBackoff(
                         config.maxNumRetries(), config.backoffSlotSize(), ThreadLocalRandom.current()),
+                config.nodeSelectionStrategy(),
                 urlSelector,
                 schedulingExecutor,
                 executionExecutor,
