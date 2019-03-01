@@ -12,6 +12,8 @@ dependencies {
     implementation "com.palantir.safe-logging:safe-logging"
     implementation "com.palantir.tracing:tracing-jersey"
 
+    runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation"
+
     testImplementation project(':conjure-java-jackson-serialization')
     testImplementation "com.fasterxml.jackson.core:jackson-databind"
     testImplementation "com.palantir.tracing:tracing"
