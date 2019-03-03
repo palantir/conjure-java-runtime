@@ -110,7 +110,7 @@ public final class ObjectMappers {
                 .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
                 .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
     }
-    
+
     private static AfterburnerModule newSafeForNewJdksAfterburnerModule() {
         AfterburnerModule afterburner = new AfterburnerModule();
         // stops production of warnings about illegal reflective access on JDK9+
