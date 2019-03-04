@@ -100,7 +100,7 @@ public final class ObjectMappers {
                 .registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
-                .registerModule(new AfterburnerModule())
+                .registerModule(newSafeForNewJdksAfterburnerModule())
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
@@ -109,5 +109,13 @@ public final class ObjectMappers {
                 .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
                 .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
                 .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
+    }
+
+    private static AfterburnerModule newSafeForNewJdksAfterburnerModule() {
+        AfterburnerModule afterburner = new AfterburnerModule();
+        // stops production of warnings about illegal reflective access on JDK9+
+        // https://github.com/FasterXML/jackson-modules-base/issues/37
+        afterburner.setUseValueClassLoader(false);
+        return afterburner;
     }
 }
