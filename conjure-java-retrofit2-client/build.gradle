@@ -5,7 +5,6 @@
 apply plugin: "org.inferred.processors"
 
 apply from: "${rootDir}/gradle/publish-jar.gradle"
-apply from: "${rootDir}/gradle/publish-bom.gradle"
 
 dependencies {
     api project(":extras:refresh-utils")
