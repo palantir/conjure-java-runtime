@@ -1,7 +1,10 @@
 publishing {
     publications {
         nebulaBom(MavenPublication) {
-            // TODO java platform plugin
+            // Groovy Strings are not Strings, so need the explicit toString here
+            nebulaDependencyManagement.withDependencies { "${project.group}:${project.name}:${project.version}".toString() }
+            
+            nebulaDependencyManagement.fromConfigurations { configurations.runtimeClasspath }
             artifactId = project.name + '-bom'
         }
     }

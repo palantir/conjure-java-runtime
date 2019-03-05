@@ -23,6 +23,8 @@ allprojects {
     version gitVersion()
     group 'com.palantir.conjure.java.runtime'
 
+    apply plugin: 'nebula.dependency-recommender' // necessary only to construct the BOM
+
     repositories {
         jcenter()
         maven { url "http://palantir.bintray.com/releases" }
