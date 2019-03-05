@@ -17,10 +17,15 @@
 package com.palantir.conjure.java.okhttp;
 
 import com.google.common.util.concurrent.SettableFuture;
+import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import org.slf4j.Logger;
@@ -36,6 +41,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     private static final int MAX_NUM_RELOCATIONS = 20;
 
     private final Supplier<BackoffStrategy> backoffStrategyFactory;
+    private final NodeSelectionStrategy nodeSelectionStrategy;
     private final UrlSelector urls;
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
@@ -44,12 +50,14 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     RemotingOkHttpClient(
             OkHttpClient delegate,
             Supplier<BackoffStrategy> backoffStrategy,
+            NodeSelectionStrategy nodeSelectionStrategy,
             UrlSelector urls,
             ScheduledExecutorService schedulingExecutor,
             ExecutorService executionExecutor,
             ConcurrencyLimiters concurrencyLimiters) {
         super(delegate);
         this.backoffStrategyFactory = backoffStrategy;
+        this.nodeSelectionStrategy = nodeSelectionStrategy;
         this.urls = urls;
         this.schedulingExecutor = schedulingExecutor;
         this.executionExecutor = executionExecutor;
@@ -58,7 +66,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
 
     @Override
     public RemotingOkHttpCall newCall(Request request) {
-        return newCallWithMutableState(addRateLimitIdTag(request), backoffStrategyFactory.get(), MAX_NUM_RELOCATIONS);
+        return newCallWithMutableState(createNewRequest(request), backoffStrategyFactory.get(), MAX_NUM_RELOCATIONS);
     }
 
     @Override
@@ -81,9 +89,26 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 maxNumRelocations);
     }
 
-    private Request addRateLimitIdTag(Request request) {
+    private Request createNewRequest(Request request) {
         return request.newBuilder()
+                .url(getNewRequestUrl(request.url()))
                 .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.of(SettableFuture.create()))
                 .build();
+    }
+
+    private HttpUrl getNewRequestUrl(HttpUrl requestUrl) {
+        return redirectToNewRequest(requestUrl).orElse(requestUrl);
+    }
+
+    private Optional<HttpUrl> redirectToNewRequest(HttpUrl current) {
+        switch (nodeSelectionStrategy) {
+            case ROUND_ROBIN:
+                return urls.redirectToNextRoundRobin(current);
+            case PIN_UNTIL_ERROR:
+                return urls.redirectToCurrent(current);
+        }
+
+        throw new SafeIllegalStateException("Encountered unknown node selection strategy",
+                SafeArg.of("nodeSelectionStrategy", nodeSelectionStrategy));
     }
 }

@@ -115,6 +115,16 @@ public final class ConjureTextDelegateDecoderTest extends TestBase {
     }
 
     @Test
+    public void testReturnsEmptyStringForNullResponseBodyWithTextPlain() throws Exception {
+        headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN));
+        Response response = Response.create(200, "OK", headers, null, StandardCharsets.UTF_8);
+        Object decodedObject = textDelegateDecoder.decode(response, String.class);
+
+        assertEquals("", decodedObject);
+        verifyZeroInteractions(delegate);
+    }
+
+    @Test
     public void testUsesDelegateWithNoHeader() throws Exception {
         when(delegate.decode(any(), any())).thenReturn(DELEGATE_RESPONSE);
         Response response = Response.create(200, "OK", headers, new byte[0]);
