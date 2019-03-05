@@ -1,5 +1,4 @@
 apply from: "${rootDir}/gradle/publish-jar.gradle"
-apply from: "${rootDir}/gradle/publish-bom.gradle"
 
 dependencies {
     api "com.palantir.conjure.java.api:errors"

@@ -11,11 +11,13 @@ buildscript {
         classpath 'com.palantir.baseline:gradle-baseline-java:0.51.1'
         classpath 'com.palantir.gradle.gitversion:gradle-git-version:0.11.0'
         classpath 'gradle.plugin.org.inferred:gradle-processors:2.1.0'
+        classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:0.17.0'
     }
 }
 
 apply plugin: 'com.palantir.baseline'
 apply plugin: 'com.palantir.git-version'
+apply plugin: 'com.palantir.consistent-versions'
 
 allprojects {
     version gitVersion()
@@ -32,34 +34,7 @@ subprojects {
     apply plugin: 'com.palantir.baseline-class-uniqueness'
 
     sourceCompatibility = 1.8
-    if (gradle.startParameter.taskNames.find {
-        it.endsWith('verifyDependencyLocksAreCurrent') || it.endsWith('build')}) {
-        gradle.startParameter.setTaskNames(gradle.startParameter.taskNames + ['generateLock'])
-    }
-
-    apply plugin: 'nebula.dependency-lock'
-    dependencyLock {
-        includeTransitives = true
-        lockFile = 'versions.lock'
-        configurationNames = ['runtimeClasspath', 'compileClasspath']
-    }
-
-    task verifyDependencyLocksAreCurrent {
-        doLast {
-            def expectedDependencies = tasks.saveLock.getOutputLock()
-            def actualDependencies = tasks.saveLock.getGeneratedLock()
-            def digester = java.security.MessageDigest.getInstance('SHA')
-            logger.info("Verifying integrity of dependency locks: {} vs {}", expectedDependencies, actualDependencies)
-            if (digester.digest(expectedDependencies.bytes) != digester.digest(actualDependencies.bytes)) {
-                throw new GradleException("The dependencies of project " + project.name + " do not match the expected "
-                    + "dependencies recorded in " + expectedDependencies + ". "
-                    + "Run `./gradlew generateLock saveLock` and commit the updated version.lock files")
-            }
-        }
-    }
-    verifyDependencyLocksAreCurrent.dependsOn(generateLock)
-    build.dependsOn(verifyDependencyLocksAreCurrent)
-
+    
     tasks.check.dependsOn(javadoc)
 
     test {
