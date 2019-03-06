@@ -27,6 +27,20 @@ allprojects {
         jcenter()
         maven { url "http://palantir.bintray.com/releases" }
     }
+
+    dependencies {
+        constraints {
+            rootConfiguration 'io.dropwizard.metrics:metrics-core', {
+                version { strictly '[3, 4[' }
+                because "Spark still uses 3.X, which can't co-exist with 4.X"
+            }
+
+            rootConfiguration 'com.squareup.retrofit2:retrofit', {
+                version { strictly '2.4.0' }
+                because 'Retrofit 2.5.0 breaks with our path parameter routing logic'
+            }
+        }
+    }
 }
 
 subprojects {
@@ -34,7 +48,6 @@ subprojects {
     apply plugin: 'com.palantir.baseline-class-uniqueness'
 
     sourceCompatibility = 1.8
-    
     tasks.check.dependsOn(javadoc)
 
     test {
