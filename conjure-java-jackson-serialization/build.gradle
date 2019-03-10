@@ -3,7 +3,6 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 dependencies {
     compile "com.fasterxml.jackson.core:jackson-databind"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-guava"
-    compile "com.fasterxml.jackson.module:jackson-module-afterburner"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor"

@@ -6,7 +6,6 @@ dependencies {
 
     implementation project(':conjure-java-jackson-serialization')
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
-    implementation "com.fasterxml.jackson.module:jackson-module-afterburner"
     implementation "com.jcraft:jzlib"
     implementation "com.palantir.safe-logging:safe-logging"
     implementation "com.palantir.tracing:tracing-jersey"

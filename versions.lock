@@ -9,7 +9,7 @@ com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.9.7 (3 constraints: 34232
 com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.7 (1 constraints: b0086a7e)
 com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.9.7 (1 constraints: 3d175124)
 com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider:2.9.7 (1 constraints: b0086a7e)
-com.fasterxml.jackson.module:jackson-module-afterburner:2.9.7 (2 constraints: 571513c9)
+com.fasterxml.jackson.module:jackson-module-afterburner:2.9.7 (1 constraints: a80c4f09)
 com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.9.7 (1 constraints: 3d175124)
 com.fasterxml.jackson.module:jackson-module-paranamer:2.9.7 (1 constraints: e0154600)
 com.fasterxml.jackson.module:jackson-module-scala_2.11:2.9.7 (1 constraints: b0086a7e)

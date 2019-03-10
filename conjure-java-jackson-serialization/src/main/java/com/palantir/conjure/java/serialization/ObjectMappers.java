@@ -84,7 +84,7 @@ public final class ObjectMappers {
     /**
      * Configures provided ObjectMapper with default modules and settings.
      * <p>
-     * Modules: Guava, JDK7, JDK8, Afterburner, JavaTime
+     * Modules: Guava, JDK7, JDK8, JavaTime
      * <p>
      * Settings:
      * <ul>
