@@ -19,7 +19,11 @@ package com.palantir.conjure.java.serialization;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -30,7 +34,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.Test;
 
 public final class ObjectMappersTest {
@@ -92,6 +99,33 @@ public final class ObjectMappersTest {
         LocalDate localDate = LocalDate.of(2001, 2, 3);
         assertThat(ser(localDate)).isEqualTo("\"2001-02-03\"");
         assertThat(serDe(localDate, LocalDate.class)).isEqualTo(localDate);
+    }
+
+    @Test
+    public void testListsAreImmutable() throws IOException {
+        List<String> value = MAPPER.readValue("[1,2,3,4]", new TypeReference<List<Integer>>() {});
+        assertThat(value).isInstanceOf(ImmutableList.class);
+    }
+
+    @Test
+    public void testSetsAreImmutable() throws IOException {
+        Set<String> value = MAPPER.readValue("[1,2,3,4]", new TypeReference<Set<Integer>>() {});
+        assertThat(value).isInstanceOf(ImmutableSet.class);
+    }
+
+    @Test
+    public void testMapsAreImmutable() throws IOException {
+        Map<String, String> value = MAPPER.readValue(
+                "{\"one\":\"two\",\"three\":\"four\"}", new TypeReference<Map<String, String>>() {});
+        assertThat(value).isInstanceOf(ImmutableMap.class);
+    }
+
+    @Test
+    public void testNestedTypesAreImmutable() throws IOException {
+        List<List<String>> value = MAPPER.readValue(
+                "[[1,2,3]]", new TypeReference<List<List<String>>>() {});
+        assertThat(value).isInstanceOf(ImmutableList.class);
+        assertThat(value.get(0)).isInstanceOf(ImmutableList.class);
     }
 
     private static String ser(Object object) throws IOException {
