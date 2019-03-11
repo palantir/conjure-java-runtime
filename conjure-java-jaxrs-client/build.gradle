@@ -28,7 +28,7 @@ dependencies {
     testImplementation project(':keystores')
     testImplementation "com.netflix.feign:feign-jackson"
     testImplementation "com.squareup.okhttp3:mockwebserver"
-    testImplementation "io.dropwizard:dropwizard-testing"
+    testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
     testImplementation "junit:junit"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
