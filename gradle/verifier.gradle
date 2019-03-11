@@ -82,7 +82,7 @@ task copyTestCases(type: Sync) {
 
 task conjureJavaObjects(type: Exec, dependsOn: unpackGenerator) {
     executable "${-> unpackGenerator.getExecutable()}"
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedObjects/java', '--objects'
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedObjects/java', '--objects', '--useImmutableBytes'
 
     inputs.file "${-> configurations.verificationApi.singleFile}"
     outputs.dir "src/generatedObjects/java"
