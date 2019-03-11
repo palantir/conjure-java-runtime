@@ -18,6 +18,7 @@ dependencies {
     testImplementation "com.palantir.tracing:tracing"
     testImplementation "com.palantir.conjure.java.api:ssl-config"
     testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
+    testImplementation "io.dropwizard.metrics:metrics-core"
     testImplementation "junit:junit"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
