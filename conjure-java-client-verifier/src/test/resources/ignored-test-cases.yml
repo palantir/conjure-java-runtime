@@ -66,6 +66,10 @@ client:
    receiveSetAnyAliasExample:
    - 'null'
 
+   receiveEnumExample:
+   - '"!!!"'
+   - '"one-hundred"'
+
    receiveMapBinaryAliasExample:
    - '{}'
    - '{"SGVsbG8sIFdvcmxk": true}'
