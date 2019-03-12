@@ -3,3 +3,7 @@ server:
     getMapBinaryAliasExample:
       - '{}'
       - '{"SGVsbG8sIFdvcmxk": true}'
+    getListAnyAliasExample:
+      - '[null, 0, "content", true, [1,2,3], {"key":3}]' # null is not a valid any value, see conjure-verification#141
+    getSetAnyAliasExample:
+      - '[null, 0, "content", true, [1,2,3], {"key":3}]' # null is not a valid any value, see conjure-verification#141

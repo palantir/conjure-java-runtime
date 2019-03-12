@@ -17,8 +17,11 @@
 package com.palantir.conjure.java.serialization;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +33,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.junit.Test;
 
 public final class ObjectMappersTest {
@@ -92,6 +98,33 @@ public final class ObjectMappersTest {
         LocalDate localDate = LocalDate.of(2001, 2, 3);
         assertThat(ser(localDate)).isEqualTo("\"2001-02-03\"");
         assertThat(serDe(localDate, LocalDate.class)).isEqualTo(localDate);
+    }
+
+    @Test
+    public void testListWithNullValues() {
+        assertThatThrownBy(() -> MAPPER.readValue("[1,2,null]", new TypeReference<List<Integer>>() {}))
+                .isInstanceOf(AssertionError.class)
+                .hasMessage("Null values are not allowed by Conjure");
+    }
+
+    @Test
+    public void testSetWithNullValues() {
+        assertThatThrownBy(() -> MAPPER.readValue("[1,2,null]", new TypeReference<Set<Integer>>() {}))
+                .isInstanceOf(AssertionError.class)
+                .hasMessage("Null values are not allowed by Conjure");
+    }
+
+    @Test
+    public void testMapWithNullValues() {
+        assertThatThrownBy(() -> MAPPER.readValue("{\"test\":null}", new TypeReference<Map<String, String>>() {}))
+                .isInstanceOf(AssertionError.class)
+                .hasMessage("Null values are not allowed by Conjure");
+    }
+
+    @Test
+    public void testMapWithNullKeys() {
+        assertThatThrownBy(() -> MAPPER.readValue("{null: \"test\"}", new TypeReference<Map<String, String>>() {}))
+                .isInstanceOf(JsonParseException.class);
     }
 
     private static String ser(Object object) throws IOException {

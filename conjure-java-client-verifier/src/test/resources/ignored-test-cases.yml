@@ -43,6 +43,7 @@ client:
    - 'null'
    receiveListAnyAliasExample:
    - 'null'
+   - '[null, 0, "content", true, [1,2,3], {"key":3}]' # null is not a valid any value, see conjure-verification#141
    receiveSetBearerTokenAliasExample:
    - 'null'
    receiveSetBinaryAliasExample:
@@ -65,6 +66,7 @@ client:
    - 'null'
    receiveSetAnyAliasExample:
    - 'null'
+   - '[null, 0, "content", true, [1,2,3], {"key":3}]' # null is not a valid any value, see conjure-verification#141
 
    receiveEnumExample:
    - '"!!!"'
