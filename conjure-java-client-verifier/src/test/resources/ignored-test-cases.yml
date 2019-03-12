@@ -3,7 +3,7 @@ client:
 
    receiveBooleanExample:
    - '{"value":0}' # jackson is casting 0 -> false and 1 -> true... 2.9.9 will save us - https://github.com/FasterXML/jackson-modules-base/pull/70
-   - '{"value":"true"}' # jackson is casting 0 -> false and 1 -> true... in 2.9.9 will save us - https://github.com/FasterXML/jackson-modules-base/pull/70
+   - '{"value":"true"}' # jackson is casting 0 -> false and 1 -> true... 2.9.9 will save us - https://github.com/FasterXML/jackson-modules-base/pull/70
 
    receiveStringExample:
    - '{"value":8}' # jackson coerces things to other types
