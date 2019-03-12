@@ -7,6 +7,3 @@
 <!-- Describe at a high-level why this approach is better. -->
 
 <!-- Reference any existing GitHub issues, e.g. 'fixes #000' or 'relevant to #000' -->
-
-## Who might this affect negatively?
-<!-- All changes have a certain amount of risk. Please describe the people who might be affected negatively by this change. -->
