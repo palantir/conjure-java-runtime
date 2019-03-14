@@ -40,7 +40,10 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *     <li>Collection values must not be null</li>
  *     <li>Maps must not contain duplicate keys</li>
- *     <li>TODO: Values are not mutated (after deserialization)</li>
+ * </ul>
+ * What is not validated?
+ * <ul>
+ *     <li>This implementation does not validate that deserialized collections are not modified.</li>
  * </ul>
  */
 final class CollectionValidationModule extends SimpleModule {
