@@ -127,6 +127,15 @@ public final class ObjectMappersTest {
                 .isInstanceOf(JsonParseException.class);
     }
 
+    @Test
+    public void testMapWithDuplicateKeys() {
+        assertThatThrownBy(() -> MAPPER.readValue("{\"test\":\"foo\",\"test\":\"bar\"}",
+                new TypeReference<Map<String, String>>() {}))
+                .isInstanceOf(AssertionError.class)
+                .hasMessage("Duplicate values for the same key are not allowed by Conjure. "
+                        + "Key 'test' values ['bar', 'foo']");
+    }
+
     private static String ser(Object object) throws IOException {
         return MAPPER.writeValueAsString(object);
     }
