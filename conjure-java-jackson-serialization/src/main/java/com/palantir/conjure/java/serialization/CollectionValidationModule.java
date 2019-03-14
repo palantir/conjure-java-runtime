@@ -137,14 +137,19 @@ final class CollectionValidationModule extends SimpleModule {
 
     @Nullable
     private static <T> T logIfNull(@Nullable T value) {
-        // Log noisily in production
-        if (value == null
-                // Avoid the performance cost of Throwable.fillInStackTrace if WARN has been disabled
-                && log.isWarnEnabled()) {
+        if (value == null) {
+            onNull();
+        }
+        return value;
+    }
+
+    private static void onNull() {
+        // Avoid the performance cost of Throwable.fillInStackTrace if WARN has been disabled
+        if (log.isWarnEnabled()) {
+            // Log noisily in production
             log.warn("Detected a null value, null values are not allowed by Conjure", new IllegalArgumentException());
         }
         // Tests should fail, but we're not ready to cause breaks in deployed systems yet.
-        assert value != null : "Null values are not allowed by Conjure";
-        return value;
+        assert false : "Null values are not allowed by Conjure";
     }
 }
