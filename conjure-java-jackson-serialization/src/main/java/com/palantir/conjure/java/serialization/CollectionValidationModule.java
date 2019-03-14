@@ -111,17 +111,21 @@ final class CollectionValidationModule extends SimpleModule {
         public V put(K key, V value) {
             V previousValue = super.put(key, logIfNull(value));
             if (previousValue != null) {
-                // Avoid the performance cost of Throwable.fillInStackTrace if WARN has been disabled
-                if (log.isWarnEnabled()) {
-                    // TODO(ckozak): Log key and values as unsafe arguments. This would require us to take a
-                    // dependency on safe-logging.
-                    log.warn("Detected duplicate map keys which are not allowed by Conjure",
-                            new IllegalArgumentException());
-                }
-                assert false : "Duplicate values for the same key are not allowed by Conjure. Key '"
-                        + key + "' values ['" + value + "', '" + previousValue + "']";
+                onDuplicateKey(key, previousValue, value);
             }
             return previousValue;
+        }
+
+        void onDuplicateKey(K key, V previousValue, V newValue) {
+            // Avoid the performance cost of Throwable.fillInStackTrace if WARN has been disabled
+            if (log.isWarnEnabled()) {
+                // TODO(ckozak): Log key and values as unsafe arguments. This would require us to take a
+                // dependency on safe-logging.
+                log.warn("Detected duplicate map keys which are not allowed by Conjure",
+                        new IllegalArgumentException());
+            }
+            assert false : "Duplicate values for the same key are not allowed by Conjure. Key '"
+                    + key + "' values ['" + newValue + "', '" + previousValue + "']";
         }
 
         @Override
