@@ -16,8 +16,9 @@ dependencies {
     testImplementation "com.netflix.feign:feign-okhttp"
     testImplementation "com.squareup.okhttp3:okhttp"
     testImplementation "org.hamcrest:hamcrest-all"
-    testImplementation "io.dropwizard:dropwizard-core"
-    testImplementation "io.dropwizard:dropwizard-testing"
+    testImplementation("io.dropwizard:dropwizard-core") { exclude module: 'metrics-core' }
+    testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
+    testImplementation "io.dropwizard.metrics:metrics-core"
     testImplementation "junit:junit"
 
     annotationProcessor "org.immutables:value"
