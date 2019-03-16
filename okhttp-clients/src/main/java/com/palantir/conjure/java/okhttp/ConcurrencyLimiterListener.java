@@ -16,20 +16,18 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.netflix.concurrency.limits.Limiter;
 import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import org.immutables.value.Value;
 
-@Value.Immutable
+@Value.Modifiable
 @ImmutablesStyle
 public interface ConcurrencyLimiterListener {
+    ListenableFuture<Limiter.Listener> limiterListener();
+    ConcurrencyLimiterListener setLimiterListener(ListenableFuture<Limiter.Listener> limiterListener);
 
-    @Value.Parameter
-    SettableFuture<Limiter.Listener> limiterListener();
-
-    static ConcurrencyLimiterListener of(SettableFuture<Limiter.Listener> limiterListener) {
-        return ImmutableConcurrencyLimiterListener.of(limiterListener);
+    static ConcurrencyLimiterListener create() {
+        return ModifiableConcurrencyLimiterListener.create();
     }
-
 }

@@ -101,12 +101,12 @@ final class ConcurrencyLimiters {
         return new ConcurrencyLimiter(limiterKey, limiter);
     }
 
-    private static String limiterKey(Request request) {
+    private String limiterKey(Request request) {
         String pathTemplate = request.header(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER);
         if (pathTemplate == null) {
             return FALLBACK;
         } else {
-            return request.method() + " " + pathTemplate;
+            return request.url().host() + " " + request.method() + " " + pathTemplate;
         }
     }
 

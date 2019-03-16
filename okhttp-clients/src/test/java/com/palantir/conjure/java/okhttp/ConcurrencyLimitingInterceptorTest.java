@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import com.google.common.util.concurrent.SettableFuture;
+import com.google.common.util.concurrent.Futures;
 import com.netflix.concurrency.limits.Limiter;
 import java.io.IOException;
 import okhttp3.Interceptor;
@@ -51,11 +51,10 @@ public final class ConcurrencyLimitingInterceptorTest {
 
     @Before
     public void before() {
-        SettableFuture<Limiter.Listener> listenerFuture = SettableFuture.create();
-        listenerFuture.set(listener);
         request = new Request.Builder()
                 .url("https://localhost:1234/call")
-                .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.of(listenerFuture))
+                .tag(ConcurrencyLimiterListener.class,
+                        ConcurrencyLimiterListener.create().setLimiterListener(Futures.immediateFuture(listener)))
                 .get()
                 .build();
         response = new Response.Builder()
