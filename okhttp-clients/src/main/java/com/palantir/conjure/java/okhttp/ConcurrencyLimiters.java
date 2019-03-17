@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import javax.annotation.concurrent.GuardedBy;
 import okhttp3.Request;
+import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,6 @@ final class ConcurrencyLimiters {
     private static final Logger log = LoggerFactory.getLogger(ConcurrencyLimiters.class);
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(1);
     private static final Void NO_CONTEXT = null;
-    private static final String FALLBACK = "";
     private static final MetricName SLOW_ACQUIRE =
             MetricName.builder().safeName("conjure-java-client.qos.request-permit.slow-acquire").build();
     private static final MetricName LEAK_SUSPECTED =
@@ -56,7 +56,7 @@ final class ConcurrencyLimiters {
 
     private final Timer slowAcquire;
     private final Meter leakSuspected;
-    private final ConcurrentMap<String, ConcurrencyLimiter> limiters = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Key, ConcurrencyLimiter> limiters = new ConcurrentHashMap<>();
     private final Duration timeout;
     private final Class<?> serviceClass;
     private final ScheduledExecutorService scheduledExecutorService;
@@ -90,24 +90,35 @@ final class ConcurrencyLimiters {
     }
 
     @VisibleForTesting
-    ConcurrencyLimiter acquireLimiterInternal(String limiterKey) {
+    ConcurrencyLimiter acquireLimiterInternal(Key limiterKey) {
         return limiters.computeIfAbsent(limiterKey, this::newLimiter);
     }
 
-    private ConcurrencyLimiter newLimiter(String limiterKey) {
+    private ConcurrencyLimiter newLimiter(Key limiterKey) {
         Supplier<Limiter<Void>> limiter = () -> SimpleLimiter.newBuilder()
                 .limit(new ConjureWindowedLimit(AIMDLimit.newBuilder().build()))
                 .build();
         return new ConcurrencyLimiter(limiterKey, limiter);
     }
 
-    private String limiterKey(Request request) {
+    private Key limiterKey(Request request) {
         String pathTemplate = request.header(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER);
         if (pathTemplate == null) {
-            return FALLBACK;
+            return ImmutableKey.builder().hostname(request.url().host()).build();
         } else {
-            return request.url().host() + " " + request.method() + " " + pathTemplate;
+            return ImmutableKey.builder()
+                    .hostname(request.url().host())
+                    .method(request.method())
+                    .pathTemplate(pathTemplate)
+                    .build();
         }
+    }
+
+    @Value.Immutable
+    interface Key {
+        String hostname();
+        Optional<String> method();
+        Optional<String> pathTemplate();
     }
 
     /**
@@ -127,10 +138,10 @@ final class ConcurrencyLimiters {
         private Limiter<Void> limiter;
         @GuardedBy("this")
         private ScheduledFuture<?> timeoutCleanup;
-        private final String limiterKey;
+        private final Key limiterKey;
         private final Supplier<Limiter<Void>> limiterFactory;
 
-        ConcurrencyLimiter(String limiterKey, Supplier<Limiter<Void>> limiterFactory) {
+        ConcurrencyLimiter(Key limiterKey, Supplier<Limiter<Void>> limiterFactory) {
             this.limiterKey = limiterKey;
             this.limiterFactory = limiterFactory;
             this.limiter = limiterFactory.get();
