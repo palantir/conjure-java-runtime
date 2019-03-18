@@ -28,7 +28,9 @@ import java.util.concurrent.Executors;
 import org.junit.Test;
 
 public final class ConcurrencyLimitersTest {
-    private static final String KEY = "";
+    private static final ConcurrencyLimiters.Key KEY = ImmutableKey.builder()
+            .hostname("")
+            .build();
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
     private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(
             Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()

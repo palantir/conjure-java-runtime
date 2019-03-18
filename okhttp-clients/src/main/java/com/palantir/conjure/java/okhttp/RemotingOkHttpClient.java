@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.google.common.util.concurrent.SettableFuture;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
@@ -92,7 +91,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     private Request createNewRequest(Request request) {
         return request.newBuilder()
                 .url(getNewRequestUrl(request.url()))
-                .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.of(SettableFuture.create()))
+                .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create())
                 .build();
     }
 
