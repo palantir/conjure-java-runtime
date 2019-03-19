@@ -39,7 +39,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
 
     private static final int MAX_NUM_RELOCATIONS = 20;
 
-    private final Supplier<BackoffStrategy> backoffStrategyFactory;
+    private final Supplier<RetryStrategy> retryStrategyFactory;
     private final NodeSelectionStrategy nodeSelectionStrategy;
     private final UrlSelector urls;
     private final ScheduledExecutorService schedulingExecutor;
@@ -48,14 +48,14 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
 
     RemotingOkHttpClient(
             OkHttpClient delegate,
-            Supplier<BackoffStrategy> backoffStrategy,
+            Supplier<RetryStrategy> retryStrategy,
             NodeSelectionStrategy nodeSelectionStrategy,
             UrlSelector urls,
             ScheduledExecutorService schedulingExecutor,
             ExecutorService executionExecutor,
             ConcurrencyLimiters concurrencyLimiters) {
         super(delegate);
-        this.backoffStrategyFactory = backoffStrategy;
+        this.retryStrategyFactory = retryStrategy;
         this.nodeSelectionStrategy = nodeSelectionStrategy;
         this.urls = urls;
         this.schedulingExecutor = schedulingExecutor;
@@ -65,7 +65,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
 
     @Override
     public RemotingOkHttpCall newCall(Request request) {
-        return newCallWithMutableState(createNewRequest(request), backoffStrategyFactory.get(), MAX_NUM_RELOCATIONS);
+        return newCallWithMutableState(createNewRequest(request), retryStrategyFactory.get(), MAX_NUM_RELOCATIONS);
     }
 
     @Override
@@ -76,10 +76,10 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     }
 
     RemotingOkHttpCall newCallWithMutableState(
-            Request request, BackoffStrategy backoffStrategy, int maxNumRelocations) {
+            Request request, RetryStrategy retryStrategy, int maxNumRelocations) {
         return new RemotingOkHttpCall(
                 getDelegate().newCall(request),
-                backoffStrategy,
+                retryStrategy,
                 urls,
                 this,
                 schedulingExecutor,

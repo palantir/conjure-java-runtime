@@ -116,24 +116,24 @@ public final class FlowControlTest {
     }
 
     private static final class Worker implements Runnable {
-        private final Supplier<BackoffStrategy> backoffFactory;
+        private final Supplier<RetryStrategy> retryStrategyFactory;
         private final ConcurrencyLimiters limiters;
         private final Duration successDuration;
         private final RateLimiter rateLimiter;
         private final Meter meter;
         private final Histogram avgRetries;
 
-        private BackoffStrategy backoff;
+        private RetryStrategy retryStrategy;
         private int numRetries = 0;
 
         private Worker(
-                Supplier<BackoffStrategy> backoffFactory,
+                Supplier<RetryStrategy> retryStrategyFactory,
                 ConcurrencyLimiters limiters,
                 Duration successDuration,
                 RateLimiter rateLimiter,
                 Meter meter,
                 Histogram avgRetries) {
-            this.backoffFactory = backoffFactory;
+            this.retryStrategyFactory = retryStrategyFactory;
             this.limiters = limiters;
             this.successDuration = successDuration;
             this.rateLimiter = rateLimiter;
@@ -152,11 +152,11 @@ public final class FlowControlTest {
                     listener.onSuccess();
                     avgRetries.update(numRetries);
                     numRetries = 0;
-                    backoff = null;
+                    retryStrategy = null;
                     i++;
                 } else {
-                    initializeBackoff();
-                    Optional<Duration> sleep = backoff.nextBackoff();
+                    initializeRetryStrategy();
+                    Optional<Duration> sleep = retryStrategy.nextBackoff();
                     numRetries++;
                     if (!sleep.isPresent()) {
                         listener.onIgnore();
@@ -170,11 +170,11 @@ public final class FlowControlTest {
             }
         }
 
-        private void initializeBackoff() {
-            if (backoff != null) {
+        private void initializeRetryStrategy() {
+            if (retryStrategy != null) {
                 return;
             }
-            backoff = backoffFactory.get();
+            retryStrategy = retryStrategyFactory.get();
         }
     }
 

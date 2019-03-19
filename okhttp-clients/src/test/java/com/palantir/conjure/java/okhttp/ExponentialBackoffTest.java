@@ -35,6 +35,7 @@ public final class ExponentialBackoffTest {
         Random random = mock(Random.class);
         ExponentialBackoff backoff = new ExponentialBackoff(0, ONE_SECOND, random);
 
+        assertThat(backoff.shouldRetry()).isFalse();
         assertThat(backoff.nextBackoff()).isEmpty();
     }
 

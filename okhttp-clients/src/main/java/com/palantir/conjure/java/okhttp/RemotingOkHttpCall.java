@@ -63,7 +63,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private static final ResponseHandler<IOException> ioExceptionHandler = IoExceptionResponseHandler.INSTANCE;
     private static final ResponseHandler<QosException> qosHandler = QosExceptionResponseHandler.INSTANCE;
 
-    private final BackoffStrategy backoffStrategy;
+    private final RetryStrategy retryStrategy;
     private final UrlSelector urls;
     private final RemotingOkHttpClient client;
     private final ScheduledExecutorService schedulingExecutor;
@@ -74,7 +74,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     RemotingOkHttpCall(
             Call delegate,
-            BackoffStrategy backoffStrategy,
+            RetryStrategy retryStrategy,
             UrlSelector urls,
             RemotingOkHttpClient client,
             ScheduledExecutorService schedulingExecutor,
@@ -82,7 +82,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             ConcurrencyLimiters.ConcurrencyLimiter limiter,
             int maxNumRelocations) {
         super(delegate);
-        this.backoffStrategy = backoffStrategy;
+        this.retryStrategy = retryStrategy;
         this.urls = urls;
         this.client = client;
         this.schedulingExecutor = schedulingExecutor;
@@ -114,7 +114,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         try {
             // We don't enforce a timeout here because it's not possible to know how long this operation might take.
             // First, it might get queued indefinitely in the Dispatcher, and then it might get retried a (potentially)
-            // unknown amount of times by the BackoffStrategy. The {@code get} call times out when the underlying
+            // unknown amount of times by the RetryStrategy. The {@code get} call times out when the underlying
             // OkHttp call times out (, possibly after a number of retries).
             return future.get();
         } catch (InterruptedException e) {
@@ -180,7 +180,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 urls.markAsFailed(request().url());
 
                 // Fail call if backoffs are exhausted or if no retry URL can be determined.
-                Optional<Duration> backoff = backoffStrategy.nextBackoff();
+                Optional<Duration> backoff = retryStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
                             "Failed to complete the request due to an IOException",
@@ -207,7 +207,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                         .url(redirectTo.get())
                         .build();
                 RemotingOkHttpCall retryCall =
-                        client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
+                        client.newCallWithMutableState(redirectedRequest, retryStrategy, maxNumRelocations - 1);
                 scheduleExecution(
                         () -> retryCall.enqueue(callback),
                         backoff.get());
@@ -273,7 +273,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
         return new QosException.Visitor<Void>() {
             @Override
             public Void visit(QosException.Throttle exception) {
-                Optional<Duration> nonAdvertizedBackoff = backoffStrategy.nextBackoff();
+                if (!retryStrategy.shouldRetry()) {
+                    throw exception;
+                }
+
+                Optional<Duration> nonAdvertizedBackoff = retryStrategy.nextBackoff();
                 if (!nonAdvertizedBackoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
                             "Failed to complete the request due to QosException.Throttle",
@@ -321,14 +325,18 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 Request redirectedRequest = request().newBuilder()
                         .url(redirectTo.get())
                         .build();
-                client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
+                client.newCallWithMutableState(redirectedRequest, retryStrategy, maxNumRelocations - 1)
                         .enqueue(callback);
                 return null;
             }
 
             @Override
             public Void visit(QosException.Unavailable exception) {
-                Optional<Duration> backoff = backoffStrategy.nextBackoff();
+                if (!retryStrategy.shouldRetry()) {
+                    throw exception;
+                }
+
+                Optional<Duration> backoff = retryStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
                             "Failed to complete the request due to QosException.Unavailable",
@@ -355,7 +363,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                         .url(redirectTo.get())
                         .build();
                 scheduleExecution(
-                        () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
+                        () -> client.newCallWithMutableState(redirectedRequest, retryStrategy, maxNumRelocations)
                                 .enqueue(callback),
                         backoff.get());
                 return null;
@@ -366,7 +374,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     // TODO(rfink): Consider removing RemotingOkHttpCall#doClone method, #627
     @Override
     public RemotingOkHttpCall doClone() {
-        return new RemotingOkHttpCall(getDelegate().clone(), backoffStrategy, urls, client, schedulingExecutor,
+        return new RemotingOkHttpCall(getDelegate().clone(), retryStrategy, urls, client, schedulingExecutor,
                 executionExecutor, limiter, maxNumRelocations);
     }
 }

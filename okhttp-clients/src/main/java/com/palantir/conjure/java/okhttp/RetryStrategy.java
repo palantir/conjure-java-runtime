@@ -20,12 +20,16 @@ import java.time.Duration;
 import java.util.Optional;
 
 /**
- * Defines a strategy for waiting in between successive retries of an operation that is subject to failure.
+ * Defines a strategy for handling an operation that is subject to failure.
  */
-public interface BackoffStrategy {
+public interface RetryStrategy {
     /**
-     * Returns the next suggested backoff duration, or {@link Optional#empty} if the operation should not be retried
-     * again.
+     * Returns whether a failed operation should be retried.
+     */
+    boolean shouldRetry();
+    /**
+     * Returns the next suggested backoff duration before retrying, or {@link Optional#empty} if the operation should
+     * not be retried again.
      */
     Optional<Duration> nextBackoff();
 }
