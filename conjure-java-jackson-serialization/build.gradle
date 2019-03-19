@@ -8,8 +8,12 @@ dependencies {
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor"
 
+    implementation 'com.palantir.conjure.java:conjure-lib', {
+        transitive = false
+    }
     implementation "org.slf4j:slf4j-api"
 
-    testCompile "junit:junit"
-    testCompile "org.assertj:assertj-core"
+    testImplementation "junit:junit"
+    testImplementation "org.assertj:assertj-core"
+    testImplementation 'com.palantir.conjure.java:conjure-lib'
 }

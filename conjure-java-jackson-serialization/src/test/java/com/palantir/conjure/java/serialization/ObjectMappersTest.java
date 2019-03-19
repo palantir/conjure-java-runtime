@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.palantir.conjure.java.lib.SafeLong;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -134,6 +135,36 @@ public final class ObjectMappersTest {
                 .isInstanceOf(AssertionError.class)
                 .hasMessage("Duplicate values for the same key are not allowed by Conjure. "
                         + "Key 'test' values ['bar', 'foo']");
+    }
+
+    @Test
+    public void testLongDeserializationFromString() throws IOException {
+        assertThat((Long) MAPPER.readValue("\"1\"", new TypeReference<Long>() {})).isEqualTo(1L);
+    }
+
+    @Test
+    public void testLongTypeDeserializationFromString() throws IOException {
+        assertThat(MAPPER.readValue("\"1\"", Long.TYPE)).isEqualTo(1L);
+    }
+
+    @Test
+    public void testLongDeserializationFromJsonNumber() throws IOException {
+        assertThat((Long) MAPPER.readValue("1", new TypeReference<Long>() {})).isEqualTo(1L);
+    }
+
+    @Test
+    public void testLongTypeDeserializationFromJsonNumber() throws IOException {
+        assertThat(MAPPER.readValue("1", Long.TYPE)).isEqualTo(1L);
+    }
+
+    @Test
+    public void testLongSerialization() throws IOException {
+        assertThat(ser(1L)).isEqualTo("\"1\"");
+    }
+
+    @Test
+    public void testSafeLongSerialization() throws IOException {
+        assertThat(ser(SafeLong.of(1))).isEqualTo("1");
     }
 
     private static String ser(Object object) throws IOException {
