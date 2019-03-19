@@ -111,10 +111,10 @@ public final class OkHttpClients {
      * <p>
      * Note: In contrast to the {@link java.util.concurrent.ThreadPoolExecutor} used by OkHttp's {@link
      * #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
-     * Javadoc.
+     * Javadoc. Since this executor will never hit zero threads, it must use daemon threads.
      */
     private static final ScheduledExecutorService schedulingExecutor = Tracers.wrap(Executors.newScheduledThreadPool(
-            NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", false)));
+            NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true)));
 
     private OkHttpClients() {}
 
