@@ -46,7 +46,6 @@ final class LenientLongModule extends SimpleModule {
         public Long deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {
             switch (jsonParser.currentToken()) {
                 case VALUE_NUMBER_INT:
-                    // Lenient implementation for compatibility with existing clients
                     return jsonParser.getLongValue();
                 case VALUE_STRING:
                     return parseLong(jsonParser);
