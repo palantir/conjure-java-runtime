@@ -188,9 +188,24 @@ public final class ObjectMappersTest {
     }
 
     @Test
+    public void testLongAsStringOverflowDeserialization() {
+        BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
+        assertThatThrownBy(() -> MAPPER.readValue("\"" + large + "\"", Long.TYPE))
+                .isInstanceOf(NumberFormatException.class);
+    }
+
+    @Test
     public void testOptionalLongOverflowDeserialization() {
         BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
         assertThatThrownBy(() -> MAPPER.readValue("" + large, OptionalLong.class))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("out of range of long");
+    }
+
+    @Test
+    public void testOptionalLongAsStringOverflowDeserialization() {
+        BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
+        assertThatThrownBy(() -> MAPPER.readValue("\"" + large + "\"", OptionalLong.class))
                 .isInstanceOf(JsonParseException.class)
                 .hasMessageContaining("out of range of long");
     }
