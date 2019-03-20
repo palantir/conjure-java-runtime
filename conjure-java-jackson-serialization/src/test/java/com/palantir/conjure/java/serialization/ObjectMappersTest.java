@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -206,8 +207,8 @@ public final class ObjectMappersTest {
     public void testOptionalLongAsStringOverflowDeserialization() {
         BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
         assertThatThrownBy(() -> MAPPER.readValue("\"" + large + "\"", OptionalLong.class))
-                .isInstanceOf(JsonParseException.class)
-                .hasMessageContaining("out of range of long");
+                .isInstanceOf(InvalidFormatException.class)
+                .hasMessageContaining("not a valid long value");
     }
 
     @Test
