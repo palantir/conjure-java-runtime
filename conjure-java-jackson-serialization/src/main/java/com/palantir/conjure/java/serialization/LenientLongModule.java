@@ -56,6 +56,11 @@ final class LenientLongModule extends SimpleModule {
             throw new IOException("Expected a long value");
         }
 
+        @Override
+        public boolean isCachable() {
+            return true;
+        }
+
         private static Long parseLong(JsonParser jsonParser) throws IOException {
             try {
                 return Long.valueOf(jsonParser.getValueAsString());
