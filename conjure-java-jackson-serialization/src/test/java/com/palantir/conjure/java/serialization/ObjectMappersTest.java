@@ -136,6 +136,26 @@ public final class ObjectMappersTest {
                         + "Key 'test' values ['bar', 'foo']");
     }
 
+    @Test
+    public void testLongDeserializationFromString() throws IOException {
+        assertThat((Long) MAPPER.readValue("\"1\"", new TypeReference<Long>() {})).isEqualTo(1L);
+    }
+
+    @Test
+    public void testLongTypeDeserializationFromString() throws IOException {
+        assertThat(MAPPER.readValue("\"1\"", Long.TYPE)).isEqualTo(1L);
+    }
+
+    @Test
+    public void testLongDeserializationFromJsonNumber() throws IOException {
+        assertThat((Long) MAPPER.readValue("1", new TypeReference<Long>() {})).isEqualTo(1L);
+    }
+
+    @Test
+    public void testLongTypeDeserializationFromJsonNumber() throws IOException {
+        assertThat(MAPPER.readValue("1", Long.TYPE)).isEqualTo(1L);
+    }
+
     private static String ser(Object object) throws IOException {
         return MAPPER.writeValueAsString(object);
     }
