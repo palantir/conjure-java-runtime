@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -36,6 +37,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
 import org.junit.Test;
@@ -175,6 +177,36 @@ public final class ObjectMappersTest {
     @Test
     public void testOptionalLongDeserializationFromJsonNull() throws IOException {
         assertThat(MAPPER.readValue("null", OptionalLong.class)).isEmpty();
+    }
+
+    @Test
+    public void testLongOverflowDeserialization() {
+        BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
+        assertThatThrownBy(() -> MAPPER.readValue("" + large, Long.TYPE))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("out of range of long");
+    }
+
+    @Test
+    public void testOptionalLongOverflowDeserialization() {
+        BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
+        assertThatThrownBy(() -> MAPPER.readValue("" + large, OptionalLong.class))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("out of range of long");
+    }
+
+    @Test
+    public void testIntegerOverflowDeserialization() {
+        assertThatThrownBy(() -> MAPPER.readValue("" + Long.MAX_VALUE, Integer.TYPE))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("out of range of int");
+    }
+
+    @Test
+    public void testOptionalIntOverflowDeserialization() {
+        assertThatThrownBy(() -> MAPPER.readValue("" + Long.MAX_VALUE, OptionalInt.class))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("out of range of int");
     }
 
     private static String ser(Object object) throws IOException {
