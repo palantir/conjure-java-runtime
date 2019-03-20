@@ -49,6 +49,8 @@ final class LenientLongModule extends SimpleModule {
                     return jsonParser.getLongValue();
                 case VALUE_STRING:
                     return Long.valueOf(jsonParser.getValueAsString());
+                case VALUE_NULL:
+                    return null;
             }
             throw new IOException("Expected a long value");
         }

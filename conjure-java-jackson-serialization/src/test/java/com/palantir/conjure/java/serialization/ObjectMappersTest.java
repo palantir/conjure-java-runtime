@@ -36,6 +36,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.Set;
 import org.junit.Test;
 
@@ -138,7 +139,7 @@ public final class ObjectMappersTest {
 
     @Test
     public void testLongDeserializationFromString() throws IOException {
-        assertThat((Long) MAPPER.readValue("\"1\"", new TypeReference<Long>() {})).isEqualTo(1L);
+        assertThat(MAPPER.readValue("\"1\"", Long.class)).isEqualTo(1L);
     }
 
     @Test
@@ -147,13 +148,33 @@ public final class ObjectMappersTest {
     }
 
     @Test
+    public void testOptionalLongTypeDeserializationFromString() throws IOException {
+        assertThat(MAPPER.readValue("\"1\"", OptionalLong.class)).hasValue(1L);
+    }
+
+    @Test
     public void testLongDeserializationFromJsonNumber() throws IOException {
-        assertThat((Long) MAPPER.readValue("1", new TypeReference<Long>() {})).isEqualTo(1L);
+        assertThat(MAPPER.readValue("1", Long.class)).isEqualTo(1L);
+    }
+
+    @Test
+    public void testOptionalLongDeserializationFromJsonNumber() throws IOException {
+        assertThat(MAPPER.readValue("1", OptionalLong.class)).hasValue(1L);
     }
 
     @Test
     public void testLongTypeDeserializationFromJsonNumber() throws IOException {
         assertThat(MAPPER.readValue("1", Long.TYPE)).isEqualTo(1L);
+    }
+
+    @Test
+    public void testLongDeserializationFromJsonNull() throws IOException {
+        assertThat(MAPPER.readValue("null", Long.class)).isNull();
+    }
+
+    @Test
+    public void testOptionalLongDeserializationFromJsonNull() throws IOException {
+        assertThat(MAPPER.readValue("null", OptionalLong.class)).isEmpty();
     }
 
     private static String ser(Object object) throws IOException {
