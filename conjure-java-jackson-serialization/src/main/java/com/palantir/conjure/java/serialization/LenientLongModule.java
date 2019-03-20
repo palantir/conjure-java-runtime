@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.serialization;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -48,11 +49,19 @@ final class LenientLongModule extends SimpleModule {
                     // Lenient implementation for compatibility with existing clients
                     return jsonParser.getLongValue();
                 case VALUE_STRING:
-                    return Long.valueOf(jsonParser.getValueAsString());
+                    return parseLong(jsonParser);
                 case VALUE_NULL:
                     return null;
             }
             throw new IOException("Expected a long value");
+        }
+
+        private static Long parseLong(JsonParser jsonParser) throws IOException {
+            try {
+                return Long.valueOf(jsonParser.getValueAsString());
+            } catch (NumberFormatException e) {
+                throw new JsonParseException(jsonParser, "not a valid long value", e);
+            }
         }
     }
 }
