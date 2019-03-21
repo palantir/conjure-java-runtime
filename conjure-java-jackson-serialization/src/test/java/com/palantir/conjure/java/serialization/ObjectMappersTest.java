@@ -35,6 +35,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -119,10 +120,12 @@ public final class ObjectMappersTest {
     }
 
     @Test
-    public void testMapWithNullValues() {
-        assertThatThrownBy(() -> MAPPER.readValue("{\"test\":null}", new TypeReference<Map<String, String>>() {}))
-                .isInstanceOf(AssertionError.class)
-                .hasMessage("Null values are not allowed by Conjure");
+    public void testMapWithNullValues() throws IOException {
+        // This is potentially a bug, see conjure-java#291
+        assertThat(MAPPER.<Map<String, String>>readValue(
+                "{\"test\":null}",
+                new TypeReference<Map<String, String>>() {}))
+                .isEqualTo(Collections.singletonMap("test", null));
     }
 
     @Test
