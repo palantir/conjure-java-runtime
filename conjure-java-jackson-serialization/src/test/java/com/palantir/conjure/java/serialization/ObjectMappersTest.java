@@ -23,8 +23,10 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -36,6 +38,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
 import org.junit.Test;
 
@@ -134,6 +138,92 @@ public final class ObjectMappersTest {
                 .isInstanceOf(AssertionError.class)
                 .hasMessage("Duplicate values for the same key are not allowed by Conjure. "
                         + "Key 'test' values ['bar', 'foo']");
+    }
+
+    @Test
+    public void testLongDeserializationFromString() throws IOException {
+        assertThat(MAPPER.readValue("\"1\"", Long.class)).isEqualTo(1L);
+    }
+
+    @Test
+    public void testLongTypeDeserializationFromString() throws IOException {
+        assertThat(MAPPER.readValue("\"1\"", Long.TYPE)).isEqualTo(1L);
+    }
+
+    @Test
+    public void testOptionalLongTypeDeserializationFromString() throws IOException {
+        assertThat(MAPPER.readValue("\"1\"", OptionalLong.class)).hasValue(1L);
+    }
+
+    @Test
+    public void testLongDeserializationFromJsonNumber() throws IOException {
+        assertThat(MAPPER.readValue("1", Long.class)).isEqualTo(1L);
+    }
+
+    @Test
+    public void testOptionalLongDeserializationFromJsonNumber() throws IOException {
+        assertThat(MAPPER.readValue("1", OptionalLong.class)).hasValue(1L);
+    }
+
+    @Test
+    public void testLongTypeDeserializationFromJsonNumber() throws IOException {
+        assertThat(MAPPER.readValue("1", Long.TYPE)).isEqualTo(1L);
+    }
+
+    @Test
+    public void testLongDeserializationFromJsonNull() throws IOException {
+        assertThat(MAPPER.readValue("null", Long.class)).isNull();
+    }
+
+    @Test
+    public void testOptionalLongDeserializationFromJsonNull() throws IOException {
+        assertThat(MAPPER.readValue("null", OptionalLong.class)).isEmpty();
+    }
+
+    @Test
+    public void testLongOverflowDeserialization() {
+        BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
+        assertThatThrownBy(() -> MAPPER.readValue("" + large, Long.TYPE))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("out of range of long");
+    }
+
+    @Test
+    public void testLongAsStringOverflowDeserialization() {
+        BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
+        assertThatThrownBy(() -> MAPPER.readValue("\"" + large + "\"", Long.TYPE))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("not a valid long value");
+    }
+
+    @Test
+    public void testOptionalLongOverflowDeserialization() {
+        BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
+        assertThatThrownBy(() -> MAPPER.readValue("" + large, OptionalLong.class))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("out of range of long");
+    }
+
+    @Test
+    public void testOptionalLongAsStringOverflowDeserialization() {
+        BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
+        assertThatThrownBy(() -> MAPPER.readValue("\"" + large + "\"", OptionalLong.class))
+                .isInstanceOf(InvalidFormatException.class)
+                .hasMessageContaining("not a valid long value");
+    }
+
+    @Test
+    public void testIntegerOverflowDeserialization() {
+        assertThatThrownBy(() -> MAPPER.readValue("" + Long.MAX_VALUE, Integer.TYPE))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("out of range of int");
+    }
+
+    @Test
+    public void testOptionalIntOverflowDeserialization() {
+        assertThatThrownBy(() -> MAPPER.readValue("" + Long.MAX_VALUE, OptionalInt.class))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("out of range of int");
     }
 
     private static String ser(Object object) throws IOException {
