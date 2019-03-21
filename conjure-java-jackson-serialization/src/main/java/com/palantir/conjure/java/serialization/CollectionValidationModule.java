@@ -24,7 +24,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,13 +102,13 @@ final class CollectionValidationModule extends SimpleModule {
         }
     }
 
-    /** Logs noisily if null values are received. */
+    /** Logs noisily if duplicate keys are received. */
     static final class ValidatingHashMap<K, V> extends HashMap<K, V> {
-        private static final BiConsumer<Object, Object> validator = (key, value) -> logIfNull(value);
 
         @Override
-        public V put(K key, V value) {
-            V previousValue = super.put(key, logIfNull(value));
+        public V put(K key, @Nullable V value) {
+            // n.b. Generated bean builders do not currently validate map values are non-null.
+            V previousValue = super.put(key, value);
             if (previousValue != null) {
                 onDuplicateKey(key, previousValue, value);
             }
@@ -126,12 +125,6 @@ final class CollectionValidationModule extends SimpleModule {
             }
             assert false : "Duplicate values for the same key are not allowed by Conjure. Key '"
                     + key + "' values ['" + newValue + "', '" + previousValue + "']";
-        }
-
-        @Override
-        public void putAll(Map<? extends K, ? extends V> map) {
-            map.forEach(validator);
-            super.putAll(map);
         }
     }
 
