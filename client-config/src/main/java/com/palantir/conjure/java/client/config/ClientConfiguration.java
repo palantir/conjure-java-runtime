@@ -101,6 +101,13 @@ public interface ClientConfiguration {
      */
     Duration backoffSlotSize();
 
+    /**
+     * Disables the client-side sympathetic QoS. Consumers should almost always set this value to its default of false,
+     * except where there are known issues with the QoS interaction. Please consult project maintainers if flipping
+     * this value to true.
+     */
+    boolean forExpertsOnlyDisableSympatheticClientQoS();
+
     @Value.Check
     default void check() {
         if (meshProxy().isPresent()) {

@@ -60,25 +60,29 @@ final class ConcurrencyLimiters {
     private final Duration timeout;
     private final Class<?> serviceClass;
     private final ScheduledExecutorService scheduledExecutorService;
+    private final boolean useLimiter;
 
     @VisibleForTesting
     ConcurrencyLimiters(
             ScheduledExecutorService scheduledExecutorService,
             TaggedMetricRegistry taggedMetricRegistry,
             Duration timeout,
-            Class<?> serviceClass) {
+            Class<?> serviceClass,
+            boolean useLimiter) {
         this.slowAcquire = taggedMetricRegistry.timer(SLOW_ACQUIRE);
         this.leakSuspected = taggedMetricRegistry.meter(LEAK_SUSPECTED);
         this.timeout = timeout;
         this.serviceClass = serviceClass;
         this.scheduledExecutorService = scheduledExecutorService;
+        this.useLimiter = useLimiter;
     }
 
     ConcurrencyLimiters(
             ScheduledExecutorService scheduledExecutorService,
             TaggedMetricRegistry taggedMetricRegistry,
-            Class<?> serviceClass) {
-        this(scheduledExecutorService, taggedMetricRegistry, DEFAULT_TIMEOUT, serviceClass);
+            Class<?> serviceClass,
+            boolean useLimiter) {
+        this(scheduledExecutorService, taggedMetricRegistry, DEFAULT_TIMEOUT, serviceClass, useLimiter);
     }
 
     /**
@@ -95,10 +99,13 @@ final class ConcurrencyLimiters {
     }
 
     private ConcurrencyLimiter newLimiter(Key limiterKey) {
+        if (!useLimiter) {
+            return NoOpConcurrencyLimiter.INSTANCE;
+        }
         Supplier<Limiter<Void>> limiter = () -> SimpleLimiter.newBuilder()
                 .limit(new ConjureWindowedLimit(AIMDLimit.newBuilder().build()))
                 .build();
-        return new ConcurrencyLimiter(limiterKey, limiter);
+        return new DefaultConcurrencyLimiter(limiterKey, limiter);
     }
 
     private Key limiterKey(Request request) {
@@ -131,7 +138,30 @@ final class ConcurrencyLimiters {
      * Upon a request finishing, we check if there are any waiting requests, and if there are we attempt to trigger some
      * more.
      */
-    final class ConcurrencyLimiter {
+    public interface ConcurrencyLimiter {
+        ListenableFuture<Limiter.Listener> acquire();
+    }
+
+    static final class NoOpConcurrencyLimiter implements ConcurrencyLimiter {
+        private static final NoOpLimiterListener NO_OP_LIMITER_LISTENER = new NoOpLimiterListener();
+        static final NoOpConcurrencyLimiter INSTANCE = new NoOpConcurrencyLimiter();
+
+        @Override
+        public ListenableFuture<Limiter.Listener> acquire() {
+            return Futures.immediateFuture(NO_OP_LIMITER_LISTENER);
+        }
+
+        static final class NoOpLimiterListener implements Limiter.Listener {
+            @Override
+            public void onSuccess() {}
+            @Override
+            public void onIgnore() {}
+            @Override
+            public void onDropped() {}
+        }
+    }
+
+    final class DefaultConcurrencyLimiter implements ConcurrencyLimiter {
         @GuardedBy("this")
         private final ThreadWorkQueue<SettableFuture<Limiter.Listener>> waitingRequests = new ThreadWorkQueue<>();
         @GuardedBy("this")
@@ -141,13 +171,14 @@ final class ConcurrencyLimiters {
         private final Key limiterKey;
         private final Supplier<Limiter<Void>> limiterFactory;
 
-        ConcurrencyLimiter(Key limiterKey, Supplier<Limiter<Void>> limiterFactory) {
+        DefaultConcurrencyLimiter(Key limiterKey, Supplier<Limiter<Void>> limiterFactory) {
             this.limiterKey = limiterKey;
             this.limiterFactory = limiterFactory;
             this.limiter = limiterFactory.get();
         }
 
-        synchronized ListenableFuture<Limiter.Listener> acquire() {
+        @Override
+        public synchronized ListenableFuture<Limiter.Listener> acquire() {
             SettableFuture<Limiter.Listener> future = SettableFuture.create();
             addSlowAcquireMarker(future);
             waitingRequests.add(future);

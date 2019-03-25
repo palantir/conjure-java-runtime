@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import org.junit.Test;
 
-public final class ConcurrencyLimitersTest {
+public final class DefaultConcurrencyLimitersTest {
     private static final ConcurrencyLimiters.Key KEY = ImmutableKey.builder()
             .hostname("")
             .build();
@@ -38,7 +38,7 @@ public final class ConcurrencyLimitersTest {
                     .build()),
             new DefaultTaggedMetricRegistry(),
             TIMEOUT,
-            ConcurrencyLimitersTest.class);
+            DefaultConcurrencyLimitersTest.class);
 
     @Test
     public void testTimeout() {
