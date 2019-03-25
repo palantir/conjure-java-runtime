@@ -139,8 +139,9 @@ public final class OkHttpClients {
             HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
+        boolean enableClientQoS = config.clientQoS().equals(ClientConfiguration.ClientQoS.ENABLED);
         ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(limitReviver, registry, serviceClass,
-                !config.forExpertsOnlyDisableSympatheticClientQoS());
+                enableClientQoS);
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
         // Routing
@@ -159,7 +160,7 @@ public final class OkHttpClients {
         }
 
         // Intercept calls to augment request meta data
-        if (!config.forExpertsOnlyDisableSympatheticClientQoS()) {
+        if (enableClientQoS) {
             client.addInterceptor(new ConcurrencyLimitingInterceptor());
         }
         client.addInterceptor(InstrumentedInterceptor.create(registry, hostEventsSink, serviceClass));

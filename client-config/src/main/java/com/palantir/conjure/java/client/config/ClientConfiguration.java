@@ -101,12 +101,9 @@ public interface ClientConfiguration {
      */
     Duration backoffSlotSize();
 
-    /**
-     * Disables the client-side sympathetic QoS. Consumers should almost always set this value to its default of false,
-     * except where there are known issues with the QoS interaction. Please consult project maintainers if flipping
-     * this value to true.
-     */
-    boolean forExpertsOnlyDisableSympatheticClientQoS();
+
+    /** Indicates whether client-side sympathetic QoS should be enabled. */
+    ClientQoS clientQoS();
 
     @Value.Check
     default void check() {
@@ -125,4 +122,16 @@ public interface ClientConfiguration {
     }
 
     class Builder extends ImmutableClientConfiguration.Builder {}
+
+    enum ClientQoS {
+        /** Default. */
+        ENABLED,
+
+        /**
+         * Disables the client-side sympathetic QoS. Consumers should almost always set this value to its default of false,
+         * except where there are known issues with the QoS interaction. Please consult project maintainers if flipping
+         * this value to true.
+         */
+        DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS
+    }
 }

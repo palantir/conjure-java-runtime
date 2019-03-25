@@ -46,7 +46,8 @@ public final class ClientConfigurations {
     private static final boolean DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION = false;
     private static final NodeSelectionStrategy DEFAULT_NODE_SELECTION_STRATEGY = NodeSelectionStrategy.PIN_UNTIL_ERROR;
     private static final int DEFAULT_MAX_NUM_RETRIES = 4;
-    private static final boolean DEFAULT_DISABLE_SYMPATHETIC_QOS = false;
+    private static final ClientConfiguration.ClientQoS DEFAULT_DISABLE_SYMPATHETIC_QOS =
+            ClientConfiguration.ClientQoS.ENABLED;
 
     private ClientConfigurations() {}
 
@@ -72,7 +73,7 @@ public final class ClientConfigurations {
                 .nodeSelectionStrategy(DEFAULT_NODE_SELECTION_STRATEGY)
                 .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
-                .forExpertsOnlyDisableSympatheticClientQoS(DEFAULT_DISABLE_SYMPATHETIC_QOS)
+                .clientQoS(DEFAULT_DISABLE_SYMPATHETIC_QOS)
                 .build();
     }
 
@@ -97,7 +98,7 @@ public final class ClientConfigurations {
                 .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
                 .nodeSelectionStrategy(DEFAULT_NODE_SELECTION_STRATEGY)
                 .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)
-                .forExpertsOnlyDisableSympatheticClientQoS(DEFAULT_DISABLE_SYMPATHETIC_QOS)
+                .clientQoS(DEFAULT_DISABLE_SYMPATHETIC_QOS)
                 .build();
     }
 
