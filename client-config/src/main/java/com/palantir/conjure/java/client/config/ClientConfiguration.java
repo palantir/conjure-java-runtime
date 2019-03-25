@@ -101,6 +101,10 @@ public interface ClientConfiguration {
      */
     Duration backoffSlotSize();
 
+
+    /** Indicates whether client-side sympathetic QoS should be enabled. */
+    ClientQoS clientQoS();
+
     @Value.Check
     default void check() {
         if (meshProxy().isPresent()) {
@@ -118,4 +122,16 @@ public interface ClientConfiguration {
     }
 
     class Builder extends ImmutableClientConfiguration.Builder {}
+
+    enum ClientQoS {
+        /** Default. */
+        ENABLED,
+
+        /**
+         * Disables the client-side sympathetic QoS. Consumers should almost never use this option, reserving it
+         * for where there are known issues with the QoS interaction. Please consult project maintainers if applying
+         * this option.
+         */
+        DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS
+    }
 }
