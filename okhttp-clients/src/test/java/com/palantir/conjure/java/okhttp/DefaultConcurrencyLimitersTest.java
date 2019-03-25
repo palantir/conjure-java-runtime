@@ -38,7 +38,8 @@ public final class DefaultConcurrencyLimitersTest {
                     .build()),
             new DefaultTaggedMetricRegistry(),
             TIMEOUT,
-            DefaultConcurrencyLimitersTest.class);
+            DefaultConcurrencyLimitersTest.class,
+            true);
 
     @Test
     public void testTimeout() {

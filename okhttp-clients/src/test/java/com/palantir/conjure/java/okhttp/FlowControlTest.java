@@ -68,7 +68,8 @@ public final class FlowControlTest {
                     .setNameFormat("listener-reviver")
                     .build()),
             new DefaultTaggedMetricRegistry(),
-            FlowControlTest.class);
+            FlowControlTest.class,
+            true);
 
     @BeforeClass
     public static void beforeClass() {
