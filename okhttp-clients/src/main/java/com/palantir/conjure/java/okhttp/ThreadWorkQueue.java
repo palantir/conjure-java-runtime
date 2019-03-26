@@ -36,8 +36,7 @@ import javax.annotation.concurrent.NotThreadSafe;
  */
 @NotThreadSafe
 final class ThreadWorkQueue<T> {
-    private final Set<Long> activeQueuedThreads = new LinkedHashSet<>();
-    private final Map<Long, Queue<T>> queuedRequests = new HashMap<>();
+    private final Map<Long, Queue<T>> queuedRequests = new LinkedHashMap<>();
 
     boolean isEmpty() {
         return activeQueuedThreads.isEmpty();
@@ -45,27 +44,21 @@ final class ThreadWorkQueue<T> {
 
     void add(T element) {
         long threadId = Thread.currentThread().getId();
-        if (!activeQueuedThreads.contains(threadId)) {
-            activeQueuedThreads.add(threadId);
-        }
         queue(threadId).add(element);
     }
 
     T remove() {
-        long id = nextThread();
-        Queue<T> workQueue = queuedRequests.get(id);
-        T result = workQueue.remove();
-        if (workQueue.isEmpty()) {
-            queuedRequests.remove(id);
-        } else {
-            activeQueuedThreads.add(id);
+        Map.Entry<Long, Queue<T>> workQueue = queuedRequests.get(id);
+        T result = workQueue.getValue().remove();
+        if (!workQueue.getValue().isEmpty()) {
+            queuedRequests.put(workQueue.getKey(), workQueue.getValue());
         }
         return result;
     }
 
-    private long nextThread() {
-        Iterator<Long> iterator = activeQueuedThreads.iterator();
-        long result = iterator.next();
+    private Map.Entry<Long, Queue<T>> nextTask() {
+        Iterator<Map.Entry<Long, Queue<T>>> iterator = queuedRequests.entrySet().iterator();
+        Map.Entry<Long, Queue<T>> result = iterator.next();
         iterator.remove();
         return result;
     }
