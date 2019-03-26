@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -26,12 +25,14 @@ import com.google.common.collect.Sets;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.api.OpenSpan;
+import com.palantir.tracing.api.SpanType;
 import com.palantir.tracing.api.TraceHttpHeaders;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -54,18 +55,25 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
-    public void testClientIsInstrumentedWithTracer() throws InterruptedException, IOException {
+    public void testClientIsInstrumentedWithTracer() throws InterruptedException {
         server.enqueue(new MockResponse().setBody("\"server\""));
         OpenSpan parentTrace = Tracer.startSpan("");
 
+        AtomicInteger called = new AtomicInteger();
         Tracer.subscribe(TracerTest.class.getName(), span -> {
-            assertThat(span.getOperation(), either(is("acquireLimiter")).or(is("GET /{param}")));
+            if (span.type().equals(SpanType.CLIENT_OUTGOING)) {
+                assertThat(span.getOperation(), is("GET /{param}"));
+            } else {
+                assertThat(span.getOperation(), is("acquireLimiter"));
+            }
+            called.getAndIncrement();
         });
 
         String traceId = Tracer.getTraceId();
         service.param("somevalue");
 
         Tracer.unsubscribe(TracerTest.class.getName());
+        assertThat(called.intValue(), is(2));
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));
