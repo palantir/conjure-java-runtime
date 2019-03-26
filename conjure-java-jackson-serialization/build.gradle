@@ -8,8 +8,6 @@ dependencies {
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor"
 
-    implementation "org.slf4j:slf4j-api"
-
     testCompile "junit:junit"
     testCompile "org.assertj:assertj-core"
 }
