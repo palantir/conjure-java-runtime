@@ -61,10 +61,14 @@ public final class OkHttpClients {
                                     + "which requires debugging.",
                             uncaughtException))
             .setNameFormat("remoting-okhttp-dispatcher-%d")
+            // The Dispatcher must *not* use daemon threads otherwise it would become impossible to make
+            // outgoing network requests in a shutdown hook.
+            .setDaemon(false)
             .build();
     /**
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
-     * Same as OkHttp's default, but with a logging uncaught exception handler.
+     * Same as OkHttp's default, but with a logging uncaught exception handler. In a cachedThreadPool, threads that
+     * have not been used for sixty seconds are terminated, so this won't block shutdown indefinitely.
      */
     private static final ExecutorService executionExecutor =
             Tracers.wrap(Executors.newCachedThreadPool(executionThreads));
@@ -103,7 +107,7 @@ public final class OkHttpClients {
      */
     private static final ScheduledExecutorService limitReviver = Tracers.wrap(
             Executors.newSingleThreadScheduledExecutor(
-                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", false)));
+                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", true)));
 
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
@@ -111,10 +115,10 @@ public final class OkHttpClients {
      * <p>
      * Note: In contrast to the {@link java.util.concurrent.ThreadPoolExecutor} used by OkHttp's {@link
      * #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
-     * Javadoc.
+     * Javadoc. Since this executor will never hit zero threads, it must use daemon threads.
      */
     private static final ScheduledExecutorService schedulingExecutor = Tracers.wrap(Executors.newScheduledThreadPool(
-            NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", false)));
+            NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true)));
 
     private OkHttpClients() {}
 
