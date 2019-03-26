@@ -17,12 +17,10 @@
 package com.palantir.conjure.java.okhttp;
 
 import java.util.ArrayDeque;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
