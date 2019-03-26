@@ -36,12 +36,10 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
-import java.util.Set;
 import org.junit.Test;
 
 public final class ObjectMappersTest {
@@ -106,20 +104,6 @@ public final class ObjectMappersTest {
     }
 
     @Test
-    public void testListWithNullValues() {
-        assertThatThrownBy(() -> MAPPER.readValue("[1,2,null]", new TypeReference<List<Integer>>() {}))
-                .isInstanceOf(AssertionError.class)
-                .hasMessage("Null values are not allowed by Conjure");
-    }
-
-    @Test
-    public void testSetWithNullValues() {
-        assertThatThrownBy(() -> MAPPER.readValue("[1,2,null]", new TypeReference<Set<Integer>>() {}))
-                .isInstanceOf(AssertionError.class)
-                .hasMessage("Null values are not allowed by Conjure");
-    }
-
-    @Test
     public void testMapWithNullValues() throws IOException {
         // This is potentially a bug, see conjure-java#291
         assertThat(MAPPER.<Map<String, String>>readValue(
@@ -132,15 +116,6 @@ public final class ObjectMappersTest {
     public void testMapWithNullKeys() {
         assertThatThrownBy(() -> MAPPER.readValue("{null: \"test\"}", new TypeReference<Map<String, String>>() {}))
                 .isInstanceOf(JsonParseException.class);
-    }
-
-    @Test
-    public void testMapWithDuplicateKeys() {
-        assertThatThrownBy(() -> MAPPER.readValue("{\"test\":\"foo\",\"test\":\"bar\"}",
-                new TypeReference<Map<String, String>>() {}))
-                .isInstanceOf(AssertionError.class)
-                .hasMessage("Duplicate values for the same key are not allowed by Conjure. "
-                        + "Key 'test' values ['bar', 'foo']");
     }
 
     @Test
