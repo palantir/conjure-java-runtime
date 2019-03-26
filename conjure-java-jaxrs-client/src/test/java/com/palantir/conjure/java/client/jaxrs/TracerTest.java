@@ -16,26 +16,33 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.api.OpenSpan;
+import com.palantir.tracing.api.Span;
 import com.palantir.tracing.api.SpanType;
 import com.palantir.tracing.api.TraceHttpHeaders;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.assertj.core.api.Assertions;
+import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -58,21 +65,17 @@ public final class TracerTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\""));
         OpenSpan parentTrace = Tracer.startSpan("");
 
-        AtomicInteger called = new AtomicInteger();
-        Tracer.subscribe(TracerTest.class.getName(), span -> {
-            if (span.type().equals(SpanType.CLIENT_OUTGOING)) {
-                assertThat(span.getOperation(), is("GET /{param}"));
-            } else {
-                assertThat(span.getOperation(), is("acquireLimiter"));
-            }
-            called.getAndIncrement();
-        });
+        List<Map.Entry<SpanType, String>> observedSpans = Lists.newArrayList();
+        Tracer.subscribe(TracerTest.class.getName(),
+                span -> observedSpans.add(Maps.immutableEntry(span.type(), span.getOperation())));
 
         String traceId = Tracer.getTraceId();
         service.param("somevalue");
 
         Tracer.unsubscribe(TracerTest.class.getName());
-        assertThat(called.intValue(), is(2));
+        assertThat(observedSpans, contains(
+                Maps.immutableEntry(SpanType.LOCAL, "acquireLimiter"),
+                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "GET /{param}")));
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));
