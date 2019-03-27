@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.okhttp;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -38,6 +39,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
@@ -105,9 +107,9 @@ public final class OkHttpClients {
     /**
      * The {@link ScheduledExecutorService} used for recovering leaked limits.
      */
-    private static final ScheduledExecutorService limitReviver = Tracers.wrap(
+    private static final Supplier<ScheduledExecutorService> limitReviver = Suppliers.memoize(() -> Tracers.wrap(
             Executors.newSingleThreadScheduledExecutor(
-                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", true)));
+                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", true))));
 
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
@@ -117,8 +119,9 @@ public final class OkHttpClients {
      * #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
      * Javadoc. Since this executor will never hit zero threads, it must use daemon threads.
      */
-    private static final ScheduledExecutorService schedulingExecutor = Tracers.wrap(Executors.newScheduledThreadPool(
-            NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true)));
+    private static final Supplier<ScheduledExecutorService> schedulingExecutor = Suppliers.memoize(() ->
+            Tracers.wrap(Executors.newScheduledThreadPool(NUM_SCHEDULING_THREADS,
+                    Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true))));
 
     private OkHttpClients() {}
 
@@ -144,7 +147,7 @@ public final class OkHttpClients {
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
         boolean enableClientQoS = config.clientQoS().equals(ClientConfiguration.ClientQoS.ENABLED);
-        ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(limitReviver, registry, serviceClass,
+        ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(limitReviver.get(), registry, serviceClass,
                 enableClientQoS);
         OkHttpClient.Builder client = new OkHttpClient.Builder();
 
@@ -202,7 +205,7 @@ public final class OkHttpClients {
                         config.maxNumRetries(), config.backoffSlotSize(), ThreadLocalRandom.current()),
                 config.nodeSelectionStrategy(),
                 urlSelector,
-                schedulingExecutor,
+                schedulingExecutor.get(),
                 executionExecutor,
                 concurrencyLimiters);
     }
