@@ -59,7 +59,7 @@ public final class TracerTest extends TestBase {
         OpenSpan parentTrace = Tracer.startSpan("");
 
         Tracer.subscribe(TracerTest.class.getName(), span -> {
-            assertThat(span.getOperation(), either(is("OkHttp: acquire-limiter")).or(is("OkHttp: GET /{param}")));
+            assertThat(span.getOperation(), either(is("OkHttp: enqueue")).or(is("OkHttp: GET /{param}")));
         });
 
         String traceId = Tracer.getTraceId();
