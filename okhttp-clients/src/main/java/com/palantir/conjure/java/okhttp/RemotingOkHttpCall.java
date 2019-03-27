@@ -273,10 +273,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
         return new QosException.Visitor<Void>() {
             @Override
             public Void visit(QosException.Throttle exception) {
-                if (!retryStrategy.shouldRetry()) {
-                    throw exception;
-                }
-
                 Optional<Duration> nonAdvertizedBackoff = retryStrategy.nextBackoff();
                 if (!nonAdvertizedBackoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
@@ -332,10 +328,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public Void visit(QosException.Unavailable exception) {
-                if (!retryStrategy.shouldRetry()) {
-                    throw exception;
-                }
-
                 Optional<Duration> backoff = retryStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
