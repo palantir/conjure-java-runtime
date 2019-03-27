@@ -37,7 +37,7 @@ final class ThreadWorkQueue<T> {
     private final Map<Long, Queue<T>> queuedRequests = new LinkedHashMap<>();
 
     boolean isEmpty() {
-        return activeQueuedThreads.isEmpty();
+        return queuedRequests.isEmpty();
     }
 
     void add(T element) {
