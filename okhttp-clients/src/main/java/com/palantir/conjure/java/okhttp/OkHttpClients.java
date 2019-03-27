@@ -73,7 +73,7 @@ public final class OkHttpClients {
      * have not been used for sixty seconds are terminated, so this won't block shutdown indefinitely.
      */
     private static final ExecutorService executionExecutor =
-            Tracers.wrap("dispatcher", Executors.newCachedThreadPool(executionThreads));
+            Tracers.wrap("OkHttp: dispatcher", Executors.newCachedThreadPool(executionThreads));
 
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
