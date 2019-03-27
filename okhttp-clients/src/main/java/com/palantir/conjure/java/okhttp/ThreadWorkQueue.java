@@ -46,7 +46,7 @@ final class ThreadWorkQueue<T> {
     }
 
     T remove() {
-        Map.Entry<Long, Queue<T>> workQueue = queuedRequests.get(id);
+        Map.Entry<Long, Queue<T>> workQueue = nextTask();
         T result = workQueue.getValue().remove();
         if (!workQueue.getValue().isEmpty()) {
             queuedRequests.put(workQueue.getKey(), workQueue.getValue());
