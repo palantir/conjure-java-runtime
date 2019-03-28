@@ -63,14 +63,21 @@ public final class OkHttpClients {
                                     + "which requires debugging.",
                             uncaughtException))
             .setNameFormat("remoting-okhttp-dispatcher-%d")
-            // The Dispatcher must *not* use daemon threads otherwise it would become impossible to make
-            // outgoing network requests in a shutdown hook.
-            .setDaemon(false)
+            // This diverges from the OkHttp default value, allowing the JVM to cleanly exit
+            // while idle dispatcher threads are still alive.
+            .setDaemon(true)
             .build();
     /**
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
-     * Same as OkHttp's default, but with a logging uncaught exception handler. In a cachedThreadPool, threads that
-     * have not been used for sixty seconds are terminated, so this won't block shutdown indefinitely.
+     * Similar to OkHttp's default, but with two modifications:
+     * <ol>
+     *     <li>A logging uncaught exception handler</li>
+     *     <li>
+     *         Daemon threads: active request will not block JVM shutdown <b>unless</b> another non-daemon
+     *         thread blocks waiting for the result. Most of our usage falls into this category. This allows
+     *         JVM shutdown to occur cleanly without waiting a full minute after the last request completes.
+     *     </li>
+     * </ol>
      */
     private static final ExecutorService executionExecutor =
             Tracers.wrap(Executors.newCachedThreadPool(executionThreads));
