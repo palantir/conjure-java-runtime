@@ -151,7 +151,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     @Override
     public void enqueue(Callback callback) {
-        DeferredTracer tracer = new DeferredTracer();
+        DeferredTracer tracer = new DeferredTracer("OkHttp: enqueue");
         ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
         request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
         Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {

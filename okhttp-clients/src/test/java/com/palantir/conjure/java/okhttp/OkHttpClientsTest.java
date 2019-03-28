@@ -33,6 +33,7 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfigurations;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
@@ -221,8 +222,13 @@ public final class OkHttpClientsTest extends TestBase {
 
         OkHttpClient client = createRetryingClient(1);
         Call call = client.newCall(new Request.Builder().url(url).build());
-        assertThatThrownBy(call::execute).isInstanceOf(SafeIoException.class)
-                .hasMessageContaining("Error 400. (Failed to parse response body as SerializableError.)");
+        assertThatLoggableExceptionThrownBy(call::execute)
+                .isInstanceOf(SafeIoException.class)
+                .hasLogMessage("Failed to parse response body as SerializableError")
+                .hasExactlyArgs(
+                        SafeArg.of("code", 400),
+                        UnsafeArg.of("body", responseJson),
+                        SafeArg.of("contentType", "application/json"));
     }
 
     @Test
@@ -234,7 +240,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Failed to complete the request due to QosException.Unavailable")
-                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
+                .hasExactlyArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));
@@ -243,7 +249,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Failed to complete the request due to QosException.Unavailable")
-                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
+                .hasExactlyArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         assertThat(server.getRequestCount()).isEqualTo(4 /* original plus two retries */);
     }
@@ -268,7 +274,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Failed to complete the request due to QosException.Throttle")
-                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
+                .hasExactlyArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         server.enqueue(new MockResponse().setResponseCode(429));
         server.enqueue(new MockResponse().setResponseCode(429));
@@ -277,7 +283,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Failed to complete the request due to QosException.Throttle")
-                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
+                .hasExactlyArgs(UnsafeArg.of("requestUrl", url + "/"));
 
         assertThat(server.getRequestCount()).isEqualTo(4 /* original plus two retries */);
     }
@@ -291,7 +297,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Failed to complete the request due to QosException.Throttle")
-                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
+                .hasExactlyArgs(UnsafeArg.of("requestUrl", url + "/"));
         assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
 
@@ -328,7 +334,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Failed to complete the request due to QosException.Throttle")
-                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
+                .hasExactlyArgs(UnsafeArg.of("requestUrl", url + "/"));
     }
 
     @Test
@@ -384,7 +390,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Exceeded the maximum number of allowed redirects")
-                .hasArgs(UnsafeArg.of("requestUrl", url + "/"));
+                .hasExactlyArgs(UnsafeArg.of("requestUrl", url + "/"));
         assertThat(server.getRequestCount()).isEqualTo(21);
     }
 
@@ -460,7 +466,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Failed to complete the request due to an IOException")
-                .hasArgs(UnsafeArg.of("requestUrl", url2 + "/foo?bar"));
+                .hasExactlyArgs(UnsafeArg.of("requestUrl", url2 + "/foo?bar"));
 
         assertThat(server3.getRequestCount()).isEqualTo(0);
     }
