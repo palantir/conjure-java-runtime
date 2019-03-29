@@ -226,6 +226,7 @@ public final class OkHttpClientsTest extends TestBase {
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Failed to parse response body as SerializableError")
                 .hasExactlyArgs(
+                        SafeArg.of("legacyMessage", "Error 400. (Failed to parse response body as SerializableError.)"),
                         SafeArg.of("code", 400),
                         UnsafeArg.of("body", responseJson),
                         SafeArg.of("contentType", "application/json"));
