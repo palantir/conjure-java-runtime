@@ -19,6 +19,7 @@ package com.palantir.conjure.java.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
 import java.util.Optional;
 import javax.annotation.CheckForNull;
@@ -49,10 +50,12 @@ public final class IoExceptionResponseHandlerTest {
     @Test
     public void extractsIoExceptionForAllErrorCodes() {
         for (int code : ImmutableList.of(300, 400, 404, 500)) {
-            IOException exception = decode(MediaType.APPLICATION_JSON, code, "body").get();
-            assertThat(exception.getMessage()).isEqualTo(
-                    "Failed to parse response body as SerializableError: "
-                            + "{code=" + code + ", body=body, contentType=application/json}");
+            SafeIoException exception = (SafeIoException) decode(MediaType.APPLICATION_JSON, code, "body").get();
+            assertThat(exception.getMessage()).contains(
+                    "Error " + code + ". (Failed to parse response body as SerializableError.), "
+                            + "code=" + code + ", body=body, contentType=application/json}");
+            assertThat(exception.getLogMessage())
+                    .isEqualTo("Failed to parse response body as SerializableError");
         }
     }
 
