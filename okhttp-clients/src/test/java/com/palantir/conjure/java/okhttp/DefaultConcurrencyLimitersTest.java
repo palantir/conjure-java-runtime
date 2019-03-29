@@ -19,12 +19,18 @@ package com.palantir.conjure.java.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.netflix.concurrency.limits.Limit;
+import com.netflix.concurrency.limits.Limiter;
+import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 public final class DefaultConcurrencyLimitersTest {
@@ -49,6 +55,27 @@ public final class DefaultConcurrencyLimitersTest {
         Instant end = Instant.now();
         exhauster.interrupt();
         assertThat(Duration.between(start, end)).isGreaterThanOrEqualTo(TIMEOUT);
+    }
+
+    @Test
+    public void testAimdLimiterDoesNotApplyTimeBasedLimits() {
+        AIMDLimit limit = AIMDLimit.newBuilder().timeout(Long.MAX_VALUE, TimeUnit.NANOSECONDS).build();
+        int initialLimit = limit.getLimit();
+        limit.onSample(0, Long.MAX_VALUE, 0, false);
+        int resultLimit = limit.getLimit();
+        assertThat(resultLimit).isEqualTo(initialLimit);
+    }
+
+    @Test
+    public void testConcurrencyLimitersLimitDoesNotApplyTimeBasedLimits() {
+        Limit limit = limiters.newLimit();
+
+        int initialLimit = limit.getLimit();
+        for (int i = 0; i < 15; i++) {
+            limit.onSample(TimeUnit.SECONDS.toNanos(i), TimeUnit.SECONDS.toNanos(300), 0, false);
+            int resultLimit = limit.getLimit();
+            assertThat(resultLimit).isEqualTo(initialLimit);
+        }
     }
 
     private Thread exhaust() {

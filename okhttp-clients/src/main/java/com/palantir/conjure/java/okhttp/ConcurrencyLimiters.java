@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import com.netflix.concurrency.limits.Limit;
 import com.netflix.concurrency.limits.Limiter;
 import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
@@ -98,13 +99,19 @@ final class ConcurrencyLimiters {
         return limiters.computeIfAbsent(limiterKey, this::newLimiter);
     }
 
+    @VisibleForTesting
+    Limit newLimit() {
+        return new ConjureWindowedLimit(AIMDLimit.newBuilder()
+                .timeout(Long.MAX_VALUE, TimeUnit.NANOSECONDS)
+                .build());
+    }
+
+
     private ConcurrencyLimiter newLimiter(Key limiterKey) {
         if (!useLimiter) {
             return NoOpConcurrencyLimiter.INSTANCE;
         }
-        Supplier<Limiter<Void>> limiter = () -> SimpleLimiter.newBuilder()
-                .limit(new ConjureWindowedLimit(AIMDLimit.newBuilder().build()))
-                .build();
+        Supplier<Limiter<Void>> limiter = () -> SimpleLimiter.newBuilder().limit(newLimit()).build();
         return new DefaultConcurrencyLimiter(limiterKey, limiter);
     }
 
