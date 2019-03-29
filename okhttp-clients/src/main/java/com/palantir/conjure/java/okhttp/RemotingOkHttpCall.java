@@ -28,6 +28,7 @@ import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
+import com.palantir.tracing.AsyncTracer;
 import com.palantir.tracing.DeferredTracer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -151,7 +152,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     @Override
     public void enqueue(Callback callback) {
-        DeferredTracer tracer = new DeferredTracer("OkHttp: enqueue");
+        AsyncTracer tracer = new AsyncTracer("OkHttp: execute");
         ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
         request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
         Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {

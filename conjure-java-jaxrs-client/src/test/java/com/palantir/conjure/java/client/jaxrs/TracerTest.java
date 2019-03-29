@@ -70,9 +70,10 @@ public final class TracerTest extends TestBase {
 
         Tracer.unsubscribe(TracerTest.class.getName());
         assertThat(observedSpans, contains(
-                Maps.immutableEntry(SpanType.LOCAL, "acquireLimiter-enqueue"),
-                Maps.immutableEntry(SpanType.LOCAL, "acquireLimiter-run"),
-                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "GET /{param}")));
+                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: execute-enqueue"),
+                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: execute-run"),
+                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: GET /{param}"),
+                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: dispatcher")));
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));

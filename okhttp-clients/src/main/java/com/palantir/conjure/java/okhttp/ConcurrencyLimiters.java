@@ -188,8 +188,7 @@ final class ConcurrencyLimiters {
         @Override
         public synchronized ListenableFuture<Limiter.Listener> acquire() {
             SettableFuture<Limiter.Listener> future = SettableFuture.create();
-            AsyncTracer tracer = new AsyncTracer("acquireLimiter");
-            instrumentAcquire(future, tracer);
+            addSlowAcquireMarker(future);
             waitingRequests.add(future);
             processQueue();
             return future;
@@ -231,7 +230,7 @@ final class ConcurrencyLimiters {
             processQueue();
         }
 
-        private void instrumentAcquire(ListenableFuture<Limiter.Listener> future, AsyncTracer tracer) {
+        private void addSlowAcquireMarker(ListenableFuture<Limiter.Listener> future) {
             long start = System.nanoTime();
             Futures.addCallback(future, new FutureCallback<Limiter.Listener>() {
                 @Override
@@ -244,9 +243,6 @@ final class ConcurrencyLimiters {
                     if (TimeUnit.NANOSECONDS.toMillis(durationNanos) > 1) {
                         slowAcquire.update(durationNanos, TimeUnit.NANOSECONDS);
                     }
-
-                    // complete enqueue trace
-                    tracer.withTrace(() -> null);
                 }
 
                 @Override
