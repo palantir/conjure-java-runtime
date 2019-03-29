@@ -20,7 +20,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.netflix.concurrency.limits.Limiter;
-import com.netflix.concurrency.limits.limit.VegasLimit;
+import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.remoting3.tracing.okhttp3.OkhttpTraceInterceptor;
@@ -90,7 +90,9 @@ class ConcurrencyLimiters {
 
     private Limiter<Void> newLimiter() {
         Limiter<Void> limiter = new InstrumentedLimiter(SimpleLimiter.newBuilder()
-                .limit(new RemotingWindowedLimit(VegasLimit.newDefault()))
+                .limit(new RemotingWindowedLimit(AIMDLimit.newBuilder()
+                        .timeout(Long.MAX_VALUE, TimeUnit.NANOSECONDS)
+                        .build()))
                 .build(), slowAcquire);
         return RemotingBlockingLimiter.wrap(limiter, timeout);
     }

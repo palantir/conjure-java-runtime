@@ -115,7 +115,7 @@
             ]
         },
         "com.netflix.concurrency-limits:concurrency-limits-core": {
-            "locked": "0.1.1",
+            "locked": "0.1.9",
             "transitive": [
                 "com.palantir.remoting3:okhttp-clients"
             ]
@@ -468,7 +468,7 @@
             ]
         },
         "com.netflix.concurrency-limits:concurrency-limits-core": {
-            "locked": "0.1.1",
+            "locked": "0.1.9",
             "transitive": [
                 "com.palantir.remoting3:okhttp-clients"
             ]
