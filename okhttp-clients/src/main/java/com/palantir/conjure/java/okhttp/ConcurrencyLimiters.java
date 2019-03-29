@@ -29,6 +29,7 @@ import com.netflix.concurrency.limits.Limiter;
 import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.tracing.AsyncTracer;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -187,7 +188,8 @@ final class ConcurrencyLimiters {
         @Override
         public synchronized ListenableFuture<Limiter.Listener> acquire() {
             SettableFuture<Limiter.Listener> future = SettableFuture.create();
-            addSlowAcquireMarker(future);
+            AsyncTracer tracer = new AsyncTracer("acquireLimiter");
+            instrumentAcquire(future, tracer);
             waitingRequests.add(future);
             processQueue();
             return future;
@@ -229,7 +231,7 @@ final class ConcurrencyLimiters {
             processQueue();
         }
 
-        private void addSlowAcquireMarker(ListenableFuture<Limiter.Listener> future) {
+        private void instrumentAcquire(ListenableFuture<Limiter.Listener> future, AsyncTracer tracer) {
             long start = System.nanoTime();
             Futures.addCallback(future, new FutureCallback<Limiter.Listener>() {
                 @Override
@@ -242,6 +244,9 @@ final class ConcurrencyLimiters {
                     if (TimeUnit.NANOSECONDS.toMillis(durationNanos) > 1) {
                         slowAcquire.update(durationNanos, TimeUnit.NANOSECONDS);
                     }
+
+                    // complete enqueue trace
+                    tracer.withTrace(() -> null);
                 }
 
                 @Override

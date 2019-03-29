@@ -16,18 +16,22 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-import static org.hamcrest.Matchers.either;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.api.OpenSpan;
+import com.palantir.tracing.api.SpanType;
 import com.palantir.tracing.api.TraceHttpHeaders;
-import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -54,18 +58,21 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
-    public void testClientIsInstrumentedWithTracer() throws InterruptedException, IOException {
+    public void testClientIsInstrumentedWithTracer() throws InterruptedException {
         server.enqueue(new MockResponse().setBody("\"server\""));
         OpenSpan parentTrace = Tracer.startSpan("");
-
-        Tracer.subscribe(TracerTest.class.getName(), span -> {
-            assertThat(span.getOperation(), either(is("OkHttp: enqueue")).or(is("OkHttp: GET /{param}")));
-        });
+        List<Map.Entry<SpanType, String>> observedSpans = Lists.newArrayList();
+        Tracer.subscribe(TracerTest.class.getName(),
+                span -> observedSpans.add(Maps.immutableEntry(span.type(), span.getOperation())));
 
         String traceId = Tracer.getTraceId();
         service.param("somevalue");
 
         Tracer.unsubscribe(TracerTest.class.getName());
+        assertThat(observedSpans, contains(
+                Maps.immutableEntry(SpanType.LOCAL, "acquireLimiter-enqueue"),
+                Maps.immutableEntry(SpanType.LOCAL, "acquireLimiter-run"),
+                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "GET /{param}")));
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));
