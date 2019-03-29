@@ -29,7 +29,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tracing.AsyncTracer;
-import com.palantir.tracing.DeferredTracer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.time.Duration;

@@ -29,7 +29,6 @@ import com.netflix.concurrency.limits.Limiter;
 import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.tracing.AsyncTracer;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
