@@ -20,6 +20,7 @@ import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.tracing.AsyncTracer;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -92,6 +93,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
         return request.newBuilder()
                 .url(getNewRequestUrl(request.url()))
                 .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create())
+                .tag(AsyncTracer.class, new AsyncTracer("OkHttp: execute"))
                 .build();
     }
 
