@@ -157,6 +157,7 @@ public final class OkHttpClients {
         ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(limitReviver.get(), registry, serviceClass,
                 enableClientQoS);
         OkHttpClient.Builder client = new OkHttpClient.Builder();
+        client.addInterceptor(new DispatcherTraceTerminatingInterceptor());
 
         // Routing
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(config.uris(), randomizeUrlOrder,
