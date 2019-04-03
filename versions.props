@@ -11,9 +11,8 @@ com.palantir.conjure.java:conjure-lib = 3.1.0
 com.palantir.conjure.java.api:* = 2.2.0
 com.palantir.conjure.verification:* = 0.16.6
 com.palantir.safe-logging:* = 1.7.0
-com.palantir.tracing:* = 2.10.0
+com.palantir.tracing:* = 2.10.1
 com.palantir.tritium:tritium-registry = 0.11.2
-com.squareup.okhttp3:* = 3.13.1
 io.dropwizard:dropwizard-* = 1.3.7
 io.reactivex.rxjava2:rxjava = 2.2.8
 javax.ws.rs:javax.ws.rs-api = 2.1
@@ -29,6 +28,9 @@ org.mockito:mockito-core = 2.25.1
 org.slf4j:slf4j-api = 1.7.12
 
 # dependency-upgrader:OFF
+
+# Temporarily pausing until internal libraries stop relying on UnrepeatableRequestBody
+com.squareup.okhttp3:* = 3.13.1
 
 # We cannot upgrade retrofit2 to 2.5.0 because of https://github.com/palantir/conjure-java-runtime/issues/930
 com.squareup.retrofit2:* = 2.4.0
