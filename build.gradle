@@ -42,7 +42,7 @@ allprojects {
 
             rootConfiguration 'com.squareup.okhttp3:okhttp', {
                 version { strictly '[3, 3.14.0[' }
-                because 'okhttp 3.14.0 was found to exhibit some weird behaviour, so blocking the upgrade for now'
+                because 'okhttp 3.14.0 removed UnrepeatableRequestBody which is relied on by an internal library'
             }
         }
     }
