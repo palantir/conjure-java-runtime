@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.okhttp;
+package feign;
 
 import com.palantir.conjure.java.QosExceptionResponseMapper;
-import com.palantir.conjure.java.api.errors.QosException;
+import feign.codec.ErrorDecoder;
 import java.util.Optional;
-import okhttp3.Response;
+import java.util.function.Function;
 
-/**
- * A {@link ResponseHandler} that turns QOS-related HTTP responses into {@link QosException}s.
- */
-enum QosExceptionResponseHandler implements ResponseHandler<QosException> {
-    INSTANCE;
-
+public final class QosErrorDecoder implements ErrorDecoder {
     @Override
-    public Optional<QosException> handle(Response response) {
-        return QosExceptionResponseMapper.mapResponseCode(response.code(), response::header);
+    public Exception decode(String methodKey, Response response) {
+        Optional<Exception> exception = QosExceptionResponseMapper.mapResponseCodeHeaderStream(
+                response.status(),
+                header -> response.headers().get(header).stream()
+        ).map(Function.identity());
+        return exception.orElseGet(() -> new ErrorDecoder.Default().decode(methodKey, response));
     }
 }

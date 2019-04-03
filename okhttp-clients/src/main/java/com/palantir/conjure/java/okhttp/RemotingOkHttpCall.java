@@ -69,6 +69,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
     private final ConcurrencyLimiters.ConcurrencyLimiter limiter;
+    private final ClientConfiguration.PropagateQoS propagateQoS;
 
     private final int maxNumRelocations;
 
@@ -80,7 +81,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
             ScheduledExecutorService schedulingExecutor,
             ExecutorService executionExecutor,
             ConcurrencyLimiters.ConcurrencyLimiter limiter,
-            int maxNumRelocations) {
+            int maxNumRelocations,
+            ClientConfiguration.PropagateQoS propagateQoS) {
         super(delegate);
         this.backoffStrategy = backoffStrategy;
         this.urls = urls;
@@ -89,6 +91,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         this.executionExecutor = executionExecutor;
         this.limiter = limiter;
         this.maxNumRelocations = maxNumRelocations;
+        this.propagateQoS = propagateQoS;
     }
 
     /**
@@ -236,7 +239,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 // Handle to handle QoS situations: retry, failover, etc.
                 Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
                 if (qosError.isPresent()) {
-                    qosError.get().accept(createQosVisitor(callback, call));
+                    qosError.get().accept(createQosVisitor(callback, call, response));
                     return;
                 }
 
@@ -269,10 +272,19 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 TimeUnit.MILLISECONDS);
     }
 
-    private QosException.Visitor<Void> createQosVisitor(Callback callback, Call call) {
+    private QosException.Visitor<Void> createQosVisitor(Callback callback, Call call, Response response) {
         return new QosException.Visitor<Void>() {
             @Override
             public Void visit(QosException.Throttle exception) {
+                if (propagateQoS.equals(ClientConfiguration.PropagateQoS.ENABLED)) {
+                    try {
+                        callback.onResponse(call, response);
+                    } catch (IOException e) {
+                        callback.onFailure(call, e);
+                    }
+                    return null;
+                }
+
                 Optional<Duration> nonAdvertizedBackoff = backoffStrategy.nextBackoff();
                 if (!nonAdvertizedBackoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
@@ -328,6 +340,15 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public Void visit(QosException.Unavailable exception) {
+                if (propagateQoS.equals(ClientConfiguration.PropagateQoS.ENABLED)) {
+                    try {
+                        callback.onResponse(call, response);
+                    } catch (IOException e) {
+                        callback.onFailure(call, e);
+                    }
+                    return null;
+                }
+
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
@@ -367,6 +388,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
     @Override
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(), backoffStrategy, urls, client, schedulingExecutor,
-                executionExecutor, limiter, maxNumRelocations);
+                executionExecutor, limiter, maxNumRelocations, propagateQoS);
     }
 }

@@ -215,7 +215,8 @@ public final class OkHttpClients {
                 urlSelector,
                 schedulingExecutor.get(),
                 executionExecutor,
-                concurrencyLimiters);
+                concurrencyLimiters,
+                config.propagateQoS());
     }
 
     /**

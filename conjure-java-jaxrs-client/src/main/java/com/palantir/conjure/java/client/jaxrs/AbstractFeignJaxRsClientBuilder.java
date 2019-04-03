@@ -39,6 +39,7 @@ import feign.ConjureTextDelegateEncoder;
 import feign.Contract;
 import feign.Feign;
 import feign.Logger;
+import feign.QosErrorDecoder;
 import feign.Request;
 import feign.Retryer;
 import feign.codec.Decoder;
@@ -97,6 +98,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 cborObjectMapper,
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
+                .errorDecoder(new QosErrorDecoder())
                 .client(new OkHttpClient(okHttpClient))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)

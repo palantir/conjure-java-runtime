@@ -105,6 +105,9 @@ public interface ClientConfiguration {
     /** Indicates whether client-side sympathetic QoS should be enabled. */
     ClientQoS clientQoS();
 
+    /** Indicates whether QosExceptions (other than RetryOther) should be propagated. */
+    PropagateQoS propagateQoS();
+
     @Value.Check
     default void check() {
         if (meshProxy().isPresent()) {
@@ -133,5 +136,15 @@ public interface ClientConfiguration {
          * this option.
          */
         DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS
+    }
+
+    enum PropagateQoS {
+        /** Default. */
+        DISABLED,
+        /**
+         * QoS exceptions other than RetryOther will not cause the client to retry. Instead, they will be propagated
+         * to and handled by the caller.
+         */
+        ENABLED
     }
 }
