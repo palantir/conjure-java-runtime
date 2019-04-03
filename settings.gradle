@@ -14,5 +14,3 @@ include 'keystores'
 include 'okhttp-clients'
 include 'pkcs1-reader-bouncy-castle'
 include 'pkcs1-reader-sun'
-
-enableFeaturePreview('GRADLE_METADATA')
