@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import okhttp3.Request;
 import retrofit2.Call;
@@ -82,7 +83,9 @@ final class QosExceptionThrowingCallAdapterFactory extends CallAdapter.Factory {
             Map<String, List<String>> headers = response.headers().toMultimap();
             Optional<QosException> exception = QosExceptionResponseMapper.mapResponseCodeHeaderStream(
                     response.code(),
-                    header -> headers.get(header).stream());
+                    header -> Optional.ofNullable(headers.get(header))
+                            .map(List::stream)
+                            .orElseGet(Stream::empty));
             if (exception.isPresent()) {
                 throw exception.get();
             }

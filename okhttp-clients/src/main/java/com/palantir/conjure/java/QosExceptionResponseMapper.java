@@ -36,8 +36,7 @@ public final class QosExceptionResponseMapper {
     }
 
     public static Optional<QosException> mapResponseCodeHeaderStream(
-            int code, Function<String,
-            Stream<String>> headerFn) {
+            int code, Function<String, Stream<String>> headerFn) {
         return mapResponseCode(code, header -> headerFn.apply(header).findFirst().orElse(null));
     }
 

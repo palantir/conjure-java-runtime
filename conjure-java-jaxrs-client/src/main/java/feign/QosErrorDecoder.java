@@ -18,15 +18,19 @@ package feign;
 
 import com.palantir.conjure.java.QosExceptionResponseMapper;
 import feign.codec.ErrorDecoder;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public final class QosErrorDecoder implements ErrorDecoder {
     @Override
     public Exception decode(String methodKey, Response response) {
         Optional<Exception> exception = QosExceptionResponseMapper.mapResponseCodeHeaderStream(
                 response.status(),
-                header -> response.headers().get(header).stream()
+                header -> Optional.ofNullable(response.headers().get(header))
+                        .map(Collection::stream)
+                        .orElseGet(Stream::empty)
         ).map(Function.identity());
         return exception.orElseGet(() -> new ErrorDecoder.Default().decode(methodKey, response));
     }
