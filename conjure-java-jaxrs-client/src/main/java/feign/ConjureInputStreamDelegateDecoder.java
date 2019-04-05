@@ -16,29 +16,25 @@
 
 package feign;
 
+import com.palantir.conjure.java.client.jaxrs.feignimpl.InputStreamDelegateDecoder;
 import feign.codec.Decoder;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
 
 /**
- * If the return type is InputStream, return it, otherwise delegate to provided decoder.
+ * Use {@link InputStreamDelegateDecoder}.
+ * @deprecated Use {@link InputStreamDelegateDecoder}.
  */
+@Deprecated
 public final class ConjureInputStreamDelegateDecoder implements Decoder {
     private final Decoder delegate;
 
     public ConjureInputStreamDelegateDecoder(Decoder delegate) {
-        this.delegate = delegate;
+        this.delegate = new InputStreamDelegateDecoder(delegate);
     }
 
     @Override
     public Object decode(Response response, Type type) throws IOException, FeignException {
-        if (type.equals(InputStream.class)) {
-            byte[] body = response.body() != null ? Util.toByteArray(response.body().asInputStream()) : new byte[0];
-            return new ByteArrayInputStream(body);
-        } else {
-            return delegate.decode(response, type);
-        }
+        return delegate.decode(response, type);
     }
 }

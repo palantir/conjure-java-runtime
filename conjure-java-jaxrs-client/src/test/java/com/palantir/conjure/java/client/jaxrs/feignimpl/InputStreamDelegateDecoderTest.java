@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package feign;
+package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -25,8 +25,9 @@ import static org.mockito.Mockito.when;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaTestServer;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import feign.Response;
+import feign.Util;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -38,7 +39,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public final class ConjureInputStreamDelegateDecoderTest extends TestBase {
+public final class InputStreamDelegateDecoderTest extends TestBase {
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
             "src/test/resources/test-server.yml");
@@ -50,7 +51,7 @@ public final class ConjureInputStreamDelegateDecoderTest extends TestBase {
     @Before
     public void before() {
         delegate = Mockito.mock(Decoder.class);
-        inputStreamDelegateDecoder = new ConjureInputStreamDelegateDecoder(delegate);
+        inputStreamDelegateDecoder = new InputStreamDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(

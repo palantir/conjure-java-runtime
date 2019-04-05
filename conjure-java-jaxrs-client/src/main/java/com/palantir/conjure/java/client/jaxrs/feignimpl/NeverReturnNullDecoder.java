@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
-package feign;
+package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import com.palantir.conjure.java.client.jaxrs.feignimpl.NeverReturnNullDecoder;
+import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
+import feign.FeignException;
+import feign.Response;
 import feign.codec.Decoder;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-/**
- * Use {@link NeverReturnNullDecoder}.
- * @deprecated Use {@link NeverReturnNullDecoder}.
- */
-@Deprecated
-public final class ConjureNeverReturnNullDecoder implements Decoder {
+public final class NeverReturnNullDecoder implements Decoder {
     private final Decoder delegate;
 
-    public ConjureNeverReturnNullDecoder(Decoder delegate) {
-        this.delegate = new NeverReturnNullDecoder(delegate);
+    public NeverReturnNullDecoder(Decoder delegate) {
+        this.delegate = delegate;
     }
 
     @Override
     public Object decode(Response response, Type type) throws FeignException, IOException {
-        return delegate.decode(response, type);
+        Object object = delegate.decode(response, type);
+        Preconditions.checkNotNull(object,
+                "Unexpected null body",
+                SafeArg.of("status", response.status()));
+
+        return object;
     }
 }
