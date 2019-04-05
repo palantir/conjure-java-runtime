@@ -35,7 +35,7 @@ public final class QosErrorDecoderTest {
     public void http_429_throw_qos_throttle() {
         Map<String, Collection<String>> headers = ImmutableMap.of();
         Response response = Response.create(429, "too many requests", headers, new byte[0]);
-        assertThat(new QosErrorDecoder().decode(methodKey, response))
+        assertThat(QosErrorDecoder.INSTANCE.decode(methodKey, response))
                 .isInstanceOfSatisfying(
                         QosException.Throttle.class,
                         e -> assertThat(e.getRetryAfter()).isEmpty());
@@ -47,7 +47,7 @@ public final class QosErrorDecoderTest {
                 HttpHeaders.RETRY_AFTER, ImmutableList.of("5")
         );
         Response response = Response.create(429, "too many requests", headers, new byte[0]);
-        assertThat(new QosErrorDecoder().decode(methodKey, response))
+        assertThat(QosErrorDecoder.INSTANCE.decode(methodKey, response))
                 .isInstanceOfSatisfying(
                         QosException.Throttle.class,
                         e -> assertThat(e.getRetryAfter()).contains(Duration.ofSeconds(5)));
@@ -57,7 +57,7 @@ public final class QosErrorDecoderTest {
     public void http_503_throw_qos_unavailable() {
         Map<String, Collection<String>> headers = ImmutableMap.of();
         Response response = Response.create(503, "too many requests", headers, new byte[0]);
-        assertThat(new QosErrorDecoder().decode(methodKey, response))
+        assertThat(QosErrorDecoder.INSTANCE.decode(methodKey, response))
                 .isInstanceOf(QosException.Unavailable.class);
     }
 

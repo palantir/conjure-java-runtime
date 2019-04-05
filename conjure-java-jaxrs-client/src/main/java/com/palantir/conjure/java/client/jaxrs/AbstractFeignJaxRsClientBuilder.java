@@ -98,7 +98,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 cborObjectMapper,
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
-                .errorDecoder(new QosErrorDecoder())
+                .errorDecoder(QosErrorDecoder.INSTANCE)
                 .client(new OkHttpClient(okHttpClient))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)

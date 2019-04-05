@@ -23,7 +23,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public final class QosErrorDecoder implements ErrorDecoder {
+public enum QosErrorDecoder implements ErrorDecoder {
+    INSTANCE;
+
     @Override
     public Exception decode(String methodKey, Response response) {
         Optional<Exception> exception = QosExceptionResponseMapper.mapResponseCodeHeaderStream(
