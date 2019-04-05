@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package feign;
+package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.errors.QosException;
+import feign.Response;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;

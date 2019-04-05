@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package feign;
+package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.palantir.conjure.java.QosExceptionResponseMapper;
+import feign.Response;
 import feign.codec.ErrorDecoder;
 import java.util.Collection;
 import java.util.Optional;
