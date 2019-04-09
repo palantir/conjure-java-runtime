@@ -24,8 +24,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public enum QosErrorDecoder implements ErrorDecoder {
-    INSTANCE;
+public final class QosErrorDecoder implements ErrorDecoder {
+    private final ErrorDecoder delegate;
+
+    public QosErrorDecoder(ErrorDecoder delegate) {
+        this.delegate = delegate;
+    }
 
     @Override
     public Exception decode(String methodKey, Response response) {
@@ -35,6 +39,6 @@ public enum QosErrorDecoder implements ErrorDecoder {
                         .map(Collection::stream)
                         .orElseGet(Stream::empty)
         ).map(Function.identity());
-        return exception.orElseGet(() -> new ErrorDecoder.Default().decode(methodKey, response));
+        return exception.orElseGet(() -> delegate.decode(methodKey, response));
     }
 }
