@@ -30,7 +30,7 @@ public enum NodeSelectionStrategy {
     ROUND_ROBIN,
 
     /**
-     * Try to pin to a particular node based on HEURISTIC_NODE_VALUE header otherwise round robin.
+     * Try to pin to a particular node based on NODE_PIN_VALUE header otherwise round robin.
      */
-    HEURISTIC_PIN
+    PIN_FROM_REQUEST
 }
