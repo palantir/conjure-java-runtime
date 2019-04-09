@@ -142,8 +142,19 @@ public interface ClientConfiguration {
         /** Default. */
         DISABLED,
         /**
-         * QoS exceptions other than RetryOther will not cause the client to retry. Instead, they will be propagated
-         * to and handled by the caller.
+         * Propagate QosException.Throttle and QosException.Unavailable (429/503) to the caller. Consumers should use
+         * this when proxying or dispatching requests where it is unclear how to handle these QoS responses.
+         *
+         * For example, let us imagine a proxy server that serves both interactive and long-running background requests
+         * by dispatching requests to some backend. Interactive requests should be retried relatively few times in
+         * comparison to background jobs which run for minutes our even hours. The proxy server should use a backend
+         * client that propagates the QoS responses instead of retrying so the proxy client can handle them
+         * appropriately. There is no risk of retry storms because the retries are isolated to one layer, the proxy
+         * client.
+         *
+         * Note that QosException.RetryOther (308) is not propagated. If the proxy server is exposed on the front door
+         * but the backend is not, it makes no sense to redirect the caller to a new backend. The client will still
+         * follow redirects.
          */
         ENABLED
     }
