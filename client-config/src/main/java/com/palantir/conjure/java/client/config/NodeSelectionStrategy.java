@@ -27,5 +27,10 @@ public enum NodeSelectionStrategy {
     /**
      * For each new request, select the "next" node (in some undefined order).
      */
-    ROUND_ROBIN
+    ROUND_ROBIN,
+
+    /**
+     * Try to pin to a particular node based on HEURISTIC_NODE_VALUE header otherwise round robin.
+     */
+    HEURISTIC_PIN
 }
