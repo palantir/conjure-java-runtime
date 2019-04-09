@@ -27,6 +27,7 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tracing.AsyncTracer;
 import java.io.IOException;
@@ -380,9 +381,12 @@ final class RemotingOkHttpCall extends ForwardingCall {
         switch (propagateQoS) {
             case ENABLED:
                 return true;
-            default:
+            case DISABLED:
                 return false;
         }
+
+        throw new SafeIllegalStateException("Encountered unknown propagate QoS configuration",
+                SafeArg.of("propagateQoS", propagateQoS));
     }
 
     private static void propagateResponse(Callback callback, Call call, Response response) {
