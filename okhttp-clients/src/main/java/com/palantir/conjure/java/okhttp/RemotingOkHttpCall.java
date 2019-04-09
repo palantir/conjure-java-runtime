@@ -276,12 +276,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
         return new QosException.Visitor<Void>() {
             @Override
             public Void visit(QosException.Throttle exception) {
-                if (propagateQoS.equals(ClientConfiguration.PropagateQoS.ENABLED)) {
-                    try {
-                        callback.onResponse(call, response);
-                    } catch (IOException e) {
-                        callback.onFailure(call, e);
-                    }
+                if (shouldPropagateQos(propagateQoS)) {
+                    propagateResponse(callback, call, response);
                     return null;
                 }
 
@@ -340,12 +336,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public Void visit(QosException.Unavailable exception) {
-                if (propagateQoS.equals(ClientConfiguration.PropagateQoS.ENABLED)) {
-                    try {
-                        callback.onResponse(call, response);
-                    } catch (IOException e) {
-                        callback.onFailure(call, e);
-                    }
+                if (shouldPropagateQos(propagateQoS)) {
+                    propagateResponse(callback, call, response);
                     return null;
                 }
 
@@ -382,6 +374,23 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 return null;
             }
         };
+    }
+
+    private static boolean shouldPropagateQos(ClientConfiguration.PropagateQoS propagateQoS) {
+        switch (propagateQoS) {
+            case ENABLED:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private static void propagateResponse(Callback callback, Call call, Response response) {
+        try {
+            callback.onResponse(call, response);
+        } catch (IOException e) {
+            callback.onFailure(call, e);
+        }
     }
 
     // TODO(rfink): Consider removing RemotingOkHttpCall#doClone method, #627
