@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,34 @@
  * limitations under the License.
  */
 
-package feign;
+package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareDecoder;
+import feign.FeignException;
+import feign.Response;
+import feign.Util;
 import feign.codec.Decoder;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 
 /**
- * Use {@link Java8OptionalAwareDecoder}.
- * @deprecated Use {@link Java8OptionalAwareDecoder}.
+ * If the return type is InputStream, return it, otherwise delegate to provided decoder.
  */
-@Deprecated
-public final class ConjureJava8OptionalAwareDecoder implements Decoder {
-
+public final class InputStreamDelegateDecoder implements Decoder {
     private final Decoder delegate;
 
-    public ConjureJava8OptionalAwareDecoder(Decoder delegate) {
-        this.delegate = new Java8OptionalAwareDecoder(delegate);
+    public InputStreamDelegateDecoder(Decoder delegate) {
+        this.delegate = delegate;
     }
 
     @Override
     public Object decode(Response response, Type type) throws IOException, FeignException {
-        return delegate.decode(response, type);
+        if (type.equals(InputStream.class)) {
+            byte[] body = response.body() != null ? Util.toByteArray(response.body().asInputStream()) : new byte[0];
+            return new ByteArrayInputStream(body);
+        } else {
+            return delegate.decode(response, type);
+        }
     }
 }

@@ -16,42 +16,26 @@
 
 package feign;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.net.HttpHeaders;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.HeaderAccessUtils;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.TextDelegateEncoder;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import javax.ws.rs.core.MediaType;
 
 /**
- * Delegates to a {@link feign.codec.Encoder.Default} if the response has a Content-Type of text/plain, or falls back
- * to the given delegate otherwise.
+ * Use {@link TextDelegateEncoder}.
+ * @deprecated Use {@link TextDelegateEncoder}.
  */
+@Deprecated
 public final class ConjureTextDelegateEncoder implements Encoder {
-    private static final Encoder defaultEncoder = new Encoder.Default();
 
     private final Encoder delegate;
 
     public ConjureTextDelegateEncoder(Encoder delegate) {
-        this.delegate = delegate;
+        this.delegate = new TextDelegateEncoder(delegate);
     }
 
     @Override
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
-        Collection<String> contentTypes =
-                HeaderAccessUtils.caseInsensitiveGet(template.headers(), HttpHeaders.CONTENT_TYPE);
-        if (contentTypes == null) {
-            contentTypes = ImmutableSet.of();
-        }
-
-        // In the case of multiple content types, or an unknown content type, we'll use the delegate instead.
-        if (contentTypes.size() == 1 && Iterables.getOnlyElement(contentTypes, "").equals(MediaType.TEXT_PLAIN)) {
-            defaultEncoder.encode(object, bodyType, template);
-        } else {
-            delegate.encode(object,  bodyType, template);
-        }
+        delegate.encode(object, bodyType, template);
     }
 }

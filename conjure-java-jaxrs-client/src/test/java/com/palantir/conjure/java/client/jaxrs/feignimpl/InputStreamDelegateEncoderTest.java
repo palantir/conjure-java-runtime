@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package feign;
+package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -22,8 +22,8 @@ import static org.mockito.Mockito.verify;
 
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaTestServer;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import feign.RequestTemplate;
 import feign.codec.Encoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -38,7 +38,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public final class ConjureInputStreamDelegateEncoderTest extends TestBase {
+public final class InputStreamDelegateEncoderTest extends TestBase {
     @Mock
     private Encoder delegate;
 
@@ -54,7 +54,7 @@ public final class ConjureInputStreamDelegateEncoderTest extends TestBase {
 
     @Before
     public void before() {
-        inputStreamDelegateEncoder = new ConjureInputStreamDelegateEncoder(delegate);
+        inputStreamDelegateEncoder = new InputStreamDelegateEncoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(
