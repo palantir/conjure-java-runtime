@@ -38,6 +38,7 @@ import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
@@ -545,6 +546,7 @@ public final class OkHttpClientsTest extends TestBase {
     public void verifyNodeSelectionStrategy_pinFromRequestDistributesRequestsEvenly() throws Exception {
         IntStream serverResponses = IntStream.range(0, 400);
         IntStream clientRequests = IntStream.range(0, 1000);
+        SecureRandom rand = new SecureRandom();
 
         serverResponses.forEach(i -> {
             server.enqueue(new MockResponse());
@@ -564,7 +566,7 @@ public final class OkHttpClientsTest extends TestBase {
         clientRequests.forEach(i -> {
             try {
                 client.newCall(new Request.Builder().url(url + "/foo?bar").header("Node-Pin-Value",
-                        Integer.toString(i)).build()).execute();
+                        Integer.toString(rand.nextInt())).build()).execute();
             } catch (IOException e) {
                 // nothing
             }
@@ -739,6 +741,6 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     private double percentageDiff(double v1, double v2) {
-        return ((v1 - v2) / ((v1 + v2) / 2)) * 100;
+        return Math.abs(((v1 - v2) / ((v1 + v2) / 2)) * 100);
     }
 }
