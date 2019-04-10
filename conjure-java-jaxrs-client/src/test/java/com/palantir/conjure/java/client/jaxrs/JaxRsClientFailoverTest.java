@@ -53,7 +53,9 @@ public final class JaxRsClientFailoverTest extends TestBase {
                 NodeSelectionStrategy.PIN_UNTIL_ERROR);
         FailoverTestCase pinWithCache = new FailoverTestCase(new MockWebServer(), new MockWebServer(), CACHE_DURATION,
                 NodeSelectionStrategy.PIN_UNTIL_ERROR);
-        return new FailoverTestCase[]{pinNoCache, pinWithCache};
+        FailoverTestCase requestPin = new FailoverTestCase(new MockWebServer(), new MockWebServer(), CACHE_DURATION,
+                NodeSelectionStrategy.PIN_FROM_REQUEST);
+        return new FailoverTestCase[]{pinNoCache, pinWithCache, requestPin};
     }
 
     @DataPoints("AllStrategies")
@@ -64,7 +66,9 @@ public final class JaxRsClientFailoverTest extends TestBase {
                 NodeSelectionStrategy.PIN_UNTIL_ERROR);
         FailoverTestCase roundRobin = new FailoverTestCase(new MockWebServer(), new MockWebServer(), CACHE_DURATION,
                 NodeSelectionStrategy.ROUND_ROBIN);
-        return new FailoverTestCase[]{pinNoCache, pinWithCache, roundRobin};
+        FailoverTestCase requestPin = new FailoverTestCase(new MockWebServer(), new MockWebServer(), CACHE_DURATION,
+                NodeSelectionStrategy.PIN_FROM_REQUEST);
+        return new FailoverTestCase[]{pinNoCache, pinWithCache, roundRobin, requestPin};
     }
 
     @Test

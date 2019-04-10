@@ -25,6 +25,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Supplier;
+import okhttp3.Headers;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -39,6 +40,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     private static final Logger log = LoggerFactory.getLogger(RemotingOkHttpClient.class);
 
     private static final int MAX_NUM_RELOCATIONS = 20;
+    private static final String NODE_PIN_VALUE_HEADER = "Node-Pin-Value";
 
     private final Supplier<BackoffStrategy> backoffStrategyFactory;
     private final NodeSelectionStrategy nodeSelectionStrategy;
@@ -91,22 +93,24 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
 
     private Request createNewRequest(Request request) {
         return request.newBuilder()
-                .url(getNewRequestUrl(request.url()))
+                .url(getNewRequestUrl(request.url(), request.headers()))
                 .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create())
                 .tag(AsyncTracer.class, new AsyncTracer("OkHttp: execute"))
                 .build();
     }
 
-    private HttpUrl getNewRequestUrl(HttpUrl requestUrl) {
-        return redirectToNewRequest(requestUrl).orElse(requestUrl);
+    private HttpUrl getNewRequestUrl(HttpUrl requestUrl, Headers requestHeaders) {
+        return redirectToNewRequest(requestUrl, requestHeaders).orElse(requestUrl);
     }
 
-    private Optional<HttpUrl> redirectToNewRequest(HttpUrl current) {
+    private Optional<HttpUrl> redirectToNewRequest(HttpUrl current, Headers requestHeaders) {
         switch (nodeSelectionStrategy) {
             case ROUND_ROBIN:
                 return urls.redirectToNextRoundRobin(current);
             case PIN_UNTIL_ERROR:
                 return urls.redirectToCurrent(current);
+            case PIN_FROM_REQUEST:
+                return urls.redirectToHash(current, Optional.ofNullable(requestHeaders.get(NODE_PIN_VALUE_HEADER)));
         }
 
         throw new SafeIllegalStateException("Encountered unknown node selection strategy",

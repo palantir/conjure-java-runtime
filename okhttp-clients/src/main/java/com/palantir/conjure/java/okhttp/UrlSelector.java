@@ -52,6 +52,12 @@ public interface UrlSelector {
     Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl current);
 
     /**
+     * Similar to {@link #redirectTo}. but redirects the given URL to the url closest in the hash ring to the hash
+     * value of {@code nodePinValue}.
+     */
+    Optional<HttpUrl> redirectToHash(HttpUrl current, Optional<String> nodePinValue);
+
+    /**
      * Returns the base URLs that this UrlSelector matches against. Note that implementations should parse web socket
      * (ws:// and ws:///) URLs as http (http:// and https:// respectively), in a similar to how {@link
      * okhttp3.Request#url} does.

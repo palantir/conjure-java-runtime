@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Range;
 import com.google.common.net.HostAndPort;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Uninterruptibles;
@@ -39,12 +40,15 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -539,6 +543,76 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
+    public void verifyNodeSelectionStrategy_pinFromRequestDistributesRequestsEvenly() throws Exception {
+        IntStream serverResponses = IntStream.range(0, 400);
+        IntStream clientRequests = IntStream.range(0, 1000);
+
+        serverResponses.forEach(i -> {
+            server.enqueue(new MockResponse());
+            server2.enqueue(new MockResponse());
+            server3.enqueue(new MockResponse());
+        });
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url, url2, url3))
+                        .nodeSelectionStrategy(NodeSelectionStrategy.PIN_FROM_REQUEST)
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+
+        clientRequests.forEach(i -> {
+            try {
+                client.newCall(new Request.Builder().url(url + "/foo?bar").header("Node-Pin-Value",
+                        Integer.toString(i)).build()).execute();
+            } catch (IOException e) {
+                // nothing
+            }
+        });
+
+        double server1RequestCount = (double) server.getRequestCount();
+        double server2RequestCount = (double) server2.getRequestCount();
+        double server3RequestCount = (double) server3.getRequestCount();
+        assertThat(percentageDiff(server1RequestCount, server2RequestCount)).isLessThan(10.0);
+        assertThat(percentageDiff(server1RequestCount, server3RequestCount)).isLessThan(10.0);
+        assertThat(percentageDiff(server2RequestCount, server3RequestCount)).isLessThan(10.0);
+    }
+
+    @Test
+    public void verifyNodeSelectionStrategy_pinFromRequestPinsToSameNodeWhenMatchingHeader() throws Exception {
+        IntStream serverResponses = IntStream.range(0, 100);
+        IntStream clientRequests = IntStream.range(0, 100);
+
+        serverResponses.forEach(i -> {
+            server.enqueue(new MockResponse());
+            server2.enqueue(new MockResponse());
+            server3.enqueue(new MockResponse());
+        });
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url, url2, url3))
+                        .nodeSelectionStrategy(NodeSelectionStrategy.PIN_FROM_REQUEST)
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+
+        clientRequests.forEach(i -> {
+            try {
+                client.newCall(new Request.Builder().url(url + "/foo?bar").header("Node-Pin-Value",
+                        "MATCH").build()).execute();
+            } catch (IOException e) {
+                // nothing
+            }
+        });
+
+        Integer[] requestCounts = { server.getRequestCount(), server2.getRequestCount(), server3.getRequestCount() };
+        assertThat(Collections.max(Arrays.asList(requestCounts))).isEqualTo(100);
+    }
+
+    @Test
     public void timeouts_set_to_all_zero_should_be_treated_as_infinity() throws Exception {
         server.enqueue(new MockResponse()
                 .setBodyDelay(Duration.ofSeconds(11).toMillis(), TimeUnit.MILLISECONDS)
@@ -663,5 +737,9 @@ public final class OkHttpClientsTest extends TestBase {
                 AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
+    }
+
+    private double percentageDiff(double v1, double v2) {
+        return ((v1 - v2) / ((v1 + v2) / 2)) * 100;
     }
 }

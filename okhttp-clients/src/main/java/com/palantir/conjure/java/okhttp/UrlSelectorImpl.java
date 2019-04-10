@@ -38,10 +38,12 @@ final class UrlSelectorImpl implements UrlSelector {
     private final AtomicInteger currentUrl;
     private final Cache<HttpUrl, UrlAvailability> failedUrls;
     private final boolean useFailedUrlCache;
+    private final ConsistentHashRing consistentHashRing;
 
     private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, Duration failedUrlCooldown) {
         this.baseUrls = baseUrls;
         this.currentUrl = new AtomicInteger(0);
+        this.consistentHashRing = new ConsistentHashRing(baseUrls);
 
         long coolDownMillis = failedUrlCooldown.toMillis();
         this.failedUrls = Caffeine.newBuilder()
@@ -156,11 +158,25 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     @Override
+    public Optional<HttpUrl> redirectToHash(HttpUrl current, Optional<String> nodePinValue) {
+        if (nodePinValue.isPresent()) {
+            Optional<HttpUrl> nextUrl = consistentHashRing.getNode(nodePinValue.get());
+            if (nextUrl.isPresent()) {
+                return redirectTo(current, nextUrl.get());
+            }
+        }
+
+        return redirectTo(current, baseUrls.get(currentUrl.get()));
+    }
+
+    @Override
     public void markAsFailed(HttpUrl failedUrl) {
         if (useFailedUrlCache) {
             Optional<Integer> indexForFailedUrl = indexFor(failedUrl);
-            indexForFailedUrl.ifPresent(index ->
-                    failedUrls.put(baseUrls.get(index), UrlAvailability.FAILED)
+            indexForFailedUrl.ifPresent(index -> {
+                        failedUrls.put(baseUrls.get(index), UrlAvailability.FAILED);
+                        consistentHashRing.removeNode(baseUrls.get(index));
+                    }
             );
         }
     }
