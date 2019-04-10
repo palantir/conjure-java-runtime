@@ -16,11 +16,14 @@
 
 package com.palantir.conjure.java.client.config;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
+import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -42,7 +45,7 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(250);
     private static final Duration DEFAULT_FAILED_URL_COOLDOWN = Duration.ZERO;
-    private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = false;
+    private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = defaultEnableGcm();
     private static final boolean DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION = false;
     private static final NodeSelectionStrategy DEFAULT_NODE_SELECTION_STRATEGY = NodeSelectionStrategy.PIN_UNTIL_ERROR;
     private static final int DEFAULT_MAX_NUM_RETRIES = 4;
@@ -139,5 +142,22 @@ public final class ClientConfigurations {
             @Override
             public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {}
         };
+    }
+
+    // In java 9+ GCM ciphers are more efficient than CBC
+    private static boolean defaultEnableGcm() {
+        int runtimeMajorVersion = getJavaMajorVersion(System.getProperty("java.version"));
+        return runtimeMajorVersion > 8;
+    }
+
+    @VisibleForTesting
+    static int getJavaMajorVersion(final String version) {
+        final String[] parts = version.split("[-.]");
+        Preconditions.checkState(parts.length >= 2,
+                "Malformed version string", SafeArg.of("version", version));
+        final int majorVersion = Integer.parseInt(parts[0]);
+        // https://openjdk.java.net/jeps/223
+        boolean jep223Format = majorVersion != 1;
+        return jep223Format ? majorVersion : Integer.parseInt(parts[1]);
     }
 }
