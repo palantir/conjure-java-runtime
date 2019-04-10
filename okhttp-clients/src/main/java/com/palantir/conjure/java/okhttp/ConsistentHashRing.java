@@ -16,9 +16,9 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,6 +48,6 @@ final class ConsistentHashRing {
     }
 
     private int hash(String nodePinValue) {
-        return Hashing.consistentHash(Hashing.crc32c().hashString(nodePinValue, Charsets.UTF_8), nodes.size());
+        return Hashing.consistentHash(Hashing.crc32c().hashString(nodePinValue, StandardCharsets.UTF_8), nodes.size());
     }
 }
