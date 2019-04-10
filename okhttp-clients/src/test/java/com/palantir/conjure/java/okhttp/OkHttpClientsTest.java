@@ -544,8 +544,8 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void verifyNodeSelectionStrategy_pinFromRequestDistributesRequestsEvenly() throws Exception {
-        IntStream serverResponses = IntStream.range(0, 400);
-        IntStream clientRequests = IntStream.range(0, 1000);
+        IntStream serverResponses = IntStream.range(0, 4000);
+        IntStream clientRequests = IntStream.range(0, 10000);
         SecureRandom rand = new SecureRandom();
 
         serverResponses.forEach(i -> {
