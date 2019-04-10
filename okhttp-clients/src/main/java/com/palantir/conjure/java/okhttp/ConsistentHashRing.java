@@ -20,12 +20,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.hash.Hashing;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.HttpUrl;
 
 final class ConsistentHashRing {
-    private final List<HttpUrl> nodes = new ArrayList<>();
+    private final List<HttpUrl> nodes = Collections.synchronizedList(new ArrayList<>());
 
     ConsistentHashRing(ImmutableList<HttpUrl> baseUrls) {
         baseUrls.forEach(this::addNode);
@@ -48,6 +49,7 @@ final class ConsistentHashRing {
     }
 
     private int hash(String nodePinValue) {
-        return Hashing.consistentHash(Hashing.crc32c().hashString(nodePinValue, StandardCharsets.UTF_8), nodes.size());
+        return Hashing.consistentHash(Hashing.murmur3_32().hashString(nodePinValue, StandardCharsets.UTF_8),
+                nodes.size());
     }
 }
