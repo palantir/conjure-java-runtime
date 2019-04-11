@@ -68,10 +68,11 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     /**
-     * Creates a new {@link UrlSelector} with the supplied URLs. The order of the URLs may be randomized by setting
-     * {@code randomizeOrder} to true. If a {@code failedUrlCooldown} is specified, URLs that are marked as failed
-     * using {@link #markAsFailed(HttpUrl)} will be removed from the pool of prioritized, healthy URLs for that period
-     * of time.
+     * Creates a new {@link UrlSelector} with the supplied URLs. The order of the URLs may be randomized every so often
+     * (eg: every 10 minutes) when {@code randomizeOrder} is set to true, which should be preferred except when
+     * testing. If a {@code failedUrlCooldown} is specified, URLs that are marked as failed using
+     * {@link #markAsFailed(HttpUrl)} will be removed from the pool of prioritized, healthy URLs for that period of
+     * time.
      */
     static UrlSelectorImpl createWithFailedUrlCooldown(Collection<String> baseUrls, boolean randomizeOrder,
             Duration failedUrlCooldown) {
