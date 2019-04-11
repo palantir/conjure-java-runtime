@@ -36,17 +36,26 @@ import java.util.function.Supplier;
 import okhttp3.HttpUrl;
 
 final class UrlSelectorImpl implements UrlSelector {
+
+    private static final Duration RANDOMIZE = Duration.ofMinutes(10);
+
     private final Supplier<List<HttpUrl>> baseUrls;
     private final AtomicInteger currentUrl;
     private final Cache<HttpUrl, UrlAvailability> failedUrls;
     private final boolean useFailedUrlCache;
 
     private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, boolean randomizeOrder, Duration failedUrlCooldown) {
-        this.baseUrls = Suppliers.memoizeWithExpiration(
-                () -> randomize(baseUrls, randomizeOrder),
-                // Add jitter to avoid mass node reassignment when multiple nodes of a client are restarted
-                600 + ThreadLocalRandom.current().nextLong(-30, 30),
-                TimeUnit.SECONDS);
+        if (randomizeOrder) {
+            // Add jitter to avoid mass node reassignment when multiple nodes of a client are restarted
+            Duration jitter = Duration.ofSeconds(ThreadLocalRandom.current().nextLong(-30, 30));
+            this.baseUrls = Suppliers.memoizeWithExpiration(
+                    () -> randomize(baseUrls),
+                    RANDOMIZE.plus(jitter).toMillis(),
+                    TimeUnit.MILLISECONDS);
+        } else {
+            // deterministic for testing only
+            this.baseUrls = () -> baseUrls;
+        }
 
         this.currentUrl = new AtomicInteger(0);
 
@@ -61,19 +70,9 @@ final class UrlSelectorImpl implements UrlSelector {
         Preconditions.checkArgument(!failedUrlCooldown.isNegative(), "Cache expiration must be non-negative");
     }
 
-    private <T> List<T> randomize(List<T> list, boolean randomizeOrder) {
-        if (randomizeOrder) {
-            List<T> shuffledList = new ArrayList<>(list);
-            Collections.shuffle(shuffledList);
-            return Collections.unmodifiableList(shuffledList);
-        } else {
-            return list;
-        }
-    }
-
     /**
-     * Creates a new {@link UrlSelector} with the supplied URLs. The order of the URLs may be randomized every so often
-     * (eg: every 10 minutes) when {@code randomizeOrder} is set to true, which should be preferred except when
+     * Creates a new {@link UrlSelector} with the supplied URLs. The order of the URLs are randomized every
+     * 10 minutes when {@code randomizeOrder} is set to true, which should be preferred except when
      * testing. If a {@code failedUrlCooldown} is specified, URLs that are marked as failed using
      * {@link #markAsFailed(HttpUrl)} will be removed from the pool of prioritized, healthy URLs for that period of
      * time.
@@ -94,6 +93,12 @@ final class UrlSelectorImpl implements UrlSelector {
 
     static UrlSelectorImpl create(Collection<String> baseUrls, boolean randomizeOrder) {
         return createWithFailedUrlCooldown(baseUrls, randomizeOrder, Duration.ZERO);
+    }
+
+    private static <T> List<T> randomize(ImmutableList<T> list) {
+        List<T> shuffledList = new ArrayList<>(list);
+        Collections.shuffle(shuffledList);
+        return Collections.unmodifiableList(shuffledList);
     }
 
     private static String switchWsToHttp(String url) {
