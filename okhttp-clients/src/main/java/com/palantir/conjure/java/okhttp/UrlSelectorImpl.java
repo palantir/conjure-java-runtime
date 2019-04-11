@@ -45,6 +45,7 @@ final class UrlSelectorImpl implements UrlSelector {
     private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, boolean randomizeOrder, Duration failedUrlCooldown) {
         this.baseUrls = Suppliers.memoizeWithExpiration(
                 () -> randomize(baseUrls, randomizeOrder),
+                // Add jitter to avoid mass node reassignment when multiple nodes of a client are restarted
                 600 + ThreadLocalRandom.current().nextLong(-30, 30),
                 TimeUnit.SECONDS);
 
