@@ -182,9 +182,7 @@ final class UrlSelectorImpl implements UrlSelector {
         List<HttpUrl> httpUrls = baseUrls.get();
 
         // Find the next URL that is not marked as failed
-        while (true) {
-            if (!(numAttempts < httpUrls.size()))
-                break;
+        while (numAttempts < httpUrls.size()) {
             index = (index + 1) % httpUrls.size();
             UrlAvailability isFailed = failedUrls.getIfPresent(httpUrls.get(index));
             if (isFailed == null) {
