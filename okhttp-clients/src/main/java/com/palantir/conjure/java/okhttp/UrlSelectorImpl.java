@@ -29,13 +29,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import okhttp3.HttpUrl;
 
 final class UrlSelectorImpl implements UrlSelector {
-
     private final Supplier<List<HttpUrl>> baseUrls;
     private final AtomicInteger currentUrl;
     private final Cache<HttpUrl, UrlAvailability> failedUrls;
@@ -43,7 +44,10 @@ final class UrlSelectorImpl implements UrlSelector {
 
     private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, boolean randomizeOrder, Duration failedUrlCooldown) {
         this.baseUrls = Suppliers.memoizeWithExpiration(
-                () -> randomize(baseUrls, randomizeOrder), 10, TimeUnit.MINUTES);
+                () -> randomize(baseUrls, randomizeOrder),
+                600 + ThreadLocalRandom.current().nextLong(-30, 30),
+                TimeUnit.SECONDS);
+
         this.currentUrl = new AtomicInteger(0);
 
         long coolDownMillis = failedUrlCooldown.toMillis();
