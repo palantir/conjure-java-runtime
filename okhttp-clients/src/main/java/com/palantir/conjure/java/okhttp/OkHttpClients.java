@@ -34,6 +34,7 @@ import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -47,6 +48,7 @@ import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.TlsVersion;
 import okhttp3.internal.Util;
 import org.slf4j.Logger;
@@ -203,6 +205,11 @@ public final class OkHttpClients {
 
         // cipher setup
         client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
+
+        // http2
+        if (!config.http2()) {
+            client.protocols(Arrays.asList(Protocol.HTTP_1_1));
+        }
 
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
         client.connectionPool(connectionPool);

@@ -105,6 +105,9 @@ public interface ClientConfiguration {
     /** Indicates whether client-side sympathetic QoS should be enabled. */
     ClientQoS clientQoS();
 
+    /** Indicates whether the client should support the HTTP/2 protocol. */
+    boolean http2();
+
     @Value.Check
     default void check() {
         if (meshProxy().isPresent()) {

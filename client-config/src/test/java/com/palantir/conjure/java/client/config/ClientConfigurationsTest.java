@@ -56,6 +56,7 @@ public final class ClientConfigurationsTest {
         assertThat(actual.enableGcmCipherSuites()).isFalse();
         assertThat(actual.fallbackToCommonNameVerification()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
+        assertThat(actual.http2()).isTrue();
     }
 
     @Test
@@ -73,6 +74,7 @@ public final class ClientConfigurationsTest {
         assertThat(actual.enableGcmCipherSuites()).isFalse();
         assertThat(actual.fallbackToCommonNameVerification()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
+        assertThat(actual.http2()).isTrue();
     }
 
     @Test

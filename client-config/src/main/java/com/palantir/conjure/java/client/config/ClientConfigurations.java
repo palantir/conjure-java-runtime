@@ -48,6 +48,7 @@ public final class ClientConfigurations {
     private static final int DEFAULT_MAX_NUM_RETRIES = 4;
     private static final ClientConfiguration.ClientQoS DEFAULT_DISABLE_SYMPATHETIC_QOS =
             ClientConfiguration.ClientQoS.ENABLED;
+    private static final boolean DEFAULT_HTTP_2 = true;
 
     private ClientConfigurations() {}
 
@@ -74,6 +75,7 @@ public final class ClientConfigurations {
                 .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
                 .clientQoS(DEFAULT_DISABLE_SYMPATHETIC_QOS)
+                .http2(DEFAULT_HTTP_2)
                 .build();
     }
 
@@ -99,6 +101,7 @@ public final class ClientConfigurations {
                 .nodeSelectionStrategy(DEFAULT_NODE_SELECTION_STRATEGY)
                 .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)
                 .clientQoS(DEFAULT_DISABLE_SYMPATHETIC_QOS)
+                .http2(DEFAULT_HTTP_2)
                 .build();
     }
 
