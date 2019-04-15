@@ -143,7 +143,9 @@ public interface ClientConfiguration {
         DISABLED,
         /**
          * Propagate QosException.Throttle and QosException.Unavailable (429/503) to the caller. Consumers should use
-         * this when proxying or dispatching requests where it is unclear how to handle these QoS responses.
+         * this when an upstream service has better context on how to handle the QoS error. This delegates the
+         * responsibility to the upstream service, which should use an appropriate conjure client to handle the
+         * response.
          *
          * For example, let us imagine a proxy server that serves both interactive and long-running background requests
          * by dispatching requests to some backend. Interactive requests should be retried relatively few times in
