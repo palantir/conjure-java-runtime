@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package feign;
+package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -31,8 +31,9 @@ import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaTestServer;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import feign.FeignException;
+import feign.Response;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
@@ -47,7 +48,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public final class ConjureTextDelegateDecoderTest extends TestBase {
+public final class TextDelegateDecoderTest extends TestBase {
     private static final String DELEGATE_RESPONSE = "delegate response";
 
     @ClassRule
@@ -66,7 +67,7 @@ public final class ConjureTextDelegateDecoderTest extends TestBase {
     public void before() {
         delegate = mock(Decoder.class);
         headers = Maps.newHashMap();
-        textDelegateDecoder = new ConjureTextDelegateDecoder(delegate);
+        textDelegateDecoder = new TextDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(

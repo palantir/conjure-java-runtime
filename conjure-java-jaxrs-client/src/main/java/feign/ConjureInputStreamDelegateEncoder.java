@@ -16,33 +16,25 @@
 
 package feign;
 
+import com.palantir.conjure.java.client.jaxrs.feignimpl.InputStreamDelegateEncoder;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 
 /**
- * If the body type is an InputStream, write it into the body, otherwise pass to delegate.
+ * Use {@link InputStreamDelegateEncoder}.
+ * @deprecated Use {@link InputStreamDelegateEncoder}.
  */
+@Deprecated
 public final class ConjureInputStreamDelegateEncoder implements Encoder {
     private final Encoder delegate;
 
     public ConjureInputStreamDelegateEncoder(Encoder delegate) {
-        this.delegate = delegate;
+        this.delegate = new InputStreamDelegateEncoder(delegate);
     }
 
     @Override
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
-        if (bodyType.equals(InputStream.class)) {
-            try {
-                template.body(Util.toByteArray((InputStream) object), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            delegate.encode(object, bodyType, template);
-        }
+        delegate.encode(object, bodyType, template);
     }
 }

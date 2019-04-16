@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package feign;
+package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import feign.Response;
 import feign.codec.Decoder;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -47,14 +48,14 @@ import javax.annotation.Generated;
 import javax.ws.rs.core.MediaType;
 import org.junit.Test;
 
-public class ConjureEmptyContainerDecoderTest {
+public class EmptyContainerDecoderTest {
 
     private static final ObjectMapper mapper = ObjectMappers.newClientObjectMapper();
     private static final Response HTTP_204 =
             Response.create(204, "No Content", Collections.emptyMap(), new byte[] {});
     private final Decoder delegate = mock(Decoder.class);
-    private final ConjureEmptyContainerDecoder emptyContainerDecoder =
-            new ConjureEmptyContainerDecoder(mapper, delegate);
+    private final EmptyContainerDecoder emptyContainerDecoder =
+            new EmptyContainerDecoder(mapper, delegate);
 
     @Test
     public void http_200_uses_delegate_decoder() throws IOException {

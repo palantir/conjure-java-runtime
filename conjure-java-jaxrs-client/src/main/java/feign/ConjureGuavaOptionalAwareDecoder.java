@@ -16,42 +16,26 @@
 
 package feign;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaOptionalAwareDecoder;
 import feign.codec.Decoder;
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
- * Decorates a Feign {@link Decoder} such that it returns {@link com.google.common.base.Optional#absent}
- * when observing an HTTP 204 error code for a method with {@link Type} {@link com.google.common.base.Optional}.
+ * Use {@link GuavaOptionalAwareDecoder}.
+ * @deprecated Use {@link GuavaOptionalAwareDecoder}.
  */
+@Deprecated
 public final class ConjureGuavaOptionalAwareDecoder implements Decoder {
 
     private final Decoder delegate;
 
     public ConjureGuavaOptionalAwareDecoder(Decoder delegate) {
-        this.delegate = delegate;
+        this.delegate = new GuavaOptionalAwareDecoder(delegate);
     }
 
     @Override
     public Object decode(Response response, Type type) throws IOException, FeignException {
-        if (Types.getRawType(type).equals(com.google.common.base.Optional.class)) {
-            if (response.status() == 204) {
-                return com.google.common.base.Optional.absent();
-            } else {
-                Object decoded = checkNotNull(delegate.decode(response, getInnerType(type)),
-                        "Unexpected null content for response status %s", response.status());
-                return com.google.common.base.Optional.of(decoded);
-            }
-        } else {
-            return delegate.decode(response, type);
-        }
-    }
-
-    private static Type getInnerType(Type type) {
-        ParameterizedType paramType = (ParameterizedType) type;
-        return paramType.getActualTypeArguments()[0];
+        return delegate.decode(response, type);
     }
 }

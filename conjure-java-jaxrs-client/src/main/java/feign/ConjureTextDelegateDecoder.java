@@ -16,46 +16,26 @@
 
 package feign;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
-import com.google.common.net.HttpHeaders;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.HeaderAccessUtils;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.TextDelegateDecoder;
 import feign.codec.Decoder;
-import feign.codec.StringDecoder;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import javax.ws.rs.core.MediaType;
 
 /**
- * Delegates to a {@link StringDecoder} if the response has a Content-Type of text/plain, or falls back to the given
- * delegate otherwise.
+ * Use {@link TextDelegateDecoder}.
+ * @deprecated Use {@link TextDelegateDecoder}.
  */
+@Deprecated
 public final class ConjureTextDelegateDecoder implements Decoder {
-    private static final Decoder stringDecoder = new StringDecoder();
 
     private final Decoder delegate;
 
     public ConjureTextDelegateDecoder(Decoder delegate) {
-        this.delegate = delegate;
+        this.delegate = new TextDelegateDecoder(delegate);
     }
 
     @Override
     public Object decode(Response response, Type type) throws IOException, FeignException {
-        Collection<String> contentTypes =
-                HeaderAccessUtils.caseInsensitiveGet(response.headers(), HttpHeaders.CONTENT_TYPE);
-        if (contentTypes == null) {
-            contentTypes = ImmutableSet.of();
-        }
-        // In the case of multiple content types, or an unknown content type, we'll use the delegate instead.
-        if (contentTypes.size() == 1 && Iterables.getOnlyElement(contentTypes, "").startsWith(MediaType.TEXT_PLAIN)) {
-            Object decoded = stringDecoder.decode(response, type);
-            if (decoded == null) {
-                return "";
-            }
-            return decoded;
-        }
-
         return delegate.decode(response, type);
     }
 }

@@ -19,24 +19,24 @@ package com.palantir.conjure.java.client.jaxrs;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.CborDelegateDecoder;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.CborDelegateEncoder;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.EmptyContainerDecoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaOptionalAwareContract;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaOptionalAwareDecoder;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.InputStreamDelegateDecoder;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.InputStreamDelegateEncoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareContract;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareDecoder;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.NeverReturnNullDecoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.QosErrorDecoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.SlashEncodingContract;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.TextDelegateDecoder;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.TextDelegateEncoder;
 import com.palantir.conjure.java.okhttp.HostEventsSink;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import com.palantir.logsafe.Preconditions;
-import feign.ConjureCborDelegateDecoder;
-import feign.ConjureCborDelegateEncoder;
-import feign.ConjureEmptyContainerDecoder;
-import feign.ConjureGuavaOptionalAwareDecoder;
-import feign.ConjureInputStreamDelegateDecoder;
-import feign.ConjureInputStreamDelegateEncoder;
-import feign.ConjureJava8OptionalAwareDecoder;
-import feign.ConjureNeverReturnNullDecoder;
-import feign.ConjureTextDelegateDecoder;
-import feign.ConjureTextDelegateEncoder;
 import feign.Contract;
 import feign.Feign;
 import feign.Logger;
@@ -93,9 +93,9 @@ abstract class AbstractFeignJaxRsClientBuilder {
         return Feign.builder()
                 .contract(createContract())
                 .encoder(
-                        new ConjureInputStreamDelegateEncoder(
-                                new ConjureTextDelegateEncoder(
-                                        new ConjureCborDelegateEncoder(
+                        new InputStreamDelegateEncoder(
+                                new TextDelegateEncoder(
+                                        new CborDelegateEncoder(
                                                 cborObjectMapper,
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
@@ -122,14 +122,14 @@ abstract class AbstractFeignJaxRsClientBuilder {
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
-        return new ConjureNeverReturnNullDecoder(
-                new ConjureJava8OptionalAwareDecoder(
-                        new ConjureGuavaOptionalAwareDecoder(
-                                new ConjureEmptyContainerDecoder(
+        return new NeverReturnNullDecoder(
+                new Java8OptionalAwareDecoder(
+                        new GuavaOptionalAwareDecoder(
+                                new EmptyContainerDecoder(
                                         objectMapper,
-                                        new ConjureInputStreamDelegateDecoder(
-                                                new ConjureTextDelegateDecoder(
-                                                        new ConjureCborDelegateDecoder(
+                                        new InputStreamDelegateDecoder(
+                                                new TextDelegateDecoder(
+                                                        new CborDelegateDecoder(
                                                                 cborObjectMapper,
                                                                 new JacksonDecoder(objectMapper))))))));
     }

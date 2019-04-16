@@ -161,10 +161,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
         Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {
             @Override
             public void onSuccess(Limiter.Listener listener) {
-                tracer.withTrace(() -> {
-                    enqueueInternal(callback);
-                    return null;
-                });
+                tracer.withTrace(() -> null);
+                enqueueInternal(callback);
             }
 
             @Override

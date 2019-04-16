@@ -41,6 +41,15 @@ public interface TestService {
             @Path("pathString") java.util.Optional<String> pathString,
             @Query("queryString") java.util.Optional<String> queryString);
 
+    @GET("getJava8OptionalInt")
+    Call<java.util.OptionalInt> getJava8OptionalInt();
+
+    @GET("getJava8OptionalLong")
+    Call<java.util.OptionalLong> getJava8OptionalLong();
+
+    @GET("getJava8OptionalDouble")
+    Call<java.util.OptionalDouble> getJava8OptionalDouble();
+
     @POST("getComplexGuavaType")
     Call<com.google.common.base.Optional<LocalDate>> getComplexGuavaType(
             @Body com.google.common.base.Optional<LocalDate> date);

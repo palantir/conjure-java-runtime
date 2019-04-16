@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2019 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package feign;
+package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,6 +24,7 @@ import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.testing.Assertions;
+import feign.Response;
 import feign.codec.Decoder;
 import feign.jackson.JacksonDecoder;
 import java.nio.charset.StandardCharsets;
@@ -32,10 +33,10 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 
-public final class ConjureNeverReturnNullDecoderTest extends TestBase {
+public final class NeverReturnNullDecoderTest extends TestBase {
 
     private final Map<String, Collection<String>> headers = Maps.newHashMap();
-    private final Decoder textDelegateDecoder = new ConjureNeverReturnNullDecoder(
+    private final Decoder textDelegateDecoder = new NeverReturnNullDecoder(
             new JacksonDecoder(ObjectMappers.newClientObjectMapper()));
 
     @Test

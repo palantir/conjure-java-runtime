@@ -27,6 +27,8 @@ import com.palantir.conjure.java.api.config.service.UserAgent.Agent;
 import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.config.CipherSuites;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.Tracers;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
@@ -153,7 +155,7 @@ public final class OkHttpClients {
             HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             boolean randomizeUrlOrder) {
-        boolean enableClientQoS = config.clientQoS().equals(ClientConfiguration.ClientQoS.ENABLED);
+        boolean enableClientQoS = shouldEnableQos(config.clientQoS());
         ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(limitReviver.get(), registry, serviceClass,
                 enableClientQoS);
         OkHttpClient.Builder client = new OkHttpClient.Builder();
@@ -217,6 +219,18 @@ public final class OkHttpClients {
                 executionExecutor,
                 concurrencyLimiters,
                 config.propagateQoS());
+    }
+
+    private static boolean shouldEnableQos(ClientConfiguration.ClientQoS clientQoS) {
+        switch (clientQoS) {
+            case ENABLED:
+                return true;
+            case DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS:
+                return false;
+        }
+
+        throw new SafeIllegalStateException("Encountered unknown client QoS configuration",
+                SafeArg.of("ClientQoS", clientQoS));
     }
 
     /**

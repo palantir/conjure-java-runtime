@@ -13,6 +13,10 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
@@ -29,16 +33,16 @@ import retrofit2.Retrofit;
  * type is a collection. Jackson can only do this for fields inside an object, but for top-level fields we have to do
  * this manually.
  * <p>
- * This class is the counterpart of {@link CoerceNullCollectionsConverterFactory} and handles coercion of 204/205
+ * This class is the counterpart of {@link CoerceNullValuesConverterFactory} and handles coercion of 204/205
  * responses to the default values for collections (without this, the {@link Response} body would be null,
  * according to {@link retrofit2.OkHttpCall#parseResponse(okhttp3.Response)}).
  */
 // TODO(dsanduleac): link to spec
-final class CoerceNullCollectionsCallAdapterFactory extends CallAdapter.Factory {
+final class CoerceNullValuesCallAdapterFactory extends CallAdapter.Factory {
 
     private final CallAdapter.Factory delegate;
 
-    CoerceNullCollectionsCallAdapterFactory(Factory delegate) {
+    CoerceNullValuesCallAdapterFactory(Factory delegate) {
         this.delegate = delegate;
     }
 
@@ -63,7 +67,18 @@ final class CoerceNullCollectionsCallAdapterFactory extends CallAdapter.Factory 
             return new DefaultingOnNullAdapter<>(callAdapter, Collections::emptySet);
         } else if (Map.class.isAssignableFrom(rawType)) {
             return new DefaultingOnNullAdapter<>(callAdapter, Collections::emptyMap);
+        } else if (rawType == java.util.Optional.class) {
+            return new DefaultingOnNullAdapter<>(callAdapter, Optional::empty);
+        } else if (rawType == java.util.OptionalInt.class) {
+            return new DefaultingOnNullAdapter<>(callAdapter, OptionalInt::empty);
+        } else if (rawType == java.util.OptionalLong.class) {
+            return new DefaultingOnNullAdapter<>(callAdapter, OptionalLong::empty);
+        } else if (rawType == java.util.OptionalDouble.class) {
+            return new DefaultingOnNullAdapter<>(callAdapter, OptionalDouble::empty);
+        } else if (rawType == com.google.common.base.Optional.class) {
+            return new DefaultingOnNullAdapter<>(callAdapter, com.google.common.base.Optional::absent);
         }
+
         return callAdapter;
     }
 
