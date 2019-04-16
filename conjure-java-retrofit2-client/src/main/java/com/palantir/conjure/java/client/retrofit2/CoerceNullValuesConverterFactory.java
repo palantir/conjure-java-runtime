@@ -22,6 +22,10 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.Set;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -41,10 +45,10 @@ import retrofit2.Retrofit;
  * this manually.)
  */
 // TODO(dsanduleac): link to spec
-final class CoerceNullCollectionsConverterFactory extends Converter.Factory {
+final class CoerceNullValuesConverterFactory extends Converter.Factory {
     private final Converter.Factory delegate;
 
-    CoerceNullCollectionsConverterFactory(Converter.Factory delegate) {
+    CoerceNullValuesConverterFactory(Converter.Factory delegate) {
         this.delegate = delegate;
     }
 
@@ -69,6 +73,7 @@ final class CoerceNullCollectionsConverterFactory extends Converter.Factory {
             this.type = type;
         }
 
+        @SuppressWarnings("CyclomaticComplexity")
         @Override
         public Object convert(ResponseBody value) throws IOException {
             Object object = (value.contentLength() == 0) ? null : responseBodyConverter.convert(value);
@@ -84,9 +89,19 @@ final class CoerceNullCollectionsConverterFactory extends Converter.Factory {
                 return Collections.emptySet();
             } else if (Map.class.isAssignableFrom(rawType)) {
                 return Collections.emptyMap();
-            } else {
-                return null;
+            }  else if (rawType == java.util.Optional.class) {
+                return Optional.empty();
+            } else if (rawType == java.util.OptionalInt.class) {
+                return OptionalInt.empty();
+            } else if (rawType == java.util.OptionalLong.class) {
+                return OptionalLong.empty();
+            } else if (rawType == java.util.OptionalDouble.class) {
+                return OptionalDouble.empty();
+            } else if (rawType == com.google.common.base.Optional.class) {
+                return com.google.common.base.Optional.absent();
             }
+
+            return null;
         }
     }
 }
