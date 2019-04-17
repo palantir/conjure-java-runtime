@@ -47,7 +47,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
     private final ConcurrencyLimiters concurrencyLimiters;
-    private final ClientConfiguration.PropagateQoS propagateQoS;
+    private final ClientConfiguration.AutomaticRetryOnQoS automaticRetryOnQoS;
 
     RemotingOkHttpClient(
             OkHttpClient delegate,
@@ -57,7 +57,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
             ScheduledExecutorService schedulingExecutor,
             ExecutorService executionExecutor,
             ConcurrencyLimiters concurrencyLimiters,
-            ClientConfiguration.PropagateQoS propagateQoS) {
+            ClientConfiguration.AutomaticRetryOnQoS automaticRetryOnQoS) {
         super(delegate);
         this.backoffStrategyFactory = backoffStrategy;
         this.nodeSelectionStrategy = nodeSelectionStrategy;
@@ -65,7 +65,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
         this.schedulingExecutor = schedulingExecutor;
         this.executionExecutor = executionExecutor;
         this.concurrencyLimiters = concurrencyLimiters;
-        this.propagateQoS = propagateQoS;
+        this.automaticRetryOnQoS = automaticRetryOnQoS;
     }
 
     @Override
@@ -91,7 +91,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 executionExecutor,
                 concurrencyLimiters.acquireLimiter(request),
                 maxNumRelocations,
-                propagateQoS);
+                automaticRetryOnQoS);
     }
 
     private Request createNewRequest(Request request) {
