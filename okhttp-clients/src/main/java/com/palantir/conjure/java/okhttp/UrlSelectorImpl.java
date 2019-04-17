@@ -44,12 +44,12 @@ final class UrlSelectorImpl implements UrlSelector {
     private final Cache<HttpUrl, UrlAvailability> failedUrls;
     private final boolean useFailedUrlCache;
 
-    private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, boolean randomizeOrder, Duration failedUrlCooldown) {
-        if (randomizeOrder) {
+    private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, boolean reshuffle, Duration failedUrlCooldown) {
+        if (reshuffle) {
             // Add jitter to avoid mass node reassignment when multiple nodes of a client are restarted
             Duration jitter = Duration.ofSeconds(ThreadLocalRandom.current().nextLong(-30, 30));
             this.baseUrls = Suppliers.memoizeWithExpiration(
-                    () -> randomize(baseUrls),
+                    () -> shuffle(baseUrls),
                     RANDOMIZE.plus(jitter).toMillis(),
                     TimeUnit.MILLISECONDS);
         } else {
@@ -77,8 +77,8 @@ final class UrlSelectorImpl implements UrlSelector {
      * {@link #markAsFailed(HttpUrl)} will be removed from the pool of prioritized, healthy URLs for that period of
      * time.
      */
-    static UrlSelectorImpl createWithFailedUrlCooldown(Collection<String> baseUrls, boolean randomizeOrder,
-            Duration failedUrlCooldown) {
+    static UrlSelectorImpl createWithFailedUrlCooldown(
+            Collection<String> baseUrls, boolean reshuffle, Duration failedUrlCooldown) {
         ImmutableSet.Builder<HttpUrl> canonicalUrls = ImmutableSet.builder();  // ImmutableSet maintains insert order
         baseUrls.forEach(url -> {
             HttpUrl httpUrl = HttpUrl.parse(switchWsToHttp(url));
@@ -88,14 +88,15 @@ final class UrlSelectorImpl implements UrlSelector {
                     "Base URLs must be 'canonical' and consist of schema, host, port, and path only: %s", url);
             canonicalUrls.add(canonicalUrl);
         });
-        return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()), randomizeOrder, failedUrlCooldown);
+        return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()), reshuffle, failedUrlCooldown);
     }
 
-    static UrlSelectorImpl create(Collection<String> baseUrls, boolean randomizeOrder) {
-        return createWithFailedUrlCooldown(baseUrls, randomizeOrder, Duration.ZERO);
+    @VisibleForTesting
+    static UrlSelectorImpl create(Collection<String> baseUrls, boolean reshuffle) {
+        return createWithFailedUrlCooldown(baseUrls, reshuffle, Duration.ZERO);
     }
 
-    private static <T> List<T> randomize(ImmutableList<T> list) {
+    static <T> List<T> shuffle(List<T> list) {
         List<T> shuffledList = new ArrayList<>(list);
         Collections.shuffle(shuffledList);
         return Collections.unmodifiableList(shuffledList);

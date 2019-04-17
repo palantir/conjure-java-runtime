@@ -27,6 +27,7 @@ import com.palantir.conjure.java.api.config.service.UserAgent.Agent;
 import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.config.CipherSuites;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.Tracers;
@@ -34,6 +35,10 @@ import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -162,7 +167,9 @@ public final class OkHttpClients {
         client.addInterceptor(new DispatcherTraceTerminatingInterceptor());
 
         // Routing
-        UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(config.uris(), randomizeUrlOrder,
+        UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(
+                randomizeUrlOrder ? UrlSelectorImpl.shuffle(config.uris()) : config.uris(),
+                !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE),
                 config.failedUrlCooldown());
         if (config.meshProxy().isPresent()) {
             // TODO(rfink): Should this go into the call itself?
@@ -218,6 +225,12 @@ public final class OkHttpClients {
                 schedulingExecutor.get(),
                 executionExecutor,
                 concurrencyLimiters);
+    }
+
+    private static Collection<String> shuffle(List<String> uris) {
+        ArrayList<String> shuffled = new ArrayList<>(uris);
+        Collections.shuffle(shuffled);
+        return shuffled;
     }
 
     private static boolean shouldEnableQos(ClientConfiguration.ClientQoS clientQoS) {
