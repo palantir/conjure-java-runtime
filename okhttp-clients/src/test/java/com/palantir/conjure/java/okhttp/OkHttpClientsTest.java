@@ -657,7 +657,6 @@ public final class OkHttpClientsTest extends TestBase {
         return OkHttpClients.withStableUris(
                 ClientConfiguration.builder()
                         .from(createTestConfig(urls))
-                        .nodeSelectionStrategy(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE)
                         .maxNumRetries(maxNumRetries)
                         .backoffSlotSize(backoffSlotSize)
                         .build(),
