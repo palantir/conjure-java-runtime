@@ -55,6 +55,8 @@ import org.slf4j.LoggerFactory;
 
 public final class OkHttpClients {
     private static final Logger log = LoggerFactory.getLogger(OkHttpClients.class);
+    private static final boolean RANDOMIZE = true;
+    private static final boolean RESHUFFLE = true;
 
     @VisibleForTesting
     static final int NUM_SCHEDULING_THREADS = 5;
@@ -141,13 +143,15 @@ public final class OkHttpClients {
      */
     public static OkHttpClient create(
             ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
-        return createInternal(config, userAgent, hostEventsSink, serviceClass, true /* randomize URLs */);
+        boolean reshuffle =
+                !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
+        return createInternal(config, userAgent, hostEventsSink, serviceClass, RANDOMIZE, reshuffle);
     }
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
             ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
-        return createInternal(config, userAgent, hostEventsSink, serviceClass, false);
+        return createInternal(config, userAgent, hostEventsSink, serviceClass, !RANDOMIZE, !RESHUFFLE);
     }
 
     private static RemotingOkHttpClient createInternal(
@@ -155,7 +159,8 @@ public final class OkHttpClients {
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
             Class<?> serviceClass,
-            boolean randomizeUrlOrder) {
+            boolean randomizeUrlOrder,
+            boolean reshuffle) {
         boolean enableClientQoS = shouldEnableQos(config.clientQoS());
         ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(limitReviver.get(), registry, serviceClass,
                 enableClientQoS);
@@ -165,7 +170,7 @@ public final class OkHttpClients {
         // Routing
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(
                 randomizeUrlOrder ? UrlSelectorImpl.shuffle(config.uris()) : config.uris(),
-                !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE),
+                reshuffle,
                 config.failedUrlCooldown());
         if (config.meshProxy().isPresent()) {
             // TODO(rfink): Should this go into the call itself?
