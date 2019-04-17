@@ -19,13 +19,19 @@ package com.palantir.conjure.java.client.config;
 public enum NodeSelectionStrategy {
 
     /**
-     * Once a node is found that returns responses successfully, use that node until a failure is
-     * received, then select a new node.
+     * Once a node is found that returns responses successfully, use that node until a failure is received, then select
+     * a new node. This strategy allows for the implementation to repin to a new node at any point in time. If this
+     * behavior is not desirable, you can use {@link #PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE}.
      */
     PIN_UNTIL_ERROR,
 
     /**
      * For each new request, select the "next" node (in some undefined order).
      */
-    ROUND_ROBIN
+    ROUND_ROBIN,
+
+    /**
+     * Similar to {@link #PIN_UNTIL_ERROR}, except will not shuffle the URLs throughout the lifetime of the client.
+     */
+    PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE
 }
