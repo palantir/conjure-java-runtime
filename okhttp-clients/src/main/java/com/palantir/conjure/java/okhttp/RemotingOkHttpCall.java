@@ -27,6 +27,7 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tracing.AsyncTracer;
 import java.io.IOException;
@@ -69,6 +70,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
     private final ConcurrencyLimiters.ConcurrencyLimiter limiter;
+    private final ClientConfiguration.AutomaticRetryOnQoS automaticRetryOnQoS;
 
     private final int maxNumRelocations;
 
@@ -80,7 +82,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
             ScheduledExecutorService schedulingExecutor,
             ExecutorService executionExecutor,
             ConcurrencyLimiters.ConcurrencyLimiter limiter,
-            int maxNumRelocations) {
+            int maxNumRelocations,
+            ClientConfiguration.AutomaticRetryOnQoS automaticRetryOnQoS) {
         super(delegate);
         this.backoffStrategy = backoffStrategy;
         this.urls = urls;
@@ -89,6 +92,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         this.executionExecutor = executionExecutor;
         this.limiter = limiter;
         this.maxNumRelocations = maxNumRelocations;
+        this.automaticRetryOnQoS = automaticRetryOnQoS;
     }
 
     /**
@@ -234,7 +238,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 // Handle to handle QoS situations: retry, failover, etc.
                 Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
                 if (qosError.isPresent()) {
-                    qosError.get().accept(createQosVisitor(callback, call));
+                    qosError.get().accept(createQosVisitor(callback, call, response));
                     return;
                 }
 
@@ -267,10 +271,15 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 TimeUnit.MILLISECONDS);
     }
 
-    private QosException.Visitor<Void> createQosVisitor(Callback callback, Call call) {
+    private QosException.Visitor<Void> createQosVisitor(Callback callback, Call call, Response response) {
         return new QosException.Visitor<Void>() {
             @Override
             public Void visit(QosException.Throttle exception) {
+                if (shouldPropagateQos(automaticRetryOnQoS)) {
+                    propagateResponse(callback, call, response);
+                    return null;
+                }
+
                 Optional<Duration> nonAdvertizedBackoff = backoffStrategy.nextBackoff();
                 if (!nonAdvertizedBackoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
@@ -326,6 +335,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public Void visit(QosException.Unavailable exception) {
+                if (shouldPropagateQos(automaticRetryOnQoS)) {
+                    propagateResponse(callback, call, response);
+                    return null;
+                }
+
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
@@ -361,10 +375,30 @@ final class RemotingOkHttpCall extends ForwardingCall {
         };
     }
 
+    private static boolean shouldPropagateQos(ClientConfiguration.AutomaticRetryOnQoS automaticRetryOnQoS) {
+        switch (automaticRetryOnQoS) {
+            case ENABLED:
+                return false;
+            case DANGEROUS_DISABLE_AUTOMATIC_RETRY_ON_QOS:
+                return true;
+        }
+
+        throw new SafeIllegalStateException("Encountered unknown propagate QoS configuration",
+                SafeArg.of("automaticRetryOnQoS", automaticRetryOnQoS));
+    }
+
+    private static void propagateResponse(Callback callback, Call call, Response response) {
+        try {
+            callback.onResponse(call, response);
+        } catch (IOException e) {
+            callback.onFailure(call, e);
+        }
+    }
+
     // TODO(rfink): Consider removing RemotingOkHttpCall#doClone method, #627
     @Override
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(), backoffStrategy, urls, client, schedulingExecutor,
-                executionExecutor, limiter, maxNumRelocations);
+                executionExecutor, limiter, maxNumRelocations, automaticRetryOnQoS);
     }
 }

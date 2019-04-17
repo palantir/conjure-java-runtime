@@ -30,6 +30,7 @@ import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareContra
 import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareDecoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.NeverReturnNullDecoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.QosErrorDecoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.TextDelegateDecoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.TextDelegateEncoder;
@@ -42,6 +43,7 @@ import feign.Logger;
 import feign.Request;
 import feign.Retryer;
 import feign.codec.Decoder;
+import feign.codec.ErrorDecoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JAXRSContract;
@@ -97,6 +99,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                                 cborObjectMapper,
                                                 new JacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
+                .errorDecoder(new QosErrorDecoder(new ErrorDecoder.Default()))
                 .client(new OkHttpClient(okHttpClient))
                 .options(createRequestOptions())
                 .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
