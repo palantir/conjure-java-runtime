@@ -106,6 +106,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
             case ROUND_ROBIN:
                 return urls.redirectToNextRoundRobin(current);
             case PIN_UNTIL_ERROR:
+            case PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE:
                 return urls.redirectToCurrent(current);
         }
 
