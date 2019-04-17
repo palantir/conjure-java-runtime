@@ -227,12 +227,6 @@ public final class OkHttpClients {
                 concurrencyLimiters);
     }
 
-    private static Collection<String> shuffle(List<String> uris) {
-        ArrayList<String> shuffled = new ArrayList<>(uris);
-        Collections.shuffle(shuffled);
-        return shuffled;
-    }
-
     private static boolean shouldEnableQos(ClientConfiguration.ClientQoS clientQoS) {
         switch (clientQoS) {
             case ENABLED:
