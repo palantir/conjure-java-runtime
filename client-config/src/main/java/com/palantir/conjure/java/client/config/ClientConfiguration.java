@@ -106,7 +106,7 @@ public interface ClientConfiguration {
     ClientQoS clientQoS();
 
     /** Indicates whether QosExceptions (other than RetryOther) should be propagated. */
-    PropagateQoS propagateQoS();
+    ServerQoS serverQoS();
 
     @Value.Check
     default void check() {
@@ -138,13 +138,14 @@ public interface ClientConfiguration {
         DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS
     }
 
-    enum PropagateQoS {
+    enum ServerQoS {
         /** Default. */
-        DISABLED,
+        AUTOMATIC_RETRY,
+
         /**
-         * Propagate QosException.Throttle and QosException.Unavailable (429/503) to the caller. Consumers should use
-         * this when an upstream service has better context on how to handle the QoS error. This delegates the
-         * responsibility to the upstream service, which should use an appropriate conjure client to handle the
+         * Propagate QosException.Throttle and QosException.Unavailable (429/503) to the caller. Consumers
+         * should use this when an upstream service has better context on how to handle the QoS error. This delegates
+         * the responsibility to the upstream service, which should use an appropriate conjure client to handle the
          * response.
          *
          * For example, let us imagine a proxy server that serves both interactive and long-running background requests
@@ -158,6 +159,6 @@ public interface ClientConfiguration {
          * but the backend is not, it makes no sense to redirect the caller to a new backend. The client will still
          * follow redirects.
          */
-        ENABLED
+        PROPAGATE_429_and_503_TO_CALLER
     }
 }

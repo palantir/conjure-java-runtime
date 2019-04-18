@@ -70,7 +70,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
     private final ConcurrencyLimiters.ConcurrencyLimiter limiter;
-    private final ClientConfiguration.PropagateQoS propagateQoS;
+    private final ClientConfiguration.ServerQoS serverQoS;
 
     private final int maxNumRelocations;
 
@@ -83,7 +83,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             ExecutorService executionExecutor,
             ConcurrencyLimiters.ConcurrencyLimiter limiter,
             int maxNumRelocations,
-            ClientConfiguration.PropagateQoS propagateQoS) {
+            ClientConfiguration.ServerQoS serverQoS) {
         super(delegate);
         this.backoffStrategy = backoffStrategy;
         this.urls = urls;
@@ -92,7 +92,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         this.executionExecutor = executionExecutor;
         this.limiter = limiter;
         this.maxNumRelocations = maxNumRelocations;
-        this.propagateQoS = propagateQoS;
+        this.serverQoS = serverQoS;
     }
 
     /**
@@ -275,7 +275,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         return new QosException.Visitor<Void>() {
             @Override
             public Void visit(QosException.Throttle exception) {
-                if (shouldPropagateQos(propagateQoS)) {
+                if (shouldPropagateQos(serverQoS)) {
                     propagateResponse(callback, call, response);
                     return null;
                 }
@@ -335,7 +335,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public Void visit(QosException.Unavailable exception) {
-                if (shouldPropagateQos(propagateQoS)) {
+                if (shouldPropagateQos(serverQoS)) {
                     propagateResponse(callback, call, response);
                     return null;
                 }
@@ -375,16 +375,16 @@ final class RemotingOkHttpCall extends ForwardingCall {
         };
     }
 
-    private static boolean shouldPropagateQos(ClientConfiguration.PropagateQoS propagateQoS) {
-        switch (propagateQoS) {
-            case ENABLED:
+    private static boolean shouldPropagateQos(ClientConfiguration.ServerQoS serverQoS) {
+        switch (serverQoS) {
+            case PROPAGATE_429_and_503_TO_CALLER:
                 return true;
-            case DISABLED:
+            case AUTOMATIC_RETRY:
                 return false;
         }
 
         throw new SafeIllegalStateException("Encountered unknown propagate QoS configuration",
-                SafeArg.of("propagateQoS", propagateQoS));
+                SafeArg.of("serverQoS", serverQoS));
     }
 
     private static void propagateResponse(Callback callback, Call call, Response response) {
@@ -399,6 +399,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
     @Override
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(), backoffStrategy, urls, client, schedulingExecutor,
-                executionExecutor, limiter, maxNumRelocations, propagateQoS);
+                executionExecutor, limiter, maxNumRelocations, serverQoS);
     }
 }
