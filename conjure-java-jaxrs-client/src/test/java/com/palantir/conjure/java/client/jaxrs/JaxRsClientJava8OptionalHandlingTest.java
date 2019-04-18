@@ -34,6 +34,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -165,6 +166,15 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getHeader("opt"), is("str"));
         assertThat(takeRequest.getHeader("req"), is("str2"));
+    }
+
+    @Ignore("TODO(rfink): Add support for header encoding")
+    @Test
+    public void testStringHeader_withNonAsciiCharacters() throws Exception {
+        proxy.header(Optional.of("ü"), "ø");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getHeader("opt"), is("ü"));
+        assertThat(takeRequest.getHeader("req"), is("ø"));
     }
 
     @Test
