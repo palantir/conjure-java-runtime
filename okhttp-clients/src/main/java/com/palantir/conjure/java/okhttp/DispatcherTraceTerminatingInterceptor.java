@@ -24,7 +24,7 @@ public final class DispatcherTraceTerminatingInterceptor implements Interceptor 
     @Override
     public Response intercept(Chain chain) throws IOException {
         AsyncTracerTag tracerTag = chain.request().tag(AsyncTracerTag.class);
-        if (tracerTag == null && tracerTag.asyncTracer() == null) {
+        if (tracerTag == null || tracerTag.asyncTracer() == null) {
             return chain.proceed(chain.request());
         }
 
