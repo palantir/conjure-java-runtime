@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
@@ -46,6 +47,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     private final ScheduledExecutorService schedulingExecutor;
     private final ExecutorService executionExecutor;
     private final ConcurrencyLimiters concurrencyLimiters;
+    private final ClientConfiguration.ServerQoS serverQoS;
 
     RemotingOkHttpClient(
             OkHttpClient delegate,
@@ -54,7 +56,8 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
             UrlSelector urls,
             ScheduledExecutorService schedulingExecutor,
             ExecutorService executionExecutor,
-            ConcurrencyLimiters concurrencyLimiters) {
+            ConcurrencyLimiters concurrencyLimiters,
+            ClientConfiguration.ServerQoS serverQoS) {
         super(delegate);
         this.backoffStrategyFactory = backoffStrategy;
         this.nodeSelectionStrategy = nodeSelectionStrategy;
@@ -62,6 +65,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
         this.schedulingExecutor = schedulingExecutor;
         this.executionExecutor = executionExecutor;
         this.concurrencyLimiters = concurrencyLimiters;
+        this.serverQoS = serverQoS;
     }
 
     @Override
@@ -86,7 +90,8 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 schedulingExecutor,
                 executionExecutor,
                 concurrencyLimiters.acquireLimiter(request),
-                maxNumRelocations);
+                maxNumRelocations,
+                serverQoS);
     }
 
     private Request createNewRequest(Request request) {
@@ -106,6 +111,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
             case ROUND_ROBIN:
                 return urls.redirectToNextRoundRobin(current);
             case PIN_UNTIL_ERROR:
+            case PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE:
                 return urls.redirectToCurrent(current);
         }
 

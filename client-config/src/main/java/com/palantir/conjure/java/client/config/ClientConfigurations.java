@@ -48,6 +48,8 @@ public final class ClientConfigurations {
     private static final int DEFAULT_MAX_NUM_RETRIES = 4;
     private static final ClientConfiguration.ClientQoS CLIENT_QOS_DEFAULT =
             ClientConfiguration.ClientQoS.ENABLED;
+    private static final ClientConfiguration.ServerQoS PROPAGATE_QOS_DEFAULT =
+            ClientConfiguration.ServerQoS.AUTOMATIC_RETRY;
 
     private ClientConfigurations() {}
 
@@ -74,6 +76,7 @@ public final class ClientConfigurations {
                 .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
                 .clientQoS(CLIENT_QOS_DEFAULT)
+                .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .build();
     }
 
@@ -99,6 +102,7 @@ public final class ClientConfigurations {
                 .nodeSelectionStrategy(DEFAULT_NODE_SELECTION_STRATEGY)
                 .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)
                 .clientQoS(CLIENT_QOS_DEFAULT)
+                .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .build();
     }
 
