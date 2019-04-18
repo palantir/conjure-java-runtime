@@ -102,7 +102,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
         return request.newBuilder()
                 .url(getNewRequestUrl(request.url()))
                 .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create())
-                .tag(AsyncTracer.class, new AsyncTracer("OkHttp: execute"))
+                .tag(AsyncTracerTag.class, AsyncTracerTag.create())
                 .build();
     }
 

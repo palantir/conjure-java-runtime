@@ -16,18 +16,17 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import java.io.IOException;
-import okhttp3.Interceptor;
-import okhttp3.Response;
+import com.palantir.conjure.java.client.config.ImmutablesStyle;
+import com.palantir.tracing.AsyncTracer;
+import org.immutables.value.Value;
 
-public final class DispatcherTraceTerminatingInterceptor implements Interceptor {
-    @Override
-    public Response intercept(Chain chain) throws IOException {
-        AsyncTracerTag tracerTag = chain.request().tag(AsyncTracerTag.class);
-        if (tracerTag == null && tracerTag.asyncTracer() == null) {
-            return chain.proceed(chain.request());
-        }
+@Value.Modifiable
+@ImmutablesStyle
+public interface AsyncTracerTag {
+    AsyncTracer asyncTracer();
+    AsyncTracerTag setAsyncTracer(AsyncTracer asyncTracer);
 
-        return tracerTag.asyncTracer().withTrace(() -> chain.proceed(chain.request()));
+    static AsyncTracerTag create() {
+        return ModifiableAsyncTracerTag.create();
     }
 }

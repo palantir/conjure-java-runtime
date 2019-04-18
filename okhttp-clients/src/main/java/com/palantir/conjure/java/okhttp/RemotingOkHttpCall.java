@@ -30,6 +30,7 @@ import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tracing.AsyncTracer;
+import com.palantir.tracing.Tracer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
@@ -165,8 +166,15 @@ final class RemotingOkHttpCall extends ForwardingCall {
         Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {
             @Override
             public void onSuccess(Limiter.Listener listener) {
-                tracer.withTrace(() -> null);
-                enqueueInternal(callback);
+                tracer.withTrace(() -> {
+                    // terminate acquire-limiter-run span
+                    Tracer.fastCompleteSpan();
+                    request().tag(AsyncTracerTag.class).setAsyncTracer(new AsyncTracer("OkHttp: execute"));
+                    enqueueInternal(callback);
+                    // Need to recreate a span to make sure withTrace will not close parent spans
+                    Tracer.startSpan("ignored-span");
+                    return null;
+                });
             }
 
             @Override
