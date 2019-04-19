@@ -16,22 +16,16 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.tracing.Tracer;
-import com.palantir.tracing.api.OpenSpan;
+import com.palantir.tracing.api.Span;
 import com.palantir.tracing.api.SpanType;
 import com.palantir.tracing.api.TraceHttpHeaders;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -60,26 +54,32 @@ public final class TracerTest extends TestBase {
     @Test
     public void testClientIsInstrumentedWithTracer() throws InterruptedException {
         server.enqueue(new MockResponse().setBody("\"server\""));
-        OpenSpan parentTrace = Tracer.startSpan("");
-        List<Map.Entry<SpanType, String>> observedSpans = Lists.newArrayList();
-        Tracer.subscribe(TracerTest.class.getName(),
-                span -> observedSpans.add(Maps.immutableEntry(span.type(), span.getOperation())));
 
+        String parentSpanId = Tracer.startSpan("").getSpanId();
         String traceId = Tracer.getTraceId();
+
+        List<String> spanIds = Lists.newArrayList();
+        List<Span> spans = Lists.newArrayList();
+        Tracer.subscribe(TracerTest.class.getName(), span -> {
+            spanIds.add(span.getSpanId());
+            spans.add(span);
+        });
+
         service.param("somevalue");
 
         Tracer.unsubscribe(TracerTest.class.getName());
-        assertThat(observedSpans, contains(
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: acquire-limiter-enqueue"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: acquire-limiter-run"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: execute-enqueue"),
-                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: GET /{param}"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: execute-run"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: dispatcher")));
+
+        assertThat(spans).containsExactly(
+                span(spans.get(0), traceId, parentSpanId, SpanType.LOCAL, "OkHttp: acquire-limiter-enqueue"),
+                span(spans.get(1), traceId, parentSpanId, SpanType.LOCAL, "OkHttp: acquire-limiter-run"),
+                span(spans.get(2), traceId, parentSpanId, SpanType.LOCAL, "OkHttp: execute-enqueue"),
+                span(spans.get(3), traceId, spanIds.get(4), SpanType.CLIENT_OUTGOING, "OkHttp: GET /{param}"),
+                span(spans.get(4), traceId, parentSpanId, SpanType.LOCAL, "OkHttp: execute-run"),
+                span(spans.get(5), traceId, parentSpanId, SpanType.LOCAL, "OkHttp: dispatcher"));
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));
-        assertThat(request.getHeader(TraceHttpHeaders.SPAN_ID), is(not(parentTrace.getSpanId())));
+        assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID)).isEqualTo(traceId);
+        assertThat(request.getHeader(TraceHttpHeaders.SPAN_ID)).isNotEqualTo(parentSpanId);
     }
 
     @Test
@@ -89,7 +89,22 @@ public final class TracerTest extends TestBase {
         addTraceSubscriber(observedTraceIds);
         runTwoRequestsInParallel();
         removeTraceSubscriber();
-        assertThat(observedTraceIds, hasSize(2));
+        assertThat(observedTraceIds).hasSize(2);
+    }
+
+    private static Span span(
+            Span actualSpan,
+            String traceId,
+            String parentSpanId,
+            SpanType spanType,
+            String operation) {
+        return Span.builder()
+                .from(actualSpan)
+                .traceId(traceId)
+                .parentSpanId(parentSpanId)
+                .type(spanType)
+                .operation(operation)
+                .build();
     }
 
     private void runTwoRequestsInParallel() {
@@ -130,7 +145,7 @@ public final class TracerTest extends TestBase {
                 server.enqueue(new MockResponse().setResponseCode(429));
             });
             server.enqueue(new MockResponse().setBody("\"server\""));
-            assertThat(service.string(), is("server"));
+            assertThat(service.string()).isEqualTo("server");
         }
     }
 }
