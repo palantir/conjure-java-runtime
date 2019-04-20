@@ -155,7 +155,6 @@ public final class OkHttpClients {
                 enableClientQoS);
 
         OkHttpClient.Builder client = new OkHttpClient.Builder();
-        client.addInterceptor(new DispatcherTraceTerminatingInterceptor());
 
         // Routing
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(

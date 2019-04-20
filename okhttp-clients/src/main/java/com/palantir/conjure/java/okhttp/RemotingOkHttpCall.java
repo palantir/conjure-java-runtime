@@ -30,6 +30,7 @@ import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tracing.AsyncTracer;
+import com.palantir.tracing.CloseableTracer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
@@ -159,14 +160,22 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     @Override
     public void enqueue(Callback callback) {
-        AsyncTracer tracer = new AsyncTracer("OkHttp: acquire-limiter");
+        try (CloseableTracer ignored = CloseableTracer.startSpan("OkHttp: enqueue")) {
+            enqueueLimiter(callback);
+        }
+    }
+
+    private void enqueueLimiter(Callback callback) {
+        AsyncTracer tracer = new AsyncTracer("OkHttp: limiter");
         ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
         request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
         Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {
             @Override
             public void onSuccess(Limiter.Listener listener) {
-                tracer.withTrace(() -> null);
-                enqueueInternal(callback);
+                tracer.withTrace(() -> {
+                    enqueueCall(callback);
+                    return null;
+                });
             }
 
             @Override
@@ -179,7 +188,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }, MoreExecutors.directExecutor());
     }
 
-    private void enqueueInternal(Callback callback) {
+    private void enqueueCall(Callback callback) {
         super.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {

@@ -70,12 +70,11 @@ public final class TracerTest extends TestBase {
         Tracer.unsubscribe(TracerTest.class.getName());
 
         assertThat(spans).containsExactly(
-                span(spans.get(0), traceId, parentSpanId, SpanType.LOCAL, "OkHttp: acquire-limiter-enqueue"),
-                span(spans.get(1), traceId, parentSpanId, SpanType.LOCAL, "OkHttp: acquire-limiter-run"),
-                span(spans.get(2), traceId, parentSpanId, SpanType.LOCAL, "OkHttp: execute-enqueue"),
+                span(spans.get(0), traceId, spanIds.get(2), SpanType.LOCAL, "OkHttp: limiter-enqueue"),
+                span(spans.get(1), traceId, spanIds.get(2), SpanType.LOCAL, "OkHttp: limiter-run"),
+                span(spans.get(2), traceId, parentSpanId, SpanType.LOCAL, "OkHttp: enqueue"),
                 span(spans.get(3), traceId, spanIds.get(4), SpanType.CLIENT_OUTGOING, "OkHttp: GET /{param}"),
-                span(spans.get(4), traceId, parentSpanId, SpanType.LOCAL, "OkHttp: execute-run"),
-                span(spans.get(5), traceId, parentSpanId, SpanType.LOCAL, "OkHttp: dispatcher"));
+                span(spans.get(4), traceId, spanIds.get(1), SpanType.LOCAL, "OkHttp: dispatcher"));
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID)).isEqualTo(traceId);
