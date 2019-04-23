@@ -443,6 +443,44 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
+    public void propagatesQos_429() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(429));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url))
+                        .serverQoS(ClientConfiguration.ServerQoS.PROPAGATE_429_and_503_TO_CALLER)
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+
+        Call call = client.newCall(new Request.Builder().url(url).build());
+        assertThat(call.execute().code()).isEqualTo(429);
+
+        assertThat(server.getRequestCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void propagatesQos_503() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(503));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url))
+                        .serverQoS(ClientConfiguration.ServerQoS.PROPAGATE_429_and_503_TO_CALLER)
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+
+        Call call = client.newCall(new Request.Builder().url(url).build());
+        assertThat(call.execute().code()).isEqualTo(503);
+
+        assertThat(server.getRequestCount()).isEqualTo(1);
+    }
+
+    @Test
     public void handlesIoExceptions_retriesOtherServers() throws Exception {
         server.shutdown();
         server2.shutdown();

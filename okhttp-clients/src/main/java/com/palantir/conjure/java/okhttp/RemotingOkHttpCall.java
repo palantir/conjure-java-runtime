@@ -238,7 +238,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 // Handle to handle QoS situations: retry, failover, etc.
                 Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
                 if (qosError.isPresent()) {
-                    qosError.get().accept(createQosVisitor(callback, call, response));
+                    qosError.get().accept(createQosVisitor(callback, call, errorResponseSupplier.get()));
                     return;
                 }
 
