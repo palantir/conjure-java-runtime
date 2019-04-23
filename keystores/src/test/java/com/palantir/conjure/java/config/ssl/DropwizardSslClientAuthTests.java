@@ -54,7 +54,7 @@ public final class DropwizardSslClientAuthTests {
             ConfigOverride.config("server.applicationConnectors[0].trustStorePath",
                     TestConstants.CA_TRUST_STORE_PATH.toString()),
             ConfigOverride.config("server.applicationConnectors[0].trustStorePassword",
-                    TestConstants.CA_TRUST_STIRE_JKS_PASSWORD),
+                    TestConstants.CA_TRUST_STORE_JKS_PASSWORD),
             ConfigOverride.config("server.applicationConnectors[0].crlPath",
                     TestConstants.COMBINED_CRL_PATH.toString()),
             ConfigOverride.config("server.applicationConnectors[0].needClientAuth",
