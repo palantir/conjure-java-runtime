@@ -38,6 +38,7 @@ final class DefaultHostMetrics implements HostMetrics {
     private final Timer redirection;
     private final Timer clientError;
     private final Timer serverError;
+    private final Timer qos;
     private final Timer other;
     private final Meter ioExceptions;
     private final Clock clock;
@@ -54,6 +55,7 @@ final class DefaultHostMetrics implements HostMetrics {
         this.redirection = new Timer();
         this.clientError = new Timer();
         this.serverError = new Timer();
+        this.qos = new Timer();
         this.other = new Timer();
         this.ioExceptions = new Meter();
         this.clock = clock;
@@ -106,6 +108,11 @@ final class DefaultHostMetrics implements HostMetrics {
     }
 
     @Override
+    public Timer getQos() {
+        return qos;
+    }
+
+    @Override
     public Timer getOther() {
         return other;
     }
@@ -120,32 +127,34 @@ final class DefaultHostMetrics implements HostMetrics {
      * HTTP status code.
      */
     void record(int statusCode, long micros) {
-        // Explicitly not using javax.ws.rs.core.Response API since it's incompatible across versions.
-        switch (statusCode / 100) {
-            case 1:
-                informational.update(micros, MICROS);
-                break;
-            case 2:
-                successful.update(micros, MICROS);
-                break;
-            case 3:
-                redirection.update(micros, MICROS);
-                break;
-            case 4:
-                clientError.update(micros, MICROS);
-                break;
-            case 5:
-                serverError.update(micros, MICROS);
-                break;
-            default:
-                other.update(micros, MICROS);
-                break;
-        }
+        timer(statusCode).update(micros, MICROS);
         lastUpdateEpochMillis = clock.millis();
     }
 
     void recordIoException() {
         ioExceptions.mark();
         lastUpdateEpochMillis = clock.millis();
+    }
+
+    private Timer timer(int statusCode) {
+        // Explicitly not using javax.ws.rs.core.Response API since it's incompatible across versions.
+        if (statusCode == 429 || statusCode == 503) {
+            return qos;
+        }
+
+        switch (statusCode / 100) {
+            case 1:
+                return informational;
+            case 2:
+                return successful;
+            case 3:
+                return redirection;
+            case 4:
+                return clientError;
+            case 5:
+                return serverError;
+        }
+
+        return other;
     }
 }

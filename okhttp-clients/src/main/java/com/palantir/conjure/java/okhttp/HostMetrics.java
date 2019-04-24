@@ -56,6 +56,8 @@ public interface HostMetrics {
 
     Timer get5xx();
 
+    Timer getQos();
+
     Timer getOther();
 
     Meter getIoExceptions();
