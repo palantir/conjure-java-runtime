@@ -54,8 +54,10 @@ final class ConcurrencyLimiters {
             MetricName.builder().safeName("conjure-java-client.qos.request-permit.slow-acquire").build();
     private static final MetricName LEAK_SUSPECTED =
             MetricName.builder().safeName("conjure-java-client.qos.request-permit.leak-suspected").build();
+    private static final String SLOW_ACQUIRE_TAGGED = "conjure-java-client.qos.request-permit.slow-acquire-tagged";
 
     private final Timer slowAcquire;
+    private final Timer slowAcquireTagged;
     private final Meter leakSuspected;
     private final ConcurrentMap<Key, ConcurrencyLimiter> limiters = new ConcurrentHashMap<>();
     private final Duration timeout;
@@ -72,6 +74,8 @@ final class ConcurrencyLimiters {
             boolean useLimiter) {
         this.slowAcquire = taggedMetricRegistry.timer(SLOW_ACQUIRE);
         this.leakSuspected = taggedMetricRegistry.meter(LEAK_SUSPECTED);
+        this.slowAcquireTagged = taggedMetricRegistry.timer(generateMetricNameWithServiceName(SLOW_ACQUIRE_TAGGED,
+                serviceClass));
         this.timeout = timeout;
         this.serviceClass = serviceClass;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -106,6 +110,12 @@ final class ConcurrencyLimiters {
                 .build());
     }
 
+    private MetricName generateMetricNameWithServiceName(String name, Class<?> service) {
+        return MetricName.builder()
+                .safeName(name)
+                .putSafeTags("serviceClass", service.getSimpleName())
+                .build();
+    }
 
     private ConcurrencyLimiter newLimiter(Key limiterKey) {
         if (!useLimiter) {
@@ -241,6 +251,7 @@ final class ConcurrencyLimiters {
                     // them from the 'slow acquire' metric
                     if (TimeUnit.NANOSECONDS.toMillis(durationNanos) > 1) {
                         slowAcquire.update(durationNanos, TimeUnit.NANOSECONDS);
+                        slowAcquireTagged.update(durationNanos, TimeUnit.NANOSECONDS);
                     }
                 }
 
