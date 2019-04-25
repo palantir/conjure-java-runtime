@@ -110,10 +110,10 @@ final class ConcurrencyLimiters {
                 .build());
     }
 
-    private MetricName generateMetricNameWithServiceName(String name, Class<?> serviceClass) {
+    private MetricName generateMetricNameWithServiceName(String name, Class<?> service) {
         return MetricName.builder()
                 .safeName(name)
-                .putSafeTags("serviceClass", serviceClass.getSimpleName())
+                .putSafeTags("serviceClass", service.getSimpleName())
                 .build();
     }
 
