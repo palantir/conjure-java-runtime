@@ -37,6 +37,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
@@ -507,6 +508,28 @@ public final class OkHttpClientsTest extends TestBase {
                 .hasExactlyArgs(UnsafeArg.of("requestUrl", url2 + "/foo?bar"));
 
         assertThat(server3.getRequestCount()).isEqualTo(0);
+    }
+
+    @Test
+    public void handlesTimeouts_failFast() {
+        server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE));
+        server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url, url2))
+                        .readTimeout(Duration.ofMillis(20))
+                        .maxNumRetries(1)
+                        .backoffSlotSize(Duration.ofMillis(10))
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+        Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThatThrownBy(() -> call.execute())
+                .isInstanceOf(SafeIoException.class)
+                .hasMessageContaining("Failed to complete the request due to an IOException")
+                .hasCauseInstanceOf(SocketTimeoutException.class);
     }
 
     @Test(timeout = 10_000)

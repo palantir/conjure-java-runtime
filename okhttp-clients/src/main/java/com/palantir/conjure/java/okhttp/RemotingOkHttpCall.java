@@ -32,6 +32,7 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tracing.AsyncTracer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -183,7 +184,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 // Fail call if backoffs are exhausted or if no retry URL can be determined.
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
-                if (!backoff.isPresent()) {
+                if (!shouldRetry(exception, backoff)) {
                     callback.onFailure(call, new SafeIoException(
                             "Failed to complete the request due to an IOException",
                             exception,
@@ -260,6 +261,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
                         + "this is an conjure-java-runtime bug."));
             }
         });
+    }
+
+    private static boolean shouldRetry(IOException exception, Optional<Duration> backoff) {
+        boolean isTimedOut = exception instanceof SocketTimeoutException;
+        return !isTimedOut && backoff.isPresent();
     }
 
     @SuppressWarnings("FutureReturnValueIgnored")
