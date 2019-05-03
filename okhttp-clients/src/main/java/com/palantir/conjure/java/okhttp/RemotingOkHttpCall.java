@@ -269,8 +269,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private boolean shouldRetry(IOException exception, Optional<Duration> backoff) {
         switch (retryOnTimeout) {
             case DISABLED:
-                boolean isTimedOut = exception instanceof SocketTimeoutException;
-                return !isTimedOut && backoff.isPresent();
+                if (exception instanceof SocketTimeoutException) {
+                    // non-connect timeouts should not be retried
+                    SocketTimeoutException socketTimeout = (SocketTimeoutException) exception;
+                    if (!socketTimeout.getMessage().contains("connect timed out")) {
+                        return false;
+                    }
+                }
+                return backoff.isPresent();
             case DANGEROUS_ENABLE_AT_RISK_OF_RETRY_STORMS:
                 return backoff.isPresent();
         }
