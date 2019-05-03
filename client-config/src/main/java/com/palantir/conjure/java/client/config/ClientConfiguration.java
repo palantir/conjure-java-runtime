@@ -101,12 +101,14 @@ public interface ClientConfiguration {
      */
     Duration backoffSlotSize();
 
-
     /** Indicates whether client-side sympathetic QoS should be enabled. */
     ClientQoS clientQoS();
 
     /** Indicates whether QosExceptions (other than RetryOther) should be propagated. */
     ServerQoS serverQoS();
+
+    /** Indicates whether timed out requests should be retried. */
+    RetryOnTimeout retryOnTimeout();
 
     @Value.Check
     default void check() {
@@ -161,4 +163,20 @@ public interface ClientConfiguration {
          */
         PROPAGATE_429_and_503_TO_CALLER
     }
+
+    enum RetryOnTimeout {
+        /** Default. */
+        DISABLED,
+        /**
+         * Enables retry on timeout. This was the default behavior in versions up to and including 4.24.x. Consumers
+         * should almost never use this option, reserving it for when their clients have guaranteed that they will never
+         * retry on timeout.
+         *
+         * The risk of retry storms is severe. If the client times out before the consumer finishes retrying on its
+         * timeout, it will submit a new request which will also retry on timeout. Expensive requests that time out have
+         * brought down servers with this behavior enabled.
+         */
+        DANGEROUS_ENABLE_AT_RISK_OF_RETRY_STORMS
+    }
+
 }

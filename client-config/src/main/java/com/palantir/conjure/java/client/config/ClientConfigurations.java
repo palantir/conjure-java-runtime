@@ -50,6 +50,8 @@ public final class ClientConfigurations {
             ClientConfiguration.ClientQoS.ENABLED;
     private static final ClientConfiguration.ServerQoS PROPAGATE_QOS_DEFAULT =
             ClientConfiguration.ServerQoS.AUTOMATIC_RETRY;
+    private static final ClientConfiguration.RetryOnTimeout RETRY_ON_TIMEOUT_DEFAULT =
+            ClientConfiguration.RetryOnTimeout.DISABLED;
 
     private ClientConfigurations() {}
 
@@ -77,6 +79,7 @@ public final class ClientConfigurations {
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
                 .clientQoS(CLIENT_QOS_DEFAULT)
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
+                .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
                 .build();
     }
 
@@ -103,6 +106,7 @@ public final class ClientConfigurations {
                 .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)
                 .clientQoS(CLIENT_QOS_DEFAULT)
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
+                .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
                 .build();
     }
 

@@ -226,7 +226,8 @@ public final class OkHttpClients {
                 schedulingExecutor.get(),
                 executionExecutor,
                 concurrencyLimiters,
-                config.serverQoS());
+                config.serverQoS(),
+                config.retryOnTimeout());
     }
 
     private static boolean shouldEnableQos(ClientConfiguration.ClientQoS clientQoS) {

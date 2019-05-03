@@ -72,6 +72,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private final ExecutorService executionExecutor;
     private final ConcurrencyLimiters.ConcurrencyLimiter limiter;
     private final ClientConfiguration.ServerQoS serverQoS;
+    private final ClientConfiguration.RetryOnTimeout retryOnTimeout;
 
     private final int maxNumRelocations;
 
@@ -84,7 +85,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
             ExecutorService executionExecutor,
             ConcurrencyLimiters.ConcurrencyLimiter limiter,
             int maxNumRelocations,
-            ClientConfiguration.ServerQoS serverQoS) {
+            ClientConfiguration.ServerQoS serverQoS,
+            ClientConfiguration.RetryOnTimeout retryOnTimeout) {
         super(delegate);
         this.backoffStrategy = backoffStrategy;
         this.urls = urls;
@@ -94,6 +96,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         this.limiter = limiter;
         this.maxNumRelocations = maxNumRelocations;
         this.serverQoS = serverQoS;
+        this.retryOnTimeout = retryOnTimeout;
     }
 
     /**
@@ -263,9 +266,17 @@ final class RemotingOkHttpCall extends ForwardingCall {
         });
     }
 
-    private static boolean shouldRetry(IOException exception, Optional<Duration> backoff) {
-        boolean isTimedOut = exception instanceof SocketTimeoutException;
-        return !isTimedOut && backoff.isPresent();
+    private boolean shouldRetry(IOException exception, Optional<Duration> backoff) {
+        switch (retryOnTimeout) {
+            case DISABLED:
+                boolean isTimedOut = exception instanceof SocketTimeoutException;
+                return !isTimedOut && backoff.isPresent();
+            case DANGEROUS_ENABLE_AT_RISK_OF_RETRY_STORMS:
+                return backoff.isPresent();
+        }
+
+        throw new SafeIllegalStateException("Encountered unknown retry on timeout configuration",
+                SafeArg.of("retryOnTimeout", retryOnTimeout));
     }
 
     @SuppressWarnings("FutureReturnValueIgnored")
@@ -405,6 +416,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
     @Override
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(), backoffStrategy, urls, client, schedulingExecutor,
-                executionExecutor, limiter, maxNumRelocations, serverQoS);
+                executionExecutor, limiter, maxNumRelocations, serverQoS, retryOnTimeout);
     }
 }
