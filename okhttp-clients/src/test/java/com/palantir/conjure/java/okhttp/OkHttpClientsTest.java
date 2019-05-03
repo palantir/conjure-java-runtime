@@ -533,6 +533,29 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
+    public void handlesConnectTimeouts_alwaysRetry() throws IOException, InterruptedException {
+        String urlConnectTimeout = "http://www.google.com:81";
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(urlConnectTimeout, url))
+                        .readTimeout(Duration.ofMillis(20))
+                        .maxNumRetries(1)
+                        .backoffSlotSize(Duration.ofMillis(10))
+                        .connectTimeout(Duration.ofMillis(50))
+                        .retryOnTimeout(ClientConfiguration.RetryOnTimeout.DISABLED)
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+        Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThat(call.execute().body().string()).isEqualTo("foo");
+
+        assertThat(server.takeRequest().getPath()).isEqualTo("/foo?bar");
+    }
+
+    @Test
     public void handlesTimeouts_withRetryOnTimeout() throws IOException, InterruptedException {
         server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE));
         server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
