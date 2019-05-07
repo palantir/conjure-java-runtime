@@ -23,6 +23,7 @@ import com.palantir.conjure.java.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.net.ProxySelector;
 import java.time.Duration;
 import java.util.List;
@@ -103,12 +104,14 @@ public interface ClientConfiguration {
      */
     Duration backoffSlotSize();
 
-
     /** Indicates whether client-side sympathetic QoS should be enabled. */
     ClientQoS clientQoS();
 
     /** Indicates whether QosExceptions (other than RetryOther) should be propagated. */
     ServerQoS serverQoS();
+
+    /** Both per-request and global metrics are recorded in this registry. */
+    TaggedMetricRegistry taggedMetricRegistry();
 
     @Value.Check
     default void check() {

@@ -3,6 +3,7 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
     api 'com.palantir.conjure.java.api:service-config'
+    api 'com.palantir.tritium:tritium-registry'
     implementation 'com.palantir.safe-logging:safe-logging'
     implementation 'com.google.guava:guava'
     implementation project(":keystores")
