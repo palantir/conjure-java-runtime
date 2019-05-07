@@ -534,7 +534,7 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void handlesConnectTimeouts_alwaysRetry() throws IOException, InterruptedException {
-        String urlConnectTimeout = "http:/10.255.255.1";
+        String urlConnectTimeout = "http://10.255.255.1";
         server.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
 
         OkHttpClient client = OkHttpClients.withStableUris(
