@@ -85,7 +85,7 @@ public final class ClientConfigurationsTest {
                 .build();
         Assertions
                 .assertThatLoggableExceptionThrownBy(() -> ClientConfigurations.of(serviceConfig))
-                .hasLogMessage("Timeout should be a multiple of milliseconds");
+                .hasLogMessage("Timeouts with sub-millisecond precision are not supported");
     }
 
     @Test

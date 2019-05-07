@@ -128,7 +128,7 @@ public interface ClientConfiguration {
 
     default void checkTimeoutPrecision(Duration duration, String timeoutName) {
         checkArgument(duration.minusMillis(duration.toMillis()).isZero(),
-                "Timeout should be a multiple of milliseconds",
+                "Timeouts with sub-millisecond precision are not supported",
                 SafeArg.of("timeoutName", timeoutName),
                 SafeArg.of("duration", duration),
                 UnsafeArg.of("uris", uris()));
