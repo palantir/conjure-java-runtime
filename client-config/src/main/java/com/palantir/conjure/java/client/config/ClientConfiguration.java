@@ -16,11 +16,13 @@
 
 package com.palantir.conjure.java.client.config;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.palantir.logsafe.Preconditions.checkArgument;
 
 import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
 import java.net.ProxySelector;
 import java.time.Duration;
 import java.util.List;
@@ -118,6 +120,18 @@ public interface ClientConfiguration {
             checkArgument(!failedUrlCooldown().isNegative() && !failedUrlCooldown().isZero(),
                     "If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
         }
+        // Assert that timeouts are in milliseconds, not any higher precision, because feign only supports millis.
+        checkTimeoutPrecision(connectTimeout(), "connectTimeout");
+        checkTimeoutPrecision(readTimeout(), "readTimeout");
+        checkTimeoutPrecision(writeTimeout(), "writeTimeout");
+    }
+
+    default void checkTimeoutPrecision(Duration duration, String timeoutName) {
+        checkArgument(duration.minusMillis(duration.toMillis()).isZero(),
+                "Timeout should be a multiple of milliseconds",
+                SafeArg.of("timeoutName", timeoutName),
+                SafeArg.of("duration", duration),
+                UnsafeArg.of("uris", uris()));
     }
 
     static Builder builder() {
