@@ -32,9 +32,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.Tracers;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
-import com.palantir.tritium.metrics.registry.MetricName;
-import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -90,30 +87,18 @@ public final class OkHttpClients {
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
 
-    /** Global {@link TaggedMetricRegistry} for per-client and dispatcher-wide metrics. */
-    private static TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
-
     /** Shared connection pool. */
     private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
+
+    private static DispatcherMetricSet dispatcherMetricSet;
 
     static {
         dispatcher = new Dispatcher(executionExecutor);
         dispatcher.setMaxRequests(256);
         // Must be less than maxRequests so a single slow host does not block all requests
         dispatcher.setMaxRequestsPerHost(64);
-        // metrics
-        registry.gauge(
-                MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.queued").build(),
-                dispatcher::queuedCallsCount);
-        registry.gauge(
-                MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.running").build(),
-                dispatcher::runningCallsCount);
-        registry.gauge(
-                MetricName.builder().safeName("com.palantir.conjure.java.connection-pool.connections.total").build(),
-                connectionPool::connectionCount);
-        registry.gauge(
-                MetricName.builder().safeName("com.palantir.conjure.java.connection-pool.connections.idle").build(),
-                connectionPool::idleConnectionCount);
+
+        dispatcherMetricSet = new DispatcherMetricSet(dispatcher, connectionPool);
     }
 
     /**
@@ -134,6 +119,7 @@ public final class OkHttpClients {
     private static final Supplier<ScheduledExecutorService> schedulingExecutor = Suppliers.memoize(() ->
             Tracers.wrap(Executors.newScheduledThreadPool(NUM_SCHEDULING_THREADS,
                     Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true))));
+
 
     private OkHttpClients() {}
 
@@ -162,8 +148,12 @@ public final class OkHttpClients {
             boolean randomizeUrlOrder,
             boolean reshuffle) {
         boolean enableClientQoS = shouldEnableQos(config.clientQoS());
-        ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(limitReviver.get(), registry, serviceClass,
+        ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(
+                limitReviver.get(),
+                config.taggedMetricRegistry(),
+                serviceClass,
                 enableClientQoS);
+
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         client.addInterceptor(new DispatcherTraceTerminatingInterceptor());
 
@@ -188,7 +178,10 @@ public final class OkHttpClients {
         if (enableClientQoS) {
             client.addInterceptor(new ConcurrencyLimitingInterceptor());
         }
-        client.addInterceptor(InstrumentedInterceptor.create(registry, hostEventsSink, serviceClass));
+        client.addInterceptor(InstrumentedInterceptor.create(
+                config.taggedMetricRegistry(),
+                hostEventsSink,
+                serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
         client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
 
@@ -216,6 +209,10 @@ public final class OkHttpClients {
         client.connectionPool(connectionPool);
 
         client.dispatcher(dispatcher);
+
+        // global metrics (addMetrics is idempotent, so this works even when multiple clients are created)
+        config.taggedMetricRegistry().addMetrics(
+                "from", DispatcherMetricSet.class.getSimpleName(), dispatcherMetricSet);
 
         return new RemotingOkHttpClient(
                 client.build(),

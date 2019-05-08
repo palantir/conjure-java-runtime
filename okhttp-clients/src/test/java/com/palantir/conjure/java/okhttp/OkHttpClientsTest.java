@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HostAndPort;
 import com.google.common.net.HttpHeaders;
@@ -36,6 +37,9 @@ import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -95,6 +99,24 @@ public final class OkHttpClientsTest extends TestBase {
         HostMetrics actualMetrics = Iterables.getOnlyElement(hostMetrics);
 
         assertThat(actualMetrics.get2xx().getCount()).isGreaterThanOrEqualTo(1);
+    }
+
+    @Test
+    /** See {@link DispatcherMetricSet}. */
+    public void verifyGlobalMetricsAreRegistered() {
+        TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
+        ClientConfiguration clientConfiguration = ClientConfiguration.builder()
+                .from(createTestConfig(url))
+                .taggedMetricRegistry(registry)
+                .build();
+
+        OkHttpClients.create(clientConfiguration, AGENT, hostEventsSink, OkHttpClientsTest.class);
+
+        assertThat(Collections2.transform(registry.getMetrics().keySet(), MetricName::safeName)).contains(
+                "com.palantir.conjure.java.connection-pool.connections.idle",
+                "com.palantir.conjure.java.connection-pool.connections.total",
+                "com.palantir.conjure.java.dispatcher.calls.queued",
+                "com.palantir.conjure.java.dispatcher.calls.running");
     }
 
     @Test
