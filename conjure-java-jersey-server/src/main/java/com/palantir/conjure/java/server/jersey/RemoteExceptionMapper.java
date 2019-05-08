@@ -50,17 +50,9 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
     @Override
     public Response toResponse(RemoteException exception) {
-        Status status = Status.fromStatusCode(exception.getStatus());
-
-        // log at WARN instead of ERROR because although this indicates an issue in a remote server
-        log.warn("Encountered a remote exception. Mapping to an internal error before propagating",
-                SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
-                SafeArg.of("errorName", exception.getError().errorName()),
-                SafeArg.of("statusCode", status.getStatusCode()),
-                exception);
-
-        ErrorType errorType = ErrorType.INTERNAL;
+        ErrorType errorType = mapErrorType(exception);
         Response.ResponseBuilder builder = Response.status(errorType.httpErrorCode());
+
         try {
             SerializableError error = SerializableError.builder()
                     .errorName(errorType.name())
@@ -80,5 +72,29 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
                     + exception.getError().errorInstanceId());
         }
         return builder.build();
+    }
+
+    private ErrorType mapErrorType(RemoteException exception) {
+        Status status = Status.fromStatusCode(exception.getStatus());
+
+        if (status.getStatusCode() == 403) {
+            log.info("Encountered a remote permission denied exception."
+                            + " Mapping to a default permission denied exception before propagating",
+                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
+                    SafeArg.of("errorName", exception.getError().errorName()),
+                    SafeArg.of("statusCode", status.getStatusCode()),
+                    exception);
+
+            return ErrorType.PERMISSION_DENIED;
+        } else {
+            // log at WARN instead of ERROR because this indicates an issue in a remote server
+            log.warn("Encountered a remote exception. Mapping to an internal error before propagating",
+                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
+                    SafeArg.of("errorName", exception.getError().errorName()),
+                    SafeArg.of("statusCode", status.getStatusCode()),
+                    exception);
+
+            return ErrorType.INTERNAL;
+        }
     }
 }

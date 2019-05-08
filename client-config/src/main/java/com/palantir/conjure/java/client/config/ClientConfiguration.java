@@ -16,11 +16,14 @@
 
 package com.palantir.conjure.java.client.config;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.palantir.logsafe.Preconditions.checkArgument;
 
 import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.net.ProxySelector;
 import java.time.Duration;
 import java.util.List;
@@ -110,6 +113,9 @@ public interface ClientConfiguration {
     /** Indicates whether timed out requests should be retried. */
     RetryOnTimeout retryOnTimeout();
 
+    /** Both per-request and global metrics are recorded in this registry. */
+    TaggedMetricRegistry taggedMetricRegistry();
+
     @Value.Check
     default void check() {
         if (meshProxy().isPresent()) {
@@ -120,6 +126,18 @@ public interface ClientConfiguration {
             checkArgument(!failedUrlCooldown().isNegative() && !failedUrlCooldown().isZero(),
                     "If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
         }
+        // Assert that timeouts are in milliseconds, not any higher precision, because feign only supports millis.
+        checkTimeoutPrecision(connectTimeout(), "connectTimeout");
+        checkTimeoutPrecision(readTimeout(), "readTimeout");
+        checkTimeoutPrecision(writeTimeout(), "writeTimeout");
+    }
+
+    default void checkTimeoutPrecision(Duration duration, String timeoutName) {
+        checkArgument(duration.minusMillis(duration.toMillis()).isZero(),
+                "Timeouts with sub-millisecond precision are not supported",
+                SafeArg.of("timeoutName", timeoutName),
+                SafeArg.of("duration", duration),
+                UnsafeArg.of("uris", uris()));
     }
 
     static Builder builder() {

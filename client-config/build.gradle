@@ -3,6 +3,7 @@ apply from: "${rootDir}/gradle/publish-jar.gradle"
 
 dependencies {
     api 'com.palantir.conjure.java.api:service-config'
+    api 'com.palantir.tritium:tritium-registry'
     implementation 'com.palantir.safe-logging:safe-logging'
     implementation 'com.google.guava:guava'
     implementation project(":keystores")
@@ -11,6 +12,7 @@ dependencies {
     testImplementation 'com.google.guava:guava'
     testImplementation "org.assertj:assertj-core"
     testImplementation "org.mockito:mockito-core"
+    testImplementation 'com.palantir.safe-logging:preconditions-assertj'
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'

@@ -21,6 +21,7 @@ import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -80,6 +81,7 @@ public final class ClientConfigurations {
                 .clientQoS(CLIENT_QOS_DEFAULT)
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
+                .taggedMetricRegistry(DefaultTaggedMetricRegistry.getDefault())
                 .build();
     }
 
@@ -107,6 +109,7 @@ public final class ClientConfigurations {
                 .clientQoS(CLIENT_QOS_DEFAULT)
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
+                .taggedMetricRegistry(DefaultTaggedMetricRegistry.getDefault())
                 .build();
     }
 

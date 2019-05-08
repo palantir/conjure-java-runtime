@@ -67,6 +67,7 @@ public final class ExceptionMappingTest {
     private static final Response.Status SERVER_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
     private static final Response.Status WEB_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
     private static final int REMOTE_EXCEPTION_STATUS_CODE = 400;
+    private static final int REMOTE_AUTH_EXCEPTION_STATUS_CODE = 403;
 
     private WebTarget target;
 
@@ -110,8 +111,7 @@ public final class ExceptionMappingTest {
     public void testRemoteException() throws IOException {
         Response response = target.path("throw-remote-exception").request().get();
         assertThat(response.getStatus(), is(ErrorType.INTERNAL.httpErrorCode()));
-        String body =
-                new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
+        String body = readBody(response);
 
         SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
         assertThat(error.errorInstanceId(), is("errorInstanceId"));
@@ -120,11 +120,22 @@ public final class ExceptionMappingTest {
     }
 
     @Test
+    public void testRemoteAuthException() throws IOException {
+        Response response = target.path("throw-remote-auth-exception").request().get();
+        assertThat(response.getStatus(), is(ErrorType.PERMISSION_DENIED.httpErrorCode()));
+        String body = readBody(response);
+
+        SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
+        assertThat(error.errorInstanceId(), is("errorInstanceId"));
+        assertThat(error.errorCode(), is(ErrorType.PERMISSION_DENIED.code().toString()));
+        assertThat(error.errorName(), is(ErrorType.PERMISSION_DENIED.name()));
+    }
+
+    @Test
     public void testServiceException() throws IOException {
         Response response = target.path("throw-service-exception").request().get();
         assertThat(response.getStatus(), is(ErrorType.INVALID_ARGUMENT.httpErrorCode()));
-        String body =
-                new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
+        String body = readBody(response);
 
         SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
         assertThat(error.errorCode(), is(ErrorType.INVALID_ARGUMENT.code().toString()));
@@ -149,12 +160,15 @@ public final class ExceptionMappingTest {
     public void testAssertionErrorIsJsonException() throws IOException {
         Response response = target.path("throw-assertion-error").request().get();
         assertThat(response.getStatus(), is(SERVER_EXCEPTION_STATUS.getStatusCode()));
-        String body =
-                new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
+        String body = readBody(response);
 
         SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
         assertThat(error.errorCode(), is(ErrorType.INTERNAL.code().toString()));
         assertThat(error.errorName(), is(ErrorType.INTERNAL.name()));
+    }
+
+    private String readBody(Response response) throws IOException {
+        return new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
     }
 
     public static class ExceptionMappersTestServer extends Application<Configuration> {
@@ -194,6 +208,16 @@ public final class ExceptionMappingTest {
                     .errorName("errorName")
                     .build(),
                     REMOTE_EXCEPTION_STATUS_CODE);
+        }
+
+        @Override
+        public String throwRemoteAuthException() {
+            throw new RemoteException(SerializableError.builder()
+                    .errorInstanceId("errorInstanceId")
+                    .errorCode("errorCode")
+                    .errorName("errorName")
+                    .build(),
+                    REMOTE_AUTH_EXCEPTION_STATUS_CODE);
         }
 
         @Override
@@ -239,6 +263,10 @@ public final class ExceptionMappingTest {
         @GET
         @Path("/throw-remote-exception")
         String throwRemoteException();
+
+        @GET
+        @Path("/throw-remote-auth-exception")
+        String throwRemoteAuthException();
 
         @GET
         @Path("/throw-service-exception")
