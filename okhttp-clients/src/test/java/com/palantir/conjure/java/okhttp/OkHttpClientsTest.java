@@ -41,6 +41,7 @@ import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
@@ -529,6 +530,73 @@ public final class OkHttpClientsTest extends TestBase {
                 .hasExactlyArgs(UnsafeArg.of("requestUrl", url2 + "/foo?bar"));
 
         assertThat(server3.getRequestCount()).isEqualTo(0);
+    }
+
+    @Test
+    public void handlesTimeouts_failFastByDefault() {
+        server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE));
+        server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url, url2))
+                        .readTimeout(Duration.ofMillis(20))
+                        .maxNumRetries(1)
+                        .backoffSlotSize(Duration.ofMillis(10))
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+        Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThatThrownBy(() -> call.execute())
+                .isInstanceOf(SafeIoException.class)
+                .hasMessageContaining("Failed to complete the request due to an IOException")
+                .hasCauseInstanceOf(SocketTimeoutException.class);
+    }
+
+    @Test
+    public void handlesConnectTimeouts_alwaysRetry() throws IOException, InterruptedException {
+        String urlConnectTimeout = "http://10.255.255.1";
+        server.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(urlConnectTimeout, url))
+                        .readTimeout(Duration.ofMillis(20))
+                        .maxNumRetries(1)
+                        .backoffSlotSize(Duration.ofMillis(10))
+                        .connectTimeout(Duration.ofMillis(50))
+                        .retryOnTimeout(ClientConfiguration.RetryOnTimeout.DISABLED)
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+        Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThat(call.execute().body().string()).isEqualTo("foo");
+
+        assertThat(server.takeRequest().getPath()).isEqualTo("/foo?bar");
+    }
+
+    @Test
+    public void handlesTimeouts_withRetryOnTimeout() throws IOException, InterruptedException {
+        server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE));
+        server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url, url2))
+                        .readTimeout(Duration.ofMillis(20))
+                        .maxNumRetries(1)
+                        .backoffSlotSize(Duration.ofMillis(10))
+                        .retryOnTimeout(ClientConfiguration.RetryOnTimeout.DANGEROUS_ENABLE_AT_RISK_OF_RETRY_STORMS)
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+        Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThat(call.execute().body().string()).isEqualTo("foo");
+
+        assertThat(server2.takeRequest().getPath()).isEqualTo("/foo?bar");
     }
 
     @Test(timeout = 10_000)

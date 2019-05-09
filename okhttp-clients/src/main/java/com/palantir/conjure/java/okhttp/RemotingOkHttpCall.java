@@ -32,6 +32,7 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tracing.AsyncTracer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -71,6 +72,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private final ExecutorService executionExecutor;
     private final ConcurrencyLimiters.ConcurrencyLimiter limiter;
     private final ClientConfiguration.ServerQoS serverQoS;
+    private final ClientConfiguration.RetryOnTimeout retryOnTimeout;
 
     private final int maxNumRelocations;
 
@@ -83,7 +85,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
             ExecutorService executionExecutor,
             ConcurrencyLimiters.ConcurrencyLimiter limiter,
             int maxNumRelocations,
-            ClientConfiguration.ServerQoS serverQoS) {
+            ClientConfiguration.ServerQoS serverQoS,
+            ClientConfiguration.RetryOnTimeout retryOnTimeout) {
         super(delegate);
         this.backoffStrategy = backoffStrategy;
         this.urls = urls;
@@ -93,6 +96,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         this.limiter = limiter;
         this.maxNumRelocations = maxNumRelocations;
         this.serverQoS = serverQoS;
+        this.retryOnTimeout = retryOnTimeout;
     }
 
     /**
@@ -183,7 +187,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 // Fail call if backoffs are exhausted or if no retry URL can be determined.
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
-                if (!backoff.isPresent()) {
+                if (!shouldRetry(exception, backoff)) {
                     callback.onFailure(call, new SafeIoException(
                             "Failed to complete the request due to an IOException",
                             exception,
@@ -260,6 +264,25 @@ final class RemotingOkHttpCall extends ForwardingCall {
                         + "this is an conjure-java-runtime bug."));
             }
         });
+    }
+
+    private boolean shouldRetry(IOException exception, Optional<Duration> backoff) {
+        switch (retryOnTimeout) {
+            case DISABLED:
+                if (exception instanceof SocketTimeoutException) {
+                    // non-connect timeouts should not be retried
+                    SocketTimeoutException socketTimeout = (SocketTimeoutException) exception;
+                    if (!socketTimeout.getMessage().contains("connect timed out")) {
+                        return false;
+                    }
+                }
+                return backoff.isPresent();
+            case DANGEROUS_ENABLE_AT_RISK_OF_RETRY_STORMS:
+                return backoff.isPresent();
+        }
+
+        throw new SafeIllegalStateException("Encountered unknown retry on timeout configuration",
+                SafeArg.of("retryOnTimeout", retryOnTimeout));
     }
 
     @SuppressWarnings("FutureReturnValueIgnored")
@@ -399,6 +422,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
     @Override
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(), backoffStrategy, urls, client, schedulingExecutor,
-                executionExecutor, limiter, maxNumRelocations, serverQoS);
+                executionExecutor, limiter, maxNumRelocations, serverQoS, retryOnTimeout);
     }
 }
