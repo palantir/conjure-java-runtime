@@ -115,8 +115,9 @@ public interface ClientConfiguration {
             checkArgument(uris().size() == 1, "If meshProxy is configured then uris must contain exactly 1 URI");
         }
         if (nodeSelectionStrategy().equals(NodeSelectionStrategy.ROUND_ROBIN)) {
-            checkArgument(!failedUrlCooldown().isNegative() && !failedUrlCooldown().isZero(),
-                    "If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
+            checkArgument(
+                    !failedUrlCooldown().isNegative() && failedUrlCooldown().compareTo(readTimeout()) >= 0,
+                    "If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be greater than read timeout");
         }
     }
 
