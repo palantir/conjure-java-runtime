@@ -59,6 +59,12 @@ public interface UrlSelector {
     List<HttpUrl> getBaseUrls();
 
     /**
+     * Indicates that a call against the given URL has succeeded. Implementations can use success statistics to
+     * determine when a previously unavailable host is once again available and should be used for future calls.
+     */
+    void markAsSucceeded(HttpUrl failedUrl);
+
+    /**
      * Indicates that a call against the given URL has failed. Implementations can use failure statistics to determine
      * which hosts may be unavailable and should be avoided for future calls.
      */

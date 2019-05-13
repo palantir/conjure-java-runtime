@@ -16,14 +16,16 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.MoreExecutors;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -41,7 +43,7 @@ final class UrlSelectorImpl implements UrlSelector {
 
     private final Supplier<List<HttpUrl>> baseUrls;
     private final AtomicInteger currentUrl;
-    private final Cache<HttpUrl, UrlAvailability> failedUrls;
+    private final LoadingCache<Integer, Instant> failedUrls;
     private final boolean useFailedUrlCache;
 
     private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, boolean reshuffle, Duration failedUrlCooldown) {
@@ -59,11 +61,10 @@ final class UrlSelectorImpl implements UrlSelector {
 
         this.currentUrl = new AtomicInteger(0);
 
-        long coolDownMillis = failedUrlCooldown.toMillis();
         this.failedUrls = Caffeine.newBuilder()
+                .executor(MoreExecutors.directExecutor())
                 .maximumSize(baseUrls.size())
-                .expireAfterWrite(coolDownMillis, TimeUnit.MILLISECONDS)
-                .build();
+                .build(key -> Instant.now().plus(failedUrlCooldown));
         this.useFailedUrlCache = !failedUrlCooldown.isNegative() && !failedUrlCooldown.isZero();
 
         Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
@@ -177,29 +178,39 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     @Override
+    public void markAsSucceeded(HttpUrl failedUrl) {
+        if (useFailedUrlCache) {
+            indexFor(failedUrl).ifPresent(failedUrls::invalidate);
+        }
+    }
+
+    @Override
     public void markAsFailed(HttpUrl failedUrl) {
         if (useFailedUrlCache) {
-            Optional<Integer> indexForFailedUrl = indexFor(failedUrl);
-            indexForFailedUrl.ifPresent(index ->
-                    failedUrls.put(baseUrls.get().get(index), UrlAvailability.FAILED)
-            );
+            indexFor(failedUrl).ifPresent(failedUrls::refresh);
         }
     }
 
     /** Get the next URL in {@code baseUrls}, after the supplied index, that has not been marked as failed. */
     private Optional<HttpUrl> getNext(int startIndex) {
-        int numAttempts = 0;
-        int index = startIndex;
         List<HttpUrl> httpUrls = baseUrls.get();
+        int urlIndex = startIndex;
 
-        // Find the next URL that is not marked as failed
-        while (numAttempts < httpUrls.size()) {
-            index = (index + 1) % httpUrls.size();
-            UrlAvailability isFailed = failedUrls.getIfPresent(httpUrls.get(index));
-            if (isFailed == null) {
-                return Optional.of(httpUrls.get(index));
+        for (int numAttempts = 0; numAttempts < httpUrls.size(); numAttempts++) {
+            urlIndex = (urlIndex + 1) % httpUrls.size();
+
+            Instant cooldownFinished = failedUrls.getIfPresent(urlIndex);
+            if (cooldownFinished != null) {
+                // continue to the next URL if the cooldown has not elapsed
+                if (Instant.now().isBefore(cooldownFinished)) {
+                    continue;
+                }
+
+                // use the failed URL once and refresh to ensure that the cooldown elapses before it is used again
+                failedUrls.refresh(urlIndex);
             }
-            numAttempts++;
+
+            return Optional.of(httpUrls.get(urlIndex));
         }
 
         return Optional.empty();
@@ -246,13 +257,5 @@ final class UrlSelectorImpl implements UrlSelector {
     @Override
     public List<HttpUrl> getBaseUrls() {
         return baseUrls.get();
-    }
-
-    private enum UrlAvailability {
-
-        /**
-         * URL has been marked as failed.
-         */
-        FAILED
     }
 }
