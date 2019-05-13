@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.HttpUrl;
@@ -180,6 +181,38 @@ public final class UrlSelectorTest extends TestBase {
         assertThat(selector.redirectTo(current, redirectTo)).contains(HttpUrl.parse("http://bar/a/b/path"));
         assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
         assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
+    public void testMarkUrlAsFailed_withoutCooldown() {
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a", "http://bar/a"), false);
+        HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
+
+        selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
+    public void testMarkUrlAsFailed_withCooldown() throws Exception {
+        Duration failedUrlCooldown = Duration.ofMillis(100);
+
+        UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown);
+        HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
+
+        selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        Thread.sleep(failedUrlCooldown.toMillis());
+
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
     }
 
     @Test
