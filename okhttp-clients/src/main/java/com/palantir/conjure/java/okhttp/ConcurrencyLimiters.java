@@ -107,6 +107,10 @@ final class ConcurrencyLimiters {
     Limit newLimit() {
         return new ConjureWindowedLimit(AIMDLimit.newBuilder()
                 .timeout(Long.MAX_VALUE, TimeUnit.NANOSECONDS)
+                .initialLimit(10)
+                .backoffRatio(0.9)
+                .minLimit(1)
+                .maxLimit(Integer.MAX_VALUE)
                 .build());
     }
 
