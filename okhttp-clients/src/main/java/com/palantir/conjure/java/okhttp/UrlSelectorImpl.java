@@ -24,6 +24,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.MoreExecutors;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -45,8 +46,10 @@ final class UrlSelectorImpl implements UrlSelector {
     private final AtomicInteger currentUrl;
     private final LoadingCache<Integer, Instant> failedUrls;
     private final boolean useFailedUrlCache;
+    private final Clock clock;
 
-    private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, boolean reshuffle, Duration failedUrlCooldown) {
+    private UrlSelectorImpl(
+            ImmutableList<HttpUrl> baseUrls, boolean reshuffle, Duration failedUrlCooldown, Clock clock) {
         if (reshuffle) {
             // Add jitter to avoid mass node reassignment when multiple nodes of a client are restarted
             Duration jitter = Duration.ofSeconds(ThreadLocalRandom.current().nextLong(-30, 30));
@@ -59,12 +62,12 @@ final class UrlSelectorImpl implements UrlSelector {
             this.baseUrls = () -> baseUrls;
         }
 
+        this.clock = clock;
         this.currentUrl = new AtomicInteger(0);
-
         this.failedUrls = Caffeine.newBuilder()
                 .executor(MoreExecutors.directExecutor())
                 .maximumSize(baseUrls.size())
-                .build(key -> Instant.now().plus(failedUrlCooldown));
+                .build(key -> clock.instant().plus(failedUrlCooldown));
         this.useFailedUrlCache = !failedUrlCooldown.isNegative() && !failedUrlCooldown.isZero();
 
         Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
@@ -79,7 +82,7 @@ final class UrlSelectorImpl implements UrlSelector {
      * time.
      */
     static UrlSelectorImpl createWithFailedUrlCooldown(
-            Collection<String> baseUrls, boolean reshuffle, Duration failedUrlCooldown) {
+            Collection<String> baseUrls, boolean reshuffle, Duration failedUrlCooldown, Clock clock) {
         ImmutableSet.Builder<HttpUrl> canonicalUrls = ImmutableSet.builder();  // ImmutableSet maintains insert order
         baseUrls.forEach(url -> {
             HttpUrl httpUrl = HttpUrl.parse(switchWsToHttp(url));
@@ -89,12 +92,12 @@ final class UrlSelectorImpl implements UrlSelector {
                     "Base URLs must be 'canonical' and consist of schema, host, port, and path only: %s", url);
             canonicalUrls.add(canonicalUrl);
         });
-        return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()), reshuffle, failedUrlCooldown);
+        return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()), reshuffle, failedUrlCooldown, clock);
     }
 
     @VisibleForTesting
     static UrlSelectorImpl create(Collection<String> baseUrls, boolean reshuffle) {
-        return createWithFailedUrlCooldown(baseUrls, reshuffle, Duration.ZERO);
+        return createWithFailedUrlCooldown(baseUrls, reshuffle, Duration.ZERO, Clock.systemUTC());
     }
 
     static <T> List<T> shuffle(List<T> list) {
@@ -202,7 +205,7 @@ final class UrlSelectorImpl implements UrlSelector {
             Instant cooldownFinished = failedUrls.getIfPresent(urlIndex);
             if (cooldownFinished != null) {
                 // continue to the next URL if the cooldown has not elapsed
-                if (Instant.now().isBefore(cooldownFinished)) {
+                if (clock.instant().isBefore(cooldownFinished)) {
                     continue;
                 }
 

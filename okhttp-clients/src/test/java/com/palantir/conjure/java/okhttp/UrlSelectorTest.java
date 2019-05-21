@@ -18,19 +18,32 @@ package com.palantir.conjure.java.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class UrlSelectorTest extends TestBase {
+
+    @Mock
+    Clock clock;
+
+    @Before
+    public void before() {
+        when(clock.instant()).thenReturn(Instant.EPOCH);
+    }
 
     @Test
     public void mustSpecifyAtLeastOneUrl() throws Exception {
@@ -200,7 +213,7 @@ public final class UrlSelectorTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown);
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
         HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
@@ -208,7 +221,7 @@ public final class UrlSelectorTest extends TestBase {
         assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
         assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
 
-        Thread.sleep(failedUrlCooldown.toMillis());
+        when(clock.instant()).thenReturn(Instant.EPOCH.plus(failedUrlCooldown));
 
         assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
         assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
