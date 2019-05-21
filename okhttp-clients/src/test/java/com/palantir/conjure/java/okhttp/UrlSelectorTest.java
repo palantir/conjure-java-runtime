@@ -235,6 +235,28 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
+    public void testAllUrlsFailed_withCooldown() throws Exception {
+        Duration failedUrlCooldown = Duration.ofMillis(100);
+
+        UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
+        HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
+
+        selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));
+        selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        selector.markAsSucceeded(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
     public void testWorksWithWebSockets() throws Exception {
         Request wsRequest = new Request.Builder()
                 .url("wss://foo/a")
