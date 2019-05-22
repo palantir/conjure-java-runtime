@@ -44,7 +44,7 @@ final class UrlSelectorImpl implements UrlSelector {
 
     private final Supplier<List<HttpUrl>> baseUrls;
     private final AtomicInteger currentUrl;
-    private final LoadingCache<Integer, Instant> failedUrls;
+    private final LoadingCache<HttpUrl, Instant> failedUrls;
     private final boolean useFailedUrlCache;
     private final Clock clock;
 
@@ -183,14 +183,18 @@ final class UrlSelectorImpl implements UrlSelector {
     @Override
     public void markAsSucceeded(HttpUrl failedUrl) {
         if (useFailedUrlCache) {
-            indexFor(failedUrl).ifPresent(failedUrls::invalidate);
+            indexFor(failedUrl)
+                    .map(baseUrls.get()::get)
+                    .ifPresent(failedUrls::invalidate);
         }
     }
 
     @Override
     public void markAsFailed(HttpUrl failedUrl) {
         if (useFailedUrlCache) {
-            indexFor(failedUrl).ifPresent(failedUrls::refresh);
+            indexFor(failedUrl)
+                    .map(baseUrls.get()::get)
+                    .ifPresent(failedUrls::refresh);
         }
     }
 
@@ -201,8 +205,9 @@ final class UrlSelectorImpl implements UrlSelector {
 
         for (int numAttempts = 0; numAttempts < httpUrls.size(); numAttempts++) {
             urlIndex = (urlIndex + 1) % httpUrls.size();
+            HttpUrl httpUrl = httpUrls.get(urlIndex);
 
-            Instant cooldownFinished = failedUrls.getIfPresent(urlIndex);
+            Instant cooldownFinished = failedUrls.getIfPresent(httpUrl);
             if (cooldownFinished != null) {
                 // continue to the next URL if the cooldown has not elapsed
                 if (clock.instant().isBefore(cooldownFinished)) {
@@ -210,7 +215,7 @@ final class UrlSelectorImpl implements UrlSelector {
                 }
 
                 // use the failed URL once and refresh to ensure that the cooldown elapses before it is used again
-                failedUrls.refresh(urlIndex);
+                failedUrls.refresh(httpUrl);
             }
 
             return Optional.of(httpUrls.get(urlIndex));
