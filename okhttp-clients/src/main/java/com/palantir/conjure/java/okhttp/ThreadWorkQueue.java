@@ -40,6 +40,10 @@ final class ThreadWorkQueue<T> {
         return queuedRequests.isEmpty();
     }
 
+    int size() {
+        return queuedRequests.size();
+    }
+
     void add(T element) {
         long threadId = Thread.currentThread().getId();
         queue(threadId).add(element);

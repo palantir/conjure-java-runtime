@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
@@ -50,12 +51,15 @@ final class ConcurrencyLimiters {
     private static final Logger log = LoggerFactory.getLogger(ConcurrencyLimiters.class);
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(1);
     private static final Void NO_CONTEXT = null;
+    private static final MetricName ACQUIRE_QUEUE =
+            MetricName.builder().safeName("conjure-java-client.qos.request-permit.acquire-queue").build();
     private static final MetricName SLOW_ACQUIRE =
             MetricName.builder().safeName("conjure-java-client.qos.request-permit.slow-acquire").build();
     private static final MetricName LEAK_SUSPECTED =
             MetricName.builder().safeName("conjure-java-client.qos.request-permit.leak-suspected").build();
     private static final String SLOW_ACQUIRE_TAGGED = "conjure-java-client.qos.request-permit.slow-acquire-tagged";
 
+    private final Histogram acquireQueue;
     private final Timer slowAcquire;
     private final Timer slowAcquireTagged;
     private final Meter leakSuspected;
@@ -72,6 +76,7 @@ final class ConcurrencyLimiters {
             Duration timeout,
             Class<?> serviceClass,
             boolean useLimiter) {
+        this.acquireQueue = taggedMetricRegistry.histogram(ACQUIRE_QUEUE);
         this.slowAcquire = taggedMetricRegistry.timer(SLOW_ACQUIRE);
         this.leakSuspected = taggedMetricRegistry.meter(LEAK_SUSPECTED);
         this.slowAcquireTagged = taggedMetricRegistry.timer(generateMetricNameWithServiceName(SLOW_ACQUIRE_TAGGED,
@@ -208,6 +213,9 @@ final class ConcurrencyLimiters {
         }
 
         synchronized void processQueue() {
+            // Too many metrics to emit per endpoint, so we record as histogram instead
+            acquireQueue.update(waitingRequests.size());
+
             while (!waitingRequests.isEmpty()) {
                 Optional<Limiter.Listener> maybeAcquired = limiter.acquire(NO_CONTEXT);
                 if (!maybeAcquired.isPresent()) {
