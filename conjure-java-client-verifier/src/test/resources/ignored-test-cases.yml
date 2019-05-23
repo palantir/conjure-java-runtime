@@ -37,6 +37,7 @@ client:
    - 'null'
    receiveListAnyAliasExample:
    - 'null'
+   - '[null]'
    receiveSetBearerTokenAliasExample:
    - 'null'
    receiveSetBinaryAliasExample:
@@ -59,6 +60,11 @@ client:
    - 'null'
    receiveSetAnyAliasExample:
    - 'null'
+   - '[null]'
+   receiveSetOptionalAnyAliasExample:
+   - 'null'
+   receiveListOptionalAnyAliasExample:
+   - 'null' # jackson coerces this to [], which is kinda OK, but other conjure languages might not do this
 
    receiveEnumExample:
    - '"!!!"'
