@@ -125,7 +125,7 @@ final class ConcurrencyLimiters {
         if (!useLimiter) {
             return NoOpConcurrencyLimiter.INSTANCE;
         }
-        Supplier<Limiter<Void>> limiter = () -> SimpleLimiter.newBuilder().limit(newLimit()).build();
+        Supplier<SimpleLimiter<Void>> limiter = () -> SimpleLimiter.newBuilder().limit(newLimit()).build();
         return new DefaultConcurrencyLimiter(limiterKey, limiter);
     }
 
@@ -183,19 +183,25 @@ final class ConcurrencyLimiters {
     }
 
     final class DefaultConcurrencyLimiter implements ConcurrencyLimiter {
+
         @GuardedBy("this")
         private final ThreadWorkQueue<SettableFuture<Limiter.Listener>> waitingRequests = new ThreadWorkQueue<>();
         @GuardedBy("this")
-        private Limiter<Void> limiter;
+        private SimpleLimiter<Void> limiter;
         @GuardedBy("this")
         private ScheduledFuture<?> timeoutCleanup;
         private final Key limiterKey;
-        private final Supplier<Limiter<Void>> limiterFactory;
+        private final Supplier<SimpleLimiter<Void>> limiterFactory;
 
-        DefaultConcurrencyLimiter(Key limiterKey, Supplier<Limiter<Void>> limiterFactory) {
+        private final SafeArg<Optional<String>> safeArgMethod;
+        private final SafeArg<Optional<String>> safeArgPathTemplate;
+
+        DefaultConcurrencyLimiter(Key limiterKey, Supplier<SimpleLimiter<Void>> limiterFactory) {
             this.limiterKey = limiterKey;
             this.limiterFactory = limiterFactory;
             this.limiter = limiterFactory.get();
+            this.safeArgMethod = SafeArg.of("method", limiterKey.method());
+            this.safeArgPathTemplate = SafeArg.of("pathTemplate", limiterKey.pathTemplate());
         }
 
         @Override
@@ -209,6 +215,10 @@ final class ConcurrencyLimiters {
 
         synchronized void processQueue() {
             while (!waitingRequests.isEmpty()) {
+                log.debug("Limit",
+                        SafeArg.of("limit", limiter.getLimit()),
+                        safeArgMethod,
+                        safeArgPathTemplate);
                 Optional<Limiter.Listener> maybeAcquired = limiter.acquire(NO_CONTEXT);
                 if (!maybeAcquired.isPresent()) {
                     if (!timeoutScheduled()) {
@@ -218,6 +228,7 @@ final class ConcurrencyLimiters {
                     return;
                 }
                 Limiter.Listener acquired = maybeAcquired.get();
+
                 SettableFuture<Limiter.Listener> head = waitingRequests.remove();
                 head.set(wrap(acquired));
             }
