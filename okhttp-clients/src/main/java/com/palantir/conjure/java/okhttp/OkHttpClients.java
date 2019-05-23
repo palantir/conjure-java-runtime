@@ -58,6 +58,9 @@ public final class OkHttpClients {
     @VisibleForTesting
     static final int NUM_SCHEDULING_THREADS = 5;
 
+    static final int MAX_REQUESTS = 256;
+    static final int MAX_REQUESTS_PER_HOST = 64;
+
     private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler((thread, uncaughtException) ->
                     log.error("An exception was uncaught in an execution thread. "
@@ -94,9 +97,9 @@ public final class OkHttpClients {
 
     static {
         dispatcher = new Dispatcher(executionExecutor);
-        dispatcher.setMaxRequests(256);
+        dispatcher.setMaxRequests(MAX_REQUESTS);
         // Must be less than maxRequests so a single slow host does not block all requests
-        dispatcher.setMaxRequestsPerHost(64);
+        dispatcher.setMaxRequestsPerHost(MAX_REQUESTS_PER_HOST);
 
         dispatcherMetricSet = new DispatcherMetricSet(dispatcher, connectionPool);
     }
