@@ -313,17 +313,22 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void future_should_throw_RemoteException_for_server_serializable_errors_listenable() throws Exception {
-        future_should_throw_RemoteException_for_server_serializable_errors(() -> service.makeListenableFutureRequest());
+        future_should_throw_RemoteException_for_server_serializable_errors(
+                () -> service.makeListenableFutureRequest(),
+                "makeListenableFutureRequest"
+        );
     }
 
     @Test
     public void future_should_throw_RemoteException_for_server_serializable_errors_completable() throws Exception {
         future_should_throw_RemoteException_for_server_serializable_errors(
-                () -> service.makeCompletableFutureRequest());
+                () -> service.makeCompletableFutureRequest(),
+                "makeCompletableFutureRequest"
+        );
     }
 
     private void future_should_throw_RemoteException_for_server_serializable_errors(
-            Supplier<Future<String>> futureSupplier) throws Exception {
+            Supplier<Future<String>> futureSupplier, String methodName) throws Exception {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
@@ -335,11 +340,15 @@ public final class Retrofit2ClientApiTest extends TestBase {
             Futures.getUnchecked(future);
             failBecauseExceptionWasNotThrown(CompletionException.class);
         } catch (UncheckedExecutionException e) {
-            assertThat(e.getCause()).isInstanceOf(RemoteException.class);
+            assertThat(e.getCause())
+                    .isInstanceOf(RemoteException.class)
+                    .hasCauseInstanceOf(AsyncException.class)
+                    .hasStackTraceContaining(methodName);
             RemoteException remoteException = (RemoteException) e.getCause();
             assertThat(remoteException.getError()).isEqualTo(ERROR);
         }
     }
+
     @Test
     public void future_should_throw_normal_IoException_for_client_side_errors_completable() {
         future_should_throw_normal_IoException_for_client_side_errors(() -> service.makeCompletableFutureRequest());

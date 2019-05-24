@@ -76,6 +76,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
 
     private static final class ListenableFutureCallback<R> extends AbstractFuture<R> implements Callback<R> {
         private final Call<R> delegate;
+        private final AsyncException asyncException = new AsyncException();
 
         private ListenableFutureCallback(Call<R> delegate) {
             this.delegate = delegate;
@@ -96,7 +97,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
         public void onFailure(Call<R> call, Throwable throwable) {
             // TODO(rfink): Would be good to not leak okhttp internals here
             if (throwable instanceof IoRemoteException) {
-                setException(((IoRemoteException) throwable).getWrappedException());
+                setException(((IoRemoteException) throwable).getWrappedException().initCause(asyncException));
             } else {
                 setException(throwable);
             }
@@ -125,6 +126,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
 
     private static final class CompletableFutureBodyCallAdapter<R> implements CallAdapter<R, CompletableFuture<R>> {
         private final Type responseType;
+        private final AsyncException asyncException = new AsyncException();
 
         CompletableFutureBodyCallAdapter(Type responseType) {
             this.responseType = responseType;
@@ -158,7 +160,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
                     // TODO(rfink): Would be good to not leak okhttp internals here
                     if (throwable instanceof IoRemoteException) {
                         future.completeExceptionally(
-                                ((IoRemoteException) throwable).getWrappedException());
+                                ((IoRemoteException) throwable).getWrappedException().initCause(asyncException));
                     } else {
                         future.completeExceptionally(throwable);
                     }
