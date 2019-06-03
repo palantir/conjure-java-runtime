@@ -264,8 +264,8 @@ final class ConcurrencyLimiters {
 
         private synchronized void resetLimiter() {
             log.warn("Timed out waiting to get permits for concurrency. In most cases this would indicate some kind of "
-                            + "deadlock. We expect that either this is caused by not closing response bodies "
-                            + "(there should be OkHttp log lines indicating this), or service overloading.",
+                            + "deadlock. We expect that either this is caused by either service overloading, or not "
+                            + "closing response bodies (consider using the try-with-resources pattern).",
                     SafeArg.of("serviceClass", serviceClass),
                     SafeArg.of("limiterKey", limiterKey),
                     SafeArg.of("timeout", timeout));
