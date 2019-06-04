@@ -192,7 +192,6 @@ final class KeyStores {
             Path certDirPath,
             String certExtension,
             String keyStorePassword) {
-
         if (!keyDirPath.toFile().isDirectory()) {
             throw new IllegalStateException(String.format("keyDirPath is not a directory: \"%s\"", keyDirPath));
         } else if (!certDirPath.toFile().isDirectory()) {
