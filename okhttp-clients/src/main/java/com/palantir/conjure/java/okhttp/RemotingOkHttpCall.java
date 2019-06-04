@@ -32,7 +32,9 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tracing.AsyncTracer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.InetAddress;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -207,8 +209,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 log.info("Retrying call after failure",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
-                        SafeArg.of("originalHost", request().url().host()),
-                        SafeArg.of("redirectToHost", redirectTo.get().host()),
+                        SafeArg.of("originalIp", getIpAddress(request().url())),
+                        SafeArg.of("redirectToIp", getIpAddress(redirectTo.get())),
                         UnsafeArg.of("redirectToUrl", redirectTo.get()),
                         exception);
                 Request redirectedRequest = request().newBuilder()
@@ -266,6 +268,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
                         + "this is an conjure-java-runtime bug."));
             }
         });
+    }
+
+    private static String getIpAddress(HttpUrl url) {
+        try {
+            return InetAddress.getByName(url.host()).getHostAddress();
+        } catch (UnknownHostException e) {
+            return "Unknown host";
+        }
     }
 
     private boolean shouldRetry(IOException exception, Optional<Duration> backoff) {
@@ -347,8 +357,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 log.debug("Retrying call after receiving QosException.RetryOther",
-                        SafeArg.of("originalHost", request().url().host()),
-                        SafeArg.of("redirectToHost", redirectTo.get().host()),
+                        SafeArg.of("originalIp", getIpAddress(request().url())),
+                        SafeArg.of("redirectToIp", getIpAddress(redirectTo.get())),
                         UnsafeArg.of("requestUrl", call.request().url()),
                         UnsafeArg.of("redirectToUrl", redirectTo.get()),
                         exception);
@@ -388,8 +398,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 log.debug("Retrying call after receiving QosException.Unavailable",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
-                        SafeArg.of("originalHost", request().url().host()),
-                        SafeArg.of("redirectToHost", redirectTo.get().host()),
+                        SafeArg.of("originalIp", getIpAddress(request().url())),
+                        SafeArg.of("redirectToIp", getIpAddress(redirectTo.get())),
                         UnsafeArg.of("redirectToUrl", redirectTo.get()),
                         exception);
                 Request redirectedRequest = request().newBuilder()
