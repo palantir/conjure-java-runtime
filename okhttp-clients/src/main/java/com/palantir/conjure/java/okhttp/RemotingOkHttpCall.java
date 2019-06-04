@@ -207,8 +207,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 log.info("Retrying call after failure",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
-                        SafeArg.of("originalHost", request().url().host()),
-                        SafeArg.of("redirectToHost", redirectTo.get().host()),
+                        UnsafeArg.of("originalHost", request().url().host()),
+                        UnsafeArg.of("redirectToHost", redirectTo.get().host()),
                         UnsafeArg.of("redirectToUrl", redirectTo.get()),
                         exception);
                 Request redirectedRequest = request().newBuilder()
@@ -347,8 +347,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 log.debug("Retrying call after receiving QosException.RetryOther",
-                        SafeArg.of("originalHost", request().url().host()),
-                        SafeArg.of("redirectToHost", redirectTo.get().host()),
+                        UnsafeArg.of("originalHost", request().url().host()),
+                        UnsafeArg.of("redirectToHost", redirectTo.get().host()),
                         UnsafeArg.of("requestUrl", call.request().url()),
                         UnsafeArg.of("redirectToUrl", redirectTo.get()),
                         exception);
@@ -388,8 +388,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 log.debug("Retrying call after receiving QosException.Unavailable",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
-                        SafeArg.of("originalHost", request().url().host()),
-                        SafeArg.of("redirectToHost", redirectTo.get().host()),
+                        UnsafeArg.of("originalHost", request().url().host()),
+                        UnsafeArg.of("redirectToHost", redirectTo.get().host()),
                         UnsafeArg.of("redirectToUrl", redirectTo.get()),
                         exception);
                 Request redirectedRequest = request().newBuilder()
