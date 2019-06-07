@@ -769,7 +769,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(server.takeRequest().getHeader(HttpHeaders.HOST)).isEqualTo("foo.com");
     }
 
-    @Test
+    @Test(timeout = 1000)
     public void non_ioexceptions_dont_break_the_world() throws IOException {
         server.enqueue(new MockResponse().setBody("foo"));
 
