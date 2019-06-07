@@ -776,7 +776,6 @@ public final class OkHttpClientsTest extends TestBase {
         HostEventsSink throwingSink = new HostEventsSink() {
             @Override
             public void record(String serviceName, String hostname, int port, int statusCode, long micros) {
-                //empty
                 throw new IllegalStateException("I am not an IOException");
             }
 
