@@ -16,10 +16,15 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
+/**
+ * {@link okhttp3.RealCall#execute()} only catches IOExceptions, which means that any non-IOException eventually
+ * mean the {@link okhttp3.Dispatcher} runs out of threads and can't make *any* outgoing requests.
+ */
 enum CatchThrowableInterceptor implements Interceptor {
     INSTANCE;
 
@@ -31,9 +36,9 @@ enum CatchThrowableInterceptor implements Interceptor {
             if (t instanceof IOException) {
                 throw (IOException) t;
             }
-            throw new IOException("Caught a non-IOException while executing a call. "
+            throw new SafeIoException("Caught a non-IOException. "
                     + "This is a serious bug and requires investigation. Rethrowing "
-                    + "as an IOException in order to avoid blocking a thread", t);
+                    + "as an IOException in order to avoid blocking a Dispatcher thread", t);
         }
     }
 }
