@@ -24,6 +24,8 @@ import okhttp3.Response;
 /**
  * {@link okhttp3.RealCall#execute()} only catches IOExceptions, which means that any non-IOException eventually
  * mean the {@link okhttp3.Dispatcher} runs out of threads and can't make *any* outgoing requests.
+ *
+ * https://github.com/square/okhttp/issues/5151
  */
 enum CatchThrowableInterceptor implements Interceptor {
     INSTANCE;
