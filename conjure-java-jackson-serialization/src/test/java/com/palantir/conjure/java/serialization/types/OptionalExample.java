@@ -30,7 +30,7 @@ import java.util.Optional;
 import javax.annotation.Generated;
 
 // copied from the verification subproject to avoid a circular dependency
-@SuppressWarnings("checkstyle:HiddenFieldCheck")
+@SuppressWarnings("checkstyle:HiddenField")
 @JsonDeserialize(builder = OptionalExample.Builder.class)
 @Generated("com.palantir.conjure.java.types.BeanGenerator")
 public final class OptionalExample {
