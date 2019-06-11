@@ -105,6 +105,13 @@ public final class ObjectMappersTest {
     }
 
     @Test
+    public void testWriteMapWithNullValues() throws IOException {
+        Map<String, String> nullableMap = Collections.singletonMap("test", null);
+        assertThat(ser(nullableMap))
+                .isEqualTo("");
+    }
+
+    @Test
     public void testMapWithNullValues() throws IOException {
         // This is potentially a bug, see conjure-java#291
         assertThat(MAPPER.<Map<String, String>>readValue(
@@ -120,11 +127,9 @@ public final class ObjectMappersTest {
     }
 
     @Test
-    public void testWrappedOptionalSerialization() {
-        assertThat(MAPPER.<Map<String ,String>>convertValue(
-                OptionalExample.builder().build(),
-                new TypeReference<Map<String, String>>() {}))
-                .isEqualTo(Collections.emptyMap());
+    public void testWrappedOptionalSerialization() throws IOException {
+        assertThat(ser(OptionalExample.builder().build()))
+                .isEqualTo("{}");
     }
 
     @Test
