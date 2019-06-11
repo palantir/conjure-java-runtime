@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.palantir.conjure.java.serialization.types.OptionalExample;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -116,6 +117,14 @@ public final class ObjectMappersTest {
     public void testMapWithNullKeys() {
         assertThatThrownBy(() -> MAPPER.readValue("{null: \"test\"}", new TypeReference<Map<String, String>>() {}))
                 .isInstanceOf(JsonParseException.class);
+    }
+
+    @Test
+    public void testWrappedOptionalSerialization() {
+        assertThat(MAPPER.<Map<String ,String>>convertValue(
+                OptionalExample.builder().build(),
+                new TypeReference<Map<String, String>>() {}))
+                .isEqualTo(Collections.emptyMap());
     }
 
     @Test
