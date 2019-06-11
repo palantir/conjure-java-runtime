@@ -108,7 +108,7 @@ public final class ObjectMappersTest {
     public void testWriteMapWithNullValues() throws IOException {
         Map<String, String> nullableMap = Collections.singletonMap("test", null);
         assertThat(ser(nullableMap))
-                .isEqualTo("");
+                .isEqualTo("{}");
     }
 
     @Test
