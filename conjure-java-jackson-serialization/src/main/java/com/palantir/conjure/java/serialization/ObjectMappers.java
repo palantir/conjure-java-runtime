@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.serialization;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -97,6 +98,7 @@ public final class ObjectMappers {
      */
     public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
         return mapper
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
                 .registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
