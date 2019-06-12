@@ -29,6 +29,7 @@ import com.netflix.concurrency.limits.Limiter;
 import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -267,7 +268,9 @@ final class ConcurrencyLimiters {
                             + "deadlock. We expect that either this is caused by either service overloading, or not "
                             + "closing response bodies (consider using the try-with-resources pattern).",
                     SafeArg.of("serviceClass", serviceClass),
-                    SafeArg.of("limiterKey", limiterKey),
+                    UnsafeArg.of("hostname", limiterKey.hostname()),
+                    safeArgMethod,
+                    safeArgPathTemplate,
                     SafeArg.of("timeout", timeout));
             leakSuspected.mark();
             limiter = limiterFactory.get();
