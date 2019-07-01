@@ -22,14 +22,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.netflix.concurrency.limits.Limiter;
 import com.palantir.logsafe.Preconditions;
 import java.io.IOException;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import okhttp3.Interceptor;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
-import okio.BufferedSource;
 
 /**
  * Flow control in Conjure is a collaborative effort between servers and clients. Servers advertise an overloaded state
@@ -75,11 +69,16 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
             if (DROPPED_CODES.contains(response.code())) {
                 listener.onDropped();
                 return response;
-            } else if (!response.isSuccessful() || response.isRedirect()) {
+            } else if (!response.isSuccessful() || response.isRedirect() || response.body() == null) {
                 listener.onIgnore();
                 return response;
+            } else if (response.body().source().exhausted()) {
+                // this case exists for Feign, which does not properly close empty responses
+                listener.onSuccess();
+                return response;
             } else {
-                return wrapResponse(listener, response);
+                listener.onSuccess();
+                return response;
             }
         } catch (IOException e) {
             listener.onIgnore();
@@ -87,59 +86,4 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
         }
     }
 
-    private static Response wrapResponse(Limiter.Listener listener, Response response) throws IOException {
-        // OkHttp guarantees not-null to execute() and callbacks, but not at this level.
-        if (response.body() == null) {
-            listener.onIgnore();
-            return response;
-        } else if (response.body().source().exhausted()) {
-            // this case exists for Feign, which does not properly close empty responses
-            listener.onSuccess();
-            return response;
-        }
-        ResponseBody currentBody = response.body();
-        ResponseBody newResponseBody =
-                ResponseBody.create(
-                        currentBody.contentType(),
-                        currentBody.contentLength(),
-                        wrapSource(currentBody.source(), listener));
-        return response.newBuilder()
-                .body(newResponseBody)
-                .build();
-    }
-
-    private static BufferedSource wrapSource(BufferedSource currentSource, Limiter.Listener listener) {
-        return (BufferedSource) Proxy.newProxyInstance(
-                BufferedSource.class.getClassLoader(),
-                new Class<?>[] { BufferedSource.class },
-                new ReleaseConcurrencyLimitProxy(currentSource, listener));
-    }
-
-    /**
-     * This proxy enables e.g. Okio to make additive additions to their API without breaking us.
-     */
-    private static final class ReleaseConcurrencyLimitProxy implements InvocationHandler {
-        private final BufferedSource delegate;
-        private final Limiter.Listener listener;
-        private boolean closed = false;
-
-        private ReleaseConcurrencyLimitProxy(BufferedSource delegate, Limiter.Listener listener) {
-            this.delegate = delegate;
-            this.listener = listener;
-        }
-
-        @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if (method.getName().equals("close") && !closed) {
-                closed = true;
-                listener.onSuccess();
-            }
-
-            try {
-                return method.invoke(delegate, args);
-            } catch (InvocationTargetException e) {
-                throw e.getCause();
-            }
-        }
-    }
 }

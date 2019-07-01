@@ -19,7 +19,6 @@ package com.palantir.conjure.java.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.util.concurrent.Futures;
@@ -104,17 +103,6 @@ public final class ConcurrencyLimitingInterceptorTest {
         when(chain.proceed(request)).thenThrow(exception);
         assertThatThrownBy(() -> interceptor.intercept(chain)).isEqualTo(exception);
         verify(listener).onIgnore();
-    }
-
-    @Test
-    public void wrapsResponseBody() throws IOException {
-        String data = "data";
-        ResponseBody body = ResponseBody.create(MediaType.parse("application/json"), data);
-        when(chain.proceed(request)).thenReturn(response.newBuilder().body(body).build());
-        Response wrappedResponse = interceptor.intercept(chain);
-        verifyZeroInteractions(listener);
-        assertThat(wrappedResponse.body().string()).isEqualTo(data);
-        verify(listener).onSuccess();
     }
 
     @Test
