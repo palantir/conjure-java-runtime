@@ -66,8 +66,8 @@ final class UrlSelectorImpl implements UrlSelector {
                 .build();
         this.useFailedUrlCache = !failedUrlCooldown.isNegative() && !failedUrlCooldown.isZero();
 
-        Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
-        Preconditions.checkArgument(!failedUrlCooldown.isNegative(), "Cache expiration must be non-negative");
+        com.palantir.logsafe.Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
+        com.palantir.logsafe.Preconditions.checkArgument(!failedUrlCooldown.isNegative(), "Cache expiration must be non-negative");
     }
 
     /**

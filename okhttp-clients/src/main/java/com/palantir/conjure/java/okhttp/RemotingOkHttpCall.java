@@ -142,7 +142,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             } else if (e.getCause() instanceof IOException) {
                 throw (IOException) e.getCause();
             } else {
-                throw new IOException("Failed to execute call", e);
+                throw new SafeIoException("Failed to execute call", e);
             }
         }
     }
@@ -260,7 +260,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
-                callback.onFailure(call, new IOException("Failed to handle request, "
+                callback.onFailure(call, new SafeIoException("Failed to handle request, "
                         + "this is an conjure-java-runtime bug."));
             }
         });

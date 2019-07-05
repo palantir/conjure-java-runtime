@@ -29,6 +29,7 @@ package com.palantir.conjure.java.client.retrofit2;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.okhttp.IoRemoteException;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -51,7 +52,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
             return null;
         }
         if (!(returnType instanceof ParameterizedType)) {
-            throw new IllegalStateException("CompletableFuture/ListenableFuture return type must be parameterized"
+            throw new SafeIllegalStateException("CompletableFuture/ListenableFuture return type must be parameterized"
                     + " as <Foo> or <? extends Foo>");
         }
         Type innerType = getParameterUpperBound(0, (ParameterizedType) returnType);

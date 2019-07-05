@@ -118,7 +118,6 @@ public class NullRequestBodyTest {
     public static final class TestResource implements TestService {
         @Override
         public void postRequestBody(Map<String, String> data) {
-
         }
 
         @Override

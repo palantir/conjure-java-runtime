@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import okhttp3.mockwebserver.MockResponse;
@@ -85,7 +86,7 @@ public final class TracerTest extends TestBase {
     @Test
     public void testLimiterAcquisitionMultiThread() {
         reduceConcurrencyLimitTo1();
-        Set<String> observedTraceIds = Sets.newConcurrentHashSet();
+        Set<String> observedTraceIds = ConcurrentHashMap.newKeySet();
         addTraceSubscriber(observedTraceIds);
         runTwoRequestsInParallel();
         removeTraceSubscriber();

@@ -295,7 +295,6 @@ final class ConcurrencyLimiters {
 
                 @Override
                 public void onFailure(Throwable error) {
-
                 }
             }, MoreExecutors.directExecutor());
         }

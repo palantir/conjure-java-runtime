@@ -21,6 +21,7 @@ package com.palantir.conjure.java.server.jersey;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.palantir.logsafe.Preconditions;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.OptionalDouble;
@@ -55,7 +56,7 @@ public final class Java8OptionalDoubleParamConverterProvider implements ParamCon
 
         @Override
         public String toString(final OptionalDouble value) {
-            checkArgument(value != null);
+            Preconditions.checkArgument(value != null);
             return value.isPresent() ? Double.toString(value.getAsDouble()) : "";
         }
     }

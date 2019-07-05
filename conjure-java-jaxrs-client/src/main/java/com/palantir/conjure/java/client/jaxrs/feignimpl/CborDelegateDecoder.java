@@ -57,7 +57,6 @@ public final class CborDelegateDecoder implements Decoder {
 
         if (contentTypes.size() == 1
                 && Iterables.getOnlyElement(contentTypes, "").startsWith(CborDelegateEncoder.MIME_TYPE)) {
-
             // some sillyness to test whether the input stram is empty
             // if it's empty, we want to return null rather than having jackson throw
             int pushbackBufferSize = 1;

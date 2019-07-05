@@ -178,7 +178,6 @@ public final class SslSocketFactories {
     private static TrustManagerFactory createTrustManagerFactory(
             Path trustStorePath,
             SslConfiguration.StoreType trustStoreType) {
-
         KeyStore keyStore;
         switch (trustStoreType) {
             case JKS:
@@ -215,7 +214,6 @@ public final class SslSocketFactories {
             String keyStorePassword,
             SslConfiguration.StoreType keyStoreType,
             Optional<String> keyStoreKeyAlias) {
-
         KeyStore keyStore;
         switch (keyStoreType) {
             case JKS:

@@ -18,6 +18,7 @@ package com.palantir.conjure.java.server.jersey;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.palantir.logsafe.Preconditions;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.time.ZonedDateTime;
@@ -44,7 +45,7 @@ public final class ZonedDateTimeParamConverterProvider implements ParamConverter
 
         @Override
         public String toString(final ZonedDateTime value) {
-            checkArgument(value != null);
+            Preconditions.checkArgument(value != null);
             return value.toOffsetDateTime().toString();
         }
     }

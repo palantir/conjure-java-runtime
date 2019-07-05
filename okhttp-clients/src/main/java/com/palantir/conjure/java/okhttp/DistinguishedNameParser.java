@@ -113,7 +113,6 @@ final class DistinguishedNameParser {
         beg = pos;
         end = beg;
         while (true) {
-
             if (pos == length) {
                 throw new IllegalStateException("Unexpected end of DN: " + dn);
             }
@@ -150,7 +149,6 @@ final class DistinguishedNameParser {
         beg = pos; // store '#' position
         pos++;
         while (true) {
-
             // check for end of attribute value
             // looks for space and component separators
             if (pos == length || chars[pos] == '+' || chars[pos] == ','
@@ -274,7 +272,6 @@ final class DistinguishedNameParser {
         if (res < 128) { // one byte: 0-7F
             return (char) res;
         } else if (res >= 192 && res <= 247) {
-
             int count;
             if (res <= 223) { // two bytes: C0-DF
                 count = 1;
