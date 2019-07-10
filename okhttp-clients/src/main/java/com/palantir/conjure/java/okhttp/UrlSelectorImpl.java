@@ -19,10 +19,11 @@ package com.palantir.conjure.java.okhttp;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.UnsafeArg;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +46,9 @@ final class UrlSelectorImpl implements UrlSelector {
     private final boolean useFailedUrlCache;
 
     private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, boolean reshuffle, Duration failedUrlCooldown) {
+        Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
+        Preconditions.checkArgument(!failedUrlCooldown.isNegative(), "Cache expiration must be non-negative");
+
         if (reshuffle) {
             // Add jitter to avoid mass node reassignment when multiple nodes of a client are restarted
             Duration jitter = Duration.ofSeconds(ThreadLocalRandom.current().nextLong(-30, 30));
@@ -65,9 +69,6 @@ final class UrlSelectorImpl implements UrlSelector {
                 .expireAfterWrite(coolDownMillis, TimeUnit.MILLISECONDS)
                 .build();
         this.useFailedUrlCache = !failedUrlCooldown.isNegative() && !failedUrlCooldown.isZero();
-
-        com.palantir.logsafe.Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
-        com.palantir.logsafe.Preconditions.checkArgument(!failedUrlCooldown.isNegative(), "Cache expiration must be non-negative");
     }
 
     /**
@@ -82,10 +83,12 @@ final class UrlSelectorImpl implements UrlSelector {
         ImmutableSet.Builder<HttpUrl> canonicalUrls = ImmutableSet.builder();  // ImmutableSet maintains insert order
         baseUrls.forEach(url -> {
             HttpUrl httpUrl = HttpUrl.parse(switchWsToHttp(url));
-            Preconditions.checkArgument(httpUrl != null, "Not a valid URL: %s", url);
+            Preconditions.checkArgument(httpUrl != null, "Not a valid URL", UnsafeArg.of("url", url));
             HttpUrl canonicalUrl = canonicalize(httpUrl);
-            Preconditions.checkArgument(canonicalUrl.equals(httpUrl),
-                    "Base URLs must be 'canonical' and consist of schema, host, port, and path only: %s", url);
+            Preconditions.checkArgument(
+                    canonicalUrl.equals(httpUrl),
+                    "Base URLs must be 'canonical' and consist of schema, host, port, and path only",
+                    UnsafeArg.of("url", url));
             canonicalUrls.add(canonicalUrl);
         });
         return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()), reshuffle, failedUrlCooldown);
