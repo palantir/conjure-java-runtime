@@ -46,9 +46,6 @@ final class UrlSelectorImpl implements UrlSelector {
     private final boolean useFailedUrlCache;
 
     private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, boolean reshuffle, Duration failedUrlCooldown) {
-        Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
-        Preconditions.checkArgument(!failedUrlCooldown.isNegative(), "Cache expiration must be non-negative");
-
         if (reshuffle) {
             // Add jitter to avoid mass node reassignment when multiple nodes of a client are restarted
             Duration jitter = Duration.ofSeconds(ThreadLocalRandom.current().nextLong(-30, 30));
@@ -69,6 +66,9 @@ final class UrlSelectorImpl implements UrlSelector {
                 .expireAfterWrite(coolDownMillis, TimeUnit.MILLISECONDS)
                 .build();
         this.useFailedUrlCache = !failedUrlCooldown.isNegative() && !failedUrlCooldown.isZero();
+
+        Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
+        Preconditions.checkArgument(!failedUrlCooldown.isNegative(), "Cache expiration must be non-negative");
     }
 
     /**
