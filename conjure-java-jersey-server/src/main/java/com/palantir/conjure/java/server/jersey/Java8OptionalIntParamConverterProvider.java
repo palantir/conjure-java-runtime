@@ -19,7 +19,6 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
 import com.palantir.logsafe.Preconditions;
 import java.lang.annotation.Annotation;

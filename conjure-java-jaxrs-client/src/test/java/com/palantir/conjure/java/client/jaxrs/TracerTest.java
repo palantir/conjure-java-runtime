@@ -24,7 +24,6 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.api.OpenSpan;
