@@ -18,6 +18,7 @@ package com.palantir.conjure.java.config.ssl.pkcs1;
 
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterators;
+import com.palantir.logsafe.Preconditions;
 import java.util.ServiceLoader;
 import java.util.function.Supplier;
 
@@ -27,7 +28,7 @@ public final class Pkcs1Readers {
     private static final Supplier<Pkcs1Reader> PKCS1_READER_SUPPLIER = Suppliers.memoize(() -> {
         Pkcs1Reader reader = Iterators.getNext(PKCS1_READER_LOADER.iterator(), null);
 
-        com.palantir.logsafe.Preconditions.checkState(reader != null, "No Pkcs1Reader services were present. Ensure that a Pkcs1Reader "
+        Preconditions.checkState(reader != null, "No Pkcs1Reader services were present. Ensure that a Pkcs1Reader "
                 + "with a properly configured META-INF/services/ entry is present on the classpath.");
 
         return reader;
