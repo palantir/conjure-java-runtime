@@ -149,7 +149,7 @@ final class UrlSelectorImpl implements UrlSelector {
 
         int potentialNextIndex = existingUrlIndex.orElse(currentUrl.get());
 
-        Optional<HttpUrl> nextUrl = getNext(potentialNextIndex);
+        Optional<HttpUrl> nextUrl = getNext(potentialNextIndex, httpUrls);
         if (nextUrl.isPresent()) {
             return redirectTo(existingUrl, nextUrl.get());
         }
@@ -167,7 +167,7 @@ final class UrlSelectorImpl implements UrlSelector {
 
     @Override
     public Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl current) {
-        Optional<HttpUrl> nextUrl = getNext(currentUrl.get());
+        Optional<HttpUrl> nextUrl = getNext(currentUrl.get(), baseUrls.get());
         if (nextUrl.isPresent()) {
             return redirectTo(current, nextUrl.get());
         }
@@ -187,10 +187,9 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     /** Get the next URL in {@code baseUrls}, after the supplied index, that has not been marked as failed. */
-    private Optional<HttpUrl> getNext(int startIndex) {
+    private Optional<HttpUrl> getNext(int startIndex, List<HttpUrl> httpUrls) {
         int numAttempts = 0;
         int index = startIndex;
-        List<HttpUrl> httpUrls = baseUrls.get();
 
         // Find the next URL that is not marked as failed
         while (numAttempts < httpUrls.size()) {
