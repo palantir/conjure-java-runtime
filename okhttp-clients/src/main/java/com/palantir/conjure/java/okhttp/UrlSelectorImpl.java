@@ -153,9 +153,10 @@ final class UrlSelectorImpl implements UrlSelector {
 
     @Override
     public Optional<HttpUrl> redirectToNext(HttpUrl existingUrl) {
-        // if possible, determine the index of the passed in url (so we can be sure to return a url which is different)
         List<HttpUrl> httpUrls = baseUrls.get();
-        int currentIndex = getCurrentIndex(existingUrl, httpUrls);
+        // if possible, determine the index of the passed in url (so we can be sure to return a url which is different)
+        Optional<Integer> existingUrlIndex = indexFor(existingUrl, httpUrls);
+        int currentIndex = existingUrlIndex.orElseGet(() -> getCurrentIndex(httpUrls));
 
         Optional<HttpUrl> nextUrl = getNext(currentIndex, httpUrls);
         if (nextUrl.isPresent()) {
@@ -192,21 +193,6 @@ final class UrlSelectorImpl implements UrlSelector {
                     failedUrls.put(baseUrls.get().get(index), UrlAvailability.FAILED)
             );
         }
-    }
-
-    /**
-     * Best-effort to find the index of the last used base URL, by going through the following cases in order.
-     * <ul>
-     *     <li>The index of a baseUrl from {@code httpUrls} that is a path-prefix of {@code justAttemptedUrl}</li>
-     *     <li>The index of {@link #currentBaseUrl}, which is expected to exist in {@code httpUrls}</li>
-     * </ul>
-     *
-     * @param justAttemptedUrl  URL that was just attempted
-     * @param httpUrls          the current list of base URLs
-     */
-    private int getCurrentIndex(HttpUrl justAttemptedUrl, List<HttpUrl> httpUrls) {
-        Optional<Integer> existingUrlIndex = indexFor(justAttemptedUrl, httpUrls);
-        return existingUrlIndex.orElseGet(() -> getCurrentIndex(httpUrls));
     }
 
     /**
