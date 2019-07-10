@@ -41,7 +41,7 @@ final class UrlSelectorImpl implements UrlSelector {
     private static final Duration RANDOMIZE = Duration.ofMinutes(10);
 
     private final Supplier<List<HttpUrl>> baseUrls;
-    private final AtomicReference<HttpUrl> currentBaseUrl;
+    private final AtomicReference<HttpUrl> lastBaseUrl;
     private final Cache<HttpUrl, UrlAvailability> failedUrls;
     private final boolean useFailedUrlCache;
 
@@ -62,7 +62,7 @@ final class UrlSelectorImpl implements UrlSelector {
         }
 
         // Assuming that baseUrls is already randomized, start with the first one.
-        this.currentBaseUrl = new AtomicReference<>(baseUrls.get(0));
+        this.lastBaseUrl = new AtomicReference<>(baseUrls.get(0));
 
         long coolDownMillis = failedUrlCooldown.toMillis();
         this.failedUrls = Caffeine.newBuilder()
@@ -128,12 +128,12 @@ final class UrlSelectorImpl implements UrlSelector {
      * Rewrites the current URL to use the new {@code redirectBaseUrl}, if the path prefix is compatible, otherwise
      * it returns {@link Optional#empty()}.
      *
-     * Also updates the {@link #currentBaseUrl} with the given {@code redirectBaseUrl}.
+     * Also updates the {@link #lastBaseUrl} with the given {@code redirectBaseUrl}.
      *
      * @param redirectBaseUrl  expected to be an actual base url that exists in {@link #baseUrls}.
      */
     private Optional<HttpUrl> redirectTo(HttpUrl current, HttpUrl redirectBaseUrl) {
-        currentBaseUrl.set(redirectBaseUrl);
+        lastBaseUrl.set(redirectBaseUrl);
 
         if (!isPathPrefixFor(redirectBaseUrl, current)) {
             // The requested redirectBaseUrl has a path that is not compatible with
@@ -156,33 +156,33 @@ final class UrlSelectorImpl implements UrlSelector {
         List<HttpUrl> httpUrls = baseUrls.get();
         // if possible, determine the index of the passed in url (so we can be sure to return a url which is different)
         Optional<Integer> existingUrlIndex = indexFor(existingUrl, httpUrls);
-        int currentIndex = existingUrlIndex.orElseGet(() -> getCurrentIndex(httpUrls));
+        int thisIndex = existingUrlIndex.orElseGet(() -> getLastIndex(httpUrls));
 
-        Optional<HttpUrl> nextUrl = getNext(currentIndex, httpUrls);
+        Optional<HttpUrl> nextUrl = getNext(thisIndex, httpUrls);
         if (nextUrl.isPresent()) {
             return redirectTo(existingUrl, nextUrl.get());
         }
 
         // No healthy URLs remain; re-balance across any specified nodes
-        return redirectTo(existingUrl, httpUrls.get((currentIndex + 1) % httpUrls.size()));
+        return redirectTo(existingUrl, httpUrls.get((thisIndex + 1) % httpUrls.size()));
     }
 
     @Override
     public Optional<HttpUrl> redirectToCurrent(HttpUrl current) {
-        return redirectTo(current, currentBaseUrl.get());
+        return redirectTo(current, lastBaseUrl.get());
     }
 
     @Override
     public Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl current) {
         List<HttpUrl> httpUrls = baseUrls.get();
         // Ignore whatever base URL 'current' might match to, get the last base URL that was used
-        int currentIndex = getCurrentIndex(httpUrls);
-        Optional<HttpUrl> nextUrl = getNext(currentIndex, httpUrls);
+        int lastIndex = getLastIndex(httpUrls);
+        Optional<HttpUrl> nextUrl = getNext(lastIndex, httpUrls);
         if (nextUrl.isPresent()) {
             return redirectTo(current, nextUrl.get());
         }
 
-        return redirectTo(current, httpUrls.get((currentIndex + 1) % httpUrls.size()));
+        return redirectTo(current, httpUrls.get((lastIndex + 1) % httpUrls.size()));
     }
 
     @Override
@@ -196,14 +196,14 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     /**
-     * Returns the index of {@link #currentBaseUrl}, which is expected to exist in {@code httpUrls}.
+     * Returns the index of {@link #lastBaseUrl}, which is expected to exist in {@code httpUrls}.
      */
-    private Integer getCurrentIndex(List<HttpUrl> httpUrls) {
-        int index = httpUrls.indexOf(currentBaseUrl.get());
+    private int getLastIndex(List<HttpUrl> httpUrls) {
+        int index = httpUrls.indexOf(lastBaseUrl.get());
         Preconditions.checkState(index != -1,
                 "Expected httpUrls to contain currentBaseUrl",
                 UnsafeArg.of("httpUrls", httpUrls),
-                UnsafeArg.of("currentBaseUrl", currentBaseUrl));
+                UnsafeArg.of("currentBaseUrl", lastBaseUrl));
         return index;
     }
 
