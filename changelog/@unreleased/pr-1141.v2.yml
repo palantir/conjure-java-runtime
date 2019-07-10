@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Fix `Retrying call after failure` log parameters, and additionally
+    log the original `requestUrl` that failed.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1141
