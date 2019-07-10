@@ -115,33 +115,40 @@ final class UrlSelectorImpl implements UrlSelector {
         }
     }
 
+    /**
+     * Attempt to redirect to the given redirectUrl, which could be a longer URL than just a base path, in which
+     * case it will first be matched to a baseUrl from {@link #baseUrls}.
+     */
     @Override
-    public Optional<HttpUrl> redirectTo(HttpUrl current, String redirectBaseUrl) {
-        return redirectTo(current, HttpUrl.parse(redirectBaseUrl));
+    public Optional<HttpUrl> redirectTo(HttpUrl current, String redirectUrl) {
+        return baseUrlFor(HttpUrl.parse(redirectUrl), baseUrls.get()).flatMap(baseUrl -> redirectTo(current, baseUrl));
     }
 
+    /**
+     * Rewrites the current URL to use the new {@code redirectBaseUrl}, if the path prefix is compatible, otherwise
+     * it returns {@link Optional#empty()}.
+     *
+     * Also updates the {@link #currentBaseUrl} with the given {@code redirectBaseUrl}.
+     *
+     * @param redirectBaseUrl  expected to be an actual base url that exists in {@link #baseUrls}.
+     */
     private Optional<HttpUrl> redirectTo(HttpUrl current, HttpUrl redirectBaseUrl) {
-        List<HttpUrl> httpUrls = baseUrls.get();
-        Optional<HttpUrl> baseUrlForRedirect = baseUrlFor(redirectBaseUrl, httpUrls);
-        baseUrlForRedirect.ifPresent(currentBaseUrl::set);
+        currentBaseUrl.set(redirectBaseUrl);
 
-        return baseUrlForRedirect
-                .flatMap(baseUrl -> {
-                    if (!isPathPrefixFor(baseUrl, current)) {
-                        // The requested redirectBaseUrl has a path that is not compatible with
-                        // the path of the current URL
-                        return Optional.empty();
-                    } else {
-                        return Optional.of(current.newBuilder()
-                                .scheme(baseUrl.scheme())
-                                .host(baseUrl.host())
-                                .port(baseUrl.port())
-                                .encodedPath(
-                                        baseUrl.encodedPath()  // matching prefix
-                                                + current.encodedPath().substring(baseUrl.encodedPath().length()))
-                                .build());
-                    }
-                });
+        if (!isPathPrefixFor(redirectBaseUrl, current)) {
+            // The requested redirectBaseUrl has a path that is not compatible with
+            // the path of the current URL
+            return Optional.empty();
+        } else {
+            return Optional.of(current.newBuilder()
+                    .scheme(redirectBaseUrl.scheme())
+                    .host(redirectBaseUrl.host())
+                    .port(redirectBaseUrl.port())
+                    .encodedPath(
+                            redirectBaseUrl.encodedPath()  // matching prefix
+                                    + current.encodedPath().substring(redirectBaseUrl.encodedPath().length()))
+                    .build());
+        }
     }
 
     @Override
