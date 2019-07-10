@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Clean up UrlSelector logic so it's easier to follow.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1142
