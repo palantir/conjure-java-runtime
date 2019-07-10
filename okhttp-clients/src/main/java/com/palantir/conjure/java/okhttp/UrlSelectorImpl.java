@@ -23,6 +23,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.palantir.logsafe.UnsafeArg;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import okhttp3.HttpUrl;
 
@@ -40,7 +41,7 @@ final class UrlSelectorImpl implements UrlSelector {
     private static final Duration RANDOMIZE = Duration.ofMinutes(10);
 
     private final Supplier<List<HttpUrl>> baseUrls;
-    private final AtomicInteger currentUrl;
+    private final AtomicReference<HttpUrl> currentBaseUrl;
     private final Cache<HttpUrl, UrlAvailability> failedUrls;
     private final boolean useFailedUrlCache;
 
@@ -60,7 +61,8 @@ final class UrlSelectorImpl implements UrlSelector {
             this.baseUrls = () -> baseUrls;
         }
 
-        this.currentUrl = new AtomicInteger(0);
+        // Assuming that baseUrls is already randomized, start with the first one.
+        this.currentBaseUrl = new AtomicReference<>(baseUrls.get(0));
 
         long coolDownMillis = failedUrlCooldown.toMillis();
         this.failedUrls = Caffeine.newBuilder()
@@ -119,11 +121,11 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     private Optional<HttpUrl> redirectTo(HttpUrl current, HttpUrl redirectBaseUrl) {
-        Optional<Integer> baseUrlIndex = indexFor(redirectBaseUrl, baseUrls.get());
-        baseUrlIndex.ifPresent(currentUrl::set);
+        List<HttpUrl> httpUrls = baseUrls.get();
+        Optional<HttpUrl> baseUrlForRedirect = baseUrlFor(redirectBaseUrl, httpUrls);
+        baseUrlForRedirect.ifPresent(currentBaseUrl::set);
 
-        return baseUrlIndex
-                .map(baseUrls.get()::get)
+        return baseUrlForRedirect
                 .flatMap(baseUrl -> {
                     if (!isPathPrefixFor(baseUrl, current)) {
                         // The requested redirectBaseUrl has a path that is not compatible with
@@ -145,35 +147,34 @@ final class UrlSelectorImpl implements UrlSelector {
     @Override
     public Optional<HttpUrl> redirectToNext(HttpUrl existingUrl) {
         // if possible, determine the index of the passed in url (so we can be sure to return a url which is different)
-        Optional<Integer> existingUrlIndex = indexFor(existingUrl, baseUrls.get());
+        List<HttpUrl> httpUrls = baseUrls.get();
+        int currentIndex = getCurrentIndex(existingUrl, httpUrls);
 
-        int potentialNextIndex = existingUrlIndex.orElse(currentUrl.get());
-
-        Optional<HttpUrl> nextUrl = getNext(potentialNextIndex, httpUrls);
+        Optional<HttpUrl> nextUrl = getNext(currentIndex, httpUrls);
         if (nextUrl.isPresent()) {
             return redirectTo(existingUrl, nextUrl.get());
         }
 
         // No healthy URLs remain; re-balance across any specified nodes
-        List<HttpUrl> httpUrls = baseUrls.get();
-        return redirectTo(existingUrl,
-                httpUrls.get((existingUrlIndex.orElse(currentUrl.get()) + 1) % httpUrls.size()));
+        return redirectTo(existingUrl, httpUrls.get((currentIndex + 1) % httpUrls.size()));
     }
 
     @Override
     public Optional<HttpUrl> redirectToCurrent(HttpUrl current) {
-        return redirectTo(current, baseUrls.get().get(currentUrl.get()));
+        return redirectTo(current, currentBaseUrl.get());
     }
 
     @Override
     public Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl current) {
-        Optional<HttpUrl> nextUrl = getNext(currentUrl.get(), baseUrls.get());
+        List<HttpUrl> httpUrls = baseUrls.get();
+        // Ignore whatever base URL 'current' might match to, get the last base URL that was used
+        int currentIndex = getCurrentIndex(httpUrls);
+        Optional<HttpUrl> nextUrl = getNext(currentIndex, httpUrls);
         if (nextUrl.isPresent()) {
             return redirectTo(current, nextUrl.get());
         }
 
-        List<HttpUrl> httpUrls = baseUrls.get();
-        return redirectTo(current, httpUrls.get((currentUrl.get() + 1) % httpUrls.size()));
+        return redirectTo(current, httpUrls.get((currentIndex + 1) % httpUrls.size()));
     }
 
     @Override
@@ -184,6 +185,33 @@ final class UrlSelectorImpl implements UrlSelector {
                     failedUrls.put(baseUrls.get().get(index), UrlAvailability.FAILED)
             );
         }
+    }
+
+    /**
+     * Best-effort to find the index of the last used base URL, by going through the following cases in order.
+     * <ul>
+     *     <li>The index of a baseUrl from {@code httpUrls} that is a path-prefix of {@code justAttemptedUrl}</li>
+     *     <li>The index of {@link #currentBaseUrl}, which is expected to exist in {@code httpUrls}</li>
+     * </ul>
+     *
+     * @param justAttemptedUrl  URL that was just attempted
+     * @param httpUrls          the current list of base URLs
+     */
+    private int getCurrentIndex(HttpUrl justAttemptedUrl, List<HttpUrl> httpUrls) {
+        Optional<Integer> existingUrlIndex = indexFor(justAttemptedUrl, httpUrls);
+        return existingUrlIndex.orElseGet(() -> getCurrentIndex(httpUrls));
+    }
+
+    /**
+     * Returns the index of {@link #currentBaseUrl}, which is expected to exist in {@code httpUrls}.
+     */
+    private Integer getCurrentIndex(List<HttpUrl> httpUrls) {
+        int index = httpUrls.indexOf(currentBaseUrl.get());
+        Preconditions.checkState(index != -1,
+                "Expected httpUrls to contain currentBaseUrl",
+                UnsafeArg.of("httpUrls", httpUrls),
+                UnsafeArg.of("currentBaseUrl", currentBaseUrl));
+        return index;
     }
 
     /** Get the next URL in {@code baseUrls}, after the supplied index, that has not been marked as failed. */
@@ -202,6 +230,10 @@ final class UrlSelectorImpl implements UrlSelector {
         }
 
         return Optional.empty();
+    }
+
+    private static Optional<HttpUrl> baseUrlFor(HttpUrl url, List<HttpUrl> currentUrls) {
+        return indexFor(url, currentUrls).map(currentUrls::get);
     }
 
     private static Optional<Integer> indexFor(HttpUrl url, List<HttpUrl> currentUrls) {
