@@ -119,7 +119,7 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     private Optional<HttpUrl> redirectTo(HttpUrl current, HttpUrl redirectBaseUrl) {
-        Optional<Integer> baseUrlIndex = indexFor(redirectBaseUrl);
+        Optional<Integer> baseUrlIndex = indexFor(redirectBaseUrl, baseUrls.get());
         baseUrlIndex.ifPresent(currentUrl::set);
 
         return baseUrlIndex
@@ -145,7 +145,7 @@ final class UrlSelectorImpl implements UrlSelector {
     @Override
     public Optional<HttpUrl> redirectToNext(HttpUrl existingUrl) {
         // if possible, determine the index of the passed in url (so we can be sure to return a url which is different)
-        Optional<Integer> existingUrlIndex = indexFor(existingUrl);
+        Optional<Integer> existingUrlIndex = indexFor(existingUrl, baseUrls.get());
 
         int potentialNextIndex = existingUrlIndex.orElse(currentUrl.get());
 
@@ -179,7 +179,7 @@ final class UrlSelectorImpl implements UrlSelector {
     @Override
     public void markAsFailed(HttpUrl failedUrl) {
         if (useFailedUrlCache) {
-            Optional<Integer> indexForFailedUrl = indexFor(failedUrl);
+            Optional<Integer> indexForFailedUrl = indexFor(failedUrl, baseUrls.get());
             indexForFailedUrl.ifPresent(index ->
                     failedUrls.put(baseUrls.get().get(index), UrlAvailability.FAILED)
             );
@@ -205,11 +205,10 @@ final class UrlSelectorImpl implements UrlSelector {
         return Optional.empty();
     }
 
-    private Optional<Integer> indexFor(HttpUrl url) {
+    private static Optional<Integer> indexFor(HttpUrl url, List<HttpUrl> currentUrls) {
         HttpUrl canonicalUrl = canonicalize(url);
-        List<HttpUrl> httpUrls = baseUrls.get();
-        for (int i = 0; i < httpUrls.size(); ++i) {
-            if (isBaseUrlFor(httpUrls.get(i), canonicalUrl)) {
+        for (int i = 0; i < currentUrls.size(); ++i) {
+            if (isBaseUrlFor(currentUrls.get(i), canonicalUrl)) {
                 return Optional.of(i);
             }
         }
