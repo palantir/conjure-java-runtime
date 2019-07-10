@@ -155,7 +155,7 @@ final class UrlSelectorImpl implements UrlSelector {
         List<HttpUrl> httpUrls = baseUrls.get();
         // if possible, determine the index of the passed in url (so we can be sure to return a url which is different)
         Optional<Integer> currentUrlIndex = indexFor(currentUrl, httpUrls);
-        int startIndex = currentUrlIndex.orElseGet(() -> getLastIndex(httpUrls));
+        int startIndex = currentUrlIndex.orElseGet(() -> getIndexOfLastBaseUrl(httpUrls));
 
         Optional<HttpUrl> nextUrl = getNext(startIndex, httpUrls);
         if (nextUrl.isPresent()) {
@@ -175,7 +175,7 @@ final class UrlSelectorImpl implements UrlSelector {
     public Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl current) {
         List<HttpUrl> httpUrls = baseUrls.get();
         // Ignore whatever base URL 'current' might match to, get the last base URL that was used
-        int lastIndex = getLastIndex(httpUrls);
+        int lastIndex = getIndexOfLastBaseUrl(httpUrls);
         Optional<HttpUrl> nextUrl = getNext(lastIndex, httpUrls);
         if (nextUrl.isPresent()) {
             return redirectTo(current, nextUrl.get());
@@ -197,7 +197,7 @@ final class UrlSelectorImpl implements UrlSelector {
     /**
      * Returns the index of {@link #lastBaseUrl}, which is expected to exist in {@code httpUrls}.
      */
-    private int getLastIndex(List<HttpUrl> httpUrls) {
+    private int getIndexOfLastBaseUrl(List<HttpUrl> httpUrls) {
         int index = httpUrls.indexOf(lastBaseUrl.get());
         Preconditions.checkState(index != -1,
                 "Expected httpUrls to contain currentBaseUrl",
