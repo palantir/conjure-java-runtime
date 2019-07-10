@@ -139,16 +139,15 @@ final class UrlSelectorImpl implements UrlSelector {
             // The requested redirectBaseUrl has a path that is not compatible with
             // the path of the current URL
             return Optional.empty();
-        } else {
-            return Optional.of(current.newBuilder()
-                    .scheme(redirectBaseUrl.scheme())
-                    .host(redirectBaseUrl.host())
-                    .port(redirectBaseUrl.port())
-                    .encodedPath(
-                            redirectBaseUrl.encodedPath()  // matching prefix
-                                    + current.encodedPath().substring(redirectBaseUrl.encodedPath().length()))
-                    .build());
         }
+        return Optional.of(current.newBuilder()
+                .scheme(redirectBaseUrl.scheme())
+                .host(redirectBaseUrl.host())
+                .port(redirectBaseUrl.port())
+                .encodedPath(
+                        redirectBaseUrl.encodedPath()  // matching prefix
+                                + current.encodedPath().substring(redirectBaseUrl.encodedPath().length()))
+                .build());
     }
 
     @Override
