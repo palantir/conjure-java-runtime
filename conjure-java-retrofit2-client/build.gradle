@@ -25,6 +25,7 @@ dependencies {
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
+    testImplementation "io.leangen.geantyref:geantyref"
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'
