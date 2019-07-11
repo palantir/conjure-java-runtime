@@ -33,7 +33,6 @@ import com.palantir.logsafe.UnsafeArg;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import java.lang.ref.WeakReference;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -338,15 +337,6 @@ final class ConcurrencyLimiters {
                 SettableFuture<Limiter.Listener> future, Optional<RuntimeException> allocationStackTrace) {
             this.future = future;
             this.allocationStackTrace = allocationStackTrace;
-        }
-    }
-
-    private static final class LeakDetectingReference<T> extends WeakReference<T> {
-        private final Optional<RuntimeException> stackTrace;
-
-        LeakDetectingReference(T referent, Optional<RuntimeException> stackTrace) {
-            super(referent);
-            this.stackTrace = stackTrace;
         }
     }
 }
