@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
