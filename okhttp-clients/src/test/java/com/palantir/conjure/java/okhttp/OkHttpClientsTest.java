@@ -769,6 +769,34 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(server.takeRequest().getHeader(HttpHeaders.HOST)).isEqualTo("foo.com");
     }
 
+    @Test(timeout = 1000)
+    public void non_ioexceptions_dont_break_the_world() throws IOException {
+        server.enqueue(new MockResponse().setBody("foo"));
+
+        HostEventsSink throwingSink = new HostEventsSink() {
+            @Override
+            public void record(String serviceName, String hostname, int port, int statusCode, long micros) {
+                throw new IllegalStateException("I am not an IOException");
+            }
+
+            @Override
+            public void recordIoException(String serviceName, String hostname, int port) {
+                //empty;
+            }
+        };
+        OkHttpClient client = OkHttpClients.create(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url))
+                        .maxNumRetries(0)
+                        .build(),
+                AGENT,
+                throwingSink,
+                OkHttpClientsTest.class);
+
+        assertThatThrownBy(() -> client.newCall(new Request.Builder().url(url).build()).execute())
+                .hasStackTraceContaining("Caught a non-IOException. This is a serious bug and requires investigation");
+    }
+
     private OkHttpClient createRetryingClient(int maxNumRetries) {
         return createRetryingClient(maxNumRetries, Duration.ofMillis(500));
     }

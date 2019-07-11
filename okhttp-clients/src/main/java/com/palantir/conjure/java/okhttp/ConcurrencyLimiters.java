@@ -29,6 +29,7 @@ import com.netflix.concurrency.limits.Limiter;
 import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -106,7 +107,31 @@ final class ConcurrencyLimiters {
     @VisibleForTesting
     Limit newLimit() {
         return new ConjureWindowedLimit(AIMDLimit.newBuilder()
+                /**
+                 * Requests slower than this timeout are treated as failures, which reduce concurrency. Since we have
+                 * plenty of long streaming requests, we set this timeout to 292.27726 years to effectively turn it off.
+                 */
                 .timeout(Long.MAX_VALUE, TimeUnit.NANOSECONDS)
+                /**
+                 * Our initial limit is pretty conservative - only 10 concurrent requests in flight at the same time.
+                 * If a client is consistently maxing out its concurrency permits, this increases additively once per
+                 * second (see {@link ConjureWindowedLimit#MIN_WINDOW_TIME}.
+                 */
+                .initialLimit(10)
+                /**
+                 * We reduce concurrency _immediately_ as soon as a request fails, which can result in drastic limit
+                 * reductions, e.g. starting with 30 concurrent permits, 100 failures in a row results in:
+                 * 30 * 0.9^100 = 0.0007 (rounded up to the minLimit of 1).
+                 */
+                .backoffRatio(0.9)
+                /**
+                 * However many failures we get, we always need at least 1 permit so we can keep trying.
+                 */
+                .minLimit(1)
+                /**
+                 * Note that the Dispatcher in {@link OkHttpClients} has a max concurrent requests too.
+                 */
+                .maxLimit(Integer.MAX_VALUE)
                 .build());
     }
 
@@ -121,7 +146,7 @@ final class ConcurrencyLimiters {
         if (!useLimiter) {
             return NoOpConcurrencyLimiter.INSTANCE;
         }
-        Supplier<Limiter<Void>> limiter = () -> SimpleLimiter.newBuilder().limit(newLimit()).build();
+        Supplier<SimpleLimiter<Void>> limiter = () -> SimpleLimiter.newBuilder().limit(newLimit()).build();
         return new DefaultConcurrencyLimiter(limiterKey, limiter);
     }
 
@@ -179,19 +204,25 @@ final class ConcurrencyLimiters {
     }
 
     final class DefaultConcurrencyLimiter implements ConcurrencyLimiter {
+
         @GuardedBy("this")
         private final ThreadWorkQueue<SettableFuture<Limiter.Listener>> waitingRequests = new ThreadWorkQueue<>();
         @GuardedBy("this")
-        private Limiter<Void> limiter;
+        private SimpleLimiter<Void> limiter;
         @GuardedBy("this")
         private ScheduledFuture<?> timeoutCleanup;
         private final Key limiterKey;
-        private final Supplier<Limiter<Void>> limiterFactory;
+        private final Supplier<SimpleLimiter<Void>> limiterFactory;
 
-        DefaultConcurrencyLimiter(Key limiterKey, Supplier<Limiter<Void>> limiterFactory) {
+        private final SafeArg<Optional<String>> safeArgMethod;
+        private final SafeArg<Optional<String>> safeArgPathTemplate;
+
+        DefaultConcurrencyLimiter(Key limiterKey, Supplier<SimpleLimiter<Void>> limiterFactory) {
             this.limiterKey = limiterKey;
             this.limiterFactory = limiterFactory;
             this.limiter = limiterFactory.get();
+            this.safeArgMethod = SafeArg.of("method", limiterKey.method());
+            this.safeArgPathTemplate = SafeArg.of("pathTemplate", limiterKey.pathTemplate());
         }
 
         @Override
@@ -205,6 +236,10 @@ final class ConcurrencyLimiters {
 
         synchronized void processQueue() {
             while (!waitingRequests.isEmpty()) {
+                log.debug("Limit",
+                        SafeArg.of("limit", limiter.getLimit()),
+                        safeArgMethod,
+                        safeArgPathTemplate);
                 Optional<Limiter.Listener> maybeAcquired = limiter.acquire(NO_CONTEXT);
                 if (!maybeAcquired.isPresent()) {
                     if (!timeoutScheduled()) {
@@ -214,6 +249,7 @@ final class ConcurrencyLimiters {
                     return;
                 }
                 Limiter.Listener acquired = maybeAcquired.get();
+
                 SettableFuture<Limiter.Listener> head = waitingRequests.remove();
                 head.set(wrap(acquired));
             }
@@ -229,10 +265,12 @@ final class ConcurrencyLimiters {
 
         private synchronized void resetLimiter() {
             log.warn("Timed out waiting to get permits for concurrency. In most cases this would indicate some kind of "
-                            + "deadlock. We expect that either this is caused by not closing response bodies "
-                            + "(there should be OkHttp log lines indicating this), or service overloading.",
+                            + "deadlock. We expect that either this is caused by either service overloading, or not "
+                            + "closing response bodies (consider using the try-with-resources pattern).",
                     SafeArg.of("serviceClass", serviceClass),
-                    SafeArg.of("limiterKey", limiterKey),
+                    UnsafeArg.of("hostname", limiterKey.hostname()),
+                    safeArgMethod,
+                    safeArgPathTemplate,
                     SafeArg.of("timeout", timeout));
             leakSuspected.mark();
             limiter = limiterFactory.get();

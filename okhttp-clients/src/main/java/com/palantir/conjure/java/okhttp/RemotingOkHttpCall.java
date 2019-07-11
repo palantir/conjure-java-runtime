@@ -207,7 +207,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 log.info("Retrying call after failure",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
-                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
+                        UnsafeArg.of("requestUrl", call.request().url().toString()),
+                        UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
                         exception);
                 Request redirectedRequest = request().newBuilder()
                         .url(redirectTo.get())
