@@ -19,16 +19,19 @@ package com.palantir.conjure.java.client.retrofit2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.client.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalDoubleStringConverter;
 import com.palantir.conjure.java.client.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalIntStringConverter;
 import com.palantir.conjure.java.client.retrofit2.OptionalObjectToStringConverterFactory.Java8OptionalLongStringConverter;
 import io.leangen.geantyref.AnnotationFormatException;
 import io.leangen.geantyref.TypeFactory;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -132,7 +135,12 @@ public final class OptionalObjectToStringConverterFactoryTest {
         Annotation[] annotations = new Annotation[clazz.length];
         for (int i = 0; i < clazz.length; ++i) {
             try {
-                annotations[i] = TypeFactory.annotation(clazz[i], ImmutableMap.of());
+                // Set bogus string values for any annotation methods that don't have a default
+                Map<String, Object> map = Arrays
+                        .stream(clazz[i].getDeclaredMethods())
+                        .filter(method -> method.getDefaultValue() == null)
+                        .collect(Collectors.toMap(Method::getName, method -> ""));
+                annotations[i] = TypeFactory.annotation(clazz[i], map);
             } catch (AnnotationFormatException e) {
                 throw new RuntimeException(e);
             }
