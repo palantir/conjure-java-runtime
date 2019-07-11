@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.testing.Assertions;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.HttpUrl;
@@ -44,19 +46,21 @@ public final class UrlSelectorTest extends TestBase {
                 "user:pass@foo.com/path",
                 ""
         }) {
-            assertThatThrownBy(() -> UrlSelectorImpl.create(list(url), false))
+            Assertions.assertThatLoggableExceptionThrownBy(() -> UrlSelectorImpl.create(list(url), false))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("Not a valid URL: %s", url);
+                    .hasLogMessage("Not a valid URL")
+                    .hasExactlyArgs(UnsafeArg.of("url", url));
         }
 
         for (String url : new String[] {
                 "http://user:pass@foo.com/path",
                 "http://foo.com/path?bar",
                 }) {
-            assertThatThrownBy(() -> UrlSelectorImpl.create(list(url), false))
+            Assertions.assertThatLoggableExceptionThrownBy(() -> UrlSelectorImpl.create(list(url), false))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage(
-                            "Base URLs must be 'canonical' and consist of schema, host, port, and path only: %s", url);
+                    .hasLogMessage(
+                            "Base URLs must be 'canonical' and consist of schema, host, port, and path only")
+                    .hasExactlyArgs(UnsafeArg.of("url", url));
         }
 
         for (String url : new String[] {
