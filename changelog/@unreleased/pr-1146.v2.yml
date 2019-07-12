@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix bug in leak detector which detected everything as a leak
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1146

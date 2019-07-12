@@ -59,10 +59,11 @@ final class LeakDetector<T> {
 
     synchronized void unregister(T objectToNoLongerMonitor) {
         for (int i = 0; i < references.size(); i++) {
-            if (references.get(i) == objectToNoLongerMonitor) {
+            if (references.get(i).get() == objectToNoLongerMonitor) {
                 int last = references.size() - 1;
                 Collections.swap(references, i, last);
                 references.remove(last);
+                return;
             }
         }
     }

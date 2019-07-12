@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.Test;
 
 public class LeakDetectorTest {
@@ -37,5 +38,16 @@ public class LeakDetectorTest {
         leakDetector.register("this will trigger detection", Optional.empty());
         assertThat(leaks).containsExactly(exception);
         leakDetector.unregister(toUnregister);
+    }
+
+    @Test
+    public void canUnregister() {
+        String track = UUID.randomUUID().toString();
+        leakDetector.register(track, Optional.empty());
+        leakDetector.unregister(track);
+        track = null;
+        System.gc();
+        leakDetector.register("trigger", Optional.empty());
+        assertThat(leaks).isEmpty();
     }
 }
