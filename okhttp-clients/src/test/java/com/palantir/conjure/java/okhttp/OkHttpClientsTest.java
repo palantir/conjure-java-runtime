@@ -20,12 +20,16 @@ import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptio
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HostAndPort;
 import com.google.common.net.HttpHeaders;
+import com.google.common.util.concurrent.AbstractFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
@@ -85,6 +89,48 @@ public final class OkHttpClientsTest extends TestBase {
         url = "http://localhost:" + server.getPort();
         url2 = "http://localhost:" + server2.getPort();
         url3 = "http://localhost:" + server3.getPort();
+    }
+
+    @Test
+    public void cancelledCallsDoNotRetry() {
+        server.enqueue(new MockResponse().setHeadersDelay(1, TimeUnit.SECONDS).setBody("pong"));
+        OkHttpClient client = createRetryingClient(1);
+        AsyncRequest future = AsyncRequest.of(client.newCall(new Request.Builder().url(url).build()));
+        future.cancelCall();
+        try {
+            Futures.getUnchecked(future);
+            fail("Did not throw an exception");
+        } catch (UncheckedExecutionException e) {
+            assertThat(e.getCause()).hasMessage("Canceled").isInstanceOf(IOException.class);
+        }
+    }
+
+    private static final class AsyncRequest extends AbstractFuture<Response> implements Callback {
+        private final Call call;
+
+        private AsyncRequest(Call call) {
+            this.call = call;
+        }
+
+        public void cancelCall() {
+            call.cancel();
+        }
+
+        @Override
+        public void onFailure(Call unused, IOException exception) {
+            setException(exception);
+        }
+
+        @Override
+        public void onResponse(Call unused, Response response) {
+            set(response);
+        }
+
+        static AsyncRequest of(Call call) {
+            AsyncRequest future = new AsyncRequest(call);
+            call.enqueue(future);
+            return future;
+        }
     }
 
     @Test
