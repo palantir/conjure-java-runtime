@@ -185,6 +185,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             public void onFailure(Call call, IOException exception) {
                 if (isCanceled()) {
                     callback.onFailure(call, exception);
+                    return;
                 }
 
                 urls.markAsFailed(request().url());
