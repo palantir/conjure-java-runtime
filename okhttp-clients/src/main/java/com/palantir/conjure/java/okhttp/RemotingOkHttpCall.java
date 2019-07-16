@@ -16,11 +16,11 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.SettableFuture;
 import com.netflix.concurrency.limits.Limiter;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -106,19 +106,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
      */
     @Override
     public Response execute() throws IOException {
-        SettableFuture<Response> future = SettableFuture.create();
-        enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException exception) {
-                future.setException(exception);
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) {
-                future.set(response);
-            }
-        });
-
+        ListenableFuture<Response> future = executeAsync();
         try {
             // We don't enforce a timeout here because it's not possible to know how long this operation might take.
             // First, it might get queued indefinitely in the Dispatcher, and then it might get retried a (potentially)
@@ -159,24 +147,58 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     @Override
     public void enqueue(Callback callback) {
-        AsyncTracer tracer = new AsyncTracer("OkHttp: acquire-limiter");
-        ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
-        request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
-        Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {
+        Futures.addCallback(executeAsync(), new FutureCallback<Response>() {
             @Override
-            public void onSuccess(Limiter.Listener listener) {
-                tracer.withTrace(() -> null);
-                enqueueInternal(callback);
+            public void onSuccess(Response response) {
+                try {
+                    callback.onResponse(RemotingOkHttpCall.this, response);
+                } catch (IOException e) {
+                    log.warn("Callback failure", e);
+                }
             }
 
             @Override
             public void onFailure(Throwable throwable) {
-                callback.onFailure(
-                        RemotingOkHttpCall.this,
-                        new IOException(new AssertionError("This should never happen, since it implies "
-                                + "we failed when using the concurrency limiter", throwable)));
+                if (throwable instanceof IOException) {
+                    callback.onFailure(RemotingOkHttpCall.this, (IOException) throwable);
+                } else {
+                    callback.onFailure(RemotingOkHttpCall.this,
+                            new IOException(
+                                    "This shouldn't happen - all throwables should be IOExceptions",
+                                    throwable));
+                }
             }
         }, MoreExecutors.directExecutor());
+    }
+
+    private ListenableFuture<Response> executeAsync() {
+        AsyncTracer tracer = new AsyncTracer("OkHttp: acquire-limiter");
+        ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
+        request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
+        return Futures.transformAsync(limiterListener, listener -> {
+            tracer.withTrace(() -> null);
+            ListenableFutureCallback callback = new ListenableFutureCallback();
+            enqueueInternal(callback);
+            return callback;
+        }, MoreExecutors.directExecutor());
+    }
+
+    private final class ListenableFutureCallback extends AbstractFuture<Response> implements Callback {
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            RemotingOkHttpCall.this.cancel();
+            return super.cancel(mayInterruptIfRunning);
+        }
+
+        @Override
+        public void onResponse(Call call, Response response) {
+            set(response);
+        }
+
+        @Override
+        public void onFailure(Call call, IOException ioException) {
+            setException(ioException);
+        }
     }
 
     private void enqueueInternal(Callback callback) {
