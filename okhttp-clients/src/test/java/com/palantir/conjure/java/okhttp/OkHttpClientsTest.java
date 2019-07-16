@@ -105,7 +105,7 @@ public final class OkHttpClientsTest extends TestBase {
         }
     }
 
-    private static class AsyncRequest extends AbstractFuture<Response> implements Callback {
+    private static final class AsyncRequest extends AbstractFuture<Response> implements Callback {
         private final Call call;
 
         private AsyncRequest(Call call) {
@@ -117,8 +117,8 @@ public final class OkHttpClientsTest extends TestBase {
         }
 
         @Override
-        public void onFailure(Call unused, IOException e) {
-            setException(e);
+        public void onFailure(Call unused, IOException exception) {
+            setException(exception);
         }
 
         @Override
