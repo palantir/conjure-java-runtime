@@ -252,7 +252,11 @@ final class ConcurrencyLimiters {
                 QueuedRequest request = waitingRequests.remove();
 
                 SettableFuture<Limiter.Listener> head = request.future;
-                head.set(wrap(acquired, request.allocationStackTrace));
+                Limiter.Listener wrapped = wrap(acquired, request.allocationStackTrace);
+                boolean wasCancelled = !head.set(wrapped);
+                if (wasCancelled) {
+                    wrapped.onIgnore();
+                }
             }
 
             if (timeoutScheduled()) {

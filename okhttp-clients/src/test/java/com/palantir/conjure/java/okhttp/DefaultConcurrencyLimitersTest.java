@@ -19,12 +19,17 @@ package com.palantir.conjure.java.okhttp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.netflix.concurrency.limits.Limit;
+import com.netflix.concurrency.limits.Limiter;
 import com.netflix.concurrency.limits.limit.AIMDLimit;
+import com.palantir.conjure.java.okhttp.ConcurrencyLimiters.ConcurrencyLimiter;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -73,6 +78,26 @@ public final class DefaultConcurrencyLimitersTest {
             int resultLimit = limit.getLimit();
             assertThat(resultLimit).isEqualTo(initialLimit);
         }
+    }
+
+    @Test
+    public void testConcurrencyLimitersFuturesCanBeCancelled() {
+        List<Limiter.Listener> acquired = new ArrayList<>();
+        List<ListenableFuture<Limiter.Listener>> waitingFutures = new ArrayList<>();
+        ConcurrencyLimiter limiter = limiters.acquireLimiterInternal(KEY);
+        while (waitingFutures.size() < 2) {
+            ListenableFuture<Limiter.Listener> listener = limiter.acquire();
+            if (listener.isDone()) {
+                acquired.add(Futures.getUnchecked(listener));
+            } else {
+                waitingFutures.add(listener);
+            }
+        }
+        waitingFutures.get(0).cancel(true);
+        ListenableFuture<Limiter.Listener> toBeCompleted = waitingFutures.get(1);
+        assertThat(toBeCompleted).isNotDone();
+        acquired.get(0).onIgnore();
+        assertThat(toBeCompleted).isDone();
     }
 
     private Thread exhaust() {
