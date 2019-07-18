@@ -44,8 +44,11 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.HttpRetryException;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
@@ -53,15 +56,22 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.internal.http.UnrepeatableRequestBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.SocketPolicy;
+import okio.BufferedSink;
+import okio.Okio;
+import okio.Source;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -130,6 +140,59 @@ public final class OkHttpClientsTest extends TestBase {
             AsyncRequest future = new AsyncRequest(call);
             call.enqueue(future);
             return future;
+        }
+    }
+
+    @Test
+    public void streamingRequestBodyIsNotRetried() throws IOException {
+        server.enqueue(new MockResponse().setResponseCode(503));
+
+        OkHttpClient client = createRetryingClient(1);
+
+        StreamingRequestBody body =
+                StreamingRequestBody.create(
+                        Okio.buffer(
+                                Okio.source(
+                                        new ByteArrayInputStream("hello".getBytes(StandardCharsets.UTF_8)))));
+        assertThatThrownBy(() -> client.newCall(new Request.Builder().url(url).post(body).build()).execute())
+                .isInstanceOf(HttpRetryException.class)
+                .hasMessage("Cannot retry streamed HTTP body");
+    }
+
+    private static final class StreamingRequestBody extends RequestBody implements UnrepeatableRequestBody {
+        private static final MediaType OCTET_STREAM = MediaType.parse("application/octet-stream");
+
+        private final Source source;
+        private final AtomicBoolean used = new AtomicBoolean(false);
+
+        StreamingRequestBody(Source source) {
+            this.source = source;
+        }
+
+        private static StreamingRequestBody create(Source input) {
+            return new StreamingRequestBody(input);
+        }
+
+        @Override
+        public MediaType contentType() {
+            return OCTET_STREAM;
+        }
+
+        @Override
+        public void writeTo(BufferedSink sink) throws IOException {
+            if (!used.compareAndSet(false, true)) {
+                throw new StreamReusedException("StreamingRequestBody was already consumed");
+            } else {
+                try (Source closeableSource = source) {
+                    sink.writeAll(closeableSource);
+                }
+            }
+        }
+    }
+
+    private static final class StreamReusedException extends IOException {
+        StreamReusedException(String message) {
+            super(message);
         }
     }
 

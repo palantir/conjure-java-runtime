@@ -32,6 +32,7 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tracing.AsyncTracer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.HttpRetryException;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Optional;
@@ -47,6 +48,7 @@ import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okhttp3.internal.http.UnrepeatableRequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,7 +185,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         super.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {
-                if (isCanceled()) {
+                if (isCanceled() || isStreamingBody(call)) {
                     callback.onFailure(call, exception);
                     return;
                 }
@@ -245,6 +247,13 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
+                if (isStreamingBody(call)) {
+                    callback.onFailure(
+                            call,
+                            new HttpRetryException("Cannot retry streamed HTTP body", response.code()));
+                    return;
+                }
+
                 // Handle to handle QoS situations: retry, failover, etc.
                 Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
                 if (qosError.isPresent()) {
@@ -268,6 +277,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 callback.onFailure(call, new SafeIoException("Failed to handle request, "
                         + "this is an conjure-java-runtime bug."));
+            }
+
+            private boolean isStreamingBody(Call call) {
+                return call.request().body() instanceof UnrepeatableRequestBody;
             }
         });
     }
