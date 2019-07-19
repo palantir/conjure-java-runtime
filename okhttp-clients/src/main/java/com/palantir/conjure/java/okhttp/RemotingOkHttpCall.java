@@ -32,7 +32,6 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tracing.AsyncTracer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.HttpRetryException;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Optional;
@@ -212,7 +211,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
-                log.info("Retrying call after failure",
+                log.info(
+                        "Retrying call after failure",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
                         UnsafeArg.of("requestUrl", call.request().url().toString()),
                         UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
@@ -250,37 +250,57 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 if (isStreamingBody(call)) {
                     callback.onFailure(
                             call,
-                            new HttpRetryException("Cannot retry streamed HTTP body", response.code()));
-                    return;
-                }
+                            new SafeIoException(
+                                    "Cannot retry streamed HTTP body",
+                                    mapToException(errorResponseSupplier)));
+                } else {
+                    // Handle QoS situations: retry, failover, etc.
+                    Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
+                    if (qosError.isPresent()) {
+                        qosError.get().accept(createQosVisitor(callback, call, errorResponseSupplier.get()));
+                        return;
+                    }
 
-                // Handle to handle QoS situations: retry, failover, etc.
+                    // Handle responses that correspond to RemoteExceptions / SerializableErrors
+                    Optional<RemoteException> httpError = remoteExceptionHandler.handle(errorResponseSupplier.get());
+                    if (httpError.isPresent()) {
+                        callback.onFailure(call, new IoRemoteException(httpError.get()));
+                        return;
+                    }
+
+                    // Catch-all: handle all other responses
+                    Optional<IOException> ioException = ioExceptionHandler.handle(errorResponseSupplier.get());
+                    if (ioException.isPresent()) {
+                        callback.onFailure(call, ioException.get());
+                        return;
+                    }
+
+                    callback.onFailure(call, new SafeIoException("Failed to handle request, "
+                            + "this is a conjure-java-runtime bug."));
+                }
+            }
+
+            private boolean isStreamingBody(Call call) {
+                return call.request().body() instanceof UnrepeatableRequestBody;
+            }
+
+            private Exception mapToException(Supplier<Response> errorResponseSupplier) {
+                // Handle QoS situations: retry, failover, etc.
                 Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
                 if (qosError.isPresent()) {
-                    qosError.get().accept(createQosVisitor(callback, call, errorResponseSupplier.get()));
-                    return;
+                    return qosError.get();
                 }
 
                 // Handle responses that correspond to RemoteExceptions / SerializableErrors
                 Optional<RemoteException> httpError = remoteExceptionHandler.handle(errorResponseSupplier.get());
                 if (httpError.isPresent()) {
-                    callback.onFailure(call, new IoRemoteException(httpError.get()));
-                    return;
+                    return new IoRemoteException(httpError.get());
                 }
 
                 // Catch-all: handle all other responses
                 Optional<IOException> ioException = ioExceptionHandler.handle(errorResponseSupplier.get());
-                if (ioException.isPresent()) {
-                    callback.onFailure(call, ioException.get());
-                    return;
-                }
-
-                callback.onFailure(call, new SafeIoException("Failed to handle request, "
-                        + "this is an conjure-java-runtime bug."));
-            }
-
-            private boolean isStreamingBody(Call call) {
-                return call.request().body() instanceof UnrepeatableRequestBody;
+                return ioException.orElseGet(
+                        () -> new SafeIoException("Failed to handle request, this is a conjure-java-runtime bug."));
             }
         });
     }

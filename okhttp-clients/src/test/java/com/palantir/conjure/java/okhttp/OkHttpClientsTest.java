@@ -46,7 +46,6 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.HttpRetryException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
@@ -57,6 +56,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -150,13 +150,16 @@ public final class OkHttpClientsTest extends TestBase {
         OkHttpClient client = createRetryingClient(1);
 
         StreamingRequestBody body =
-                StreamingRequestBody.create(
+                new StreamingRequestBody(
                         Okio.buffer(
                                 Okio.source(
                                         new ByteArrayInputStream("hello".getBytes(StandardCharsets.UTF_8)))));
         assertThatThrownBy(() -> client.newCall(new Request.Builder().url(url).post(body).build()).execute())
-                .isInstanceOf(HttpRetryException.class)
+                .isInstanceOf(SafeIoException.class)
                 .hasMessage("Cannot retry streamed HTTP body");
+
+        assertThat(body.used).isTrue();
+        assertThat(body.retried).hasValue(0);
     }
 
     private static final class StreamingRequestBody extends RequestBody implements UnrepeatableRequestBody {
@@ -164,13 +167,10 @@ public final class OkHttpClientsTest extends TestBase {
 
         private final Source source;
         private final AtomicBoolean used = new AtomicBoolean(false);
+        private final AtomicInteger retried = new AtomicInteger();
 
         StreamingRequestBody(Source source) {
             this.source = source;
-        }
-
-        private static StreamingRequestBody create(Source input) {
-            return new StreamingRequestBody(input);
         }
 
         @Override
@@ -181,6 +181,7 @@ public final class OkHttpClientsTest extends TestBase {
         @Override
         public void writeTo(BufferedSink sink) throws IOException {
             if (!used.compareAndSet(false, true)) {
+                retried.incrementAndGet();
                 throw new StreamReusedException("StreamingRequestBody was already consumed");
             } else {
                 try (Source closeableSource = source) {
