@@ -211,19 +211,21 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
-                log.info("Retrying call after failure",
-                        SafeArg.of("backoffMillis", backoff.get().toMillis()),
-                        UnsafeArg.of("requestUrl", call.request().url().toString()),
-                        UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
-                        exception);
-                Request redirectedRequest = request().newBuilder()
-                        .url(redirectTo.get())
-                        .build();
-                RemotingOkHttpCall retryCall =
-                        client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
-                scheduleExecution(
-                        () -> retryCall.enqueue(callback),
-                        backoff.get());
+                retryIfAllowed(callback, call, exception, () -> {
+                    log.info("Retrying call after failure",
+                            SafeArg.of("backoffMillis", backoff.get().toMillis()),
+                            UnsafeArg.of("requestUrl", call.request().url().toString()),
+                            UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
+                            exception);
+                    Request redirectedRequest = request().newBuilder()
+                            .url(redirectTo.get())
+                            .build();
+                    RemotingOkHttpCall retryCall =
+                            client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
+                    scheduleExecution(
+                            () -> retryCall.enqueue(callback),
+                            backoff.get());
+                });
             }
 
             @Override
