@@ -246,60 +246,29 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
-                if (isStreamingBody(call)) {
-                    callback.onFailure(
-                            call,
-                            new SafeIoException(
-                                    "Cannot retry streamed HTTP body",
-                                    mapToException(errorResponseSupplier)));
-                } else {
-                    // Handle QoS situations: retry, failover, etc.
-                    Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
-                    if (qosError.isPresent()) {
-                        qosError.get().accept(createQosVisitor(callback, call, errorResponseSupplier.get()));
-                        return;
-                    }
-
-                    // Handle responses that correspond to RemoteExceptions / SerializableErrors
-                    Optional<RemoteException> httpError = remoteExceptionHandler.handle(errorResponseSupplier.get());
-                    if (httpError.isPresent()) {
-                        callback.onFailure(call, new IoRemoteException(httpError.get()));
-                        return;
-                    }
-
-                    // Catch-all: handle all other responses
-                    Optional<IOException> ioException = ioExceptionHandler.handle(errorResponseSupplier.get());
-                    if (ioException.isPresent()) {
-                        callback.onFailure(call, ioException.get());
-                        return;
-                    }
-
-                    callback.onFailure(call, new SafeIoException("Failed to handle request, "
-                            + "this is an conjure-java-runtime bug."));
-                }
-            }
-
-            private boolean isStreamingBody(Call call) {
-                return call.request().body() instanceof UnrepeatableRequestBody;
-            }
-
-            private Exception mapToException(Supplier<Response> errorResponseSupplier) {
-                // Handle QoS situations: retry, failover, etc.
+                // Handle to handle QoS situations: retry, failover, etc.
                 Optional<QosException> qosError = qosHandler.handle(errorResponseSupplier.get());
                 if (qosError.isPresent()) {
-                    return qosError.get();
+                    qosError.get().accept(createQosVisitor(callback, call, errorResponseSupplier.get()));
+                    return;
                 }
 
                 // Handle responses that correspond to RemoteExceptions / SerializableErrors
                 Optional<RemoteException> httpError = remoteExceptionHandler.handle(errorResponseSupplier.get());
                 if (httpError.isPresent()) {
-                    return new IoRemoteException(httpError.get());
+                    callback.onFailure(call, new IoRemoteException(httpError.get()));
+                    return;
                 }
 
                 // Catch-all: handle all other responses
                 Optional<IOException> ioException = ioExceptionHandler.handle(errorResponseSupplier.get());
-                return ioException.orElseGet(
-                        () -> new SafeIoException("Failed to handle request, this is an conjure-java-runtime bug."));
+                if (ioException.isPresent()) {
+                    callback.onFailure(call, ioException.get());
+                    return;
+                }
+
+                callback.onFailure(call, new SafeIoException("Failed to handle request, "
+                        + "this is an conjure-java-runtime bug."));
             }
         });
     }
@@ -330,6 +299,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 () -> executionExecutor.submit(execution),
                 backoff.toMillis(),
                 TimeUnit.MILLISECONDS);
+    }
+
+    private boolean isStreamingBody(Call call) {
+        return call.request().body() instanceof UnrepeatableRequestBody;
     }
 
     private QosException.Visitor<Void> createQosVisitor(Callback callback, Call call, Response response) {
@@ -382,15 +355,18 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return null;
                 }
 
-                log.debug("Retrying call after receiving QosException.RetryOther",
-                        UnsafeArg.of("requestUrl", call.request().url()),
-                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
-                        exception);
-                Request redirectedRequest = request().newBuilder()
-                        .url(redirectTo.get())
-                        .build();
-                client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
-                        .enqueue(callback);
+                retryIfAllowed(exception, () -> {
+                    log.debug("Retrying call after receiving QosException.RetryOther",
+                            UnsafeArg.of("requestUrl", call.request().url()),
+                            UnsafeArg.of("redirectToUrl", redirectTo.get()),
+                            exception);
+                    Request redirectedRequest = request().newBuilder()
+                            .url(redirectTo.get())
+                            .build();
+                    client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
+                            .enqueue(callback);
+                });
+
                 return null;
             }
 
@@ -420,18 +396,31 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return null;
                 }
 
-                log.debug("Retrying call after receiving QosException.Unavailable",
-                        SafeArg.of("backoffMillis", backoff.get().toMillis()),
-                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
-                        exception);
-                Request redirectedRequest = request().newBuilder()
-                        .url(redirectTo.get())
-                        .build();
-                scheduleExecution(
-                        () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
-                                .enqueue(callback),
-                        backoff.get());
+                retryIfAllowed(exception, () -> {
+                    log.debug("Retrying call after receiving QosException.Unavailable",
+                            SafeArg.of("backoffMillis", backoff.get().toMillis()),
+                            UnsafeArg.of("redirectToUrl", redirectTo.get()),
+                            exception);
+                    Request redirectedRequest = request().newBuilder()
+                            .url(redirectTo.get())
+                            .build();
+                    scheduleExecution(
+                            () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
+                                    .enqueue(callback),
+                            backoff.get());
+                });
                 return null;
+            }
+
+            private void retryIfAllowed(QosException exception, Runnable retryScheduler) {
+                if (isStreamingBody(call)) {
+                    callback.onFailure(call,
+                            new SafeIoException(
+                            "Cannot retry streamed HTTP body",
+                            exception));
+                } else {
+                    retryScheduler.run();
+                }
             }
         };
     }
