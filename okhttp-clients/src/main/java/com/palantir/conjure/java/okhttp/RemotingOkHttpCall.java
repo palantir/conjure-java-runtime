@@ -292,6 +292,22 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 SafeArg.of("retryOnTimeout", retryOnTimeout));
     }
 
+    private static void retryIfAllowed(Callback callback, Call call, Exception exception, Runnable retryScheduler) {
+        if (isStreamingBody(call)) {
+            callback.onFailure(
+                    call,
+                    new SafeIoException(
+                            "Cannot retry streamed HTTP body",
+                            exception));
+        } else {
+            retryScheduler.run();
+        }
+    }
+
+    private static boolean isStreamingBody(Call call) {
+        return call.request().body() instanceof UnrepeatableRequestBody;
+    }
+
     @SuppressWarnings("FutureReturnValueIgnored")
     private void scheduleExecution(Runnable execution, Duration backoff) {
         // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
@@ -299,10 +315,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 () -> executionExecutor.submit(execution),
                 backoff.toMillis(),
                 TimeUnit.MILLISECONDS);
-    }
-
-    private boolean isStreamingBody(Call call) {
-        return call.request().body() instanceof UnrepeatableRequestBody;
     }
 
     private QosException.Visitor<Void> createQosVisitor(Callback callback, Call call, Response response) {
@@ -323,13 +335,15 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return null;
                 }
 
-                Duration backoff = exception.getRetryAfter().orElse(nonAdvertizedBackoff.get());
-                log.debug("Rescheduling call after receiving QosException.Throttle",
-                        SafeArg.of("backoffMillis", backoff.toMillis()),
-                        exception);
-                scheduleExecution(
-                        () -> doClone().enqueue(callback),
-                        backoff);
+                retryIfAllowed(callback, call, exception, () -> {
+                    Duration backoff = exception.getRetryAfter().orElse(nonAdvertizedBackoff.get());
+                    log.debug("Rescheduling call after receiving QosException.Throttle",
+                            SafeArg.of("backoffMillis", backoff.toMillis()),
+                            exception);
+                    scheduleExecution(
+                            () -> doClone().enqueue(callback),
+                            backoff);
+                });
                 return null;
             }
 
@@ -355,7 +369,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return null;
                 }
 
-                retryIfAllowed(exception, () -> {
+                retryIfAllowed(callback, call, exception, () -> {
                     log.debug("Retrying call after receiving QosException.RetryOther",
                             UnsafeArg.of("requestUrl", call.request().url()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get()),
@@ -396,7 +410,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return null;
                 }
 
-                retryIfAllowed(exception, () -> {
+                retryIfAllowed(callback, call, exception, () -> {
                     log.debug("Retrying call after receiving QosException.Unavailable",
                             SafeArg.of("backoffMillis", backoff.get().toMillis()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get()),
@@ -410,17 +424,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             backoff.get());
                 });
                 return null;
-            }
-
-            private void retryIfAllowed(QosException exception, Runnable retryScheduler) {
-                if (isStreamingBody(call)) {
-                    callback.onFailure(call,
-                            new SafeIoException(
-                            "Cannot retry streamed HTTP body",
-                            exception));
-                } else {
-                    retryScheduler.run();
-                }
             }
         };
     }
