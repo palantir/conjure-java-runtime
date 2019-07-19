@@ -211,8 +211,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
-                log.info(
-                        "Retrying call after failure",
+                log.info("Retrying call after failure",
                         SafeArg.of("backoffMillis", backoff.get().toMillis()),
                         UnsafeArg.of("requestUrl", call.request().url().toString()),
                         UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
@@ -276,7 +275,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     }
 
                     callback.onFailure(call, new SafeIoException("Failed to handle request, "
-                            + "this is a conjure-java-runtime bug."));
+                            + "this is an conjure-java-runtime bug."));
                 }
             }
 
@@ -300,7 +299,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 // Catch-all: handle all other responses
                 Optional<IOException> ioException = ioExceptionHandler.handle(errorResponseSupplier.get());
                 return ioException.orElseGet(
-                        () -> new SafeIoException("Failed to handle request, this is a conjure-java-runtime bug."));
+                        () -> new SafeIoException("Failed to handle request, this is an conjure-java-runtime bug."));
             }
         });
     }
