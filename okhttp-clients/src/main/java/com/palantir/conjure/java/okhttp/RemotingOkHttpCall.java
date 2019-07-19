@@ -294,22 +294,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 SafeArg.of("retryOnTimeout", retryOnTimeout));
     }
 
-    private static void retryIfAllowed(Callback callback, Call call, Exception exception, Runnable retryScheduler) {
-        if (isStreamingBody(call)) {
-            callback.onFailure(
-                    call,
-                    new SafeIoException(
-                            "Cannot retry streamed HTTP body",
-                            exception));
-        } else {
-            retryScheduler.run();
-        }
-    }
-
-    private static boolean isStreamingBody(Call call) {
-        return call.request().body() instanceof UnrepeatableRequestBody;
-    }
-
     @SuppressWarnings("FutureReturnValueIgnored")
     private void scheduleExecution(Runnable execution, Duration backoff) {
         // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
@@ -428,6 +412,22 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 return null;
             }
         };
+    }
+
+    private static void retryIfAllowed(Callback callback, Call call, Exception exception, Runnable retryScheduler) {
+        if (isStreamingBody(call)) {
+            callback.onFailure(
+                    call,
+                    new SafeIoException(
+                            "Cannot retry streamed HTTP body",
+                            exception));
+        } else {
+            retryScheduler.run();
+        }
+    }
+
+    private static boolean isStreamingBody(Call call) {
+        return call.request().body() instanceof UnrepeatableRequestBody;
     }
 
     private static boolean shouldPropagateQos(ClientConfiguration.ServerQoS serverQoS) {
