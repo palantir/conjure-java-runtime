@@ -184,7 +184,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         super.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {
-                if (isCanceled() || isStreamingBody(call)) {
+                if (isCanceled()) {
                     callback.onFailure(call, exception);
                     return;
                 }
