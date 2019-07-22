@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Do not retry ``UnrepeatableRequestBody``.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1152
