@@ -63,7 +63,6 @@ public class SingleParamServicesTest {
 
     @Parameterized.Parameters(name = "{0}/{1}({3})")
     public static Collection<Object[]> data() {
-
         List<Object[]> objects = new ArrayList<>();
         Cases.TEST_CASES.getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();

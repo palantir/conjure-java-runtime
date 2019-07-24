@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
+import com.palantir.logsafe.Preconditions;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.time.Instant;
@@ -44,7 +44,7 @@ public final class InstantParamConverterProvider implements ParamConverterProvid
 
         @Override
         public String toString(final Instant value) {
-            checkArgument(value != null);
+            Preconditions.checkArgument(value != null);
             return value.toString();
         }
     }

@@ -7,3 +7,19 @@ dependencies {
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation 'com.google.guava:guava'
 }
+
+// The Java 11 JDK cannot cross-compile us against internal APIs of java 8, so for this to work when testing against
+// java 11, we need to prevent baseline from setting `--release 8`. Setting targetCompatibility to the same as the
+// toolchain version achieves this.
+tasks.withType(JavaCompile).all { JavaCompile it ->
+    def version = it.toolChain.version
+    if (JavaVersion.toVersion(version).isJava9Compatible()) {
+        it.targetCompatibility = version
+        // disable publish tasks
+        tasks.matching { it instanceof AbstractPublishToMaven || it == tasks.bintrayUpload }.configureEach {
+            doFirst {
+                throw new RuntimeException("Disallowing publish of jars targetting java 11")
+            }
+        }
+    }
+}

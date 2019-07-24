@@ -20,12 +20,16 @@ import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptio
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HostAndPort;
 import com.google.common.net.HttpHeaders;
+import com.google.common.util.concurrent.AbstractFuture;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
@@ -40,8 +44,10 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
@@ -49,15 +55,23 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.internal.http.UnrepeatableRequestBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.SocketPolicy;
+import okio.BufferedSink;
+import okio.Okio;
+import okio.Source;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -85,6 +99,102 @@ public final class OkHttpClientsTest extends TestBase {
         url = "http://localhost:" + server.getPort();
         url2 = "http://localhost:" + server2.getPort();
         url3 = "http://localhost:" + server3.getPort();
+    }
+
+    @Test
+    public void cancelledCallsDoNotRetry() {
+        server.enqueue(new MockResponse().setHeadersDelay(1, TimeUnit.SECONDS).setBody("pong"));
+        OkHttpClient client = createRetryingClient(1);
+        AsyncRequest future = AsyncRequest.of(client.newCall(new Request.Builder().url(url).build()));
+        future.cancelCall();
+        try {
+            Futures.getUnchecked(future);
+            fail("Did not throw an exception");
+        } catch (UncheckedExecutionException e) {
+            assertThat(e.getCause()).hasMessage("Canceled").isInstanceOf(IOException.class);
+        }
+    }
+
+    private static final class AsyncRequest extends AbstractFuture<Response> implements Callback {
+        private final Call call;
+
+        private AsyncRequest(Call call) {
+            this.call = call;
+        }
+
+        public void cancelCall() {
+            call.cancel();
+        }
+
+        @Override
+        public void onFailure(Call unused, IOException exception) {
+            setException(exception);
+        }
+
+        @Override
+        public void onResponse(Call unused, Response response) {
+            set(response);
+        }
+
+        static AsyncRequest of(Call call) {
+            AsyncRequest future = new AsyncRequest(call);
+            call.enqueue(future);
+            return future;
+        }
+    }
+
+    @Test
+    public void streamingRequestBodyIsNotRetried() throws IOException {
+        server.enqueue(new MockResponse().setResponseCode(503));
+
+        OkHttpClient client = createRetryingClient(1);
+
+        StreamingRequestBody body =
+                new StreamingRequestBody(
+                        Okio.buffer(
+                                Okio.source(
+                                        new ByteArrayInputStream("hello".getBytes(StandardCharsets.UTF_8)))));
+        assertThatThrownBy(() -> client.newCall(new Request.Builder().url(url).post(body).build()).execute())
+                .isInstanceOf(SafeIoException.class)
+                .hasMessage("Cannot retry streamed HTTP body");
+
+        assertThat(body.used).isTrue();
+        assertThat(body.retried).hasValue(0);
+    }
+
+    private static final class StreamingRequestBody extends RequestBody implements UnrepeatableRequestBody {
+        private static final MediaType OCTET_STREAM = MediaType.parse("application/octet-stream");
+
+        private final Source source;
+        private final AtomicBoolean used = new AtomicBoolean(false);
+        private final AtomicInteger retried = new AtomicInteger();
+
+        StreamingRequestBody(Source source) {
+            this.source = source;
+        }
+
+        @Override
+        public MediaType contentType() {
+            return OCTET_STREAM;
+        }
+
+        @Override
+        public void writeTo(BufferedSink sink) throws IOException {
+            if (!used.compareAndSet(false, true)) {
+                retried.incrementAndGet();
+                throw new StreamReusedException("StreamingRequestBody was already consumed");
+            } else {
+                try (Source closeableSource = source) {
+                    sink.writeAll(closeableSource);
+                }
+            }
+        }
+    }
+
+    private static final class StreamReusedException extends IOException {
+        StreamReusedException(String message) {
+            super(message);
+        }
     }
 
     @Test
@@ -767,6 +877,34 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(client.newCall(new Request.Builder().url(serviceUrl).build()).execute().body().string())
                 .isEqualTo("foo");
         assertThat(server.takeRequest().getHeader(HttpHeaders.HOST)).isEqualTo("foo.com");
+    }
+
+    @Test(timeout = 1000)
+    public void non_ioexceptions_dont_break_the_world() throws IOException {
+        server.enqueue(new MockResponse().setBody("foo"));
+
+        HostEventsSink throwingSink = new HostEventsSink() {
+            @Override
+            public void record(String serviceName, String hostname, int port, int statusCode, long micros) {
+                throw new IllegalStateException("I am not an IOException");
+            }
+
+            @Override
+            public void recordIoException(String serviceName, String hostname, int port) {
+                //empty;
+            }
+        };
+        OkHttpClient client = OkHttpClients.create(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url))
+                        .maxNumRetries(0)
+                        .build(),
+                AGENT,
+                throwingSink,
+                OkHttpClientsTest.class);
+
+        assertThatThrownBy(() -> client.newCall(new Request.Builder().url(url).build()).execute())
+                .hasStackTraceContaining("Caught a non-IOException. This is a serious bug and requires investigation");
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {

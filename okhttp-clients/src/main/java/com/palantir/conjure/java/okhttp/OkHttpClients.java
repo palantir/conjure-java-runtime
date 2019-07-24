@@ -155,6 +155,7 @@ public final class OkHttpClients {
                 enableClientQoS);
 
         OkHttpClient.Builder client = new OkHttpClient.Builder();
+        client.addInterceptor(CatchThrowableInterceptor.INSTANCE);
         client.addInterceptor(new DispatcherTraceTerminatingInterceptor());
 
         // Routing
