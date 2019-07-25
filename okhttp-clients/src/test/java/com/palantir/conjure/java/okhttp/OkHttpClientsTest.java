@@ -817,8 +817,7 @@ public final class OkHttpClientsTest extends TestBase {
                                 .readTimeout(Duration.ZERO) // unlimited pls
                                 .writeTimeout(Duration.ZERO) // unlimited pls
                                 .security(SslConfiguration.of(Paths.get("src", "test", "resources", "trustStore.jks")))
-                                .build()
-                ),
+                                .build()),
                 AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);

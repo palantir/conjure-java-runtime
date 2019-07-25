@@ -191,8 +191,7 @@ final class UrlSelectorImpl implements UrlSelector {
         if (useFailedUrlCache) {
             Optional<Integer> indexForFailedUrl = indexFor(failedUrl, baseUrls.get());
             indexForFailedUrl.ifPresent(index ->
-                    failedUrls.put(baseUrls.get().get(index), UrlAvailability.FAILED)
-            );
+                    failedUrls.put(baseUrls.get().get(index), UrlAvailability.FAILED));
         }
     }
 

@@ -18,6 +18,7 @@ package com.palantir.conjure.java.okhttp;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +48,7 @@ final class LeakDetector<T> {
 
     static Optional<RuntimeException> maybeCreateStackTrace() {
         if (log.isTraceEnabled()) {
-            return Optional.of(new RuntimeException("Runtime exception for stack trace"));
+            return Optional.of(new SafeRuntimeException("Runtime exception for stack trace"));
         }
         return Optional.empty();
     }
