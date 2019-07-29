@@ -99,12 +99,12 @@ public final class TracerTest extends TestBase {
 
         CompletableFuture<?> first = CompletableFuture.runAsync(() -> {
             Tracer.initTrace(Optional.of(true), "first");
-            Tracer.startSpan("");
+            OpenSpan ignored = Tracer.startSpan("");
             service.string();
         });
         CompletableFuture<?> second = CompletableFuture.runAsync(() -> {
             Tracer.initTrace(Optional.of(true), "second");
-            Tracer.startSpan("");
+            OpenSpan ignored = Tracer.startSpan("");
             service.string();
         });
         first.join();
