@@ -54,8 +54,7 @@ public final class QosErrorDecoderTest {
     @Test
     public void http_429_throw_qos_throttle_with_retry_after() {
         Map<String, Collection<String>> headers = ImmutableMap.of(
-                HttpHeaders.RETRY_AFTER, ImmutableList.of("5")
-        );
+                HttpHeaders.RETRY_AFTER, ImmutableList.of("5"));
         Response response = Response.create(429, "too many requests", headers, new byte[0]);
         assertThat(decoder.decode(methodKey, response))
                 .isInstanceOfSatisfying(
