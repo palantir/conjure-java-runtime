@@ -45,8 +45,7 @@ public final class NeverReturnNullDecoderTest extends TestBase {
 
         Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
                 .isInstanceOf(NullPointerException.class)
-                .hasLogMessage("Unexpected null body")
-                .hasArgs(SafeArg.of("status", 200));
+                .hasLogMessage("Unexpected null body").containsArgs(SafeArg.of("status", 200));
     }
 
     @Test
@@ -55,8 +54,7 @@ public final class NeverReturnNullDecoderTest extends TestBase {
 
         Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
                 .isInstanceOf(NullPointerException.class)
-                .hasLogMessage("Unexpected null body")
-                .hasArgs(SafeArg.of("status", 200));
+                .hasLogMessage("Unexpected null body").containsArgs(SafeArg.of("status", 200));
     }
 
     @Test
@@ -65,8 +63,7 @@ public final class NeverReturnNullDecoderTest extends TestBase {
 
         Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
                 .isInstanceOf(NullPointerException.class)
-                .hasLogMessage("Unexpected null body")
-                .hasArgs(SafeArg.of("status", 200));
+                .hasLogMessage("Unexpected null body").containsArgs(SafeArg.of("status", 200));
     }
 
     @Test
