@@ -64,7 +64,6 @@ public final class SslConfigurationTest {
         assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedCamelCase, SslConfiguration.class))
                 .isEqualTo(serialized);
         assertThat(
-                ObjectMappers.newClientObjectMapper().readValue(deserializedKebabCaseWithNulls, SslConfiguration.class)
-        ).isEqualTo(serialized);
+                ObjectMappers.newClientObjectMapper().readValue(deserializedKebabCaseWithNulls, SslConfiguration.class)).isEqualTo(serialized);
     }
 }
