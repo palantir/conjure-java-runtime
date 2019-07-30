@@ -37,8 +37,7 @@ public final class QosErrorDecoder implements ErrorDecoder {
                 response.status(),
                 header -> Optional.ofNullable(response.headers().get(header))
                         .map(Collection::stream)
-                        .orElseGet(Stream::empty)
-        ).map(Function.identity());
+                        .orElseGet(Stream::empty)).map(Function.identity());
         return exception.orElseGet(() -> delegate.decode(methodKey, response));
     }
 }

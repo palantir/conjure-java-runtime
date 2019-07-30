@@ -21,6 +21,7 @@ import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -71,7 +72,9 @@ public final class ClientConfigurations {
                 .enableGcmCipherSuites(config.enableGcmCipherSuites().orElse(DEFAULT_ENABLE_GCM_CIPHERS))
                 .fallbackToCommonNameVerification(config.fallbackToCommonNameVerification()
                         .orElse(DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION))
-                .proxy(config.proxy().map(ClientConfigurations::createProxySelector).orElse(ProxySelector.getDefault()))
+                .proxy(config.proxy()
+                        .map(ClientConfigurations::createProxySelector)
+                        .orElseGet(ProxySelector::getDefault))
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
                 .meshProxy(meshProxy(config.proxy()))
                 .maxNumRetries(config.maxNumRetries().orElse(DEFAULT_MAX_NUM_RETRIES))
@@ -119,7 +122,7 @@ public final class ClientConfigurations {
                 return fixedProxySelectorFor(Proxy.NO_PROXY);
             case HTTP:
                 HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig.hostAndPort()
-                        .orElseThrow(() -> new IllegalArgumentException(
+                        .orElseThrow(() -> new SafeIllegalArgumentException(
                                 "Expected to find proxy hostAndPort configuration for HTTP proxy")));
                 InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHost(), hostAndPort.getPort());
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, addr));

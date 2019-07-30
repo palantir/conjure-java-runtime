@@ -30,8 +30,7 @@ public final class HeaderAccessUtilsTest {
     private static final ImmutableMap<String, Collection<String>> TEST_HEADERS_MAP = ImmutableMap.of(
             "header", Arrays.asList("value1"),
             "Header", Arrays.asList("value2", "value3"),
-            "HEADER", Arrays.asList("value4", "value5")
-    );
+            "HEADER", Arrays.asList("value4", "value5"));
 
     @Test
     public void caseInsensitiveContainsShouldReturnTrueIgnoringCase() {

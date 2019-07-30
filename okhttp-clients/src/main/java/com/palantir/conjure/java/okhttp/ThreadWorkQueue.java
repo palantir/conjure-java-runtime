@@ -35,6 +35,7 @@ import javax.annotation.concurrent.NotThreadSafe;
 @NotThreadSafe
 final class ThreadWorkQueue<T> {
     private final Map<Long, Queue<T>> queuedRequests = new LinkedHashMap<>();
+    private int size = 0;
 
     boolean isEmpty() {
         return queuedRequests.isEmpty();
@@ -43,6 +44,7 @@ final class ThreadWorkQueue<T> {
     void add(T element) {
         long threadId = Thread.currentThread().getId();
         queue(threadId).add(element);
+        size++;
     }
 
     T remove() {
@@ -51,7 +53,12 @@ final class ThreadWorkQueue<T> {
         if (!workQueue.getValue().isEmpty()) {
             queuedRequests.put(workQueue.getKey(), workQueue.getValue());
         }
+        size--;
         return result;
+    }
+
+    int size() {
+        return size;
     }
 
     private Map.Entry<Long, Queue<T>> nextTask() {

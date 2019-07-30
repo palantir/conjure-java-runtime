@@ -49,7 +49,7 @@ enum IoExceptionResponseHandler implements ResponseHandler<IOException> {
                     UnsafeArg.of("body", body),
                     SafeArg.of("contentType", response.header(HttpHeaders.CONTENT_TYPE))));
         } catch (IOException e) {
-            return Optional.of(new IOException("Failed to read response body", e));
+            return Optional.of(new SafeIoException("Failed to read response body", e));
         }
     }
 

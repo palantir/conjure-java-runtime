@@ -7,6 +7,7 @@ dependencies {
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor"
+    compile "com.palantir.safe-logging:preconditions"
 
     testCompile "junit:junit"
     testCompile "org.assertj:assertj-core"

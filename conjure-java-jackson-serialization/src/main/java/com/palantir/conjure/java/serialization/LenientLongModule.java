@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
 
 /**
@@ -52,7 +53,7 @@ final class LenientLongModule extends SimpleModule {
                 case VALUE_NULL:
                     return null;
             }
-            throw new IOException("Expected a long value");
+            throw new SafeIoException("Expected a long value");
         }
 
         @Override

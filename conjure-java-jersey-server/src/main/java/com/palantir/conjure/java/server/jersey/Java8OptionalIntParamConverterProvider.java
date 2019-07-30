@@ -19,8 +19,8 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import static com.google.common.base.Preconditions.checkArgument;
 
+import com.palantir.logsafe.Preconditions;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.OptionalInt;
@@ -55,7 +55,7 @@ public final class Java8OptionalIntParamConverterProvider implements ParamConver
 
         @Override
         public String toString(final OptionalInt value) {
-            checkArgument(value != null);
+            Preconditions.checkArgument(value != null);
             return value.isPresent() ? Integer.toString(value.getAsInt()) : "";
         }
     }
