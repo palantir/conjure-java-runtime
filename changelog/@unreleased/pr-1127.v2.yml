@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: |
+    Conjure ObjectMappers no longer produce JSON object values of `null` when serialising absent fields on conjure objects.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1127
