@@ -1,0 +1,7 @@
+types:
+  definitions:
+    default-package: com.palantir.conjure.java.serialization.types
+    objects:
+      OptionalExample:
+        fields:
+          value: optional<string>
