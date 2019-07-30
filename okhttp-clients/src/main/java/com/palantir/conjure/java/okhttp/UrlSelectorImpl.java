@@ -22,7 +22,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.UnsafeArg;
@@ -197,9 +196,9 @@ final class UrlSelectorImpl implements UrlSelector {
      * Redirect to the first URL in {@code httpUrls}, beginning the start index, that has not been marked as failed.
      */
     private Optional<HttpUrl> redirectToFirstNotFailed(HttpUrl requestUrl, List<HttpUrl> httpUrls, int startIndex) {
-        Iterable<HttpUrl> httpsUrlsFromStartIndex = fromStartIndex(httpUrls, startIndex);
+        for (int i = startIndex; i < startIndex + httpUrls.size(); i++) {
+            HttpUrl httpUrl = httpUrls.get(i % httpUrls.size());
 
-        for (HttpUrl httpUrl : httpsUrlsFromStartIndex) {
             Instant cooldownFinished = failedUrls.getIfPresent(httpUrl);
             if (cooldownFinished != null) {
                 // Continue to the next URL if the cooldown has not elapsed
@@ -249,12 +248,6 @@ final class UrlSelectorImpl implements UrlSelector {
             }
         }
         return Optional.empty();
-    }
-
-    private static Iterable<HttpUrl> fromStartIndex(List<HttpUrl> urls, int startIndex) {
-        return Iterables.concat(
-                urls.subList(startIndex, urls.size()),
-                urls.subList(0, startIndex));
     }
 
     private static int increment(int index, List<HttpUrl> urls) {
