@@ -47,6 +47,7 @@ import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okhttp3.internal.http.UnrepeatableRequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -142,7 +143,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             } else if (e.getCause() instanceof IOException) {
                 throw (IOException) e.getCause();
             } else {
-                throw new IOException("Failed to execute call", e);
+                throw new SafeIoException("Failed to execute call", e);
             }
         }
     }
@@ -183,6 +184,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
         super.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {
+                if (isCanceled()) {
+                    callback.onFailure(call, exception);
+                    return;
+                }
+
                 urls.markAsFailed(request().url());
 
                 // Fail call if backoffs are exhausted or if no retry URL can be determined.
@@ -205,18 +211,21 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
-                log.info("Retrying call after failure",
-                        SafeArg.of("backoffMillis", backoff.get().toMillis()),
-                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
-                        exception);
-                Request redirectedRequest = request().newBuilder()
-                        .url(redirectTo.get())
-                        .build();
-                RemotingOkHttpCall retryCall =
-                        client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
-                scheduleExecution(
-                        () -> retryCall.enqueue(callback),
-                        backoff.get());
+                retryIfAllowed(callback, call, exception, () -> {
+                    log.info("Retrying call after failure",
+                            SafeArg.of("backoffMillis", backoff.get().toMillis()),
+                            UnsafeArg.of("requestUrl", call.request().url().toString()),
+                            UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
+                            exception);
+                    Request redirectedRequest = request().newBuilder()
+                            .url(redirectTo.get())
+                            .build();
+                    RemotingOkHttpCall retryCall =
+                            client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
+                    scheduleExecution(
+                            () -> retryCall.enqueue(callback),
+                            backoff.get());
+                });
             }
 
             @Override
@@ -260,7 +269,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
-                callback.onFailure(call, new IOException("Failed to handle request, "
+                callback.onFailure(call, new SafeIoException("Failed to handle request, "
                         + "this is an conjure-java-runtime bug."));
             }
         });
@@ -312,13 +321,15 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return null;
                 }
 
-                Duration backoff = exception.getRetryAfter().orElse(nonAdvertizedBackoff.get());
-                log.debug("Rescheduling call after receiving QosException.Throttle",
-                        SafeArg.of("backoffMillis", backoff.toMillis()),
-                        exception);
-                scheduleExecution(
-                        () -> doClone().enqueue(callback),
-                        backoff);
+                retryIfAllowed(callback, call, exception, () -> {
+                    Duration backoff = exception.getRetryAfter().orElseGet(() -> nonAdvertizedBackoff.get());
+                    log.debug("Rescheduling call after receiving QosException.Throttle",
+                            SafeArg.of("backoffMillis", backoff.toMillis()),
+                            exception);
+                    scheduleExecution(
+                            () -> doClone().enqueue(callback),
+                            backoff);
+                });
                 return null;
             }
 
@@ -344,15 +355,18 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return null;
                 }
 
-                log.debug("Retrying call after receiving QosException.RetryOther",
-                        UnsafeArg.of("requestUrl", call.request().url()),
-                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
-                        exception);
-                Request redirectedRequest = request().newBuilder()
-                        .url(redirectTo.get())
-                        .build();
-                client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
-                        .enqueue(callback);
+                retryIfAllowed(callback, call, exception, () -> {
+                    log.debug("Retrying call after receiving QosException.RetryOther",
+                            UnsafeArg.of("requestUrl", call.request().url()),
+                            UnsafeArg.of("redirectToUrl", redirectTo.get()),
+                            exception);
+                    Request redirectedRequest = request().newBuilder()
+                            .url(redirectTo.get())
+                            .build();
+                    client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
+                            .enqueue(callback);
+                });
+
                 return null;
             }
 
@@ -382,20 +396,38 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return null;
                 }
 
-                log.debug("Retrying call after receiving QosException.Unavailable",
-                        SafeArg.of("backoffMillis", backoff.get().toMillis()),
-                        UnsafeArg.of("redirectToUrl", redirectTo.get()),
-                        exception);
-                Request redirectedRequest = request().newBuilder()
-                        .url(redirectTo.get())
-                        .build();
-                scheduleExecution(
-                        () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
-                                .enqueue(callback),
-                        backoff.get());
+                retryIfAllowed(callback, call, exception, () -> {
+                    log.debug("Retrying call after receiving QosException.Unavailable",
+                            SafeArg.of("backoffMillis", backoff.get().toMillis()),
+                            UnsafeArg.of("redirectToUrl", redirectTo.get()),
+                            exception);
+                    Request redirectedRequest = request().newBuilder()
+                            .url(redirectTo.get())
+                            .build();
+                    scheduleExecution(
+                            () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
+                                    .enqueue(callback),
+                            backoff.get());
+                });
                 return null;
             }
         };
+    }
+
+    private static void retryIfAllowed(Callback callback, Call call, Exception exception, Runnable retryScheduler) {
+        if (isStreamingBody(call)) {
+            callback.onFailure(
+                    call,
+                    new SafeIoException(
+                            "Cannot retry streamed HTTP body",
+                            exception));
+        } else {
+            retryScheduler.run();
+        }
+    }
+
+    private static boolean isStreamingBody(Call call) {
+        return call.request().body() instanceof UnrepeatableRequestBody;
     }
 
     private static boolean shouldPropagateQos(ClientConfiguration.ServerQoS serverQoS) {

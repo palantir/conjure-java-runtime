@@ -19,6 +19,7 @@ package com.palantir.conjure.java.config.ssl;
 import com.google.common.base.Throwables;
 import com.google.common.io.BaseEncoding;
 import com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1Readers;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -192,7 +193,6 @@ final class KeyStores {
             Path certDirPath,
             String certExtension,
             String keyStorePassword) {
-
         if (!keyDirPath.toFile().isDirectory()) {
             throw new IllegalStateException(String.format("keyDirPath is not a directory: \"%s\"", keyDirPath));
         } else if (!certDirPath.toFile().isDirectory()) {
@@ -223,7 +223,7 @@ final class KeyStores {
 
             return keyStore;
         } catch (GeneralSecurityException | IOException e) {
-            throw new RuntimeException("Failed to create key store from PEM directories", e);
+            throw new SafeRuntimeException("Failed to create key store from PEM directories", e);
         }
     }
 

@@ -45,7 +45,6 @@ import feign.Retryer;
 import feign.codec.Decoder;
 import feign.codec.ErrorDecoder;
 import feign.jackson.JacksonDecoder;
-import feign.jackson.JacksonEncoder;
 import feign.jaxrs.JAXRSContract;
 import feign.okhttp.OkHttpClient;
 
@@ -97,7 +96,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
                                 new TextDelegateEncoder(
                                         new CborDelegateEncoder(
                                                 cborObjectMapper,
-                                                new JacksonEncoder(objectMapper)))))
+                                                new ConjureFeignJacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
                 .errorDecoder(new QosErrorDecoder(new ErrorDecoder.Default()))
                 .client(new OkHttpClient(okHttpClient))

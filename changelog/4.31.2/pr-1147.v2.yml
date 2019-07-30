@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Concurrency limiters respect call cancellation
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1147

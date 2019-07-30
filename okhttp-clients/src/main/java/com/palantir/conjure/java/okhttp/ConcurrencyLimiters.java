@@ -29,6 +29,7 @@ import com.netflix.concurrency.limits.Limiter;
 import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -203,42 +204,41 @@ final class ConcurrencyLimiters {
     }
 
     final class DefaultConcurrencyLimiter implements ConcurrencyLimiter {
-
         @GuardedBy("this")
-        private final ThreadWorkQueue<SettableFuture<Limiter.Listener>> waitingRequests = new ThreadWorkQueue<>();
+        private final ThreadWorkQueue<QueuedRequest> waitingRequests = new ThreadWorkQueue<>();
         @GuardedBy("this")
         private SimpleLimiter<Void> limiter;
         @GuardedBy("this")
         private ScheduledFuture<?> timeoutCleanup;
         private final Key limiterKey;
         private final Supplier<SimpleLimiter<Void>> limiterFactory;
-
-        private final SafeArg<Optional<String>> safeArgMethod;
-        private final SafeArg<Optional<String>> safeArgPathTemplate;
+        private final LeakDetector<Limiter.Listener> leakDetector = new LeakDetector<>(Limiter.Listener.class);
 
         DefaultConcurrencyLimiter(Key limiterKey, Supplier<SimpleLimiter<Void>> limiterFactory) {
             this.limiterKey = limiterKey;
             this.limiterFactory = limiterFactory;
             this.limiter = limiterFactory.get();
-            this.safeArgMethod = SafeArg.of("method", limiterKey.method());
-            this.safeArgPathTemplate = SafeArg.of("pathTemplate", limiterKey.pathTemplate());
         }
 
         @Override
         public synchronized ListenableFuture<Limiter.Listener> acquire() {
             SettableFuture<Limiter.Listener> future = SettableFuture.create();
             addSlowAcquireMarker(future);
-            waitingRequests.add(future);
+            waitingRequests.add(new QueuedRequest(future, LeakDetector.maybeCreateStackTrace()));
             processQueue();
             return future;
         }
 
         synchronized void processQueue() {
             while (!waitingRequests.isEmpty()) {
-                log.debug("Limit",
-                        SafeArg.of("limit", limiter.getLimit()),
-                        safeArgMethod,
-                        safeArgPathTemplate);
+                if (log.isDebugEnabled()) {
+                    log.debug("Limit",
+                            SafeArg.of("limit", limiter.getLimit()),
+                            SafeArg.of("queueLength", waitingRequests.size()),
+                            SafeArg.of("method", limiterKey.method()),
+                            SafeArg.of("pathTemplate", limiterKey.pathTemplate()),
+                            UnsafeArg.of("hostname", limiterKey.hostname()));
+                }
                 Optional<Limiter.Listener> maybeAcquired = limiter.acquire(NO_CONTEXT);
                 if (!maybeAcquired.isPresent()) {
                     if (!timeoutScheduled()) {
@@ -249,8 +249,14 @@ final class ConcurrencyLimiters {
                 }
                 Limiter.Listener acquired = maybeAcquired.get();
 
-                SettableFuture<Limiter.Listener> head = waitingRequests.remove();
-                head.set(wrap(acquired));
+                QueuedRequest request = waitingRequests.remove();
+
+                SettableFuture<Limiter.Listener> head = request.future;
+                Limiter.Listener wrapped = wrap(acquired, request.allocationStackTrace);
+                boolean wasCancelled = !head.set(wrapped);
+                if (wasCancelled) {
+                    wrapped.onIgnore();
+                }
             }
 
             if (timeoutScheduled()) {
@@ -267,7 +273,9 @@ final class ConcurrencyLimiters {
                             + "deadlock. We expect that either this is caused by either service overloading, or not "
                             + "closing response bodies (consider using the try-with-resources pattern).",
                     SafeArg.of("serviceClass", serviceClass),
-                    SafeArg.of("limiterKey", limiterKey),
+                    UnsafeArg.of("hostname", limiterKey.hostname()),
+                    SafeArg.of("method", limiterKey.method()),
+                    SafeArg.of("pathTemplate", limiterKey.pathTemplate()),
                     SafeArg.of("timeout", timeout));
             leakSuspected.mark();
             limiter = limiterFactory.get();
@@ -292,31 +300,46 @@ final class ConcurrencyLimiters {
 
                 @Override
                 public void onFailure(Throwable error) {
-
                 }
             }, MoreExecutors.directExecutor());
         }
 
-        private Limiter.Listener wrap(Limiter.Listener listener) {
-            return new Limiter.Listener() {
+        private Limiter.Listener wrap(Limiter.Listener listener, Optional<RuntimeException> allocationStackTrace) {
+            Limiter.Listener result = new Limiter.Listener() {
                 @Override
                 public void onSuccess() {
+                    leakDetector.unregister(this);
                     listener.onSuccess();
                     processQueue();
                 }
 
                 @Override
                 public void onIgnore() {
+                    leakDetector.unregister(this);
                     listener.onIgnore();
                     processQueue();
                 }
 
                 @Override
                 public void onDropped() {
+                    leakDetector.unregister(this);
                     listener.onDropped();
                     processQueue();
                 }
             };
+            leakDetector.register(result, allocationStackTrace);
+            return result;
+        }
+    }
+
+    private static final class QueuedRequest {
+        private final SettableFuture<Limiter.Listener> future;
+        private final Optional<RuntimeException> allocationStackTrace;
+
+        private QueuedRequest(
+                SettableFuture<Limiter.Listener> future, Optional<RuntimeException> allocationStackTrace) {
+            this.future = future;
+            this.allocationStackTrace = allocationStackTrace;
         }
     }
 }

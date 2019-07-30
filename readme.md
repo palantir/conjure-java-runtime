@@ -1,3 +1,7 @@
+<p align="right">
+<a href="https://autorelease.general.dmz.palantir.tech/palantir/conjure-java-runtime"><img src="https://img.shields.io/badge/Perform%20an-Autorelease-success.svg" alt="Autorelease"></a>
+</p>
+
 [![CircleCI Build Status](https://circleci.com/gh/palantir/conjure-java-runtime/tree/develop.svg?style=shield)](https://circleci.com/gh/palantir/conjure-java-runtime)
 [![Download](https://api.bintray.com/packages/palantir/releases/conjure-java-runtime/images/download.svg) ](https://bintray.com/palantir/releases/conjure-java-runtime/_latestVersion)
 
