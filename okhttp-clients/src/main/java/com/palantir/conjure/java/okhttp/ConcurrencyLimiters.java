@@ -232,7 +232,7 @@ final class ConcurrencyLimiters {
         synchronized void processQueue() {
             while (!waitingRequests.isEmpty()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Limit",
+                    log.debug("Limit {} {} {} {}",
                             SafeArg.of("limit", limiter.getLimit()),
                             SafeArg.of("queueLength", waitingRequests.size()),
                             SafeArg.of("method", limiterKey.method()),
