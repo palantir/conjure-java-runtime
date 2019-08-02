@@ -20,7 +20,6 @@ import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptio
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Collections2;
@@ -107,12 +106,8 @@ public final class OkHttpClientsTest extends TestBase {
         OkHttpClient client = createRetryingClient(1);
         AsyncRequest future = AsyncRequest.of(client.newCall(new Request.Builder().url(url).build()));
         future.cancelCall();
-        try {
-            Futures.getUnchecked(future);
-            fail("Did not throw an exception");
-        } catch (UncheckedExecutionException e) {
-            assertThat(e.getCause()).hasMessage("Canceled").isInstanceOf(IOException.class);
-        }
+        assertThatExceptionOfType(UncheckedExecutionException.class).isThrownBy(() -> Futures.getUnchecked(future))
+                .satisfies(e -> assertThat(e.getCause()).hasMessage("Canceled").isInstanceOf(IOException.class));
     }
 
     private static final class AsyncRequest extends AbstractFuture<Response> implements Callback {
