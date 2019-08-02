@@ -200,9 +200,9 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     @Override
-    public void markAsSucceeded(HttpUrl failedUrl) {
+    public void markAsSucceeded(HttpUrl succeededUrl) {
         if (useFailedUrlCache) {
-            baseUrlFor(failedUrl, baseUrls.get()).ifPresent(failedUrls::invalidate);
+            baseUrlFor(succeededUrl, baseUrls.get()).ifPresent(failedUrls::invalidate);
         }
     }
 

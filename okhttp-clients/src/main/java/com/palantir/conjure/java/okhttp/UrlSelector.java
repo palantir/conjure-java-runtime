@@ -32,24 +32,24 @@ public interface UrlSelector {
      * Changes the "current" URL of this selector so that that a subsequent call to {@link #redirectToCurrent} yields
      * the same base address as the URL returned by this call.
      */
-    Optional<HttpUrl> redirectTo(HttpUrl current, String redirectBaseUrl);
+    Optional<HttpUrl> redirectTo(HttpUrl requestUrl, String redirectBaseUrl);
 
     /**
      * Similar to {@link #redirectTo}, but redirects the given URL to the next (in some undefined order) {@link
      * #getBaseUrls baseURL} after the supplied {@code current} URL.
      */
-    Optional<HttpUrl> redirectToNext(HttpUrl current);
+    Optional<HttpUrl> redirectToNext(HttpUrl requestUrl);
 
     /**
      * Similar to {@link #redirectTo}, but redirects the given URL to the current {@link #getBaseUrls baseURL}.
      */
-    Optional<HttpUrl> redirectToCurrent(HttpUrl current);
+    Optional<HttpUrl> redirectToCurrent(HttpUrl requestUrl);
 
     /**
      * Similar to {@link #redirectTo}, but redirects the given URL to the next (in some undefined order) after the
      * last URL used.
      */
-    Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl current);
+    Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl requestUrl);
 
     /**
      * Returns the base URLs that this UrlSelector matches against. Note that implementations should parse web socket
@@ -62,7 +62,7 @@ public interface UrlSelector {
      * Indicates that a call against the given URL has succeeded. Implementations can use success statistics to
      * determine when a previously unavailable host is once again available and should be used for future calls.
      */
-    void markAsSucceeded(HttpUrl failedUrl);
+    void markAsSucceeded(HttpUrl succeededUrl);
 
     /**
      * Indicates that a call against the given URL has failed. Implementations can use failure statistics to determine

@@ -37,7 +37,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public final class UrlSelectorTest extends TestBase {
+public final class UrlSelectorImplTest extends TestBase {
 
     @Mock
     Clock clock;
@@ -218,24 +218,26 @@ public final class UrlSelectorTest extends TestBase {
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
                 list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
-        HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
+        HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
 
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
 
         when(clock.instant()).thenReturn(Instant.EPOCH.plus(failedUrlCooldown));
 
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        // we're intentionally only trying 'bar' once as we're not confident it's healthy yet - waiting for
+        // markAsSucceeded
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
 
         selector.markAsSucceeded(HttpUrl.parse("http://bar/a/b/path"));
 
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
     }
 
     @Test
@@ -244,20 +246,20 @@ public final class UrlSelectorTest extends TestBase {
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
                 list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
-        HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
+        HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));
         selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
 
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
 
         selector.markAsSucceeded(HttpUrl.parse("http://bar/a/b/path"));
 
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
     }
 
     @Test
@@ -266,26 +268,26 @@ public final class UrlSelectorTest extends TestBase {
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
                 list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
-        HttpUrl current = HttpUrl.parse("http://does-not-exist/a/b/path");
+        HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
 
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
 
         when(clock.instant()).thenReturn(Instant.EPOCH.plus(failedUrlCooldown));
 
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
         // The timer has passed, but because it's still failed, 'bar' will only be tried once
-        assertThat(selector.redirectToNext(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
 
         selector.markAsSucceeded(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToNext(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
     }
 
     @Test
@@ -294,20 +296,26 @@ public final class UrlSelectorTest extends TestBase {
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
                 list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
-        HttpUrl current = HttpUrl.parse("http://does-not-exist/a/b/path");
+        HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));
         selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
 
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
 
         selector.markAsSucceeded(HttpUrl.parse("http://bar/a/b/path"));
 
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
-        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
     }
 
     @Test
