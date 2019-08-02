@@ -261,7 +261,7 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testMarkUrlAsFailed_pinUntilFailure_withCooldown() {
+    public void testMarkUrlAsFailed_pinUntilError_withCooldown() {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
@@ -289,7 +289,7 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testAllUrlsFailed_pinUntilFailure_withCooldown() {
+    public void testAllUrlsFailed_pinUntilError_withCooldown() {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
