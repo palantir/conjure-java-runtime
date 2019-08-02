@@ -213,7 +213,7 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testMarkUrlAsFailed_withCooldown() {
+    public void testMarkUrlAsFailed_roundRobin_withCooldown() {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
@@ -239,7 +239,7 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testAllUrlsFailed_withCooldown() {
+    public void testAllUrlsFailed_roundRobin_withCooldown() {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
@@ -258,6 +258,56 @@ public final class UrlSelectorTest extends TestBase {
 
         assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
         assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
+    public void testMarkUrlAsFailed_pinUntilFailure_withCooldown() {
+        Duration failedUrlCooldown = Duration.ofMillis(100);
+
+        UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
+        HttpUrl current = HttpUrl.parse("http://does-not-exist/a/b/path");
+
+        selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        when(clock.instant()).thenReturn(Instant.EPOCH.plus(failedUrlCooldown));
+
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        // The timer has passed, but because it's still failed, 'bar' will only be tried once
+        assertThat(selector.redirectToNext(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        selector.markAsSucceeded(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
+    public void testAllUrlsFailed_pinUntilFailure_withCooldown() {
+        Duration failedUrlCooldown = Duration.ofMillis(100);
+
+        UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
+        HttpUrl current = HttpUrl.parse("http://does-not-exist/a/b/path");
+
+        selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));
+        selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        selector.markAsSucceeded(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
     }
 
     @Test
