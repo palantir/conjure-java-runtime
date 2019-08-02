@@ -193,7 +193,7 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     /**
-     * Redirect to the first URL in {@code httpUrls}, beginning the start index, that has not been marked as failed.
+     * Redirect to the first URL in {@code httpUrls}, starting from the start index, that has not been marked as failed.
      */
     private Optional<HttpUrl> redirectToFirstNotFailed(HttpUrl requestUrl, List<HttpUrl> httpUrls, int startIndex) {
         for (int i = startIndex; i < startIndex + httpUrls.size(); i++) {
