@@ -16,13 +16,10 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.UnsafeArg;
 import java.time.Clock;
@@ -32,7 +29,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -45,9 +44,10 @@ final class UrlSelectorImpl implements UrlSelector {
 
     private final Supplier<List<HttpUrl>> baseUrls;
     private final AtomicReference<HttpUrl> lastBaseUrl;
-    private final LoadingCache<HttpUrl, Instant> failedUrls;
+    private final Map<HttpUrl, Instant> failedUrls;
     private final boolean useFailedUrlCache;
     private final Clock clock;
+    private final Duration failedUrlCooldown;
 
     private UrlSelectorImpl(
             ImmutableList<HttpUrl> baseUrls, boolean reshuffle, Duration failedUrlCooldown, Clock clock) {
@@ -69,10 +69,8 @@ final class UrlSelectorImpl implements UrlSelector {
         this.lastBaseUrl = new AtomicReference<>(baseUrls.get(0));
 
         this.clock = clock;
-        this.failedUrls = Caffeine.newBuilder()
-                .executor(MoreExecutors.directExecutor())
-                .maximumSize(baseUrls.size())
-                .build(key -> clock.instant().plus(failedUrlCooldown));
+        this.failedUrlCooldown = failedUrlCooldown;
+        this.failedUrls = new ConcurrentHashMap<>(baseUrls.size());
         this.useFailedUrlCache = !failedUrlCooldown.isNegative() && !failedUrlCooldown.isZero();
     }
 
@@ -202,15 +200,19 @@ final class UrlSelectorImpl implements UrlSelector {
     @Override
     public void markAsSucceeded(HttpUrl succeededUrl) {
         if (useFailedUrlCache) {
-            baseUrlFor(succeededUrl, baseUrls.get()).ifPresent(failedUrls::invalidate);
+            baseUrlFor(succeededUrl, baseUrls.get()).ifPresent(failedUrls::remove);
         }
     }
 
     @Override
     public void markAsFailed(HttpUrl failedUrl) {
         if (useFailedUrlCache) {
-            baseUrlFor(failedUrl, baseUrls.get()).ifPresent(failedUrls::refresh);
+            baseUrlFor(failedUrl, baseUrls.get()).ifPresent(this::markBaseUrlAsFailed);
         }
+    }
+
+    private void markBaseUrlAsFailed(HttpUrl key) {
+        failedUrls.put(key, clock.instant().plus(this.failedUrlCooldown));
     }
 
     private int indexForLastBaseUrl(List<HttpUrl> httpUrls) {
@@ -230,7 +232,7 @@ final class UrlSelectorImpl implements UrlSelector {
         for (int i = startIndex; i < startIndex + httpUrls.size(); i++) {
             HttpUrl httpUrl = httpUrls.get(i % httpUrls.size());
 
-            Instant cooldownFinished = failedUrls.getIfPresent(httpUrl);
+            Instant cooldownFinished = failedUrls.get(httpUrl);
             if (cooldownFinished != null) {
                 // continue to the next URL if the cooldown has not elapsed
                 if (clock.instant().isBefore(cooldownFinished)) {
@@ -238,7 +240,7 @@ final class UrlSelectorImpl implements UrlSelector {
                 }
 
                 // use the failed URL once and refresh to ensure that the cooldown elapses before it is used again
-                failedUrls.refresh(httpUrl);
+                markBaseUrlAsFailed(httpUrl);
             }
 
             return Optional.of(httpUrl);
