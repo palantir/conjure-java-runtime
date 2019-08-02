@@ -166,9 +166,10 @@ final class UrlSelectorImpl implements UrlSelector {
         int lastIndex = indexFor(requestUrl, httpUrls)
                 .orElseGet(() -> indexForLastBaseUrl(httpUrls));
 
-        int startIndex = increment(lastIndex, httpUrls);
+        int nextIndex = increment(lastIndex, httpUrls);
 
-        return redirectToFirstNotFailed(requestUrl, httpUrls, startIndex);
+        HttpUrl next = getNextHealthy(nextIndex, httpUrls).orElseGet(() -> httpUrls.get(nextIndex));
+        return redirectTo(requestUrl, next);
     }
 
     @Override
@@ -177,7 +178,12 @@ final class UrlSelectorImpl implements UrlSelector {
 
         int startIndex = indexForLastBaseUrl(httpUrls);
 
-        return redirectToFirstNotFailed(requestUrl, httpUrls, startIndex);
+        HttpUrl next = getNextHealthy(startIndex, httpUrls).orElseGet(() -> {
+            // Revert to round robin behaviour if _all_ nodes have been marked as unhealthy
+            int nextIndex = increment(startIndex, httpUrls);
+            return httpUrls.get(nextIndex);
+        });
+        return redirectTo(requestUrl, next);
     }
 
     @Override
@@ -187,34 +193,10 @@ final class UrlSelectorImpl implements UrlSelector {
         // Ignore whatever base URL the request URL might match to, use the last base URL instead
         int lastIndex = indexForLastBaseUrl(httpUrls);
 
-        int startIndex = increment(lastIndex, httpUrls);
+        int nextIndex = increment(lastIndex, httpUrls);
 
-        return redirectToFirstNotFailed(requestUrl, httpUrls, startIndex);
-    }
-
-    /**
-     * Redirect to the first URL in {@code httpUrls}, starting from the start index, that has not been marked as failed.
-     */
-    private Optional<HttpUrl> redirectToFirstNotFailed(HttpUrl requestUrl, List<HttpUrl> httpUrls, int startIndex) {
-        for (int i = startIndex; i < startIndex + httpUrls.size(); i++) {
-            HttpUrl httpUrl = httpUrls.get(i % httpUrls.size());
-
-            Instant cooldownFinished = failedUrls.getIfPresent(httpUrl);
-            if (cooldownFinished != null) {
-                // Continue to the next URL if the cooldown has not elapsed
-                if (clock.instant().isBefore(cooldownFinished)) {
-                    continue;
-                }
-
-                // Use the failed URL once and refresh to ensure that the cooldown elapses before it is used again
-                failedUrls.refresh(httpUrl);
-            }
-
-            return redirectTo(requestUrl, httpUrl);
-        }
-
-        // No healthy URLs remain, just use the start index
-        return redirectTo(requestUrl, httpUrls.get(startIndex));
+        HttpUrl next = getNextHealthy(nextIndex, httpUrls).orElseGet(() -> httpUrls.get(nextIndex));
+        return redirectTo(requestUrl, next);
     }
 
     @Override
@@ -234,6 +216,35 @@ final class UrlSelectorImpl implements UrlSelector {
     private int indexForLastBaseUrl(List<HttpUrl> httpUrls) {
         // Fallback to index 0 if last base URL is no longer present in base URLs
         return indexFor(lastBaseUrl.get(), httpUrls).orElse(0);
+    }
+
+    /**
+     * Get the next URL in {@code baseUrls}, after the supplied index.
+     * <p>
+     * If the {@code failedUrlCooldown} is positive, then this method will skip over nodes that have failed if
+     * it's been less than {@code failedUrlCooldown} since they failed. Furthermore, if a node had previously failed
+     * but the cooldown has since elapsed, that node's URL will be returned but it will once again be marked as
+     * failed (so that it's only tried once).
+     */
+    private Optional<HttpUrl> getNextHealthy(int startIndex, List<HttpUrl> httpUrls) {
+        for (int i = startIndex; i < startIndex + httpUrls.size(); i++) {
+            HttpUrl httpUrl = httpUrls.get(i % httpUrls.size());
+
+            Instant cooldownFinished = failedUrls.getIfPresent(httpUrl);
+            if (cooldownFinished != null) {
+                // continue to the next URL if the cooldown has not elapsed
+                if (clock.instant().isBefore(cooldownFinished)) {
+                    continue;
+                }
+
+                // use the failed URL once and refresh to ensure that the cooldown elapses before it is used again
+                failedUrls.refresh(httpUrl);
+            }
+
+            return Optional.of(httpUrl);
+        }
+
+        return Optional.empty();
     }
 
     private static Optional<HttpUrl> baseUrlFor(HttpUrl url, List<HttpUrl> httpUrls) {
