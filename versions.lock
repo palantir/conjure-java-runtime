@@ -84,7 +84,7 @@ com.fasterxml.jackson.datatype:jackson-datatype-joda:2.9.9 (1 constraints: 8b0ec
 com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.9.9 (1 constraints: 340e2840)
 com.fasterxml.jackson.module:jackson-module-parameter-names:2.9.9 (1 constraints: 8b0ec44f)
 com.google.code.findbugs:annotations:3.0.1 (1 constraints: 9e0aafc3)
-com.palantir.conjure.java:conjure-lib:3.13.0 (1 constraints: 39053e3b)
+com.palantir.conjure.java:conjure-lib:3.15.0 (1 constraints: 3b05443b)
 com.palantir.ri:resource-identifier:1.0.1 (1 constraints: ea0f6699)
 com.palantir.safe-logging:preconditions-assertj:1.10.1 (1 constraints: 0c050b36)
 com.papertrail:profiler:1.0.2 (1 constraints: e21051b8)
