@@ -32,6 +32,7 @@ import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tracing.AsyncTracer;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.Optional;
@@ -224,8 +225,16 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
                     scheduleExecution(
                             () -> retryCall.enqueue(callback),
-                            backoff.get());
+                            retryImmediatelyIfCannotConnect(backoff.get(), exception));
                 });
+            }
+
+            private Duration retryImmediatelyIfCannotConnect(Duration suggestedBackoff, IOException exception) {
+                if (exception instanceof ConnectException) {
+                    return Duration.ZERO;
+                } else {
+                    return suggestedBackoff;
+                }
             }
 
             @Override
