@@ -127,11 +127,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
             // OkHttp call times out (, possibly after a number of retries).
             return future.get();
         } catch (InterruptedException e) {
-            getDelegate().cancel();
+            cancelCallAndCloseResponseBody(future);
             Thread.currentThread().interrupt();
             throw new InterruptedIOException("Call was interrupted during execution");
         } catch (ExecutionException e) {
-            getDelegate().cancel();
+            cancelCallAndCloseResponseBody(future);
             if (e.getCause() instanceof IoRemoteException) {
                 // TODO(rfink): Consider unwrapping the RemoteException at the Retrofit/Feign layer for symmetry, #626
                 RemoteException wrappedException = ((IoRemoteException) e.getCause()).getWrappedException();
@@ -145,6 +145,21 @@ final class RemotingOkHttpCall extends ForwardingCall {
             } else {
                 throw new SafeIoException("Failed to execute call", e);
             }
+        }
+    }
+
+    private void cancelCallAndCloseResponseBody(SettableFuture<Response> future) {
+        getDelegate().cancel();
+        try {
+            Response response = future.get();
+            if (response.body() != null) {
+                response.close();
+            }
+        } catch (InterruptedException e) {
+            log.info("Interrupted while attempting to close the response body of a cancelled call.");
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException e) {
+            // Most likely this is because we successfully cancelled the call
         }
     }
 
