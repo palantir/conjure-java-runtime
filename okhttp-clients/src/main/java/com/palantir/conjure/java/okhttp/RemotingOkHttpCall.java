@@ -150,7 +150,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     private void cancelCallAndCloseResponseBody(SettableFuture<Response> future) {
         getDelegate().cancel();
-        executionExecutor.submit(() -> closeResponseBody(future);
+        executionExecutor.submit(() -> closeResponseBody(future));
     }
 
     private void closeResponseBody(SettableFuture<Response> future) {
@@ -160,7 +160,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 response.close();
             }
         } catch (InterruptedException e) {
-            log.info("Interrupted while attempting to close the response body of a cancelled call.");
+            log.info("Interrupted while attempting to close the response body of a cancelled call.", e);
             Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
             // Most likely this is because we successfully cancelled the call
