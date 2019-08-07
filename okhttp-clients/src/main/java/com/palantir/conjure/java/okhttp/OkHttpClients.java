@@ -94,9 +94,9 @@ public final class OkHttpClients {
 
     static {
         dispatcher = new Dispatcher(executionExecutor);
-        dispatcher.setMaxRequests(256);
+        dispatcher.setMaxRequests(1024);
         // Must be less than maxRequests so a single slow host does not block all requests
-        dispatcher.setMaxRequestsPerHost(64);
+        dispatcher.setMaxRequestsPerHost(256);
 
         dispatcherMetricSet = new DispatcherMetricSet(dispatcher, connectionPool);
     }
