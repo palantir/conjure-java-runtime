@@ -150,6 +150,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     private void cancelCallAndCloseResponseBody(SettableFuture<Response> future) {
         getDelegate().cancel();
+        executionExecutor.submit(() -> closeResponseBody(future);
+    }
+
+    private void closeResponseBody(SettableFuture<Response> future) {
         try {
             Response response = future.get();
             if (response.body() != null) {
