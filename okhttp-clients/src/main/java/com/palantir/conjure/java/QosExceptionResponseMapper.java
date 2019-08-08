@@ -77,7 +77,7 @@ public final class QosExceptionResponseMapper {
         String duration = headerFn.apply(HttpHeaders.RETRY_AFTER);
 
         return QosException.unavailable(
-                Optional.ofNullable(duration).map(Long::parseLong).map(Duration::ofSeconds),
+                Optional.ofNullable(duration).map(Long::parseLong).map(Duration::ofMillis),
                 Optional.ofNullable(locationHeader).flatMap(QosExceptionResponseMapper::tryParseLocation));
     }
 
