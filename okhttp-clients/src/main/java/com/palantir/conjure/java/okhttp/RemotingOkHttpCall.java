@@ -407,7 +407,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     scheduleExecution(
                             () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
                                     .enqueue(callback),
-                            backoff.get());
+                            exception.getRetryAfter().orElseGet(backoff::get));
                 });
                 return null;
             }

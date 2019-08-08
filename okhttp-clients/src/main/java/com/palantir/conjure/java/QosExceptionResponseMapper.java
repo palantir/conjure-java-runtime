@@ -47,7 +47,7 @@ public final class QosExceptionResponseMapper {
             case 429:
                 return Optional.of(map429(headerFn));
             case 503:
-                return Optional.of(map503());
+                return Optional.of(map503(headerFn));
         }
 
         return Optional.empty();
@@ -61,13 +61,7 @@ public final class QosExceptionResponseMapper {
             return Optional.empty();
         }
 
-        try {
-            return Optional.of(QosException.retryOther(new URL(locationHeader)));
-        } catch (MalformedURLException e) {
-            log.error("Failed to parse location header, not performing redirect",
-                    UnsafeArg.of("locationHeader", locationHeader), e);
-            return Optional.empty();
-        }
+        return tryParseLocation(locationHeader).map(QosException::retryOther);
     }
 
     private static QosException map429(Function<String, String> headerFn) {
@@ -78,8 +72,23 @@ public final class QosExceptionResponseMapper {
         return QosException.throttle();
     }
 
-    private static QosException map503() {
-        return QosException.unavailable();
+    private static QosException map503(Function<String, String> headerFn) {
+        String locationHeader = headerFn.apply(HttpHeaders.LOCATION);
+        String duration = headerFn.apply(HttpHeaders.RETRY_AFTER);
+
+        return QosException.unavailable(
+                Optional.ofNullable(duration).map(Long::parseLong).map(Duration::ofSeconds),
+                tryParseLocation(locationHeader));
+    }
+
+    private static Optional<URL> tryParseLocation(String locationHeader) {
+        try {
+            return Optional.of(new URL(locationHeader));
+        } catch (MalformedURLException e) {
+            log.error("Failed to parse location header, not performing redirect",
+                    UnsafeArg.of("locationHeader", locationHeader), e);
+            return Optional.empty();
+        }
     }
 
 }
