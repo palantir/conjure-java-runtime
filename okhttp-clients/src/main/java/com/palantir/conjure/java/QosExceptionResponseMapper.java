@@ -78,7 +78,7 @@ public final class QosExceptionResponseMapper {
 
         return QosException.unavailable(
                 Optional.ofNullable(duration).map(Long::parseLong).map(Duration::ofSeconds),
-                tryParseLocation(locationHeader));
+                Optional.ofNullable(locationHeader).flatMap(QosExceptionResponseMapper::tryParseLocation));
     }
 
     private static Optional<URL> tryParseLocation(String locationHeader) {

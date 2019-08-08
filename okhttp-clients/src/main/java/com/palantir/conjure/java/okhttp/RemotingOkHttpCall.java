@@ -386,6 +386,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return null;
                 }
 
+                Duration realBackoff = exception.getRetryAfter().orElseGet(backoff::get);
+
                 // Redirect to the "next" URL, whichever that may be, after backing off.
                 Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
                 if (!redirectTo.isPresent()) {
@@ -397,9 +399,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 retryIfAllowed(callback, call, exception, () -> {
-                    Duration duration = exception.getRetryAfter().orElseGet(backoff::get);
                     log.info("Retrying call after receiving QosException.Unavailable",
-                            SafeArg.of("backoffMillis", duration.toMillis()),
+                            SafeArg.of("backoffMillis", realBackoff.toMillis()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get()),
                             exception);
                     Request redirectedRequest = request().newBuilder()
@@ -408,7 +409,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     scheduleExecution(
                             () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
                                     .enqueue(callback),
-                            duration);
+                            realBackoff);
                 });
                 return null;
             }
