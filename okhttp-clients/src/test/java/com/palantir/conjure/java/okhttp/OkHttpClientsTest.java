@@ -19,6 +19,7 @@ package com.palantir.conjure.java.okhttp;
 import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.fail;
 
@@ -685,6 +686,23 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(call.execute().body().string()).isEqualTo("foo");
 
         assertThat(server.takeRequest().getPath()).isEqualTo("/foo?bar");
+    }
+    @Test
+    public void handlesSocketExceptions_disabled() throws IOException {
+        server.shutdown();
+        server2.enqueue(new MockResponse().setBody("foo"));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url, url2))
+                        .retryOnSocketException(ClientConfiguration.RetryOnSocketException.DANGEROUS_DISABLED)
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+        Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThatIOException()
+                .isThrownBy(() -> call.execute().body().string());
     }
 
     @Test

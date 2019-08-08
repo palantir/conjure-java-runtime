@@ -49,6 +49,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     private final ConcurrencyLimiters concurrencyLimiters;
     private final ClientConfiguration.ServerQoS serverQoS;
     private final ClientConfiguration.RetryOnTimeout retryOnTimeout;
+    private final ClientConfiguration.RetryOnSocketException retryOnSocketException;
 
     RemotingOkHttpClient(
             OkHttpClient delegate,
@@ -59,7 +60,8 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
             ExecutorService executionExecutor,
             ConcurrencyLimiters concurrencyLimiters,
             ClientConfiguration.ServerQoS serverQoS,
-            ClientConfiguration.RetryOnTimeout retryOnTimeout) {
+            ClientConfiguration.RetryOnTimeout retryOnTimeout,
+            ClientConfiguration.RetryOnSocketException retryOnSocketException) {
         super(delegate);
         this.backoffStrategyFactory = backoffStrategy;
         this.nodeSelectionStrategy = nodeSelectionStrategy;
@@ -69,6 +71,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
         this.concurrencyLimiters = concurrencyLimiters;
         this.serverQoS = serverQoS;
         this.retryOnTimeout = retryOnTimeout;
+        this.retryOnSocketException = retryOnSocketException;
     }
 
     @Override
@@ -95,7 +98,8 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 concurrencyLimiters.acquireLimiter(request),
                 maxNumRelocations,
                 serverQoS,
-                retryOnTimeout);
+                retryOnTimeout,
+                retryOnSocketException);
     }
 
     private Request createNewRequest(Request request) {
