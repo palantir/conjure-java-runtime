@@ -212,7 +212,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 retryIfAllowed(callback, call, exception, () -> {
-                    log.info("Retrying call after failure",
+                    log.debug("Retrying call after failure",
                             SafeArg.of("backoffMillis", backoff.get().toMillis()),
                             UnsafeArg.of("requestUrl", call.request().url().toString()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
@@ -397,8 +397,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 retryIfAllowed(callback, call, exception, () -> {
-                    log.debug("Retrying call after receiving QosException.Unavailable",
-                            SafeArg.of("backoffMillis", backoff.get().toMillis()),
+                    Duration duration = exception.getRetryAfter().orElseGet(backoff::get);
+                    log.info("Retrying call after receiving QosException.Unavailable",
+                            SafeArg.of("backoffMillis", duration.toMillis()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get()),
                             exception);
                     Request redirectedRequest = request().newBuilder()
@@ -407,7 +408,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     scheduleExecution(
                             () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
                                     .enqueue(callback),
-                            exception.getRetryAfter().orElseGet(backoff::get));
+                            duration);
                 });
                 return null;
             }
