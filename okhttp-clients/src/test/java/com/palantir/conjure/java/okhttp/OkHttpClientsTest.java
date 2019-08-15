@@ -19,8 +19,8 @@ package com.palantir.conjure.java.okhttp;
 import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assert.fail;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Collections2;
@@ -107,12 +107,8 @@ public final class OkHttpClientsTest extends TestBase {
         OkHttpClient client = createRetryingClient(1);
         AsyncRequest future = AsyncRequest.of(client.newCall(new Request.Builder().url(url).build()));
         future.cancelCall();
-        try {
-            Futures.getUnchecked(future);
-            fail("Did not throw an exception");
-        } catch (UncheckedExecutionException e) {
-            assertThat(e.getCause()).hasMessage("Canceled").isInstanceOf(IOException.class);
-        }
+        assertThatExceptionOfType(UncheckedExecutionException.class).isThrownBy(() -> Futures.getUnchecked(future))
+                .satisfies(e -> assertThat(e.getCause()).hasMessage("Canceled").isInstanceOf(IOException.class));
     }
 
     private static final class AsyncRequest extends AbstractFuture<Response> implements Callback {
@@ -686,6 +682,23 @@ public final class OkHttpClientsTest extends TestBase {
 
         assertThat(server.takeRequest().getPath()).isEqualTo("/foo?bar");
     }
+    @Test
+    public void handlesSocketExceptions_disabled() throws IOException {
+        server.shutdown();
+        server2.enqueue(new MockResponse().setBody("foo"));
+
+        OkHttpClient client = OkHttpClients.withStableUris(
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url, url2))
+                        .retryOnSocketException(ClientConfiguration.RetryOnSocketException.DANGEROUS_DISABLED)
+                        .build(),
+                AGENT,
+                hostEventsSink,
+                OkHttpClientsTest.class);
+        Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
+        assertThatIOException()
+                .isThrownBy(() -> call.execute().body().string());
+    }
 
     @Test
     public void handlesTimeouts_withRetryOnTimeout() throws IOException, InterruptedException {
@@ -817,8 +830,7 @@ public final class OkHttpClientsTest extends TestBase {
                                 .readTimeout(Duration.ZERO) // unlimited pls
                                 .writeTimeout(Duration.ZERO) // unlimited pls
                                 .security(SslConfiguration.of(Paths.get("src", "test", "resources", "trustStore.jks")))
-                                .build()
-                ),
+                                .build()),
                 AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);

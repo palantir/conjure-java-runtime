@@ -16,20 +16,22 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.UnsafeArg;
+import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,13 +44,15 @@ final class UrlSelectorImpl implements UrlSelector {
 
     private final Supplier<List<HttpUrl>> baseUrls;
     private final AtomicReference<HttpUrl> lastBaseUrl;
-    private final Cache<HttpUrl, UrlAvailability> failedUrls;
+    private final Map<HttpUrl, Instant> failedUrls;
     private final boolean useFailedUrlCache;
+    private final Clock clock;
+    private final Duration failedUrlCooldown;
 
-    private UrlSelectorImpl(ImmutableList<HttpUrl> baseUrls, boolean reshuffle, Duration failedUrlCooldown) {
+    private UrlSelectorImpl(
+            ImmutableList<HttpUrl> baseUrls, boolean reshuffle, Duration failedUrlCooldown, Clock clock) {
         Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
         Preconditions.checkArgument(!failedUrlCooldown.isNegative(), "Cache expiration must be non-negative");
-
         if (reshuffle) {
             // Add jitter to avoid mass node reassignment when multiple nodes of a client are restarted
             Duration jitter = Duration.ofSeconds(ThreadLocalRandom.current().nextLong(-30, 30));
@@ -64,11 +68,9 @@ final class UrlSelectorImpl implements UrlSelector {
         // Assuming that baseUrls is already randomized, start with the first one.
         this.lastBaseUrl = new AtomicReference<>(baseUrls.get(0));
 
-        long coolDownMillis = failedUrlCooldown.toMillis();
-        this.failedUrls = Caffeine.newBuilder()
-                .maximumSize(baseUrls.size())
-                .expireAfterWrite(coolDownMillis, TimeUnit.MILLISECONDS)
-                .build();
+        this.clock = clock;
+        this.failedUrlCooldown = failedUrlCooldown;
+        this.failedUrls = new ConcurrentHashMap<>(baseUrls.size());
         this.useFailedUrlCache = !failedUrlCooldown.isNegative() && !failedUrlCooldown.isZero();
     }
 
@@ -80,7 +82,7 @@ final class UrlSelectorImpl implements UrlSelector {
      * time.
      */
     static UrlSelectorImpl createWithFailedUrlCooldown(
-            Collection<String> baseUrls, boolean reshuffle, Duration failedUrlCooldown) {
+            Collection<String> baseUrls, boolean reshuffle, Duration failedUrlCooldown, Clock clock) {
         ImmutableSet.Builder<HttpUrl> canonicalUrls = ImmutableSet.builder();  // ImmutableSet maintains insert order
         baseUrls.forEach(url -> {
             HttpUrl httpUrl = HttpUrl.parse(switchWsToHttp(url));
@@ -92,12 +94,12 @@ final class UrlSelectorImpl implements UrlSelector {
                     UnsafeArg.of("url", url));
             canonicalUrls.add(canonicalUrl);
         });
-        return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()), reshuffle, failedUrlCooldown);
+        return new UrlSelectorImpl(ImmutableList.copyOf(canonicalUrls.build()), reshuffle, failedUrlCooldown, clock);
     }
 
     @VisibleForTesting
     static UrlSelectorImpl create(Collection<String> baseUrls, boolean reshuffle) {
-        return createWithFailedUrlCooldown(baseUrls, reshuffle, Duration.ZERO);
+        return createWithFailedUrlCooldown(baseUrls, reshuffle, Duration.ZERO, Clock.systemUTC());
     }
 
     static <T> List<T> shuffle(List<T> list) {
@@ -122,122 +124,147 @@ final class UrlSelectorImpl implements UrlSelector {
      * case it will first be matched to a baseUrl from {@link #baseUrls}.
      */
     @Override
-    public Optional<HttpUrl> redirectTo(HttpUrl current, String redirectUrl) {
-        return baseUrlFor(HttpUrl.parse(redirectUrl), baseUrls.get()).flatMap(baseUrl -> redirectTo(current, baseUrl));
+    public Optional<HttpUrl> redirectTo(HttpUrl requestUrl, String redirectUrl) {
+        return baseUrlFor(HttpUrl.parse(redirectUrl), baseUrls.get())
+                .flatMap(baseUrl -> redirectTo(requestUrl, baseUrl));
     }
 
     /**
-     * Rewrites the current URL to use the new {@code redirectBaseUrl}, if the path prefix is compatible, otherwise
+     * Rewrites the request URL to use the new {@code redirectBaseUrl}, if the path prefix is compatible, otherwise
      * it returns {@link Optional#empty()}.
      *
      * Also updates the {@link #lastBaseUrl} with the given {@code redirectBaseUrl}.
      *
      * @param redirectBaseUrl  expected to be an actual base url that exists in {@link #baseUrls}.
      */
-    private Optional<HttpUrl> redirectTo(HttpUrl current, HttpUrl redirectBaseUrl) {
+    private Optional<HttpUrl> redirectTo(HttpUrl requestUrl, HttpUrl redirectBaseUrl) {
         lastBaseUrl.set(redirectBaseUrl);
 
-        if (!isPathPrefixFor(redirectBaseUrl, current)) {
+        if (!isPathPrefixFor(redirectBaseUrl, requestUrl)) {
             // The requested redirectBaseUrl has a path that is not compatible with
-            // the path of the current URL
+            // the path of the request URL
             return Optional.empty();
         }
-        return Optional.of(current.newBuilder()
+
+        return Optional.of(requestUrl.newBuilder()
                 .scheme(redirectBaseUrl.scheme())
                 .host(redirectBaseUrl.host())
                 .port(redirectBaseUrl.port())
                 .encodedPath(
                         redirectBaseUrl.encodedPath()  // matching prefix
-                                + current.encodedPath().substring(redirectBaseUrl.encodedPath().length()))
+                                + requestUrl.encodedPath().substring(redirectBaseUrl.encodedPath().length()))
                 .build());
     }
 
     @Override
-    public Optional<HttpUrl> redirectToNext(HttpUrl currentUrl) {
+    public Optional<HttpUrl> redirectToNext(HttpUrl requestUrl) {
         List<HttpUrl> httpUrls = baseUrls.get();
-        // if possible, determine the index of the passed in url (so we can be sure to return a url which is different)
-        Optional<Integer> currentUrlIndex = indexFor(currentUrl, httpUrls);
-        int startIndex = currentUrlIndex.orElseGet(() -> getIndexOfLastBaseUrl(httpUrls));
 
-        Optional<HttpUrl> nextUrl = getNext(startIndex, httpUrls);
-        if (nextUrl.isPresent()) {
-            return redirectTo(currentUrl, nextUrl.get());
-        }
+        // If possible, determine the index of the request URL (so we can be sure to redirect to a different URL)
+        int lastIndex = indexFor(requestUrl, httpUrls)
+                .orElseGet(() -> indexForLastBaseUrl(httpUrls));
 
-        // No healthy URLs remain; re-balance across any specified nodes
-        return redirectTo(currentUrl, httpUrls.get((startIndex + 1) % httpUrls.size()));
+        int nextIndex = increment(lastIndex, httpUrls);
+
+        HttpUrl next = getNextHealthy(nextIndex, httpUrls).orElseGet(() -> httpUrls.get(nextIndex));
+        return redirectTo(requestUrl, next);
     }
 
     @Override
-    public Optional<HttpUrl> redirectToCurrent(HttpUrl current) {
-        return redirectTo(current, lastBaseUrl.get());
+    public Optional<HttpUrl> redirectToCurrent(HttpUrl requestUrl) {
+        List<HttpUrl> httpUrls = baseUrls.get();
+
+        int startIndex = indexForLastBaseUrl(httpUrls);
+
+        HttpUrl next = getNextHealthy(startIndex, httpUrls).orElseGet(() -> {
+            // Revert to round robin behaviour if _all_ nodes have been marked as unhealthy
+            int nextIndex = increment(startIndex, httpUrls);
+            return httpUrls.get(nextIndex);
+        });
+        return redirectTo(requestUrl, next);
     }
 
     @Override
-    public Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl current) {
+    public Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl requestUrl) {
         List<HttpUrl> httpUrls = baseUrls.get();
-        // Ignore whatever base URL 'current' might match to, get the last base URL that was used
-        int lastIndex = getIndexOfLastBaseUrl(httpUrls);
-        Optional<HttpUrl> nextUrl = getNext(lastIndex, httpUrls);
-        if (nextUrl.isPresent()) {
-            return redirectTo(current, nextUrl.get());
-        }
 
-        return redirectTo(current, httpUrls.get((lastIndex + 1) % httpUrls.size()));
+        // Ignore whatever base URL the request URL might match to, use the last base URL instead
+        int lastIndex = indexForLastBaseUrl(httpUrls);
+
+        int nextIndex = increment(lastIndex, httpUrls);
+
+        HttpUrl next = getNextHealthy(nextIndex, httpUrls).orElseGet(() -> httpUrls.get(nextIndex));
+        return redirectTo(requestUrl, next);
+    }
+
+    @Override
+    public void markAsSucceeded(HttpUrl succeededUrl) {
+        if (useFailedUrlCache) {
+            baseUrlFor(succeededUrl, baseUrls.get()).ifPresent(failedUrls::remove);
+        }
     }
 
     @Override
     public void markAsFailed(HttpUrl failedUrl) {
         if (useFailedUrlCache) {
-            Optional<Integer> indexForFailedUrl = indexFor(failedUrl, baseUrls.get());
-            indexForFailedUrl.ifPresent(index ->
-                    failedUrls.put(baseUrls.get().get(index), UrlAvailability.FAILED)
-            );
+            baseUrlFor(failedUrl, baseUrls.get()).ifPresent(this::markBaseUrlAsFailed);
         }
     }
 
-    /**
-     * Returns the index of {@link #lastBaseUrl}, which is expected to exist in {@code httpUrls}.
-     */
-    private int getIndexOfLastBaseUrl(List<HttpUrl> httpUrls) {
-        int index = httpUrls.indexOf(lastBaseUrl.get());
-        Preconditions.checkState(index != -1,
-                "Expected httpUrls to contain currentBaseUrl",
-                UnsafeArg.of("httpUrls", httpUrls),
-                UnsafeArg.of("currentBaseUrl", lastBaseUrl));
-        return index;
+    private void markBaseUrlAsFailed(HttpUrl key) {
+        failedUrls.put(key, clock.instant().plus(this.failedUrlCooldown));
     }
 
-    /** Get the next URL in {@code baseUrls}, after the supplied index, that has not been marked as failed. */
-    private Optional<HttpUrl> getNext(int startIndex, List<HttpUrl> httpUrls) {
-        int numAttempts = 0;
-        int index = startIndex;
+    private int indexForLastBaseUrl(List<HttpUrl> httpUrls) {
+        // Fallback to index 0 if last base URL is no longer present in base URLs
+        return indexFor(lastBaseUrl.get(), httpUrls).orElse(0);
+    }
 
-        // Find the next URL that is not marked as failed
-        while (numAttempts < httpUrls.size()) {
-            index = (index + 1) % httpUrls.size();
-            UrlAvailability isFailed = failedUrls.getIfPresent(httpUrls.get(index));
-            if (isFailed == null) {
-                return Optional.of(httpUrls.get(index));
+    /**
+     * Get the next URL in {@code baseUrls}, after the supplied index.
+     * <p>
+     * If the {@code failedUrlCooldown} is positive, then this method will skip over nodes that have failed if
+     * it's been less than {@code failedUrlCooldown} since they failed. Furthermore, if a node had previously failed
+     * but the cooldown has since elapsed, that node's URL will be returned but it will once again be marked as
+     * failed (so that it's only tried once).
+     */
+    private Optional<HttpUrl> getNextHealthy(int startIndex, List<HttpUrl> httpUrls) {
+        for (int i = startIndex; i < startIndex + httpUrls.size(); i++) {
+            HttpUrl httpUrl = httpUrls.get(i % httpUrls.size());
+
+            Instant cooldownFinished = failedUrls.get(httpUrl);
+            if (cooldownFinished != null) {
+                // continue to the next URL if the cooldown has not elapsed
+                if (clock.instant().isBefore(cooldownFinished)) {
+                    continue;
+                }
+
+                // use the failed URL once and refresh to ensure that the cooldown elapses before it is used again
+                markBaseUrlAsFailed(httpUrl);
             }
-            numAttempts++;
+
+            return Optional.of(httpUrl);
         }
 
         return Optional.empty();
     }
 
-    private static Optional<HttpUrl> baseUrlFor(HttpUrl url, List<HttpUrl> currentUrls) {
-        return indexFor(url, currentUrls).map(currentUrls::get);
+    private static Optional<HttpUrl> baseUrlFor(HttpUrl url, List<HttpUrl> httpUrls) {
+        return indexFor(url, httpUrls).map(httpUrls::get);
     }
 
-    private static Optional<Integer> indexFor(HttpUrl url, List<HttpUrl> currentUrls) {
+    private static Optional<Integer> indexFor(HttpUrl url, List<HttpUrl> httpUrls) {
         HttpUrl canonicalUrl = canonicalize(url);
-        for (int i = 0; i < currentUrls.size(); ++i) {
-            if (isBaseUrlFor(currentUrls.get(i), canonicalUrl)) {
+        for (int i = 0; i < httpUrls.size(); ++i) {
+            if (isBaseUrlFor(httpUrls.get(i), canonicalUrl)) {
                 return Optional.of(i);
             }
         }
         return Optional.empty();
+    }
+
+    private static int increment(int index, List<HttpUrl> urls) {
+        return (index + 1) % urls.size();
     }
 
     /**
@@ -258,25 +285,17 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     /** Returns the "canonical" part of the given URL, consisting of schema, host, port, and path only. */
-    private static HttpUrl canonicalize(HttpUrl baseUrl) {
+    private static HttpUrl canonicalize(HttpUrl url) {
         return new HttpUrl.Builder()
-                .scheme(baseUrl.scheme())
-                .host(baseUrl.host())
-                .port(baseUrl.port())
-                .encodedPath(baseUrl.encodedPath())
+                .scheme(url.scheme())
+                .host(url.host())
+                .port(url.port())
+                .encodedPath(url.encodedPath())
                 .build();
     }
 
     @Override
     public List<HttpUrl> getBaseUrls() {
         return baseUrls.get();
-    }
-
-    private enum UrlAvailability {
-
-        /**
-         * URL has been marked as failed.
-         */
-        FAILED
     }
 }

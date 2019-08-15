@@ -54,6 +54,8 @@ public final class ClientConfigurations {
             ClientConfiguration.ServerQoS.AUTOMATIC_RETRY;
     private static final ClientConfiguration.RetryOnTimeout RETRY_ON_TIMEOUT_DEFAULT =
             ClientConfiguration.RetryOnTimeout.DISABLED;
+    private static final ClientConfiguration.RetryOnSocketException RETRY_ON_SOCKET_EXCEPTION_DEFAULT =
+            ClientConfiguration.RetryOnSocketException.ENABLED;
 
     private ClientConfigurations() {}
 
@@ -72,7 +74,9 @@ public final class ClientConfigurations {
                 .enableGcmCipherSuites(config.enableGcmCipherSuites().orElse(DEFAULT_ENABLE_GCM_CIPHERS))
                 .fallbackToCommonNameVerification(config.fallbackToCommonNameVerification()
                         .orElse(DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION))
-                .proxy(config.proxy().map(ClientConfigurations::createProxySelector).orElse(ProxySelector.getDefault()))
+                .proxy(config.proxy()
+                        .map(ClientConfigurations::createProxySelector)
+                        .orElseGet(ProxySelector::getDefault))
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
                 .meshProxy(meshProxy(config.proxy()))
                 .maxNumRetries(config.maxNumRetries().orElse(DEFAULT_MAX_NUM_RETRIES))
@@ -82,6 +86,7 @@ public final class ClientConfigurations {
                 .clientQoS(CLIENT_QOS_DEFAULT)
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
+                .retryOnSocketException(RETRY_ON_SOCKET_EXCEPTION_DEFAULT)
                 .taggedMetricRegistry(DefaultTaggedMetricRegistry.getDefault())
                 .build();
     }
@@ -110,6 +115,7 @@ public final class ClientConfigurations {
                 .clientQoS(CLIENT_QOS_DEFAULT)
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
+                .retryOnSocketException(RETRY_ON_SOCKET_EXCEPTION_DEFAULT)
                 .taggedMetricRegistry(DefaultTaggedMetricRegistry.getDefault())
                 .build();
     }

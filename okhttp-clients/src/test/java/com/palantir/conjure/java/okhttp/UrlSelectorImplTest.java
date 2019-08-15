@@ -18,30 +18,44 @@ package com.palantir.conjure.java.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.testing.Assertions;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import okhttp3.HttpUrl;
 import okhttp3.Request;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public final class UrlSelectorTest extends TestBase {
+public final class UrlSelectorImplTest extends TestBase {
+
+    @Mock
+    Clock clock;
+
+    @Before
+    public void before() {
+        when(clock.instant()).thenReturn(Instant.EPOCH);
+    }
 
     @Test
-    public void mustSpecifyAtLeastOneUrl() throws Exception {
+    public void mustSpecifyAtLeastOneUrl() {
         assertThatThrownBy(() -> UrlSelectorImpl.create(set(), false))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Must specify at least one URL");
     }
 
     @Test
-    public void baseUrlsMustBeCanonical() throws Exception {
+    public void baseUrlsMustBeCanonical() {
         for (String url : new String[] {
                 "user:pass@foo.com/path",
                 ""
@@ -73,7 +87,7 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testRedirectTo_succeedsWhenRequestedBaseUrlPathIsPrefixOfCurrentPath() throws Exception {
+    public void testRedirectTo_succeedsWhenRequestedBaseUrlPathIsPrefixOfCurrentPath() {
         String url1 = "http://foo/a";
         String url2 = "https://bar:8080/a/b/c";
         List<String> baseUrls = list(url1, url2);
@@ -90,7 +104,7 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testRedirectTo_updatesCurrentPointer() throws Exception {
+    public void testRedirectTo_updatesCurrentPointer() {
         UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a", "http://bar/a"), false);
         HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
         String redirectTo = "http://bar/a";
@@ -100,7 +114,7 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testRedirectTo_findsMatchesWithCaseInsensitiveHostNames() throws Exception {
+    public void testRedirectTo_findsMatchesWithCaseInsensitiveHostNames() {
         String baseUrl = "http://foo/a";
         UrlSelectorImpl selector = UrlSelectorImpl.create(list(baseUrl), false);
 
@@ -108,7 +122,7 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testRedirectTo_doesNotFindMatchesForCaseSentitivePaths() throws Exception {
+    public void testRedirectTo_doesNotFindMatchesForCaseSentitivePaths() {
         String baseUrl = "http://foo/a";
         UrlSelectorImpl selector = UrlSelectorImpl.create(list(baseUrl), false);
 
@@ -116,7 +130,7 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testRedirectTo_failsWhenRequestedBaseUrlPathIsNotPrefixOfCurrentPath() throws Exception {
+    public void testRedirectTo_failsWhenRequestedBaseUrlPathIsNotPrefixOfCurrentPath() {
         String url1 = "http://foo/a";
         String url2 = "https://bar:8080/a/b/c";
         UrlSelectorImpl selector = UrlSelectorImpl.create(list(url1, url2), false);
@@ -125,7 +139,7 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testIsBaseUrlFor() throws Exception {
+    public void testIsBaseUrlFor() {
         // Negative cases
         assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("https://foo/a"))).isFalse();
         assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://bar/a"))).isFalse();
@@ -140,7 +154,7 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testRedirectToNext_updatesCurrentPointer() throws Exception {
+    public void testRedirectToNext_updatesCurrentPointer() {
         UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a", "http://bar/a"), false);
         HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
 
@@ -187,7 +201,125 @@ public final class UrlSelectorTest extends TestBase {
     }
 
     @Test
-    public void testWorksWithWebSockets() throws Exception {
+    public void testMarkUrlAsFailed_withoutCooldown() {
+        UrlSelectorImpl selector = UrlSelectorImpl.create(list("http://foo/a", "http://bar/a"), false);
+        HttpUrl current = HttpUrl.parse("http://baz/a/b/path");
+
+        selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(current)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
+    public void testMarkUrlAsFailed_roundRobin_withCooldown() {
+        Duration failedUrlCooldown = Duration.ofMillis(100);
+
+        UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
+        HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
+
+        selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        when(clock.instant()).thenReturn(Instant.EPOCH.plus(failedUrlCooldown));
+
+        // we're intentionally only trying 'bar' once as we're not confident it's healthy yet - waiting for
+        // markAsSucceeded
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        selector.markAsSucceeded(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
+    public void testAllUrlsFailed_roundRobin_withCooldown() {
+        Duration failedUrlCooldown = Duration.ofMillis(100);
+
+        UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
+        HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
+
+        selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));
+        selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        selector.markAsSucceeded(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNextRoundRobin(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
+    public void testMarkUrlAsFailed_pinUntilError_withCooldown() {
+        Duration failedUrlCooldown = Duration.ofMillis(100);
+
+        UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
+        HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
+
+        selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        when(clock.instant()).thenReturn(Instant.EPOCH.plus(failedUrlCooldown));
+
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        // The timer has passed, but because it's still failed, 'bar' will only be tried once
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        selector.markAsSucceeded(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
+    public void testAllUrlsFailed_pinUntilError_withCooldown() {
+        Duration failedUrlCooldown = Duration.ofMillis(100);
+
+        UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
+        HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
+
+        selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));
+        selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://foo/a/b/path"));
+
+        selector.markAsSucceeded(HttpUrl.parse("http://bar/a/b/path"));
+
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToCurrent(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+        assertThat(selector.redirectToNext(requestUrl)).contains(HttpUrl.parse("http://bar/a/b/path"));
+    }
+
+    @Test
+    public void testWorksWithWebSockets() {
         Request wsRequest = new Request.Builder()
                 .url("wss://foo/a")
                 .build();

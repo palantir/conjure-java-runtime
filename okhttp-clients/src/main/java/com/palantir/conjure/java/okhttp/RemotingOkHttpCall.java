@@ -74,6 +74,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private final ConcurrencyLimiters.ConcurrencyLimiter limiter;
     private final ClientConfiguration.ServerQoS serverQoS;
     private final ClientConfiguration.RetryOnTimeout retryOnTimeout;
+    private final ClientConfiguration.RetryOnSocketException retryOnSocketException;
 
     private final int maxNumRelocations;
 
@@ -87,7 +88,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
             ConcurrencyLimiters.ConcurrencyLimiter limiter,
             int maxNumRelocations,
             ClientConfiguration.ServerQoS serverQoS,
-            ClientConfiguration.RetryOnTimeout retryOnTimeout) {
+            ClientConfiguration.RetryOnTimeout retryOnTimeout,
+            ClientConfiguration.RetryOnSocketException retryOnSocketException) {
         super(delegate);
         this.backoffStrategy = backoffStrategy;
         this.urls = urls;
@@ -98,6 +100,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         this.maxNumRelocations = maxNumRelocations;
         this.serverQoS = serverQoS;
         this.retryOnTimeout = retryOnTimeout;
+        this.retryOnSocketException = retryOnSocketException;
     }
 
     /**
@@ -230,6 +233,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                urls.markAsSucceeded(request().url());
+
                 // Relay successful responses
                 if (response.code() / 100 <= 2) {
                     callback.onResponse(call, response);
@@ -276,12 +281,16 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     private boolean shouldRetry(IOException exception, Optional<Duration> backoff) {
+        if (retryOnSocketException == ClientConfiguration.RetryOnSocketException.DANGEROUS_DISABLED) {
+            return false;
+        }
         switch (retryOnTimeout) {
             case DISABLED:
                 if (exception instanceof SocketTimeoutException) {
                     // non-connect timeouts should not be retried
                     SocketTimeoutException socketTimeout = (SocketTimeoutException) exception;
-                    if (!socketTimeout.getMessage().contains("connect timed out")) {
+                    if (socketTimeout.getMessage() == null
+                            || !socketTimeout.getMessage().contains("connect timed out")) {
                         return false;
                     }
                 }
@@ -322,7 +331,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 retryIfAllowed(callback, call, exception, () -> {
-                    Duration backoff = exception.getRetryAfter().orElse(nonAdvertizedBackoff.get());
+                    Duration backoff = exception.getRetryAfter().orElseGet(() -> nonAdvertizedBackoff.get());
                     log.debug("Rescheduling call after receiving QosException.Throttle",
                             SafeArg.of("backoffMillis", backoff.toMillis()),
                             exception);
@@ -454,6 +463,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
     @Override
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(), backoffStrategy, urls, client, schedulingExecutor,
-                executionExecutor, limiter, maxNumRelocations, serverQoS, retryOnTimeout);
+                executionExecutor, limiter, maxNumRelocations, serverQoS, retryOnTimeout, retryOnSocketException);
     }
 }

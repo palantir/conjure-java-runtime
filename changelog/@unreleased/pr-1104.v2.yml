@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: >
+    When a URL fails, we limit its use to at most one request every `failedUrlCooldown`.
+    Once a request to a previously failed URL succeeds, then we mark that URL as available and it is used normally again.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1104

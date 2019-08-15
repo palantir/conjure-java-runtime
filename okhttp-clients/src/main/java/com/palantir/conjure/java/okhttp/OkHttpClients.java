@@ -32,6 +32,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.Tracers;
 import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
+import java.time.Clock;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -162,7 +163,8 @@ public final class OkHttpClients {
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(
                 randomizeUrlOrder ? UrlSelectorImpl.shuffle(config.uris()) : config.uris(),
                 reshuffle,
-                config.failedUrlCooldown());
+                config.failedUrlCooldown(),
+                Clock.systemUTC());
         if (config.meshProxy().isPresent()) {
             // TODO(rfink): Should this go into the call itself?
             client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
@@ -225,7 +227,8 @@ public final class OkHttpClients {
                 executionExecutor,
                 concurrencyLimiters,
                 config.serverQoS(),
-                config.retryOnTimeout());
+                config.retryOnTimeout(),
+                config.retryOnSocketException());
     }
 
     private static boolean shouldEnableQos(ClientConfiguration.ClientQoS clientQoS) {
