@@ -233,6 +233,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                urls.markAsSucceeded(request().url());
+
                 // Relay successful responses
                 if (response.code() / 100 <= 2) {
                     callback.onResponse(call, response);
