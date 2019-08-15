@@ -25,7 +25,9 @@ import static org.junit.Assert.assertThat;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import com.palantir.tracing.Observability;
 import com.palantir.tracing.Tracer;
+import com.palantir.tracing.Tracers;
 import com.palantir.tracing.api.OpenSpan;
 import com.palantir.tracing.api.SpanType;
 import com.palantir.tracing.api.TraceHttpHeaders;
@@ -60,6 +62,7 @@ public final class TracerTest extends TestBase {
     @Test
     public void testClientIsInstrumentedWithTracer() throws InterruptedException {
         server.enqueue(new MockResponse().setBody("\"server\""));
+        Tracer.initTrace(Observability.SAMPLE, Tracers.randomId());
         OpenSpan parentTrace = Tracer.startSpan("");
         List<Map.Entry<SpanType, String>> observedSpans = Lists.newArrayList();
         Tracer.subscribe(TracerTest.class.getName(),
@@ -99,12 +102,12 @@ public final class TracerTest extends TestBase {
 
         CompletableFuture<?> first = CompletableFuture.runAsync(() -> {
             Tracer.initTrace(Optional.of(true), "first");
-            Tracer.startSpan("");
+            OpenSpan ignored = Tracer.startSpan("");
             service.string();
         });
         CompletableFuture<?> second = CompletableFuture.runAsync(() -> {
             Tracer.initTrace(Optional.of(true), "second");
-            Tracer.startSpan("");
+            OpenSpan ignored = Tracer.startSpan("");
             service.string();
         });
         first.join();
