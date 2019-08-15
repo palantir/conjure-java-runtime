@@ -35,6 +35,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 import okhttp3.mockwebserver.MockResponse;
@@ -97,16 +99,17 @@ public final class TracerTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\"").setHeadersDelay(100, TimeUnit.MILLISECONDS));
         server.enqueue(new MockResponse().setBody("\"server\""));
 
+        ExecutorService executor = Executors.newFixedThreadPool(2);
         CompletableFuture<?> first = CompletableFuture.runAsync(() -> {
             Tracer.initTrace(Optional.of(true), "first");
             Tracer.startSpan("");
             service.string();
-        });
+        }, executor);
         CompletableFuture<?> second = CompletableFuture.runAsync(() -> {
             Tracer.initTrace(Optional.of(true), "second");
             Tracer.startSpan("");
             service.string();
-        });
+        }, executor);
         first.join();
         second.join();
     }
