@@ -94,6 +94,7 @@ public final class OkHttpClients {
 
     static {
         dispatcher = new Dispatcher(executionExecutor);
+        // Restricting concurrency is done elsewhere in ConcurrencyLimiters.
         dispatcher.setMaxRequests(Integer.MAX_VALUE);
         // Must be less than maxRequests so a single slow host does not block all requests
         dispatcher.setMaxRequestsPerHost(256);
