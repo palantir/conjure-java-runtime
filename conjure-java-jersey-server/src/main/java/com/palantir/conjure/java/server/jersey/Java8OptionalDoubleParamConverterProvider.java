@@ -49,7 +49,7 @@ public final class Java8OptionalDoubleParamConverterProvider implements ParamCon
             try {
                 return OptionalDouble.of(Double.parseDouble(value));
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(e);
+                throw new IllegalStateException(e);
             }
         }
 

@@ -49,7 +49,7 @@ public final class Java8OptionalIntParamConverterProvider implements ParamConver
             try {
                 return OptionalInt.of(Integer.parseInt(value));
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(e);
+                throw new IllegalStateException(e);
             }
         }
 

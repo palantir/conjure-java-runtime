@@ -49,7 +49,7 @@ public final class Java8OptionalLongParamConverterProvider implements ParamConve
             try {
                 return OptionalLong.of(Long.parseLong(value));
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(e);
+                throw new IllegalStateException(e);
             }
         }
 

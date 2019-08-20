@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Correctly handle query parameters for optional primitives
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1183

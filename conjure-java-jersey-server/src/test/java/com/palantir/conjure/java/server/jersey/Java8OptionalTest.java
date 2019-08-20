@@ -103,6 +103,12 @@ public final class Java8OptionalTest {
     }
 
     @Test
+    public void testQueryParam_optionalIntInvalid() {
+        Response response = target.path("optional/int").queryParam("value", "foo").request().get();
+        assertThat(response.getStatus(), is(Status.BAD_REQUEST.getStatusCode()));
+    }
+
+    @Test
     public void testQueryParam_optionalDoublePresent() throws NoSuchMethodException, SecurityException {
         Response response = target.path("optional/double").queryParam("value", "1.5").request().get();
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
@@ -117,6 +123,12 @@ public final class Java8OptionalTest {
     }
 
     @Test
+    public void testQueryParam_optionalDoubleInvalid() {
+        Response response = target.path("optional/double").queryParam("value", "foo").request().get();
+        assertThat(response.getStatus(), is(Status.BAD_REQUEST.getStatusCode()));
+    }
+
+    @Test
     public void testQueryParam_optionalLongPresent() throws NoSuchMethodException, SecurityException {
         Response response = target.path("optional/long").queryParam("value", "100").request().get();
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
@@ -128,6 +140,12 @@ public final class Java8OptionalTest {
         Response response = target.path("optional/long").request().get();
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
         assertThat(response.readEntity(String.class), is("0"));
+    }
+
+    @Test
+    public void testQueryParam_optionalLongInvalid() {
+        Response response = target.path("optional/long").queryParam("value", "foo").request().get();
+        assertThat(response.getStatus(), is(Status.BAD_REQUEST.getStatusCode()));
     }
 
     public static class OptionalTestServer extends Application<Configuration> {
