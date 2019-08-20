@@ -103,13 +103,6 @@ public final class Java8OptionalTest {
     }
 
     @Test
-    public void testQueryParam_optionalIntNull() {
-        Response response = target.path("optional/int").queryParam("value", "null").request().get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("0"));
-    }
-
-    @Test
     public void testQueryParam_optionalIntInvalid() {
         Response response = target.path("optional/int").queryParam("value", "foo").request().get();
         assertThat(response.getStatus(), is(Status.BAD_REQUEST.getStatusCode()));
@@ -130,13 +123,6 @@ public final class Java8OptionalTest {
     }
 
     @Test
-    public void testQueryParam_optionalDoubleNull() {
-        Response response = target.path("optional/double").queryParam("value", "null").request().get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("0.0"));
-    }
-
-    @Test
     public void testQueryParam_optionalDoubleInvalid() {
         Response response = target.path("optional/double").queryParam("value", "foo").request().get();
         assertThat(response.getStatus(), is(Status.BAD_REQUEST.getStatusCode()));
@@ -152,13 +138,6 @@ public final class Java8OptionalTest {
     @Test
     public void testQueryParam_optionalLongEmpty() {
         Response response = target.path("optional/long").request().get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("0"));
-    }
-
-    @Test
-    public void testQueryParam_optionalLongNull() {
-        Response response = target.path("optional/long").queryParam("value", "null").request().get();
         assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
         assertThat(response.readEntity(String.class), is("0"));
     }

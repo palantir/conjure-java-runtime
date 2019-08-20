@@ -42,7 +42,7 @@ public final class Java8OptionalIntParamConverterProvider implements ParamConver
     public static final class OptionalIntParamConverter implements ParamConverter<OptionalInt> {
         @Override
         public OptionalInt fromString(final String value) {
-            if (value == null || value.equals("null")) {
+            if (value == null) {
                 return OptionalInt.empty();
             }
 

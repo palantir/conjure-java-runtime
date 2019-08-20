@@ -42,7 +42,7 @@ public final class Java8OptionalDoubleParamConverterProvider implements ParamCon
     public static final class OptionalDoubleParamConverter implements ParamConverter<OptionalDouble> {
         @Override
         public OptionalDouble fromString(final String value) {
-            if (value == null || value.equals("null")) {
+            if (value == null) {
                 return OptionalDouble.empty();
             }
 
