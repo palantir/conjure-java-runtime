@@ -42,14 +42,14 @@ public final class Java8OptionalLongParamConverterProvider implements ParamConve
     public static final class OptionalLongParamConverter implements ParamConverter<OptionalLong> {
         @Override
         public OptionalLong fromString(final String value) {
-            if (value == null) {
+            if (value == null || value.equals("null")) {
                 return OptionalLong.empty();
             }
 
             try {
                 return OptionalLong.of(Long.parseLong(value));
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(e);
+                throw new IllegalStateException(e);
             }
         }
 

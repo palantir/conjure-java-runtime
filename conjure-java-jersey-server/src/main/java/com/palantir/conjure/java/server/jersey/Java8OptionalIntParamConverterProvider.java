@@ -42,14 +42,14 @@ public final class Java8OptionalIntParamConverterProvider implements ParamConver
     public static final class OptionalIntParamConverter implements ParamConverter<OptionalInt> {
         @Override
         public OptionalInt fromString(final String value) {
-            if (value == null) {
+            if (value == null || value.equals("null")) {
                 return OptionalInt.empty();
             }
 
             try {
                 return OptionalInt.of(Integer.parseInt(value));
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException(e);
+                throw new IllegalStateException(e);
             }
         }
 
