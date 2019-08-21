@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Optional header parameters are serialized as string representation
+    of the wrapped object omitting optional wrapper
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1184
