@@ -18,10 +18,12 @@ package com.palantir.conjure.java.client.retrofit2;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -73,4 +75,11 @@ public interface TestService {
 
     @POST("makeListenableFutureRequest")
     ListenableFuture<String> makeListenableFutureRequest();
+
+    @GET("getJavaOptionalHeader")
+    ListenableFuture<String> getJavaOptionalHeader(@Header("Optional-Header") Optional<String> optionalHeader);
+
+    @GET("getJavaOptionalHeader")
+    ListenableFuture<String> getGuavaOptionalHeader(
+            @Header("Optional-Header") com.google.common.base.Optional<String> optionalHeader);
 }
