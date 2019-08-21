@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
+import retrofit2.http.Header;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -47,12 +48,16 @@ public final class OptionalObjectToStringConverterFactoryTest {
             OptionalObjectToStringConverterFactory.Java8OptionalStringConverter.INSTANCE;
 
     @Test
-    public void testRequiresPathOrQueryAnnotation() throws Exception {
+    public void testRequiresPathHeaderQueryAnnotation() throws Exception {
         // Java8
+        assertThat(factory.stringConverter(java.util.Optional.class, createAnnotations(Header.class), null))
+                .isNotNull();
         assertThat(factory.stringConverter(java.util.Optional.class, createAnnotations(Path.class), null)).isNotNull();
         assertThat(factory.stringConverter(java.util.Optional.class, createAnnotations(Query.class), null)).isNotNull();
         assertThat(factory.stringConverter(java.util.Optional.class, createAnnotations(Nonnull.class), null)).isNull();
 
+        assertThat(factory.stringConverter(java.util.OptionalInt.class, createAnnotations(Header.class), null))
+                .isNotNull();
         assertThat(factory.stringConverter(java.util.OptionalInt.class, createAnnotations(Path.class), null))
                 .isNotNull();
         assertThat(factory.stringConverter(java.util.OptionalInt.class, createAnnotations(Query.class), null))
@@ -60,6 +65,8 @@ public final class OptionalObjectToStringConverterFactoryTest {
         assertThat(factory.stringConverter(java.util.OptionalInt.class, createAnnotations(Nonnull.class), null))
                 .isNull();
 
+        assertThat(factory.stringConverter(java.util.OptionalDouble.class, createAnnotations(Header.class), null))
+                .isNotNull();
         assertThat(factory.stringConverter(java.util.OptionalDouble.class, createAnnotations(Path.class), null))
                 .isNotNull();
         assertThat(factory.stringConverter(java.util.OptionalDouble.class, createAnnotations(Query.class), null))
@@ -67,6 +74,8 @@ public final class OptionalObjectToStringConverterFactoryTest {
         assertThat(factory.stringConverter(java.util.OptionalDouble.class, createAnnotations(Nonnull.class), null))
                 .isNull();
 
+        assertThat(factory.stringConverter(java.util.OptionalLong.class, createAnnotations(Header.class), null))
+                .isNotNull();
         assertThat(factory.stringConverter(java.util.OptionalLong.class, createAnnotations(Path.class), null))
                 .isNotNull();
         assertThat(factory.stringConverter(java.util.OptionalLong.class, createAnnotations(Query.class), null))
@@ -75,6 +84,9 @@ public final class OptionalObjectToStringConverterFactoryTest {
                 .isNull();
 
         // Guava
+        assertThat(
+                factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Header.class), null))
+                .isNotNull();
         assertThat(factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Path.class), null))
                 .isNotNull();
         assertThat(factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Query.class), null))
