@@ -47,7 +47,8 @@ public final class DefaultConcurrencyLimitersTest {
             new DefaultTaggedMetricRegistry(),
             TIMEOUT,
             DefaultConcurrencyLimitersTest.class,
-            true);
+            true,
+            false);
 
     @Test
     public void testTimeout() {

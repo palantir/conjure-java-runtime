@@ -55,6 +55,10 @@ final class ConcurrencyLimiters {
             MetricName.builder().safeName("conjure-java-client.qos.request-permit.slow-acquire").build();
     private static final MetricName LEAK_SUSPECTED =
             MetricName.builder().safeName("conjure-java-client.qos.request-permit.leak-suspected").build();
+    private static final MetricName INFLIGHT =
+            MetricName.builder().safeName("conjure-java-client.qos.request-permit.inflight").build();
+    private static final MetricName TOTAL =
+            MetricName.builder().safeName("conjure-java-client.qos.request-permit.total").build();
     private static final String SLOW_ACQUIRE_TAGGED = "conjure-java-client.qos.request-permit.slow-acquire-tagged";
 
     private final Timer slowAcquire;
@@ -65,6 +69,8 @@ final class ConcurrencyLimiters {
     private final Class<?> serviceClass;
     private final ScheduledExecutorService scheduledExecutorService;
     private final boolean useLimiter;
+    private final boolean produceClientQoSMetrics;
+    private final TaggedMetricRegistry taggedMetricRegistry;
 
     @VisibleForTesting
     ConcurrencyLimiters(
@@ -72,7 +78,8 @@ final class ConcurrencyLimiters {
             TaggedMetricRegistry taggedMetricRegistry,
             Duration timeout,
             Class<?> serviceClass,
-            boolean useLimiter) {
+            boolean useLimiter,
+            boolean produceClientQoSMetrics) {
         this.slowAcquire = taggedMetricRegistry.timer(SLOW_ACQUIRE);
         this.leakSuspected = taggedMetricRegistry.meter(LEAK_SUSPECTED);
         this.slowAcquireTagged = taggedMetricRegistry.timer(generateMetricNameWithServiceName(SLOW_ACQUIRE_TAGGED,
@@ -81,14 +88,22 @@ final class ConcurrencyLimiters {
         this.serviceClass = serviceClass;
         this.scheduledExecutorService = scheduledExecutorService;
         this.useLimiter = useLimiter;
+        this.taggedMetricRegistry = taggedMetricRegistry;
+        this.produceClientQoSMetrics = produceClientQoSMetrics;
     }
 
     ConcurrencyLimiters(
             ScheduledExecutorService scheduledExecutorService,
             TaggedMetricRegistry taggedMetricRegistry,
             Class<?> serviceClass,
-            boolean useLimiter) {
-        this(scheduledExecutorService, taggedMetricRegistry, DEFAULT_TIMEOUT, serviceClass, useLimiter);
+            boolean useLimiter,
+            boolean produceClientQoSMetrics) {
+        this(scheduledExecutorService,
+                taggedMetricRegistry,
+                DEFAULT_TIMEOUT,
+                serviceClass,
+                useLimiter,
+                produceClientQoSMetrics);
     }
 
     /**
@@ -147,7 +162,7 @@ final class ConcurrencyLimiters {
             return NoOpConcurrencyLimiter.INSTANCE;
         }
         Supplier<SimpleLimiter<Void>> limiter = () -> SimpleLimiter.newBuilder().limit(newLimit()).build();
-        return new DefaultConcurrencyLimiter(limiterKey, limiter);
+        return new DefaultConcurrencyLimiter(taggedMetricRegistry, limiterKey, limiter, produceClientQoSMetrics);
     }
 
     private Key limiterKey(Request request) {
@@ -214,10 +229,28 @@ final class ConcurrencyLimiters {
         private final Supplier<SimpleLimiter<Void>> limiterFactory;
         private final LeakDetector<Limiter.Listener> leakDetector = new LeakDetector<>(Limiter.Listener.class);
 
-        DefaultConcurrencyLimiter(Key limiterKey, Supplier<SimpleLimiter<Void>> limiterFactory) {
+        DefaultConcurrencyLimiter(
+                TaggedMetricRegistry taggedMetricRegistry,
+                Key limiterKey,
+                Supplier<SimpleLimiter<Void>> limiterFactory,
+                boolean dumpFullMetrics) {
             this.limiterKey = limiterKey;
             this.limiterFactory = limiterFactory;
             this.limiter = limiterFactory.get();
+
+            if (dumpFullMetrics) {
+                taggedMetricRegistry.gauge(metricName(INFLIGHT, limiterKey), limiter::getInflight);
+                taggedMetricRegistry.gauge(metricName(TOTAL, limiterKey), limiter::getLimit);
+            }
+        }
+
+        private static MetricName metricName(MetricName base, Key limiterKey) {
+            MetricName.Builder builder = MetricName.builder()
+                    .from(base)
+                    .putSafeTags("hostName", limiterKey.hostname());
+            limiterKey.method().ifPresent(method -> builder.putSafeTags("method", method));
+            limiterKey.pathTemplate().ifPresent(pathTemplate -> builder.putSafeTags("pathTemplate", pathTemplate));
+            return builder.build();
         }
 
         @Override

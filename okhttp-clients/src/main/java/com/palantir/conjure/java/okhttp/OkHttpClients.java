@@ -150,11 +150,13 @@ public final class OkHttpClients {
             boolean randomizeUrlOrder,
             boolean reshuffle) {
         boolean enableClientQoS = shouldEnableQos(config.clientQoS());
+        boolean produceClientQoSMetrics = shouldProduceClientQoSMetrics(config.clientQoS());
         ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(
                 limitReviver.get(),
                 config.taggedMetricRegistry(),
                 serviceClass,
-                enableClientQoS);
+                enableClientQoS,
+                produceClientQoSMetrics);
 
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         client.addInterceptor(CatchThrowableInterceptor.INSTANCE);
@@ -235,7 +237,21 @@ public final class OkHttpClients {
     private static boolean shouldEnableQos(ClientConfiguration.ClientQoS clientQoS) {
         switch (clientQoS) {
             case ENABLED:
+            case ENABLED_WITH_ADDITIONAL_METRICS:
                 return true;
+            case DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS:
+                return false;
+        }
+
+        throw new SafeIllegalStateException("Encountered unknown client QoS configuration",
+                SafeArg.of("ClientQoS", clientQoS));
+    }
+
+    private static boolean shouldProduceClientQoSMetrics(ClientConfiguration.ClientQoS clientQoS) {
+        switch (clientQoS) {
+            case ENABLED_WITH_ADDITIONAL_METRICS:
+                return true;
+            case ENABLED:
             case DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS:
                 return false;
         }

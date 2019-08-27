@@ -153,6 +153,9 @@ public interface ClientConfiguration {
         /** Default. */
         ENABLED,
 
+        /** Enable, and produce additional metrics. */
+        ENABLED_WITH_ADDITIONAL_METRICS,
+
         /**
          * Disables the client-side sympathetic QoS. Consumers should almost never use this option, reserving it
          * for where there are known issues with the QoS interaction. Please consult project maintainers if applying
