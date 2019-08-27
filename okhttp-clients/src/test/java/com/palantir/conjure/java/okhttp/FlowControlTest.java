@@ -69,6 +69,7 @@ public final class FlowControlTest {
                     .build()),
             new DefaultTaggedMetricRegistry(),
             FlowControlTest.class,
+            true,
             true);
 
     @BeforeClass

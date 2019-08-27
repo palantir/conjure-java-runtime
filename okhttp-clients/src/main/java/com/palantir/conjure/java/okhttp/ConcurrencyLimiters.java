@@ -239,12 +239,12 @@ final class ConcurrencyLimiters {
             this.limiter = limiterFactory.get();
 
             if (dumpFullMetrics) {
-                taggedMetricRegistry.gauge(metricName(INFLIGHT, limiterKey), limiter::getInflight);
-                taggedMetricRegistry.gauge(metricName(TOTAL, limiterKey), limiter::getLimit);
+                taggedMetricRegistry.gauge(metricName(INFLIGHT), limiter::getInflight);
+                taggedMetricRegistry.gauge(metricName(TOTAL), limiter::getLimit);
             }
         }
 
-        private static MetricName metricName(MetricName base, Key limiterKey) {
+        private MetricName metricName(MetricName base) {
             MetricName.Builder builder = MetricName.builder()
                     .from(base)
                     .putSafeTags("hostName", limiterKey.hostname());
