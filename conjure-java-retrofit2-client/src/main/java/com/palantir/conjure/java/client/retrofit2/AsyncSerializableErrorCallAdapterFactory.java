@@ -26,6 +26,7 @@
  */
 package com.palantir.conjure.java.client.retrofit2;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.AbstractFuture;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.palantir.conjure.java.okhttp.IoRemoteException;
@@ -34,6 +35,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Callback;
@@ -90,7 +92,13 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
 
         @Override
         public void onResponse(Call<R> call, Response<R> response) {
-            set(response.body());
+            boolean futureWasCancelled = !set(response.body());
+            if (futureWasCancelled) {
+                ResponseBody body = response.raw().body();
+                if (body != null) {
+                    body.close();
+                }
+            }
         }
 
         @Override
@@ -104,7 +112,8 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
         }
     }
 
-    private static final class ListenableFutureBodyCallAdapter<R> implements CallAdapter<R, ListenableFuture<R>> {
+    @VisibleForTesting
+    static final class ListenableFutureBodyCallAdapter<R> implements CallAdapter<R, ListenableFuture<R>> {
         private final Type responseType;
 
         ListenableFutureBodyCallAdapter(Type responseType) {
@@ -124,7 +133,8 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
         }
     }
 
-    private static final class CompletableFutureBodyCallAdapter<R> implements CallAdapter<R, CompletableFuture<R>> {
+    @VisibleForTesting
+    static final class CompletableFutureBodyCallAdapter<R> implements CallAdapter<R, CompletableFuture<R>> {
         private final Type responseType;
 
         CompletableFutureBodyCallAdapter(Type responseType) {
@@ -151,7 +161,13 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
             call.enqueue(new Callback<R>() {
                 @Override
                 public void onResponse(Call<R> call, Response<R> response) {
-                    future.complete(response.body());
+                    boolean futureWasCancelled = !future.complete(response.body());
+                    if (futureWasCancelled) {
+                        ResponseBody body = response.raw().body();
+                        if (body != null) {
+                            body.close();
+                        }
+                    }
                 }
 
                 @Override
