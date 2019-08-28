@@ -35,7 +35,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Callback;
@@ -94,10 +93,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
         public void onResponse(Call<R> call, Response<R> response) {
             boolean futureWasCancelled = !set(response.body());
             if (futureWasCancelled) {
-                ResponseBody body = response.raw().body();
-                if (body != null) {
-                    body.close();
-                }
+                close(response);
             }
         }
 
@@ -163,10 +159,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
                 public void onResponse(Call<R> call, Response<R> response) {
                     boolean futureWasCancelled = !future.complete(response.body());
                     if (futureWasCancelled) {
-                        ResponseBody body = response.raw().body();
-                        if (body != null) {
-                            body.close();
-                        }
+                        close(response);
                     }
                 }
 
@@ -184,5 +177,12 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
 
             return future;
         }
+    }
+
+    private static void close(Response<?> response) {
+        if (response.raw().body() == null) {
+            return;
+        }
+        response.raw().body().close();
     }
 }
