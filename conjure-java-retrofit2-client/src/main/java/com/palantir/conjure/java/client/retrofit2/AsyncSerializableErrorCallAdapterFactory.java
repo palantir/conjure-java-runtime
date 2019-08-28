@@ -35,6 +35,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Callback;
@@ -180,9 +181,9 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
     }
 
     private static void close(Response<?> response) {
-        if (response.raw().body() == null) {
-            return;
+        ResponseBody body = response.raw().body();
+        if (body != null) {
+            body.close();
         }
-        response.raw().body().close();
     }
 }
