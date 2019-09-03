@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.tracing.Observability;
+import com.palantir.tracing.RenderTracingRule;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.Tracers;
 import com.palantir.tracing.api.OpenSpan;
@@ -52,6 +53,9 @@ public final class TracerTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
+
+    @Rule
+    public final RenderTracingRule renderTracingRule = new RenderTracingRule();
 
     private TestService service;
 
