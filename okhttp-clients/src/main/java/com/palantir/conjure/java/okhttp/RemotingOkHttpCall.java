@@ -29,7 +29,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeIoException;
-import com.palantir.tracing.AsyncTracer;
+import com.palantir.tracing.DetachedSpan;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
@@ -163,13 +163,13 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     @Override
     public void enqueue(Callback callback) {
-        AsyncTracer tracer = new AsyncTracer("OkHttp: acquire-limiter");
+        DetachedSpan waitingSpan = DetachedSpan.start("OkHttp: client-side-concurrency-limiter");
         ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
         request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
         Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {
             @Override
             public void onSuccess(Limiter.Listener listener) {
-                tracer.withTrace(() -> null);
+                waitingSpan.complete();
                 enqueueInternal(callback);
             }
 
