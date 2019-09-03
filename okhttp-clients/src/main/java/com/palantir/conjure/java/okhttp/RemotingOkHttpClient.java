@@ -110,8 +110,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 .url(getNewRequestUrl(request.url()))
                 .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create())
                 .tag(EntireSpan.class, () -> entireSpan)
-                .tag(AttemptSpan.class, ImmutableAttemptSpan.builder().attemptSpan(entireSpan.childDetachedSpan(
-                        "OkHttp: attempt")).build())
+                .tag(AttemptSpan.class, AttemptSpan.createAttempt(entireSpan, 0))
                 .tag(SettableDispatcherSpan.class, SettableDispatcherSpan.create())
                 .build();
     }
@@ -128,11 +127,15 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
 
         DetachedSpan attemptSpan();
 
-        default AttemptSpan nextAttempt(DetachedSpan entireSpan) {
+        static AttemptSpan createAttempt(DetachedSpan entireSpan, int attemptNumber) {
             return ImmutableAttemptSpan.builder()
-                    .attemptNumber(attemptNumber() + 1)
-                    .attemptSpan(entireSpan.childDetachedSpan("OkHttp: Attempt " + (attemptNumber() + 1)))
+                    .attemptNumber(attemptNumber)
+                    .attemptSpan(entireSpan.childDetachedSpan("OkHttp: Attempt " + attemptNumber))
                     .build();
+        }
+
+        default AttemptSpan nextAttempt(DetachedSpan entireSpan) {
+            return createAttempt(entireSpan, attemptNumber() + 1);
         }
     }
 
