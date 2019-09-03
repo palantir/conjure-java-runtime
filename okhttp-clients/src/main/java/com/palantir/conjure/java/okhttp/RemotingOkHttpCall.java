@@ -176,7 +176,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 concurrencyLimiterSpan.complete();
                 DetachedSpan dispatcherSpan = attemptSpan.childDetachedSpan("OkHttp: waiting-in-dispatcher");
                 request().tag(SettableDispatcherSpan.class).setDispatcherSpan(dispatcherSpan);
-                enqueueInternal(callback);
+                enqueueClosingEntireSpan(callback);
             }
 
             @Override
@@ -187,6 +187,22 @@ final class RemotingOkHttpCall extends ForwardingCall {
                                 + "we failed when using the concurrency limiter", throwable)));
             }
         }, MoreExecutors.directExecutor());
+    }
+
+    private void enqueueClosingEntireSpan(Callback callback) {
+        enqueueInternal(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException exception) {
+                call.request().tag(EntireSpan.class).get().complete();
+                callback.onFailure(call, exception);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                call.request().tag(EntireSpan.class).get().complete();
+                callback.onResponse(call, response);
+            }
+        });
     }
 
     private void enqueueInternal(Callback callback) {
@@ -246,7 +262,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 // Relay successful responses
                 if (response.code() / 100 <= 2) {
-                    call.request().tag(EntireSpan.class).get().complete();
                     callback.onResponse(call, response);
 
                     return;
