@@ -131,7 +131,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
         default AttemptSpan nextAttempt(DetachedSpan entireSpan) {
             return ImmutableAttemptSpan.builder()
                     .attemptNumber(attemptNumber() + 1)
-                    .attemptSpan(entireSpan.childDetachedSpan("OkHttp: Attempt " + attemptNumber() + 1))
+                    .attemptSpan(entireSpan.childDetachedSpan("OkHttp: Attempt " + (attemptNumber() + 1)))
                     .build();
         }
     }
