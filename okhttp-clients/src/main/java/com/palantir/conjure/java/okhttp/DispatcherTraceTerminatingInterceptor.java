@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.EntireSpan;
+import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.AttemptSpan;
 import com.palantir.tracing.CloseableSpan;
 import com.palantir.tracing.DetachedSpan;
 import java.io.IOException;
@@ -28,15 +28,15 @@ public final class DispatcherTraceTerminatingInterceptor implements Interceptor 
     @Override
     public Response intercept(Chain chain) throws IOException {
         // TODO if null?
-        DetachedSpan entireSpan = chain.request().tag(EntireSpan.class).get();
+        DetachedSpan attemptSpan = chain.request().tag(AttemptSpan.class).attemptSpan();
         DetachedSpan dispatcherSpan = chain.request().tag(SettableDispatcherSpan.class).dispatcherSpan();
 
         if (dispatcherSpan != null) {
             dispatcherSpan.complete();
-            try (CloseableSpan executeSpan = entireSpan.childSpan("OkHttp: execute")) {
+            try (CloseableSpan executeSpan = attemptSpan.childSpan("OkHttp: execute")) {
                 return chain.proceed(chain.request());
             } finally {
-                entireSpan.complete();
+                attemptSpan.complete();
             }
         }
         return chain.proceed(chain.request());

@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.okhttp;
 
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
@@ -29,6 +30,7 @@ import java.util.function.Supplier;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,11 +110,31 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 .url(getNewRequestUrl(request.url()))
                 .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create())
                 .tag(EntireSpan.class, () -> entireSpan)
+                .tag(AttemptSpan.class, ImmutableAttemptSpan.builder().attemptSpan(entireSpan.childDetachedSpan(
+                        "OkHttp: attempt")).build())
                 .tag(SettableDispatcherSpan.class, SettableDispatcherSpan.create())
                 .build();
     }
 
     interface EntireSpan extends Supplier<DetachedSpan> {}
+
+    @Value.Immutable
+    @ImmutablesStyle
+    interface AttemptSpan {
+        @Value.Default
+        default int attemptNumber() {
+            return 0;
+        }
+
+        DetachedSpan attemptSpan();
+
+        default AttemptSpan nextAttempt(DetachedSpan entireSpan) {
+            return ImmutableAttemptSpan.builder()
+                    .attemptNumber(attemptNumber() + 1)
+                    .attemptSpan(entireSpan.childDetachedSpan("OkHttp: Attempt " + attemptNumber() + 1))
+                    .build();
+        }
+    }
 
     private HttpUrl getNewRequestUrl(HttpUrl requestUrl) {
         return redirectToNewRequest(requestUrl).orElse(requestUrl);

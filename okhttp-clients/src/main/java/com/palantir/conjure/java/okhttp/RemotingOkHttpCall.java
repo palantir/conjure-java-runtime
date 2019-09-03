@@ -25,6 +25,7 @@ import com.netflix.concurrency.limits.Limiter;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.AttemptSpan;
 import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.EntireSpan;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
@@ -164,16 +165,16 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     @Override
     public void enqueue(Callback callback) {
-        DetachedSpan entireSpan = request().tag(EntireSpan.class).get();
+        DetachedSpan attemptSpan = request().tag(AttemptSpan.class).attemptSpan();
         DetachedSpan concurrencyLimiterSpan =
-                entireSpan.childDetachedSpan("OkHttp: client-side-concurrency-limiter");
+                attemptSpan.childDetachedSpan("OkHttp: client-side-concurrency-limiter");
         ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
         request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
         Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {
             @Override
             public void onSuccess(Limiter.Listener listener) {
                 concurrencyLimiterSpan.complete();
-                DetachedSpan dispatcherSpan = entireSpan.childDetachedSpan("OkHttp: waiting-in-dispatcher");
+                DetachedSpan dispatcherSpan = attemptSpan.childDetachedSpan("OkHttp: waiting-in-dispatcher");
                 request().tag(SettableDispatcherSpan.class).setDispatcherSpan(dispatcherSpan);
                 enqueueInternal(callback);
             }
@@ -225,8 +226,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             UnsafeArg.of("requestUrl", call.request().url().toString()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
                             exception);
+                    AttemptSpan currentAttempt = request().tag(AttemptSpan.class);
+                    DetachedSpan entireSpan = request().tag(EntireSpan.class).get();
                     Request redirectedRequest = request().newBuilder()
                             .url(redirectTo.get())
+                            .tag(AttemptSpan.class, currentAttempt.nextAttempt(entireSpan))
                             .build();
                     RemotingOkHttpCall retryCall =
                             client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
@@ -242,7 +246,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 // Relay successful responses
                 if (response.code() / 100 <= 2) {
+                    call.request().tag(EntireSpan.class).get().complete();
                     callback.onResponse(call, response);
+
                     return;
                 }
 
@@ -374,8 +380,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             UnsafeArg.of("requestUrl", call.request().url()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get()),
                             exception);
+                    AttemptSpan currentAttempt = request().tag(AttemptSpan.class);
+                    DetachedSpan entireSpan = request().tag(EntireSpan.class).get();
                     Request redirectedRequest = request().newBuilder()
                             .url(redirectTo.get())
+                            .tag(AttemptSpan.class, currentAttempt.nextAttempt(entireSpan))
                             .build();
                     client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
                             .enqueue(callback);
@@ -415,8 +424,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             SafeArg.of("backoffMillis", backoff.get().toMillis()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get()),
                             exception);
+                    AttemptSpan currentAttempt = request().tag(AttemptSpan.class);
+                    DetachedSpan entireSpan = request().tag(EntireSpan.class).get();
                     Request redirectedRequest = request().newBuilder()
                             .url(redirectTo.get())
+                            .tag(AttemptSpan.class, currentAttempt.nextAttempt(entireSpan))
                             .build();
                     scheduleExecution(
                             () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
