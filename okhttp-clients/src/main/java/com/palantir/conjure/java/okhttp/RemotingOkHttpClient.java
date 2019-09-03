@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import static com.palantir.tracing.okhttp3.OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER;
+
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
@@ -105,7 +107,15 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     }
 
     private Request createNewRequest(Request request) {
-        DetachedSpan entireSpan = DetachedSpan.start("OkHttp: entire-span");
+        String httpRemotingPath = request.header(PATH_TEMPLATE_HEADER);
+        String spanName;
+        // TODO copied from OkhttpTraceInterceptor, should rename the CLIENT_OUTGOING span to "network" or smth
+        if (httpRemotingPath != null) {
+            spanName = "OkHttp: " + httpRemotingPath;
+        } else {
+            spanName = request.method();
+        }
+        DetachedSpan entireSpan = DetachedSpan.start("OkHttp: parent: " + spanName);
         return request.newBuilder()
                 .url(getNewRequestUrl(request.url()))
                 .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create())
