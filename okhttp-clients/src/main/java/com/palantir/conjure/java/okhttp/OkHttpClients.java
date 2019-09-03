@@ -83,7 +83,7 @@ public final class OkHttpClients {
      * </ol>
      */
     private static final ExecutorService executionExecutor =
-            Tracers.wrap("OkHttp: dispatcher", Executors.newCachedThreadPool(executionThreads));
+            Executors.newCachedThreadPool(executionThreads);
 
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;

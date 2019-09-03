@@ -16,19 +16,29 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.palantir.tracing.AsyncTracer;
+import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.EntireSpan;
+import com.palantir.tracing.CloseableSpan;
+import com.palantir.tracing.DetachedSpan;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
 public final class DispatcherTraceTerminatingInterceptor implements Interceptor {
+
     @Override
     public Response intercept(Chain chain) throws IOException {
-        AsyncTracer tracerTag = chain.request().tag(AsyncTracer.class);
-        if (tracerTag == null) {
-            return chain.proceed(chain.request());
-        }
+        // TODO if null?
+        DetachedSpan entireSpan = chain.request().tag(EntireSpan.class).get();
+        DetachedSpan dispatcherSpan = chain.request().tag(SettableDispatcherSpan.class).dispatcherSpan();
 
-        return tracerTag.withTrace(() -> chain.proceed(chain.request()));
+        if (dispatcherSpan != null) {
+            dispatcherSpan.complete();
+            try (CloseableSpan executeSpan = entireSpan.childSpan("OkHttp: execute")) {
+                return chain.proceed(chain.request());
+            } finally {
+                entireSpan.complete();
+            }
+        }
+        return chain.proceed(chain.request());
     }
 }

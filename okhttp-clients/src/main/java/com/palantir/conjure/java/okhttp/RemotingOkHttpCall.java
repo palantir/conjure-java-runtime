@@ -25,6 +25,7 @@ import com.netflix.concurrency.limits.Limiter;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.EntireSpan;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
@@ -163,13 +164,17 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     @Override
     public void enqueue(Callback callback) {
-        DetachedSpan waitingSpan = DetachedSpan.start("OkHttp: client-side-concurrency-limiter");
+        DetachedSpan entireSpan = request().tag(EntireSpan.class).get();
+        DetachedSpan concurrencyLimiterSpan =
+                entireSpan.childDetachedSpan("OkHttp: client-side-concurrency-limiter");
         ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
         request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
         Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {
             @Override
             public void onSuccess(Limiter.Listener listener) {
-                waitingSpan.complete();
+                concurrencyLimiterSpan.complete();
+                DetachedSpan dispatcherSpan = entireSpan.childDetachedSpan("OkHttp: waiting-in-dispatcher");
+                request().tag(SettableDispatcherSpan.class).setDispatcherSpan(dispatcherSpan);
                 enqueueInternal(callback);
             }
 

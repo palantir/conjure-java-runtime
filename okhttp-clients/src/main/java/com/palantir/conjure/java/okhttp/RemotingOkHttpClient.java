@@ -21,7 +21,7 @@ import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
-import com.palantir.tracing.AsyncTracer;
+import com.palantir.tracing.DetachedSpan;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -103,12 +103,16 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     }
 
     private Request createNewRequest(Request request) {
+        DetachedSpan entireSpan = DetachedSpan.start("OkHttp: entire-span");
         return request.newBuilder()
                 .url(getNewRequestUrl(request.url()))
                 .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create())
-                .tag(AsyncTracer.class, new AsyncTracer("OkHttp: execute"))
+                .tag(EntireSpan.class, () -> entireSpan)
+                .tag(SettableDispatcherSpan.class, SettableDispatcherSpan.create())
                 .build();
     }
+
+    interface EntireSpan extends Supplier<DetachedSpan> {}
 
     private HttpUrl getNewRequestUrl(HttpUrl requestUrl) {
         return redirectToNewRequest(requestUrl).orElse(requestUrl);
