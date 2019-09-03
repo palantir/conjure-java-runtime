@@ -27,7 +27,6 @@ public final class DispatcherTraceTerminatingInterceptor implements Interceptor 
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        // TODO if null?
         DetachedSpan attemptSpan = chain.request().tag(AttemptSpan.class).attemptSpan();
         DetachedSpan dispatcherSpan = chain.request().tag(SettableDispatcherSpan.class).dispatcherSpan();
 
