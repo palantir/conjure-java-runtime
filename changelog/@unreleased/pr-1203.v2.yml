@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Upgrade jackson-databind to 2.9.9.3 from 2.9.9
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1203
