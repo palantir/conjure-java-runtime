@@ -24,6 +24,7 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.tracing.CloseableTracer;
 import com.palantir.tracing.Observability;
@@ -46,6 +47,7 @@ import java.util.stream.IntStream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -104,12 +106,16 @@ public final class TracerTest extends TestBase {
 
     @Test
     public void test503_exhausting_retries() throws InterruptedException {
+        // Default is 4 retries, so doing 5
+        server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));
         try (CloseableTracer span = CloseableTracer.startSpan("test-retries")) {
-            service.param("somevalue");
+            Assertions
+                    .assertThatCode(() -> service.param("somevalue"))
+                    .hasRootCauseExactlyInstanceOf(QosException.Unavailable.class);
         }
     }
 
