@@ -242,17 +242,16 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             UnsafeArg.of("requestUrl", call.request().url().toString()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
                             exception);
-                    AttemptSpan currentAttempt = request().tag(AttemptSpan.class);
+                    AttemptSpan previousAttempt = request().tag(AttemptSpan.class);
                     DetachedSpan entireSpan = request().tag(EntireSpan.class).get();
+                    AttemptSpan nextAttempt = previousAttempt.nextAttempt(entireSpan);
                     Request redirectedRequest = request().newBuilder()
                             .url(redirectTo.get())
-                            .tag(AttemptSpan.class, currentAttempt.nextAttempt(entireSpan))
+                            .tag(AttemptSpan.class, nextAttempt)
                             .build();
                     RemotingOkHttpCall retryCall =
                             client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
-                    scheduleExecution(
-                            () -> retryCall.enqueue(callback),
-                            backoff.get());
+                    scheduleExecution(backoff.get(), nextAttempt, () -> retryCall.enqueue(callback));
                 });
             }
 
@@ -330,10 +329,16 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     @SuppressWarnings("FutureReturnValueIgnored")
-    private void scheduleExecution(Runnable execution, Duration backoff) {
+    private void scheduleExecution(
+            Duration backoff, AttemptSpan attemptSpan, Runnable execution) {
+        DetachedSpan backoffSpan = attemptSpan.attemptSpan().childDetachedSpan("backoff");
+
         // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
         schedulingExecutor.schedule(
-                () -> executionExecutor.submit(execution),
+                () -> executionExecutor.submit(() -> {
+                    backoffSpan.complete();
+                    execution.run();
+                }),
                 backoff.toMillis(),
                 TimeUnit.MILLISECONDS);
     }
@@ -361,9 +366,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     log.debug("Rescheduling call after receiving QosException.Throttle",
                             SafeArg.of("backoffMillis", backoff.toMillis()),
                             exception);
-                    scheduleExecution(
-                            () -> doClone().enqueue(callback),
-                            backoff);
+                    RemotingOkHttpCall nextAttemptCall = createNextAttemptCall();
+                    scheduleExecution(backoff, nextAttemptCall.request().tag(AttemptSpan.class), () -> {
+                        nextAttemptCall.enqueue(callback);
+                    });
                 });
                 return null;
             }
@@ -439,16 +445,17 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             SafeArg.of("backoffMillis", backoff.get().toMillis()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get()),
                             exception);
-                    AttemptSpan currentAttempt = request().tag(AttemptSpan.class);
+                    AttemptSpan previousAttempt = request().tag(AttemptSpan.class);
                     DetachedSpan entireSpan = request().tag(EntireSpan.class).get();
+                    AttemptSpan nextAttempt = previousAttempt.nextAttempt(entireSpan);
                     Request redirectedRequest = request().newBuilder()
                             .url(redirectTo.get())
-                            .tag(AttemptSpan.class, currentAttempt.nextAttempt(entireSpan))
+                            .tag(AttemptSpan.class, nextAttempt)
                             .build();
-                    scheduleExecution(
-                            () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
-                                    .enqueue(callback),
-                            backoff.get());
+                    scheduleExecution(backoff.get(), nextAttempt, () -> {
+                        client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
+                                .enqueue(callback);
+                    });
                 });
                 return null;
             }
@@ -496,5 +503,13 @@ final class RemotingOkHttpCall extends ForwardingCall {
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(), backoffStrategy, urls, client, schedulingExecutor,
                 executionExecutor, limiter, maxNumRelocations, serverQoS, retryOnTimeout, retryOnSocketException);
+    }
+
+    private RemotingOkHttpCall createNextAttemptCall() {
+        AttemptSpan previousAttempt = request().tag(AttemptSpan.class);
+        DetachedSpan entireSpan = request().tag(EntireSpan.class).get();
+        AttemptSpan nextAttempt = previousAttempt.nextAttempt(entireSpan);
+        Request nextAttemptRequest = request().newBuilder().tag(AttemptSpan.class, nextAttempt).build();
+        return client.newCallWithMutableState(nextAttemptRequest, backoffStrategy, maxNumRelocations);
     }
 }
