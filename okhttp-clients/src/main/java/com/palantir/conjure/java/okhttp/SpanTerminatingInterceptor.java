@@ -20,8 +20,11 @@ import com.palantir.tracing.DetachedSpan;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class SpanTerminatingInterceptor implements Interceptor {
+    private static final Logger log = LoggerFactory.getLogger(SpanTerminatingInterceptor.class);
     static final Interceptor INSTANCE = new SpanTerminatingInterceptor();
 
     private SpanTerminatingInterceptor() {}
@@ -31,8 +34,9 @@ final class SpanTerminatingInterceptor implements Interceptor {
         DetachedSpan attemptSpan = chain.request().tag(Tags.AttemptSpan.class).attemptSpan();
         DetachedSpan dispatcherSpan = chain.request().tag(Tags.SettableDispatcherSpan.class).dispatcherSpan();
 
-        // TODO(dfox): when can the dispatcherSpan ever be null?
-        if (dispatcherSpan == null) {
+        if (attemptSpan == null || dispatcherSpan == null) {
+            log.warn("Missing attemptSpan / dispatcherSpan, which will result in missing spans. Likely a "
+                    + "conjure-java-runtime bug");
             return chain.proceed(chain.request());
         }
 
