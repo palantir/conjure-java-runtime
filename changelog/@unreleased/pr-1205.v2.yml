@@ -1,0 +1,10 @@
+type: improvement
+improvement:
+  description: "For a single JaxRsClient request, all spans are now correctly attributed
+    to a single traceId. Newly introduced spans are:\n- `OkHttp: Attempt X` (first
+    one will be `Attempt 0`, max is still 4 retries for a total of 5 reqs) \n- `OkHttp:
+    client-side-concurrency-limiter 4/10` (showing number of inflight request / current
+    limit)\n- `OkHttp: waiting-in-dispatcher` (helps debug when client hits the max
+    requests per host)\n- `OkHttp: backoff-with-jitter`\n- `OkHttp: network-call`"
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1205
