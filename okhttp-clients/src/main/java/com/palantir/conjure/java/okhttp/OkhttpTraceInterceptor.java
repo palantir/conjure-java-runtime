@@ -17,9 +17,11 @@
 package com.palantir.conjure.java.okhttp;
 
 import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.AttemptSpan;
+import com.palantir.tracing.CloseableSpan;
 import com.palantir.tracing.OkhttpTraceInterceptor2;
 import com.palantir.tracing.api.SpanType;
 import okhttp3.Interceptor;
+import okhttp3.Request;
 
 /** An OkHttp interceptor that adds Zipkin-style trace/span/parent-span headers to the HTTP request. */
 public final class OkhttpTraceInterceptor {
@@ -27,11 +29,15 @@ public final class OkhttpTraceInterceptor {
     /** The HTTP header used to communicate API endpoint names internally. Not considered public API. */
     public static final String PATH_TEMPLATE_HEADER = "hr-path-template";
 
-    @SuppressWarnings("MustBeClosed") // the OkhttpTraceInterceptor2 will definitely close this
-    static final Interceptor INSTANCE = OkhttpTraceInterceptor2.create(request -> request
-            .tag(AttemptSpan.class)
-            .attemptSpan()
-            .childSpan("OkHttp: network-call", SpanType.CLIENT_OUTGOING));
+    static final Interceptor INSTANCE = OkhttpTraceInterceptor2.create(OkhttpTraceInterceptor::createSpan);
+
+    @SuppressWarnings("MustBeClosedChecker") // the OkhttpTraceInterceptor2 will definitely close this
+    private static CloseableSpan createSpan(Request request) {
+        return request
+                .tag(AttemptSpan.class)
+                .attemptSpan()
+                .childSpan("OkHttp: network-call", SpanType.CLIENT_OUTGOING);
+    }
 
     private OkhttpTraceInterceptor() {}
 }

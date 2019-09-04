@@ -20,16 +20,13 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
-import com.google.common.util.concurrent.Futures;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.tracing.RenderTracingRule;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.api.OpenSpan;
 import com.palantir.tracing.api.TraceHttpHeaders;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
