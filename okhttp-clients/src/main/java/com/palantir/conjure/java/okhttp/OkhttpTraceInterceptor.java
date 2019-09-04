@@ -40,7 +40,7 @@ public enum OkhttpTraceInterceptor implements Interceptor {
         try (CloseableSpan span = request
                 .tag(AttemptSpan.class)
                 .attemptSpan()
-                .childSpan("network-call", SpanType.CLIENT_OUTGOING)) {
+                .childSpan("OkHttp: network-call", SpanType.CLIENT_OUTGOING)) {
 
             Request.Builder tracedRequest = request
                     .newBuilder()
