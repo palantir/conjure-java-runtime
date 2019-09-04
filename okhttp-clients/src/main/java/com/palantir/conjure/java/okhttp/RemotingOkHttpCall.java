@@ -171,7 +171,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             @Override
             public void onSuccess(Limiter.Listener listener) {
                 concurrencyLimiterSpan.complete();
-                DetachedSpan dispatcherSpan = attemptSpan.childDetachedSpan("OkHttp: waiting-in-dispatcher");
+                DetachedSpan dispatcherSpan = attemptSpan.childDetachedSpan("OkHttp: dispatcher");
                 request().tag(SettableDispatcherSpan.class).setDispatcherSpan(dispatcherSpan);
                 enqueueClosingEntireSpan(callback);
             }

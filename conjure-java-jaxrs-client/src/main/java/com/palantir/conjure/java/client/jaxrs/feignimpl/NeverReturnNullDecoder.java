@@ -18,7 +18,6 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import com.palantir.tracing.CloseableTracer;
 import feign.FeignException;
 import feign.Response;
 import feign.codec.Decoder;
@@ -34,14 +33,12 @@ public final class NeverReturnNullDecoder implements Decoder {
 
     @Override
     public Object decode(Response response, Type type) throws FeignException, IOException {
-        try (CloseableTracer tracer = CloseableTracer.startSpan("JaxRsClient: decode")) {
-            Object object = delegate.decode(response, type);
-            Preconditions.checkNotNull(
-                    object,
-                    "Unexpected null body",
-                    SafeArg.of("status", response.status()));
+        Object object = delegate.decode(response, type);
+        Preconditions.checkNotNull(
+                object,
+                "Unexpected null body",
+                SafeArg.of("status", response.status()));
 
-            return object;
-        }
+        return object;
     }
 }
