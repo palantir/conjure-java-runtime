@@ -23,8 +23,6 @@ dependencies {
     implementation "com.palantir.tracing:tracing-okhttp3"
     implementation "org.slf4j:slf4j-api"
 
-    testImplementation platform('org.junit:junit-bom')
-
     testImplementation project(":conjure-java-retrofit2-client")
     testImplementation project(":conjure-java-jersey-server")
     testImplementation project(':keystores')
@@ -34,9 +32,7 @@ dependencies {
     testImplementation "com.palantir.tracing:tracing-test-utils"
     testImplementation "io.dropwizard.metrics:metrics-core"
     testImplementation "junit:junit"
-    testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
 }
