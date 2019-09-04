@@ -65,7 +65,10 @@ public final class TracerTest extends TestBase {
 
     @Test
     public void makeListenableFutureRequest() throws Exception {
-        server.enqueue(new MockResponse().setBodyDelay(3, TimeUnit.SECONDS).setBody("\"stringy mc stringface\""));
+        server.enqueue(new MockResponse()
+                .setHeadersDelay(1, TimeUnit.SECONDS)
+                .setBodyDelay(3, TimeUnit.SECONDS)
+                .setBody("\"stringy mc stringface\""));
         service.makeListenableFutureRequest().get(10, TimeUnit.SECONDS);
     }
 }

@@ -104,6 +104,17 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
+    public void give_me_some_delays() throws InterruptedException {
+        server.enqueue(new MockResponse()
+                .setHeadersDelay(1, TimeUnit.SECONDS)
+                .setBodyDelay(3, TimeUnit.SECONDS)
+                .setBody("\"stringy mc stringface\""));
+        try (CloseableTracer span = CloseableTracer.startSpan("test")) {
+            service.param("somevalue");
+        }
+    }
+
+    @Test
     public void test503_exhausting_retries() throws InterruptedException {
         // Default is 4 retries, so doing 5
         server.enqueue(new MockResponse().setResponseCode(503));
