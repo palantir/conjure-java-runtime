@@ -166,8 +166,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     @Override
     public void enqueue(Callback callback) {
         DetachedSpan attemptSpan = request().tag(AttemptSpan.class).attemptSpan();
-        DetachedSpan concurrencyLimiterSpan =
-                attemptSpan.childDetachedSpan("OkHttp: client-side-concurrency-limiter");
+        DetachedSpan concurrencyLimiterSpan = attemptSpan.childDetachedSpan(limiter.spanName());
         ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
         request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
         Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {

@@ -181,6 +181,8 @@ final class ConcurrencyLimiters {
      */
     public interface ConcurrencyLimiter {
         ListenableFuture<Limiter.Listener> acquire();
+
+        String spanName();
     }
 
     static final class NoOpConcurrencyLimiter implements ConcurrencyLimiter {
@@ -190,6 +192,11 @@ final class ConcurrencyLimiters {
         @Override
         public ListenableFuture<Limiter.Listener> acquire() {
             return Futures.immediateFuture(NO_OP_LIMITER_LISTENER);
+        }
+
+        @Override
+        public String spanName() {
+            return "no-op concurrency-limiter";
         }
 
         static final class NoOpLimiterListener implements Limiter.Listener {
@@ -217,6 +224,13 @@ final class ConcurrencyLimiters {
             this.limiterKey = limiterKey;
             this.limiterFactory = limiterFactory;
             this.limiter = limiterFactory.get();
+        }
+
+        @Override
+        public synchronized String spanName() {
+            return String.format("OkHttp: client-side-concurrency-limiter %d/%d",
+                    limiter.getInflight(),
+                    limiter.getLimit());
         }
 
         @Override

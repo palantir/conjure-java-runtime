@@ -84,7 +84,7 @@ public final class TracerTest extends TestBase {
         assertThat(observedSpans, contains(
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: GET /{param}"),
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: Attempt 0"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: OkHttp: client-side-concurrency-limiter"),
+                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: client-side-concurrency-limiter 0/10"),
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: waiting-in-dispatcher"),
                 Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: network-call")));
 
