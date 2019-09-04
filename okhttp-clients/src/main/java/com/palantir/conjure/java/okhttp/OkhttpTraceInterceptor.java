@@ -17,45 +17,20 @@
 package com.palantir.conjure.java.okhttp;
 
 import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.AttemptSpan;
-import com.palantir.tracing.CloseableSpan;
-import com.palantir.tracing.Tracer;
+import com.palantir.tracing.OkhttpTraceInterceptor2;
 import com.palantir.tracing.api.SpanType;
-import com.palantir.tracing.api.TraceHttpHeaders;
-import java.io.IOException;
 import okhttp3.Interceptor;
-import okhttp3.Request;
-import okhttp3.Response;
 
 /** An OkHttp interceptor that adds Zipkin-style trace/span/parent-span headers to the HTTP request. */
-public enum OkhttpTraceInterceptor implements Interceptor {
-    INSTANCE;
+public final class OkhttpTraceInterceptor {
 
     /** The HTTP header used to communicate API endpoint names internally. Not considered public API. */
     public static final String PATH_TEMPLATE_HEADER = "hr-path-template";
 
-    @Override
-    public Response intercept(Chain chain) throws IOException {
-        Request request = chain.request();
+    static final Interceptor INSTANCE = OkhttpTraceInterceptor2.create(request -> request
+            .tag(AttemptSpan.class)
+            .attemptSpan()
+            .childSpan("OkHttp: network-call", SpanType.CLIENT_OUTGOING));
 
-        try (CloseableSpan span = request
-                .tag(AttemptSpan.class)
-                .attemptSpan()
-                .childSpan("OkHttp: network-call", SpanType.CLIENT_OUTGOING)) {
-
-            Request.Builder tracedRequest = request
-                    .newBuilder()
-                    .addHeader(TraceHttpHeaders.TRACE_ID, Tracer.getTraceId())
-                    .addHeader(TraceHttpHeaders.SPAN_ID, span.getSpanId())
-                    .addHeader(TraceHttpHeaders.IS_SAMPLED, Tracer.isTraceObservable() ? "1" : "0");
-            if (span.getParentSpanId().isPresent()) {
-                tracedRequest.header(TraceHttpHeaders.PARENT_SPAN_ID, span.getParentSpanId().get());
-            }
-            if (span.getOriginatingSpanId().isPresent()) {
-                tracedRequest.header(TraceHttpHeaders.ORIGINATING_SPAN_ID, span.getOriginatingSpanId().get());
-            }
-
-            return chain.proceed(tracedRequest.build());
-        }
-    }
-
+    private OkhttpTraceInterceptor() {}
 }
