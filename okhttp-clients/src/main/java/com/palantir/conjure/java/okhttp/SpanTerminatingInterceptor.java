@@ -22,6 +22,9 @@ import okhttp3.Interceptor;
 import okhttp3.Response;
 
 public final class SpanTerminatingInterceptor implements Interceptor {
+    public static final Interceptor INSTANCE = new SpanTerminatingInterceptor();
+
+    private SpanTerminatingInterceptor() {}
 
     @Override
     public Response intercept(Chain chain) throws IOException {
