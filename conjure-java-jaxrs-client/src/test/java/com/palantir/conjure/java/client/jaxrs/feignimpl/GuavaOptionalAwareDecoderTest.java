@@ -27,26 +27,21 @@ import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.nio.file.Paths;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public final class GuavaOptionalAwareDecoderTest extends TestBase {
-
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
+    public static final DropwizardAppExtension<Configuration> APP = new DropwizardAppExtension<>(GuavaTestServer.class,
             "src/test/resources/test-server.yml");
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private GuavaTestServer.TestService service;
 
-    @Before
+    @BeforeEach
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(

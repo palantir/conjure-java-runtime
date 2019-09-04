@@ -28,7 +28,7 @@ import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.tracing.CloseableTracer;
 import com.palantir.tracing.Observability;
-import com.palantir.tracing.RenderTracingRule;
+import com.palantir.tracing.TestTracing;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.Tracers;
 import com.palantir.tracing.api.OpenSpan;
@@ -48,27 +48,28 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 
+@EnableRuleMigrationSupport
 public final class TracerTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    @Rule
-    public final RenderTracingRule renderTracingRule = new RenderTracingRule();
-
     private TestService service;
 
-    @Before
+    @BeforeEach
+    @TestTracing(snapshot = true)
     public void before() {
         String uri = "http://localhost:" + server.getPort();
         service = JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(uri));
     }
 
     @Test
+    @TestTracing(snapshot = true)
     public void testClientIsInstrumentedWithTracer() throws InterruptedException {
         server.enqueue(new MockResponse().setBody("\"server\""));
         Tracer.initTrace(Observability.SAMPLE, Tracers.randomId());
@@ -96,6 +97,7 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
+    @TestTracing(snapshot = true)
     public void test503_eventually_works() throws InterruptedException {
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));
@@ -106,6 +108,7 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
+    @TestTracing(snapshot = true)
     public void give_me_some_delays() throws InterruptedException {
         server.enqueue(new MockResponse()
                 .setHeadersDelay(100, TimeUnit.MILLISECONDS)
@@ -118,6 +121,7 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
+    @TestTracing(snapshot = true)
     public void test503_exhausting_retries() throws InterruptedException {
         // Default is 4 retries, so doing 5
         server.enqueue(new MockResponse().setResponseCode(503));
@@ -133,6 +137,7 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
+    @TestTracing(snapshot = true)
     public void testLimiterAcquisitionMultiThread() {
         reduceConcurrencyLimitTo1();
         Set<String> observedTraceIds = ConcurrentHashMap.newKeySet();

@@ -30,25 +30,26 @@ import feign.Response;
 import feign.Util;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public final class InputStreamDelegateDecoderTest extends TestBase {
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
+    public static final DropwizardAppExtension<Configuration> APP = new DropwizardAppExtension<>(GuavaTestServer.class,
             "src/test/resources/test-server.yml");
 
     private GuavaTestServer.TestService service;
     private Decoder delegate;
     private Decoder inputStreamDelegateDecoder;
 
-    @Before
+    @BeforeEach
     public void before() {
         delegate = Mockito.mock(Decoder.class);
         inputStreamDelegateDecoder = new InputStreamDelegateDecoder(delegate);

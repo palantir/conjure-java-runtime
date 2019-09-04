@@ -31,15 +31,16 @@ import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
-import org.junit.Rule;
-import org.junit.Test;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public final class ServiceConfigTest extends TestBase {
 
-    @Rule
-    public final DropwizardAppRule<ServiceConfigTestAppConfig> rule =
-            new DropwizardAppRule<>(ServiceConfigTestServer.ServiceConfigTestApp.class,
+    public final DropwizardAppExtension<ServiceConfigTestAppConfig> rule =
+            new DropwizardAppExtension<>(ServiceConfigTestServer.ServiceConfigTestApp.class,
                     ServiceConfigTest.class.getClassLoader().getResource("service-config-example.yml").getPath());
 
     @Test

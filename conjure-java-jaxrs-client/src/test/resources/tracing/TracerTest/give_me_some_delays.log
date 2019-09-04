@@ -1,0 +1,7 @@
+{"traceId":"c010ca88dcc990ba","parentSpanId":"d13548fa68486177","spanId":"9f9397e8c46d4cae","operation":"OkHttp: client-side-concurrency-limiter 0/10","startTimeMicroSeconds":1567628743124217,"durationNanoSeconds":141088,"metadata":{}}
+{"traceId":"c010ca88dcc990ba","parentSpanId":"d13548fa68486177","spanId":"57f442830feb2498","operation":"OkHttp: dispatcher","startTimeMicroSeconds":1567628743124380,"durationNanoSeconds":104858,"metadata":{}}
+{"traceId":"c010ca88dcc990ba","parentSpanId":"d13548fa68486177","spanId":"034137cdab34b29a","operation":"OkHttp: wait-for-headers","startTimeMicroSeconds":1567628743124528,"durationNanoSeconds":104095294,"metadata":{}}
+{"traceId":"c010ca88dcc990ba","parentSpanId":"9028e3a042287c42","spanId":"d13548fa68486177","operation":"OkHttp: attempt 0","startTimeMicroSeconds":1567628743124114,"durationNanoSeconds":404826265,"metadata":{}}
+{"traceId":"c010ca88dcc990ba","parentSpanId":"d13548fa68486177","spanId":"935fc09461fcba77","operation":"OkHttp: wait-for-body","startTimeMicroSeconds":1567628743228686,"durationNanoSeconds":300308074,"metadata":{}}
+{"traceId":"c010ca88dcc990ba","parentSpanId":"0a5b41881b36dbd3","spanId":"9028e3a042287c42","operation":"OkHttp: GET /{param}","startTimeMicroSeconds":1567628743124055,"durationNanoSeconds":404969979,"metadata":{}}
+{"traceId":"c010ca88dcc990ba","parentSpanId":"1f2c40c0be908e03","spanId":"0a5b41881b36dbd3","operation":"test","startTimeMicroSeconds":1567628743123952,"durationNanoSeconds":405842692,"metadata":{}}

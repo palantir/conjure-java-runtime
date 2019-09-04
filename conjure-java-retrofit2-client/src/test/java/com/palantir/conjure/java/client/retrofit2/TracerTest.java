@@ -33,9 +33,9 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.migrationsupport.EnableJUnit4MigrationSupport;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 
-@EnableJUnit4MigrationSupport
+@EnableRuleMigrationSupport
 public final class TracerTest extends TestBase {
 
     @Rule
