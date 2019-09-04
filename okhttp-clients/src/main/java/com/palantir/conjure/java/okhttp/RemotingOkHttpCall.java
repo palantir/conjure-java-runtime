@@ -329,7 +329,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     @SuppressWarnings("FutureReturnValueIgnored")
     private void scheduleExecution(
             Duration backoff, AttemptSpan attemptSpan, Runnable execution) {
-        DetachedSpan backoffSpan = attemptSpan.attemptSpan().childDetachedSpan("backoff");
+        DetachedSpan backoffSpan = attemptSpan.attemptSpan().childDetachedSpan("OkHttp: backoff-with-jitter");
 
         // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
         schedulingExecutor.schedule(
