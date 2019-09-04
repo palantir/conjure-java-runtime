@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.AttemptSpan;
 import com.palantir.tracing.CloseableSpan;
 import com.palantir.tracing.OkhttpTraceInterceptor2;
 import com.palantir.tracing.api.SpanType;
@@ -36,7 +35,7 @@ public final class OkhttpTraceInterceptor {
         return request
                 .tag(AttemptSpan.class)
                 .attemptSpan()
-                .childSpan("OkHttp: network-call", SpanType.CLIENT_OUTGOING);
+                .childSpan("OkHttp: wait-for-headers", SpanType.CLIENT_OUTGOING);
     }
 
     private OkhttpTraceInterceptor() {}

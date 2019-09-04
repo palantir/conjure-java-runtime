@@ -16,26 +16,28 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import com.palantir.tracing.DetachedSpan;
-import java.io.IOException;
-import okhttp3.Interceptor;
-import okhttp3.Response;
+import org.immutables.value.Value;
 
-public final class DispatcherTraceTerminatingInterceptor implements Interceptor {
+@Value.Immutable
+@ImmutablesStyle
+public interface AttemptSpan {
+    @Value.Default
+    default int attemptNumber() {
+        return 0;
+    }
 
-    @Override
-    public Response intercept(Chain chain) throws IOException {
-        DetachedSpan attemptSpan = chain.request().tag(AttemptSpan.class).attemptSpan();
-        DetachedSpan dispatcherSpan = chain.request().tag(SettableDispatcherSpan.class).dispatcherSpan();
+    DetachedSpan attemptSpan();
 
-        if (dispatcherSpan != null) {
-            dispatcherSpan.complete();
-            try {
-                return chain.proceed(chain.request());
-            } finally {
-                attemptSpan.complete();
-            }
-        }
-        return chain.proceed(chain.request());
+    static AttemptSpan createAttempt(DetachedSpan entireSpan, int attemptNumber) {
+        return ImmutableAttemptSpan.builder()
+                .attemptNumber(attemptNumber)
+                .attemptSpan(entireSpan.childDetachedSpan("OkHttp: Attempt " + attemptNumber))
+                .build();
+    }
+
+    default AttemptSpan nextAttempt(DetachedSpan entireSpan) {
+        return createAttempt(entireSpan, attemptNumber() + 1);
     }
 }

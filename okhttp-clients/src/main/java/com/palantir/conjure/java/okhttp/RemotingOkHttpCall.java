@@ -25,8 +25,6 @@ import com.netflix.concurrency.limits.Limiter;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
-import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.AttemptSpan;
-import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.EntireSpan;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
