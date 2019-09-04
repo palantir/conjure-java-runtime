@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.okhttp;
 
 import com.palantir.conjure.java.okhttp.RemotingOkHttpClient.AttemptSpan;
-import com.palantir.tracing.CloseableSpan;
 import com.palantir.tracing.DetachedSpan;
 import java.io.IOException;
 import okhttp3.Interceptor;
@@ -32,7 +31,7 @@ public final class DispatcherTraceTerminatingInterceptor implements Interceptor 
 
         if (dispatcherSpan != null) {
             dispatcherSpan.complete();
-            try (CloseableSpan executeSpan = attemptSpan.childSpan("OkHttp: execute")) {
+            try {
                 return chain.proceed(chain.request());
             } finally {
                 attemptSpan.complete();
