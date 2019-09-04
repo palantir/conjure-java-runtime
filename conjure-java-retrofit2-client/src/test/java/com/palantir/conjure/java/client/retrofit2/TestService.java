@@ -71,9 +71,11 @@ public interface TestService {
     Call<Void> makeCborRequest(@Body LocalDate localDate);
 
     @POST("makeCompletableFutureRequest")
+    @Headers("hr-path-template: /makeCompletableFutureRequest")
     CompletableFuture<String> makeCompletableFutureRequest();
 
     @POST("makeListenableFutureRequest")
+    @Headers("hr-path-template: /makeListenableFutureRequest") // conjure-java adds these headers
     ListenableFuture<String> makeListenableFutureRequest();
 
     @GET("getJavaOptionalHeader")

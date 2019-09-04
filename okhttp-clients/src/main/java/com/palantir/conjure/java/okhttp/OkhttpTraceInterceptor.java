@@ -27,6 +27,7 @@ public final class OkhttpTraceInterceptor {
     /** The HTTP header used to communicate API endpoint names internally. Not considered public API. */
     public static final String PATH_TEMPLATE_HEADER = "hr-path-template";
 
+    @SuppressWarnings("MustBeClosed") // the OkhttpTraceInterceptor2 will definitely close this
     static final Interceptor INSTANCE = OkhttpTraceInterceptor2.create(request -> request
             .tag(AttemptSpan.class)
             .attemptSpan()
