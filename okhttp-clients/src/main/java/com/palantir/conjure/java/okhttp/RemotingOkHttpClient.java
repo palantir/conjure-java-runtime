@@ -114,10 +114,10 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
         return request.newBuilder()
                 .url(getNewRequestUrl(request.url()))
                 .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create())
-                .tag(EntireSpan.class, () -> entireSpan)
-                .tag(AttemptSpan.class, AttemptSpan.createAttempt(entireSpan, 0))
-                .tag(SettableDispatcherSpan.class, SettableDispatcherSpan.create())
-                .tag(SettableWaitForBodySpan.class, SettableWaitForBodySpan.create())
+                .tag(Tags.EntireSpan.class, () -> entireSpan)
+                .tag(Tags.AttemptSpan.class, Tags.AttemptSpan.createAttempt(entireSpan, 0))
+                .tag(Tags.SettableDispatcherSpan.class, Tags.SettableDispatcherSpan.create())
+                .tag(Tags.SettableWaitForBodySpan.class, Tags.SettableWaitForBodySpan.create())
                 .build();
     }
 

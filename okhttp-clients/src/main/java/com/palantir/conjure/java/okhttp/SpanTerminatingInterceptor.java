@@ -28,8 +28,8 @@ final class SpanTerminatingInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
-        DetachedSpan attemptSpan = chain.request().tag(AttemptSpan.class).attemptSpan();
-        DetachedSpan dispatcherSpan = chain.request().tag(SettableDispatcherSpan.class).dispatcherSpan();
+        DetachedSpan attemptSpan = chain.request().tag(Tags.AttemptSpan.class).attemptSpan();
+        DetachedSpan dispatcherSpan = chain.request().tag(Tags.SettableDispatcherSpan.class).dispatcherSpan();
 
         // TODO(dfox): when can the dispatcherSpan ever be null?
         if (dispatcherSpan == null) {
@@ -41,7 +41,7 @@ final class SpanTerminatingInterceptor implements Interceptor {
             return chain.proceed(chain.request());
         } finally {
             attemptSpan.complete();
-            chain.request().tag(SettableWaitForBodySpan.class).waitForBodySpan().complete();
+            chain.request().tag(Tags.SettableWaitForBodySpan.class).waitForBodySpan().complete();
         }
     }
 }
