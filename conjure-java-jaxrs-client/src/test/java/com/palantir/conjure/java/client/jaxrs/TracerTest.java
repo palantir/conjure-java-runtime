@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -81,7 +81,7 @@ public final class TracerTest extends TestBase {
         service.param("somevalue");
 
         Tracer.unsubscribe(TracerTest.class.getName());
-        assertThat(observedSpans, contains(
+        assertThat(observedSpans, containsInAnyOrder(
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: GET /{param}"),
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: Attempt 0"),
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: client-side-concurrency-limiter 0/10"),
