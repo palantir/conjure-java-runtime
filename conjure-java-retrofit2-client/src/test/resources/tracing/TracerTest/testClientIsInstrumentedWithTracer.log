@@ -1,0 +1,6 @@
+{"traceId":"74f27a800e626ad1","parentSpanId":"e4a5fe2b7079fd31","spanId":"52df89047a2ca712","operation":"OkHttp: client-side-concurrency-limiter 0/10","startTimeMicroSeconds":1567629130112803,"durationNanoSeconds":175640,"metadata":{}}
+{"traceId":"74f27a800e626ad1","parentSpanId":"e4a5fe2b7079fd31","spanId":"7f45485290331d18","operation":"OkHttp: dispatcher","startTimeMicroSeconds":1567629130113005,"durationNanoSeconds":225505,"metadata":{}}
+{"traceId":"74f27a800e626ad1","parentSpanId":"e4a5fe2b7079fd31","spanId":"cb4325f7fd4746f9","operation":"OkHttp: wait-for-headers","startTimeMicroSeconds":1567629130113283,"durationNanoSeconds":2305395,"metadata":{}}
+{"traceId":"74f27a800e626ad1","parentSpanId":"c93f02675e028fac","spanId":"e4a5fe2b7079fd31","operation":"OkHttp: attempt 0","startTimeMicroSeconds":1567629130112123,"durationNanoSeconds":3768019,"metadata":{}}
+{"traceId":"74f27a800e626ad1","parentSpanId":"e4a5fe2b7079fd31","spanId":"5accfc9eb9e4f688","operation":"OkHttp: wait-for-body","startTimeMicroSeconds":1567629130115614,"durationNanoSeconds":297055,"metadata":{}}
+{"traceId":"74f27a800e626ad1","parentSpanId":"6d55a0928927ff69","spanId":"c93f02675e028fac","operation":"GET","startTimeMicroSeconds":1567629130112026,"durationNanoSeconds":3898716,"metadata":{}}

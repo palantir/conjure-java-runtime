@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import com.palantir.tracing.RenderTracingRule;
+import com.palantir.tracing.TestTracing;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.api.OpenSpan;
 import com.palantir.tracing.api.TraceHttpHeaders;
@@ -30,27 +30,27 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.migrationsupport.EnableJUnit4MigrationSupport;
 
+@EnableJUnit4MigrationSupport
 public final class TracerTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
 
-    @Rule
-    public final RenderTracingRule renderTracingRule = new RenderTracingRule();
-
     private TestService service;
 
-    @Before
+    @BeforeEach
     public void before() {
         String uri = "http://localhost:" + server.getPort();
         service = Retrofit2Client.create(TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(uri));
     }
 
     @Test
+    @TestTracing(snapshot = true)
     public void testClientIsInstrumentedWithTracer() throws InterruptedException, IOException {
         OpenSpan parentTrace = Tracer.startSpan("");
         String traceId = Tracer.getTraceId();
@@ -64,6 +64,7 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
+    @TestTracing(snapshot = true)
     public void makeListenableFutureRequestWithDelays() throws Exception {
         server.enqueue(new MockResponse()
                 .setHeadersDelay(300, TimeUnit.MILLISECONDS)
@@ -74,6 +75,7 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
+    @TestTracing(snapshot = true)
     public void makeCompletableFutureRequestWithDelays() throws Exception {
         server.enqueue(new MockResponse()
                 .setHeadersDelay(300, TimeUnit.MILLISECONDS)
