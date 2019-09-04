@@ -17,10 +17,13 @@
 package com.palantir.conjure.java.okhttp;
 
 import com.palantir.tracing.CloseableSpan;
+import com.palantir.tracing.DetachedSpan;
 import com.palantir.tracing.OkhttpTraceInterceptor2;
 import com.palantir.tracing.api.SpanType;
+import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Request;
+import okhttp3.Response;
 
 /** An OkHttp interceptor that adds Zipkin-style trace/span/parent-span headers to the HTTP request. */
 public final class OkhttpTraceInterceptor {
@@ -28,7 +31,22 @@ public final class OkhttpTraceInterceptor {
     /** The HTTP header used to communicate API endpoint names internally. Not considered public API. */
     public static final String PATH_TEMPLATE_HEADER = "hr-path-template";
 
-    static final Interceptor INSTANCE = OkhttpTraceInterceptor2.create(OkhttpTraceInterceptor::createSpan);
+    private static final Interceptor delegate = OkhttpTraceInterceptor2.create(OkhttpTraceInterceptor::createSpan);
+
+    static final Interceptor INSTANCE = new Interceptor() {
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            try {
+                return delegate.intercept(chain);
+            } finally {
+                DetachedSpan waitForBody = chain.request().tag(AttemptSpan.class)
+                        .attemptSpan()
+                        .childDetachedSpan("OkHttp: wait-for-body", SpanType.CLIENT_OUTGOING);
+
+                chain.request().tag(SettableWaitForBodySpan.class).setWaitForBodySpan(waitForBody);
+            }
+        }
+    };
 
     @SuppressWarnings("MustBeClosedChecker") // the OkhttpTraceInterceptor2 will definitely close this
     private static CloseableSpan createSpan(Request request) {

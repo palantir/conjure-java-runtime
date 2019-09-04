@@ -157,7 +157,7 @@ public final class OkHttpClients {
 
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         client.addInterceptor(CatchThrowableInterceptor.INSTANCE);
-        client.addInterceptor(new DispatcherTraceTerminatingInterceptor());
+        client.addInterceptor(new SpanTerminatingInterceptor());
 
         // Routing
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(

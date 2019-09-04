@@ -83,10 +83,13 @@ public final class TracerTest extends TestBase {
         Tracer.unsubscribe(TracerTest.class.getName());
         assertThat(observedSpans, containsInAnyOrder(
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: GET /{param}"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: Attempt 0"),
+                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: attempt 0"),
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: client-side-concurrency-limiter 0/10"),
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: waiting-in-dispatcher"),
-                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: network-call")));
+                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-headers"),
+                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-body"),
+                Maps.immutableEntry(SpanType.LOCAL, "JaxRsClient: decode")
+        ));
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));
@@ -106,7 +109,7 @@ public final class TracerTest extends TestBase {
     @Test
     public void give_me_some_delays() throws InterruptedException {
         server.enqueue(new MockResponse()
-                .setHeadersDelay(300, TimeUnit.MILLISECONDS)
+                .setHeadersDelay(100, TimeUnit.MILLISECONDS)
                 .setHeader("Content-Type", "application/json")
                 .setBodyDelay(300, TimeUnit.MILLISECONDS)
                 .setBody("\"stringy mc stringface\""));

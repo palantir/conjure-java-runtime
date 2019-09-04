@@ -20,24 +20,13 @@ import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import com.palantir.tracing.DetachedSpan;
 import org.immutables.value.Value;
 
-@Value.Immutable
+@Value.Modifiable
 @ImmutablesStyle
-public interface AttemptSpan {
-    @Value.Default
-    default int attemptNumber() {
-        return 0;
-    }
+interface SettableWaitForBodySpan {
+    DetachedSpan waitForBodySpan();
+    SettableWaitForBodySpan setWaitForBodySpan(DetachedSpan span);
 
-    DetachedSpan attemptSpan();
-
-    static AttemptSpan createAttempt(DetachedSpan entireSpan, int attemptNumber) {
-        return ImmutableAttemptSpan.builder()
-                .attemptNumber(attemptNumber)
-                .attemptSpan(entireSpan.childDetachedSpan("OkHttp: attempt " + attemptNumber))
-                .build();
-    }
-
-    default AttemptSpan nextAttempt(DetachedSpan entireSpan) {
-        return createAttempt(entireSpan, attemptNumber() + 1);
+    static SettableWaitForBodySpan create() {
+        return ModifiableSettableWaitForBodySpan.create();
     }
 }

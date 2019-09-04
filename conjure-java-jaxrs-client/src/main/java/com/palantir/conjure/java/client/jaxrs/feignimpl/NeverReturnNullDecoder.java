@@ -34,7 +34,7 @@ public final class NeverReturnNullDecoder implements Decoder {
 
     @Override
     public Object decode(Response response, Type type) throws FeignException, IOException {
-        try (CloseableTracer tracer = CloseableTracer.startSpan("OkHttp: decode")) {
+        try (CloseableTracer tracer = CloseableTracer.startSpan("JaxRsClient: decode")) {
             Object object = delegate.decode(response, type);
             Preconditions.checkNotNull(
                     object,

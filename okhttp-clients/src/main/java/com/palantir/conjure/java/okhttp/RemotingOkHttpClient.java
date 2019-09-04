@@ -117,6 +117,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 .tag(EntireSpan.class, () -> entireSpan)
                 .tag(AttemptSpan.class, AttemptSpan.createAttempt(entireSpan, 0))
                 .tag(SettableDispatcherSpan.class, SettableDispatcherSpan.create())
+                .tag(SettableWaitForBodySpan.class, SettableWaitForBodySpan.create())
                 .build();
     }
 

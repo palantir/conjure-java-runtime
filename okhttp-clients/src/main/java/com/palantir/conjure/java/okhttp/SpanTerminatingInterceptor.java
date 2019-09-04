@@ -21,21 +21,24 @@ import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
-public final class DispatcherTraceTerminatingInterceptor implements Interceptor {
+public final class SpanTerminatingInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
         DetachedSpan attemptSpan = chain.request().tag(AttemptSpan.class).attemptSpan();
         DetachedSpan dispatcherSpan = chain.request().tag(SettableDispatcherSpan.class).dispatcherSpan();
 
-        if (dispatcherSpan != null) {
-            dispatcherSpan.complete();
-            try {
-                return chain.proceed(chain.request());
-            } finally {
-                attemptSpan.complete();
-            }
+        // TODO(dfox): when can the dispatcherSpan ever be null?
+        if (dispatcherSpan == null) {
+            return chain.proceed(chain.request());
         }
-        return chain.proceed(chain.request());
+
+        dispatcherSpan.complete();
+        try {
+            return chain.proceed(chain.request());
+        } finally {
+            attemptSpan.complete();
+            chain.request().tag(SettableWaitForBodySpan.class).waitForBodySpan().complete();
+        }
     }
 }
