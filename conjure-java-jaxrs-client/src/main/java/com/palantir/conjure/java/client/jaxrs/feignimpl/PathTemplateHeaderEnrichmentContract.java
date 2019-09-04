@@ -4,7 +4,7 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
+import com.palantir.conjure.java.okhttp.OkhttpTraceInterceptor;
 import feign.Contract;
 import feign.MethodMetadata;
 import java.lang.reflect.Method;
