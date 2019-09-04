@@ -1,5 +1,0 @@
-{"traceId":"49a0e455cca983dd","parentSpanId":"f609234384914fe7","spanId":"5558ac97ca167ed2","operation":"OkHttp: client-side-concurrency-limiter","startTimeMicroSeconds":1567599500384000,"durationNanoSeconds":173400,"metadata":{}}
-{"traceId":"49a0e455cca983dd","parentSpanId":"f609234384914fe7","spanId":"60737ec8391a7584","operation":"OkHttp: waiting-in-dispatcher","startTimeMicroSeconds":1567599500385000,"durationNanoSeconds":126651,"metadata":{}}
-{"traceId":"49a0e455cca983dd","parentSpanId":"f609234384914fe7","spanId":"f4896ec7ce696801","operation":"network-call","startTimeMicroSeconds":1567599500385000,"durationNanoSeconds":2152660,"metadata":{}}
-{"traceId":"49a0e455cca983dd","parentSpanId":"089a6a6b350929cc","spanId":"f609234384914fe7","operation":"OkHttp: Attempt 0","startTimeMicroSeconds":1567599500384000,"durationNanoSeconds":2870935,"metadata":{}}
-{"traceId":"49a0e455cca983dd","parentSpanId":"91f60a26e67f3726","spanId":"089a6a6b350929cc","operation":"OkHttp: GET /{param}","startTimeMicroSeconds":1567599500384000,"durationNanoSeconds":2976481,"metadata":{}}

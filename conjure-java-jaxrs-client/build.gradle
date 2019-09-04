@@ -34,10 +34,9 @@ dependencies {
     testImplementation "com.palantir.tracing:tracing-test-utils"
     testImplementation "io.dropwizard.metrics:metrics-core"
     testImplementation "junit:junit"
+    testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
-    testImplementation "org.junit.jupiter:junit-jupiter"
-    testImplementation 'org.junit.jupiter:junit-jupiter-migrationsupport'
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine"
 }
