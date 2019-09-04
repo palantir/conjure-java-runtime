@@ -106,8 +106,9 @@ public final class TracerTest extends TestBase {
     @Test
     public void give_me_some_delays() throws InterruptedException {
         server.enqueue(new MockResponse()
-                .setHeadersDelay(1, TimeUnit.SECONDS)
-                .setBodyDelay(3, TimeUnit.SECONDS)
+                .setHeadersDelay(300, TimeUnit.MILLISECONDS)
+                .setHeader("Content-Type", "application/json")
+                .setBodyDelay(300, TimeUnit.MILLISECONDS)
                 .setBody("\"stringy mc stringface\""));
         try (CloseableTracer span = CloseableTracer.startSpan("test")) {
             service.param("somevalue");

@@ -64,11 +64,22 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
-    public void makeListenableFutureRequest() throws Exception {
+    public void makeListenableFutureRequestWithDelays() throws Exception {
         server.enqueue(new MockResponse()
-                .setHeadersDelay(1, TimeUnit.SECONDS)
-                .setBodyDelay(3, TimeUnit.SECONDS)
+                .setHeadersDelay(300, TimeUnit.MILLISECONDS)
+                .setHeader("Content-Type", "application/json")
+                .setBodyDelay(300, TimeUnit.MILLISECONDS)
                 .setBody("\"stringy mc stringface\""));
         service.makeListenableFutureRequest().get(10, TimeUnit.SECONDS);
+    }
+
+    @Test
+    public void makeCompletableFutureRequestWithDelays() throws Exception {
+        server.enqueue(new MockResponse()
+                .setHeadersDelay(300, TimeUnit.MILLISECONDS)
+                .setHeader("Content-Type", "application/json")
+                .setBodyDelay(300, TimeUnit.MILLISECONDS)
+                .setBody("\"stringy mc stringface\""));
+        service.makeCompletableFutureRequest().get(10, TimeUnit.SECONDS);
     }
 }
