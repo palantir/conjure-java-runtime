@@ -4,7 +4,8 @@ improvement:
     to a single traceId. Newly introduced spans are:\n- `OkHttp: Attempt X` (first
     one will be `Attempt 0`, max is still 4 retries for a total of 5 reqs) \n- `OkHttp:
     client-side-concurrency-limiter 4/10` (showing number of inflight request / current
-    limit)\n- `OkHttp: waiting-in-dispatcher` (helps debug when client hits the max
-    requests per host)\n- `OkHttp: backoff-with-jitter`\n- `OkHttp: network-call`"
+    limit)\n- `OkHttp: waiting-in-dispatcher` (signifies a client may have hit the
+    max requests per host)\n- `OkHttp: backoff-with-jitter`\n- `OkHttp: wait-for-headers`\n-
+    `OkHttp: wait-for-body`"
   links:
   - https://github.com/palantir/conjure-java-runtime/pull/1205
