@@ -29,7 +29,7 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeIoException;
-import com.palantir.tracing.AsyncTracer;
+import com.palantir.tracing.DetachedSpan;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
@@ -163,14 +163,17 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     @Override
     public void enqueue(Callback callback) {
-        AsyncTracer tracer = new AsyncTracer("OkHttp: acquire-limiter");
+        DetachedSpan attemptSpan = request().tag(Tags.AttemptSpan.class).attemptSpan();
+        DetachedSpan concurrencyLimiterSpan = attemptSpan.childDetachedSpan(limiter.spanName());
         ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
         request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
         Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {
             @Override
             public void onSuccess(Limiter.Listener listener) {
-                tracer.withTrace(() -> null);
-                enqueueInternal(callback);
+                concurrencyLimiterSpan.complete();
+                DetachedSpan dispatcherSpan = attemptSpan.childDetachedSpan("OkHttp: dispatcher");
+                request().tag(Tags.SettableDispatcherSpan.class).setDispatcherSpan(dispatcherSpan);
+                enqueueClosingEntireSpan(callback);
             }
 
             @Override
@@ -181,6 +184,22 @@ final class RemotingOkHttpCall extends ForwardingCall {
                                 + "we failed when using the concurrency limiter", throwable)));
             }
         }, MoreExecutors.directExecutor());
+    }
+
+    private void enqueueClosingEntireSpan(Callback callback) {
+        enqueueInternal(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException exception) {
+                call.request().tag(Tags.EntireSpan.class).get().complete();
+                callback.onFailure(call, exception);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                call.request().tag(Tags.EntireSpan.class).get().complete();
+                callback.onResponse(call, response);
+            }
+        });
     }
 
     private void enqueueInternal(Callback callback) {
@@ -220,14 +239,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             UnsafeArg.of("requestUrl", call.request().url().toString()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
                             exception);
+                    Tags.AttemptSpan nextAttempt = createNextAttempt();
                     Request redirectedRequest = request().newBuilder()
                             .url(redirectTo.get())
+                            .tag(Tags.AttemptSpan.class, nextAttempt)
                             .build();
                     RemotingOkHttpCall retryCall =
                             client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
-                    scheduleExecution(
-                            () -> retryCall.enqueue(callback),
-                            backoff.get());
+                    scheduleExecution(backoff.get(), nextAttempt, () -> retryCall.enqueue(callback));
                 });
             }
 
@@ -238,6 +257,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 // Relay successful responses
                 if (response.code() / 100 <= 2) {
                     callback.onResponse(call, response);
+
                     return;
                 }
 
@@ -304,10 +324,16 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     @SuppressWarnings("FutureReturnValueIgnored")
-    private void scheduleExecution(Runnable execution, Duration backoff) {
+    private void scheduleExecution(
+            Duration backoff, Tags.AttemptSpan attemptSpan, Runnable execution) {
+        DetachedSpan backoffSpan = attemptSpan.attemptSpan().childDetachedSpan("OkHttp: backoff-with-jitter");
+
         // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
         schedulingExecutor.schedule(
-                () -> executionExecutor.submit(execution),
+                () -> executionExecutor.submit(() -> {
+                    backoffSpan.complete();
+                    execution.run();
+                }),
                 backoff.toMillis(),
                 TimeUnit.MILLISECONDS);
     }
@@ -335,9 +361,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     log.debug("Rescheduling call after receiving QosException.Throttle",
                             SafeArg.of("backoffMillis", backoff.toMillis()),
                             exception);
-                    scheduleExecution(
-                            () -> doClone().enqueue(callback),
-                            backoff);
+                    // Must create this before scheduling, so the attempt starts right now.
+                    Tags.AttemptSpan nextAttempt = createNextAttempt();
+                    Request nextAttemptRequest = request().newBuilder()
+                            .tag(Tags.AttemptSpan.class, nextAttempt)
+                            .build();
+                    RemotingOkHttpCall nextCall =
+                            client.newCallWithMutableState(nextAttemptRequest, backoffStrategy, maxNumRelocations);
+                    scheduleExecution(backoff, nextAttempt, () -> nextCall.enqueue(callback));
                 });
                 return null;
             }
@@ -369,7 +400,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             UnsafeArg.of("requestUrl", call.request().url()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get()),
                             exception);
+                    Tags.AttemptSpan nextAttempt = createNextAttempt();
                     Request redirectedRequest = request().newBuilder()
+                            .tag(Tags.AttemptSpan.class, nextAttempt)
                             .url(redirectTo.get())
                             .build();
                     client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
@@ -410,13 +443,15 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             SafeArg.of("backoffMillis", backoff.get().toMillis()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get()),
                             exception);
+                    Tags.AttemptSpan nextAttempt = createNextAttempt();
                     Request redirectedRequest = request().newBuilder()
+                            .tag(Tags.AttemptSpan.class, nextAttempt)
                             .url(redirectTo.get())
                             .build();
-                    scheduleExecution(
-                            () -> client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
-                                    .enqueue(callback),
-                            backoff.get());
+                    scheduleExecution(backoff.get(), nextAttempt, () -> {
+                        client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
+                                .enqueue(callback);
+                    });
                 });
                 return null;
             }
@@ -464,5 +499,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(), backoffStrategy, urls, client, schedulingExecutor,
                 executionExecutor, limiter, maxNumRelocations, serverQoS, retryOnTimeout, retryOnSocketException);
+    }
+
+    private Tags.AttemptSpan createNextAttempt() {
+        Tags.AttemptSpan previousAttempt = request().tag(Tags.AttemptSpan.class);
+        DetachedSpan entireSpan = request().tag(Tags.EntireSpan.class).get();
+        return previousAttempt.nextAttempt(entireSpan);
     }
 }

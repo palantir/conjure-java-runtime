@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -24,8 +24,11 @@ import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import com.palantir.tracing.CloseableTracer;
 import com.palantir.tracing.Observability;
+import com.palantir.tracing.RenderTracingRule;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.Tracers;
 import com.palantir.tracing.api.OpenSpan;
@@ -44,6 +47,7 @@ import java.util.stream.IntStream;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,6 +56,9 @@ public final class TracerTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
+
+    @Rule
+    public final RenderTracingRule renderTracingRule = new RenderTracingRule();
 
     private TestService service;
 
@@ -74,17 +81,55 @@ public final class TracerTest extends TestBase {
         service.param("somevalue");
 
         Tracer.unsubscribe(TracerTest.class.getName());
-        assertThat(observedSpans, contains(
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: acquire-limiter-enqueue"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: acquire-limiter-run"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: execute-enqueue"),
-                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: GET /{param}"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: execute-run"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: dispatcher")));
+        assertThat(observedSpans, containsInAnyOrder(
+                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: GET /{param}"),
+                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: attempt 0"),
+                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: client-side-concurrency-limiter 0/10"),
+                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: dispatcher"),
+                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-headers"),
+                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-body")
+        ));
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));
         assertThat(request.getHeader(TraceHttpHeaders.SPAN_ID), is(not(parentTrace.getSpanId())));
+    }
+
+    @Test
+    public void test503_eventually_works() throws InterruptedException {
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setBody("\"foo\""));
+        try (CloseableTracer span = CloseableTracer.startSpan("test-retries")) {
+            service.param("somevalue");
+        }
+    }
+
+    @Test
+    public void give_me_some_delays() throws InterruptedException {
+        server.enqueue(new MockResponse()
+                .setHeadersDelay(100, TimeUnit.MILLISECONDS)
+                .setHeader("Content-Type", "application/json")
+                .setBodyDelay(300, TimeUnit.MILLISECONDS)
+                .setBody("\"stringy mc stringface\""));
+        try (CloseableTracer span = CloseableTracer.startSpan("test")) {
+            service.param("somevalue");
+        }
+    }
+
+    @Test
+    public void test503_exhausting_retries() throws InterruptedException {
+        // Default is 4 retries, so doing 5
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setResponseCode(503));
+        server.enqueue(new MockResponse().setResponseCode(503));
+        try (CloseableTracer span = CloseableTracer.startSpan("test-retries")) {
+            Assertions
+                    .assertThatCode(() -> service.param("somevalue"))
+                    .hasRootCauseExactlyInstanceOf(QosException.Unavailable.class);
+        }
     }
 
     @Test

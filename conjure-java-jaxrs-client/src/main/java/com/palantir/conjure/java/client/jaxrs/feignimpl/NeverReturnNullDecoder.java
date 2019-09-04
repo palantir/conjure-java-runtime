@@ -34,7 +34,8 @@ public final class NeverReturnNullDecoder implements Decoder {
     @Override
     public Object decode(Response response, Type type) throws FeignException, IOException {
         Object object = delegate.decode(response, type);
-        Preconditions.checkNotNull(object,
+        Preconditions.checkNotNull(
+                object,
                 "Unexpected null body",
                 SafeArg.of("status", response.status()));
 

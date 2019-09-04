@@ -21,7 +21,7 @@ import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
-import com.palantir.tracing.AsyncTracer;
+import com.palantir.tracing.DetachedSpan;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -103,10 +103,21 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     }
 
     private Request createNewRequest(Request request) {
+        String httpRemotingPath = request.header(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER);
+        String spanName;
+        if (httpRemotingPath != null) {
+            spanName = "OkHttp: " + httpRemotingPath;
+        } else {
+            spanName = request.method();
+        }
+        DetachedSpan entireSpan = DetachedSpan.start(spanName);
         return request.newBuilder()
                 .url(getNewRequestUrl(request.url()))
                 .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create())
-                .tag(AsyncTracer.class, new AsyncTracer("OkHttp: execute"))
+                .tag(Tags.EntireSpan.class, () -> entireSpan)
+                .tag(Tags.AttemptSpan.class, Tags.AttemptSpan.createAttempt(entireSpan, 0))
+                .tag(Tags.SettableDispatcherSpan.class, Tags.SettableDispatcherSpan.create())
+                .tag(Tags.SettableWaitForBodySpan.class, Tags.SettableWaitForBodySpan.create())
                 .build();
     }
 

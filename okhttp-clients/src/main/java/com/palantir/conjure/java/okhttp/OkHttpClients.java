@@ -31,7 +31,6 @@ import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.Tracers;
-import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import java.time.Clock;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -83,7 +82,7 @@ public final class OkHttpClients {
      * </ol>
      */
     private static final ExecutorService executionExecutor =
-            Tracers.wrap("OkHttp: dispatcher", Executors.newCachedThreadPool(executionThreads));
+            Executors.newCachedThreadPool(executionThreads);
 
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
@@ -158,7 +157,7 @@ public final class OkHttpClients {
 
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         client.addInterceptor(CatchThrowableInterceptor.INSTANCE);
-        client.addInterceptor(new DispatcherTraceTerminatingInterceptor());
+        client.addInterceptor(SpanTerminatingInterceptor.INSTANCE);
 
         // Routing
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(

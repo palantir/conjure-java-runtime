@@ -26,6 +26,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
     testImplementation "io.leangen.geantyref:geantyref"
+    testImplementation "com.palantir.tracing:tracing-test-utils"
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'
