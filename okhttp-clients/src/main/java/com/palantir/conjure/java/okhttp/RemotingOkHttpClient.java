@@ -16,8 +16,6 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import static com.palantir.conjure.java.okhttp.OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER;
-
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
@@ -107,7 +105,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     }
 
     private Request createNewRequest(Request request) {
-        String httpRemotingPath = request.header(PATH_TEMPLATE_HEADER);
+        String httpRemotingPath = request.header(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER);
         String spanName;
         if (httpRemotingPath != null) {
             spanName = "OkHttp: " + httpRemotingPath;
