@@ -26,27 +26,29 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /** An OkHttp interceptor that adds Zipkin-style trace/span/parent-span headers to the HTTP request. */
-public final class OkhttpTraceInterceptor {
+public final class OkhttpTraceInterceptor implements Interceptor {
 
     /** The HTTP header used to communicate API endpoint names internally. Not considered public API. */
     public static final String PATH_TEMPLATE_HEADER = "hr-path-template";
 
-    private static final Interceptor delegate = OkhttpTraceInterceptor2.create(OkhttpTraceInterceptor::createSpan);
+    static final Interceptor INSTANCE = new OkhttpTraceInterceptor();
 
-    static final Interceptor INSTANCE = new Interceptor() {
-        @Override
-        public Response intercept(Chain chain) throws IOException {
-            try {
-                return delegate.intercept(chain);
-            } finally {
-                DetachedSpan waitForBody = chain.request().tag(AttemptSpan.class)
-                        .attemptSpan()
-                        .childDetachedSpan("OkHttp: wait-for-body", SpanType.CLIENT_OUTGOING);
+    private static final Interceptor addHeaders = OkhttpTraceInterceptor2.create(OkhttpTraceInterceptor::createSpan);
 
-                chain.request().tag(SettableWaitForBodySpan.class).setWaitForBodySpan(waitForBody);
-            }
+    @Override
+    public Response intercept(Chain chain) throws IOException {
+        try {
+            return addHeaders.intercept(chain);
+        } finally {
+            // when we reach this point, we've got a 'Response' object (so the headers have come back), but the server
+            // hasn't necessarily filled in the request body.
+            DetachedSpan waitForBody = chain.request().tag(AttemptSpan.class)
+                    .attemptSpan()
+                    .childDetachedSpan("OkHttp: wait-for-body", SpanType.CLIENT_OUTGOING);
+
+            chain.request().tag(SettableWaitForBodySpan.class).setWaitForBodySpan(waitForBody);
         }
-    };
+    }
 
     @SuppressWarnings("MustBeClosedChecker") // the OkhttpTraceInterceptor2 will definitely close this
     private static CloseableSpan createSpan(Request request) {

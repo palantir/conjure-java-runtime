@@ -22,7 +22,7 @@ import org.immutables.value.Value;
 
 @Value.Immutable
 @ImmutablesStyle
-public interface AttemptSpan {
+interface AttemptSpan {
     @Value.Default
     default int attemptNumber() {
         return 0;

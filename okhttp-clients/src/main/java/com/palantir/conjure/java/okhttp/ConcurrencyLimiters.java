@@ -196,7 +196,7 @@ final class ConcurrencyLimiters {
 
         @Override
         public String spanName() {
-            return "no-op concurrency-limiter";
+            return "OkHttp: no-op-concurrency-limiter";
         }
 
         static final class NoOpLimiterListener implements Limiter.Listener {

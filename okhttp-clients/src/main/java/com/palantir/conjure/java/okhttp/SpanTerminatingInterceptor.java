@@ -21,8 +21,8 @@ import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
-public final class SpanTerminatingInterceptor implements Interceptor {
-    public static final Interceptor INSTANCE = new SpanTerminatingInterceptor();
+final class SpanTerminatingInterceptor implements Interceptor {
+    static final Interceptor INSTANCE = new SpanTerminatingInterceptor();
 
     private SpanTerminatingInterceptor() {}
 
