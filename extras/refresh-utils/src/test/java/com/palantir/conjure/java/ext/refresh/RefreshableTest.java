@@ -65,19 +65,20 @@ public final class RefreshableTest {
         // Observable that emits o1 for the first 10 seconds, and then o2 after 10 seconds
         DeterministicScheduler executor = new DeterministicScheduler();
         Observable<Object> observable = Observable
-                .interval(1, TimeUnit.SECONDS, Schedulers.from(executor)).flatMapIterable(
+                .interval(1, TimeUnit.SECONDS, Schedulers.from(executor))
+                .flatMapIterable(
                         e -> e < 10 ? ImmutableList.of(o1) : ImmutableList.of(o2));
 
         Refreshable<Object> refreshable = Refreshable.empty();
         Disposable disposable = observable
-                .distinctUntilChanged()  // filters duplicates, i.e., Refreshable only sees distinct values.
+                .distinctUntilChanged() // filters duplicates, i.e., Refreshable only sees distinct values.
                 .subscribe(refreshable::set);
 
         executor.tick(1, TimeUnit.SECONDS);
         assertThat(refreshable.getAndClear()).contains(o1);
         assertThat(refreshable.getAndClear()).isEmpty();
         executor.tick(2, TimeUnit.SECONDS);
-        assertThat(refreshable.getAndClear()).isEmpty();  // empty since observable is distinctUntilChanged()
+        assertThat(refreshable.getAndClear()).isEmpty(); // empty since observable is distinctUntilChanged()
         executor.tick(11, TimeUnit.SECONDS);
         assertThat(refreshable.getAndClear()).contains(o2);
         assertThat(refreshable.getAndClear()).isEmpty();

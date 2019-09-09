@@ -116,13 +116,14 @@ public final class ClientConfigurationsTest {
                 .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
                 .build();
 
-        assertThatThrownBy(() -> ClientConfiguration.builder().from(
-                ClientConfigurations.of(serviceConfig))
+        assertThatThrownBy(() -> ClientConfiguration.builder()
+                .from(
+                        ClientConfigurations.of(serviceConfig))
                 .nodeSelectionStrategy(NodeSelectionStrategy.ROUND_ROBIN)
                 .failedUrlCooldown(Duration.ofMillis(0))
                 .build())
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessage("If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
     }
 
     @Test

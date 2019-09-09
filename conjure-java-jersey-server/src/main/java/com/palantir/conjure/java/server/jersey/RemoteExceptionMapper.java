@@ -79,7 +79,7 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
         if (status.getStatusCode() == 403) {
             log.info("Encountered a remote permission denied exception."
-                            + " Mapping to a default permission denied exception before propagating",
+                    + " Mapping to a default permission denied exception before propagating",
                     SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
                     SafeArg.of("errorName", exception.getError().errorName()),
                     SafeArg.of("statusCode", status.getStatusCode()),

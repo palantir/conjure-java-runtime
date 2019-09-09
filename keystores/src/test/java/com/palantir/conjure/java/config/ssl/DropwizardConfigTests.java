@@ -55,7 +55,8 @@ public final class DropwizardConfigTests {
         private URI uri;
         private URI bogusScheme;
 
-        public DropwizardConfigTestsConfiguration(@JsonProperty("path") Path path,
+        public DropwizardConfigTestsConfiguration(
+                @JsonProperty("path") Path path,
                 @JsonProperty("uri") URI uri,
                 @JsonProperty("bogusScheme") URI bogusScheme) {
             this.path = path;

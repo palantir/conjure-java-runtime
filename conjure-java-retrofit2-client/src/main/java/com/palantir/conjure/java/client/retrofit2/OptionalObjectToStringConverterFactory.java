@@ -40,7 +40,8 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
 
     @Override
     public Converter<?, String> stringConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
-        Optional<?> pathQueryAnnotation = ImmutableList.copyOf(annotations).stream()
+        Optional<?> pathQueryAnnotation = ImmutableList.copyOf(annotations)
+                .stream()
                 .map(Annotation::annotationType)
                 .filter(t -> t == Path.class || t == Query.class || t == Header.class)
                 .findAny();

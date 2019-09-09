@@ -66,7 +66,8 @@ public final class EmptyContainerDecoder implements Decoder {
         Object delegateResult = delegate.decode(response, type);
 
         if (response.status() == 204 || (response.status() == 200 && delegateResult == null)) {
-            @Nullable Object object = blankInstanceCache.get(type);
+            @Nullable
+            Object object = blankInstanceCache.get(type);
             return Preconditions.checkNotNull(
                     object,
                     "Received HTTP 204 but unable to construct an empty instance for return type",
@@ -110,7 +111,9 @@ public final class EmptyContainerDecoder implements Decoder {
                 Method method = jsonCreator.get();
                 Class<?> parameterType = method.getParameters()[0].getType();
                 Optional<Object> parameter = constructEmptyInstance(
-                        parameterType, originalType, decrement(maxRecursion, originalType));
+                        parameterType,
+                        originalType,
+                        decrement(maxRecursion, originalType));
 
                 if (parameter.isPresent()) {
                     return invokeStaticFactoryMethod(method, parameter.get());

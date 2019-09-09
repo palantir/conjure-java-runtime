@@ -45,8 +45,9 @@ public final class ServerUnderTestApplication extends Application<Configuration>
 
     @Override
     public void run(Configuration configuration, Environment environment) {
-        environment.jersey().register(
-                Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()));
+        environment.jersey()
+                .register(
+                        Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()));
 
         // must register ConjureJerseyFeature to map conjure error types.
         environment.jersey().register(ConjureJerseyFeature.INSTANCE);

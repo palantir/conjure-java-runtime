@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -84,25 +83,25 @@ public final class ExceptionMappingTest {
      * WebApplicationExceptionMapper} rather than the {@link RuntimeExceptionMapper}
      */
     @Test
-    public void testForbiddenException()  {
+    public void testForbiddenException() {
         Response response = target.path("throw-forbidden-exception").request().get();
         assertThat(response.getStatus(), is(Status.FORBIDDEN.getStatusCode()));
     }
 
     @Test
-    public void testNotFoundException()  {
+    public void testNotFoundException() {
         Response response = target.path("throw-not-found-exception").request().get();
         assertThat(response.getStatus(), is(Status.NOT_FOUND.getStatusCode()));
     }
 
     @Test
-    public void testServerErrorException()  {
+    public void testServerErrorException() {
         Response response = target.path("throw-server-error-exception").request().get();
         assertThat(response.getStatus(), is(SERVER_EXCEPTION_STATUS.getStatusCode()));
     }
 
     @Test
-    public void testWebApplicationException()  {
+    public void testWebApplicationException() {
         Response response = target.path("throw-web-application-exception").request().get();
         assertThat(response.getStatus(), is(WEB_EXCEPTION_STATUS.getStatusCode()));
     }

@@ -51,7 +51,7 @@ public final class TextDelegateEncoder implements Encoder {
         if (contentTypes.size() == 1 && Iterables.getOnlyElement(contentTypes, "").equals(MediaType.TEXT_PLAIN)) {
             defaultEncoder.encode(object, bodyType, template);
         } else {
-            delegate.encode(object,  bodyType, template);
+            delegate.encode(object, bodyType, template);
         }
     }
 }

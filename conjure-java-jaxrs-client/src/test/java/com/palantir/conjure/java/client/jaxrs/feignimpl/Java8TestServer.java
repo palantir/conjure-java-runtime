@@ -66,7 +66,6 @@ public class Java8TestServer extends Application<Configuration> {
         }
     }
 
-
     static class TestResource implements TestService {
         @Override
         public Optional<ImmutableMap<String, String>> getOptional(@Nullable String value) {

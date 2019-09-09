@@ -45,7 +45,8 @@ public final class Java8OptionalAwareDecoder implements Decoder {
                 return Optional.empty();
             } else {
                 Object decoded = checkNotNull(delegate.decode(response, getInnerType(type)),
-                        "Unexpected null content for response status %s", response.status());
+                        "Unexpected null content for response status %s",
+                        response.status());
                 return Optional.of(decoded);
             }
         } else {

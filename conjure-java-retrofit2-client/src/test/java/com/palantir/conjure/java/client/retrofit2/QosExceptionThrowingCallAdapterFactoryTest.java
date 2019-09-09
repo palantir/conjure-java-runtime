@@ -90,8 +90,7 @@ public final class QosExceptionThrowingCallAdapterFactoryTest {
     public void http_429_throw_qos_throttle() throws IOException {
         when(call.execute())
                 .thenReturn(Response.error(429, NO_CONTENT_RESPONSE_BODY));
-        CallAdapter<Void, Void> adapter = (CallAdapter<Void, Void>)
-                factory.get(type, NO_ANNOTATIONS, retrofit);
+        CallAdapter<Void, Void> adapter = (CallAdapter<Void, Void>) factory.get(type, NO_ANNOTATIONS, retrofit);
         adapter.adapt(call);
         assertThatThrownBy(() -> argument.getValue().execute())
                 .isInstanceOfSatisfying(
@@ -114,8 +113,7 @@ public final class QosExceptionThrowingCallAdapterFactoryTest {
                 .build();
         when(call.execute())
                 .thenReturn(Response.error(NO_CONTENT_RESPONSE_BODY, response));
-        CallAdapter<Void, Void> adapter = (CallAdapter<Void, Void>)
-                factory.get(type, NO_ANNOTATIONS, retrofit);
+        CallAdapter<Void, Void> adapter = (CallAdapter<Void, Void>) factory.get(type, NO_ANNOTATIONS, retrofit);
         adapter.adapt(call);
         assertThatThrownBy(() -> argument.getValue().execute())
                 .isInstanceOfSatisfying(
@@ -127,8 +125,7 @@ public final class QosExceptionThrowingCallAdapterFactoryTest {
     public void http_503_throw_qos_unavailable() throws IOException {
         when(call.execute())
                 .thenReturn(Response.error(503, NO_CONTENT_RESPONSE_BODY));
-        CallAdapter<Void, Void> adapter = (CallAdapter<Void, Void>)
-                factory.get(type, NO_ANNOTATIONS, retrofit);
+        CallAdapter<Void, Void> adapter = (CallAdapter<Void, Void>) factory.get(type, NO_ANNOTATIONS, retrofit);
         adapter.adapt(call);
         assertThatThrownBy(() -> argument.getValue().execute())
                 .isInstanceOf(QosException.Unavailable.class);

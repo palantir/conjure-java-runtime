@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.nio.file.Path;
 import java.util.Optional;
 
-
 public final class Java8ComplexType {
     private final Optional<Java8ComplexType> nested;
     private final Optional<String> string;

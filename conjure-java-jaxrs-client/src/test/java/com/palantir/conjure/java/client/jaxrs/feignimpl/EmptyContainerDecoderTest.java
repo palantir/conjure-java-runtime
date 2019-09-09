@@ -60,9 +60,13 @@ public class EmptyContainerDecoderTest {
     @Test
     public void http_200_uses_delegate_decoder() throws IOException {
         when(delegate.decode(any(), eq(String.class))).thenReturn("text response");
-        Response http200 = Response.create(200, "OK", ImmutableMap.of(
-                HttpHeaders.CONTENT_TYPE,
-                ImmutableSet.of(MediaType.TEXT_PLAIN)), "text response", StandardCharsets.UTF_8);
+        Response http200 = Response.create(200,
+                "OK",
+                ImmutableMap.of(
+                        HttpHeaders.CONTENT_TYPE,
+                        ImmutableSet.of(MediaType.TEXT_PLAIN)),
+                "text response",
+                StandardCharsets.UTF_8);
 
         emptyContainerDecoder.decode(http200, String.class);
         verify(delegate, times(1)).decode(any(), any());
@@ -141,7 +145,7 @@ public class EmptyContainerDecoderTest {
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof Alias1
-                    && this.value.equals(((Alias1) other).value));
+                            && this.value.equals(((Alias1) other).value));
         }
 
         @Override
@@ -178,7 +182,7 @@ public class EmptyContainerDecoderTest {
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof Alias2
-                    && this.value.equals(((Alias2) other).value));
+                            && this.value.equals(((Alias2) other).value));
         }
 
         @Override
@@ -215,7 +219,7 @@ public class EmptyContainerDecoderTest {
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof Alias3
-                    && this.value.equals(((Alias3) other).value));
+                            && this.value.equals(((Alias3) other).value));
         }
 
         @Override
@@ -252,7 +256,7 @@ public class EmptyContainerDecoderTest {
         public boolean equals(Object other) {
             return this == other
                     || (other instanceof AliasAlias1
-                    && this.value.equals(((AliasAlias1) other).value));
+                            && this.value.equals(((AliasAlias1) other).value));
         }
 
         @Override

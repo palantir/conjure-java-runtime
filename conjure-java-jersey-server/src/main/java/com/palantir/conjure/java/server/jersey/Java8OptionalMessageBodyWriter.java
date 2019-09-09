@@ -41,7 +41,11 @@ public final class Java8OptionalMessageBodyWriter implements MessageBodyWriter<O
     // Jersey ignores this
     @Override
     public long getSize(
-            Optional<?> entity, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+            Optional<?> entity,
+            Class<?> type,
+            Type genericType,
+            Annotation[] annotations,
+            MediaType mediaType) {
         return 0;
     }
 
@@ -52,8 +56,14 @@ public final class Java8OptionalMessageBodyWriter implements MessageBodyWriter<O
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public void writeTo(Optional<?> entity, Class<?> type, Type genericType, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
+    public void writeTo(
+            Optional<?> entity,
+            Class<?> type,
+            Type genericType,
+            Annotation[] annotations,
+            MediaType mediaType,
+            MultivaluedMap<String, Object> httpHeaders,
+            OutputStream entityStream)
             throws IOException {
         if (!entity.isPresent()) {
             throw new NoContentException("Absent value for type: " + genericType);
@@ -61,12 +71,21 @@ public final class Java8OptionalMessageBodyWriter implements MessageBodyWriter<O
 
         Type innerGenericType =
                 (genericType instanceof ParameterizedType)
-                        ? ((ParameterizedType) genericType).getActualTypeArguments()[0] : entity.get().getClass();
+                        ? ((ParameterizedType) genericType).getActualTypeArguments()[0]
+                        : entity.get().getClass();
 
-        MessageBodyWriter writer = mbw.get().getMessageBodyWriter(entity.get().getClass(),
-                innerGenericType, annotations, mediaType);
+        MessageBodyWriter writer = mbw.get()
+                .getMessageBodyWriter(entity.get().getClass(),
+                        innerGenericType,
+                        annotations,
+                        mediaType);
 
-        writer.writeTo(entity.get(), entity.get().getClass(),
-                innerGenericType, annotations, mediaType, httpHeaders, entityStream);
+        writer.writeTo(entity.get(),
+                entity.get().getClass(),
+                innerGenericType,
+                annotations,
+                mediaType,
+                httpHeaders,
+                entityStream);
     }
 }

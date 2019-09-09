@@ -39,7 +39,11 @@ public final class Java8OptionalLongMessageBodyWriter implements MessageBodyWrit
     // Jersey ignores this
     @Override
     public long getSize(
-            OptionalLong entity, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+            OptionalLong entity,
+            Class<?> type,
+            Type genericType,
+            Annotation[] annotations,
+            MediaType mediaType) {
         return 0;
     }
 
@@ -49,8 +53,14 @@ public final class Java8OptionalLongMessageBodyWriter implements MessageBodyWrit
     }
 
     @Override
-    public void writeTo(OptionalLong entity, Class<?> type, Type genericType, Annotation[] annotations,
-            MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
+    public void writeTo(
+            OptionalLong entity,
+            Class<?> type,
+            Type genericType,
+            Annotation[] annotations,
+            MediaType mediaType,
+            MultivaluedMap<String, Object> httpHeaders,
+            OutputStream entityStream)
             throws IOException {
         if (!entity.isPresent()) {
             throw new NoContentException("Absent value for type: " + genericType);

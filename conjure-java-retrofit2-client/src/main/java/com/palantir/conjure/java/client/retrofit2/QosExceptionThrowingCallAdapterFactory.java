@@ -44,7 +44,9 @@ final class QosExceptionThrowingCallAdapterFactory extends CallAdapter.Factory {
     @Nullable
     @Override
     public CallAdapter<?, ?> get(
-            Type returnType, Annotation[] annotations, Retrofit retrofit) {
+            Type returnType,
+            Annotation[] annotations,
+            Retrofit retrofit) {
         CallAdapter<?, ?> adapter = delegate.get(returnType, annotations, retrofit);
         return new QosExceptionThrowingCallAdapter<>(adapter);
     }
