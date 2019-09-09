@@ -5,6 +5,7 @@ buildscript {
     }
 
     dependencies {
+        classpath 'com.palantir.gradle.revapi:gradle-revapi:0.3.0'
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
         classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:7.0.1'
         classpath 'com.netflix.nebula:nebula-publishing-plugin:13.4.0'
