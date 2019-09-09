@@ -1,1 +1,2 @@
 apply from: "${rootDir}/gradle/publish-jar.gradle"
+apply plugin: 'com.palantir.revapi'
