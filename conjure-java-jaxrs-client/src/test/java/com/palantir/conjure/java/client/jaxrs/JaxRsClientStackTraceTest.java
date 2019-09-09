@@ -41,7 +41,10 @@ public final class JaxRsClientStackTraceTest extends TestBase {
 
     @Before
     public void before() throws Exception {
-        proxy = JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
+        proxy = JaxRsClient.create(TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(1)
                         .build());
@@ -74,8 +77,9 @@ public final class JaxRsClientStackTraceTest extends TestBase {
     }
 
     private static MockResponse serializableError() throws JsonProcessingException {
-        String json = ObjectMappers.newServerObjectMapper().writeValueAsString(
-                SerializableError.forException(new ServiceException(ErrorType.INTERNAL)));
+        String json = ObjectMappers.newServerObjectMapper()
+                .writeValueAsString(
+                        SerializableError.forException(new ServiceException(ErrorType.INTERNAL)));
         return new MockResponse()
                 .setResponseCode(500)
                 .setHeader("Content-Type", "application/json")

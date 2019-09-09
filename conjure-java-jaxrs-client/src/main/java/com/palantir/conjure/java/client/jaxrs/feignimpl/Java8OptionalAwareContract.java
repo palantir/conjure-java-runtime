@@ -46,9 +46,11 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
     private static final List<ExpanderDef> expanders = ImmutableList.of(
             new ExpanderDef(Optional.class, Java8EmptyOptionalExpander.class, Java8NullOptionalExpander.class),
             new ExpanderDef(OptionalInt.class, Java8EmptyOptionalIntExpander.class, Java8NullOptionalIntExpander.class),
-            new ExpanderDef(OptionalDouble.class, Java8EmptyOptionalDoubleExpander.class,
+            new ExpanderDef(OptionalDouble.class,
+                    Java8EmptyOptionalDoubleExpander.class,
                     Java8NullOptionalDoubleExpander.class),
-            new ExpanderDef(OptionalLong.class, Java8EmptyOptionalLongExpander.class,
+            new ExpanderDef(OptionalLong.class,
+                    Java8EmptyOptionalLongExpander.class,
                     Java8NullOptionalLongExpander.class));
 
     public Java8OptionalAwareContract(Contract delegate) {
@@ -64,8 +66,13 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
             for (ExpanderDef def : expanders) {
                 if (cls.equals(def.match)) {
                     FluentIterable<Class<?>> paramAnnotations = getAnnotations(annotations, i);
-                    configureOptionalExpanders(targetType, method, metadata, i, paramAnnotations,
-                            def.emptyExpanderClass, def.nullExpanderClass);
+                    configureOptionalExpanders(targetType,
+                            method,
+                            metadata,
+                            i,
+                            paramAnnotations,
+                            def.emptyExpanderClass,
+                            def.nullExpanderClass);
                 }
             }
         }
@@ -75,8 +82,13 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
         return FluentIterable.from(Lists.newArrayList(annotations[index])).transform(EXTRACT_CLASS);
     }
 
-    private void configureOptionalExpanders(Class<?> targetType, Method method, MethodMetadata metadata, int index,
-            FluentIterable<Class<?>> paramAnnotations, Class<? extends Expander> emptyExpanderClass,
+    private void configureOptionalExpanders(
+            Class<?> targetType,
+            Method method,
+            MethodMetadata metadata,
+            int index,
+            FluentIterable<Class<?>> paramAnnotations,
+            Class<? extends Expander> emptyExpanderClass,
             Class<? extends Expander> nullExpanderClass) {
         if (paramAnnotations.contains(HeaderParam.class)) {
             metadata.indexToExpanderClass().put(index, emptyExpanderClass);
@@ -85,7 +97,9 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
         } else if (paramAnnotations.contains(PathParam.class)) {
             throw new RuntimeException(String.format(
                     "Cannot use Java8 Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
-                    targetType.getName(), method.getName(), index));
+                    targetType.getName(),
+                    method.getName(),
+                    index));
         }
     }
 
@@ -96,7 +110,9 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
         private final Class<? extends Expander> emptyExpanderClass;
         private final Class<? extends Expander> nullExpanderClass;
 
-        ExpanderDef(Class<?> match, Class<? extends Expander> emptyExpanderClass,
+        ExpanderDef(
+                Class<?> match,
+                Class<? extends Expander> emptyExpanderClass,
                 Class<? extends Expander> nullExpanderClass) {
             this.match = match;
             this.emptyExpanderClass = emptyExpanderClass;

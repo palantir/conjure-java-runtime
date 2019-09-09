@@ -28,5 +28,5 @@ final class RawTypes {
         return TypeToken.of(type).getRawType();
     }
 
-    private RawTypes() { }
+    private RawTypes() {}
 }

@@ -109,7 +109,7 @@ public final class ObjectMappersTest {
         assertThat(MAPPER.<Map<String, String>>readValue(
                 "{\"test\":null}",
                 new TypeReference<Map<String, String>>() {}))
-                .isEqualTo(Collections.singletonMap("test", null));
+                        .isEqualTo(Collections.singletonMap("test", null));
     }
 
     @Test

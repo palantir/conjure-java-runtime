@@ -61,7 +61,8 @@ public final class CborDelegateDecoder implements Decoder {
             // if it's empty, we want to return null rather than having jackson throw
             int pushbackBufferSize = 1;
             PushbackInputStream pushbackInputStream = new PushbackInputStream(
-                    response.body().asInputStream(), pushbackBufferSize);
+                    response.body().asInputStream(),
+                    pushbackBufferSize);
             int firstByte = pushbackInputStream.read();
             if (firstByte == -1) {
                 return null; // we don't have any data in the stream

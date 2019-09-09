@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-
 import com.palantir.logsafe.Preconditions;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -31,8 +30,10 @@ public final class InstantParamConverterProvider implements ParamConverterProvid
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> ParamConverter<T> getConverter(final Class<T> rawType, final Type genericType,
-                                              final Annotation[] annotations) {
+    public <T> ParamConverter<T> getConverter(
+            final Class<T> rawType,
+            final Type genericType,
+            final Annotation[] annotations) {
         return Instant.class.equals(rawType) ? (ParamConverter<T>) paramConverter : null;
     }
 

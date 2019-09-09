@@ -54,8 +54,9 @@ public final class Retrofit2Client {
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
             Refreshable<ClientConfiguration> config) {
-        return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
-                config,
-                serviceConfiguration -> create(serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
+        return Reflection.newProxy(serviceClass,
+                RefreshableProxyInvocationHandler.create(
+                        config,
+                        serviceConfiguration -> create(serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
     }
 }

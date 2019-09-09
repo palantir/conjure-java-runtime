@@ -56,17 +56,22 @@ final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicat
 
         if (exception instanceof ForbiddenException) {
             return JsonExceptionMapper.createResponse(
-                    ErrorType.PERMISSION_DENIED, errorInstanceId);
+                    ErrorType.PERMISSION_DENIED,
+                    errorInstanceId);
         } else if (exception instanceof NotFoundException) {
             return JsonExceptionMapper.createResponse(
-                    ErrorType.NOT_FOUND, errorInstanceId);
+                    ErrorType.NOT_FOUND,
+                    errorInstanceId);
         } else if (exception instanceof BadRequestException || exception instanceof ParamException) {
             return JsonExceptionMapper.createResponse(
-                    ErrorType.INVALID_ARGUMENT, errorInstanceId);
+                    ErrorType.INVALID_ARGUMENT,
+                    errorInstanceId);
         } else {
             return JsonExceptionMapper.createResponse(
-                    exception.getResponse().getStatus(), exception.getClass().getName(),
-                    exception.getClass().getSimpleName(), errorInstanceId);
+                    exception.getResponse().getStatus(),
+                    exception.getClass().getName(),
+                    exception.getClass().getSimpleName(),
+                    errorInstanceId);
         }
     }
 }

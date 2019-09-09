@@ -50,7 +50,10 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(
-                GuavaTestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
+                GuavaTestServer.TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig(endpointUri));
     }
 
     @Test

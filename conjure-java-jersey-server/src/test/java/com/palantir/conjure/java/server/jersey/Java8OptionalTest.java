@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 

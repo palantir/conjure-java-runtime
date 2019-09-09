@@ -68,7 +68,9 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
     }
 
     static Response createResponse(ErrorType errorType, String errorInstanceId) {
-        return createResponse(errorType.httpErrorCode(), errorType.code().name(), errorType.name(),
+        return createResponse(errorType.httpErrorCode(),
+                errorType.code().name(),
+                errorType.name(),
                 errorInstanceId);
     }
 

@@ -101,8 +101,8 @@ abstract class AbstractFeignJaxRsClientBuilder {
                 .errorDecoder(new QosErrorDecoder(new ErrorDecoder.Default()))
                 .client(new OkHttpClient(okHttpClient))
                 .options(createRequestOptions())
-                .logLevel(Logger.Level.NONE)  // we use OkHttp interceptors for logging. (note that NONE is the default)
-                .retryer(new Retryer.Default(0, 0, 1))  // use OkHttp retry mechanism only
+                .logLevel(Logger.Level.NONE) // we use OkHttp interceptors for logging. (note that NONE is the default)
+                .retryer(new Retryer.Default(0, 0, 1)) // use OkHttp retry mechanism only
                 .target(serviceClass, primaryUri);
     }
 

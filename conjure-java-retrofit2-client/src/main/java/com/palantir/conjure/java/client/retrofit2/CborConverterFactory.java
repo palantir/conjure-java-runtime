@@ -56,8 +56,11 @@ public final class CborConverterFactory extends Converter.Factory {
     }
 
     @Override
-    public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] parameterAnnotations,
-            Annotation[] methodAnnotations, Retrofit retrofit) {
+    public Converter<?, RequestBody> requestBodyConverter(
+            Type type,
+            Annotation[] parameterAnnotations,
+            Annotation[] methodAnnotations,
+            Retrofit retrofit) {
         if (contentTypeIsCbor(methodAnnotations)) {
             return new CborRequestBodyConverter<>(cborObjectMapper.writer());
         } else {

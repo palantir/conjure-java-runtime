@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import java.nio.file.Path;
 
-
 public final class GuavaOptionalComplexType {
     private final com.google.common.base.Optional<GuavaOptionalComplexType> nested;
     private final com.google.common.base.Optional<String> string;

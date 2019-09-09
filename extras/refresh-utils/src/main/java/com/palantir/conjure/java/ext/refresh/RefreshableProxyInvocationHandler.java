@@ -42,12 +42,14 @@ public final class RefreshableProxyInvocationHandler<R, T> extends AbstractInvoc
 
         Optional<R> initialRefreshable = refreshable.getAndClear();
         Preconditions.checkArgument(initialRefreshable.isPresent(),
-                "Cannot construct %s with empty initial refreshable", getClass().getSimpleName());
+                "Cannot construct %s with empty initial refreshable",
+                getClass().getSimpleName());
         delegate = delegateSupplier.apply(initialRefreshable.get());
     }
 
     public static <R, T> RefreshableProxyInvocationHandler<R, T> create(
-            Refreshable<R> refreshable, Function<R, T> delegateSupplier) {
+            Refreshable<R> refreshable,
+            Function<R, T> delegateSupplier) {
         return new RefreshableProxyInvocationHandler<>(refreshable, delegateSupplier);
     }
 

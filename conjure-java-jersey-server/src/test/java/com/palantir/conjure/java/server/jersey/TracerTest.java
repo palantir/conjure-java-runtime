@@ -70,7 +70,8 @@ public final class TracerTest {
 
     @Test
     public void testTracingFilterIsApplied() {
-        Response response = target.path("/trace").request()
+        Response response = target.path("/trace")
+                .request()
                 .header(TraceHttpHeaders.TRACE_ID, "traceId")
                 .header(TraceHttpHeaders.PARENT_SPAN_ID, "parentSpanId")
                 .header(TraceHttpHeaders.SPAN_ID, "spanId")
@@ -108,7 +109,6 @@ public final class TracerTest {
                 byteStream.toString(StandardCharsets.UTF_8.name()),
                 Matchers.startsWith("traceId: myTraceId"));
     }
-
 
     public static class TracingTestServer extends Application<Configuration> {
         @Override

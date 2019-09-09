@@ -44,7 +44,8 @@ public final class GuavaOptionalAwareDecoder implements Decoder {
                 return com.google.common.base.Optional.absent();
             } else {
                 Object decoded = checkNotNull(delegate.decode(response, getInnerType(type)),
-                        "Unexpected null content for response status %s", response.status());
+                        "Unexpected null content for response status %s",
+                        response.status());
                 return com.google.common.base.Optional.of(decoded);
             }
         } else {

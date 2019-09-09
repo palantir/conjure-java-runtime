@@ -29,10 +29,13 @@ public final class PathTemplateHeaderEnrichmentContract extends AbstractDelegati
 
     @Override
     protected void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
-        metadata.template().header(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER,
-                metadata.template().method() + " " + metadata.template().url()
-                        // escape from feign string interpolation
-                        // See RequestTemplate.expand
-                        .replace("{", "{{"));
+        metadata.template()
+                .header(OkhttpTraceInterceptor.PATH_TEMPLATE_HEADER,
+                        metadata.template().method() + " "
+                                + metadata.template()
+                                        .url()
+                                        // escape from feign string interpolation
+                                        // See RequestTemplate.expand
+                                        .replace("{", "{{"));
     }
 }

@@ -96,7 +96,9 @@ public final class ClientConfigurations {
      * other configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(
-            List<String> uris, SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
+            List<String> uris,
+            SSLSocketFactory sslSocketFactory,
+            X509TrustManager trustManager) {
         return ClientConfiguration.builder()
                 .sslSocketFactory(sslSocketFactory)
                 .trustManager(trustManager)

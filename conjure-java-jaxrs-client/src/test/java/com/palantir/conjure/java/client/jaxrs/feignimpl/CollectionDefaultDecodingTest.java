@@ -42,7 +42,10 @@ public final class CollectionDefaultDecodingTest extends TestBase {
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(
-                Java8TestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
+                Java8TestServer.TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig(endpointUri));
     }
 
     @Test

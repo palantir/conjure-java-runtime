@@ -86,7 +86,7 @@ public final class OptionalObjectToStringConverterFactoryTest {
         // Guava
         assertThat(
                 factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Header.class), null))
-                .isNotNull();
+                        .isNotNull();
         assertThat(factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Path.class), null))
                 .isNotNull();
         assertThat(factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Query.class), null))
