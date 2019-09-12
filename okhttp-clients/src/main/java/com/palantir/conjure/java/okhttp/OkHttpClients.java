@@ -37,7 +37,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import okhttp3.ConnectionPool;
@@ -219,8 +218,7 @@ public final class OkHttpClients {
 
         return new RemotingOkHttpClient(
                 client.build(),
-                () -> new ExponentialBackoff(
-                        config.maxNumRetries(), config.backoffSlotSize(), ThreadLocalRandom.current()),
+                () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize()),
                 config.nodeSelectionStrategy(),
                 urlSelector,
                 schedulingExecutor.get(),

@@ -20,6 +20,8 @@ import com.google.common.annotations.VisibleForTesting;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Supplier;
 
 /**
  * Implements "exponential backoff with full jitter", suggesting a backoff duration chosen randomly from the interval
@@ -29,12 +31,16 @@ final class ExponentialBackoff implements BackoffStrategy {
 
     private final int maxNumRetries;
     private final Duration backoffSlotSize;
-    private final Random random;
+    private final Supplier<Random> random;
 
     private int retryNumber = 0;
 
+    ExponentialBackoff(int maxNumRetries, Duration backoffSlotSize) {
+        this(maxNumRetries, backoffSlotSize, ThreadLocalRandom::current);
+    }
+
     @VisibleForTesting
-    ExponentialBackoff(int maxNumRetries, Duration backoffSlotSize, Random random) {
+    ExponentialBackoff(int maxNumRetries, Duration backoffSlotSize, Supplier<Random> random) {
         this.maxNumRetries = maxNumRetries;
         this.backoffSlotSize = backoffSlotSize;
         this.random = random;
@@ -48,6 +54,7 @@ final class ExponentialBackoff implements BackoffStrategy {
         }
 
         int upperBound = (int) Math.pow(2, retryNumber);
-        return Optional.of(Duration.ofNanos(Math.round(backoffSlotSize.toNanos() * random.nextDouble() * upperBound)));
+        return Optional.of(Duration.ofNanos(Math.round(
+                backoffSlotSize.toNanos() * random.get().nextDouble() * upperBound)));
     }
 }
