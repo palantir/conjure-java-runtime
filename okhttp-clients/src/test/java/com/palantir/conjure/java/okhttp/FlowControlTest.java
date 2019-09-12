@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -108,7 +107,7 @@ public final class FlowControlTest {
         RateLimiter rateLimiter = RateLimiter.create(rateLimit);
         return IntStream.range(0, numThreads)
                 .mapToObj(unused -> new Worker(
-                        () -> new ExponentialBackoff(4, Duration.ofMillis(250), ThreadLocalRandom.current()),
+                        () -> new ExponentialBackoff(4, Duration.ofMillis(250)),
                         limiters,
                         delay,
                         rateLimiter,
