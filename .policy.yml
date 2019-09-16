@@ -76,7 +76,7 @@ approval_rules:
           - "^versions.props$"
           - "^versions.lock$"
 
-  - name: excavator only touched package.json and lock files
+  - name: excavator only touched config files
     requires:
       count: 0
     if:
