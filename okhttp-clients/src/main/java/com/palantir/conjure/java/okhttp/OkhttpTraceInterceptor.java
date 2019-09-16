@@ -31,7 +31,7 @@ public final class OkhttpTraceInterceptor implements Interceptor {
     /** The HTTP header used to communicate API endpoint names internally. Not considered public API. */
     public static final String PATH_TEMPLATE_HEADER = "hr-path-template";
 
-    static final Interceptor INSTANCE = new OkhttpTraceInterceptor();
+    public static final Interceptor INSTANCE = new OkhttpTraceInterceptor();
 
     private static final Interceptor addHeaders = OkhttpTraceInterceptor2.create(OkhttpTraceInterceptor::createSpan);
 
