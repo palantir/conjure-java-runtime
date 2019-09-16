@@ -24,3 +24,12 @@ dependencies {
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
 }
+
+configurations.all {
+    resolutionStrategy {
+        // Conflicts with javax.inject:javax.inject:1
+        // This is safe to remove, the purpose of the repackaged version is to implement OSGI, which we don't use
+        // Source: https://stackoverflow.com/a/25218230/274699
+        exclude group: 'org.glassfish.hk2.external', module: 'javax.inject'
+    }
+}
