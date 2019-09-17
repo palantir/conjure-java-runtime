@@ -16,10 +16,10 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -29,6 +29,7 @@ import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
+import org.assertj.core.api.HamcrestCondition;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -58,26 +59,24 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
 
     @Test
     public void testOptional() {
-        assertThat(service.getOptional("something"),
-                is(com.google.common.base.Optional.of(ImmutableMap.of("something", "something"))));
-        assertThat(service.getOptional(null),
-                is(com.google.common.base.Optional.<ImmutableMap<String, String>>absent()));
+        assertThat(service.getOptional("something")).is(new HamcrestCondition<>(is(com.google.common.base.Optional.of(ImmutableMap.of("something", "something")))));
+        assertThat(service.getOptional(null)).is(new HamcrestCondition<>(is(com.google.common.base.Optional.<ImmutableMap<String, String>>absent())));
     }
 
     @Test
     public void testNonOptional() {
-        assertThat(service.getNonOptional("something"), is(ImmutableMap.of("something", "something")));
-        assertThat(service.getNonOptional(null), is(ImmutableMap.<String, String>of()));
+        assertThat(service.getNonOptional("something")).is(new HamcrestCondition<>(is(ImmutableMap.of("something", "something"))));
+        assertThat(service.getNonOptional(null)).is(new HamcrestCondition<>(is(ImmutableMap.<String, String>of())));
     }
 
     @Test
     public void testThrowsNotFound() {
         try {
             service.getThrowsNotFound(null);
-            fail();
+            fail("fail");
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: NOT_FOUND (Default:NotFound)"));
-            assertThat(e.getError().errorCode(), is("NOT_FOUND"));
+            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString("RemoteException: NOT_FOUND (Default:NotFound)")));
+            assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("NOT_FOUND")));
         }
     }
 
@@ -85,10 +84,10 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     public void testThrowsNotAuthorized() {
         try {
             service.getThrowsNotAuthorized(null);
-            fail();
+            fail("fail");
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotAuthorizedException"));
-            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotAuthorizedException"));
+            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString("RemoteException: javax.ws.rs.NotAuthorizedException")));
+            assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("javax.ws.rs.NotAuthorizedException")));
         }
     }
 
@@ -96,10 +95,10 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     public void testOptionalThrowsNotAuthorized() {
         try {
             service.getOptionalThrowsNotAuthorized(null);
-            fail();
+            fail("fail");
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotAuthorizedException"));
-            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotAuthorizedException"));
+            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString("RemoteException: javax.ws.rs.NotAuthorizedException")));
+            assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("javax.ws.rs.NotAuthorizedException")));
         }
     }
 
@@ -107,10 +106,10 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     public void testThrowsFordidden() {
         try {
             service.getThrowsForbidden(null);
-            fail();
+            fail("fail");
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)"));
-            assertThat(e.getError().errorCode(), is("PERMISSION_DENIED"));
+            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)")));
+            assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("PERMISSION_DENIED")));
         }
     }
 
@@ -118,17 +117,17 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     public void testOptionalThrowsForbbbden() {
         try {
             service.getOptionalThrowsForbidden(null);
-            fail();
+            fail("fail");
         } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)"));
-            assertThat(e.getError().errorCode(), is("PERMISSION_DENIED"));
+            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)")));
+            assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("PERMISSION_DENIED")));
         }
     }
 
     @Test
     public void testOptionalString() {
-        assertThat(service.getOptionalString(null), is(com.google.common.base.Optional.absent()));
-        assertThat(service.getOptionalString("foo"), is(com.google.common.base.Optional.of("foo")));
+        assertThat(service.getOptionalString(null)).is(new HamcrestCondition<>(is(com.google.common.base.Optional.absent())));
+        assertThat(service.getOptionalString("foo")).is(new HamcrestCondition<>(is(com.google.common.base.Optional.of("foo"))));
     }
 
     @Test
@@ -142,7 +141,7 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
-        assertThat(service.getGuavaComplexType(value), is(value));
+        assertThat(service.getGuavaComplexType(value)).is(new HamcrestCondition<>(is(value)));
     }
 
     @Test
@@ -155,7 +154,7 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
                                 Paths.get("bar"))),
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
-        assertThat(service.getCborResponse(value), is(value));
+        assertThat(service.getCborResponse(value)).is(new HamcrestCondition<>(is(value)));
     }
 
     @Test
@@ -168,6 +167,6 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
                                 Paths.get("bar"))),
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
-        assertThat(service.postCborRequest(value), is(value));
+        assertThat(service.postCborRequest(value)).is(new HamcrestCondition<>(is(value)));
     }
 }

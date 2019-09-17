@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -36,6 +36,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.assertj.core.api.HamcrestCondition;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -63,22 +64,22 @@ public final class DateTimeTest {
                 .queryParam("value", "2017-01-02T03:04:05.06Z")
                 .request()
                 .get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("2017-01-02T03:04:05.060Z"));
+        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
+        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("2017-01-02T03:04:05.060Z")));
     }
 
     @Test
     public void testZonedDateTimeParam() throws SecurityException {
         Response response = target.path("zonedDateTime").queryParam("value", "2017-01-02T03:04:05.06Z").request().get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("2017-01-02T03:04:05.060Z"));
+        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
+        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("2017-01-02T03:04:05.060Z")));
     }
 
     @Test
     public void testInstantParam() {
         Response response = target.path("instant").queryParam("value", "2017-01-02T03:04:05.06Z").request().get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("2017-01-02T03:04:05.060Z"));
+        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
+        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("2017-01-02T03:04:05.060Z")));
     }
 
     public static class OptionalTestServer extends Application<Configuration> {

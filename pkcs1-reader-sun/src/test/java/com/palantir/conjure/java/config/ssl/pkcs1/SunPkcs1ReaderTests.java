@@ -16,27 +16,28 @@
 
 package com.palantir.conjure.java.config.ssl.pkcs1;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.security.spec.RSAPrivateKeySpec;
+import org.assertj.core.api.HamcrestCondition;
 import org.junit.Test;
 
 public final class SunPkcs1ReaderTests {
 
     @Test
     public void testSunPkcs1ReaderInstalled() {
-        assertThat(Pkcs1Readers.getInstance(), instanceOf(SunPkcs1Reader.class));
+        assertThat(Pkcs1Readers.getInstance()).is(new HamcrestCondition<>(instanceOf(SunPkcs1Reader.class)));
     }
 
     @Test
     public void testReadPrivateKey() throws IOException {
         RSAPrivateKeySpec privateKeySpec = new SunPkcs1Reader().readPrivateKey(TestConstants.PRIVATE_KEY_DER);
 
-        assertThat(TestConstants.MODULUS, is(privateKeySpec.getModulus()));
-        assertThat(TestConstants.PRIVATE_EXPONENT, is(privateKeySpec.getPrivateExponent()));
+        assertThat(TestConstants.MODULUS).is(new HamcrestCondition<>(is(privateKeySpec.getModulus())));
+        assertThat(TestConstants.PRIVATE_EXPONENT).is(new HamcrestCondition<>(is(privateKeySpec.getPrivateExponent())));
     }
 
 }

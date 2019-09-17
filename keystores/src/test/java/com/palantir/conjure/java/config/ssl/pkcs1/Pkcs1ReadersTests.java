@@ -16,14 +16,15 @@
 
 package com.palantir.conjure.java.config.ssl.pkcs1;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.security.spec.RSAPrivateKeySpec;
 import java.util.ServiceLoader;
+import org.assertj.core.api.HamcrestCondition;
 import org.junit.Assume;
 import org.junit.Test;
 
@@ -35,9 +36,9 @@ public final class Pkcs1ReadersTests {
 
         try {
             Pkcs1Readers.getInstance();
-            fail();
+            fail("fail");
         } catch (IllegalStateException ex) {
-            assertThat(ex.getMessage(), containsString("No Pkcs1Reader services were present"));
+            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("No Pkcs1Reader services were present")));
         }
     }
 
@@ -46,8 +47,8 @@ public final class Pkcs1ReadersTests {
         Assume.assumeTrue(ServiceLoader.load(Pkcs1Reader.class).iterator().hasNext());
 
         RSAPrivateKeySpec privateKeySpec = Pkcs1Readers.getInstance().readPrivateKey(TestConstants.PRIVATE_KEY_DER);
-        assertThat(TestConstants.MODULUS, is(privateKeySpec.getModulus()));
-        assertThat(TestConstants.PRIVATE_EXPONENT, is(privateKeySpec.getPrivateExponent()));
+        assertThat(TestConstants.MODULUS).is(new HamcrestCondition<>(is(privateKeySpec.getModulus())));
+        assertThat(TestConstants.PRIVATE_EXPONENT).is(new HamcrestCondition<>(is(privateKeySpec.getPrivateExponent())));
     }
 
 }

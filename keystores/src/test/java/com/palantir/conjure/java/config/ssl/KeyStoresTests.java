@@ -16,11 +16,10 @@
 
 package com.palantir.conjure.java.config.ssl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
@@ -32,6 +31,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
+import org.assertj.core.api.HamcrestCondition;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -45,9 +45,8 @@ public final class KeyStoresTests {
     public void testCreateTrustStoreFromCertificateFile() throws GeneralSecurityException, IOException {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(TestConstants.CA_DER_CERT_PATH);
 
-        assertThat(trustStore.size(), is(1));
-        assertThat(trustStore.getCertificate(TestConstants.CA_DER_CERT_PATH.getFileName().toString()).toString(),
-                containsString("CN=testCA"));
+        assertThat(trustStore.size()).is(new HamcrestCondition<>(is(1)));
+        assertThat(trustStore.getCertificate(TestConstants.CA_DER_CERT_PATH.getFileName().toString()).toString()).is(new HamcrestCondition<>(containsString("CN=testCA")));
     }
 
     @Test
@@ -58,10 +57,10 @@ public final class KeyStoresTests {
         Files.copy(TestConstants.CLIENT_CERT_PEM_PATH.toFile(), certFolder.toPath().resolve("client.cer").toFile());
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
 
-        assertThat(trustStore.size(), is(3));
-        assertThat(trustStore.getCertificate("ca.der").toString(), containsString("CN=testCA"));
-        assertThat(trustStore.getCertificate("server.crt").toString(), containsString("CN=localhost"));
-        assertThat(trustStore.getCertificate("client.cer").toString(), containsString("CN=client"));
+        assertThat(trustStore.size()).is(new HamcrestCondition<>(is(3)));
+        assertThat(trustStore.getCertificate("ca.der").toString()).is(new HamcrestCondition<>(containsString("CN=testCA")));
+        assertThat(trustStore.getCertificate("server.crt").toString()).is(new HamcrestCondition<>(containsString("CN=localhost")));
+        assertThat(trustStore.getCertificate("client.cer").toString()).is(new HamcrestCondition<>(containsString("CN=client")));
     }
 
     @Test
@@ -69,7 +68,7 @@ public final class KeyStoresTests {
         File certFolder = tempFolder.newFolder();
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
 
-        assertThat(trustStore.size(), is(0));
+        assertThat(trustStore.size()).is(new HamcrestCondition<>(is(0)));
     }
 
     @Test
@@ -78,7 +77,7 @@ public final class KeyStoresTests {
         Files.copy(TestConstants.CA_DER_CERT_PATH.toFile(), certFolder.toPath().resolve(".hidden_file").toFile());
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
 
-        assertThat(trustStore.size(), is(0));
+        assertThat(trustStore.size()).is(new HamcrestCondition<>(is(0)));
     }
 
     @Test
@@ -99,7 +98,7 @@ public final class KeyStoresTests {
         File certFolder = tempFolder.newFolder();
         File tempDirFile = certFolder.toPath().resolve("childDir").toFile();
         boolean childDir = tempDirFile.mkdir();
-        assertTrue(childDir);
+        assertThat(childDir).isTrue();
 
         assertThatThrownBy(() -> KeyStores.createTrustStoreFromCertificates(certFolder.toPath()))
                 .isInstanceOf(RuntimeException.class)
@@ -114,7 +113,7 @@ public final class KeyStoresTests {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(
                 ImmutableMap.of("server.crt", PemX509Certificate.of(cert)));
 
-        assertThat(trustStore.getCertificate("server.crt").toString(), containsString("CN=localhost"));
+        assertThat(trustStore.getCertificate("server.crt").toString()).is(new HamcrestCondition<>(containsString("CN=localhost")));
     }
 
     @Test
@@ -136,13 +135,11 @@ public final class KeyStoresTests {
         KeyStore keyStore = KeyStores.createKeyStoreFromCombinedPems(TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH,
                 password);
 
-        assertThat(keyStore.size(), is(1));
+        assertThat(keyStore.size()).is(new HamcrestCondition<>(is(1)));
         assertThat(keyStore.getCertificate(
-                TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH.getFileName().toString()).toString(),
-                containsString("CN=testCA"));
+                TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH.getFileName().toString()).toString()).is(new HamcrestCondition<>(containsString("CN=testCA")));
         assertThat(keyStore.getKey(TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH.getFileName().toString(),
-                password.toCharArray()).getFormat(),
-                is("PKCS#8"));
+                password.toCharArray()).getFormat()).is(new HamcrestCondition<>(is("PKCS#8")));
     }
 
     @Test
@@ -158,11 +155,11 @@ public final class KeyStoresTests {
                 keyFolder.toPath().resolve("client.pkcs1").toFile());
         KeyStore keyStore = KeyStores.createKeyStoreFromCombinedPems(keyFolder.toPath(), password);
 
-        assertThat(keyStore.size(), is(2));
-        assertThat(keyStore.getCertificate("server.pkcs1").toString(), containsString("CN=localhost"));
-        assertThat(keyStore.getKey("server.pkcs1", password.toCharArray()).getFormat(), is("PKCS#8"));
-        assertThat(keyStore.getCertificate("client.pkcs1").toString(), containsString("CN=client"));
-        assertThat(keyStore.getKey("client.pkcs1", password.toCharArray()).getFormat(), is("PKCS#8"));
+        assertThat(keyStore.size()).is(new HamcrestCondition<>(is(2)));
+        assertThat(keyStore.getCertificate("server.pkcs1").toString()).is(new HamcrestCondition<>(containsString("CN=localhost")));
+        assertThat(keyStore.getKey("server.pkcs1", password.toCharArray()).getFormat()).is(new HamcrestCondition<>(is("PKCS#8")));
+        assertThat(keyStore.getCertificate("client.pkcs1").toString()).is(new HamcrestCondition<>(containsString("CN=client")));
+        assertThat(keyStore.getKey("client.pkcs1", password.toCharArray()).getFormat()).is(new HamcrestCondition<>(is("PKCS#8")));
     }
 
     @Test
@@ -170,7 +167,7 @@ public final class KeyStoresTests {
         File keyFolder = tempFolder.newFolder();
         KeyStore trustStore = KeyStores.createKeyStoreFromCombinedPems(keyFolder.toPath(), "changeit");
 
-        assertThat(trustStore.size(), is(0));
+        assertThat(trustStore.size()).is(new HamcrestCondition<>(is(0)));
     }
 
     @Test
@@ -203,9 +200,9 @@ public final class KeyStoresTests {
                 ".cer",
                 password);
 
-        assertThat(keyStore.size(), is(1));
-        assertThat(keyStore.getCertificate("server").toString(), containsString("CN=localhost"));
-        assertThat(keyStore.getKey("server", password.toCharArray()).getFormat(), is("PKCS#8"));
+        assertThat(keyStore.size()).is(new HamcrestCondition<>(is(1)));
+        assertThat(keyStore.getCertificate("server").toString()).is(new HamcrestCondition<>(containsString("CN=localhost")));
+        assertThat(keyStore.getKey("server", password.toCharArray()).getFormat()).is(new HamcrestCondition<>(is("PKCS#8")));
     }
 
     @Test

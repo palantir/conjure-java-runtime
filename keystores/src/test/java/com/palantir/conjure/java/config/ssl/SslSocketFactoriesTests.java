@@ -16,12 +16,12 @@
 
 package com.palantir.conjure.java.config.ssl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
 import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
+import org.assertj.core.api.HamcrestCondition;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -46,8 +47,8 @@ public final class SslSocketFactoriesTests {
         String cert = Files.toString(TestConstants.CA_PEM_CERT_PATH.toFile(), StandardCharsets.UTF_8);
 
         Map<String, PemX509Certificate> certs = ImmutableMap.of("cert", PemX509Certificate.of(cert));
-        assertThat(SslSocketFactories.createSslSocketFactory(certs), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(certs), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(certs)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(certs)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -58,8 +59,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(TestConstants.CA_TRUST_STORE_TYPE)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -70,8 +71,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(TestConstants.SERVER_KEY_STORE_P12_TYPE)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -82,8 +83,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -94,8 +95,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -112,8 +113,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -121,7 +122,7 @@ public final class SslSocketFactoriesTests {
         File puppetFolder = tempFolder.newFolder();
 
         File certsFolder = puppetFolder.toPath().resolve("certs").toFile();
-        assertThat(certsFolder.mkdir(), is(true));
+        assertThat(certsFolder.mkdir()).is(new HamcrestCondition<>(is(true)));
 
         Files.copy(TestConstants.CA_PEM_CERT_PATH.toFile(), certsFolder.toPath().resolve("ca.pem").toFile());
         Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), certsFolder.toPath().resolve("server.pem").toFile());
@@ -133,8 +134,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(SslConfiguration.StoreType.PUPPET)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -144,10 +145,10 @@ public final class SslSocketFactoriesTests {
         File puppetFolder = tempFolder.newFolder();
 
         File keysFolder = puppetFolder.toPath().resolve("private_keys").toFile();
-        assertThat(keysFolder.mkdir(), is(true));
+        assertThat(keysFolder.mkdir()).is(new HamcrestCondition<>(is(true)));
 
         File certsFolder = puppetFolder.toPath().resolve("certs").toFile();
-        assertThat(certsFolder.mkdir(), is(true));
+        assertThat(certsFolder.mkdir()).is(new HamcrestCondition<>(is(true)));
 
         Files.copy(TestConstants.SERVER_KEY_PEM_PATH.toFile(), keysFolder.toPath().resolve("server.pem").toFile());
         Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), certsFolder.toPath().resolve("server.pem").toFile());
@@ -160,8 +161,8 @@ public final class SslSocketFactoriesTests {
                 .keyStoreType(SslConfiguration.StoreType.PUPPET)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -176,8 +177,8 @@ public final class SslSocketFactoriesTests {
                 .keyStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -187,8 +188,8 @@ public final class SslSocketFactoriesTests {
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -201,8 +202,8 @@ public final class SslSocketFactoriesTests {
                 .keyStoreType(TestConstants.SERVER_KEY_STORE_JKS_TYPE)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -214,8 +215,8 @@ public final class SslSocketFactoriesTests {
                 .keyStorePassword(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig), notNullValue());
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig), notNullValue());
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
     }
 
     @Test
@@ -233,12 +234,12 @@ public final class SslSocketFactoriesTests {
 
             SSLSocketFactory sslSocketFactory = SslSocketFactories.createSslSocketFactory(sslConfig);
             if (System.getProperty("java.version").startsWith("1.8")) {
-                fail();
+                fail("fail");
             } else {
-                assertThat(sslSocketFactory, notNullValue());
+                assertThat(sslSocketFactory).is(new HamcrestCondition<>(notNullValue()));
             }
         } catch (RuntimeException ex) {
-            assertThat(ex.getCause(), is(instanceOf(IOException.class)));
+            assertThat(ex.getCause()).is(new HamcrestCondition<>(is(instanceOf(IOException.class))));
         }
     }
 
@@ -255,10 +256,10 @@ public final class SslSocketFactoriesTests {
 
             SslSocketFactories.createSslSocketFactory(sslConfig);
 
-            fail();
+            fail("fail");
         } catch (RuntimeException ex) {
-            assertThat(ex.getCause(), is(instanceOf(IOException.class)));
-            assertThat(ex.getMessage(), containsString("Keystore was tampered with, or password was incorrect"));
+            assertThat(ex.getCause()).is(new HamcrestCondition<>(is(instanceOf(IOException.class))));
+            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("Keystore was tampered with, or password was incorrect")));
         }
     }
 
@@ -275,10 +276,10 @@ public final class SslSocketFactoriesTests {
 
             SslSocketFactories.createSslSocketFactory(sslConfig);
 
-            fail();
+            fail("fail");
         } catch (RuntimeException ex) {
-            assertThat(ex.getCause(), is(instanceOf(IOException.class)));
-            assertThat(ex.getMessage(), containsString("keystore"));
+            assertThat(ex.getCause()).is(new HamcrestCondition<>(is(instanceOf(IOException.class))));
+            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("keystore")));
         }
     }
 
@@ -296,9 +297,9 @@ public final class SslSocketFactoriesTests {
 
             SslSocketFactories.createSslSocketFactory(sslConfig);
 
-            fail();
+            fail("fail");
         } catch (IllegalStateException ex) {
-            assertThat(ex.getMessage(), containsString("Could not find key with alias"));
+            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("Could not find key with alias")));
         }
     }
 
@@ -313,11 +314,9 @@ public final class SslSocketFactoriesTests {
 
             SslSocketFactories.createSslSocketFactory(sslConfig);
 
-            fail();
+            fail("fail");
         } catch (IllegalArgumentException ex) {
-            assertThat(
-                    ex.getMessage(),
-                    containsString("keyStorePath and keyStorePassword must both be present or both be absent"));
+            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("keyStorePath and keyStorePassword must both be present or both be absent")));
         }
     }
 
@@ -332,11 +331,9 @@ public final class SslSocketFactoriesTests {
 
             SslSocketFactories.createSslSocketFactory(sslConfig);
 
-            fail();
+            fail("fail");
         } catch (IllegalArgumentException ex) {
-            assertThat(
-                    ex.getMessage(),
-                    containsString("keyStorePath and keyStorePassword must both be present or both be absent"));
+            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("keyStorePath and keyStorePassword must both be present or both be absent")));
         }
     }
 
@@ -351,9 +348,9 @@ public final class SslSocketFactoriesTests {
 
             SslSocketFactories.createSslSocketFactory(sslConfig);
 
-            fail();
+            fail("fail");
         } catch (IllegalArgumentException ex) {
-            assertThat(ex.getMessage(), containsString("keyStorePath must be present if keyStoreKeyAlias is present"));
+            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("keyStorePath must be present if keyStoreKeyAlias is present")));
         }
     }
 
@@ -367,10 +364,10 @@ public final class SslSocketFactoriesTests {
 
             SslSocketFactories.createSslSocketFactory(sslConfig);
 
-            fail();
+            fail("fail");
         } catch (RuntimeException ex) {
-            assertThat(ex.getCause(), instanceOf(NoSuchFileException.class));
-            assertThat(ex.getMessage(), containsString("foo/bar"));
+            assertThat(ex.getCause()).is(new HamcrestCondition<>(instanceOf(NoSuchFileException.class)));
+            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("foo/bar")));
         }
     }
 

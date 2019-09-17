@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
@@ -67,8 +67,8 @@ public final class WebPreconditionsTest {
     public void testCheckNotNullNoExceptions() {
         Object reference = new Object();
 
-        assertSame(reference, WebPreconditions.checkNotNull(reference, "message"));
-        assertSame(reference, WebPreconditions.checkNotNull(reference, "message", "args"));
+        assertThat(WebPreconditions.checkNotNull(reference, "message")).isSameAs(reference);
+        assertThat(WebPreconditions.checkNotNull(reference, "message", "args")).isSameAs(reference);
     }
 
     @Test
@@ -106,8 +106,8 @@ public final class WebPreconditionsTest {
     public void testCheckNotEmptyNoExceptions() {
         String string = "here's a string";
 
-        assertSame(string, WebPreconditions.checkNotEmpty(string, "message"));
-        assertSame(string, WebPreconditions.checkNotEmpty(string, "message", "args"));
+        assertThat(WebPreconditions.checkNotEmpty(string, "message")).isSameAs(string);
+        assertThat(WebPreconditions.checkNotEmpty(string, "message", "args")).isSameAs(string);
     }
 
     @Test

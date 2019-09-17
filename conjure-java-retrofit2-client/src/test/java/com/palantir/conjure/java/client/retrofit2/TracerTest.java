@@ -16,9 +16,9 @@
 
 package com.palantir.conjure.java.client.retrofit2;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.tracing.RenderTracingRule;
@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+import org.assertj.core.api.HamcrestCondition;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,8 +60,8 @@ public final class TracerTest extends TestBase {
         service.get().execute();
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));
-        assertThat(request.getHeader(TraceHttpHeaders.SPAN_ID), is(not(parentTrace.getSpanId())));
+        assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID)).is(new HamcrestCondition<>(is(traceId)));
+        assertThat(request.getHeader(TraceHttpHeaders.SPAN_ID)).is(new HamcrestCondition<>(is(not(parentTrace.getSpanId()))));
     }
 
     @Test

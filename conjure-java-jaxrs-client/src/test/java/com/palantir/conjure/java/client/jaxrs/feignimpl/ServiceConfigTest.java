@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -56,8 +56,8 @@ public final class ServiceConfigTest extends TestBase {
                 new HostMetricsRegistry(),
                 ClientConfigurations.of(factory.get("minimal")));
 
-        assertEquals("string", full.string());
-        assertEquals("string", minimal.string());
+        assertThat(full.string()).isEqualTo("string");
+        assertThat(minimal.string()).isEqualTo("string");
     }
 
     /**

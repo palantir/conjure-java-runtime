@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.config.ssl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.Application;
@@ -27,6 +27,7 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.assertj.core.api.HamcrestCondition;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -38,9 +39,9 @@ public final class DropwizardConfigTests {
 
     @Test
     public void testUriInConfig() {
-        assertThat(APP.getConfiguration().getPath(), is(Paths.get("path/to/file")));
-        assertThat(APP.getConfiguration().getUri(), is(URI.create("hdfs://host:1234/file")));
-        assertThat(APP.getConfiguration().getBogusScheme(), is(URI.create("bogus://host:1234/file")));
+        assertThat(APP.getConfiguration().getPath()).is(new HamcrestCondition<>(is(Paths.get("path/to/file"))));
+        assertThat(APP.getConfiguration().getUri()).is(new HamcrestCondition<>(is(URI.create("hdfs://host:1234/file"))));
+        assertThat(APP.getConfiguration().getBogusScheme()).is(new HamcrestCondition<>(is(URI.create("bogus://host:1234/file"))));
     }
 
     public static final class DropwizardConfigTestsServer extends Application<DropwizardConfigTestsConfiguration> {
