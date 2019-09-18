@@ -5,6 +5,7 @@ dependencies {
     api project(":keystores")
 
     testImplementation "junit:junit"
+    testImplementation "org.assertj:assertj-core"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation 'com.google.guava:guava'
 }

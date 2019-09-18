@@ -109,7 +109,7 @@ public class NullRequestBodyTest {
 
     public static class TestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
+        public final void run(Configuration _config, final Environment env) throws Exception {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new TestResource());
         }
@@ -117,10 +117,10 @@ public class NullRequestBodyTest {
 
     public static final class TestResource implements TestService {
         @Override
-        public void postRequestBody(Map<String, String> data) {}
+        public void postRequestBody(Map<String, String> _data) {}
 
         @Override
-        public void postRequestBodyNotNull(Map<String, String> data) {
+        public void postRequestBodyNotNull(Map<String, String> _data) {
             throw new RuntimeException("oh no");
         }
     }

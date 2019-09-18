@@ -44,7 +44,7 @@ final class LenientLongModule extends SimpleModule {
         }
 
         @Override
-        public Long deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {
+        public Long deserialize(JsonParser jsonParser, DeserializationContext _ctxt) throws IOException {
             switch (jsonParser.currentToken()) {
                 case VALUE_NUMBER_INT:
                     return jsonParser.getLongValue();

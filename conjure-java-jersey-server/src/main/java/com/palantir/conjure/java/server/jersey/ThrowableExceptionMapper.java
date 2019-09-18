@@ -23,7 +23,7 @@ import javax.ws.rs.ext.Provider;
 final class ThrowableExceptionMapper extends JsonExceptionMapper<Throwable> {
 
     @Override
-    ErrorType getErrorType(Throwable exception) {
+    ErrorType getErrorType(Throwable _exception) {
         return ErrorType.INTERNAL;
     }
 }

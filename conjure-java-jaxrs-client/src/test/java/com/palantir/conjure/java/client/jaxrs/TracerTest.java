@@ -16,11 +16,9 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -48,6 +46,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.HamcrestCondition;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -81,18 +80,17 @@ public final class TracerTest extends TestBase {
         service.param("somevalue");
 
         Tracer.unsubscribe(TracerTest.class.getName());
-        assertThat(observedSpans,
-                containsInAnyOrder(
+        assertThat(observedSpans).is(new HamcrestCondition<>(containsInAnyOrder(
                         Maps.immutableEntry(SpanType.LOCAL, "OkHttp: GET /{param}"),
                         Maps.immutableEntry(SpanType.LOCAL, "OkHttp: attempt 0"),
                         Maps.immutableEntry(SpanType.LOCAL, "OkHttp: client-side-concurrency-limiter 0/10"),
                         Maps.immutableEntry(SpanType.LOCAL, "OkHttp: dispatcher"),
                         Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-headers"),
-                        Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-body")));
+                        Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-body"))));
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));
-        assertThat(request.getHeader(TraceHttpHeaders.SPAN_ID), is(not(parentTrace.getSpanId())));
+        assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID)).isEqualTo(traceId);
+        assertThat(request.getHeader(TraceHttpHeaders.SPAN_ID)).isNotEqualTo(parentTrace.getSpanId());
     }
 
     @Test
@@ -139,7 +137,7 @@ public final class TracerTest extends TestBase {
         addTraceSubscriber(observedTraceIds);
         runTwoRequestsInParallel();
         removeTraceSubscriber();
-        assertThat(observedTraceIds, hasSize(2));
+        assertThat(observedTraceIds).hasSize(2);
     }
 
     private void runTwoRequestsInParallel() {
@@ -181,7 +179,7 @@ public final class TracerTest extends TestBase {
                 server.enqueue(new MockResponse().setResponseCode(429));
             });
             server.enqueue(new MockResponse().setBody("\"server\""));
-            assertThat(service.string(), is("server"));
+            assertThat(service.string()).is(new HamcrestCondition<>(is("server")));
         }
     }
 }

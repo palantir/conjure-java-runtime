@@ -16,12 +16,13 @@
 
 package com.palantir.conjure.java.config.ssl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import com.google.common.base.Throwables;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
@@ -39,6 +40,7 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocketFactory;
+import org.assertj.core.api.HamcrestCondition;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -107,10 +109,10 @@ public final class SslSocketFactoriesConnectionTests {
 
         try {
             runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
-            fail();
+            fail("fail");
         } catch (RuntimeException ex) {
-            assertThat(ex.getCause(), is(instanceOf(SSLHandshakeException.class)));
-            assertThat(ex.getMessage(), containsString("PKIX path building failed"));
+            assertThat(ex.getCause()).is(new HamcrestCondition<>(is(instanceOf(SSLHandshakeException.class))));
+            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("PKIX path building failed")));
         }
     }
 
@@ -226,10 +228,10 @@ public final class SslSocketFactoriesConnectionTests {
 
         try {
             runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
-            fail();
+            fail("fail");
         } catch (RuntimeException ex) {
-            assertThat(ex.getCause(), is(instanceOf(SSLHandshakeException.class)));
-            assertThat(ex.getMessage(), containsString("bad_certificate"));
+            assertThat(ex.getCause()).is(new HamcrestCondition<>(is(instanceOf(SSLHandshakeException.class))));
+            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("bad_certificate")));
         }
     }
 
@@ -247,20 +249,18 @@ public final class SslSocketFactoriesConnectionTests {
                 TestConstants.CLIENT_KEY_STORE_JKS_PATH,
                 TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
 
-        try {
+        assertThatThrownBy(() -> {
             runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
-            fail();
-        } catch (RuntimeException ex) {
+        }).isInstanceOfSatisfying(RuntimeException.class, ex -> {
             if (System.getProperty("java.version").startsWith("1.8")) {
-                assertThat(ex.getCause(), is(instanceOf(SSLHandshakeException.class)));
-                assertThat(ex.getMessage(), containsString("bad_certificate"));
+                assertThat(ex).hasCauseInstanceOf(SSLHandshakeException.class).hasMessageContaining("bad_certificate");
             } else {
-                assertThat(ex.getCause(),
-                        anyOf(instanceOf(SSLException.class), instanceOf(SSLHandshakeException.class)));
-                assertThat(ex.getMessage(),
-                        anyOf(containsString("readHandshakeRecord"), containsString("certificate_unknown")));
+                assertThat(ex.getCause()).is(new HamcrestCondition<>(anyOf(
+                        instanceOf(SSLException.class), instanceOf(SSLHandshakeException.class))));
+                assertThat(ex.getMessage()).is(new HamcrestCondition<>(anyOf(
+                        containsString("readHandshakeRecord"), containsString("certificate_unknown"))));
             }
-        }
+        });
     }
 
     private void runSslConnectionTest(
@@ -295,7 +295,7 @@ public final class SslSocketFactoriesConnectionTests {
 
             String fromServer;
             while ((fromServer = in.readLine()) != null) {
-                assertThat(fromServer, is(expectedMessage));
+                assertThat(fromServer).is(new HamcrestCondition<>(is(expectedMessage)));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

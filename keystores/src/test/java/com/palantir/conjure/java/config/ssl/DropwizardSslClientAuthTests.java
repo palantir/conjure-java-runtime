@@ -16,9 +16,9 @@
 
 package com.palantir.conjure.java.config.ssl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import feign.Feign;
@@ -38,6 +38,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import okhttp3.OkHttpClient;
+import org.assertj.core.api.HamcrestCondition;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -67,7 +68,7 @@ public final class DropwizardSslClientAuthTests {
 
         try {
             service.echo("foo");
-            fail();
+            fail("fail");
         } catch (RetryableException ex) {
             // expected
         }
@@ -81,7 +82,7 @@ public final class DropwizardSslClientAuthTests {
                 TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
         TestEchoService service = createTestService(sslConfig);
 
-        assertThat(service.echo("foo"), is("foo"));
+        assertThat(service.echo("foo")).is(new HamcrestCondition<>(is("foo")));
     }
 
     @Test
@@ -96,7 +97,7 @@ public final class DropwizardSslClientAuthTests {
                 .build();
         TestEchoService service = createTestService(sslConfig);
 
-        assertThat(service.echo("foo"), is("foo"));
+        assertThat(service.echo("foo")).is(new HamcrestCondition<>(is("foo")));
     }
 
     private static TestEchoService createTestService(SslConfiguration sslConfig) {
@@ -113,7 +114,7 @@ public final class DropwizardSslClientAuthTests {
 
     public static final class TestEchoServer extends Application<Configuration> {
         @Override
-        public void run(Configuration config, final Environment env) throws Exception {
+        public void run(Configuration _config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
         }
 

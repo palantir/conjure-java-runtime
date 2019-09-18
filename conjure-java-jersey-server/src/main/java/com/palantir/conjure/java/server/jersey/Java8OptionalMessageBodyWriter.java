@@ -41,16 +41,16 @@ public final class Java8OptionalMessageBodyWriter implements MessageBodyWriter<O
     // Jersey ignores this
     @Override
     public long getSize(
-            Optional<?> entity,
-            Class<?> type,
-            Type genericType,
-            Annotation[] annotations,
-            MediaType mediaType) {
+            Optional<?> _entity,
+            Class<?> _type,
+            Type _genericType,
+            Annotation[] _annotations,
+            MediaType _mediaType) {
         return 0;
     }
 
     @Override
-    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    public boolean isWriteable(Class<?> type, Type _genericType, Annotation[] _annotations, MediaType _mediaType) {
         return Optional.class.isAssignableFrom(type);
     }
 
@@ -58,7 +58,7 @@ public final class Java8OptionalMessageBodyWriter implements MessageBodyWriter<O
     @Override
     public void writeTo(
             Optional<?> entity,
-            Class<?> type,
+            Class<?> _type,
             Type genericType,
             Annotation[] annotations,
             MediaType mediaType,

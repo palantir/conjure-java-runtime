@@ -299,7 +299,7 @@ final class ConcurrencyLimiters {
             long start = System.nanoTime();
             Futures.addCallback(future, new FutureCallback<Limiter.Listener>() {
                 @Override
-                public void onSuccess(Limiter.Listener result) {
+                public void onSuccess(Limiter.Listener _result) {
                     long end = System.nanoTime();
                     long durationNanos = end - start;
 
@@ -312,7 +312,7 @@ final class ConcurrencyLimiters {
                 }
 
                 @Override
-                public void onFailure(Throwable error) {
+                public void onFailure(Throwable _error) {
                 }
             }, MoreExecutors.directExecutor());
         }

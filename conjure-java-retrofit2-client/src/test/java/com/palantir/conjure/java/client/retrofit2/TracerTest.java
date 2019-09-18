@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.client.retrofit2;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.tracing.RenderTracingRule;
@@ -59,8 +57,8 @@ public final class TracerTest extends TestBase {
         service.get().execute();
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID), is(traceId));
-        assertThat(request.getHeader(TraceHttpHeaders.SPAN_ID), is(not(parentTrace.getSpanId())));
+        assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID)).isEqualTo(traceId);
+        assertThat(request.getHeader(TraceHttpHeaders.SPAN_ID)).isNotEqualTo(parentTrace.getSpanId());
     }
 
     @Test
