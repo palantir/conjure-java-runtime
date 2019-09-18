@@ -18,12 +18,10 @@ package com.palantir.conjure.java.config.ssl.pkcs1;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
 import java.security.spec.RSAPrivateKeySpec;
 import java.util.ServiceLoader;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.Assume;
 import org.junit.Test;
 
@@ -43,8 +41,8 @@ public final class Pkcs1ReadersTests {
         Assume.assumeTrue(ServiceLoader.load(Pkcs1Reader.class).iterator().hasNext());
 
         RSAPrivateKeySpec privateKeySpec = Pkcs1Readers.getInstance().readPrivateKey(TestConstants.PRIVATE_KEY_DER);
-        assertThat(TestConstants.MODULUS).is(new HamcrestCondition<>(is(privateKeySpec.getModulus())));
-        assertThat(TestConstants.PRIVATE_EXPONENT).is(new HamcrestCondition<>(is(privateKeySpec.getPrivateExponent())));
+        assertThat(TestConstants.MODULUS).isEqualTo(privateKeySpec.getModulus());
+        assertThat(TestConstants.PRIVATE_EXPONENT).isEqualTo(privateKeySpec.getPrivateExponent());
     }
 
 }

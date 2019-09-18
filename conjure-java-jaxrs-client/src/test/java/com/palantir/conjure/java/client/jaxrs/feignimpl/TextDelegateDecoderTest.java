@@ -19,7 +19,6 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -41,7 +40,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 import javax.ws.rs.core.MediaType;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -156,7 +154,7 @@ public final class TextDelegateDecoderTest extends TestBase {
 
     @Test
     public void testStandardClientsUseTextDelegateEncoder() {
-        assertThat(service.getString("string")).is(new HamcrestCondition<>(is("string")));
+        assertThat(service.getString("string")).isEqualTo("string");
         assertThatExceptionOfType(DecodeException.class)
                 .isThrownBy(() -> service.getString(null))
                 .withCauseInstanceOf(NullPointerException.class);

@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.client.retrofit2;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.config.service.BasicCredentials;
@@ -33,7 +32,6 @@ import java.util.List;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -62,10 +60,10 @@ public final class Retrofit2ClientProxyTest extends TestBase {
                 new HostMetricsRegistry(),
                 proxiedConfig);
 
-        assertThat(directService.get().execute().body()).is(new HamcrestCondition<>(is("server")));
-        assertThat(proxiedService.get().execute().body()).is(new HamcrestCondition<>(is("proxyServer")));
+        assertThat(directService.get().execute().body()).isEqualTo("server");
+        assertThat(proxiedService.get().execute().body()).isEqualTo("proxyServer");
         RecordedRequest proxyRequest = proxyServer.takeRequest();
-        assertThat(proxyRequest.getHeader("Host")).is(new HamcrestCondition<>(is("localhost:" + server.getPort())));
+        assertThat(proxyRequest.getHeader("Host")).isEqualTo("localhost:" + server.getPort());
     }
 
     @Test
@@ -81,7 +79,7 @@ public final class Retrofit2ClientProxyTest extends TestBase {
         TestService proxiedService =
                 Retrofit2Client.create(TestService.class, AGENT, new HostMetricsRegistry(), proxiedConfig);
 
-        assertThat(proxiedService.get().execute().body()).is(new HamcrestCondition<>(is("proxyServer")));
+        assertThat(proxiedService.get().execute().body()).isEqualTo("proxyServer");
         RecordedRequest firstRequest = proxyServer.takeRequest();
         assertThat(firstRequest.getHeader("Proxy-Authorization")).isNull();
         RecordedRequest secondRequest = proxyServer.takeRequest();

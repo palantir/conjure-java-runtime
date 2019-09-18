@@ -18,7 +18,6 @@ package com.palantir.conjure.java.config.ssl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.Matchers.is;
 
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import feign.Feign;
@@ -38,7 +37,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import okhttp3.OkHttpClient;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -82,7 +80,7 @@ public final class DropwizardSslClientAuthTests {
                 TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
         TestEchoService service = createTestService(sslConfig);
 
-        assertThat(service.echo("foo")).is(new HamcrestCondition<>(is("foo")));
+        assertThat(service.echo("foo")).isEqualTo("foo");
     }
 
     @Test
@@ -97,7 +95,7 @@ public final class DropwizardSslClientAuthTests {
                 .build();
         TestEchoService service = createTestService(sslConfig);
 
-        assertThat(service.echo("foo")).is(new HamcrestCondition<>(is("foo")));
+        assertThat(service.echo("foo")).isEqualTo("foo");
     }
 
     private static TestEchoService createTestService(SslConfiguration sslConfig) {

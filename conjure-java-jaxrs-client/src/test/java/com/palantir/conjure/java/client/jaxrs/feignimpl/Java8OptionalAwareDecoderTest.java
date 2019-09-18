@@ -17,9 +17,7 @@
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -31,7 +29,6 @@ import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.file.Paths;
 import java.util.Optional;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -41,7 +38,8 @@ import org.junit.rules.ExpectedException;
 public final class Java8OptionalAwareDecoderTest extends TestBase {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(Java8TestServer.class,
+    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
+            Java8TestServer.class,
             "src/test/resources/test-server.yml");
 
     @Rule
@@ -52,7 +50,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.create(TestService.class,
+        service = JaxRsClient.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
                 createTestConfig(endpointUri));
@@ -60,83 +59,67 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
 
     @Test
     public void testOptional() {
-        assertThat(service.getOptional("something")).is(
-                new HamcrestCondition<>(is(Optional.of(ImmutableMap.of("something", "something")))));
-        assertThat(service.getOptional(null)).is(
-                new HamcrestCondition<>(is(Optional.<ImmutableMap<String, String>>empty())));
+        assertThat(service.getOptional("something")).hasValue(ImmutableMap.of("something", "something"));
+        assertThat(service.getOptional(null)).isEmpty();
     }
 
     @Test
     public void testNonOptional() {
-        assertThat(service.getNonOptional("something")).is(
-                new HamcrestCondition<>(is(ImmutableMap.of("something", "something"))));
-        assertThat(service.getNonOptional(null)).is(new HamcrestCondition<>(is(ImmutableMap.<String, String>of())));
+        assertThat(service.getNonOptional("something")).isEqualTo(ImmutableMap.of("something", "something"));
+        assertThat(service.getNonOptional(null)).isEqualTo(ImmutableMap.<String, String>of());
     }
 
     @Test
     public void testThrowsNotFound() {
-        try {
-            service.getThrowsNotFound(null);
-            fail("fail");
-        } catch (RemoteException e) {
-            assertThat(e.getMessage()).is(
-                    new HamcrestCondition<>(containsString("RemoteException: NOT_FOUND (Default:NotFound)")));
-            assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("NOT_FOUND")));
-        }
+        assertThatThrownBy(() -> service.getThrowsNotFound(null))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    assertThat(e.getMessage()).contains("RemoteException: NOT_FOUND (Default:NotFound)");
+                    assertThat(e.getError().errorCode()).isEqualTo("NOT_FOUND");
+                });
     }
 
     @Test
     public void testThrowsNotAuthorized() {
-        try {
-            service.getThrowsNotAuthorized(null);
-            fail("fail");
-        } catch (RemoteException e) {
-            assertThat(e.getMessage()).is(
-                    new HamcrestCondition<>(containsString("RemoteException: javax.ws.rs.NotAuthorizedException")));
-            assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("javax.ws.rs.NotAuthorizedException")));
-        }
+        assertThatThrownBy(() -> service.getThrowsNotAuthorized(null))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    assertThat(e.getMessage()).contains("RemoteException: javax.ws.rs.NotAuthorizedException");
+                    assertThat(e.getError().errorCode()).isEqualTo("javax.ws.rs.NotAuthorizedException");
+                });
     }
 
     @Test
     public void testOptionalThrowsNotAuthorized() {
-        try {
-            service.getOptionalThrowsNotAuthorized(null);
-            fail("fail");
-        } catch (RemoteException e) {
-            assertThat(e.getMessage()).is(
-                    new HamcrestCondition<>(containsString("RemoteException: javax.ws.rs.NotAuthorizedException")));
-            assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("javax.ws.rs.NotAuthorizedException")));
-        }
+        assertThatThrownBy(() -> service.getOptionalThrowsNotAuthorized(null))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    assertThat(e.getMessage()).contains("RemoteException: javax.ws.rs.NotAuthorizedException");
+                    assertThat(e.getError().errorCode()).isEqualTo("javax.ws.rs.NotAuthorizedException");
+                });
     }
 
     @Test
     public void testThrowsFordidden() {
-        try {
-            service.getThrowsForbidden(null);
-            fail("fail");
-        } catch (RemoteException e) {
-            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString(
-                    "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)")));
-            assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("PERMISSION_DENIED")));
-        }
+        assertThatThrownBy(() -> service.getThrowsForbidden(null))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    assertThat(e.getMessage()).contains(
+                            "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
+                    assertThat(e.getError().errorCode()).isEqualTo("PERMISSION_DENIED");
+                });
     }
 
     @Test
     public void testOptionalThrowsFordidden() {
-        try {
-            service.getOptionalThrowsForbidden(null);
-            fail("fail");
-        } catch (RemoteException e) {
-            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString(
-                    "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)")));
-            assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("PERMISSION_DENIED")));
-        }
+        assertThatThrownBy(() -> service.getOptionalThrowsForbidden(null))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    assertThat(e.getMessage()).contains(
+                            "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
+                    assertThat(e.getError().errorCode()).isEqualTo("PERMISSION_DENIED");
+                });
     }
 
     @Test
     public void testOptionalString() {
-        assertThat(service.getOptionalString(null)).is(new HamcrestCondition<>(is(Optional.empty())));
-        assertThat(service.getOptionalString("foo")).is(new HamcrestCondition<>(is(Optional.of("foo"))));
+        assertThat(service.getOptionalString(null)).isEmpty();
+        assertThat(service.getOptionalString("foo")).hasValue("foo");
     }
 
     @Test
@@ -150,6 +133,6 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
                 Optional.of("baz"),
                 Paths.get("foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
-        assertThat(service.getJava8ComplexType(value)).is(new HamcrestCondition<>(is(value)));
+        assertThat(service.getJava8ComplexType(value)).isEqualTo(value);
     }
 }

@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -33,7 +32,6 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.assertj.core.api.HamcrestCondition;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -58,18 +56,18 @@ public final class StringFormatTest {
     @Test
     public void testTextPlainMediaTypeReturnsPlainStrings() {
         Response response = target.path("textString").request().get();
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("")));
+        assertThat(response.readEntity(String.class)).isEqualTo("");
         response = target.path("textString").queryParam("value", "val").request().get();
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("val")));
+        assertThat(response.readEntity(String.class)).isEqualTo("val");
     }
 
     @Test
     public void testJsonMediaTypeReturnsPlainStrings() {
         // This behaviour is somewhat unexpected since a valid JSON response object would be "\"val\"" rather than "val"
         Response response = target.path("jsonString").request().get();
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("")));
+        assertThat(response.readEntity(String.class)).isEqualTo("");
         response = target.path("jsonString").queryParam("value", "val").request().get();
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("val")));
+        assertThat(response.readEntity(String.class)).isEqualTo("val");
     }
 
     public static class TestServer extends Application<Configuration> {

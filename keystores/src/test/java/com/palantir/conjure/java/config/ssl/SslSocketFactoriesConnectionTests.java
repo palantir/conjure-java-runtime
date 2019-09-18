@@ -19,10 +19,6 @@ package com.palantir.conjure.java.config.ssl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 
 import com.google.common.base.Throwables;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
@@ -40,7 +36,6 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocketFactory;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -107,13 +102,12 @@ public final class SslSocketFactoriesConnectionTests {
         // that can verify the server certificate
         SslConfiguration clientConfig = SslConfiguration.of(TestConstants.CLIENT_KEY_STORE_JKS_PATH);
 
-        try {
+        assertThatThrownBy(() -> {
             runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
             fail("fail");
-        } catch (RuntimeException ex) {
-            assertThat(ex.getCause()).is(new HamcrestCondition<>(is(instanceOf(SSLHandshakeException.class))));
-            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("PKIX path building failed")));
-        }
+        }).isInstanceOf(RuntimeException.class)
+                .hasCauseInstanceOf(SSLHandshakeException.class)
+                .hasMessageContaining("PKIX path building failed");
     }
 
     @Test
@@ -226,13 +220,11 @@ public final class SslSocketFactoriesConnectionTests {
         // that requires client authentication
         SslConfiguration clientConfig = SslConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
 
-        try {
+        assertThatThrownBy(() -> {
             runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
-            fail("fail");
-        } catch (RuntimeException ex) {
-            assertThat(ex.getCause()).is(new HamcrestCondition<>(is(instanceOf(SSLHandshakeException.class))));
-            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("bad_certificate")));
-        }
+        }).isInstanceOf(RuntimeException.class)
+                .hasCauseInstanceOf(SSLHandshakeException.class)
+                .hasMessageContaining("bad_certificate");
     }
 
     @Test
@@ -255,10 +247,10 @@ public final class SslSocketFactoriesConnectionTests {
             if (System.getProperty("java.version").startsWith("1.8")) {
                 assertThat(ex).hasCauseInstanceOf(SSLHandshakeException.class).hasMessageContaining("bad_certificate");
             } else {
-                assertThat(ex.getCause()).is(new HamcrestCondition<>(anyOf(
-                        instanceOf(SSLException.class), instanceOf(SSLHandshakeException.class))));
-                assertThat(ex.getMessage()).is(new HamcrestCondition<>(anyOf(
-                        containsString("readHandshakeRecord"), containsString("certificate_unknown"))));
+                assertThat(ex.getCause()).isInstanceOfAny(SSLException.class, SSLHandshakeException.class);
+                assertThat(ex.getMessage()).satisfiesAnyOf(
+                        message -> assertThat(message).contains("readHandshakeRecord"),
+                        message -> assertThat(message).contains("certificate_unknown"));
             }
         });
     }
@@ -284,9 +276,9 @@ public final class SslSocketFactoriesConnectionTests {
     }
 
     /**
-     * Verify that an SSL connection can be established. Creates an SSL socket with
-     * the provided {@link SSLSocketFactory} that connect to localhost on the specified
-     * port and waits for expectedMessage to be sent by the server.
+     * Verify that an SSL connection can be established. Creates an SSL socket with the provided {@link
+     * SSLSocketFactory} that connect to localhost on the specified port and waits for expectedMessage to be sent by the
+     * server.
      */
     private void verifySslConnection(SSLSocketFactory factory, int port, String expectedMessage) {
         try (Socket clientSocket = factory.createSocket("localhost", port)) {
@@ -295,7 +287,7 @@ public final class SslSocketFactoriesConnectionTests {
 
             String fromServer;
             while ((fromServer = in.readLine()) != null) {
-                assertThat(fromServer).is(new HamcrestCondition<>(is(expectedMessage)));
+                assertThat(fromServer).isEqualTo(expectedMessage);
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -303,9 +295,8 @@ public final class SslSocketFactoriesConnectionTests {
     }
 
     /**
-     * Return a {@link Thread} that accepts an incoming connection on the provided
-     * {@link SSLServerSocket}. If a connection is established, the specified message
-     * is sent to the client and the socket is closed.
+     * Return a {@link Thread} that accepts an incoming connection on the provided {@link SSLServerSocket}. If a
+     * connection is established, the specified message is sent to the client and the socket is closed.
      */
     private Thread createSslServerThread(
             final SSLServerSocket sslServerSocket,
@@ -319,7 +310,8 @@ public final class SslSocketFactoriesConnectionTests {
                     sslServerSocket.setReuseAddress(true);
                     Socket clientSocket = sslServerSocket.accept();
 
-                    OutputStreamWriter streamWriter = new OutputStreamWriter(clientSocket.getOutputStream(),
+                    OutputStreamWriter streamWriter = new OutputStreamWriter(
+                            clientSocket.getOutputStream(),
                             StandardCharsets.UTF_8);
 
                     PrintWriter out = new PrintWriter(streamWriter, true);
@@ -328,11 +320,9 @@ public final class SslSocketFactoriesConnectionTests {
                 } catch (IOException e) {
                     Throwables.propagate(e);
                 }
-
             }
         };
 
         return new Thread(serverThread);
     }
-
 }

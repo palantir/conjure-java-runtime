@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 
 import com.google.common.base.Strings;
 import io.dropwizard.Application;
@@ -39,7 +38,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.assertj.core.api.HamcrestCondition;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -64,88 +62,88 @@ public final class Java8OptionalTest {
     @Test
     public void testOptionalPresent() throws NoSuchMethodException, SecurityException {
         Response response = target.path("optional").queryParam("value", "val").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("valval")));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("valval");
     }
 
     @Test
     public void testOptionalAbsent() {
         Response response = target.path("optional").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.NO_CONTENT.getStatusCode())));
+        assertThat(response.getStatus()).isEqualTo(Status.NO_CONTENT.getStatusCode());
     }
 
     @Test
     public void testQueryParam_optionalPresent() throws NoSuchMethodException, SecurityException {
         Response response = target.path("optional/string").queryParam("value", "val").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("val")));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("val");
     }
 
     @Test
     public void testQueryParam_optionalEmpty() {
         Response response = target.path("optional/string").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("default")));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("default");
     }
 
     @Test
     public void testQueryParam_optionalIntPresent() throws NoSuchMethodException, SecurityException {
         Response response = target.path("optional/int").queryParam("value", "10").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("10")));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("10");
     }
 
     @Test
     public void testQueryParam_optionalIntEmpty() {
         Response response = target.path("optional/int").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("0")));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("0");
     }
 
     @Test
     public void testQueryParam_optionalIntInvalid() {
         Response response = target.path("optional/int").queryParam("value", "foo").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.BAD_REQUEST.getStatusCode())));
+        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
     }
 
     @Test
     public void testQueryParam_optionalDoublePresent() throws NoSuchMethodException, SecurityException {
         Response response = target.path("optional/double").queryParam("value", "1.5").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("1.5")));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("1.5");
     }
 
     @Test
     public void testQueryParam_optionalDoubleEmpty() {
         Response response = target.path("optional/double").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("0.0")));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("0.0");
     }
 
     @Test
     public void testQueryParam_optionalDoubleInvalid() {
         Response response = target.path("optional/double").queryParam("value", "foo").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.BAD_REQUEST.getStatusCode())));
+        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
     }
 
     @Test
     public void testQueryParam_optionalLongPresent() throws NoSuchMethodException, SecurityException {
         Response response = target.path("optional/long").queryParam("value", "100").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("100")));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("100");
     }
 
     @Test
     public void testQueryParam_optionalLongEmpty() {
         Response response = target.path("optional/long").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("0")));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("0");
     }
 
     @Test
     public void testQueryParam_optionalLongInvalid() {
         Response response = target.path("optional/long").queryParam("value", "foo").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.BAD_REQUEST.getStatusCode())));
+        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
     }
 
     public static class OptionalTestServer extends Application<Configuration> {

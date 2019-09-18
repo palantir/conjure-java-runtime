@@ -19,9 +19,6 @@ package com.palantir.conjure.java.config.ssl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
@@ -32,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
 import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -113,8 +109,8 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).is(new HamcrestCondition<>(notNullValue()));
+        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).isNotNull();
+        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).isNotNull();
     }
 
     @Test
@@ -122,7 +118,7 @@ public final class SslSocketFactoriesTests {
         File puppetFolder = tempFolder.newFolder();
 
         File certsFolder = puppetFolder.toPath().resolve("certs").toFile();
-        assertThat(certsFolder.mkdir()).is(new HamcrestCondition<>(is(true)));
+        assertThat(certsFolder.mkdir()).isTrue();
 
         Files.copy(TestConstants.CA_PEM_CERT_PATH.toFile(), certsFolder.toPath().resolve("ca.pem").toFile());
         Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), certsFolder.toPath().resolve("server.pem").toFile());
@@ -145,10 +141,10 @@ public final class SslSocketFactoriesTests {
         File puppetFolder = tempFolder.newFolder();
 
         File keysFolder = puppetFolder.toPath().resolve("private_keys").toFile();
-        assertThat(keysFolder.mkdir()).is(new HamcrestCondition<>(is(true)));
+        assertThat(keysFolder.mkdir()).isTrue();
 
         File certsFolder = puppetFolder.toPath().resolve("certs").toFile();
-        assertThat(certsFolder.mkdir()).is(new HamcrestCondition<>(is(true)));
+        assertThat(certsFolder.mkdir()).isTrue();
 
         Files.copy(TestConstants.SERVER_KEY_PEM_PATH.toFile(), keysFolder.toPath().resolve("server.pem").toFile());
         Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), certsFolder.toPath().resolve("server.pem").toFile());
@@ -239,7 +235,7 @@ public final class SslSocketFactoriesTests {
                 assertThat(sslSocketFactory).isNotNull();
             }
         } catch (RuntimeException ex) {
-            assertThat(ex.getCause()).is(new HamcrestCondition<>(is(instanceOf(IOException.class))));
+            assertThat(ex).hasCauseInstanceOf(IOException.class);
         }
     }
 

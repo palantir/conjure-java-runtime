@@ -17,13 +17,11 @@
 package com.palantir.conjure.java.config.ssl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import java.io.IOException;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.Test;
 
 public final class SerializationTests {
@@ -48,7 +46,7 @@ public final class SerializationTests {
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
 
-        assertThat(MAPPER.readValue(JSON_STRING, SslConfiguration.class)).is(new HamcrestCondition<>(is(sslConfig)));
+        assertThat(MAPPER.readValue(JSON_STRING, SslConfiguration.class)).isEqualTo(sslConfig);
     }
 
     private static final String JSON_STRING =
