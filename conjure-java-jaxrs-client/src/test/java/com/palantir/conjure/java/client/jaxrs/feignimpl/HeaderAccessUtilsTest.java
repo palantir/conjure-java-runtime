@@ -17,14 +17,10 @@
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Arrays;
 import java.util.Collection;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.Test;
 
 public final class HeaderAccessUtilsTest {
@@ -38,25 +34,22 @@ public final class HeaderAccessUtilsTest {
 
     @Test
     public void caseInsensitiveContainsShouldReturnTrueIgnoringCase() {
-        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "hEaDeR")).is(
-                new HamcrestCondition<>(is(true)));
+        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "hEaDeR")).isTrue();
     }
 
     @Test
     public void caseInsensitiveContainsShouldReturnFalseForNonExistentKey() {
-        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "invalid")).is(
-                new HamcrestCondition<>(is(false)));
+        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "invalid")).isFalse();
     }
 
     @Test
     public void caseInsensitiveGetReturnsNullForNotExistingHeader() {
-        assertThat(HeaderAccessUtils.caseInsensitiveGet(TEST_HEADERS_MAP, "invalid")).is(
-                new HamcrestCondition<>(is(nullValue())));
+        assertThat(HeaderAccessUtils.caseInsensitiveGet(TEST_HEADERS_MAP, "invalid")).isNull();
     }
 
     @Test
     public void caseInsensitiveGetReturnsAllExistingHeaders() {
-        assertThat(HeaderAccessUtils.caseInsensitiveGet(TEST_HEADERS_MAP, "HeADER")).is(
-                new HamcrestCondition<>(contains("value1", "value2", "value3", "value4", "value5")));
+        assertThat(HeaderAccessUtils.caseInsensitiveGet(TEST_HEADERS_MAP, "HeADER"))
+                .contains("value1", "value2", "value3", "value4", "value5");
     }
 }

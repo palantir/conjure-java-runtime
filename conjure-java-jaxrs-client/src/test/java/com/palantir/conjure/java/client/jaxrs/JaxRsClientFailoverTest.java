@@ -19,7 +19,6 @@ package com.palantir.conjure.java.client.jaxrs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.Matchers.is;
 
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
@@ -34,7 +33,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
@@ -86,7 +84,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
         failoverTestCase.server1.shutdown();
         failoverTestCase.server2.enqueue(new MockResponse().setBody("\"foo\""));
 
-        assertThat(proxy.string()).is(new HamcrestCondition<>(is("foo")));
+        assertThat(proxy.string()).isEqualTo("foo");
     }
 
     @Test
@@ -107,7 +105,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
             things.add(executorService.submit(() -> proxy.string()));
         }
         for (int i = 0; i < 10; i++) {
-            assertThat(things.get(i).get()).is(new HamcrestCondition<>(is("foo")));
+            assertThat(things.get(i).get()).isEqualTo("foo");
         }
     }
 
@@ -132,7 +130,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
         MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
         anotherServer1.start(failoverTestCase.server1.getPort());
         anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
-        assertThat(proxy.string()).is(new HamcrestCondition<>(is("foo")));
+        assertThat(proxy.string()).isEqualTo("foo");
         anotherServer1.shutdown();
     }
 
@@ -146,7 +144,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
         failoverTestCase.server2.enqueue(new MockResponse().setBody("\"bar\""));
 
-        assertThat(proxy.string()).is(new HamcrestCondition<>(is("bar")));
+        assertThat(proxy.string()).isEqualTo("bar");
     }
 
     @Test
@@ -163,8 +161,8 @@ public final class JaxRsClientFailoverTest extends TestBase {
                                 "http://localhost:" + failoverTestCase.server1.getPort()))
                         .maxNumRetries(2)
                         .build());
-        assertThat(bogusHostProxy.string()).is(new HamcrestCondition<>(is("foo")));
-        assertThat(failoverTestCase.server1.getRequestCount()).is(new HamcrestCondition<>(is(1)));
+        assertThat(bogusHostProxy.string()).isEqualTo("foo");
+        assertThat(failoverTestCase.server1.getRequestCount()).isEqualTo(1);
     }
 
     @Test
@@ -182,7 +180,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
                         .maxNumRetries(2)
                         .build());
 
-        assertThat(anotherProxy.string()).is(new HamcrestCondition<>(is("foo")));
+        assertThat(anotherProxy.string()).isEqualTo("foo");
     }
 
     @Test
@@ -201,7 +199,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
                         .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
                         .build());
 
-        assertThat(anotherProxy.string()).is(new HamcrestCondition<>(is("foo")));
+        assertThat(anotherProxy.string()).isEqualTo("foo");
     }
 
     @Test
@@ -231,7 +229,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
         anotherServer1.enqueue(new MockResponse().setResponseCode(503));
         anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
-        assertThat(anotherProxy.string()).is(new HamcrestCondition<>(is("foo")));
+        assertThat(anotherProxy.string()).isEqualTo("foo");
         anotherServer1.shutdown();
     }
 
@@ -249,8 +247,8 @@ public final class JaxRsClientFailoverTest extends TestBase {
         proxy.string();
         proxy.string();
 
-        assertThat(failoverTestCase.server1.getRequestCount()).is(new HamcrestCondition<>(is(1)));
-        assertThat(failoverTestCase.server2.getRequestCount()).is(new HamcrestCondition<>(is(1)));
+        assertThat(failoverTestCase.server1.getRequestCount()).isEqualTo(1);
+        assertThat(failoverTestCase.server2.getRequestCount()).isEqualTo(1);
     }
 
     private static class FailoverTestCase {

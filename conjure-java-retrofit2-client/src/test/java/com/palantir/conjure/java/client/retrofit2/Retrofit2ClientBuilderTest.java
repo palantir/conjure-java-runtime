@@ -17,8 +17,6 @@
 package com.palantir.conjure.java.client.retrofit2;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
 
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.service.UserAgents;
@@ -29,7 +27,6 @@ import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -80,8 +77,7 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         service.get().execute();
 
         RecordedRequest capturedRequest = server.takeRequest();
-        assertThat(capturedRequest.getHeader("User-Agent")).is(
-                new HamcrestCondition<>(startsWith(UserAgents.format(AGENT))));
+        assertThat(capturedRequest.getHeader("User-Agent")).startsWith(UserAgents.format(AGENT));
     }
 
     @Test
@@ -97,7 +93,7 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         service.get().execute();
 
         RecordedRequest capturedRequest = server.takeRequest();
-        assertThat(capturedRequest.getHeader("User-Agent")).is(new HamcrestCondition<>(startsWith("unknown/0.0.0")));
+        assertThat(capturedRequest.getHeader("User-Agent")).startsWith("unknown/0.0.0");
     }
 
     @Test
@@ -118,6 +114,6 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
                 .addAgent(UserAgent.Agent.of(
                         UserAgents.CONJURE_AGENT_NAME,
                         conjureVersion != null ? conjureVersion : "0.0.0"));
-        assertThat(request.getHeader("User-Agent")).is(new HamcrestCondition<>(is(UserAgents.format(expected))));
+        assertThat(request.getHeader("User-Agent")).isEqualTo(UserAgents.format(expected));
     }
 }

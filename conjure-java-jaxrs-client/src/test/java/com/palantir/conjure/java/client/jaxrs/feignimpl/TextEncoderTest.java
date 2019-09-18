@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
@@ -29,7 +28,6 @@ import javax.ws.rs.core.MediaType;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.assertj.core.api.HamcrestCondition;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -56,7 +54,7 @@ public final class TextEncoderTest extends TestBase {
         service.post(testString);
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getBody().readUtf8()).is(new HamcrestCondition<>(is(testString)));
+        assertThat(request.getBody().readUtf8()).isEqualTo(testString);
     }
 
     @Path("/")

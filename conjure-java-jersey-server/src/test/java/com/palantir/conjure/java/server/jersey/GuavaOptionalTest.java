@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 
 import com.google.common.base.Strings;
 import io.dropwizard.Application;
@@ -35,7 +34,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.assertj.core.api.HamcrestCondition;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -60,14 +58,14 @@ public final class GuavaOptionalTest {
     @Test
     public void testOptionalPresent() throws SecurityException {
         Response response = target.path("optional").queryParam("value", "val").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.OK.getStatusCode())));
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(is("valval")));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("valval");
     }
 
     @Test
     public void testOptionalAbsent() {
         Response response = target.path("optional").request().get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(is(Status.NO_CONTENT.getStatusCode())));
+        assertThat(response.getStatus()).isEqualTo(Status.NO_CONTENT.getStatusCode());
     }
 
     public static class OptionalTestServer extends Application<Configuration> {

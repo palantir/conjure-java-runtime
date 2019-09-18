@@ -35,9 +35,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.assertj.core.api.HamcrestCondition;
 import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -78,8 +76,8 @@ public final class TracerTest {
                 .header(TraceHttpHeaders.PARENT_SPAN_ID, "parentSpanId")
                 .header(TraceHttpHeaders.SPAN_ID, "spanId")
                 .get();
-        assertThat(response.getStatus()).is(new HamcrestCondition<>(Matchers.is(Status.OK.getStatusCode())));
-        assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(Matchers.is("traceId")));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("traceId");
         assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID)).isEqualTo("traceId");
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID)).isNull();
         assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID)).isNull();
