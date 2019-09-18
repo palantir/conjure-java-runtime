@@ -287,7 +287,7 @@ public final class SslSocketFactoriesTests {
                     .keyStoreKeyAlias("nonexistent")
                     .build();
             SslSocketFactories.createSslSocketFactory(sslConfig);
-        }).isInstanceOf(IllegalStateException.class).hasMessageContaining("could not find key with alias");
+        }).isInstanceOf(IllegalStateException.class).hasMessageContaining("Could not find key with alias");
     }
 
     @Test

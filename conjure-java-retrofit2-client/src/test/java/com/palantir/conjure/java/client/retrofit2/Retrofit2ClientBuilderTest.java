@@ -80,7 +80,8 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         service.get().execute();
 
         RecordedRequest capturedRequest = server.takeRequest();
-        assertThat(capturedRequest.getHeader("User-Agent")).isEqualTo(UserAgents.format(AGENT));
+        assertThat(capturedRequest.getHeader("User-Agent")).is(
+                new HamcrestCondition<>(startsWith(UserAgents.format(AGENT))));
     }
 
     @Test
