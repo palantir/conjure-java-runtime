@@ -45,16 +45,16 @@ public final class GuavaOptionalMessageBodyWriter implements MessageBodyWriter<c
     // Jersey ignores this
     @Override
     public long getSize(
-            com.google.common.base.Optional<?> entity,
-            Class<?> type,
-            Type genericType,
-            Annotation[] annotations,
-            MediaType mediaType) {
+            com.google.common.base.Optional<?> _entity,
+            Class<?> _type,
+            Type _genericType,
+            Annotation[] _annotations,
+            MediaType _mediaType) {
         return 0;
     }
 
     @Override
-    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    public boolean isWriteable(Class<?> type, Type _genericType, Annotation[] _annotations, MediaType _mediaType) {
         return com.google.common.base.Optional.class.isAssignableFrom(type);
     }
 
@@ -62,7 +62,7 @@ public final class GuavaOptionalMessageBodyWriter implements MessageBodyWriter<c
     @Override
     public void writeTo(
             com.google.common.base.Optional<?> entity,
-            Class<?> type,
+            Class<?> _type,
             Type genericType,
             Annotation[] annotations,
             MediaType mediaType,

@@ -129,7 +129,7 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
         }
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(Object _proxy, Method method, Object[] args) throws Throwable {
             if (method.getName().equals("close") && !closed) {
                 closed = true;
                 listener.onSuccess();

@@ -35,8 +35,8 @@ public final class Java8OptionalDoubleParamConverterProvider implements ParamCon
     @SuppressWarnings("unchecked")
     public <T> ParamConverter<T> getConverter(
             final Class<T> rawType,
-            final Type genericType,
-            final Annotation[] annotations) {
+            final Type _genericType,
+            final Annotation[] _annotations) {
         return OptionalDouble.class.equals(rawType) ? (ParamConverter<T>) paramConverter : null;
     }
 

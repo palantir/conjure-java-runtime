@@ -40,7 +40,7 @@ public final class Http2Agent {
      * @deprecated this method no longer has any effect and is safe to stop calling.
      */
     @Deprecated
-    public static void agentmain(String args, Instrumentation inst) throws Exception {
+    public static void agentmain(String _args, Instrumentation _inst) throws Exception {
         // no-op
     }
 }

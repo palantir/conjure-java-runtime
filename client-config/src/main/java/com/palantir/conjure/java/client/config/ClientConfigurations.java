@@ -152,12 +152,12 @@ public final class ClientConfigurations {
     private static ProxySelector fixedProxySelectorFor(Proxy proxy) {
         return new ProxySelector() {
             @Override
-            public List<Proxy> select(URI uri) {
+            public List<Proxy> select(URI _uri) {
                 return ImmutableList.of(proxy);
             }
 
             @Override
-            public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {}
+            public void connectFailed(URI _uri, SocketAddress _sa, IOException _ioe) {}
         };
     }
 }

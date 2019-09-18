@@ -58,7 +58,7 @@ final class QosExceptionMapper implements ExceptionMapper<QosException> {
             }
 
             @Override
-            public Response visit(QosException.Unavailable exception) {
+            public Response visit(QosException.Unavailable _exception) {
                 return Response.status(503).build();
             }
         });

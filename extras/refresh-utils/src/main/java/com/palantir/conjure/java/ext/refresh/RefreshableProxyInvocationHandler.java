@@ -54,7 +54,7 @@ public final class RefreshableProxyInvocationHandler<R, T> extends AbstractInvoc
     }
 
     @Override
-    protected Object handleInvocation(@Nonnull Object proxy, @Nonnull Method method, @Nonnull Object[] args)
+    protected Object handleInvocation(@Nonnull Object _proxy, @Nonnull Method method, @Nonnull Object[] args)
             throws Throwable {
         updateDelegate();
         try {

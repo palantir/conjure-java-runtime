@@ -48,7 +48,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
     private AsyncSerializableErrorCallAdapterFactory() {}
 
     @Override
-    public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
+    public CallAdapter<?, ?> get(Type returnType, Annotation[] _annotations, Retrofit _retrofit) {
         Type outerType = getRawType(returnType);
         if (outerType != CompletableFuture.class && outerType != ListenableFuture.class) {
             return null;
@@ -91,7 +91,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
         }
 
         @Override
-        public void onResponse(Call<R> call, Response<R> response) {
+        public void onResponse(Call<R> _call, Response<R> response) {
             boolean futureWasCancelled = !set(response.body());
             if (futureWasCancelled) {
                 close(response);
@@ -99,7 +99,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
         }
 
         @Override
-        public void onFailure(Call<R> call, Throwable throwable) {
+        public void onFailure(Call<R> _call, Throwable throwable) {
             // TODO(rfink): Would be good to not leak okhttp internals here
             if (throwable instanceof IoRemoteException) {
                 setException(((IoRemoteException) throwable).getWrappedException());
@@ -157,7 +157,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
 
             call.enqueue(new Callback<R>() {
                 @Override
-                public void onResponse(Call<R> call, Response<R> response) {
+                public void onResponse(Call<R> _call, Response<R> response) {
                     boolean futureWasCancelled = !future.complete(response.body());
                     if (futureWasCancelled) {
                         close(response);
@@ -165,7 +165,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
                 }
 
                 @Override
-                public void onFailure(Call<R> call, Throwable throwable) {
+                public void onFailure(Call<R> _call, Throwable throwable) {
                     // TODO(rfink): Would be good to not leak okhttp internals here
                     if (throwable instanceof IoRemoteException) {
                         future.completeExceptionally(
