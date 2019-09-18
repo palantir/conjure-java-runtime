@@ -248,7 +248,9 @@ public final class SslSocketFactoriesConnectionTests {
                 assertThat(ex).hasCauseInstanceOf(SSLHandshakeException.class).hasMessageContaining("bad_certificate");
             } else {
                 assertThat(ex.getCause()).isInstanceOfAny(SSLException.class, SSLHandshakeException.class);
-                assertThat(ex.getMessage()).contains("readHandshakeRecord", "certificate_unknown");
+                assertThat(ex.getMessage()).satisfiesAnyOf(
+                        message -> assertThat(message).contains("readHandshakeRecord"),
+                        message -> assertThat(message).contains("certificate_unknown"));
             }
         });
     }
