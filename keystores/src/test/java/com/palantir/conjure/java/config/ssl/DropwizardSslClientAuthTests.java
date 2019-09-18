@@ -114,7 +114,7 @@ public final class DropwizardSslClientAuthTests {
 
     public static final class TestEchoServer extends Application<Configuration> {
         @Override
-        public void run(Configuration config, final Environment env) throws Exception {
+        public void run(Configuration _config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
         }
 

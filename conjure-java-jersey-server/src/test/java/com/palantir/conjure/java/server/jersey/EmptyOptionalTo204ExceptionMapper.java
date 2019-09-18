@@ -24,7 +24,7 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public final class EmptyOptionalTo204ExceptionMapper implements ExceptionMapper<EmptyOptionalException> {
     @Override
-    public Response toResponse(EmptyOptionalException exception) {
+    public Response toResponse(EmptyOptionalException _exception) {
         return Response.noContent().build();
     }
 }

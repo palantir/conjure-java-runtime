@@ -60,12 +60,12 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
                 createTestConfig(url.toString()));
 
         server.enqueue(new MockResponse().setBody("\"server\""));
-        assertThat(service.get().execute().body()).is(new HamcrestCondition<>(is("server")));
-        assertThat(server.takeRequest().getPath()).is(new HamcrestCondition<>(is(String.format(expectedQueryPath, ""))));
+        assertThat(service.get().execute().body()).isEqualTo("server");
+        assertThat(server.takeRequest().getPath()).isEqualTo(String.format(expectedQueryPath, ""));
 
         server.enqueue(new MockResponse().setBody("\"server\""));
-        assertThat(service.getRelative().execute().body()).is(new HamcrestCondition<>(is("server")));
-        assertThat(server.takeRequest().getPath()).is(new HamcrestCondition<>(is(String.format(expectedQueryPath, "relative"))));
+        assertThat(service.getRelative().execute().body()).isEqualTo("server");
+        assertThat(server.takeRequest().getPath()).isEqualTo(String.format(expectedQueryPath, "relative"));
     }
 
     @Test
@@ -80,7 +80,7 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         service.get().execute();
 
         RecordedRequest capturedRequest = server.takeRequest();
-        assertThat(capturedRequest.getHeader("User-Agent")).is(new HamcrestCondition<>(startsWith(UserAgents.format(AGENT))));
+        assertThat(capturedRequest.getHeader("User-Agent")).isEqualTo(UserAgents.format(AGENT));
     }
 
     @Test

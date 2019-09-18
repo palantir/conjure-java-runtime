@@ -74,7 +74,7 @@ public final class StringFormatTest {
 
     public static class TestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
+        public final void run(Configuration _config, final Environment env) throws Exception {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new TestResource());
         }

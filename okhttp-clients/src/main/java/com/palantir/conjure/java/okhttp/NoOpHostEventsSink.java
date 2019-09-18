@@ -23,12 +23,12 @@ public enum NoOpHostEventsSink implements HostEventsSink {
     INSTANCE;
 
     @Override
-    public void record(String serviceName, String hostname, int port, int statusCode, long micros) {
+    public void record(String _serviceName, String _hostname, int _port, int _statusCode, long _micros) {
         // do nothing
     }
 
     @Override
-    public void recordIoException(String serviceName, String hostname, int port) {
+    public void recordIoException(String _serviceName, String _hostname, int _port) {
         // do nothing
     }
 }

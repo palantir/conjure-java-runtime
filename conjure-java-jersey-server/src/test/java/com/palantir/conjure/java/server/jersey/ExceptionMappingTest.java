@@ -143,7 +143,8 @@ public final class ExceptionMappingTest {
 
         Map<String, Object> rawError =
                 ObjectMappers.newClientObjectMapper().readValue(body, new TypeReference<Map<String, Object>>() {});
-        assertThat(rawError.get("errorCode")).is(new HamcrestCondition<>(equalTo(ErrorType.INVALID_ARGUMENT.code().toString())));
+        assertThat(rawError.get("errorCode")).is(
+                new HamcrestCondition<>(equalTo(ErrorType.INVALID_ARGUMENT.code().toString())));
         assertThat(rawError.get("errorName")).is(new HamcrestCondition<>(equalTo(ErrorType.INVALID_ARGUMENT.name())));
         assertThat(rawError.get("parameters")).is(new HamcrestCondition<>(equalTo(ImmutableMap.of("arg", "value"))));
     }
@@ -173,7 +174,7 @@ public final class ExceptionMappingTest {
 
     public static class ExceptionMappersTestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
+        public final void run(Configuration _config, final Environment env) throws Exception {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new ExceptionTestResource());
         }

@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
 
 import com.google.common.collect.Lists;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
@@ -126,7 +125,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
             proxy.string();
             fail("fail");
         } catch (RetryableException e) {
-            assertThat(e.getMessage()).is(new HamcrestCondition<>(startsWith("Failed to complete the request due to an IOException")));
+            assertThat(e.getMessage()).startsWith("Failed to complete the request due to an IOException");
         }
 
         // Subsequent call (with the same proxy instance) succeeds.

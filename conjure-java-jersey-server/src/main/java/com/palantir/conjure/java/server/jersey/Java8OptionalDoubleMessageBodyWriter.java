@@ -39,27 +39,27 @@ public final class Java8OptionalDoubleMessageBodyWriter implements MessageBodyWr
     // Jersey ignores this
     @Override
     public long getSize(
-            OptionalDouble entity,
-            Class<?> type,
-            Type genericType,
-            Annotation[] annotations,
-            MediaType mediaType) {
+            OptionalDouble _entity,
+            Class<?> _type,
+            Type _genericType,
+            Annotation[] _annotations,
+            MediaType _mediaType) {
         return 0;
     }
 
     @Override
-    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    public boolean isWriteable(Class<?> type, Type _genericType, Annotation[] _annotations, MediaType _mediaType) {
         return OptionalDouble.class.isAssignableFrom(type);
     }
 
     @Override
     public void writeTo(
             OptionalDouble entity,
-            Class<?> type,
+            Class<?> _type,
             Type genericType,
-            Annotation[] annotations,
-            MediaType mediaType,
-            MultivaluedMap<String, Object> httpHeaders,
+            Annotation[] _annotations,
+            MediaType _mediaType,
+            MultivaluedMap<String, Object> _httpHeaders,
             OutputStream entityStream)
             throws IOException {
         if (!entity.isPresent()) {

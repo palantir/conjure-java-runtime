@@ -38,21 +38,25 @@ public final class HeaderAccessUtilsTest {
 
     @Test
     public void caseInsensitiveContainsShouldReturnTrueIgnoringCase() {
-        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "hEaDeR")).is(new HamcrestCondition<>(is(true)));
+        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "hEaDeR")).is(
+                new HamcrestCondition<>(is(true)));
     }
 
     @Test
     public void caseInsensitiveContainsShouldReturnFalseForNonExistentKey() {
-        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "invalid")).is(new HamcrestCondition<>(is(false)));
+        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "invalid")).is(
+                new HamcrestCondition<>(is(false)));
     }
 
     @Test
     public void caseInsensitiveGetReturnsNullForNotExistingHeader() {
-        assertThat(HeaderAccessUtils.caseInsensitiveGet(TEST_HEADERS_MAP, "invalid")).is(new HamcrestCondition<>(is(nullValue())));
+        assertThat(HeaderAccessUtils.caseInsensitiveGet(TEST_HEADERS_MAP, "invalid")).is(
+                new HamcrestCondition<>(is(nullValue())));
     }
 
     @Test
     public void caseInsensitiveGetReturnsAllExistingHeaders() {
-        assertThat(HeaderAccessUtils.caseInsensitiveGet(TEST_HEADERS_MAP, "HeADER")).is(new HamcrestCondition<>(contains("value1", "value2", "value3", "value4", "value5")));
+        assertThat(HeaderAccessUtils.caseInsensitiveGet(TEST_HEADERS_MAP, "HeADER")).is(
+                new HamcrestCondition<>(contains("value1", "value2", "value3", "value4", "value5")));
     }
 }

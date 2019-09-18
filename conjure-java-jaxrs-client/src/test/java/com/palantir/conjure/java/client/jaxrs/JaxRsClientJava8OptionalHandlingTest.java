@@ -111,9 +111,10 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
                     createTestConfig("http://localhost:" + server.getPort()));
             fail("fail");
         } catch (RuntimeException e) {
-            assertThat(e.getMessage()).is(new HamcrestCondition<>(is("Cannot use Java8 Optionals with PathParams. (Class: com.palantir.conjure."
+            assertThat(e.getMessage()).isEqualTo(
+                    "Cannot use Java8 Optionals with PathParams. (Class: com.palantir.conjure."
                             + "java.client.jaxrs.JaxRsClientJava8OptionalHandlingTest$CannotDecorateInterface,"
-                            + " Method: path, Param: arg0)")));
+                            + " Method: path, Param: arg0)");
         }
     }
 
@@ -189,7 +190,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     public void testIntQuery() throws Exception {
         proxy.queryInt(OptionalInt.of(1234), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine()).is(new HamcrestCondition<>(is("GET /foo/int?opt=1234&req=str2 HTTP/1.1")));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo/int?opt=1234&req=str2 HTTP/1.1");
     }
 
     @Test
@@ -219,7 +220,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     public void testDoubleQuery() throws Exception {
         proxy.queryDouble(OptionalDouble.of(1234.567), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine()).is(new HamcrestCondition<>(is("GET /foo/double?opt=1234.567&req=str2 HTTP/1.1")));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo/double?opt=1234.567&req=str2 HTTP/1.1");
     }
 
     @Test
@@ -249,7 +250,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     public void testLongQuery() throws Exception {
         proxy.queryLong(OptionalLong.of(12345678901234L), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine()).is(new HamcrestCondition<>(is("GET /foo/long?opt=12345678901234&req=str2 HTTP/1.1")));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo/long?opt=12345678901234&req=str2 HTTP/1.1");
     }
 
     @Test

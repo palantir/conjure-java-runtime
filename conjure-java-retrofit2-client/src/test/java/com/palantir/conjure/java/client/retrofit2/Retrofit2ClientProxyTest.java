@@ -85,7 +85,7 @@ public final class Retrofit2ClientProxyTest extends TestBase {
         RecordedRequest firstRequest = proxyServer.takeRequest();
         assertThat(firstRequest.getHeader("Proxy-Authorization")).isNull();
         RecordedRequest secondRequest = proxyServer.takeRequest();
-        assertThat(secondRequest.getHeader("Proxy-Authorization")).is(new HamcrestCondition<>(is("Basic ZmFrZVVzZXI6ZmFrZVBhc3N3b3Jk")));
+        assertThat(secondRequest.getHeader("Proxy-Authorization")).isEqualTo("Basic ZmFrZVVzZXI6ZmFrZVBhc3N3b3Jk");
     }
 
     private static ProxySelector createProxySelector(String host, int port) {

@@ -60,13 +60,16 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
 
     @Test
     public void testOptional() {
-        assertThat(service.getOptional("something")).is(new HamcrestCondition<>(is(Optional.of(ImmutableMap.of("something", "something")))));
-        assertThat(service.getOptional(null)).is(new HamcrestCondition<>(is(Optional.<ImmutableMap<String, String>>empty())));
+        assertThat(service.getOptional("something")).is(
+                new HamcrestCondition<>(is(Optional.of(ImmutableMap.of("something", "something")))));
+        assertThat(service.getOptional(null)).is(
+                new HamcrestCondition<>(is(Optional.<ImmutableMap<String, String>>empty())));
     }
 
     @Test
     public void testNonOptional() {
-        assertThat(service.getNonOptional("something")).is(new HamcrestCondition<>(is(ImmutableMap.of("something", "something"))));
+        assertThat(service.getNonOptional("something")).is(
+                new HamcrestCondition<>(is(ImmutableMap.of("something", "something"))));
         assertThat(service.getNonOptional(null)).is(new HamcrestCondition<>(is(ImmutableMap.<String, String>of())));
     }
 
@@ -76,7 +79,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
             service.getThrowsNotFound(null);
             fail("fail");
         } catch (RemoteException e) {
-            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString("RemoteException: NOT_FOUND (Default:NotFound)")));
+            assertThat(e.getMessage()).is(
+                    new HamcrestCondition<>(containsString("RemoteException: NOT_FOUND (Default:NotFound)")));
             assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("NOT_FOUND")));
         }
     }
@@ -87,7 +91,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
             service.getThrowsNotAuthorized(null);
             fail("fail");
         } catch (RemoteException e) {
-            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString("RemoteException: javax.ws.rs.NotAuthorizedException")));
+            assertThat(e.getMessage()).is(
+                    new HamcrestCondition<>(containsString("RemoteException: javax.ws.rs.NotAuthorizedException")));
             assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("javax.ws.rs.NotAuthorizedException")));
         }
     }
@@ -98,7 +103,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
             service.getOptionalThrowsNotAuthorized(null);
             fail("fail");
         } catch (RemoteException e) {
-            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString("RemoteException: javax.ws.rs.NotAuthorizedException")));
+            assertThat(e.getMessage()).is(
+                    new HamcrestCondition<>(containsString("RemoteException: javax.ws.rs.NotAuthorizedException")));
             assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("javax.ws.rs.NotAuthorizedException")));
         }
     }
@@ -109,7 +115,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
             service.getThrowsForbidden(null);
             fail("fail");
         } catch (RemoteException e) {
-            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)")));
+            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString(
+                    "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)")));
             assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("PERMISSION_DENIED")));
         }
     }
@@ -120,7 +127,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
             service.getOptionalThrowsForbidden(null);
             fail("fail");
         } catch (RemoteException e) {
-            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)")));
+            assertThat(e.getMessage()).is(new HamcrestCondition<>(containsString(
+                    "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)")));
             assertThat(e.getError().errorCode()).is(new HamcrestCondition<>(is("PERMISSION_DENIED")));
         }
     }

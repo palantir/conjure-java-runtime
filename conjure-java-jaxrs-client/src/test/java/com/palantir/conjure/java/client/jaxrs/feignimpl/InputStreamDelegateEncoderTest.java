@@ -84,7 +84,8 @@ public final class InputStreamDelegateEncoderTest extends TestBase {
     @Test
     public void testStandardClientsUseByteArrayDelegateEncoder() {
         String data = "bytes";
-        assertThat(service.readInputStream(new ByteArrayInputStream(bytes(data)))).is(new HamcrestCondition<>(is(data)));
+        assertThat(service.readInputStream(new ByteArrayInputStream(bytes(data)))).is(
+                new HamcrestCondition<>(is(data)));
     }
 
     private static byte[] bytes(String text) {

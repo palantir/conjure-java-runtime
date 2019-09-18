@@ -25,7 +25,7 @@ import javax.ws.rs.ext.Provider;
 final class NoContentExceptionMapper implements ExceptionMapper<NoContentException> {
 
     @Override
-    public Response toResponse(NoContentException exception) {
+    public Response toResponse(NoContentException _exception) {
         return Response.noContent().build();
     }
 

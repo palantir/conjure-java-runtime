@@ -82,9 +82,10 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
                     createTestConfig("http://localhost:" + server.getPort()));
             fail("fail");
         } catch (RuntimeException e) {
-            assertThat(e.getMessage()).is(new HamcrestCondition<>(is("Cannot use Guava Optionals with PathParams. (Class: com.palantir.conjure"
+            assertThat(e.getMessage()).isEqualTo(
+                    "Cannot use Guava Optionals with PathParams. (Class: com.palantir.conjure"
                             + ".java.client.jaxrs.JaxRsClientGuavaOptionalHandlingTest$CannotDecorateInterface,"
-                            + " Method: path, Param: arg0)")));
+                            + " Method: path, Param: arg0)");
         }
     }
 

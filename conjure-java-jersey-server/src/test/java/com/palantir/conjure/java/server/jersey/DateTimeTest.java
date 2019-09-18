@@ -84,7 +84,7 @@ public final class DateTimeTest {
 
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) {
+        public final void run(Configuration _config, final Environment env) {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new DateTimeTestResource());
         }

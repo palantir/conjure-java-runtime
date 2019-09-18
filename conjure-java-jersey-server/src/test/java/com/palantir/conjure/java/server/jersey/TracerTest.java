@@ -80,7 +80,7 @@ public final class TracerTest {
                 .get();
         assertThat(response.getStatus()).is(new HamcrestCondition<>(Matchers.is(Status.OK.getStatusCode())));
         assertThat(response.readEntity(String.class)).is(new HamcrestCondition<>(Matchers.is("traceId")));
-        assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID)).is(new HamcrestCondition<>(Matchers.is("traceId")));
+        assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID)).isEqualTo("traceId");
         assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID)).isNull();
         assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID)).isNull();
     }
@@ -107,12 +107,12 @@ public final class TracerTest {
         // Invoke server and observe servers log messages; note that the server uses the same logger at INFO.
         log.setLevel(ch.qos.logback.classic.Level.INFO);
         target.path("trace").request().header(TraceHttpHeaders.TRACE_ID, "myTraceId").get();
-        assertThat(byteStream.toString(StandardCharsets.UTF_8.name())).is(new HamcrestCondition<>(Matchers.startsWith("traceId: myTraceId")));
+        assertThat(byteStream.toString(StandardCharsets.UTF_8.name())).startsWith("traceId: myTraceId");
     }
 
     public static class TracingTestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
+        public final void run(Configuration _config, final Environment env) throws Exception {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new TracingTestResource());
         }

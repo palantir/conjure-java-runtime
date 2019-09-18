@@ -113,12 +113,12 @@ final class RemotingOkHttpCall extends ForwardingCall {
         SettableFuture<Response> future = SettableFuture.create();
         enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException exception) {
+            public void onFailure(Call _call, IOException exception) {
                 future.setException(exception);
             }
 
             @Override
-            public void onResponse(Call call, Response response) {
+            public void onResponse(Call _call, Response response) {
                 future.set(response);
             }
         });
@@ -169,7 +169,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
         Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {
             @Override
-            public void onSuccess(Limiter.Listener listener) {
+            public void onSuccess(Limiter.Listener _listener) {
                 concurrencyLimiterSpan.complete();
                 DetachedSpan dispatcherSpan = attemptSpan.childDetachedSpan("OkHttp: dispatcher");
                 request().tag(Tags.SettableDispatcherSpan.class).setDispatcherSpan(dispatcherSpan);

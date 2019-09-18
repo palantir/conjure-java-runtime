@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.config.ssl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
@@ -248,18 +249,18 @@ public final class SslSocketFactoriesConnectionTests {
                 TestConstants.CLIENT_KEY_STORE_JKS_PATH,
                 TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
 
-        try {
+        assertThatThrownBy(() -> {
             runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
-            fail("fail");
-        } catch (RuntimeException ex) {
+        }).isInstanceOfSatisfying(RuntimeException.class, ex -> {
             if (System.getProperty("java.version").startsWith("1.8")) {
-                assertThat(ex.getCause()).is(new HamcrestCondition<>(is(instanceOf(SSLHandshakeException.class))));
-                assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("bad_certificate")));
+                assertThat(ex).hasCauseInstanceOf(SSLHandshakeException.class).hasMessageContaining("bad_certificate");
             } else {
-                assertThat(ex.getCause()).is(new HamcrestCondition<>(anyOf(instanceOf(SSLException.class), instanceOf(SSLHandshakeException.class))));
-                assertThat(ex.getMessage()).is(new HamcrestCondition<>(anyOf(containsString("readHandshakeRecord"), containsString("certificate_unknown"))));
+                assertThat(ex.getCause()).is(new HamcrestCondition<>(anyOf(
+                        instanceOf(SSLException.class), instanceOf(SSLHandshakeException.class))));
+                assertThat(ex.getMessage()).is(new HamcrestCondition<>(anyOf(
+                        containsString("readHandshakeRecord"), containsString("certificate_unknown"))));
             }
-        }
+        });
     }
 
     private void runSslConnectionTest(

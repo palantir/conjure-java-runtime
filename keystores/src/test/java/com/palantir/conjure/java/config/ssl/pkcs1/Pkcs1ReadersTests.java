@@ -17,8 +17,7 @@
 package com.palantir.conjure.java.config.ssl.pkcs1;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
@@ -34,12 +33,9 @@ public final class Pkcs1ReadersTests {
     public void testReadPrivateKeyFailsIfNoProvidersPresent() throws IOException {
         Assume.assumeFalse(ServiceLoader.load(Pkcs1Reader.class).iterator().hasNext());
 
-        try {
-            Pkcs1Readers.getInstance();
-            fail("fail");
-        } catch (IllegalStateException ex) {
-            assertThat(ex.getMessage()).is(new HamcrestCondition<>(containsString("No Pkcs1Reader services were present")));
-        }
+        assertThatThrownBy(() -> Pkcs1Readers.getInstance())
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("No Pkcs1Reader services were present");
     }
 
     @Test

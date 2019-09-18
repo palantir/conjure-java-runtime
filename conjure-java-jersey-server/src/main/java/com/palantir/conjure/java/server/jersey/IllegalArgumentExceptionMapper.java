@@ -23,7 +23,7 @@ import javax.ws.rs.ext.Provider;
 final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalArgumentException> {
 
     @Override
-    ErrorType getErrorType(IllegalArgumentException exception) {
+    ErrorType getErrorType(IllegalArgumentException _exception) {
         return ErrorType.INVALID_ARGUMENT;
     }
 }

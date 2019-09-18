@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.config.ssl.pkcs1;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
 import java.io.IOException;
@@ -29,7 +28,7 @@ public final class SunPkcs1ReaderTests {
 
     @Test
     public void testSunPkcs1ReaderInstalled() {
-        assertThat(Pkcs1Readers.getInstance()).is(new HamcrestCondition<>(instanceOf(SunPkcs1Reader.class)));
+        assertThat(Pkcs1Readers.getInstance()).isInstanceOf(SunPkcs1Reader.class);
     }
 
     @Test
