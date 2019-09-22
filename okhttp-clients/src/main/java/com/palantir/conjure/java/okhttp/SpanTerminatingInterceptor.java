@@ -33,11 +33,7 @@ final class SpanTerminatingInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Tags.AttemptSpan attemptSpanTag = chain.request().tag(Tags.AttemptSpan.class);
         if (attemptSpanTag == null) {
-            try {
-                return chain.proceed(chain.request());
-            } catch (NullPointerException e) {
-                throw e;
-            }
+            return chain.proceed(chain.request());
         }
         DetachedSpan attemptSpan = attemptSpanTag.attemptSpan();
         DetachedSpan dispatcherSpan = chain.request().tag(Tags.SettableDispatcherSpan.class).dispatcherSpan();
