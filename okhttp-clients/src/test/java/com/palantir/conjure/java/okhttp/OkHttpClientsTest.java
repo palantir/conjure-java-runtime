@@ -925,11 +925,7 @@ public final class OkHttpClientsTest extends TestBase {
         ClientConfiguration clientConfiguration = createTestConfig(url);
         OkHttpClient client = OkHttpClients.create(clientConfiguration, AGENT, hostEventsSink, OkHttpClientsTest.class);
         client = client.newBuilder().build();
-        try {
-            client.newCall(new Request.Builder().url(url).build()).execute();
-        } catch (IOException e) {
-            throw e;
-        }
+        client.newCall(new Request.Builder().url(url).build()).execute();
     }
 
     private OkHttpClient createRetryingClient(int maxNumRetries) {
