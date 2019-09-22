@@ -111,10 +111,12 @@ public final class ConcurrencyLimitingInterceptorTest {
         String data = "data";
         ResponseBody body = ResponseBody.create(MediaType.parse("application/json"), data);
         when(chain.proceed(request)).thenReturn(response.newBuilder().body(body).build());
-        Response wrappedResponse = interceptor.intercept(chain);
-        verifyZeroInteractions(listener);
-        assertThat(wrappedResponse.body().string()).isEqualTo(data);
+        Response interceptedResponse = interceptor.intercept(chain);
         verify(listener).onSuccess();
+        // Previously onSuccess would be called after the response body was read. This asserts that that behavior no
+        // longer exists.
+        assertThat(interceptedResponse.body().string()).isEqualTo(data);
+        verifyZeroInteractions(listener);
     }
 
     @Test
