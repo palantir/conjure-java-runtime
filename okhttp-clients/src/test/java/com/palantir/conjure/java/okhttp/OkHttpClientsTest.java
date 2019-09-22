@@ -921,6 +921,7 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Test
     public void clientMadeFromNewBuilderShouldntThrowOnExecute() throws IOException {
+        server.enqueue(new MockResponse().setBody("foo"));
         ClientConfiguration clientConfiguration = createTestConfig(url);
         OkHttpClient client = OkHttpClients.create(clientConfiguration, AGENT, hostEventsSink, OkHttpClientsTest.class);
         client = client.newBuilder().build();

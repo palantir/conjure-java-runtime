@@ -37,6 +37,10 @@ public final class OkhttpTraceInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
+        Tags.AttemptSpan attemptSpanTag = chain.request().tag(Tags.AttemptSpan.class);
+        if (attemptSpanTag == null) {
+            return chain.proceed(chain.request());
+        }
         try {
             return addHeaders.intercept(chain);
         } finally {
