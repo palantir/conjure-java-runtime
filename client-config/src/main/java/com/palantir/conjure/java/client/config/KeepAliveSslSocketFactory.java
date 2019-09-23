@@ -47,6 +47,6 @@ final class KeepAliveSslSocketFactory extends ForwardingSslSocketFactory {
     }
 
     public String toString() {
-        return "ConfigurableSslSocketFactory{delegate=" + delegate + '}';
+        return "KeepAliveSslSocketFactory{delegate=" + delegate + '}';
     }
 }
