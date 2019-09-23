@@ -1,6 +1,7 @@
 type: improvement
 improvement:
   description: All outgoing connections created by our OkhttpClients will now have
-    SO_KEEPALIVE enabled. This should make clients more responsive to a server hang-up.
+    SO_KEEPALIVE enabled. This should make clients more responsive to a router getting
+    terminated.
   links:
   - https://github.com/palantir/conjure-java-runtime/pull/1256
