@@ -57,7 +57,7 @@ import okio.BufferedSource;
 final class ConcurrencyLimitingInterceptor implements Interceptor {
     private static final ImmutableSet<Integer> DROPPED_CODES = ImmutableSet.of(429, 503);
 
-    ConcurrencyLimitingInterceptor() { }
+    ConcurrencyLimitingInterceptor() {}
 
     @Override
     public Response intercept(Chain chain) throws IOException {
@@ -111,7 +111,7 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
     private static BufferedSource wrapSource(BufferedSource currentSource, Limiter.Listener listener) {
         return (BufferedSource) Proxy.newProxyInstance(
                 BufferedSource.class.getClassLoader(),
-                new Class<?>[] { BufferedSource.class },
+                new Class<?>[] {BufferedSource.class},
                 new ReleaseConcurrencyLimitProxy(currentSource, listener));
     }
 

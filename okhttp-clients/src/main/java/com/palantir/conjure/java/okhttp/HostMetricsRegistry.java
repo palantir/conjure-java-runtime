@@ -75,8 +75,13 @@ public final class HostMetricsRegistry implements HostEventsSink {
     @Value.Immutable
     @ImmutablesStyle
     interface ServiceHostAndPort {
-        @Value.Parameter String serviceName();
-        @Value.Parameter String hostname();
-        @Value.Parameter int port();
+        @Value.Parameter
+        String serviceName();
+
+        @Value.Parameter
+        String hostname();
+
+        @Value.Parameter
+        int port();
     }
 }

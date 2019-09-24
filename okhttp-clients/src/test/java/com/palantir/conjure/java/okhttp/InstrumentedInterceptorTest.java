@@ -48,7 +48,8 @@ public final class InstrumentedInterceptorTest {
     private static final Request REQUEST_A = new Request.Builder().url(URL_A).build();
     private static final Request REQUEST_B = new Request.Builder().url(URL_B).build();
 
-    @Mock private Interceptor.Chain chain;
+    @Mock
+    private Interceptor.Chain chain;
 
     private TaggedMetricRegistry registry;
     private InstrumentedInterceptor interceptor;

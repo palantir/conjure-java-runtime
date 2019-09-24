@@ -84,14 +84,20 @@ public final class RemoteExceptionResponseHandlerTest {
                 javax.ws.rs.core.Response.Status.NOT_MODIFIED);
     }
 
-    private static void testEncodingAndDecodingWebException(Class<? extends WebApplicationException> exceptionClass,
+    private static void testEncodingAndDecodingWebException(
+            Class<? extends WebApplicationException> exceptionClass,
             Response.Status status) {
         WebApplicationException exceptionToProcess;
         try {
-            exceptionToProcess = exceptionClass.getConstructor(String.class, Response.Status.class).newInstance(message,
-                    status);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-                | NoSuchMethodException | SecurityException e) {
+            exceptionToProcess = exceptionClass.getConstructor(String.class, Response.Status.class)
+                    .newInstance(message,
+                            status);
+        } catch (InstantiationException
+                | IllegalAccessException
+                | IllegalArgumentException
+                | InvocationTargetException
+                | NoSuchMethodException
+                | SecurityException e) {
             throw new RuntimeException(e);
         }
 
@@ -113,7 +119,9 @@ public final class RemoteExceptionResponseHandlerTest {
             assertThat(exception.getError().errorName()).isEqualTo(ErrorType.FAILED_PRECONDITION.name());
             assertThat(exception.getMessage()).isEqualTo(
                     "RemoteException: " + ErrorType.FAILED_PRECONDITION.code().name()
-                            + " (" + ErrorType.FAILED_PRECONDITION.name() + ") with instance ID "
+                            + " ("
+                            + ErrorType.FAILED_PRECONDITION.name()
+                            + ") with instance ID "
                             + SERVICE_EXCEPTION.getErrorInstanceId());
         }
     }
@@ -129,7 +137,8 @@ public final class RemoteExceptionResponseHandlerTest {
         assertThat(exception.getError().errorCode()).isEqualTo(NotAuthorizedException.class.getName());
         assertThat(exception.getError().errorName()).isEqualTo(message);
         assertThat(exception.getMessage())
-                .isEqualTo("RemoteException: javax.ws.rs.NotAuthorizedException (" + message + ") with instance ID "
+                .isEqualTo("RemoteException: javax.ws.rs.NotAuthorizedException (" + message
+                        + ") with instance ID "
                         + exception.getError().errorInstanceId());
     }
 
