@@ -37,12 +37,16 @@ public final class OkhttpTraceInterceptor implements Interceptor {
 
     @Override
     public Response intercept(Chain chain) throws IOException {
+        Tags.AttemptSpan attemptSpanTag = chain.request().tag(Tags.AttemptSpan.class);
+        if (attemptSpanTag == null) {
+            return chain.proceed(chain.request());
+        }
         try {
             return addHeaders.intercept(chain);
         } finally {
             // when we reach this point, we've got a 'Response' object (so the headers have come back), but the server
             // hasn't necessarily filled in the request body.
-            DetachedSpan waitForBody = chain.request().tag(Tags.AttemptSpan.class)
+            DetachedSpan waitForBody = attemptSpanTag
                     .attemptSpan()
                     .childDetachedSpan("OkHttp: wait-for-body", SpanType.CLIENT_OUTGOING);
 

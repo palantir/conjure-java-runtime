@@ -919,6 +919,15 @@ public final class OkHttpClientsTest extends TestBase {
                 .hasStackTraceContaining("Caught a non-IOException. This is a serious bug and requires investigation");
     }
 
+    @Test
+    public void clientMadeFromNewBuilderShouldntThrowOnExecute() throws IOException {
+        server.enqueue(new MockResponse().setBody("foo"));
+        ClientConfiguration clientConfiguration = createTestConfig(url);
+        OkHttpClient client = OkHttpClients.create(clientConfiguration, AGENT, hostEventsSink, OkHttpClientsTest.class);
+        client = client.newBuilder().build();
+        client.newCall(new Request.Builder().url(url).build()).execute();
+    }
+
     private OkHttpClient createRetryingClient(int maxNumRetries) {
         return createRetryingClient(maxNumRetries, Duration.ofMillis(500));
     }
