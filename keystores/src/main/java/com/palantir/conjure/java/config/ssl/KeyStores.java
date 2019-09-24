@@ -52,14 +52,16 @@ final class KeyStores {
      * (everything that occurs between the header and footer).
      */
     private static final Pattern KEY_PATTERN = Pattern.compile(
-            "-----BEGIN RSA PRIVATE KEY-----\n?(.+?)\n?-----END RSA PRIVATE KEY-----", Pattern.DOTALL);
+            "-----BEGIN RSA PRIVATE KEY-----\n?(.+?)\n?-----END RSA PRIVATE KEY-----",
+            Pattern.DOTALL);
 
     /**
      * Pattern that matches a single certificate in a PEM file. Has a capture group that captures the content of the
      * certificate (everything that occurs between the header and footer).
      */
     private static final Pattern CERT_PATTERN = Pattern.compile(
-            "-----BEGIN CERTIFICATE-----\n?(.+?)\n?-----END CERTIFICATE-----", Pattern.DOTALL);
+            "-----BEGIN CERTIFICATE-----\n?(.+?)\n?-----END CERTIFICATE-----",
+            Pattern.DOTALL);
 
     private static final FileFilter VISIBLE_FILE_FILTER = new FileFilter() {
         @Override
@@ -68,8 +70,7 @@ final class KeyStores {
         }
     };
 
-    private KeyStores() {
-    }
+    private KeyStores() {}
 
     /**
      * Returns a {@link KeyStore} created by loading the certificate or certificates specified by the provided path.
@@ -91,10 +92,12 @@ final class KeyStores {
                 keyStore.setCertificateEntry(currFile.getName(), readX509Certificate(in));
             } catch (IOException e) {
                 throw new RuntimeException(String.format(
-                        "IOException encountered when opening '%s'", currFile.toPath()), e);
+                        "IOException encountered when opening '%s'",
+                        currFile.toPath()), e);
             } catch (CertificateException | KeyStoreException e) {
                 throw new RuntimeException(String.format(
-                        "Could not read file at \"%s\" as an X.509 certificate", currFile.toPath()), e);
+                        "Could not read file at \"%s\" as an X.509 certificate",
+                        currFile.toPath()), e);
             }
         }
 
@@ -119,7 +122,8 @@ final class KeyStores {
                 throw Throwables.propagate(e);
             } catch (KeyStoreException | CertificateException e) {
                 throw new RuntimeException(String.format(
-                        "Could not read certificate alias \"%s\" as an X.509 certificate", entry.getKey()), e);
+                        "Could not read certificate alias \"%s\" as an X.509 certificate",
+                        entry.getKey()), e);
             }
         }
 

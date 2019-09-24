@@ -69,7 +69,7 @@ public final class UrlSelectorImplTest extends TestBase {
         for (String url : new String[] {
                 "http://user:pass@foo.com/path",
                 "http://foo.com/path?bar",
-                }) {
+        }) {
             Assertions.assertThatLoggableExceptionThrownBy(() -> UrlSelectorImpl.create(list(url), false))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasLogMessage(
@@ -81,7 +81,7 @@ public final class UrlSelectorImplTest extends TestBase {
                 "http://foo.com/path",
                 "http://foo.com:80/path",
                 "http://foo.com:8080",
-                }) {
+        }) {
             UrlSelectorImpl.create(list(url), false);
         }
     }
@@ -217,7 +217,10 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
+                list("http://foo/a", "http://bar/a"),
+                false,
+                failedUrlCooldown,
+                clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
@@ -245,7 +248,10 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
+                list("http://foo/a", "http://bar/a"),
+                false,
+                failedUrlCooldown,
+                clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));
@@ -267,7 +273,10 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
+                list("http://foo/a", "http://bar/a"),
+                false,
+                failedUrlCooldown,
+                clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
@@ -295,7 +304,10 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
+                list("http://foo/a", "http://bar/a"),
+                false,
+                failedUrlCooldown,
+                clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));

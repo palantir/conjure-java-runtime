@@ -85,7 +85,8 @@ public final class MeshProxyInterceptorTest {
         interceptor.intercept(chain);
 
         verify(chain).proceed(request.capture());
-        assertThat(request.getValue().url()).isEqualTo(HttpUrl.parse("https://user:pass@localhost:456/foo/bar?baz=norf"));
+        assertThat(request.getValue().url())
+                .isEqualTo(HttpUrl.parse("https://user:pass@localhost:456/foo/bar?baz=norf"));
         assertThat(request.getValue().header(HttpHeaders.HOST)).isEqualTo("foo.com");
     }
 }

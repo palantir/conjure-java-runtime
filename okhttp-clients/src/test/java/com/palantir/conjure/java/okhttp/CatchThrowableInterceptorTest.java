@@ -29,7 +29,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class CatchThrowableInterceptorTest {
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS) private Interceptor.Chain chain;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private Interceptor.Chain chain;
 
     @Test
     public void rethrowsIoException() throws IOException {

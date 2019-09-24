@@ -90,7 +90,7 @@ public final class SslSocketFactories {
      */
     public static SSLContext createSslContext(Map<String, PemX509Certificate> trustCertificatesByAlias) {
         TrustManager[] trustManagers = createTrustManagers(trustCertificatesByAlias);
-        return createSslContext(trustManagers, new KeyManager[]{});
+        return createSslContext(trustManagers, new KeyManager[] {});
     }
 
     private static SSLContext createSslContext(TrustManager[] trustManagers, KeyManager[] keyManagers) {
@@ -144,7 +144,8 @@ public final class SslSocketFactories {
      */
     public static TrustContext createTrustContext(Map<String, PemX509Certificate> trustCertificatesByAlias) {
         return TrustContext.of(
-                createSslSocketFactory(trustCertificatesByAlias), createX509TrustManager(trustCertificatesByAlias));
+                createSslSocketFactory(trustCertificatesByAlias),
+                createX509TrustManager(trustCertificatesByAlias));
     }
 
     /**
@@ -171,7 +172,8 @@ public final class SslSocketFactories {
         } else {
             throw new RuntimeException(String.format(
                     "First TrustManager associated with certificates was expected to be a %s, but was a %s",
-                    X509TrustManager.class.getSimpleName(), trustManager.getClass().getSimpleName()));
+                    X509TrustManager.class.getSimpleName(),
+                    trustManager.getClass().getSimpleName()));
         }
     }
 

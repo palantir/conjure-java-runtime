@@ -51,7 +51,7 @@ import okhttp3.Response;
 final class ConcurrencyLimitingInterceptor implements Interceptor {
     private static final ImmutableSet<Integer> DROPPED_CODES = ImmutableSet.of(429, 503);
 
-    ConcurrencyLimitingInterceptor() { }
+    ConcurrencyLimitingInterceptor() {}
 
     @Override
     public Response intercept(Chain chain) throws IOException {

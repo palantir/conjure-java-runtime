@@ -47,7 +47,7 @@ class ForwardingOkHttpClient extends OkHttpClient {
         this.delegate = delegate;
     }
 
-    protected  OkHttpClient getDelegate() {
+    protected OkHttpClient getDelegate() {
         return delegate;
     }
 

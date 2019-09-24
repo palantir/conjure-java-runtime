@@ -68,7 +68,9 @@ final class InstrumentedInterceptor implements Interceptor {
     }
 
     static InstrumentedInterceptor create(
-            TaggedMetricRegistry registry, HostEventsSink hostEventsSink, Class<?> serviceClass) {
+            TaggedMetricRegistry registry,
+            HostEventsSink hostEventsSink,
+            Class<?> serviceClass) {
         return new InstrumentedInterceptor(registry, hostEventsSink, serviceClass.getSimpleName());
     }
 

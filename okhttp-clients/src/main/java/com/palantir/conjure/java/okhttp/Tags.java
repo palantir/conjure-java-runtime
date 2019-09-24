@@ -59,6 +59,7 @@ final class Tags {
     interface SettableDispatcherSpan {
 
         DetachedSpan dispatcherSpan();
+
         SettableDispatcherSpan setDispatcherSpan(DetachedSpan span);
 
         static SettableDispatcherSpan create() {
@@ -70,6 +71,7 @@ final class Tags {
     @ImmutablesStyle
     interface SettableWaitForBodySpan {
         DetachedSpan waitForBodySpan();
+
         SettableWaitForBodySpan setWaitForBodySpan(DetachedSpan span);
 
         static SettableWaitForBodySpan create() {
