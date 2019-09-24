@@ -90,7 +90,10 @@ class ConjureWindowedLimit implements Limit {
                                 MAX_WINDOW_TIME);
                         // +1 ensures that average rtt in nanos is never 0, which has a precond check in VegasLimit.
                         delegate.onSample(
-                                startTime, current.getAverageRttNanos() + 1, current.getMaxInFlight(), didDrop);
+                                startTime,
+                                current.getAverageRttNanos() + 1,
+                                current.getMaxInFlight(),
+                                didDrop);
                     }
                 }
             }

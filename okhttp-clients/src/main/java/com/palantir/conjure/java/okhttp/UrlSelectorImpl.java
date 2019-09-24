@@ -50,7 +50,10 @@ final class UrlSelectorImpl implements UrlSelector {
     private final Duration failedUrlCooldown;
 
     private UrlSelectorImpl(
-            ImmutableList<HttpUrl> baseUrls, boolean reshuffle, Duration failedUrlCooldown, Clock clock) {
+            ImmutableList<HttpUrl> baseUrls,
+            boolean reshuffle,
+            Duration failedUrlCooldown,
+            Clock clock) {
         Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
         Preconditions.checkArgument(!failedUrlCooldown.isNegative(), "Cache expiration must be non-negative");
         if (reshuffle) {
@@ -82,8 +85,11 @@ final class UrlSelectorImpl implements UrlSelector {
      * time.
      */
     static UrlSelectorImpl createWithFailedUrlCooldown(
-            Collection<String> baseUrls, boolean reshuffle, Duration failedUrlCooldown, Clock clock) {
-        ImmutableSet.Builder<HttpUrl> canonicalUrls = ImmutableSet.builder();  // ImmutableSet maintains insert order
+            Collection<String> baseUrls,
+            boolean reshuffle,
+            Duration failedUrlCooldown,
+            Clock clock) {
+        ImmutableSet.Builder<HttpUrl> canonicalUrls = ImmutableSet.builder(); // ImmutableSet maintains insert order
         baseUrls.forEach(url -> {
             HttpUrl httpUrl = HttpUrl.parse(switchWsToHttp(url));
             Preconditions.checkArgument(httpUrl != null, "Not a valid URL", UnsafeArg.of("url", url));
@@ -151,7 +157,7 @@ final class UrlSelectorImpl implements UrlSelector {
                 .host(redirectBaseUrl.host())
                 .port(redirectBaseUrl.port())
                 .encodedPath(
-                        redirectBaseUrl.encodedPath()  // matching prefix
+                        redirectBaseUrl.encodedPath() // matching prefix
                                 + requestUrl.encodedPath().substring(redirectBaseUrl.encodedPath().length()))
                 .build());
     }

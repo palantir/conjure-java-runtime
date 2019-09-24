@@ -58,11 +58,11 @@ public final class OkHttpClients {
     static final int NUM_SCHEDULING_THREADS = 5;
 
     private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
-            .setUncaughtExceptionHandler((thread, uncaughtException) ->
-                    log.error("An exception was uncaught in an execution thread. "
-                                    + "This likely left a thread blocked, and is as such a serious bug "
-                                    + "which requires debugging.",
-                            uncaughtException))
+            .setUncaughtExceptionHandler((thread, uncaughtException) -> log.error(
+                    "An exception was uncaught in an execution thread. "
+                            + "This likely left a thread blocked, and is as such a serious bug "
+                            + "which requires debugging.",
+                    uncaughtException))
             .setNameFormat("remoting-okhttp-dispatcher-%d")
             // This diverges from the OkHttp default value, allowing the JVM to cleanly exit
             // while idle dispatcher threads are still alive.
@@ -116,10 +116,9 @@ public final class OkHttpClients {
      * #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
      * Javadoc. Since this executor will never hit zero threads, it must use daemon threads.
      */
-    private static final Supplier<ScheduledExecutorService> schedulingExecutor = Suppliers.memoize(() ->
-            Tracers.wrap(Executors.newScheduledThreadPool(NUM_SCHEDULING_THREADS,
+    private static final Supplier<ScheduledExecutorService> schedulingExecutor =
+            Suppliers.memoize(() -> Tracers.wrap(Executors.newScheduledThreadPool(NUM_SCHEDULING_THREADS,
                     Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true))));
-
 
     private OkHttpClients() {}
 
@@ -128,7 +127,10 @@ public final class OkHttpClients {
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
     public static OkHttpClient create(
-            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
+            ClientConfiguration config,
+            UserAgent userAgent,
+            HostEventsSink hostEventsSink,
+            Class<?> serviceClass) {
         boolean reshuffle =
                 !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
         return createInternal(config, userAgent, hostEventsSink, serviceClass, RANDOMIZE, reshuffle);
@@ -136,7 +138,10 @@ public final class OkHttpClients {
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
-            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
+            ClientConfiguration config,
+            UserAgent userAgent,
+            HostEventsSink hostEventsSink,
+            Class<?> serviceClass) {
         return createInternal(config, userAgent, hostEventsSink, serviceClass, !RANDOMIZE, !RESHUFFLE);
     }
 
@@ -168,7 +173,7 @@ public final class OkHttpClients {
             // TODO(rfink): Should this go into the call itself?
             client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
         }
-        client.followRedirects(false);  // We implement our own redirect logic.
+        client.followRedirects(false); // We implement our own redirect logic.
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
@@ -199,7 +204,8 @@ public final class OkHttpClients {
         if (config.proxyCredentials().isPresent()) {
             BasicCredentials basicCreds = config.proxyCredentials().get();
             final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
-            client.proxyAuthenticator((route, response) -> response.request().newBuilder()
+            client.proxyAuthenticator((route, response) -> response.request()
+                    .newBuilder()
                     .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
                     .build());
         }
@@ -213,8 +219,11 @@ public final class OkHttpClients {
         client.dispatcher(dispatcher);
 
         // global metrics (addMetrics is idempotent, so this works even when multiple clients are created)
-        config.taggedMetricRegistry().addMetrics(
-                "from", DispatcherMetricSet.class.getSimpleName(), dispatcherMetricSet);
+        config.taggedMetricRegistry()
+                .addMetrics(
+                        "from",
+                        DispatcherMetricSet.class.getSimpleName(),
+                        dispatcherMetricSet);
 
         return new RemotingOkHttpClient(
                 client.build(),

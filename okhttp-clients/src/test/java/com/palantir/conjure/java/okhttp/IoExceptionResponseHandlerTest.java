@@ -52,7 +52,9 @@ public final class IoExceptionResponseHandlerTest {
             IOException exception = decode(MediaType.APPLICATION_JSON, code, "body").get();
             assertThat(exception.getMessage()).isEqualTo(
                     "Failed to parse response body as SerializableError: "
-                            + "{code=" + code + ", body=body, contentType=application/json}");
+                            + "{code="
+                            + code
+                            + ", body=body, contentType=application/json}");
         }
     }
 

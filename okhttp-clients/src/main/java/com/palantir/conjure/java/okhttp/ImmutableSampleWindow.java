@@ -87,10 +87,16 @@ final class ImmutableSampleWindow {
     @Override
     public String toString() {
         return "ImmutableSampleWindow ["
-                + "minRtt=" + TimeUnit.NANOSECONDS.toMicros(minRtt) / 1000.0
-                + ", avgRtt=" + TimeUnit.NANOSECONDS.toMicros(getAverageRttNanos()) / 1000.0
-                + ", maxInFlight=" + maxInFlight
-                + ", sampleCount=" + sampleCount
-                + ", didDrop=" + didDrop + "]";
+                + "minRtt="
+                + TimeUnit.NANOSECONDS.toMicros(minRtt) / 1000.0
+                + ", avgRtt="
+                + TimeUnit.NANOSECONDS.toMicros(getAverageRttNanos()) / 1000.0
+                + ", maxInFlight="
+                + maxInFlight
+                + ", sampleCount="
+                + sampleCount
+                + ", didDrop="
+                + didDrop
+                + "]";
     }
 }

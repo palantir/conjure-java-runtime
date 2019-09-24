@@ -165,7 +165,9 @@ final class ConcurrencyLimiters {
     @Value.Immutable
     interface Key {
         String hostname();
+
         Optional<String> method();
+
         Optional<String> pathTemplate();
     }
 
@@ -202,8 +204,10 @@ final class ConcurrencyLimiters {
         static final class NoOpLimiterListener implements Limiter.Listener {
             @Override
             public void onSuccess() {}
+
             @Override
             public void onIgnore() {}
+
             @Override
             public void onDropped() {}
         }
@@ -256,7 +260,9 @@ final class ConcurrencyLimiters {
                 if (!maybeAcquired.isPresent()) {
                     if (!timeoutScheduled()) {
                         timeoutCleanup = scheduledExecutorService.schedule(
-                                this::resetLimiter, timeout.toMillis(), TimeUnit.MILLISECONDS);
+                                this::resetLimiter,
+                                timeout.toMillis(),
+                                TimeUnit.MILLISECONDS);
                     }
                     return;
                 }
@@ -283,8 +289,8 @@ final class ConcurrencyLimiters {
 
         private synchronized void resetLimiter() {
             log.warn("Timed out waiting to get permits for concurrency. In most cases this would indicate some kind of "
-                            + "deadlock. We expect that either this is caused by either service overloading, or not "
-                            + "closing response bodies (consider using the try-with-resources pattern).",
+                    + "deadlock. We expect that either this is caused by either service overloading, or not "
+                    + "closing response bodies (consider using the try-with-resources pattern).",
                     SafeArg.of("serviceClass", serviceClass),
                     UnsafeArg.of("hostname", limiterKey.hostname()),
                     SafeArg.of("method", limiterKey.method()),
@@ -312,8 +318,7 @@ final class ConcurrencyLimiters {
                 }
 
                 @Override
-                public void onFailure(Throwable _error) {
-                }
+                public void onFailure(Throwable _error) {}
             }, MoreExecutors.directExecutor());
         }
 
@@ -350,7 +355,8 @@ final class ConcurrencyLimiters {
         private final Optional<RuntimeException> allocationStackTrace;
 
         private QueuedRequest(
-                SettableFuture<Limiter.Listener> future, Optional<RuntimeException> allocationStackTrace) {
+                SettableFuture<Limiter.Listener> future,
+                Optional<RuntimeException> allocationStackTrace) {
             this.future = future;
             this.allocationStackTrace = allocationStackTrace;
         }

@@ -198,7 +198,8 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setBody("pong"));
         createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();
 
-        List<HostMetrics> hostMetrics = hostEventsSink.getMetrics().stream()
+        List<HostMetrics> hostMetrics = hostEventsSink.getMetrics()
+                .stream()
                 .filter(metrics -> metrics.hostname().equals("localhost"))
                 .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
                 .filter(metrics -> metrics.port() == server.getPort())
@@ -232,7 +233,8 @@ public final class OkHttpClientsTest extends TestBase {
         assertThatExceptionOfType(IOException.class)
                 .isThrownBy(call::execute);
 
-        List<HostMetrics> hostMetrics = hostEventsSink.getMetrics().stream()
+        List<HostMetrics> hostMetrics = hostEventsSink.getMetrics()
+                .stream()
                 .filter(metrics -> metrics.hostname().equals("bogus"))
                 .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
                 .collect(Collectors.toList());
@@ -274,7 +276,7 @@ public final class OkHttpClientsTest extends TestBase {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException ioException) {
-                failureHandlerExecuted.release();  // should never happen
+                failureHandlerExecuted.release(); // should never happen
             }
 
             @Override
@@ -284,7 +286,8 @@ public final class OkHttpClientsTest extends TestBase {
         });
         assertThat(successHandlerExecuted.tryAcquire(500, TimeUnit.MILLISECONDS)).isTrue();
         assertThat(failureHandlerExecuted.tryAcquire(500, TimeUnit.MILLISECONDS))
-                .as("onFailure was executed").isFalse();
+                .as("onFailure was executed")
+                .isFalse();
     }
 
     @Test
@@ -302,11 +305,12 @@ public final class OkHttpClientsTest extends TestBase {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                successHandlerExecuted.release();  // should never happen
+                successHandlerExecuted.release(); // should never happen
             }
         });
         assertThat(successHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS))
-                .as("onSuccess was executed").isFalse();
+                .as("onSuccess was executed")
+                .isFalse();
         assertThat(failureHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
     }
 
@@ -682,6 +686,7 @@ public final class OkHttpClientsTest extends TestBase {
 
         assertThat(server.takeRequest().getPath()).isEqualTo("/foo?bar");
     }
+
     @Test
     public void handlesSocketExceptions_disabled() throws IOException {
         server.shutdown();
