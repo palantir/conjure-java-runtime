@@ -27,7 +27,9 @@ import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.logsafe.testing.Assertions;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import java.io.IOException;
 import java.net.Proxy;
+import java.net.Socket;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -139,6 +141,18 @@ public final class ClientConfigurationsTest {
                 .build();
 
         assertThat(overridden.taggedMetricRegistry()).isNotSameAs(DefaultTaggedMetricRegistry.getDefault());
+    }
+
+    @Test
+    public void sslSocketFactory_has_keepalives_enabled() throws IOException {
+        ClientConfiguration config = ClientConfigurations.of(ServiceConfiguration.builder()
+                .uris(uris)
+                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                .build());
+
+        try (Socket socket = config.sslSocketFactory().createSocket("google.com", 443)) {
+            assertThat(socket.getKeepAlive()).describedAs("keepAlives enabled").isTrue();
+        }
     }
 
     private ServiceConfiguration meshProxyServiceConfig(List<String> theUris, int maxNumRetries) {
