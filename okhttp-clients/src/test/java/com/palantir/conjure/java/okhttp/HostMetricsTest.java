@@ -21,10 +21,8 @@ import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
-import com.google.common.collect.ImmutableMap;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,26 +49,53 @@ public final class HostMetricsTest {
     }
 
     @Test
-    public void testUpdateMetricUpdatesMeter() {
-        Map<Integer, Timer> testCases = ImmutableMap.<Integer, Timer>builder()
-                .put(100, hostMetrics.get1xx())
-                .put(200, hostMetrics.get2xx())
-                .put(300, hostMetrics.get3xx())
-                .put(400, hostMetrics.get4xx())
-                .put(500, hostMetrics.get5xx())
-                .put(600, hostMetrics.getOther())
-                .build();
+    public void testUpdateMetricUpdatesMeter_1xx() {
+        testUpdateMetricUpdatesMeter(100, hostMetrics.get1xx());
+    }
 
-        for (Map.Entry<Integer, Timer> testCase : testCases.entrySet()) {
-            Timer timer = testCase.getValue();
-            assertThat(timer.getCount()).isZero();
-            assertThat(timer.getSnapshot().getMin()).isEqualTo(0);
+    @Test
+    public void testUpdateMetricUpdatesMeter_2xx() {
+        testUpdateMetricUpdatesMeter(200, hostMetrics.get2xx());
+    }
 
-            hostMetrics.record(testCase.getKey(), 1);
+    @Test
+    public void testUpdateMetricUpdatesMeter_3xx() {
+        testUpdateMetricUpdatesMeter(300, hostMetrics.get3xx());
+    }
 
-            assertThat(timer.getCount()).isEqualTo(1);
-            assertThat(timer.getSnapshot().getMin()).isEqualTo(1_000);
-        }
+    @Test
+    public void testUpdateMetricUpdatesMeter_4xx() {
+        testUpdateMetricUpdatesMeter(400, hostMetrics.get4xx());
+    }
+
+    @Test
+    public void testUpdateMetricUpdatesMeter_5xx() {
+        testUpdateMetricUpdatesMeter(500, hostMetrics.get5xx());
+    }
+
+    @Test
+    public void testUpdateMetricUpdatesMeter_429() {
+        testUpdateMetricUpdatesMeter(429, hostMetrics.getQos());
+    }
+
+    @Test
+    public void testUpdateMetricUpdatesMeter_503() {
+        testUpdateMetricUpdatesMeter(503, hostMetrics.getQos());
+    }
+
+    @Test
+    public void testUpdateMetricUpdatesMeter_other() {
+        testUpdateMetricUpdatesMeter(600, hostMetrics.getOther());
+    }
+
+    private void testUpdateMetricUpdatesMeter(int statusCode, Timer timer) {
+        assertThat(timer.getCount()).isZero();
+        assertThat(timer.getSnapshot().getMin()).isEqualTo(0);
+
+        hostMetrics.record(statusCode, 1);
+
+        assertThat(timer.getCount()).isEqualTo(1);
+        assertThat(timer.getSnapshot().getMin()).isEqualTo(1_000);
     }
 
     @Test
