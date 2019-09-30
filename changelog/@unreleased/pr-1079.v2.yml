@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Host metrics now measures QoS responses separately from other responses.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1079
