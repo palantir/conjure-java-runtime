@@ -69,7 +69,8 @@ public final class ClientConfigurationsTest {
         X509TrustManager trustManager = mock(X509TrustManager.class);
         ClientConfiguration actual = ClientConfigurations.of(uris, sslFactory, trustManager);
 
-        assertThat(actual.sslSocketFactory()).isEqualTo(sslFactory);
+        assertThat(actual.sslSocketFactory()).isInstanceOf(KeepAliveSslSocketFactory.class);
+        assertThat(((KeepAliveSslSocketFactory) actual.sslSocketFactory()).getDelegate()).isEqualTo(sslFactory);
         assertThat(actual.trustManager()).isEqualTo(trustManager);
         assertThat(actual.uris()).isEqualTo(uris);
         assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(10));

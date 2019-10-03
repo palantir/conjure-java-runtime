@@ -101,7 +101,7 @@ public final class ClientConfigurations {
             SSLSocketFactory sslSocketFactory,
             X509TrustManager trustManager) {
         return ClientConfiguration.builder()
-                .sslSocketFactory(sslSocketFactory)
+                .sslSocketFactory(new KeepAliveSslSocketFactory(sslSocketFactory))
                 .trustManager(trustManager)
                 .uris(uris)
                 .connectTimeout(DEFAULT_CONNECT_TIMEOUT)
