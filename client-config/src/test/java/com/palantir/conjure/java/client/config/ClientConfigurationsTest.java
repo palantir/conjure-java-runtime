@@ -25,6 +25,7 @@ import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
+import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.logsafe.testing.Assertions;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.io.IOException;
@@ -154,6 +155,19 @@ public final class ClientConfigurationsTest {
         try (Socket socket = config.sslSocketFactory().createSocket("google.com", 443)) {
             assertThat(socket.getKeepAlive()).describedAs("keepAlives enabled").isTrue();
         }
+    }
+
+    @Test
+    public void sensible_equality_and_hashcode() {
+        SslConfiguration sslConfiguration = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
+        SSLSocketFactory socketFactory = SslSocketFactories.createSslSocketFactory(sslConfiguration);
+        X509TrustManager x509TrustManager = SslSocketFactories.createX509TrustManager(sslConfiguration);
+
+        ClientConfiguration instance1 = ClientConfigurations.of(uris, socketFactory, x509TrustManager);
+        ClientConfiguration instance2 = ClientConfigurations.of(uris, socketFactory, x509TrustManager);
+
+        assertThat(instance1).isEqualTo(instance2);
+        assertThat(instance1).hasSameHashCodeAs(instance2);
     }
 
     private ServiceConfiguration meshProxyServiceConfig(List<String> theUris, int maxNumRetries) {
