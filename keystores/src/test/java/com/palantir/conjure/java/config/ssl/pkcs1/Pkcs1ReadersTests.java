@@ -31,7 +31,7 @@ public final class Pkcs1ReadersTests {
     public void testReadPrivateKeyFailsIfNoProvidersPresent() throws IOException {
         Assume.assumeFalse(ServiceLoader.load(Pkcs1Reader.class).iterator().hasNext());
 
-        assertThatThrownBy(() -> Pkcs1Readers.getInstance())
+        assertThatThrownBy(Pkcs1Readers::getInstance)
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("No Pkcs1Reader services were present");
     }

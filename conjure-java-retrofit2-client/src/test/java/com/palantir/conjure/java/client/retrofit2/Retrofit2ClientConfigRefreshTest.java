@@ -49,13 +49,13 @@ public final class Retrofit2ClientConfigRefreshTest extends TestBase {
         server1.enqueue(new MockResponse().setBody("\"server1\""));
         assertThat(proxy.get().execute().body()).isEqualTo("server1");
         assertThat(server1.getRequestCount()).isEqualTo(1);
-        assertThat(server2.getRequestCount()).isEqualTo(0);
+        assertThat(server2.getRequestCount()).isZero();
 
         // Call 2
         server1.enqueue(new MockResponse().setBody("\"server1\""));
         assertThat(proxy.get().execute().body()).isEqualTo("server1");
         assertThat(server1.getRequestCount()).isEqualTo(2);
-        assertThat(server2.getRequestCount()).isEqualTo(0);
+        assertThat(server2.getRequestCount()).isZero();
 
         // Switch config
         refreshableConfig.set(config2);

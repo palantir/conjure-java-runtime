@@ -140,9 +140,9 @@ public final class ExceptionMappingTest {
 
         Map<String, Object> rawError =
                 ObjectMappers.newClientObjectMapper().readValue(body, new TypeReference<Map<String, Object>>() {});
-        assertThat(rawError.get("errorCode")).isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
-        assertThat(rawError.get("errorName")).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
-        assertThat(rawError.get("parameters")).isEqualTo(ImmutableMap.of("arg", "value"));
+        assertThat(rawError).containsEntry("errorCode", ErrorType.INVALID_ARGUMENT.code().toString());
+        assertThat(rawError).containsEntry("errorName", ErrorType.INVALID_ARGUMENT.name());
+        assertThat(rawError).containsEntry("parameters", ImmutableMap.of("arg", "value"));
     }
 
     @Test
