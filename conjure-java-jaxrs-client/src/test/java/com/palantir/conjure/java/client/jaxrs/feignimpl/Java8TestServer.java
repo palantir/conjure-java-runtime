@@ -51,7 +51,7 @@ import javax.ws.rs.ext.Provider;
 
 public class Java8TestServer extends Application<Configuration> {
     @Override
-    public final void run(Configuration config, final Environment env) throws Exception {
+    public final void run(Configuration _config, final Environment env) throws Exception {
         env.jersey().register(ConjureJerseyFeature.INSTANCE);
         env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerObjectMapper()));
         env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
@@ -61,7 +61,7 @@ public class Java8TestServer extends Application<Configuration> {
     @Provider
     private static final class EmptyOptionalTo204ExceptionMapper implements ExceptionMapper<EmptyOptionalException> {
         @Override
-        public Response toResponse(EmptyOptionalException exception) {
+        public Response toResponse(EmptyOptionalException _exception) {
             return Response.noContent().build();
         }
     }

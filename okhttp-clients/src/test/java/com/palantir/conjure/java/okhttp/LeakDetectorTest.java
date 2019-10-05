@@ -45,7 +45,7 @@ public class LeakDetectorTest {
         String track = UUID.randomUUID().toString();
         leakDetector.register(track, Optional.empty());
         leakDetector.unregister(track);
-        track = null;
+
         System.gc();
         leakDetector.register("trigger", Optional.empty());
         assertThat(leaks).isEmpty();

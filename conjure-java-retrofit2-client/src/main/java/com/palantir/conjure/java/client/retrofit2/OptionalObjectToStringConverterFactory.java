@@ -39,7 +39,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
     private OptionalObjectToStringConverterFactory() {}
 
     @Override
-    public Converter<?, String> stringConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
+    public Converter<?, String> stringConverter(Type type, Annotation[] annotations, Retrofit _retrofit) {
         Optional<?> pathQueryAnnotation = ImmutableList.copyOf(annotations)
                 .stream()
                 .map(Annotation::annotationType)

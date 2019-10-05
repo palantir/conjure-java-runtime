@@ -399,12 +399,12 @@ public final class Retrofit2ClientApiTest extends TestBase {
         retrofit2.Call<String> call = service.getRelative();
         call.enqueue(new retrofit2.Callback<String>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<String> _call, Response<String> _response) {
                 failBecauseExceptionWasNotThrown(RemoteException.class);
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable throwable) {
+            public void onFailure(Call<String> _call, Throwable throwable) {
                 assertThat(throwable).isInstanceOf(RemoteException.class);
                 assertThat(((RemoteException) throwable).getError()).isEqualTo(ERROR);
                 assertionsPassed.countDown(); // if you delete this countdown latch then this test will vacuously pass.

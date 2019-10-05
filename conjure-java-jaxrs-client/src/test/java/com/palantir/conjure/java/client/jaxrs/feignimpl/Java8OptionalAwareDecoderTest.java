@@ -66,7 +66,7 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     @Test
     public void testNonOptional() {
         assertThat(service.getNonOptional("something")).isEqualTo(ImmutableMap.of("something", "something"));
-        assertThat(service.getNonOptional(null)).isEqualTo(ImmutableMap.<String, String>of());
+        assertThat(service.getNonOptional(null)).isEmpty();
     }
 
     @Test

@@ -46,6 +46,7 @@ final class KeepAliveSslSocketFactory extends ForwardingSslSocketFactory {
         return socket;
     }
 
+    @Override
     public String toString() {
         return "KeepAliveSslSocketFactory{delegate=" + delegate + '}';
     }

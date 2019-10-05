@@ -83,7 +83,7 @@ public final class ServiceConfigTest extends TestBase {
             }
 
             @Override
-            public void run(ServiceConfigTestAppConfig configuration, Environment environment) throws Exception {
+            public void run(ServiceConfigTestAppConfig _configuration, Environment environment) throws Exception {
                 environment.jersey().register(new Resource());
             }
 
