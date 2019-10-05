@@ -101,7 +101,7 @@ public final class ClientConfigurationsTest {
 
         ClientConfiguration validConfig = ClientConfigurations.of(meshProxyServiceConfig(uris, 0));
         assertThat(validConfig.meshProxy()).isEqualTo(Optional.of(HostAndPort.fromParts("localhost", 1234)));
-        assertThat(validConfig.maxNumRetries()).isEqualTo(0);
+        assertThat(validConfig.maxNumRetries()).isZero();
     }
 
     @Test

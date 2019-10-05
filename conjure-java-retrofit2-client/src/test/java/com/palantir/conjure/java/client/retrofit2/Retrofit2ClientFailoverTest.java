@@ -130,12 +130,12 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         CompletableFuture<String> future = new CompletableFuture<>();
         proxy.get().enqueue(new Callback<String>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<String> _call, Response<String> response) {
                 future.complete(response.body());
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable throwable) {
+            public void onFailure(Call<String> _call, Throwable throwable) {
                 future.completeExceptionally(throwable);
             }
         });
@@ -215,12 +215,12 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         CompletableFuture<String> future = new CompletableFuture<>();
         anotherProxy.get().enqueue(new Callback<String>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<String> _call, Response<String> response) {
                 future.complete(response.body());
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable throwable) {
+            public void onFailure(Call<String> _call, Throwable throwable) {
                 future.completeExceptionally(throwable);
             }
         });
@@ -247,12 +247,12 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         CompletableFuture<String> future = new CompletableFuture<>();
         anotherProxy.get().enqueue(new Callback<String>() {
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
+            public void onResponse(Call<String> _call, Response<String> response) {
                 future.complete(response.body());
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable throwable) {
+            public void onFailure(Call<String> _call, Throwable throwable) {
                 future.completeExceptionally(throwable);
             }
         });

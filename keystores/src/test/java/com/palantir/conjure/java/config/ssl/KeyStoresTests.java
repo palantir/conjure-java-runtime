@@ -66,7 +66,7 @@ public final class KeyStoresTests {
         File certFolder = tempFolder.newFolder();
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
 
-        assertThat(trustStore.size()).isEqualTo(0);
+        assertThat(trustStore.size()).isZero();
     }
 
     @Test
@@ -75,7 +75,7 @@ public final class KeyStoresTests {
         Files.copy(TestConstants.CA_DER_CERT_PATH.toFile(), certFolder.toPath().resolve(".hidden_file").toFile());
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
 
-        assertThat(trustStore.size()).isEqualTo(0);
+        assertThat(trustStore.size()).isZero();
     }
 
     @Test
@@ -167,7 +167,7 @@ public final class KeyStoresTests {
         File keyFolder = tempFolder.newFolder();
         KeyStore trustStore = KeyStores.createKeyStoreFromCombinedPems(keyFolder.toPath(), "changeit");
 
-        assertThat(trustStore.size()).isEqualTo(0);
+        assertThat(trustStore.size()).isZero();
     }
 
     @Test
