@@ -16,8 +16,10 @@
 
 package com.palantir.conjure.java.client.config;
 
+import com.palantir.logsafe.Preconditions;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.Objects;
 import javax.net.ssl.SSLSocketFactory;
 
 /**
@@ -32,7 +34,7 @@ final class KeepAliveSslSocketFactory extends ForwardingSslSocketFactory {
     private final SSLSocketFactory delegate;
 
     KeepAliveSslSocketFactory(SSLSocketFactory delegate) {
-        this.delegate = delegate;
+        this.delegate = Preconditions.checkNotNull(delegate, "delegate must not be null");
     }
 
     @Override
@@ -48,5 +50,22 @@ final class KeepAliveSslSocketFactory extends ForwardingSslSocketFactory {
 
     public String toString() {
         return "KeepAliveSslSocketFactory{delegate=" + delegate + '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(delegate);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        KeepAliveSslSocketFactory that = (KeepAliveSslSocketFactory) other;
+        return delegate.equals(that.delegate);
     }
 }
