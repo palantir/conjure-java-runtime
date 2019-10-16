@@ -16,11 +16,9 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -83,7 +81,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertEquals(decodedObject, "text response");
+        assertThat("text response").isEqualTo(decodedObject);
         verifyZeroInteractions(delegate);
     }
 
@@ -101,7 +99,7 @@ public final class TextDelegateDecoderTest extends TestBase {
 
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertEquals(decodedObject, "text response");
+        assertThat("text response").isEqualTo(decodedObject);
         verifyZeroInteractions(delegate);
     }
 
@@ -111,7 +109,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertEquals(decodedObject, "text response");
+        assertThat("text response").isEqualTo(decodedObject);
         verifyZeroInteractions(delegate);
     }
 
@@ -121,7 +119,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Response response = Response.create(200, "OK", headers, null, StandardCharsets.UTF_8);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertEquals("", decodedObject);
+        assertThat(decodedObject).isEqualTo("");
         verifyZeroInteractions(delegate);
     }
 
@@ -131,7 +129,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Response response = Response.create(200, "OK", headers, new byte[0]);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertEquals(decodedObject, DELEGATE_RESPONSE);
+        assertThat(DELEGATE_RESPONSE).isEqualTo(decodedObject);
     }
 
     @Test
@@ -141,7 +139,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Response response = Response.create(200, "OK", headers, new byte[0]);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertEquals(decodedObject, DELEGATE_RESPONSE);
+        assertThat(DELEGATE_RESPONSE).isEqualTo(decodedObject);
     }
 
     @Test
@@ -151,12 +149,12 @@ public final class TextDelegateDecoderTest extends TestBase {
         Response response = Response.create(200, "OK", headers, new byte[0]);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertEquals(decodedObject, DELEGATE_RESPONSE);
+        assertThat(DELEGATE_RESPONSE).isEqualTo(decodedObject);
     }
 
     @Test
     public void testStandardClientsUseTextDelegateEncoder() {
-        assertThat(service.getString("string"), is("string"));
+        assertThat(service.getString("string")).isEqualTo("string");
         assertThatExceptionOfType(DecodeException.class)
                 .isThrownBy(() -> service.getString(null))
                 .withCauseInstanceOf(NullPointerException.class);

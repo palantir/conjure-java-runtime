@@ -29,7 +29,7 @@ public final class JsonExceptionMapperTest {
 
     private final JsonExceptionMapper<RuntimeException> mapper = new JsonExceptionMapper<RuntimeException>() {
         @Override
-        ErrorType getErrorType(RuntimeException exception) {
+        ErrorType getErrorType(RuntimeException _exception) {
             return ErrorType.INVALID_ARGUMENT;
         }
     };

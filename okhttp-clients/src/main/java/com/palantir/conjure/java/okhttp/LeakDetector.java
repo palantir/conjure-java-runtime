@@ -37,7 +37,7 @@ final class LeakDetector<T> {
     private final List<LeakDetectingReference<T>> references = new ArrayList<>();
 
     LeakDetector(Class<T> resourceType) {
-        this(resourceType, unused -> { });
+        this(resourceType, unused -> {});
     }
 
     @VisibleForTesting
@@ -84,15 +84,15 @@ final class LeakDetector<T> {
     private void logLeak(Optional<RuntimeException> stackTrace) {
         if (stackTrace.isPresent()) {
             log.warn("Resource leak detected - did you forget to close a resource properly? "
-                            + "This will likely hurt performance. Stack trace is of the call where "
-                            + "the acquire happened.",
+                    + "This will likely hurt performance. Stack trace is of the call where "
+                    + "the acquire happened.",
                     SafeArg.of("resourceType", resourceType.getName()),
                     stackTrace.get());
         } else {
             log.warn("Leak detected in Conjure call - did you forget to close a resource properly? "
-                            + "This will likely hurt performance. To get a "
-                            + "stack trace for the call where the acquire happened, set log "
-                            + "level to TRACE.",
+                    + "This will likely hurt performance. To get a "
+                    + "stack trace for the call where the acquire happened, set log "
+                    + "level to TRACE.",
                     SafeArg.of("resourceType", resourceType.getName()),
                     SafeArg.of("loggerToSetToTrace", log.getName()));
         }

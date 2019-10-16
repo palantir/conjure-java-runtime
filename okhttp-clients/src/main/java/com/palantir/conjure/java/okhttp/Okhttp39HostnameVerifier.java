@@ -48,8 +48,7 @@ final class Okhttp39HostnameVerifier implements HostnameVerifier {
     private static final int ALT_DNS_NAME = 2;
     private static final int ALT_IPA_NAME = 7;
 
-    private Okhttp39HostnameVerifier() {
-    }
+    private Okhttp39HostnameVerifier() {}
 
     @Override
     public boolean verify(String host, SSLSession session) {
@@ -150,12 +149,14 @@ final class Okhttp39HostnameVerifier implements HostnameVerifier {
     public boolean verifyHostname(String hostname, String pattern) {
         // Basic sanity checks
         // Check length == 0 instead of .isEmpty() to support Java 5.
-        if ((hostname == null) || (hostname.length() == 0) || (hostname.startsWith("."))
+        if ((hostname == null) || (hostname.length() == 0)
+                || (hostname.startsWith("."))
                 || (hostname.endsWith(".."))) {
             // Invalid domain name
             return false;
         }
-        if ((pattern == null) || (pattern.length() == 0) || (pattern.startsWith("."))
+        if ((pattern == null) || (pattern.length() == 0)
+                || (pattern.startsWith("."))
                 || (pattern.endsWith(".."))) {
             // Invalid pattern/domain name
             return false;

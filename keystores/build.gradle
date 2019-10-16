@@ -1,6 +1,7 @@
 apply plugin: 'org.inferred.processors'
 
 apply from: "${rootDir}/gradle/publish-jar.gradle"
+apply plugin: 'com.palantir.revapi'
 
 dependencies {
     api "com.fasterxml.jackson.core:jackson-databind"

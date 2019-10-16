@@ -1,0 +1,8 @@
+versionOverrides: {}
+acceptedBreaks:
+  4.37.0:
+    com.palantir.conjure.java.runtime:okhttp-clients:
+    - code: "java.method.addedToInterface"
+      old: null
+      new: "method com.codahale.metrics.Timer com.palantir.conjure.java.okhttp.HostMetrics::getQos()"
+      justification: "ABI-safe change to rarely used class, low impact"

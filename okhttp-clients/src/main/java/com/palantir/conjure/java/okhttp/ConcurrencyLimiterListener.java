@@ -25,6 +25,7 @@ import org.immutables.value.Value;
 @ImmutablesStyle
 public interface ConcurrencyLimiterListener {
     ListenableFuture<Limiter.Listener> limiterListener();
+
     ConcurrencyLimiterListener setLimiterListener(ListenableFuture<Limiter.Listener> limiterListener);
 
     static ConcurrencyLimiterListener create() {

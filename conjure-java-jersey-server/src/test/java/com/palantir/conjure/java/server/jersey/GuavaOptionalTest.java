@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.base.Strings;
 import io.dropwizard.Application;
@@ -60,19 +58,19 @@ public final class GuavaOptionalTest {
     @Test
     public void testOptionalPresent() throws SecurityException {
         Response response = target.path("optional").queryParam("value", "val").request().get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("valval"));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("valval");
     }
 
     @Test
     public void testOptionalAbsent() {
         Response response = target.path("optional").request().get();
-        assertThat(response.getStatus(), is(Status.NO_CONTENT.getStatusCode()));
+        assertThat(response.getStatus()).isEqualTo(Status.NO_CONTENT.getStatusCode());
     }
 
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) {
+        public final void run(Configuration _config, final Environment env) {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new OptionalTestResource());
         }

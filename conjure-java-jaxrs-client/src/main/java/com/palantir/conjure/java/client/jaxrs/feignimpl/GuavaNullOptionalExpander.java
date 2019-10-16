@@ -30,7 +30,8 @@ public final class GuavaNullOptionalExpander implements Expander {
     @Override
     public String expand(Object value) {
         Preconditions.checkArgument(value instanceof com.google.common.base.Optional,
-                "Value must be an Optional. Was: %s", value.getClass());
+                "Value must be an Optional. Was: %s",
+                value.getClass());
         com.google.common.base.Optional<?> optional = (com.google.common.base.Optional<?>) value;
         return optional.isPresent() ? Objects.toString(optional.get()) : null;
     }

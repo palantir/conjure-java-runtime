@@ -22,7 +22,6 @@ import com.palantir.tracing.jersey.TraceEnrichingFilter;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 
-
 public enum ConjureJerseyFeature implements Feature {
     INSTANCE;
 

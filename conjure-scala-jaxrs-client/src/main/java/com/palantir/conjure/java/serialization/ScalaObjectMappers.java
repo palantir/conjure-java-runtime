@@ -24,8 +24,7 @@ import com.fasterxml.jackson.module.scala.introspect.ScalaAnnotationIntrospector
 
 public final class ScalaObjectMappers {
 
-    private ScalaObjectMappers() {
-    }
+    private ScalaObjectMappers() {}
 
     public static ObjectMapper newClientObjectMapper() {
         return withScalaSupport(ObjectMappers.newClientObjectMapper());
@@ -47,7 +46,8 @@ public final class ScalaObjectMappers {
         objectMapper
                 .registerModule(new DefaultScalaModule())
                 .setAnnotationIntrospector(new AnnotationIntrospectorPair(
-                        ScalaAnnotationIntrospector$.MODULE$, new JacksonAnnotationIntrospector()));
+                        ScalaAnnotationIntrospector$.MODULE$,
+                        new JacksonAnnotationIntrospector()));
 
         return objectMapper;
     }

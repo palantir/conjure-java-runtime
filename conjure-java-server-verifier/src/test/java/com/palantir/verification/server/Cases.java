@@ -41,7 +41,8 @@ public final class Cases {
         try {
             return new ObjectMapper()
                     .registerModule(new Jdk8Module())
-                    .readValue(file, com.palantir.conjure.verification.client.TestCases.class).getServer();
+                    .readValue(file, com.palantir.conjure.verification.client.TestCases.class)
+                    .getServer();
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Unable to read %s, you may need to run ./gradlew copyTestCases", file),
@@ -53,7 +54,8 @@ public final class Cases {
         try {
             return new ObjectMapper(new YAMLFactory())
                     .registerModule(new Jdk8Module())
-                    .readValue(file, IgnoredTestCases.class).getServer();
+                    .readValue(file, IgnoredTestCases.class)
+                    .getServer();
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Unable to read %s", file),

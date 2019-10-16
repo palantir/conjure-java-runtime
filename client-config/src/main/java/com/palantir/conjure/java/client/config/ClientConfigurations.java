@@ -54,6 +54,8 @@ public final class ClientConfigurations {
             ClientConfiguration.ServerQoS.AUTOMATIC_RETRY;
     private static final ClientConfiguration.RetryOnTimeout RETRY_ON_TIMEOUT_DEFAULT =
             ClientConfiguration.RetryOnTimeout.DISABLED;
+    private static final ClientConfiguration.RetryOnSocketException RETRY_ON_SOCKET_EXCEPTION_DEFAULT =
+            ClientConfiguration.RetryOnSocketException.ENABLED;
 
     private ClientConfigurations() {}
 
@@ -63,7 +65,8 @@ public final class ClientConfigurations {
      */
     public static ClientConfiguration of(ServiceConfiguration config) {
         return ClientConfiguration.builder()
-                .sslSocketFactory(SslSocketFactories.createSslSocketFactory(config.security()))
+                .sslSocketFactory(
+                        new KeepAliveSslSocketFactory(SslSocketFactories.createSslSocketFactory(config.security())))
                 .trustManager(SslSocketFactories.createX509TrustManager(config.security()))
                 .uris(config.uris())
                 .connectTimeout(config.connectTimeout().orElse(DEFAULT_CONNECT_TIMEOUT))
@@ -84,6 +87,7 @@ public final class ClientConfigurations {
                 .clientQoS(CLIENT_QOS_DEFAULT)
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
+                .retryOnSocketException(RETRY_ON_SOCKET_EXCEPTION_DEFAULT)
                 .taggedMetricRegistry(DefaultTaggedMetricRegistry.getDefault())
                 .build();
     }
@@ -93,9 +97,11 @@ public final class ClientConfigurations {
      * other configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(
-            List<String> uris, SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
+            List<String> uris,
+            SSLSocketFactory sslSocketFactory,
+            X509TrustManager trustManager) {
         return ClientConfiguration.builder()
-                .sslSocketFactory(sslSocketFactory)
+                .sslSocketFactory(new KeepAliveSslSocketFactory(sslSocketFactory))
                 .trustManager(trustManager)
                 .uris(uris)
                 .connectTimeout(DEFAULT_CONNECT_TIMEOUT)
@@ -112,6 +118,7 @@ public final class ClientConfigurations {
                 .clientQoS(CLIENT_QOS_DEFAULT)
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
+                .retryOnSocketException(RETRY_ON_SOCKET_EXCEPTION_DEFAULT)
                 .taggedMetricRegistry(DefaultTaggedMetricRegistry.getDefault())
                 .build();
     }
@@ -146,12 +153,12 @@ public final class ClientConfigurations {
     private static ProxySelector fixedProxySelectorFor(Proxy proxy) {
         return new ProxySelector() {
             @Override
-            public List<Proxy> select(URI uri) {
+            public List<Proxy> select(URI _uri) {
                 return ImmutableList.of(proxy);
             }
 
             @Override
-            public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {}
+            public void connectFailed(URI _uri, SocketAddress _sa, IOException _ioe) {}
         };
     }
 }

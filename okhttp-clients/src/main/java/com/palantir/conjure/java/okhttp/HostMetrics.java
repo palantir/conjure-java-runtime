@@ -46,17 +46,43 @@ public interface HostMetrics {
      */
     Instant lastUpdate();
 
+    /**
+     * A timer of 1xx responses.
+     */
     Timer get1xx();
 
+    /**
+     * A timer of 2xx responses.
+     */
     Timer get2xx();
 
+    /**
+     * A timer of 3xx responses.
+     */
     Timer get3xx();
 
+    /**
+     * A timer of 4xx responses, excluding 429s.
+     */
     Timer get4xx();
 
+    /**
+     * A timer of 5xx responses, excluding 503s.
+     */
     Timer get5xx();
 
+    /**
+     * A timer of 429 and 503 responses.
+     */
+    Timer getQos();
+
+    /**
+     * A timer of all other responses.
+     */
     Timer getOther();
 
+    /**
+     * A timer of all failed requests.
+     */
     Meter getIoExceptions();
 }

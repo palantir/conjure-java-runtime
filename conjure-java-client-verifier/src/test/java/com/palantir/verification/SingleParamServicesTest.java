@@ -45,9 +45,12 @@ public class SingleParamServicesTest {
     private static final Logger log = LoggerFactory.getLogger(SingleParamServicesTest.class);
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
     private static ImmutableMap<String, Object> servicesMaps = ImmutableMap.of(
-            "singlePathParamService", VerificationClients.singlePathParamService(server),
-            "singleHeaderService", VerificationClients.singleHeaderService(server),
-            "singleQueryParamService", VerificationClients.singleQueryParamService(server));
+            "singlePathParamService",
+            VerificationClients.singlePathParamService(server),
+            "singleHeaderService",
+            VerificationClients.singleHeaderService(server),
+            "singleQueryParamService",
+            VerificationClients.singleQueryParamService(server));
 
     @Parameterized.Parameter(0)
     public String serviceName;
@@ -113,12 +116,16 @@ public class SingleParamServicesTest {
                         Type type = method.getGenericParameterTypes()[0];
                         Class<?> cls = ClassUtils.getClass(type.getTypeName());
                         method.invoke(
-                                service, objectMapper.readValue(jsonString, cls), index);
+                                service,
+                                objectMapper.readValue(jsonString, cls),
+                                index);
                     } else {
                         Type type = method.getGenericParameterTypes()[1];
                         Class<?> cls = ClassUtils.getClass(type.getTypeName());
                         method.invoke(
-                                service, index, objectMapper.readValue(jsonString, cls));
+                                service,
+                                index,
+                                objectMapper.readValue(jsonString, cls));
                     }
 
                     log.info("Successfully post param to endpoint {} and index {}", endpointName, index);

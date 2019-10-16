@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.client.retrofit2;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.config.service.BasicCredentials;
@@ -62,10 +60,10 @@ public final class Retrofit2ClientProxyTest extends TestBase {
                 new HostMetricsRegistry(),
                 proxiedConfig);
 
-        assertThat(directService.get().execute().body(), is("server"));
-        assertThat(proxiedService.get().execute().body(), is("proxyServer"));
+        assertThat(directService.get().execute().body()).isEqualTo("server");
+        assertThat(proxiedService.get().execute().body()).isEqualTo("proxyServer");
         RecordedRequest proxyRequest = proxyServer.takeRequest();
-        assertThat(proxyRequest.getHeader("Host"), is("localhost:" + server.getPort()));
+        assertThat(proxyRequest.getHeader("Host")).isEqualTo("localhost:" + server.getPort());
     }
 
     @Test
@@ -81,11 +79,11 @@ public final class Retrofit2ClientProxyTest extends TestBase {
         TestService proxiedService =
                 Retrofit2Client.create(TestService.class, AGENT, new HostMetricsRegistry(), proxiedConfig);
 
-        assertThat(proxiedService.get().execute().body(), is("proxyServer"));
+        assertThat(proxiedService.get().execute().body()).isEqualTo("proxyServer");
         RecordedRequest firstRequest = proxyServer.takeRequest();
-        assertNull(firstRequest.getHeader("Proxy-Authorization"));
+        assertThat(firstRequest.getHeader("Proxy-Authorization")).isNull();
         RecordedRequest secondRequest = proxyServer.takeRequest();
-        assertThat(secondRequest.getHeader("Proxy-Authorization"), is("Basic ZmFrZVVzZXI6ZmFrZVBhc3N3b3Jk"));
+        assertThat(secondRequest.getHeader("Proxy-Authorization")).isEqualTo("Basic ZmFrZVVzZXI6ZmFrZVBhc3N3b3Jk");
     }
 
     private static ProxySelector createProxySelector(String host, int port) {

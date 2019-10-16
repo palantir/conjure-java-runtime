@@ -71,7 +71,8 @@ public final class Retrofit2ClientApiTest extends TestBase {
     @Before
     public void before() {
         url = server.url("/");
-        service = Retrofit2Client.create(TestService.class,
+        service = Retrofit2Client.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
                 createTestConfig(url.toString()));
@@ -340,6 +341,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
             assertThat(remoteException.getError()).isEqualTo(ERROR);
         }
     }
+
     @Test
     public void future_should_throw_normal_IoException_for_client_side_errors_completable() {
         future_should_throw_normal_IoException_for_client_side_errors(() -> service.makeCompletableFutureRequest());
@@ -409,6 +411,20 @@ public final class Retrofit2ClientApiTest extends TestBase {
             }
         });
         assertThat(assertionsPassed.await(1, TimeUnit.SECONDS)).as("Callback was executed").isTrue();
+    }
+
+    @Test
+    public void serializes_java_optional_headers() throws InterruptedException {
+        server.enqueue(new MockResponse().setBody("\"body\""));
+        assertThat(Futures.getUnchecked(service.getJavaOptionalHeader(Optional.of("value")))).isEqualTo("body");
+        assertThat(server.takeRequest().getHeader("Optional-Header")).isEqualTo("value");
+    }
+
+    @Test
+    public void serializes_guava_optional_headers() throws InterruptedException {
+        server.enqueue(new MockResponse().setBody("\"body\""));
+        assertThat(Futures.getUnchecked(service.getGuavaOptionalHeader(guavaOptional("value")))).isEqualTo("body");
+        assertThat(server.takeRequest().getHeader("Optional-Header")).isEqualTo("value");
     }
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {

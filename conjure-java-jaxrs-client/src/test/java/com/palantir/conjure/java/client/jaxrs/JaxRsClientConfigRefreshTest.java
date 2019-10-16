@@ -27,7 +27,6 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;
 import org.junit.Test;
 
-
 public final class JaxRsClientConfigRefreshTest extends TestBase {
 
     @Rule

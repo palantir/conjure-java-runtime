@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.api.TraceHttpHeaders;
 import io.dropwizard.Application;
@@ -34,9 +36,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.hamcrest.Matchers;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -70,16 +70,17 @@ public final class TracerTest {
 
     @Test
     public void testTracingFilterIsApplied() {
-        Response response = target.path("/trace").request()
+        Response response = target.path("/trace")
+                .request()
                 .header(TraceHttpHeaders.TRACE_ID, "traceId")
                 .header(TraceHttpHeaders.PARENT_SPAN_ID, "parentSpanId")
                 .header(TraceHttpHeaders.SPAN_ID, "spanId")
                 .get();
-        Assert.assertThat(response.getStatus(), Matchers.is(Status.OK.getStatusCode()));
-        Assert.assertThat(response.readEntity(String.class), Matchers.is("traceId"));
-        Assert.assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID), Matchers.is("traceId"));
-        Assert.assertNull(response.getHeaderString(TraceHttpHeaders.SPAN_ID));
-        Assert.assertNull(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("traceId");
+        assertThat(response.getHeaderString(TraceHttpHeaders.TRACE_ID)).isEqualTo("traceId");
+        assertThat(response.getHeaderString(TraceHttpHeaders.SPAN_ID)).isNull();
+        assertThat(response.getHeaderString(TraceHttpHeaders.PARENT_SPAN_ID)).isNull();
     }
 
     @Test
@@ -104,15 +105,12 @@ public final class TracerTest {
         // Invoke server and observe servers log messages; note that the server uses the same logger at INFO.
         log.setLevel(ch.qos.logback.classic.Level.INFO);
         target.path("trace").request().header(TraceHttpHeaders.TRACE_ID, "myTraceId").get();
-        Assert.assertThat(
-                byteStream.toString(StandardCharsets.UTF_8.name()),
-                Matchers.startsWith("traceId: myTraceId"));
+        assertThat(byteStream.toString(StandardCharsets.UTF_8.name())).startsWith("traceId: myTraceId");
     }
-
 
     public static class TracingTestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
+        public final void run(Configuration _config, final Environment env) throws Exception {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new TracingTestResource());
         }

@@ -16,10 +16,8 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -38,7 +36,8 @@ import org.junit.rules.ExpectedException;
 public final class GuavaOptionalAwareDecoderTest extends TestBase {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
+    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
+            GuavaTestServer.class,
             "src/test/resources/test-server.yml");
 
     @Rule
@@ -50,82 +49,77 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(
-                GuavaTestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
+                GuavaTestServer.TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig(endpointUri));
     }
 
     @Test
     public void testOptional() {
-        assertThat(service.getOptional("something"),
-                is(com.google.common.base.Optional.of(ImmutableMap.of("something", "something"))));
-        assertThat(service.getOptional(null),
-                is(com.google.common.base.Optional.<ImmutableMap<String, String>>absent()));
+        assertThat(service.getOptional("something")).isEqualTo(
+                com.google.common.base.Optional.of(ImmutableMap.of("something", "something")));
+        assertThat(service.getOptional(null)).isEqualTo(
+                com.google.common.base.Optional.<ImmutableMap<String, String>>absent());
     }
 
     @Test
     public void testNonOptional() {
-        assertThat(service.getNonOptional("something"), is(ImmutableMap.of("something", "something")));
-        assertThat(service.getNonOptional(null), is(ImmutableMap.<String, String>of()));
+        assertThat(service.getNonOptional("something")).isEqualTo(ImmutableMap.of("something", "something"));
+        assertThat(service.getNonOptional(null)).isEqualTo(ImmutableMap.<String, String>of());
     }
 
     @Test
     public void testThrowsNotFound() {
-        try {
-            service.getThrowsNotFound(null);
-            fail();
-        } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: NOT_FOUND (Default:NotFound)"));
-            assertThat(e.getError().errorCode(), is("NOT_FOUND"));
-        }
+        assertThatThrownBy(() -> service.getThrowsNotFound(null))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    assertThat(e.getMessage()).contains("RemoteException: NOT_FOUND (Default:NotFound)");
+                    assertThat(e.getError().errorCode()).isEqualTo("NOT_FOUND");
+                });
     }
 
     @Test
     public void testThrowsNotAuthorized() {
-        try {
-            service.getThrowsNotAuthorized(null);
-            fail();
-        } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotAuthorizedException"));
-            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotAuthorizedException"));
-        }
+        assertThatThrownBy(() -> service.getThrowsNotAuthorized(null))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    assertThat(e.getMessage()).contains("RemoteException: javax.ws.rs.NotAuthorizedException");
+                    assertThat(e.getError().errorCode()).isEqualTo("javax.ws.rs.NotAuthorizedException");
+                });
     }
 
     @Test
     public void testOptionalThrowsNotAuthorized() {
-        try {
-            service.getOptionalThrowsNotAuthorized(null);
-            fail();
-        } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: javax.ws.rs.NotAuthorizedException"));
-            assertThat(e.getError().errorCode(), is("javax.ws.rs.NotAuthorizedException"));
-        }
+        assertThatThrownBy(() -> service.getOptionalThrowsNotAuthorized(null))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    assertThat(e.getMessage()).contains("RemoteException: javax.ws.rs.NotAuthorizedException");
+                    assertThat(e.getError().errorCode()).isEqualTo("javax.ws.rs.NotAuthorizedException");
+                });
     }
 
     @Test
     public void testThrowsFordidden() {
-        try {
-            service.getThrowsForbidden(null);
-            fail();
-        } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)"));
-            assertThat(e.getError().errorCode(), is("PERMISSION_DENIED"));
-        }
+        assertThatThrownBy(() -> service.getThrowsForbidden(null))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    assertThat(e.getMessage()).contains(
+                            "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
+                    assertThat(e.getError().errorCode()).isEqualTo("PERMISSION_DENIED");
+                });
     }
 
     @Test
     public void testOptionalThrowsForbbbden() {
-        try {
-            service.getOptionalThrowsForbidden(null);
-            fail();
-        } catch (RemoteException e) {
-            assertThat(e.getMessage(), containsString("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)"));
-            assertThat(e.getError().errorCode(), is("PERMISSION_DENIED"));
-        }
+        assertThatThrownBy(() -> service.getOptionalThrowsForbidden(null))
+                .isInstanceOfSatisfying(RemoteException.class, e -> {
+                    assertThat(e.getMessage()).contains(
+                            "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
+                    assertThat(e.getError().errorCode()).isEqualTo("PERMISSION_DENIED");
+                });
     }
 
     @Test
     public void testOptionalString() {
-        assertThat(service.getOptionalString(null), is(com.google.common.base.Optional.absent()));
-        assertThat(service.getOptionalString("foo"), is(com.google.common.base.Optional.of("foo")));
+        assertThat(service.getOptionalString(null)).isEqualTo(com.google.common.base.Optional.absent());
+        assertThat(service.getOptionalString("foo")).isEqualTo(com.google.common.base.Optional.of("foo"));
     }
 
     @Test
@@ -139,7 +133,7 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
-        assertThat(service.getGuavaComplexType(value), is(value));
+        assertThat(service.getGuavaComplexType(value)).isEqualTo(value);
     }
 
     @Test
@@ -152,7 +146,7 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
                                 Paths.get("bar"))),
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
-        assertThat(service.getCborResponse(value), is(value));
+        assertThat(service.getCborResponse(value)).isEqualTo(value);
     }
 
     @Test
@@ -165,6 +159,6 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
                                 Paths.get("bar"))),
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
-        assertThat(service.postCborRequest(value), is(value));
+        assertThat(service.postCborRequest(value)).isEqualTo(value);
     }
 }

@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -58,23 +56,23 @@ public final class StringFormatTest {
     @Test
     public void testTextPlainMediaTypeReturnsPlainStrings() {
         Response response = target.path("textString").request().get();
-        assertThat(response.readEntity(String.class), is(""));
+        assertThat(response.readEntity(String.class)).isEqualTo("");
         response = target.path("textString").queryParam("value", "val").request().get();
-        assertThat(response.readEntity(String.class), is("val"));
+        assertThat(response.readEntity(String.class)).isEqualTo("val");
     }
 
     @Test
     public void testJsonMediaTypeReturnsPlainStrings() {
         // This behaviour is somewhat unexpected since a valid JSON response object would be "\"val\"" rather than "val"
         Response response = target.path("jsonString").request().get();
-        assertThat(response.readEntity(String.class), is(""));
+        assertThat(response.readEntity(String.class)).isEqualTo("");
         response = target.path("jsonString").queryParam("value", "val").request().get();
-        assertThat(response.readEntity(String.class), is("val"));
+        assertThat(response.readEntity(String.class)).isEqualTo("val");
     }
 
     public static class TestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
+        public final void run(Configuration _config, final Environment env) throws Exception {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new TestResource());
         }

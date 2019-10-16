@@ -31,13 +31,12 @@ import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.Tracers;
-import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
+import java.time.Clock;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import okhttp3.ConnectionPool;
@@ -59,11 +58,11 @@ public final class OkHttpClients {
     static final int NUM_SCHEDULING_THREADS = 5;
 
     private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
-            .setUncaughtExceptionHandler((thread, uncaughtException) ->
-                    log.error("An exception was uncaught in an execution thread. "
-                                    + "This likely left a thread blocked, and is as such a serious bug "
-                                    + "which requires debugging.",
-                            uncaughtException))
+            .setUncaughtExceptionHandler((thread, uncaughtException) -> log.error(
+                    "An exception was uncaught in an execution thread. "
+                            + "This likely left a thread blocked, and is as such a serious bug "
+                            + "which requires debugging.",
+                    uncaughtException))
             .setNameFormat("remoting-okhttp-dispatcher-%d")
             // This diverges from the OkHttp default value, allowing the JVM to cleanly exit
             // while idle dispatcher threads are still alive.
@@ -82,7 +81,7 @@ public final class OkHttpClients {
      * </ol>
      */
     private static final ExecutorService executionExecutor =
-            Tracers.wrap("OkHttp: dispatcher", Executors.newCachedThreadPool(executionThreads));
+            Executors.newCachedThreadPool(executionThreads);
 
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
@@ -94,9 +93,10 @@ public final class OkHttpClients {
 
     static {
         dispatcher = new Dispatcher(executionExecutor);
-        dispatcher.setMaxRequests(256);
+        // Restricting concurrency is done elsewhere in ConcurrencyLimiters.
+        dispatcher.setMaxRequests(Integer.MAX_VALUE);
         // Must be less than maxRequests so a single slow host does not block all requests
-        dispatcher.setMaxRequestsPerHost(64);
+        dispatcher.setMaxRequestsPerHost(256);
 
         dispatcherMetricSet = new DispatcherMetricSet(dispatcher, connectionPool);
     }
@@ -116,10 +116,9 @@ public final class OkHttpClients {
      * #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
      * Javadoc. Since this executor will never hit zero threads, it must use daemon threads.
      */
-    private static final Supplier<ScheduledExecutorService> schedulingExecutor = Suppliers.memoize(() ->
-            Tracers.wrap(Executors.newScheduledThreadPool(NUM_SCHEDULING_THREADS,
+    private static final Supplier<ScheduledExecutorService> schedulingExecutor =
+            Suppliers.memoize(() -> Tracers.wrap(Executors.newScheduledThreadPool(NUM_SCHEDULING_THREADS,
                     Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true))));
-
 
     private OkHttpClients() {}
 
@@ -128,7 +127,10 @@ public final class OkHttpClients {
      * ClientConfiguration#uris URIs} are initialized in random order.
      */
     public static OkHttpClient create(
-            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
+            ClientConfiguration config,
+            UserAgent userAgent,
+            HostEventsSink hostEventsSink,
+            Class<?> serviceClass) {
         boolean reshuffle =
                 !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
         return createInternal(config, userAgent, hostEventsSink, serviceClass, RANDOMIZE, reshuffle);
@@ -136,7 +138,10 @@ public final class OkHttpClients {
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
-            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
+            ClientConfiguration config,
+            UserAgent userAgent,
+            HostEventsSink hostEventsSink,
+            Class<?> serviceClass) {
         return createInternal(config, userAgent, hostEventsSink, serviceClass, !RANDOMIZE, !RESHUFFLE);
     }
 
@@ -156,18 +161,19 @@ public final class OkHttpClients {
 
         OkHttpClient.Builder client = new OkHttpClient.Builder();
         client.addInterceptor(CatchThrowableInterceptor.INSTANCE);
-        client.addInterceptor(new DispatcherTraceTerminatingInterceptor());
+        client.addInterceptor(SpanTerminatingInterceptor.INSTANCE);
 
         // Routing
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(
                 randomizeUrlOrder ? UrlSelectorImpl.shuffle(config.uris()) : config.uris(),
                 reshuffle,
-                config.failedUrlCooldown());
+                config.failedUrlCooldown(),
+                Clock.systemUTC());
         if (config.meshProxy().isPresent()) {
             // TODO(rfink): Should this go into the call itself?
             client.addInterceptor(new MeshProxyInterceptor(config.meshProxy().get()));
         }
-        client.followRedirects(false);  // We implement our own redirect logic.
+        client.followRedirects(false); // We implement our own redirect logic.
 
         // SSL
         client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
@@ -198,7 +204,8 @@ public final class OkHttpClients {
         if (config.proxyCredentials().isPresent()) {
             BasicCredentials basicCreds = config.proxyCredentials().get();
             final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
-            client.proxyAuthenticator((route, response) -> response.request().newBuilder()
+            client.proxyAuthenticator((route, response) -> response.request()
+                    .newBuilder()
                     .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
                     .build());
         }
@@ -212,20 +219,23 @@ public final class OkHttpClients {
         client.dispatcher(dispatcher);
 
         // global metrics (addMetrics is idempotent, so this works even when multiple clients are created)
-        config.taggedMetricRegistry().addMetrics(
-                "from", DispatcherMetricSet.class.getSimpleName(), dispatcherMetricSet);
+        config.taggedMetricRegistry()
+                .addMetrics(
+                        "from",
+                        DispatcherMetricSet.class.getSimpleName(),
+                        dispatcherMetricSet);
 
         return new RemotingOkHttpClient(
                 client.build(),
-                () -> new ExponentialBackoff(
-                        config.maxNumRetries(), config.backoffSlotSize(), ThreadLocalRandom.current()),
+                () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize()),
                 config.nodeSelectionStrategy(),
                 urlSelector,
                 schedulingExecutor.get(),
                 executionExecutor,
                 concurrencyLimiters,
                 config.serverQoS(),
-                config.retryOnTimeout());
+                config.retryOnTimeout(),
+                config.retryOnSocketException());
     }
 
     private static boolean shouldEnableQos(ClientConfiguration.ClientQoS clientQoS) {

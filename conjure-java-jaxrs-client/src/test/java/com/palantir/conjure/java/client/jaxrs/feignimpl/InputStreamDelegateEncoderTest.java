@@ -16,8 +16,7 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
@@ -69,7 +68,7 @@ public final class InputStreamDelegateEncoderTest extends TestBase {
         byte[] object = bytes("data");
 
         inputStreamDelegateEncoder.encode(new ByteArrayInputStream(object), InputStream.class, requestTemplate);
-        assertThat(requestTemplate.body(), is(object));
+        assertThat(requestTemplate.body()).isEqualTo(object);
     }
 
     @Test
@@ -83,7 +82,7 @@ public final class InputStreamDelegateEncoderTest extends TestBase {
     @Test
     public void testStandardClientsUseByteArrayDelegateEncoder() {
         String data = "bytes";
-        assertThat(service.readInputStream(new ByteArrayInputStream(bytes(data))), is(data));
+        assertThat(service.readInputStream(new ByteArrayInputStream(bytes(data)))).isEqualTo(data);
     }
 
     private static byte[] bytes(String text) {

@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -61,28 +59,30 @@ public final class DateTimeTest {
     @Test
     public void testOffsetDateTimeParam() throws SecurityException {
         Response response = target.path("offsetDateTime")
-                .queryParam("value", "2017-01-02T03:04:05.06Z").request().get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("2017-01-02T03:04:05.060Z"));
+                .queryParam("value", "2017-01-02T03:04:05.06Z")
+                .request()
+                .get();
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("2017-01-02T03:04:05.060Z");
     }
 
     @Test
     public void testZonedDateTimeParam() throws SecurityException {
         Response response = target.path("zonedDateTime").queryParam("value", "2017-01-02T03:04:05.06Z").request().get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("2017-01-02T03:04:05.060Z"));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("2017-01-02T03:04:05.060Z");
     }
 
     @Test
     public void testInstantParam() {
         Response response = target.path("instant").queryParam("value", "2017-01-02T03:04:05.06Z").request().get();
-        assertThat(response.getStatus(), is(Status.OK.getStatusCode()));
-        assertThat(response.readEntity(String.class), is("2017-01-02T03:04:05.060Z"));
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("2017-01-02T03:04:05.060Z");
     }
 
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) {
+        public final void run(Configuration _config, final Environment env) {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new DateTimeTestResource());
         }

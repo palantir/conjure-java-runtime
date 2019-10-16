@@ -44,20 +44,29 @@ public final class GuavaOptionalMessageBodyWriter implements MessageBodyWriter<c
 
     // Jersey ignores this
     @Override
-    public long getSize(com.google.common.base.Optional<?> entity, Class<?> type, Type genericType,
-            Annotation[] annotations, MediaType mediaType) {
+    public long getSize(
+            com.google.common.base.Optional<?> _entity,
+            Class<?> _type,
+            Type _genericType,
+            Annotation[] _annotations,
+            MediaType _mediaType) {
         return 0;
     }
 
     @Override
-    public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
+    public boolean isWriteable(Class<?> type, Type _genericType, Annotation[] _annotations, MediaType _mediaType) {
         return com.google.common.base.Optional.class.isAssignableFrom(type);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public void writeTo(com.google.common.base.Optional<?> entity, Class<?> type, Type genericType,
-            Annotation[] annotations, MediaType mediaType, MultivaluedMap<String, Object> httpHeaders,
+    public void writeTo(
+            com.google.common.base.Optional<?> entity,
+            Class<?> _type,
+            Type genericType,
+            Annotation[] annotations,
+            MediaType mediaType,
+            MultivaluedMap<String, Object> httpHeaders,
             OutputStream entityStream) throws IOException {
         if (!entity.isPresent()) {
             throw new NoContentException("Absent value for type: " + genericType);
@@ -65,12 +74,21 @@ public final class GuavaOptionalMessageBodyWriter implements MessageBodyWriter<c
 
         Type innerGenericType =
                 (genericType instanceof ParameterizedType)
-                        ? ((ParameterizedType) genericType).getActualTypeArguments()[0] : entity.get().getClass();
+                        ? ((ParameterizedType) genericType).getActualTypeArguments()[0]
+                        : entity.get().getClass();
 
-        MessageBodyWriter writer = mbw.get().getMessageBodyWriter(entity.get().getClass(),
-                innerGenericType, annotations, mediaType);
+        MessageBodyWriter writer = mbw.get()
+                .getMessageBodyWriter(entity.get().getClass(),
+                        innerGenericType,
+                        annotations,
+                        mediaType);
 
-        writer.writeTo(entity.get(), entity.get().getClass(),
-                innerGenericType, annotations, mediaType, httpHeaders, entityStream);
+        writer.writeTo(entity.get(),
+                entity.get().getClass(),
+                innerGenericType,
+                annotations,
+                mediaType,
+                httpHeaders,
+                entityStream);
     }
 }

@@ -58,7 +58,8 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
             builder.entity(error);
         } catch (RuntimeException e) {
             log.warn("Unable to translate exception to json",
-                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()), e);
+                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
+                    e);
             // simply write out the exception message
             builder.type(MediaType.TEXT_PLAIN);
             builder.entity("Unable to translate exception to json. Refer to the server logs with this errorInstanceId: "

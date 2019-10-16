@@ -30,7 +30,6 @@ import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
-import com.palantir.tracing.okhttp3.OkhttpTraceInterceptor;
 import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.time.Duration;
@@ -166,7 +165,9 @@ final class ConcurrencyLimiters {
     @Value.Immutable
     interface Key {
         String hostname();
+
         Optional<String> method();
+
         Optional<String> pathTemplate();
     }
 
@@ -182,6 +183,8 @@ final class ConcurrencyLimiters {
      */
     public interface ConcurrencyLimiter {
         ListenableFuture<Limiter.Listener> acquire();
+
+        String spanName();
     }
 
     static final class NoOpConcurrencyLimiter implements ConcurrencyLimiter {
@@ -193,11 +196,18 @@ final class ConcurrencyLimiters {
             return Futures.immediateFuture(NO_OP_LIMITER_LISTENER);
         }
 
+        @Override
+        public String spanName() {
+            return "OkHttp: no-op-concurrency-limiter";
+        }
+
         static final class NoOpLimiterListener implements Limiter.Listener {
             @Override
             public void onSuccess() {}
+
             @Override
             public void onIgnore() {}
+
             @Override
             public void onDropped() {}
         }
@@ -218,6 +228,13 @@ final class ConcurrencyLimiters {
             this.limiterKey = limiterKey;
             this.limiterFactory = limiterFactory;
             this.limiter = limiterFactory.get();
+        }
+
+        @Override
+        public synchronized String spanName() {
+            return String.format("OkHttp: client-side-concurrency-limiter %d/%d",
+                    limiter.getInflight(),
+                    limiter.getLimit());
         }
 
         @Override
@@ -243,7 +260,9 @@ final class ConcurrencyLimiters {
                 if (!maybeAcquired.isPresent()) {
                     if (!timeoutScheduled()) {
                         timeoutCleanup = scheduledExecutorService.schedule(
-                                this::resetLimiter, timeout.toMillis(), TimeUnit.MILLISECONDS);
+                                this::resetLimiter,
+                                timeout.toMillis(),
+                                TimeUnit.MILLISECONDS);
                     }
                     return;
                 }
@@ -270,8 +289,8 @@ final class ConcurrencyLimiters {
 
         private synchronized void resetLimiter() {
             log.warn("Timed out waiting to get permits for concurrency. In most cases this would indicate some kind of "
-                            + "deadlock. We expect that either this is caused by either service overloading, or not "
-                            + "closing response bodies (consider using the try-with-resources pattern).",
+                    + "deadlock. We expect that either this is caused by either service overloading, or not "
+                    + "closing response bodies (consider using the try-with-resources pattern).",
                     SafeArg.of("serviceClass", serviceClass),
                     UnsafeArg.of("hostname", limiterKey.hostname()),
                     SafeArg.of("method", limiterKey.method()),
@@ -286,7 +305,7 @@ final class ConcurrencyLimiters {
             long start = System.nanoTime();
             Futures.addCallback(future, new FutureCallback<Limiter.Listener>() {
                 @Override
-                public void onSuccess(Limiter.Listener result) {
+                public void onSuccess(Limiter.Listener _result) {
                     long end = System.nanoTime();
                     long durationNanos = end - start;
 
@@ -299,8 +318,7 @@ final class ConcurrencyLimiters {
                 }
 
                 @Override
-                public void onFailure(Throwable error) {
-                }
+                public void onFailure(Throwable _error) {}
             }, MoreExecutors.directExecutor());
         }
 
@@ -337,7 +355,8 @@ final class ConcurrencyLimiters {
         private final Optional<RuntimeException> allocationStackTrace;
 
         private QueuedRequest(
-                SettableFuture<Limiter.Listener> future, Optional<RuntimeException> allocationStackTrace) {
+                SettableFuture<Limiter.Listener> future,
+                Optional<RuntimeException> allocationStackTrace) {
             this.future = future;
             this.allocationStackTrace = allocationStackTrace;
         }

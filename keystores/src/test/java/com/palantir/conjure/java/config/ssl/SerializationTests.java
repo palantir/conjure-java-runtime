@@ -16,8 +16,7 @@
 
 package com.palantir.conjure.java.config.ssl;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
@@ -37,7 +36,7 @@ public final class SerializationTests {
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
 
-        assertThat(MAPPER.readValue(MAPPER.writeValueAsBytes(sslConfig), SslConfiguration.class), is(sslConfig));
+        assertThat(MAPPER.readValue(MAPPER.writeValueAsBytes(sslConfig), SslConfiguration.class)).isEqualTo(sslConfig);
     }
 
     @Test
@@ -47,7 +46,7 @@ public final class SerializationTests {
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
 
-        assertThat(MAPPER.readValue(JSON_STRING, SslConfiguration.class), is(sslConfig));
+        assertThat(MAPPER.readValue(JSON_STRING, SslConfiguration.class)).isEqualTo(sslConfig);
     }
 
     private static final String JSON_STRING =

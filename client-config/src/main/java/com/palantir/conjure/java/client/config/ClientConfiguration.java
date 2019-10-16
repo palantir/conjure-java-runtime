@@ -113,6 +113,9 @@ public interface ClientConfiguration {
     /** Indicates whether timed out requests should be retried. */
     RetryOnTimeout retryOnTimeout();
 
+    /** Indicates whether requests that resulted in a socket exception should be retried. */
+    RetryOnSocketException retryOnSocketException();
+
     /** Both per-request and global metrics are recorded in this registry. */
     TaggedMetricRegistry taggedMetricRegistry();
 
@@ -197,6 +200,18 @@ public interface ClientConfiguration {
          * Note that connect timeouts will always be retried.
          */
         DANGEROUS_ENABLE_AT_RISK_OF_RETRY_STORMS
+    }
+
+    enum RetryOnSocketException {
+        /** Default. */
+        ENABLED,
+        /**
+         * Disables all {@link java.net.SocketException} handling. This is almost always not what you want,
+         * the solitary case where this is desirable being cases where Conjure is used to create single-host clients
+         * with retry on host failure handled outside of the Conjure layer. If you want to use this, please
+         * talk to a relevant party; this is here to enable a very specific workflow.
+         */
+        DANGEROUS_DISABLED
     }
 
 }

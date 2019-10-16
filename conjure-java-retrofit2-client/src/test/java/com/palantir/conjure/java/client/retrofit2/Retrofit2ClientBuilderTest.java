@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.client.retrofit2;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.service.UserAgents;
@@ -59,12 +57,12 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
                 createTestConfig(url.toString()));
 
         server.enqueue(new MockResponse().setBody("\"server\""));
-        assertThat(service.get().execute().body(), is("server"));
-        assertThat(server.takeRequest().getPath(), is(String.format(expectedQueryPath, "")));
+        assertThat(service.get().execute().body()).isEqualTo("server");
+        assertThat(server.takeRequest().getPath()).isEqualTo(String.format(expectedQueryPath, ""));
 
         server.enqueue(new MockResponse().setBody("\"server\""));
-        assertThat(service.getRelative().execute().body(), is("server"));
-        assertThat(server.takeRequest().getPath(), is(String.format(expectedQueryPath, "relative")));
+        assertThat(service.getRelative().execute().body()).isEqualTo("server");
+        assertThat(server.takeRequest().getPath()).isEqualTo(String.format(expectedQueryPath, "relative"));
     }
 
     @Test
@@ -79,7 +77,7 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         service.get().execute();
 
         RecordedRequest capturedRequest = server.takeRequest();
-        assertThat(capturedRequest.getHeader("User-Agent"), startsWith(UserAgents.format(AGENT)));
+        assertThat(capturedRequest.getHeader("User-Agent")).startsWith(UserAgents.format(AGENT));
     }
 
     @Test
@@ -95,7 +93,7 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         service.get().execute();
 
         RecordedRequest capturedRequest = server.takeRequest();
-        assertThat(capturedRequest.getHeader("User-Agent"), startsWith("unknown/0.0.0"));
+        assertThat(capturedRequest.getHeader("User-Agent")).startsWith("unknown/0.0.0");
     }
 
     @Test
@@ -116,6 +114,6 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
                 .addAgent(UserAgent.Agent.of(
                         UserAgents.CONJURE_AGENT_NAME,
                         conjureVersion != null ? conjureVersion : "0.0.0"));
-        assertThat(request.getHeader("User-Agent"), is(UserAgents.format(expected)));
+        assertThat(request.getHeader("User-Agent")).isEqualTo(UserAgents.format(expected));
     }
 }

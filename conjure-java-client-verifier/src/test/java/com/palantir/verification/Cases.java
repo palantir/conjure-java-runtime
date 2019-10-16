@@ -42,7 +42,8 @@ public final class Cases {
         try {
             return new ObjectMapper()
                     .registerModule(new Jdk8Module())
-                    .readValue(file, TestCases.class).getClient();
+                    .readValue(file, TestCases.class)
+                    .getClient();
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Unable to read %s, you may need to run ./gradlew copyTestCases", file),
@@ -54,7 +55,8 @@ public final class Cases {
         try {
             return new ObjectMapper(new YAMLFactory())
                     .registerModule(new Jdk8Module())
-                    .readValue(file, IgnoredTestCases.class).getClient();
+                    .readValue(file, IgnoredTestCases.class)
+                    .getClient();
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Unable to read %s", file),

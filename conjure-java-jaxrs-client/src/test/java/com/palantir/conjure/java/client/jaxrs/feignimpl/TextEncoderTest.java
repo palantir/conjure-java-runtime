@@ -16,8 +16,7 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
@@ -55,7 +54,7 @@ public final class TextEncoderTest extends TestBase {
         service.post(testString);
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getBody().readUtf8(), is(testString));
+        assertThat(request.getBody().readUtf8()).isEqualTo(testString);
     }
 
     @Path("/")

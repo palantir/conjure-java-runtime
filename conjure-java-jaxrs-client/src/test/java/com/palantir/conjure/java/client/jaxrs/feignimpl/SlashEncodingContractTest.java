@@ -16,8 +16,7 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -81,7 +80,7 @@ public final class SlashEncodingContractTest extends TestBase {
     public void testPathAndQueryParamsAreEncoded() throws InterruptedException {
         inMemoryProxy.encoded(PATH_PARAM, QUERY_PARAM);
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getPath(), is("/path/slash%2Fpath?query=slash%2Fquery"));
+        assertThat(request.getPath()).isEqualTo("/path/slash%2Fpath?query=slash%2Fquery");
     }
 
     @Path("/")

@@ -46,10 +46,10 @@ public final class JaxRsClientCollectionHandlingTest extends TestBase {
 
     @Parameters(name = "{index}: code {0} body: \"{1}\"")
     public static Collection<Object[]> responses() {
-        return Arrays.asList(new Object[][]{
-                { 200, "null" },
-                { 200, "" },
-                { 204, "" }
+        return Arrays.asList(new Object[][] {
+                {200, "null"},
+                {200, ""},
+                {204, ""}
         });
     }
 

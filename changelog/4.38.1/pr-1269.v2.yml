@@ -1,0 +1,7 @@
+type: fix
+fix:
+  description: Multiple calls to ClientConfigurations.of() with the same arguments
+    will once again produce an equal ClientConfiguration object. This fixes a regression
+    introduce in 4.37.0
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1269

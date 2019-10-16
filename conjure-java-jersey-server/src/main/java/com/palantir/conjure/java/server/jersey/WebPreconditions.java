@@ -48,7 +48,9 @@ public final class WebPreconditions {
      * @throws BadRequestException
      *         when <code>expression</code> is false
      */
-    public static void checkArgument(boolean expression, @Nullable String messageTemplate,
+    public static void checkArgument(
+            boolean expression,
+            @Nullable String messageTemplate,
             @Nullable Object... messageArgs) {
         if (!expression) {
             throw new BadRequestException(format(messageTemplate, messageArgs));
@@ -73,7 +75,9 @@ public final class WebPreconditions {
      * @throws BadRequestException
      *         when <code>reference</code> is null or empty
      */
-    public static String checkNotEmpty(String string, @Nullable String messageTemplate,
+    public static String checkNotEmpty(
+            String string,
+            @Nullable String messageTemplate,
             @Nullable Object... messageArgs) {
         checkArgument(!Strings.isNullOrEmpty(string), messageTemplate, messageArgs);
 

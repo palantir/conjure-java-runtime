@@ -60,7 +60,10 @@ final class CoerceNullValuesConverterFactory extends Converter.Factory {
 
     @Override
     public Converter<?, RequestBody> requestBodyConverter(
-            Type type, Annotation[] parameterAnnotations, Annotation[] methodAnnotations, Retrofit retrofit) {
+            Type type,
+            Annotation[] parameterAnnotations,
+            Annotation[] methodAnnotations,
+            Retrofit retrofit) {
         return delegate.requestBodyConverter(type, parameterAnnotations, methodAnnotations, retrofit);
     }
 
@@ -89,7 +92,7 @@ final class CoerceNullValuesConverterFactory extends Converter.Factory {
                 return Collections.emptySet();
             } else if (Map.class.isAssignableFrom(rawType)) {
                 return Collections.emptyMap();
-            }  else if (rawType == java.util.Optional.class) {
+            } else if (rawType == java.util.Optional.class) {
                 return Optional.empty();
             } else if (rawType == java.util.OptionalInt.class) {
                 return OptionalInt.empty();

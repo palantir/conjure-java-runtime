@@ -39,8 +39,10 @@ public final class Java8OptionalParamConverterProvider implements ParamConverter
     }
 
     @Override
-    public <T> ParamConverter<T> getConverter(final Class<T> rawType, final Type genericType,
-                                              final Annotation[] annotations) {
+    public <T> ParamConverter<T> getConverter(
+            final Class<T> rawType,
+            final Type genericType,
+            final Annotation[] annotations) {
         if (Optional.class.equals(rawType)) {
             final List<ClassTypePair> ctps = ReflectionHelper.getTypeArgumentAndClass(genericType);
             final ClassTypePair ctp = (ctps.size() == 1) ? ctps.get(0) : null;

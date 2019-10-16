@@ -1,9 +1,11 @@
 apply from: "${rootDir}/gradle/publish-jar.gradle"
+apply plugin: 'com.palantir.revapi'
 
 dependencies {
     api project(":keystores")
 
     testImplementation "junit:junit"
+    testImplementation "org.assertj:assertj-core"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation 'com.google.guava:guava'
 }

@@ -5,6 +5,7 @@
 apply plugin: "org.inferred.processors"
 
 apply from: "${rootDir}/gradle/publish-jar.gradle"
+apply plugin: 'com.palantir.revapi'
 
 dependencies {
     api project(":extras:refresh-utils")
@@ -26,6 +27,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
     testImplementation "io.leangen.geantyref:geantyref"
+    testImplementation "com.palantir.tracing:tracing-test-utils"
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'

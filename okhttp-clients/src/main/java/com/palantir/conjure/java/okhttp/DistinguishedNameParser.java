@@ -55,8 +55,7 @@ final class DistinguishedNameParser {
     private String nextAT() {
         // skip preceding space chars, they can present after
         // comma or semicolon (compatibility with RFC 1779)
-        for (; pos < length && chars[pos] == ' '; pos++) {
-        }
+        for (; pos < length && chars[pos] == ' '; pos++) {}
         if (pos == length) {
             return null; // reached the end of DN
         }
@@ -80,8 +79,7 @@ final class DistinguishedNameParser {
         // skip trailing space chars between attribute type and '='
         // (compatibility with RFC 1779)
         if (chars[pos] == ' ') {
-            for (; pos < length && chars[pos] != '=' && chars[pos] == ' '; pos++) {
-            }
+            for (; pos < length && chars[pos] != '=' && chars[pos] == ' '; pos++) {}
 
             if (chars[pos] != '=' || pos == length) {
                 throw new IllegalStateException("Unexpected end of DN: " + dn);
@@ -92,8 +90,7 @@ final class DistinguishedNameParser {
 
         // skip space chars between '=' and attribute value
         // (compatibility with RFC 1779)
-        for (; pos < length && chars[pos] == ' '; pos++) {
-        }
+        for (; pos < length && chars[pos] == ' '; pos++) {}
 
         // in case of oid attribute type skip its prefix: "oid." or "OID."
         // (compatibility with RFC 1779)
@@ -133,8 +130,7 @@ final class DistinguishedNameParser {
 
         // skip trailing space chars before comma or semicolon.
         // (compatibility with RFC 1779)
-        for (; pos < length && chars[pos] == ' '; pos++) {
-        }
+        for (; pos < length && chars[pos] == ' '; pos++) {}
 
         return new String(chars, beg, end - beg);
     }
@@ -151,7 +147,8 @@ final class DistinguishedNameParser {
         while (true) {
             // check for end of attribute value
             // looks for space and component separators
-            if (pos == length || chars[pos] == '+' || chars[pos] == ','
+            if (pos == length || chars[pos] == '+'
+                    || chars[pos] == ','
                     || chars[pos] == ';') {
                 end = pos;
                 break;
@@ -162,8 +159,7 @@ final class DistinguishedNameParser {
                 pos++;
                 // skip trailing space chars before comma or semicolon.
                 // (compatibility with RFC 1779)
-                for (; pos < length && chars[pos] == ' '; pos++) {
-                }
+                for (; pos < length && chars[pos] == ' '; pos++) {}
                 break;
             } else if (chars[pos] >= 'A' && chars[pos] <= 'F') {
                 chars[pos] += 32; //to low case
@@ -220,7 +216,8 @@ final class DistinguishedNameParser {
                     for (; pos < length && chars[pos] == ' '; pos++) {
                         chars[end++] = ' ';
                     }
-                    if (pos == length || chars[pos] == ',' || chars[pos] == '+'
+                    if (pos == length || chars[pos] == ','
+                            || chars[pos] == '+'
                             || chars[pos] == ';') {
                         // separator char or the end of DN has been found
                         return new String(chars, beg, cur - beg);
@@ -396,8 +393,7 @@ final class DistinguishedNameParser {
                 return null;
             }
 
-            if (chars[pos] == ',' || chars[pos] == ';') {
-            } else if (chars[pos] != '+') {
+            if (chars[pos] == ',' || chars[pos] == ';') {} else if (chars[pos] != '+') {
                 throw new IllegalStateException("Malformed DN: " + dn);
             }
 

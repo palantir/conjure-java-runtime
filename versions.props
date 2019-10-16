@@ -1,30 +1,42 @@
 ch.qos.logback:logback-classic = 1.1.7
+# catch-all jackson version
 com.fasterxml.jackson.*:jackson-* = 2.9.9
-com.github.ben-manes.caffeine:caffeine = 2.7.0
+# individual components are sometimes updated out of band to fix vulnerabilities
+# https://github.com/FasterXML/jackson-databind/issues/2387
+# https://github.com/FasterXML/jackson-databind/issues/2389
+com.fasterxml.jackson.core:jackson-databind = 2.9.9.3
+com.fasterxml.jackson.datatype:jackson-datatype-guava = 2.9.9
+com.fasterxml.jackson.module:jackson-module-afterburner = 2.9.9
+com.fasterxml.jackson.datatype:jackson-datatype-jdk8 = 2.9.9
+com.fasterxml.jackson.datatype:jackson-datatype-jsr310 = 2.9.9
+com.fasterxml.jackson.dataformat:jackson-dataformat-yaml = 2.9.9
+com.fasterxml.jackson.dataformat:jackson-dataformat-cbor = 2.9.9
+com.fasterxml.jackson.module:jackson-module-scala_2.11 = 2.9.9
+com.github.ben-manes.caffeine:caffeine = 2.8.0
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 23.6.1-jre
 com.jcraft:jzlib = 1.1.3
 com.netflix.concurrency-limits:* = 0.2.2
 com.netflix.feign:feign-*= 8.18.0
-com.palantir.conjure.java:conjure-java = 3.15.0
-com.palantir.conjure.java:conjure-lib = 3.15.0
-com.palantir.conjure.java.api:* = 2.3.0
+com.palantir.conjure.java:conjure-java = 4.4.0
+com.palantir.conjure.java:conjure-lib = 4.4.0
+com.palantir.conjure.java.api:* = 2.6.0
 com.palantir.conjure.verification:* = 0.16.7
-com.palantir.safe-logging:* = 1.9.0
-com.palantir.tracing:* = 2.11.0
+com.palantir.safe-logging:* = 1.11.0
+com.palantir.tracing:* = 3.3.0
 com.palantir.tritium:tritium-registry = 0.11.2
 io.dropwizard:dropwizard-* = 1.3.7
-io.reactivex.rxjava2:rxjava = 2.2.8
+io.reactivex.rxjava2:rxjava = 2.2.13
 javax.ws.rs:javax.ws.rs-api = 2.1
 junit:junit = 4.12
 org.apache.commons:commons-lang3 = 3.9
-org.assertj:assertj-core = 3.12.2
-org.bouncycastle:bcpkix-jdk15on = 1.61
+org.assertj:assertj-core = 3.13.2
+org.bouncycastle:bcpkix-jdk15on = 1.64
 org.glassfish.jersey.*:* = 2.25.1
 org.hamcrest:hamcrest-* = 1.3
 org.immutables:value = 2.7.5
 org.jmock:jmock = 2.12.0
-org.mockito:mockito-core = 2.27.0
+org.mockito:mockito-core = 3.1.0
 org.slf4j:slf4j-api = 1.7.12
 io.leangen.geantyref:geantyref = 1.3.4
 
@@ -38,3 +50,6 @@ com.squareup.retrofit2:* = 2.4.0
 
 # Pin to same version as spark
 io.dropwizard.metrics:metrics-core = 3.2.6
+
+# We never actually properly released these yet
+com.palantir.tracing:tracing-test-utils = 3.2.0-rc1

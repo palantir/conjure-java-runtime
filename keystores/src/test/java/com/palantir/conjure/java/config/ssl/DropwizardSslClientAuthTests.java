@@ -16,9 +16,8 @@
 
 package com.palantir.conjure.java.config.ssl;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import feign.Feign;
@@ -67,7 +66,7 @@ public final class DropwizardSslClientAuthTests {
 
         try {
             service.echo("foo");
-            fail();
+            fail("fail");
         } catch (RetryableException ex) {
             // expected
         }
@@ -81,7 +80,7 @@ public final class DropwizardSslClientAuthTests {
                 TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
         TestEchoService service = createTestService(sslConfig);
 
-        assertThat(service.echo("foo"), is("foo"));
+        assertThat(service.echo("foo")).isEqualTo("foo");
     }
 
     @Test
@@ -96,7 +95,7 @@ public final class DropwizardSslClientAuthTests {
                 .build();
         TestEchoService service = createTestService(sslConfig);
 
-        assertThat(service.echo("foo"), is("foo"));
+        assertThat(service.echo("foo")).isEqualTo("foo");
     }
 
     private static TestEchoService createTestService(SslConfiguration sslConfig) {
@@ -113,7 +112,7 @@ public final class DropwizardSslClientAuthTests {
 
     public static final class TestEchoServer extends Application<Configuration> {
         @Override
-        public void run(Configuration config, final Environment env) throws Exception {
+        public void run(Configuration _config, final Environment env) throws Exception {
             env.jersey().register(new TestEchoResource());
         }
 

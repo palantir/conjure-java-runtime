@@ -1,4 +1,5 @@
 apply from: "${rootDir}/gradle/publish-jar.gradle"
+apply plugin: 'com.palantir.revapi'
 
 dependencies {
     api project(":extras:refresh-utils")
@@ -29,6 +30,7 @@ dependencies {
     testImplementation "com.netflix.feign:feign-jackson"
     testImplementation "com.squareup.okhttp3:mockwebserver"
     testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
+    testImplementation "com.palantir.tracing:tracing-test-utils"
     testImplementation "io.dropwizard.metrics:metrics-core"
     testImplementation "junit:junit"
     testImplementation "org.hamcrest:hamcrest-all"

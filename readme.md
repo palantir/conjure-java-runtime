@@ -373,5 +373,17 @@ a DNS error and the retried call succeeds against the URL from the list, then su
 The number of retries for `503` and connection errors can be configured via `ClientConfiguration#maxNumRetries` or
 `ServiceConfiguration#maxNumRetries`, defaulting to 4.
 
+#### Metrics
+
+The `HostMetricsRegistry` uses `HostMetrics` to track per-host response metrics. `HostMetrics` provides the following metrics:
+- `get1xx()`: A timer of 1xx responses.
+- `get2xx()`: A timer of 2xx responses.
+- `get3xx()`: A timer of 3xx responses.
+- `get4xx()`: A timer of 4xx responses, excluding 429s.
+- `get5xx()`: A timer of 5xx responses, excluding 503s.
+- `getQos()`: A timer of 429 and 503 responses.
+- `getOther()`: A timer of all other responses.
+- `getIoExceptions()`: A timer of all failed requests.
+
 # License
 This repository is made available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).

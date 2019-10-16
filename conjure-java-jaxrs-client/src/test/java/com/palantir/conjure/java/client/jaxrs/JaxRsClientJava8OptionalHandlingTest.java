@@ -16,9 +16,8 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import java.util.Optional;
@@ -108,11 +107,12 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
                     AGENT,
                     new HostMetricsRegistry(),
                     createTestConfig("http://localhost:" + server.getPort()));
-            fail();
+            fail("fail");
         } catch (RuntimeException e) {
-            assertThat(e.getMessage(), is("Cannot use Java8 Optionals with PathParams. (Class: com.palantir.conjure."
-                    + "java.client.jaxrs.JaxRsClientJava8OptionalHandlingTest$CannotDecorateInterface,"
-                    + " Method: path, Param: arg0)"));
+            assertThat(e.getMessage()).isEqualTo(
+                    "Cannot use Java8 Optionals with PathParams. (Class: com.palantir.conjure."
+                            + "java.client.jaxrs.JaxRsClientJava8OptionalHandlingTest$CannotDecorateInterface,"
+                            + " Method: path, Param: arg0)");
         }
     }
 
@@ -120,52 +120,52 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     public void testRegularPathParam() throws Exception {
         proxy.path("str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getPath(), is("/foo/str2"));
+        assertThat(takeRequest.getPath()).isEqualTo("/foo/str2");
     }
 
     @Test
     public void testAbsentQuery() throws Exception {
         proxy.query(Optional.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo?req=str2 HTTP/1.1"));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo?req=str2 HTTP/1.1");
     }
 
     @Test
     public void testEmptyStringQuery() throws Exception {
         proxy.query(Optional.of(""), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=&req=str2 HTTP/1.1"));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo?opt=&req=str2 HTTP/1.1");
     }
 
     @Test
     public void testStringQuery() throws Exception {
         proxy.query(Optional.of("str"), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo?opt=str&req=str2 HTTP/1.1"));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo?opt=str&req=str2 HTTP/1.1");
     }
 
     @Test
     public void testAbsentHeader() throws Exception {
         proxy.header(Optional.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt"), is(""));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
+        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
     @Test
     public void testEmptyStringHeader() throws Exception {
         proxy.header(Optional.of(""), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt"), is(""));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
+        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
     @Test
     public void testStringHeader() throws Exception {
         proxy.header(Optional.of("str"), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt"), is("str"));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
+        assertThat(takeRequest.getHeader("opt")).isEqualTo("str");
+        assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
     @Ignore("TODO(rfink): Add support for header encoding")
@@ -173,98 +173,98 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     public void testStringHeader_withNonAsciiCharacters() throws Exception {
         proxy.header(Optional.of("ü"), "ø");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt"), is("ü"));
-        assertThat(takeRequest.getHeader("req"), is("ø"));
+        assertThat(takeRequest.getHeader("opt")).isEqualTo("ü");
+        assertThat(takeRequest.getHeader("req")).isEqualTo("ø");
     }
 
     @Test
     public void testAbsentIntQuery() throws Exception {
         proxy.queryInt(OptionalInt.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo/int?req=str2 HTTP/1.1"));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo/int?req=str2 HTTP/1.1");
     }
 
     @Test
     public void testIntQuery() throws Exception {
         proxy.queryInt(OptionalInt.of(1234), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo/int?opt=1234&req=str2 HTTP/1.1"));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo/int?opt=1234&req=str2 HTTP/1.1");
     }
 
     @Test
     public void testAbsentIntHeader() throws Exception {
         proxy.headerInt(OptionalInt.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt"), is(""));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
+        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
     @Test
     public void testIntHeader() throws Exception {
         proxy.headerInt(OptionalInt.of(1234), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt"), is("1234"));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
+        assertThat(takeRequest.getHeader("opt")).isEqualTo("1234");
+        assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
     @Test
     public void testAbsentDoubleQuery() throws Exception {
         proxy.queryDouble(OptionalDouble.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo/double?req=str2 HTTP/1.1"));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo/double?req=str2 HTTP/1.1");
     }
 
     @Test
     public void testDoubleQuery() throws Exception {
         proxy.queryDouble(OptionalDouble.of(1234.567), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo/double?opt=1234.567&req=str2 HTTP/1.1"));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo/double?opt=1234.567&req=str2 HTTP/1.1");
     }
 
     @Test
     public void testAbsentDoubleHeader() throws Exception {
         proxy.headerDouble(OptionalDouble.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt"), is(""));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
+        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
     @Test
     public void testDoubleHeader() throws Exception {
         proxy.headerDouble(OptionalDouble.of(1234.567), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt"), is("1234.567"));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
+        assertThat(takeRequest.getHeader("opt")).isEqualTo("1234.567");
+        assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
     @Test
     public void testAbsentLongQuery() throws Exception {
         proxy.queryLong(OptionalLong.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo/long?req=str2 HTTP/1.1"));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo/long?req=str2 HTTP/1.1");
     }
 
     @Test
     public void testLongQuery() throws Exception {
         proxy.queryLong(OptionalLong.of(12345678901234L), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine(), is("GET /foo/long?opt=12345678901234&req=str2 HTTP/1.1"));
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo/long?opt=12345678901234&req=str2 HTTP/1.1");
     }
 
     @Test
     public void testAbsentLongHeader() throws Exception {
         proxy.headerLong(OptionalLong.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt"), is(""));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
+        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
     @Test
     public void testLongHeader() throws Exception {
         proxy.headerLong(OptionalLong.of(12345678901234L), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt"), is("12345678901234"));
-        assertThat(takeRequest.getHeader("req"), is("str2"));
+        assertThat(takeRequest.getHeader("opt")).isEqualTo("12345678901234");
+        assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
 }

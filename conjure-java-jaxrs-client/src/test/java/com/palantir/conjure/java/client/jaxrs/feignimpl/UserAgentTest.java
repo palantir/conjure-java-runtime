@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.service.UserAgents;
@@ -58,7 +56,7 @@ public final class UserAgentTest extends TestBase {
         service.string();
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getHeader("User-Agent"), startsWith(UserAgents.format(AGENT)));
+        assertThat(request.getHeader("User-Agent")).startsWith(UserAgents.format(AGENT));
     }
 
     @Test
@@ -71,7 +69,7 @@ public final class UserAgentTest extends TestBase {
         service.string();
 
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getHeader("User-Agent"), startsWith("unknown/0.0.0"));
+        assertThat(request.getHeader("User-Agent")).startsWith("unknown/0.0.0");
     }
 
     @Test
@@ -87,6 +85,6 @@ public final class UserAgentTest extends TestBase {
                 .addAgent(UserAgent.Agent.of(
                         UserAgents.CONJURE_AGENT_NAME,
                         conjureVersion != null ? conjureVersion : "0.0.0"));
-        assertThat(request.getHeader("User-Agent"), is(UserAgents.format(expected)));
+        assertThat(request.getHeader("User-Agent")).isEqualTo(UserAgents.format(expected));
     }
 }

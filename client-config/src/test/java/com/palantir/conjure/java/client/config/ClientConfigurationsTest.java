@@ -25,9 +25,12 @@ import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
+import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.logsafe.testing.Assertions;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import java.io.IOException;
 import java.net.Proxy;
+import java.net.Socket;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -67,7 +70,8 @@ public final class ClientConfigurationsTest {
         X509TrustManager trustManager = mock(X509TrustManager.class);
         ClientConfiguration actual = ClientConfigurations.of(uris, sslFactory, trustManager);
 
-        assertThat(actual.sslSocketFactory()).isEqualTo(sslFactory);
+        assertThat(actual.sslSocketFactory()).isInstanceOf(KeepAliveSslSocketFactory.class);
+        assertThat(((KeepAliveSslSocketFactory) actual.sslSocketFactory()).getDelegate()).isEqualTo(sslFactory);
         assertThat(actual.trustManager()).isEqualTo(trustManager);
         assertThat(actual.uris()).isEqualTo(uris);
         assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(10));
@@ -116,13 +120,14 @@ public final class ClientConfigurationsTest {
                 .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
                 .build();
 
-        assertThatThrownBy(() -> ClientConfiguration.builder().from(
-                ClientConfigurations.of(serviceConfig))
+        assertThatThrownBy(() -> ClientConfiguration.builder()
+                .from(
+                        ClientConfigurations.of(serviceConfig))
                 .nodeSelectionStrategy(NodeSelectionStrategy.ROUND_ROBIN)
                 .failedUrlCooldown(Duration.ofMillis(0))
                 .build())
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
+                        .isInstanceOf(IllegalArgumentException.class)
+                        .hasMessage("If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
     }
 
     @Test
@@ -138,6 +143,31 @@ public final class ClientConfigurationsTest {
                 .build();
 
         assertThat(overridden.taggedMetricRegistry()).isNotSameAs(DefaultTaggedMetricRegistry.getDefault());
+    }
+
+    @Test
+    public void sslSocketFactory_has_keepalives_enabled() throws IOException {
+        ClientConfiguration config = ClientConfigurations.of(ServiceConfiguration.builder()
+                .uris(uris)
+                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                .build());
+
+        try (Socket socket = config.sslSocketFactory().createSocket("google.com", 443)) {
+            assertThat(socket.getKeepAlive()).describedAs("keepAlives enabled").isTrue();
+        }
+    }
+
+    @Test
+    public void sensible_equality_and_hashcode() {
+        SslConfiguration sslConfiguration = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
+        SSLSocketFactory socketFactory = SslSocketFactories.createSslSocketFactory(sslConfiguration);
+        X509TrustManager x509TrustManager = SslSocketFactories.createX509TrustManager(sslConfiguration);
+
+        ClientConfiguration instance1 = ClientConfigurations.of(uris, socketFactory, x509TrustManager);
+        ClientConfiguration instance2 = ClientConfigurations.of(uris, socketFactory, x509TrustManager);
+
+        assertThat(instance1).isEqualTo(instance2);
+        assertThat(instance1).hasSameHashCodeAs(instance2);
     }
 
     private ServiceConfiguration meshProxyServiceConfig(List<String> theUris, int maxNumRetries) {

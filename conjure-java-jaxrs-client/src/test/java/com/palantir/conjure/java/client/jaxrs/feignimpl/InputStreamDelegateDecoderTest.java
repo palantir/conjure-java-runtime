@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
@@ -69,7 +67,7 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 
-        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8), is(data));
+        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8)).isEqualTo(data);
     }
 
     @Test
@@ -79,7 +77,7 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
         when(delegate.decode(any(), any())).thenReturn(returned);
         Response response = Response.create(200, "OK", ImmutableMap.of(), returned, StandardCharsets.UTF_8);
         String decodedObject = (String) inputStreamDelegateDecoder.decode(response, String.class);
-        assertEquals(returned, decodedObject);
+        assertThat(decodedObject).isEqualTo(returned);
     }
 
     @Test
@@ -89,19 +87,19 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 
-        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8), is(data));
+        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8)).isEqualTo(data);
     }
 
     @Test
     public void testStandardClientsUseInputStreamDelegateDecoder() throws IOException {
         String data = "bytes";
-        assertThat(Util.toByteArray(service.writeInputStream(data)), is(bytes(data)));
+        assertThat(Util.toByteArray(service.writeInputStream(data))).isEqualTo(bytes(data));
     }
 
     @Test
     public void testClientCanHandleEmptyInputStream() throws IOException {
         String data = "";
-        assertThat(Util.toByteArray(service.writeInputStream(data)), is(bytes(data)));
+        assertThat(Util.toByteArray(service.writeInputStream(data))).isEqualTo(bytes(data));
     }
 
     private static byte[] bytes(String text) {

@@ -48,8 +48,11 @@ final class NeverReturnNullConverterFactory extends Factory {
     }
 
     @Override
-    public Converter<?, RequestBody> requestBodyConverter(Type type, Annotation[] parameterAnnotations,
-            Annotation[] methodAnnotations, Retrofit retrofit) {
+    public Converter<?, RequestBody> requestBodyConverter(
+            Type type,
+            Annotation[] parameterAnnotations,
+            Annotation[] methodAnnotations,
+            Retrofit retrofit) {
         return delegate.requestBodyConverter(type, parameterAnnotations, methodAnnotations, retrofit);
     }
 }
