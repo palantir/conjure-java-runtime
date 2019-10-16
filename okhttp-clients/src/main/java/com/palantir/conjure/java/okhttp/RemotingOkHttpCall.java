@@ -134,7 +134,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             Thread.currentThread().interrupt();
             throw new InterruptedIOException("Call was interrupted during execution");
         } catch (ExecutionException e) {
-            cancelCallAndCloseResponseBody(future);
+            getDelegate().cancel();
             if (e.getCause() instanceof IoRemoteException) {
                 // TODO(rfink): Consider unwrapping the RemoteException at the Retrofit/Feign layer for symmetry, #626
                 RemoteException wrappedException = ((IoRemoteException) e.getCause()).getWrappedException();
