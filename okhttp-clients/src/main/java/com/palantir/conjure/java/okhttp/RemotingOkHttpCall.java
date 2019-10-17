@@ -119,7 +119,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public void onResponse(Call _call, Response response) {
-                future.set(response);
+                if (!future.set(response) && response.body() != null) {
+                    response.body().close();
+                }
             }
         });
 
@@ -130,7 +132,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
             // OkHttp call times out (, possibly after a number of retries).
             return future.get();
         } catch (InterruptedException e) {
-            cancelCallAndCloseResponseBody(future);
+            getDelegate().cancel();
+            if (!future.setException(e)) {
+                closeResponseBody(future);
+            }
             Thread.currentThread().interrupt();
             throw new InterruptedIOException("Call was interrupted during execution");
         } catch (ExecutionException e) {
@@ -149,11 +154,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 throw new SafeIoException("Failed to execute call", e);
             }
         }
-    }
-
-    private void cancelCallAndCloseResponseBody(SettableFuture<Response> future) {
-        getDelegate().cancel();
-        executionExecutor.submit(() -> closeResponseBody(future));
     }
 
     private void closeResponseBody(SettableFuture<Response> future) {
