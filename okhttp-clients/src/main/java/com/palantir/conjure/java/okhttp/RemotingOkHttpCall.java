@@ -120,7 +120,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             @Override
             public void onResponse(Call _call, Response response) {
                 if (!future.set(response)) {
-                   closeResponseBody(response);
+                    closeResponseBody(response);
                 }
             }
         });
