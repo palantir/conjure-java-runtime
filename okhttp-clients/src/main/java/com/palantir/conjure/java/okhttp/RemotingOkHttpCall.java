@@ -119,8 +119,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public void onResponse(Call _call, Response response) {
-                if (!future.set(response) && response.body() != null) {
-                    response.body().close();
+                if (!future.set(response)) {
+                   closeResponseBody(response);
                 }
             }
         });
@@ -132,12 +132,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             // OkHttp call times out (, possibly after a number of retries).
             return future.get();
         } catch (InterruptedException e) {
-            getDelegate().cancel();
-            if (!future.setException(e)) {
-                closeResponseBody(future);
-            }
-            Thread.currentThread().interrupt();
-            throw new InterruptedIOException("Call was interrupted during execution");
+            throw handleInterruption(future);
         } catch (ExecutionException e) {
             getDelegate().cancel();
             if (e.getCause() instanceof IoRemoteException) {
@@ -156,17 +151,28 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }
     }
 
-    private void closeResponseBody(SettableFuture<Response> future) {
-        try {
-            Response response = future.get();
-            if (response.body() != null) {
-                response.close();
+    private InterruptedIOException handleInterruption(SettableFuture<Response> future) {
+        getDelegate().cancel();
+        // Regardless of the cancel above, the call may have succeeded or is going to succeed, and we need to close the
+        // response body correctly:
+        // (1) if the success callback gets called before we try to set the exception, we must close the response
+        // (2) if the success callback gets called after we set the exception, the callback will close the response
+        if (!future.setException(new InterruptedIOException("Call cancelled via interruption"))) {
+            try {
+                Response response = Futures.getDone(future);
+                closeResponseBody(response);
+            } catch (ExecutionException e) {
+                // Future set via the callback but exceptionally
             }
-        } catch (InterruptedException e) {
-            log.info("Interrupted while attempting to close the response body of a cancelled call.", e);
-            Thread.currentThread().interrupt();
-        } catch (ExecutionException e) {
-            // Most likely this is because we successfully cancelled the call
+        }
+
+        Thread.currentThread().interrupt();
+        return new InterruptedIOException("Call cancelled via interruption");
+    }
+
+    private void closeResponseBody(Response response) {
+        if (response.body() != null) {
+            response.close();
         }
     }
 

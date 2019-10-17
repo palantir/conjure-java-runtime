@@ -1,6 +1,5 @@
 type: fix
 fix:
-  description: Upon cancelling remoting calls, we now submit a task that closes the
-    response body if the call successfully completes despite the cancellation.
+  description: Upon cancelling remoting calls, we now correctly close the response body if the call successfully completes despite the cancellation.
   links:
   - https://github.com/palantir/conjure-java-runtime/pull/1166
