@@ -153,20 +153,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
         getDelegate().cancel();
         // Regardless of the cancel above, the call may have succeeded or is going to succeed, and we need to make
         // sure the response body is closed correctly in those cases.
-        future.addListener(() -> closeResponseBody(future), MoreExecutors.directExecutor());
+        Futures.addCallback(future, ResponseClosingCallback.INSTANCE, MoreExecutors.directExecutor());
         Thread.currentThread().interrupt();
         return new InterruptedIOException("Call cancelled via interruption");
-    }
-
-    private static void closeResponseBody(ListenableFuture<Response> future) {
-        try {
-            Response response = Futures.getDone(future);
-            if (response.body() != null) {
-                response.close();
-            }
-        } catch (ExecutionException e) {
-            // Future set via the callback but exceptionally
-        }
     }
 
     private static Response buildFrom(Response unbufferedResponse, byte[] bodyBytes) {
@@ -542,5 +531,21 @@ final class RemotingOkHttpCall extends ForwardingCall {
         Tags.AttemptSpan previousAttempt = request().tag(Tags.AttemptSpan.class);
         DetachedSpan entireSpan = request().tag(Tags.EntireSpan.class).get();
         return previousAttempt.nextAttempt(entireSpan);
+    }
+
+    private enum ResponseClosingCallback implements FutureCallback<Response> {
+        INSTANCE;
+
+        @Override
+        public void onSuccess(Response response) {
+            if (response.body() != null) {
+                response.close();
+            }
+        }
+
+        @Override
+        public void onFailure(Throwable t) {
+            // do nothing
+        }
     }
 }
