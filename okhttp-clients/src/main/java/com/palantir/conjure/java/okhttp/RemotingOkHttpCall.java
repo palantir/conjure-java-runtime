@@ -21,7 +21,6 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
-import com.google.errorprone.annotations.CheckReturnValue;
 import com.netflix.concurrency.limits.Limiter;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -541,7 +540,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }
 
         @Override
-        public void onFailure(Throwable t) {
+        public void onFailure(Throwable throwable) {
             // do nothing
         }
     }
