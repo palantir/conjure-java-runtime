@@ -21,6 +21,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.netflix.concurrency.limits.Limiter;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
@@ -130,7 +131,12 @@ final class RemotingOkHttpCall extends ForwardingCall {
             // OkHttp call times out (, possibly after a number of retries).
             return future.get();
         } catch (InterruptedException e) {
-            throw handleInterruption(future);
+            getDelegate().cancel();
+            // Regardless of the cancel above, the call may have succeeded or is going to succeed, and we need to make
+            // sure the response body is closed correctly in those cases.
+            Futures.addCallback(future, ResponseClosingCallback.INSTANCE, MoreExecutors.directExecutor());
+            Thread.currentThread().interrupt();
+            throw new InterruptedIOException("Call cancelled via interruption");
         } catch (ExecutionException e) {
             getDelegate().cancel();
             if (e.getCause() instanceof IoRemoteException) {
@@ -147,15 +153,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 throw new SafeIoException("Failed to execute call", e);
             }
         }
-    }
-
-    private InterruptedIOException handleInterruption(SettableFuture<Response> future) {
-        getDelegate().cancel();
-        // Regardless of the cancel above, the call may have succeeded or is going to succeed, and we need to make
-        // sure the response body is closed correctly in those cases.
-        Futures.addCallback(future, ResponseClosingCallback.INSTANCE, MoreExecutors.directExecutor());
-        Thread.currentThread().interrupt();
-        return new InterruptedIOException("Call cancelled via interruption");
     }
 
     private static Response buildFrom(Response unbufferedResponse, byte[] bodyBytes) {
