@@ -154,7 +154,6 @@ final class RemotingOkHttpCall extends ForwardingCall {
         // Regardless of the cancel above, the call may have succeeded or is going to succeed, and we need to make
         // sure the response body is closed correctly in those cases.
         future.addListener(() -> closeResponseBody(future), MoreExecutors.directExecutor());
-        future.setException(new InterruptedIOException("Call cancelled via interruption"));
         Thread.currentThread().interrupt();
         return new InterruptedIOException("Call cancelled via interruption");
     }
