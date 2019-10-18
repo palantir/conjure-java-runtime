@@ -119,9 +119,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
             @Override
             public void onResponse(Call _call, Response response) {
-                if (!future.set(response)) {
-                    closeResponseBody(response);
-                }
+                future.set(response);
             }
         });
 
@@ -153,26 +151,22 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     private InterruptedIOException handleInterruption(SettableFuture<Response> future) {
         getDelegate().cancel();
-        // Regardless of the cancel above, the call may have succeeded or is going to succeed, and we need to close the
-        // response body correctly:
-        // (1) if the success callback gets called before we try to set the exception, we must close the response
-        // (2) if the success callback gets called after we set the exception, the callback will close the response
-        if (!future.setException(new InterruptedIOException("Call cancelled via interruption"))) {
-            try {
-                Response response = Futures.getDone(future);
-                closeResponseBody(response);
-            } catch (ExecutionException e) {
-                // Future set via the callback but exceptionally
-            }
-        }
-
+        // Regardless of the cancel above, the call may have succeeded or is going to succeed, and we need to make
+        // sure the response body is closed correctly in those cases.
+        future.addListener(() -> closeResponseBody(future), MoreExecutors.directExecutor());
+        future.setException(new InterruptedIOException("Call cancelled via interruption"));
         Thread.currentThread().interrupt();
         return new InterruptedIOException("Call cancelled via interruption");
     }
 
-    private void closeResponseBody(Response response) {
-        if (response.body() != null) {
-            response.close();
+    private static void closeResponseBody(ListenableFuture<Response> future) {
+        try {
+            Response response = Futures.getDone(future);
+            if (response.body() != null) {
+                response.close();
+            }
+        } catch (ExecutionException e) {
+            // Future set via the callback but exceptionally
         }
     }
 
