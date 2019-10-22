@@ -92,7 +92,7 @@ public final class SlashEncodingContractTest extends TestBase {
 
     public static class Server extends Application<Configuration> {
         @Override
-        public final void run(Configuration config, final Environment env) throws Exception {
+        public final void run(Configuration _config, final Environment env) throws Exception {
             env.jersey().register(resource);
         }
     }

@@ -28,7 +28,7 @@ public enum PathTemplateHeaderRewriter implements RequestInterceptor {
     INSTANCE;
 
     @Override
-    public void apply(RequestTemplate template) {
+    public void apply(RequestTemplate _template) {
         // nop
     }
 }

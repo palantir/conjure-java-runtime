@@ -23,7 +23,7 @@ public enum NeverRetryingBackoffStrategy implements BackoffStrategy {
     INSTANCE;
 
     @Override
-    public boolean backoff(int numFailedAttempts) {
+    public boolean backoff(int _numFailedAttempts) {
         return false;
     }
 }

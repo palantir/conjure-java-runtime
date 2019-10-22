@@ -18,7 +18,7 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
@@ -66,7 +66,7 @@ public final class TextDelegateEncoderTest {
         headers.put(HttpHeaders.CONTENT_TYPE, Arrays.asList(MediaType.TEXT_PLAIN));
         requestTemplate.headers(headers);
         textDelegateEncoder.encode(null, null, requestTemplate);
-        verifyZeroInteractions(delegate);
+        verifyNoMoreInteractions(delegate);
     }
 
     @Test
@@ -74,6 +74,6 @@ public final class TextDelegateEncoderTest {
         headers.put("Content-TYPE", Arrays.asList(MediaType.TEXT_PLAIN));
         requestTemplate.headers(headers);
         textDelegateEncoder.encode(null, null, requestTemplate);
-        verifyZeroInteractions(delegate);
+        verifyNoMoreInteractions(delegate);
     }
 }

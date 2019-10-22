@@ -44,7 +44,7 @@ public final class ServerUnderTestApplication extends Application<Configuration>
     }
 
     @Override
-    public void run(Configuration configuration, Environment environment) {
+    public void run(Configuration _configuration, Environment environment) {
         environment.jersey()
                 .register(
                         Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()));
@@ -59,7 +59,7 @@ public final class ServerUnderTestApplication extends Application<Configuration>
      */
     static class EchoResourceInvocationHandler extends AbstractInvocationHandler {
         @Override
-        protected Object handleInvocation(Object proxy, Method method, Object[] args) {
+        protected Object handleInvocation(Object _proxy, Method method, Object[] args) {
             Preconditions.checkArgument(args.length == 1, "Expected single argument. Method: %s", method);
             return args[0];
         }

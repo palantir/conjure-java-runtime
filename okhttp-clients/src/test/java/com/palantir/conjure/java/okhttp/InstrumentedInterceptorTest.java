@@ -85,7 +85,7 @@ public final class InstrumentedInterceptorTest {
                 .build();
         Timer timer = registry.timer(name);
 
-        assertThat(timer.getCount()).isEqualTo(0);
+        assertThat(timer.getCount()).isZero();
 
         successfulRequest(REQUEST_A);
         interceptor.intercept(chain);
