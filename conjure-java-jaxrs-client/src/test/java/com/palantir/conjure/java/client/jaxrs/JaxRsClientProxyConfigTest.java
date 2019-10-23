@@ -89,13 +89,13 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
     private static ProxySelector createProxySelector(String host, int port) {
         return new ProxySelector() {
             @Override
-            public List<Proxy> select(URI uri) {
+            public List<Proxy> select(URI _uri) {
                 InetSocketAddress addr = new InetSocketAddress(host, port);
                 return ImmutableList.of(new Proxy(Proxy.Type.HTTP, addr));
             }
 
             @Override
-            public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {}
+            public void connectFailed(URI _uri, SocketAddress _sa, IOException _ioe) {}
         };
     }
 }

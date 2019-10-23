@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableSet;
@@ -82,7 +82,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat("text response").isEqualTo(decodedObject);
-        verifyZeroInteractions(delegate);
+        verifyNoMoreInteractions(delegate);
     }
 
     @Test
@@ -100,7 +100,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat("text response").isEqualTo(decodedObject);
-        verifyZeroInteractions(delegate);
+        verifyNoMoreInteractions(delegate);
     }
 
     @Test
@@ -110,7 +110,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat("text response").isEqualTo(decodedObject);
-        verifyZeroInteractions(delegate);
+        verifyNoMoreInteractions(delegate);
     }
 
     @Test
@@ -120,7 +120,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat(decodedObject).isEqualTo("");
-        verifyZeroInteractions(delegate);
+        verifyNoMoreInteractions(delegate);
     }
 
     @Test

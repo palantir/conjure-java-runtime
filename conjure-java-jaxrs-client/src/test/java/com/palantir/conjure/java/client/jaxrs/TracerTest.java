@@ -145,12 +145,12 @@ public final class TracerTest extends TestBase {
         ExecutorService executor = Executors.newFixedThreadPool(2);
         CompletableFuture<?> first = CompletableFuture.runAsync(() -> {
             Tracer.initTrace(Optional.of(true), "first");
-            OpenSpan ignored = Tracer.startSpan("");
+            Tracer.fastStartSpan("");
             service.string();
         }, executor);
         CompletableFuture<?> second = CompletableFuture.runAsync(() -> {
             Tracer.initTrace(Optional.of(true), "second");
-            OpenSpan ignored = Tracer.startSpan("");
+            Tracer.fastStartSpan("");
             service.string();
         }, executor);
         first.join();
