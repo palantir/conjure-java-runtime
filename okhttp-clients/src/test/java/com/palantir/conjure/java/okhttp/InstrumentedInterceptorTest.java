@@ -29,6 +29,7 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.util.Collection;
+import okhttp3.Call;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
 import okhttp3.Request;
@@ -50,6 +51,8 @@ public final class InstrumentedInterceptorTest {
 
     @Mock
     private Interceptor.Chain chain;
+    @Mock
+    private Call call;
 
     private TaggedMetricRegistry registry;
     private InstrumentedInterceptor interceptor;
@@ -97,6 +100,8 @@ public final class InstrumentedInterceptorTest {
     public void testIoExceptionRecorded() throws IOException {
         when(chain.request()).thenReturn(REQUEST_A);
         when(chain.proceed(any())).thenThrow(IOException.class);
+        when(chain.call()).thenReturn(call);
+        when(call.isCanceled()).thenReturn(false);
 
         assertThat(hostMetrics.getMetrics()).isEmpty();
 
@@ -105,6 +110,21 @@ public final class InstrumentedInterceptorTest {
 
         HostMetrics metrics = Iterables.getOnlyElement(hostMetrics.getMetrics());
         assertThat(metrics.getIoExceptions().getCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void testIoExceptionNotRecordedWhenCancelled() throws IOException {
+        when(chain.request()).thenReturn(REQUEST_A);
+        when(chain.proceed(any())).thenThrow(IOException.class);
+        when(chain.call()).thenReturn(call);
+        when(call.isCanceled()).thenReturn(true);
+
+        assertThat(hostMetrics.getMetrics()).isEmpty();
+
+        assertThatExceptionOfType(IOException.class)
+                .isThrownBy(() -> interceptor.intercept(chain));
+
+        assertThat(hostMetrics.getMetrics()).isEmpty();
     }
 
     private HostMetrics hostMetrics(String hostname, int port) {
