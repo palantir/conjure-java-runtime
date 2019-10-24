@@ -109,7 +109,7 @@ public final class InstrumentedInterceptorTest {
     }
 
     @Test
-    public void testIoExceptionNotRecordedWhenCancelled() throws IOException {
+    public void testIoExceptionNotRecordedWhenCanceled() throws IOException {
         failedRequest(REQUEST_A, true);
 
         assertThat(hostMetrics.getMetrics()).isEmpty();
