@@ -18,7 +18,6 @@ package com.palantir.conjure.java.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Timer;
@@ -98,10 +97,7 @@ public final class InstrumentedInterceptorTest {
 
     @Test
     public void testIoExceptionRecorded() throws IOException {
-        when(chain.request()).thenReturn(REQUEST_A);
-        when(chain.proceed(any())).thenThrow(IOException.class);
-        when(chain.call()).thenReturn(call);
-        when(call.isCanceled()).thenReturn(false);
+        failedRequest(REQUEST_A, false);
 
         assertThat(hostMetrics.getMetrics()).isEmpty();
 
@@ -114,10 +110,7 @@ public final class InstrumentedInterceptorTest {
 
     @Test
     public void testIoExceptionNotRecordedWhenCancelled() throws IOException {
-        when(chain.request()).thenReturn(REQUEST_A);
-        when(chain.proceed(any())).thenThrow(IOException.class);
-        when(chain.call()).thenReturn(call);
-        when(call.isCanceled()).thenReturn(true);
+        failedRequest(REQUEST_A, true);
 
         assertThat(hostMetrics.getMetrics()).isEmpty();
 
@@ -142,5 +135,12 @@ public final class InstrumentedInterceptorTest {
                 .build();
         when(chain.request()).thenReturn(request);
         when(chain.proceed(request)).thenReturn(response);
+    }
+
+    private void failedRequest(Request request, boolean isCanceled) throws IOException {
+        when(chain.request()).thenReturn(request);
+        when(chain.proceed(request)).thenThrow(IOException.class);
+        when(chain.call()).thenReturn(call);
+        when(call.isCanceled()).thenReturn(isCanceled);
     }
 }
