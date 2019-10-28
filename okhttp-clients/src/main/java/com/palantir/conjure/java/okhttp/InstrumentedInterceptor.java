@@ -55,7 +55,9 @@ final class InstrumentedInterceptor implements Interceptor {
         try {
             response = chain.proceed(chain.request());
         } catch (IOException e) {
-            hostEventsSink.recordIoException(serviceName, hostname, port);
+            if (!chain.call().isCanceled()) {
+                hostEventsSink.recordIoException(serviceName, hostname, port);
+            }
             throw e;
         }
 

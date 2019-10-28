@@ -102,13 +102,15 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
-    public void cancelledCallsDoNotRetry() {
+    public void canceledCallsDoNotRetryAndDoNotReportToHostEventSink() {
         server.enqueue(new MockResponse().setHeadersDelay(1, TimeUnit.SECONDS).setBody("pong"));
         OkHttpClient client = createRetryingClient(1);
         AsyncRequest future = AsyncRequest.of(client.newCall(new Request.Builder().url(url).build()));
         future.cancelCall();
+
         assertThatExceptionOfType(UncheckedExecutionException.class).isThrownBy(() -> Futures.getUnchecked(future))
                 .satisfies(e -> assertThat(e.getCause()).hasMessage("Canceled").isInstanceOf(IOException.class));
+        assertThat(hostEventsSink.getMetrics()).isEmpty();
     }
 
     private static final class AsyncRequest extends AbstractFuture<Response> implements Callback {
