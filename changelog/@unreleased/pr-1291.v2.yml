@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: "HostEventsSink ignores IOExceptions when the call was canceled.\uFEFF\n"
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1291
