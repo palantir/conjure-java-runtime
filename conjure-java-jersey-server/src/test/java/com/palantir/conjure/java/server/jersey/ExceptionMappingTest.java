@@ -64,7 +64,8 @@ public final class ExceptionMappingTest {
     private static final Response.Status SERVER_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
     private static final Response.Status WEB_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
     private static final int REMOTE_EXCEPTION_STATUS_CODE = 400;
-    private static final int REMOTE_AUTH_EXCEPTION_STATUS_CODE = 403;
+    private static final int UNAUTHORIZED_STATUS_CODE = 401;
+    private static final int PERMISSION_DENIED_STATUS_CODE = 403;
 
     private WebTarget target;
 
@@ -117,8 +118,20 @@ public final class ExceptionMappingTest {
     }
 
     @Test
-    public void testRemoteAuthException() throws IOException {
-        Response response = target.path("throw-remote-auth-exception").request().get();
+    public void testUnauthorizedException() throws IOException {
+        Response response = target.path("throw-unauthorized-exception").request().get();
+        assertThat(response.getStatus()).isEqualTo(ErrorType.UNAUTHORIZED.httpErrorCode());
+        String body = readBody(response);
+
+        SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
+        assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
+        assertThat(error.errorCode()).isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
+        assertThat(error.errorName()).isEqualTo(ErrorType.UNAUTHORIZED.name());
+    }
+
+    @Test
+    public void testPermissionDeniedException() throws IOException {
+        Response response = target.path("throw-permission-denied-exception").request().get();
         assertThat(response.getStatus()).isEqualTo(ErrorType.PERMISSION_DENIED.httpErrorCode());
         String body = readBody(response);
 
@@ -170,7 +183,7 @@ public final class ExceptionMappingTest {
 
     public static class ExceptionMappersTestServer extends Application<Configuration> {
         @Override
-        public final void run(Configuration _config, final Environment env) throws Exception {
+        public final void run(Configuration _config, final Environment env) {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new ExceptionTestResource());
         }
@@ -208,13 +221,23 @@ public final class ExceptionMappingTest {
         }
 
         @Override
-        public String throwRemoteAuthException() {
+        public String throwUnauthorizedException() {
             throw new RemoteException(SerializableError.builder()
                     .errorInstanceId("errorInstanceId")
                     .errorCode("errorCode")
                     .errorName("errorName")
                     .build(),
-                    REMOTE_AUTH_EXCEPTION_STATUS_CODE);
+                    UNAUTHORIZED_STATUS_CODE);
+        }
+
+        @Override
+        public String throwPermissionDeniedException() {
+            throw new RemoteException(SerializableError.builder()
+                    .errorInstanceId("errorInstanceId")
+                    .errorCode("errorCode")
+                    .errorName("errorName")
+                    .build(),
+                    PERMISSION_DENIED_STATUS_CODE);
         }
 
         @Override
@@ -262,8 +285,12 @@ public final class ExceptionMappingTest {
         String throwRemoteException();
 
         @GET
-        @Path("/throw-remote-auth-exception")
-        String throwRemoteAuthException();
+        @Path("/throw-unauthorized-exception")
+        String throwUnauthorizedException();
+
+        @GET
+        @Path("/throw-permission-denied-exception")
+        String throwPermissionDeniedException();
 
         @GET
         @Path("/throw-service-exception")
