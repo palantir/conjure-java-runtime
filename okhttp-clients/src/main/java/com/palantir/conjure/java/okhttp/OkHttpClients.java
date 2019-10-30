@@ -158,7 +158,13 @@ public final class OkHttpClients {
             HostEventsSink hostEventsSink,
             Class<?> serviceClass) {
         return createInternal(
-                new OkHttpClient.Builder(), config, userAgent, hostEventsSink, serviceClass, !RANDOMIZE, !RESHUFFLE);
+                new OkHttpClient.Builder(),
+                config,
+                userAgent,
+                hostEventsSink,
+                serviceClass,
+                !RANDOMIZE,
+                !RESHUFFLE);
     }
 
     private static RemotingOkHttpClient createInternal(
