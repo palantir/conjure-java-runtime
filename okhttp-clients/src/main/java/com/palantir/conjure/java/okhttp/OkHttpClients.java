@@ -131,9 +131,23 @@ public final class OkHttpClients {
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
             Class<?> serviceClass) {
+        return create(new OkHttpClient.Builder(), config, userAgent, hostEventsSink, serviceClass);
+    }
+
+    /**
+     * Creates an OkHttp client from the given {@link ClientConfiguration} and {@link OkHttpClient.Builder}.
+     *
+     * Note that the builder configuration will be overwritten by any options required by Conjure.
+     * Note that the configured {@link ClientConfiguration#uris URIs} are initialized in random order.
+     */
+    public static OkHttpClient create(
+            OkHttpClient.Builder client,
+            ClientConfiguration config,
+            UserAgent userAgent,
+            HostEventsSink hostEventsSink,
+            Class<?> serviceClass) {
         boolean reshuffle =
                 !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
-        OkHttpClient.Builder client = new OkHttpClient.Builder();
         return createInternal(client, config, userAgent, hostEventsSink, serviceClass, RANDOMIZE, reshuffle);
     }
 
