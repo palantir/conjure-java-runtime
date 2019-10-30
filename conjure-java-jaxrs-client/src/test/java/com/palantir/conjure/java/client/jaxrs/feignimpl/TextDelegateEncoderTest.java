@@ -20,12 +20,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
 import feign.RequestTemplate;
 import feign.codec.Encoder;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import org.junit.Before;
@@ -41,7 +41,7 @@ public final class TextDelegateEncoderTest {
     @Before
     public void before() {
         delegate = mock(Encoder.class);
-        headers = Maps.newHashMap();
+        headers = new HashMap<>();
         textDelegateEncoder = new TextDelegateEncoder(delegate);
         requestTemplate = new RequestTemplate();
     }

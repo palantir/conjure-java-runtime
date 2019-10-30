@@ -20,13 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.google.common.collect.Lists;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import feign.RetryableException;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -100,7 +100,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
             failoverTestCase.server2.enqueue(new MockResponse().setBody("\"foo\""));
         }
 
-        List<Future<String>> things = Lists.newArrayListWithCapacity(10);
+        List<Future<String>> things = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
             things.add(executorService.submit(() -> proxy.string()));
         }

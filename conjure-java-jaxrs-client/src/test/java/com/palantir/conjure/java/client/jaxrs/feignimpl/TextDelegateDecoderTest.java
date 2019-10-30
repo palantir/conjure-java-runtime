@@ -25,7 +25,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
@@ -38,6 +37,7 @@ import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import org.junit.Before;
@@ -64,7 +64,7 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Before
     public void before() {
         delegate = mock(Decoder.class);
-        headers = Maps.newHashMap();
+        headers = new HashMap<>();
         textDelegateDecoder = new TextDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();

@@ -18,7 +18,6 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
@@ -30,6 +29,7 @@ import com.palantir.tracing.Tracers;
 import com.palantir.tracing.api.OpenSpan;
 import com.palantir.tracing.api.SpanType;
 import com.palantir.tracing.api.TraceHttpHeaders;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,7 +69,7 @@ public final class TracerTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\""));
         Tracer.initTrace(Observability.SAMPLE, Tracers.randomId());
         OpenSpan parentTrace = Tracer.startSpan("");
-        List<Map.Entry<SpanType, String>> observedSpans = Lists.newArrayList();
+        List<Map.Entry<SpanType, String>> observedSpans = new ArrayList<>();
         Tracer.subscribe(TracerTest.class.getName(),
                 span -> observedSpans.add(Maps.immutableEntry(span.type(), span.getOperation())));
 
