@@ -532,7 +532,6 @@ public final class OkHttpClientsTest extends TestBase {
     @Test
     public void handlesRetryOther_redirectsToOtherUrl() throws Exception {
         OkHttpClient client = OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
                 AGENT,
                 hostEventsSink,
@@ -583,7 +582,6 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(429));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfiguration.builder()
                         .from(createTestConfig(url))
                         .serverQoS(ClientConfiguration.ServerQoS.PROPAGATE_429_and_503_TO_CALLER)
@@ -603,7 +601,6 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(503));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfiguration.builder()
                         .from(createTestConfig(url))
                         .serverQoS(ClientConfiguration.ServerQoS.PROPAGATE_429_and_503_TO_CALLER)
@@ -653,7 +650,6 @@ public final class OkHttpClientsTest extends TestBase {
         server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfiguration.builder()
                         .from(createTestConfig(url, url2))
                         .readTimeout(Duration.ofMillis(20))
@@ -676,7 +672,6 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfiguration.builder()
                         .from(createTestConfig(urlConnectTimeout, url))
                         .readTimeout(Duration.ofMillis(20))
@@ -700,7 +695,6 @@ public final class OkHttpClientsTest extends TestBase {
         server2.enqueue(new MockResponse().setBody("foo"));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfiguration.builder()
                         .from(createTestConfig(url, url2))
                         .retryOnSocketException(ClientConfiguration.RetryOnSocketException.DANGEROUS_DISABLED)
@@ -719,7 +713,6 @@ public final class OkHttpClientsTest extends TestBase {
         server2.enqueue(new MockResponse().setResponseCode(200).setBody("foo"));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfiguration.builder()
                         .from(createTestConfig(url, url2))
                         .readTimeout(Duration.ofMillis(20))
@@ -762,7 +755,6 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setBody("bar"));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfiguration.builder()
                         .from(createTestConfig(url, url2, url3))
                         .nodeSelectionStrategy(NodeSelectionStrategy.PIN_UNTIL_ERROR)
@@ -786,7 +778,6 @@ public final class OkHttpClientsTest extends TestBase {
         server3.enqueue(new MockResponse().setBody("bar"));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfiguration.builder()
                         .from(createTestConfig(url, url2, url3))
                         .nodeSelectionStrategy(NodeSelectionStrategy.ROUND_ROBIN)
@@ -812,7 +803,6 @@ public final class OkHttpClientsTest extends TestBase {
                 .setBody("Hello, world!"));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfiguration.builder()
                         .from(createTestConfig(url))
                         .connectTimeout(Duration.ZERO)
@@ -840,7 +830,6 @@ public final class OkHttpClientsTest extends TestBase {
                 .setBody("Hello, world!"));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfigurations.of(
                         ServiceConfiguration.builder()
                                 .addUris(url)
@@ -910,7 +899,7 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test(timeout = 1000)
-    public void non_ioexceptions_dont_break_the_world() {
+    public void non_ioexceptions_dont_break_the_world() throws IOException {
         server.enqueue(new MockResponse().setBody("foo"));
 
         HostEventsSink throwingSink = new HostEventsSink() {
@@ -960,7 +949,6 @@ public final class OkHttpClientsTest extends TestBase {
 
     private OkHttpClient createRetryingClient(int maxNumRetries, Duration backoffSlotSize, String... urls) {
         return OkHttpClients.withStableUris(
-                new OkHttpClient.Builder(),
                 ClientConfiguration.builder()
                         .from(createTestConfig(urls))
                         .maxNumRetries(maxNumRetries)

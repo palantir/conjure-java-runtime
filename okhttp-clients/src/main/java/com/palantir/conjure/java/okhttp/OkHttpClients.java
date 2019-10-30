@@ -153,12 +153,12 @@ public final class OkHttpClients {
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
-            OkHttpClient.Builder client,
             ClientConfiguration config,
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
             Class<?> serviceClass) {
-        return createInternal(client, config, userAgent, hostEventsSink, serviceClass, !RANDOMIZE, !RESHUFFLE);
+        return createInternal(
+                new OkHttpClient.Builder(), config, userAgent, hostEventsSink, serviceClass, !RANDOMIZE, !RESHUFFLE);
     }
 
     private static RemotingOkHttpClient createInternal(
