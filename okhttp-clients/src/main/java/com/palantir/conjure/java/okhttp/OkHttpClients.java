@@ -133,19 +133,22 @@ public final class OkHttpClients {
             Class<?> serviceClass) {
         boolean reshuffle =
                 !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
-        return createInternal(config, userAgent, hostEventsSink, serviceClass, RANDOMIZE, reshuffle);
+        OkHttpClient.Builder client = new OkHttpClient.Builder();
+        return createInternal(client, config, userAgent, hostEventsSink, serviceClass, RANDOMIZE, reshuffle);
     }
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
+            OkHttpClient.Builder client,
             ClientConfiguration config,
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
             Class<?> serviceClass) {
-        return createInternal(config, userAgent, hostEventsSink, serviceClass, !RANDOMIZE, !RESHUFFLE);
+        return createInternal(client, config, userAgent, hostEventsSink, serviceClass, !RANDOMIZE, !RESHUFFLE);
     }
 
     private static RemotingOkHttpClient createInternal(
+            OkHttpClient.Builder client,
             ClientConfiguration config,
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
@@ -159,7 +162,6 @@ public final class OkHttpClients {
                 serviceClass,
                 enableClientQoS);
 
-        OkHttpClient.Builder client = new OkHttpClient.Builder();
         client.addInterceptor(CatchThrowableInterceptor.INSTANCE);
         client.addInterceptor(SpanTerminatingInterceptor.INSTANCE);
 
