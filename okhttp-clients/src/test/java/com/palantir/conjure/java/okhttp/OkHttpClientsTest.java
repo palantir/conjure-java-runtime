@@ -35,10 +35,10 @@ import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.UnknownRemoteException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfigurations;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
-import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
@@ -357,13 +357,12 @@ public final class OkHttpClientsTest extends TestBase {
 
         OkHttpClient client = createRetryingClient(1);
         Call call = client.newCall(new Request.Builder().url(url).build());
-        assertThatLoggableExceptionThrownBy(call::execute)
-                .isInstanceOf(SafeIoException.class)
-                .hasLogMessage("Failed to parse response body as SerializableError")
-                .hasExactlyArgs(
-                        SafeArg.of("code", 400),
-                        UnsafeArg.of("body", responseJson),
-                        SafeArg.of("contentType", "application/json"));
+
+        assertThatThrownBy(call::execute)
+                .isInstanceOfSatisfying(UnknownRemoteException.class, exception -> {
+                    assertThat(exception.getStatus()).isEqualTo(400);
+                    assertThat(exception.getBody()).isEqualTo(responseJson);
+                });
     }
 
     @Test
