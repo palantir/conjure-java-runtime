@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Stopwatch;
 import com.palantir.tritium.metrics.registry.MetricName;
@@ -37,11 +38,17 @@ final class InstrumentedInterceptor implements Interceptor {
     private final HostEventsSink hostEventsSink;
     private final String serviceName;
     private final Timer responseTimer;
+    private final Meter ioExceptionMeter;
+
 
     InstrumentedInterceptor(TaggedMetricRegistry registry, HostEventsSink hostEventsSink, String serviceName) {
         this.hostEventsSink = hostEventsSink;
         this.serviceName = serviceName;
         this.responseTimer = registry.timer(name());
+        this.ioExceptionMeter = registry.meter(MetricName.builder().safeName("client.response.failure")
+                .putSafeTags("reason", "IOException")
+                .putSafeTags(SERVICE_NAME_TAG, serviceName)
+                .build());
     }
 
     @Override
@@ -57,6 +64,7 @@ final class InstrumentedInterceptor implements Interceptor {
         } catch (IOException e) {
             if (!chain.call().isCanceled()) {
                 hostEventsSink.recordIoException(serviceName, hostname, port);
+                ioExceptionMeter.mark();
             }
             throw e;
         }
