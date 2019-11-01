@@ -40,12 +40,12 @@ final class InstrumentedInterceptor implements Interceptor {
     private final Timer responseTimer;
     private final Meter ioExceptionMeter;
 
-
     InstrumentedInterceptor(TaggedMetricRegistry registry, HostEventsSink hostEventsSink, String serviceName) {
         this.hostEventsSink = hostEventsSink;
         this.serviceName = serviceName;
         this.responseTimer = registry.timer(name());
-        this.ioExceptionMeter = registry.meter(MetricName.builder().safeName("client.response.failure")
+        this.ioExceptionMeter = registry.meter(MetricName.builder()
+                .safeName("client.response.failure")
                 .putSafeTags("reason", "IOException")
                 .putSafeTags(SERVICE_NAME_TAG, serviceName)
                 .build());
