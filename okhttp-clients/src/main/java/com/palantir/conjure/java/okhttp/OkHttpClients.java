@@ -131,9 +131,24 @@ public final class OkHttpClients {
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
             Class<?> serviceClass) {
+        return create(new OkHttpClient.Builder(), config, userAgent, hostEventsSink, serviceClass);
+    }
+
+    /**
+     * Creates an OkHttp client from the given {@link ClientConfiguration} and {@link OkHttpClient.Builder}.
+     *
+     * Note that the builder configuration will be overwritten by any options required by Conjure.
+     * Note that the configured {@link ClientConfiguration#uris URIs} are initialized in random order.
+     */
+    public static OkHttpClient create(
+            OkHttpClient.Builder client,
+            ClientConfiguration config,
+            UserAgent userAgent,
+            HostEventsSink hostEventsSink,
+            Class<?> serviceClass) {
         boolean reshuffle =
                 !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
-        return createInternal(config, userAgent, hostEventsSink, serviceClass, RANDOMIZE, reshuffle);
+        return createInternal(client, config, userAgent, hostEventsSink, serviceClass, RANDOMIZE, reshuffle);
     }
 
     @VisibleForTesting
@@ -142,10 +157,18 @@ public final class OkHttpClients {
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
             Class<?> serviceClass) {
-        return createInternal(config, userAgent, hostEventsSink, serviceClass, !RANDOMIZE, !RESHUFFLE);
+        return createInternal(
+                new OkHttpClient.Builder(),
+                config,
+                userAgent,
+                hostEventsSink,
+                serviceClass,
+                !RANDOMIZE,
+                !RESHUFFLE);
     }
 
     private static RemotingOkHttpClient createInternal(
+            OkHttpClient.Builder client,
             ClientConfiguration config,
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
@@ -159,7 +182,6 @@ public final class OkHttpClients {
                 serviceClass,
                 enableClientQoS);
 
-        OkHttpClient.Builder client = new OkHttpClient.Builder();
         client.addInterceptor(CatchThrowableInterceptor.INSTANCE);
         client.addInterceptor(SpanTerminatingInterceptor.INSTANCE);
 
