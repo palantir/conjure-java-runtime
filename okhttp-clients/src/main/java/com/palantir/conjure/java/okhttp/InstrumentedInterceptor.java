@@ -45,7 +45,7 @@ final class InstrumentedInterceptor implements Interceptor {
         this.serviceName = serviceName;
         this.responseTimer = registry.timer(name());
         this.ioExceptionMeter = registry.meter(MetricName.builder()
-                .safeName("client.response.failure")
+                .safeName("client.response.error")
                 .putSafeTags("reason", "IOException")
                 .putSafeTags(SERVICE_NAME_TAG, serviceName)
                 .build());
