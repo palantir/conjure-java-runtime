@@ -1,6 +1,6 @@
 type: improvement
 improvement:
-  description: Adds a meter, `client.response.failure` with tag `reason:IOException`
+  description: Adds a meter, `client.response.error` with tag `reason:IOException`
     when a request fails due to an IOException
   links:
   - https://github.com/palantir/conjure-java-runtime/pull/1305
