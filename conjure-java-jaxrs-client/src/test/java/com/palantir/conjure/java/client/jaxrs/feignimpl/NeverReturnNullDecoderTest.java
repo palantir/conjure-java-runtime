@@ -19,7 +19,6 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
@@ -29,13 +28,14 @@ import feign.codec.Decoder;
 import feign.jackson.JacksonDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 
 public final class NeverReturnNullDecoderTest extends TestBase {
 
-    private final Map<String, Collection<String>> headers = Maps.newHashMap();
+    private final Map<String, Collection<String>> headers = new HashMap<>();
     private final Decoder textDelegateDecoder = new NeverReturnNullDecoder(
             new JacksonDecoder(ObjectMappers.newClientObjectMapper()));
 
