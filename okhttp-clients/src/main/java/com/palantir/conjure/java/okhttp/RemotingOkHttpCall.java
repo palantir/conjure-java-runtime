@@ -549,7 +549,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }
 
         @Override
-        public void onFailure(Throwable throwable) {
+        public void onFailure(Throwable _throwable) {
             // do nothing
         }
     }
