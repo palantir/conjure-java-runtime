@@ -66,7 +66,7 @@ public final class ObjectMappersTest {
 
     @Test
     public void deserializeJdk8ModuleAbsentOptional() throws IOException {
-        assertThat(MAPPER.readValue("null", Optional.class)).isEqualTo(Optional.empty());
+        assertThat(MAPPER.readValue("null", Optional.class)).isNotPresent();
     }
 
     @Test

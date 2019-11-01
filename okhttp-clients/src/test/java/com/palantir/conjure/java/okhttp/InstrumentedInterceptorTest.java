@@ -18,7 +18,6 @@ package com.palantir.conjure.java.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import com.codahale.metrics.Timer;
@@ -29,6 +28,7 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.util.Collection;
+import okhttp3.Call;
 import okhttp3.Interceptor;
 import okhttp3.Protocol;
 import okhttp3.Request;
@@ -50,6 +50,8 @@ public final class InstrumentedInterceptorTest {
 
     @Mock
     private Interceptor.Chain chain;
+    @Mock
+    private Call call;
 
     private TaggedMetricRegistry registry;
     private InstrumentedInterceptor interceptor;
@@ -85,7 +87,7 @@ public final class InstrumentedInterceptorTest {
                 .build();
         Timer timer = registry.timer(name);
 
-        assertThat(timer.getCount()).isEqualTo(0);
+        assertThat(timer.getCount()).isZero();
 
         successfulRequest(REQUEST_A);
         interceptor.intercept(chain);
@@ -95,8 +97,7 @@ public final class InstrumentedInterceptorTest {
 
     @Test
     public void testIoExceptionRecorded() throws IOException {
-        when(chain.request()).thenReturn(REQUEST_A);
-        when(chain.proceed(any())).thenThrow(IOException.class);
+        failedRequest(REQUEST_A, false);
 
         assertThat(hostMetrics.getMetrics()).isEmpty();
 
@@ -105,6 +106,18 @@ public final class InstrumentedInterceptorTest {
 
         HostMetrics metrics = Iterables.getOnlyElement(hostMetrics.getMetrics());
         assertThat(metrics.getIoExceptions().getCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void testIoExceptionNotRecordedWhenCanceled() throws IOException {
+        failedRequest(REQUEST_A, true);
+
+        assertThat(hostMetrics.getMetrics()).isEmpty();
+
+        assertThatExceptionOfType(IOException.class)
+                .isThrownBy(() -> interceptor.intercept(chain));
+
+        assertThat(hostMetrics.getMetrics()).isEmpty();
     }
 
     private HostMetrics hostMetrics(String hostname, int port) {
@@ -122,5 +135,12 @@ public final class InstrumentedInterceptorTest {
                 .build();
         when(chain.request()).thenReturn(request);
         when(chain.proceed(request)).thenReturn(response);
+    }
+
+    private void failedRequest(Request request, boolean isCanceled) throws IOException {
+        when(chain.request()).thenReturn(request);
+        when(chain.proceed(request)).thenThrow(IOException.class);
+        when(chain.call()).thenReturn(call);
+        when(call.isCanceled()).thenReturn(isCanceled);
     }
 }

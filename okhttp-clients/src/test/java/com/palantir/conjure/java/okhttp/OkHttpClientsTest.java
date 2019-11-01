@@ -35,10 +35,10 @@ import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.UnknownRemoteException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfigurations;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
-import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
@@ -102,13 +102,15 @@ public final class OkHttpClientsTest extends TestBase {
     }
 
     @Test
-    public void cancelledCallsDoNotRetry() {
+    public void canceledCallsDoNotRetryAndDoNotReportToHostEventSink() {
         server.enqueue(new MockResponse().setHeadersDelay(1, TimeUnit.SECONDS).setBody("pong"));
         OkHttpClient client = createRetryingClient(1);
         AsyncRequest future = AsyncRequest.of(client.newCall(new Request.Builder().url(url).build()));
         future.cancelCall();
+
         assertThatExceptionOfType(UncheckedExecutionException.class).isThrownBy(() -> Futures.getUnchecked(future))
                 .satisfies(e -> assertThat(e.getCause()).hasMessage("Canceled").isInstanceOf(IOException.class));
+        assertThat(hostEventsSink.getMetrics()).isEmpty();
     }
 
     private static final class AsyncRequest extends AbstractFuture<Response> implements Callback {
@@ -123,12 +125,12 @@ public final class OkHttpClientsTest extends TestBase {
         }
 
         @Override
-        public void onFailure(Call unused, IOException exception) {
+        public void onFailure(Call _value, IOException exception) {
             setException(exception);
         }
 
         @Override
-        public void onResponse(Call unused, Response response) {
+        public void onResponse(Call _value, Response response) {
             set(response);
         }
 
@@ -253,10 +255,10 @@ public final class OkHttpClientsTest extends TestBase {
             CountDownLatch wasSuccessful = new CountDownLatch(1);
             call.enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException exception) {}
+                public void onFailure(Call _call, IOException _exception) {}
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(Call _call, Response response) throws IOException {
                     if (response.code() == code) {
                         wasSuccessful.countDown();
                     }
@@ -275,12 +277,12 @@ public final class OkHttpClientsTest extends TestBase {
         Semaphore successHandlerExecuted = new Semaphore(0);
         call.enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException ioException) {
+            public void onFailure(Call _call, IOException _ioException) {
                 failureHandlerExecuted.release(); // should never happen
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call _call, Response _response) throws IOException {
                 successHandlerExecuted.release();
             }
         });
@@ -299,12 +301,12 @@ public final class OkHttpClientsTest extends TestBase {
         Semaphore successHandlerExecuted = new Semaphore(0);
         call.enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException ioException) {
+            public void onFailure(Call _call, IOException _ioException) {
                 failureHandlerExecuted.release();
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call _call, Response _response) throws IOException {
                 successHandlerExecuted.release(); // should never happen
             }
         });
@@ -355,13 +357,12 @@ public final class OkHttpClientsTest extends TestBase {
 
         OkHttpClient client = createRetryingClient(1);
         Call call = client.newCall(new Request.Builder().url(url).build());
-        assertThatLoggableExceptionThrownBy(call::execute)
-                .isInstanceOf(SafeIoException.class)
-                .hasLogMessage("Failed to parse response body as SerializableError")
-                .hasExactlyArgs(
-                        SafeArg.of("code", 400),
-                        UnsafeArg.of("body", responseJson),
-                        SafeArg.of("contentType", "application/json"));
+
+        assertThatThrownBy(call::execute)
+                .isInstanceOfSatisfying(UnknownRemoteException.class, exception -> {
+                    assertThat(exception.getStatus()).isEqualTo(400);
+                    assertThat(exception.getBody()).isEqualTo(responseJson);
+                });
     }
 
     @Test
@@ -498,12 +499,12 @@ public final class OkHttpClientsTest extends TestBase {
         CompletableFuture<String> future = new CompletableFuture<>();
         call.enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException ioException) {
+            public void onFailure(Call _call, IOException ioException) {
                 future.completeExceptionally(ioException);
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call _call, Response response) throws IOException {
                 future.complete(response.body().string());
             }
         });
@@ -639,7 +640,7 @@ public final class OkHttpClientsTest extends TestBase {
                 .hasLogMessage("Failed to complete the request due to an IOException")
                 .hasExactlyArgs(UnsafeArg.of("requestUrl", url2 + "/foo?bar"));
 
-        assertThat(server3.getRequestCount()).isEqualTo(0);
+        assertThat(server3.getRequestCount()).isZero();
     }
 
     @Test
@@ -902,12 +903,12 @@ public final class OkHttpClientsTest extends TestBase {
 
         HostEventsSink throwingSink = new HostEventsSink() {
             @Override
-            public void record(String serviceName, String hostname, int port, int statusCode, long micros) {
+            public void record(String _serviceName, String _hostname, int _port, int _statusCode, long _micros) {
                 throw new IllegalStateException("I am not an IOException");
             }
 
             @Override
-            public void recordIoException(String serviceName, String hostname, int port) {
+            public void recordIoException(String _serviceName, String _hostname, int _port) {
                 //empty;
             }
         };

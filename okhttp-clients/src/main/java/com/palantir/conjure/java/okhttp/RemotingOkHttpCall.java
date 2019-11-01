@@ -24,6 +24,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.netflix.concurrency.limits.Limiter;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
+import com.palantir.conjure.java.api.errors.UnknownRemoteException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
@@ -51,8 +52,6 @@ import okhttp3.internal.http.UnrepeatableRequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO(rfink): Consider differentiating the IOExceptions thrown/returned by this class, add better error messages, #628
-
 /**
  * An OkHttp {@link Call} implementation that handles standard retryable error status such as 308, 429, 503, and
  * connection errors. Calls are rescheduled on a given scheduler and executed on a given executor.
@@ -63,7 +62,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     private static final ResponseHandler<RemoteException> remoteExceptionHandler =
             RemoteExceptionResponseHandler.INSTANCE;
-    private static final ResponseHandler<IOException> ioExceptionHandler = IoExceptionResponseHandler.INSTANCE;
+    private static final ResponseHandler<UnknownRemoteException> unknownRemoteExceptionHandler =
+            UnknownRemoteExceptionResponseHandler.INSTANCE;
     private static final ResponseHandler<QosException> qosHandler = QosExceptionResponseHandler.INSTANCE;
 
     private final BackoffStrategy backoffStrategy;
@@ -144,6 +144,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 RemoteException correctStackTrace = new RemoteException(
                         wrappedException.getError(),
                         wrappedException.getStatus());
+                correctStackTrace.initCause(e);
+                throw correctStackTrace;
+            } else if (e.getCause() instanceof IoUnknownRemoteException) {
+                UnknownRemoteException wrappedException = ((IoUnknownRemoteException) e.getCause())
+                        .getUnknownRemoteException();
+                UnknownRemoteException correctStackTrace = new UnknownRemoteException(
+                        wrappedException.getStatus(),
+                        wrappedException.getBody());
                 correctStackTrace.initCause(e);
                 throw correctStackTrace;
             } else if (e.getCause() instanceof IOException) {
@@ -293,9 +301,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 // Catch-all: handle all other responses
-                Optional<IOException> ioException = ioExceptionHandler.handle(errorResponseSupplier.get());
-                if (ioException.isPresent()) {
-                    callback.onFailure(call, ioException.get());
+                Optional<UnknownRemoteException> unknownHttpError = unknownRemoteExceptionHandler.handle(
+                        errorResponseSupplier.get());
+                if (unknownHttpError.isPresent()) {
+                    callback.onFailure(call, new IoUnknownRemoteException(unknownHttpError.get()));
                     return;
                 }
 
@@ -542,6 +551,19 @@ final class RemotingOkHttpCall extends ForwardingCall {
         @Override
         public void onFailure(Throwable throwable) {
             // do nothing
+        }
+    }
+
+    private static final class IoUnknownRemoteException extends IOException {
+
+        private final UnknownRemoteException unknownRemoteException;
+
+        private IoUnknownRemoteException(UnknownRemoteException unknownRemoteException) {
+            this.unknownRemoteException = unknownRemoteException;
+        }
+
+        private UnknownRemoteException getUnknownRemoteException() {
+            return unknownRemoteException;
         }
     }
 }

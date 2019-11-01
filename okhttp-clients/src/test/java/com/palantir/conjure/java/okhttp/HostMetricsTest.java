@@ -90,7 +90,7 @@ public final class HostMetricsTest {
 
     private void testUpdateMetricUpdatesMeter(int statusCode, Timer timer) {
         assertThat(timer.getCount()).isZero();
-        assertThat(timer.getSnapshot().getMin()).isEqualTo(0);
+        assertThat(timer.getSnapshot().getMin()).isZero();
 
         hostMetrics.record(statusCode, 1);
 

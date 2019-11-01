@@ -17,40 +17,37 @@
 package com.palantir.conjure.java.okhttp;
 
 import com.google.common.io.CharStreams;
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.UnsafeArg;
-import com.palantir.logsafe.exceptions.SafeIoException;
+import com.palantir.conjure.java.api.errors.UnknownRemoteException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import javax.ws.rs.core.HttpHeaders;
 import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-enum IoExceptionResponseHandler implements ResponseHandler<IOException> {
+enum UnknownRemoteExceptionResponseHandler implements ResponseHandler<UnknownRemoteException> {
     INSTANCE;
 
+    private static final Logger log = LoggerFactory.getLogger(UnknownRemoteExceptionResponseHandler.class);
+
     @Override
-    public Optional<IOException> handle(Response response) {
+    public Optional<UnknownRemoteException> handle(Response response) {
         if (response.isSuccessful() || response.code() == MoreHttpCodes.SWITCHING_PROTOCOLS) {
             return Optional.empty();
         }
 
+        String body;
         try {
-            String body = response.body() != null && response.body().byteStream() != null
-                    ? toString(response.body().byteStream())
-                    : "<empty>";
-
-            return Optional.of(new SafeIoException(
-                    "Failed to parse response body as SerializableError",
-                    SafeArg.of("code", response.code()),
-                    UnsafeArg.of("body", body),
-                    SafeArg.of("contentType", response.header(HttpHeaders.CONTENT_TYPE))));
+            body = response.body() != null ? toString(response.body().byteStream()) : "<empty>";
         } catch (IOException e) {
-            return Optional.of(new SafeIoException("Failed to read response body", e));
+            log.warn("Failed to read response body", e);
+            body = "Failed to read response body";
         }
+
+        return Optional.of(new UnknownRemoteException(response.code(), body));
     }
 
     private static String toString(InputStream body) throws IOException {

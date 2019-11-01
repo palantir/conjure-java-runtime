@@ -43,7 +43,7 @@ import org.assertj.core.util.Strings;
 
 public class GuavaTestServer extends Application<Configuration> {
     @Override
-    public final void run(Configuration config, final Environment env) throws Exception {
+    public final void run(Configuration _config, final Environment env) throws Exception {
         env.jersey().register(ConjureJerseyFeature.INSTANCE);
         env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerObjectMapper()));
         env.jersey().register(new TestResource());

@@ -77,7 +77,16 @@ final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
     private ErrorType mapErrorType(RemoteException exception) {
         Status status = Status.fromStatusCode(exception.getStatus());
 
-        if (status.getStatusCode() == 403) {
+        if (status.getStatusCode() == 401) {
+            log.info("Encountered a remote unauthorized exception."
+                    + " Mapping to a default unauthorized exception before propagating",
+                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
+                    SafeArg.of("errorName", exception.getError().errorName()),
+                    SafeArg.of("statusCode", status.getStatusCode()),
+                    exception);
+
+            return ErrorType.UNAUTHORIZED;
+        } else if (status.getStatusCode() == 403) {
             log.info("Encountered a remote permission denied exception."
                     + " Mapping to a default permission denied exception before propagating",
                     SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),

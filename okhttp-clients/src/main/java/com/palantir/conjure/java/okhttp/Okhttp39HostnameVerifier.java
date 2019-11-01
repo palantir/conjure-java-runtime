@@ -150,14 +150,14 @@ final class Okhttp39HostnameVerifier implements HostnameVerifier {
         // Basic sanity checks
         // Check length == 0 instead of .isEmpty() to support Java 5.
         if ((hostname == null) || (hostname.length() == 0)
-                || (hostname.startsWith("."))
-                || (hostname.endsWith(".."))) {
+                || hostname.startsWith(".")
+                || hostname.endsWith("..")) {
             // Invalid domain name
             return false;
         }
         if ((pattern == null) || (pattern.length() == 0)
-                || (pattern.startsWith("."))
-                || (pattern.endsWith(".."))) {
+                || pattern.startsWith(".")
+                || pattern.endsWith("..")) {
             // Invalid pattern/domain name
             return false;
         }
@@ -198,7 +198,7 @@ final class Okhttp39HostnameVerifier implements HostnameVerifier {
         //    sub.test.example.com.
         // 3. Wildcard patterns for single-label domain names are not permitted.
 
-        if ((!pattern.startsWith("*.")) || (pattern.indexOf('*', 1) != -1)) {
+        if (!pattern.startsWith("*.") || (pattern.indexOf('*', 1) != -1)) {
             // Asterisk (*) is only permitted in the left-most domain name label and must be the only
             // character in that label
             return false;
