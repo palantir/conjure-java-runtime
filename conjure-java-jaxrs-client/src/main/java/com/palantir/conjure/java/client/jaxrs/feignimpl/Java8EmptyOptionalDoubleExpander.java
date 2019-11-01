@@ -22,8 +22,8 @@ import feign.Param.Expander;
 import java.util.OptionalDouble;
 
 /**
- * Expands OptionalDouble by using the empty string for {@link OptionalDouble#empty()} and the
- * {@link Double#toString()} of the value otherwise.
+ * Expands OptionalDouble by using the empty string for {@link OptionalDouble#empty()} and the {@link Double#toString()}
+ * of the value otherwise.
  */
 public final class Java8EmptyOptionalDoubleExpander implements Expander {
 

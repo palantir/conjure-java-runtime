@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 
 /**
  * Use {@link Java8OptionalAwareDecoder}.
+ *
  * @deprecated Use {@link Java8OptionalAwareDecoder}.
  */
 @Deprecated

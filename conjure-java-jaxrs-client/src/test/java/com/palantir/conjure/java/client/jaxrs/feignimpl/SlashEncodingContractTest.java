@@ -46,26 +46,24 @@ public final class SlashEncodingContractTest extends TestBase {
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP =
             new DropwizardAppRule<>(Server.class, "src/test/resources/test-server.yml");
+
     private static final Service resource = mock(Service.class);
     private static final String PATH_PARAM = "slash/path";
     private static final String QUERY_PARAM = "slash/query";
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
 
     private Service jerseyProxy;
     private Service inMemoryProxy;
 
     @Before
     public void before() {
-        jerseyProxy = JaxRsClient.create(Service.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig("http://localhost:" + APP.getLocalPort()));
-        inMemoryProxy = JaxRsClient.create(Service.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig("http://localhost:" + server.getPort()));
+        jerseyProxy = JaxRsClient.create(
+                Service.class, AGENT, new HostMetricsRegistry(), createTestConfig("http://localhost:"
+                        + APP.getLocalPort()));
+        inMemoryProxy = JaxRsClient.create(
+                Service.class, AGENT, new HostMetricsRegistry(), createTestConfig("http://localhost:"
+                        + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
 

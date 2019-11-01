@@ -36,5 +36,4 @@ public final class SunPkcs1ReaderTests {
         assertThat(TestConstants.MODULUS).isEqualTo(privateKeySpec.getModulus());
         assertThat(TestConstants.PRIVATE_EXPONENT).isEqualTo(privateKeySpec.getPrivateExponent());
     }
-
 }

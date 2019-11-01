@@ -37,12 +37,9 @@ public final class RefreshableProxyInvocationHandlerTest {
         void call();
     }
 
-    @Mock
-    private Function<Object, Callable> supplier;
-    @Mock
-    private Callable delegate1;
-    @Mock
-    private Callable delegate2;
+    @Mock private Function<Object, Callable> supplier;
+    @Mock private Callable delegate1;
+    @Mock private Callable delegate2;
 
     @Before
     public void before() {
@@ -109,8 +106,6 @@ public final class RefreshableProxyInvocationHandlerTest {
                 RefreshableProxyInvocationHandler.create(refreshable, tec -> throwingCallable);
         Callable proxy = Reflection.newProxy(Callable.class, handler);
 
-        assertThatThrownBy(proxy::call)
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Whoops");
+        assertThatThrownBy(proxy::call).isInstanceOf(IllegalStateException.class).hasMessage("Whoops");
     }
 }

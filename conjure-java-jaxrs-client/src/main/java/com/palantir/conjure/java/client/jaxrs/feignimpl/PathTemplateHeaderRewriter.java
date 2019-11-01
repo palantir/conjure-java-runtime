@@ -21,6 +21,7 @@ import feign.RequestTemplate;
 
 /**
  * No longer used.
+ *
  * @deprecated no longer used
  */
 @Deprecated

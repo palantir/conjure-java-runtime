@@ -29,9 +29,9 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
- * A retrofit2 {@link Converter} that converts {@code Optional<?>} retrofit {@link Path}, {@link Query} and
- * {@link Header} parameters into the string representation of the wrapped object, or null if the optional is empty.
- * Handles both {@link java.util.Optional Java8 Optional} and {@link com.google.common.base.Optional Guava Optional}.
+ * A retrofit2 {@link Converter} that converts {@code Optional<?>} retrofit {@link Path}, {@link Query} and {@link
+ * Header} parameters into the string representation of the wrapped object, or null if the optional is empty. Handles
+ * both {@link java.util.Optional Java8 Optional} and {@link com.google.common.base.Optional Guava Optional}.
  */
 public final class OptionalObjectToStringConverterFactory extends Converter.Factory {
     public static final OptionalObjectToStringConverterFactory INSTANCE = new OptionalObjectToStringConverterFactory();
@@ -40,8 +40,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
 
     @Override
     public Converter<?, String> stringConverter(Type type, Annotation[] annotations, Retrofit _retrofit) {
-        Optional<?> pathQueryAnnotation = ImmutableList.copyOf(annotations)
-                .stream()
+        Optional<?> pathQueryAnnotation = ImmutableList.copyOf(annotations).stream()
                 .map(Annotation::annotationType)
                 .filter(t -> t == Path.class || t == Query.class || t == Header.class)
                 .findAny();
@@ -67,9 +66,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
         return null;
     }
 
-    /**
-     * Optionally returns a converter which returns null when the value is not present.
-     */
+    /** Optionally returns a converter which returns null when the value is not present. */
     private static Optional<Converter<?, String>> getNullableConverterForRawType(Class<?> rawType) {
         if (rawType == java.util.Optional.class) {
             return Optional.of(Java8OptionalStringConverter.INSTANCE);

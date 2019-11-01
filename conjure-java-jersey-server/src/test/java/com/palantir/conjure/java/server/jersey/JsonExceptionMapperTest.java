@@ -34,8 +34,8 @@ public final class JsonExceptionMapperTest {
         }
     };
 
-    private final ObjectMapper objectMapper = ObjectMappers.newServerObjectMapper()
-            .enable(SerializationFeature.INDENT_OUTPUT);
+    private final ObjectMapper objectMapper =
+            ObjectMappers.newServerObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     @Test
     public void testExpectedSerializedError() throws Exception {

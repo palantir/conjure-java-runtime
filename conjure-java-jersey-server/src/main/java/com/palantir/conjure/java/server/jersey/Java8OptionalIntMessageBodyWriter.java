@@ -39,11 +39,7 @@ public final class Java8OptionalIntMessageBodyWriter implements MessageBodyWrite
     // Jersey ignores this
     @Override
     public long getSize(
-            OptionalInt _entity,
-            Class<?> _type,
-            Type _genericType,
-            Annotation[] _annotations,
-            MediaType _mediaType) {
+            OptionalInt _entity, Class<?> _type, Type _genericType, Annotation[] _annotations, MediaType _mediaType) {
         return 0;
     }
 

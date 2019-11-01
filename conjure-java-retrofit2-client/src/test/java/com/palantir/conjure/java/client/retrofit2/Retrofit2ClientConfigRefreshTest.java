@@ -28,10 +28,8 @@ import org.junit.Test;
 
 public final class Retrofit2ClientConfigRefreshTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server1 = new MockWebServer();
-    @Rule
-    public final MockWebServer server2 = new MockWebServer();
+    @Rule public final MockWebServer server1 = new MockWebServer();
+    @Rule public final MockWebServer server2 = new MockWebServer();
 
     @Test
     public void testConfigRefresh() throws Exception {
@@ -40,10 +38,8 @@ public final class Retrofit2ClientConfigRefreshTest extends TestBase {
         ClientConfiguration config2 = createTestConfig("http://localhost:" + server2.getPort());
 
         Refreshable<ClientConfiguration> refreshableConfig = Refreshable.of(config1);
-        TestService proxy = Retrofit2Client.create(TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                refreshableConfig);
+        TestService proxy =
+                Retrofit2Client.create(TestService.class, AGENT, new HostMetricsRegistry(), refreshableConfig);
 
         // Call 1
         server1.enqueue(new MockResponse().setBody("\"server1\""));

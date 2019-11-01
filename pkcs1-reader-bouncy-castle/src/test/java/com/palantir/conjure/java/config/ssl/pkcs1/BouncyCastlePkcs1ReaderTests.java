@@ -35,5 +35,4 @@ public final class BouncyCastlePkcs1ReaderTests {
         assertThat(TestConstants.MODULUS).isEqualTo(privateKeySpec.getModulus());
         assertThat(TestConstants.PRIVATE_EXPONENT).isEqualTo(privateKeySpec.getPrivateExponent());
     }
-
 }

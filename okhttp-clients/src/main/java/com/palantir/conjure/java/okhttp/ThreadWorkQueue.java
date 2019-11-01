@@ -24,13 +24,13 @@ import java.util.Queue;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
- * A 'fair' queue which prioritizes by submitting thread. Requests are executed either synchronously
- * or asynchronously, more frequently synchronously. In the former case, one will block on the response;
- * in the latter case, one might submit many requests from a single thread, which if consumed in a fifo
- * fashion will potentially starve the shared resource.
- * <p>
- * Here, we hand out permits in a per-thread fifo, globally round robin fashion, so a thread which makes
- * many requests will see its requests fairly prioritized behind other threads.
+ * A 'fair' queue which prioritizes by submitting thread. Requests are executed either synchronously or asynchronously,
+ * more frequently synchronously. In the former case, one will block on the response; in the latter case, one might
+ * submit many requests from a single thread, which if consumed in a fifo fashion will potentially starve the shared
+ * resource.
+ *
+ * <p>Here, we hand out permits in a per-thread fifo, globally round robin fashion, so a thread which makes many
+ * requests will see its requests fairly prioritized behind other threads.
  */
 @NotThreadSafe
 final class ThreadWorkQueue<T> {

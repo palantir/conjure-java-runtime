@@ -19,9 +19,7 @@ package com.palantir.conjure.java.okhttp;
 import java.time.Duration;
 import java.util.Optional;
 
-/**
- * Defines a strategy for waiting in between successive retries of an operation that is subject to failure.
- */
+/** Defines a strategy for waiting in between successive retries of an operation that is subject to failure. */
 public interface BackoffStrategy {
     /**
      * Returns the next suggested backoff duration, or {@link Optional#empty} if the operation should not be retried

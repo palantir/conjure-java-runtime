@@ -50,19 +50,14 @@ final class UrlSelectorImpl implements UrlSelector {
     private final Duration failedUrlCooldown;
 
     private UrlSelectorImpl(
-            ImmutableList<HttpUrl> baseUrls,
-            boolean reshuffle,
-            Duration failedUrlCooldown,
-            Clock clock) {
+            ImmutableList<HttpUrl> baseUrls, boolean reshuffle, Duration failedUrlCooldown, Clock clock) {
         Preconditions.checkArgument(!baseUrls.isEmpty(), "Must specify at least one URL");
         Preconditions.checkArgument(!failedUrlCooldown.isNegative(), "Cache expiration must be non-negative");
         if (reshuffle) {
             // Add jitter to avoid mass node reassignment when multiple nodes of a client are restarted
             Duration jitter = Duration.ofSeconds(ThreadLocalRandom.current().nextLong(-30, 30));
             this.baseUrls = Suppliers.memoizeWithExpiration(
-                    () -> shuffle(baseUrls),
-                    RANDOMIZE.plus(jitter).toMillis(),
-                    TimeUnit.MILLISECONDS);
+                    () -> shuffle(baseUrls), RANDOMIZE.plus(jitter).toMillis(), TimeUnit.MILLISECONDS);
         } else {
             // deterministic for testing only
             this.baseUrls = () -> baseUrls;
@@ -78,17 +73,13 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     /**
-     * Creates a new {@link UrlSelector} with the supplied URLs. The order of the URLs are randomized every
-     * 10 minutes when {@code randomizeOrder} is set to true, which should be preferred except when
-     * testing. If a {@code failedUrlCooldown} is specified, URLs that are marked as failed using
-     * {@link #markAsFailed(HttpUrl)} will be removed from the pool of prioritized, healthy URLs for that period of
-     * time.
+     * Creates a new {@link UrlSelector} with the supplied URLs. The order of the URLs are randomized every 10 minutes
+     * when {@code randomizeOrder} is set to true, which should be preferred except when testing. If a {@code
+     * failedUrlCooldown} is specified, URLs that are marked as failed using {@link #markAsFailed(HttpUrl)} will be
+     * removed from the pool of prioritized, healthy URLs for that period of time.
      */
     static UrlSelectorImpl createWithFailedUrlCooldown(
-            Collection<String> baseUrls,
-            boolean reshuffle,
-            Duration failedUrlCooldown,
-            Clock clock) {
+            Collection<String> baseUrls, boolean reshuffle, Duration failedUrlCooldown, Clock clock) {
         ImmutableSet.Builder<HttpUrl> canonicalUrls = ImmutableSet.builder(); // ImmutableSet maintains insert order
         baseUrls.forEach(url -> {
             HttpUrl httpUrl = HttpUrl.parse(switchWsToHttp(url));
@@ -126,8 +117,8 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     /**
-     * Attempt to redirect to the given redirectUrl, which could be a longer URL than just a base path, in which
-     * case it will first be matched to a baseUrl from {@link #baseUrls}.
+     * Attempt to redirect to the given redirectUrl, which could be a longer URL than just a base path, in which case it
+     * will first be matched to a baseUrl from {@link #baseUrls}.
      */
     @Override
     public Optional<HttpUrl> redirectTo(HttpUrl requestUrl, String redirectUrl) {
@@ -136,12 +127,12 @@ final class UrlSelectorImpl implements UrlSelector {
     }
 
     /**
-     * Rewrites the request URL to use the new {@code redirectBaseUrl}, if the path prefix is compatible, otherwise
-     * it returns {@link Optional#empty()}.
+     * Rewrites the request URL to use the new {@code redirectBaseUrl}, if the path prefix is compatible, otherwise it
+     * returns {@link Optional#empty()}.
      *
-     * Also updates the {@link #lastBaseUrl} with the given {@code redirectBaseUrl}.
+     * <p>Also updates the {@link #lastBaseUrl} with the given {@code redirectBaseUrl}.
      *
-     * @param redirectBaseUrl  expected to be an actual base url that exists in {@link #baseUrls}.
+     * @param redirectBaseUrl expected to be an actual base url that exists in {@link #baseUrls}.
      */
     private Optional<HttpUrl> redirectTo(HttpUrl requestUrl, HttpUrl redirectBaseUrl) {
         lastBaseUrl.set(redirectBaseUrl);
@@ -152,14 +143,15 @@ final class UrlSelectorImpl implements UrlSelector {
             return Optional.empty();
         }
 
-        return Optional.of(requestUrl.newBuilder()
-                .scheme(redirectBaseUrl.scheme())
-                .host(redirectBaseUrl.host())
-                .port(redirectBaseUrl.port())
-                .encodedPath(
-                        redirectBaseUrl.encodedPath() // matching prefix
+        return Optional.of(
+                requestUrl
+                        .newBuilder()
+                        .scheme(redirectBaseUrl.scheme())
+                        .host(redirectBaseUrl.host())
+                        .port(redirectBaseUrl.port())
+                        .encodedPath(redirectBaseUrl.encodedPath() // matching prefix
                                 + requestUrl.encodedPath().substring(redirectBaseUrl.encodedPath().length()))
-                .build());
+                        .build());
     }
 
     @Override
@@ -167,8 +159,7 @@ final class UrlSelectorImpl implements UrlSelector {
         List<HttpUrl> httpUrls = baseUrls.get();
 
         // If possible, determine the index of the request URL (so we can be sure to redirect to a different URL)
-        int lastIndex = indexFor(requestUrl, httpUrls)
-                .orElseGet(() -> indexForLastBaseUrl(httpUrls));
+        int lastIndex = indexFor(requestUrl, httpUrls).orElseGet(() -> indexForLastBaseUrl(httpUrls));
 
         int nextIndex = increment(lastIndex, httpUrls);
 
@@ -228,11 +219,11 @@ final class UrlSelectorImpl implements UrlSelector {
 
     /**
      * Get the next URL in {@code baseUrls}, after the supplied index.
-     * <p>
-     * If the {@code failedUrlCooldown} is positive, then this method will skip over nodes that have failed if
-     * it's been less than {@code failedUrlCooldown} since they failed. Furthermore, if a node had previously failed
-     * but the cooldown has since elapsed, that node's URL will be returned but it will once again be marked as
-     * failed (so that it's only tried once).
+     *
+     * <p>If the {@code failedUrlCooldown} is positive, then this method will skip over nodes that have failed if it's
+     * been less than {@code failedUrlCooldown} since they failed. Furthermore, if a node had previously failed but the
+     * cooldown has since elapsed, that node's URL will be returned but it will once again be marked as failed (so that
+     * it's only tried once).
      */
     private Optional<HttpUrl> getNextHealthy(int startIndex, List<HttpUrl> httpUrls) {
         for (int i = startIndex; i < startIndex + httpUrls.size(); i++) {

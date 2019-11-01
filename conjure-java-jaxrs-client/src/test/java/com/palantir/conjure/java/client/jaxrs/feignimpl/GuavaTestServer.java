@@ -257,7 +257,5 @@ public class GuavaTestServer extends Application<Configuration> {
         @Consumes("application/cbor")
         @Produces(MediaType.APPLICATION_JSON)
         GuavaOptionalComplexType postCborRequest(GuavaOptionalComplexType complexType);
-
     }
-
 }

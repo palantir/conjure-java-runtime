@@ -43,10 +43,7 @@ final class QosExceptionThrowingCallAdapterFactory extends CallAdapter.Factory {
 
     @Nullable
     @Override
-    public CallAdapter<?, ?> get(
-            Type returnType,
-            Annotation[] annotations,
-            Retrofit retrofit) {
+    public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
         CallAdapter<?, ?> adapter = delegate.get(returnType, annotations, retrofit);
         return new QosExceptionThrowingCallAdapter<>(adapter);
     }
@@ -69,7 +66,6 @@ final class QosExceptionThrowingCallAdapterFactory extends CallAdapter.Factory {
             QosExceptionThrowingCall<R> throwingCall = new QosExceptionThrowingCall(call);
             return delegate.adapt(throwingCall);
         }
-
     }
 
     private static final class QosExceptionThrowingCall<R> implements Call<R> {
@@ -85,9 +81,7 @@ final class QosExceptionThrowingCallAdapterFactory extends CallAdapter.Factory {
             Map<String, List<String>> headers = response.headers().toMultimap();
             Optional<QosException> exception = QosExceptionResponseMapper.mapResponseCodeHeaderStream(
                     response.code(),
-                    header -> Optional.ofNullable(headers.get(header))
-                            .map(List::stream)
-                            .orElseGet(Stream::empty));
+                    header -> Optional.ofNullable(headers.get(header)).map(List::stream).orElseGet(Stream::empty));
             if (exception.isPresent()) {
                 throw exception.get();
             }

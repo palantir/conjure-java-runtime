@@ -29,15 +29,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 /**
- * An encoder which checks the Content-Type headers for the presence of
- * application/cbor. If present, encodes the request body as cbor and otherwise
- * delegates the encoding.
+ * An encoder which checks the Content-Type headers for the presence of application/cbor. If present, encodes the
+ * request body as cbor and otherwise delegates the encoding.
  *
- * It's silly that we must do this check every time, given the request content
- * type is fixed at compile time.
+ * <p>It's silly that we must do this check every time, given the request content type is fixed at compile time.
  *
- * In the future we will likely codegen the client and thus remove the need for
- * scanning the headers on every request.
+ * <p>In the future we will likely codegen the client and thus remove the need for scanning the headers on every
+ * request.
  */
 public final class CborDelegateEncoder implements Encoder {
 
@@ -71,5 +69,4 @@ public final class CborDelegateEncoder implements Encoder {
             throw new RuntimeException(e);
         }
     }
-
 }

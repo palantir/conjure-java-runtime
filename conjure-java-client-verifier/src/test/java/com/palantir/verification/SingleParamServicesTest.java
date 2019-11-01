@@ -39,8 +39,7 @@ import org.slf4j.LoggerFactory;
 @RunWith(Parameterized.class)
 public class SingleParamServicesTest {
 
-    @ClassRule
-    public static final VerificationServerRule server = new VerificationServerRule();
+    @ClassRule public static final VerificationServerRule server = new VerificationServerRule();
 
     private static final Logger log = LoggerFactory.getLogger(SingleParamServicesTest.class);
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
@@ -69,26 +68,20 @@ public class SingleParamServicesTest {
         List<Object[]> objects = new ArrayList<>();
         Cases.TEST_CASES.getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
-            IntStream.range(0, size)
-                    .forEach(i -> objects.add(
-                            new Object[] {"singleHeaderService", endpointName, i, singleHeaderTestCases.get(i)}));
-
+            IntStream.range(0, size).forEach(i ->
+                    objects.add(new Object[] {"singleHeaderService", endpointName, i, singleHeaderTestCases.get(i)}));
         });
 
         Cases.TEST_CASES.getSinglePathParamService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
-            IntStream.range(0, size)
-                    .forEach(i -> objects.add(
-                            new Object[] {"singlePathParamService", endpointName, i, singleHeaderTestCases.get(i)}));
-
+            IntStream.range(0, size).forEach(i -> objects.add(
+                    new Object[] {"singlePathParamService", endpointName, i, singleHeaderTestCases.get(i)}));
         });
 
         Cases.TEST_CASES.getSingleQueryParamService().forEach((endpointName, singleQueryTestCases) -> {
             int size = singleQueryTestCases.size();
-            IntStream.range(0, size)
-                    .forEach(i -> objects.add(
-                            new Object[] {"singleQueryParamService", endpointName, i, singleQueryTestCases.get(i)}));
-
+            IntStream.range(0, size).forEach(i -> objects.add(
+                    new Object[] {"singleQueryParamService", endpointName, i, singleQueryTestCases.get(i)}));
         });
 
         return objects;
@@ -115,17 +108,11 @@ public class SingleParamServicesTest {
                     if ("singleHeaderService".equals(serviceName)) {
                         Type type = method.getGenericParameterTypes()[0];
                         Class<?> cls = ClassUtils.getClass(type.getTypeName());
-                        method.invoke(
-                                service,
-                                objectMapper.readValue(jsonString, cls),
-                                index);
+                        method.invoke(service, objectMapper.readValue(jsonString, cls), index);
                     } else {
                         Type type = method.getGenericParameterTypes()[1];
                         Class<?> cls = ClassUtils.getClass(type.getTypeName());
-                        method.invoke(
-                                service,
-                                index,
-                                objectMapper.readValue(jsonString, cls));
+                        method.invoke(service, index, objectMapper.readValue(jsonString, cls));
                     }
 
                     log.info("Successfully post param to endpoint {} and index {}", endpointName, index);

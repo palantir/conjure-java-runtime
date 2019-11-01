@@ -39,8 +39,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public final class UrlSelectorImplTest extends TestBase {
 
-    @Mock
-    Clock clock;
+    @Mock Clock clock;
 
     @Before
     public void before() {
@@ -56,10 +55,7 @@ public final class UrlSelectorImplTest extends TestBase {
 
     @Test
     public void baseUrlsMustBeCanonical() {
-        for (String url : new String[] {
-                "user:pass@foo.com/path",
-                ""
-        }) {
+        for (String url : new String[] {"user:pass@foo.com/path", ""}) {
             Assertions.assertThatLoggableExceptionThrownBy(() -> UrlSelectorImpl.create(list(url), false))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasLogMessage("Not a valid URL")
@@ -67,20 +63,16 @@ public final class UrlSelectorImplTest extends TestBase {
         }
 
         for (String url : new String[] {
-                "http://user:pass@foo.com/path",
-                "http://foo.com/path?bar",
+            "http://user:pass@foo.com/path", "http://foo.com/path?bar",
         }) {
             Assertions.assertThatLoggableExceptionThrownBy(() -> UrlSelectorImpl.create(list(url), false))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasLogMessage(
-                            "Base URLs must be 'canonical' and consist of schema, host, port, and path only")
+                    .hasLogMessage("Base URLs must be 'canonical' and consist of schema, host, port, and path only")
                     .hasExactlyArgs(UnsafeArg.of("url", url));
         }
 
         for (String url : new String[] {
-                "http://foo.com/path",
-                "http://foo.com:80/path",
-                "http://foo.com:8080",
+            "http://foo.com/path", "http://foo.com:80/path", "http://foo.com:8080",
         }) {
             UrlSelectorImpl.create(list(url), false);
         }
@@ -217,10 +209,7 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"),
-                false,
-                failedUrlCooldown,
-                clock);
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
@@ -248,10 +237,7 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"),
-                false,
-                failedUrlCooldown,
-                clock);
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));
@@ -273,10 +259,7 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"),
-                false,
-                failedUrlCooldown,
-                clock);
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
@@ -304,10 +287,7 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"),
-                false,
-                failedUrlCooldown,
-                clock);
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));
@@ -332,9 +312,7 @@ public final class UrlSelectorImplTest extends TestBase {
 
     @Test
     public void testWorksWithWebSockets() {
-        Request wsRequest = new Request.Builder()
-                .url("wss://foo/a")
-                .build();
+        Request wsRequest = new Request.Builder().url("wss://foo/a").build();
         UrlSelectorImpl selector = UrlSelectorImpl.create(ImmutableList.of("wss://foo/", "wss://bar/"), false);
 
         // Silently replace web socket URLs with HTTP URLs. See https://github.com/square/okhttp/issues/1652.

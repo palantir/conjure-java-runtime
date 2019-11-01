@@ -32,13 +32,13 @@ import org.slf4j.LoggerFactory;
  * media type}. Never forwards the exception message. Subclasses provide an {@link ErrorType} that is used to populate
  * the {@link SerializableError#errorCode} and {@link SerializableError#errorName()} fields as well as the HTTP response
  * status code.
- * <p>
- * Consider this call stack, where a caller/browser calls a remote method in a server:
- * <p>
- * caller/browser -> [server]
- * <p>
- * When code in the server throws an {@link Exception} that reaches Jersey, this {@link ExceptionMapper} converts that
- * exception into an HTTP {@link Response} for return to the caller/browser.
+ *
+ * <p>Consider this call stack, where a caller/browser calls a remote method in a server:
+ *
+ * <p>caller/browser -> [server]
+ *
+ * <p>When code in the server throws an {@link Exception} that reaches Jersey, this {@link ExceptionMapper} converts
+ * that exception into an HTTP {@link Response} for return to the caller/browser.
  */
 abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapper<T> {
 
@@ -53,12 +53,14 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
         ErrorType errorType = getErrorType(exception);
 
         if (errorType.httpErrorCode() / 100 == 4 /* client error */) {
-            log.info("Error handling request",
+            log.info(
+                    "Error handling request",
                     SafeArg.of("errorInstanceId", errorInstanceId),
                     SafeArg.of("errorName", errorType.name()),
                     exception);
         } else {
-            log.error("Error handling request",
+            log.error(
+                    "Error handling request",
                     SafeArg.of("errorInstanceId", errorInstanceId),
                     SafeArg.of("errorName", errorType.name()),
                     exception);
@@ -68,23 +70,21 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
     }
 
     static Response createResponse(ErrorType errorType, String errorInstanceId) {
-        return createResponse(errorType.httpErrorCode(),
-                errorType.code().name(),
-                errorType.name(),
-                errorInstanceId);
+        return createResponse(errorType.httpErrorCode(), errorType.code().name(), errorType.name(), errorInstanceId);
     }
 
     static Response createResponse(int httpErrorCode, String errorCode, String errorName, String errorInstanceId) {
         ResponseBuilder builder = Response.status(httpErrorCode);
         try {
             builder.entity(SerializableError.builder()
-                    .errorCode(errorCode)
-                    .errorName(errorName)
-                    .errorInstanceId(errorInstanceId)
-                    .build())
+                            .errorCode(errorCode)
+                            .errorName(errorName)
+                            .errorInstanceId(errorInstanceId)
+                            .build())
                     .type(MediaType.APPLICATION_JSON);
         } catch (RuntimeException e) {
-            log.warn("Unable to translate exception to json",
+            log.warn(
+                    "Unable to translate exception to json",
                     SafeArg.of("errorInstanceId", errorInstanceId),
                     SafeArg.of("errorName", errorName),
                     e);

@@ -54,14 +54,12 @@ public final class VerificationClients {
 
     public static SingleHeaderService singleHeaderService(VerificationServerRule server) {
         return JaxRsClient.create(
-                SingleHeaderService.class,
-                getUserAgent(),
-                new HostMetricsRegistry(),
-                server.getClientConfiguration());
+                SingleHeaderService.class, getUserAgent(), new HostMetricsRegistry(), server.getClientConfiguration());
     }
 
     public static SingleQueryParamService singleQueryParamService(VerificationServerRule server) {
-        return JaxRsClient.create(SingleQueryParamService.class,
+        return JaxRsClient.create(
+                SingleQueryParamService.class,
                 getUserAgent(),
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());

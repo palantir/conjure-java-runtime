@@ -44,5 +44,4 @@ public final class Pkcs1ReadersTests {
         assertThat(TestConstants.MODULUS).isEqualTo(privateKeySpec.getModulus());
         assertThat(TestConstants.PRIVATE_EXPONENT).isEqualTo(privateKeySpec.getPrivateExponent());
     }
-
 }

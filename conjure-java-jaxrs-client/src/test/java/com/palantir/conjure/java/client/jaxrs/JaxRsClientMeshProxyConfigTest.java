@@ -29,8 +29,7 @@ import org.junit.Test;
 
 public final class JaxRsClientMeshProxyConfigTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
 
     @Test
     public void meshProxy() throws Exception {
@@ -42,13 +41,10 @@ public final class JaxRsClientMeshProxyConfigTest extends TestBase {
                 .maxNumRetries(0)
                 .build();
 
-        TestService proxiedService = JaxRsClient.create(TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                proxiedConfig);
+        TestService proxiedService =
+                JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), proxiedConfig);
 
         assertThat(proxiedService.string()).isEqualTo("server");
         assertThat(server.takeRequest().getHeader(HttpHeaders.HOST)).isEqualTo("foo.com");
     }
-
 }

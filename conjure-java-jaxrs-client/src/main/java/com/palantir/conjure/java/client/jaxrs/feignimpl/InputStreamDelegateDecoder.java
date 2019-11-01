@@ -25,9 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 
-/**
- * If the return type is InputStream, return it, otherwise delegate to provided decoder.
- */
+/** If the return type is InputStream, return it, otherwise delegate to provided decoder. */
 public final class InputStreamDelegateDecoder implements Decoder {
     private final Decoder delegate;
 

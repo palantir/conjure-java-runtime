@@ -48,10 +48,8 @@ public final class InstrumentedInterceptorTest {
     private static final Request REQUEST_A = new Request.Builder().url(URL_A).build();
     private static final Request REQUEST_B = new Request.Builder().url(URL_B).build();
 
-    @Mock
-    private Interceptor.Chain chain;
-    @Mock
-    private Call call;
+    @Mock private Interceptor.Chain chain;
+    @Mock private Call call;
 
     private TaggedMetricRegistry registry;
     private InstrumentedInterceptor interceptor;
@@ -101,8 +99,7 @@ public final class InstrumentedInterceptorTest {
 
         assertThat(hostMetrics.getMetrics()).isEmpty();
 
-        assertThatExceptionOfType(IOException.class)
-                .isThrownBy(() -> interceptor.intercept(chain));
+        assertThatExceptionOfType(IOException.class).isThrownBy(() -> interceptor.intercept(chain));
 
         HostMetrics metrics = Iterables.getOnlyElement(hostMetrics.getMetrics());
         assertThat(metrics.getIoExceptions().getCount()).isEqualTo(1);
@@ -114,25 +111,20 @@ public final class InstrumentedInterceptorTest {
 
         assertThat(hostMetrics.getMetrics()).isEmpty();
 
-        assertThatExceptionOfType(IOException.class)
-                .isThrownBy(() -> interceptor.intercept(chain));
+        assertThatExceptionOfType(IOException.class).isThrownBy(() -> interceptor.intercept(chain));
 
         assertThat(hostMetrics.getMetrics()).isEmpty();
     }
 
     private HostMetrics hostMetrics(String hostname, int port) {
-        Collection<HostMetrics> matching = Collections2.filter(hostMetrics.getMetrics(),
-                metrics -> metrics.hostname().equals(hostname) && metrics.port() == port);
+        Collection<HostMetrics> matching = Collections2.filter(
+                hostMetrics.getMetrics(), metrics -> metrics.hostname().equals(hostname) && metrics.port() == port);
         return Iterables.getOnlyElement(matching);
     }
 
     private void successfulRequest(Request request) throws IOException {
-        Response response = new Response.Builder()
-                .request(request)
-                .message("")
-                .protocol(Protocol.HTTP_1_1)
-                .code(200)
-                .build();
+        Response response =
+                new Response.Builder().request(request).message("").protocol(Protocol.HTTP_1_1).code(200).build();
         when(chain.request()).thenReturn(request);
         when(chain.proceed(request)).thenReturn(response);
     }

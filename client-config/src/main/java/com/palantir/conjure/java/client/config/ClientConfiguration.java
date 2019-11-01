@@ -78,8 +78,8 @@ public interface ClientConfiguration {
      * configured {@link #uris uri}; requests carry an additional {@code Host} header (or http/2 {@code :authority}
      * pseudo-header) set to the configured {@link #uris uri}. The proxy is expected to forward such requests to the
      * original {@code #uris uri}.
-     * <p>
-     * Note that if this option is set, then the {@link #maxNumRetries} must also be set to 0 and exactly one {@link
+     *
+     * <p>Note that if this option is set, then the {@link #maxNumRetries} must also be set to 0 and exactly one {@link
      * #uris} must exist since the mesh proxy is expected to handle all retry logic.
      */
     Optional<HostAndPort> meshProxy();
@@ -87,14 +87,12 @@ public interface ClientConfiguration {
     /** The maximum number of times a failed request is retried. */
     int maxNumRetries();
 
-    /**
-     * Indicates how the target node is selected for a given request.
-     */
+    /** Indicates how the target node is selected for a given request. */
     NodeSelectionStrategy nodeSelectionStrategy();
 
     /**
-     * The amount of time a URL marked as failed should be avoided for subsequent calls. If the
-     * {@link #nodeSelectionStrategy} is ROUND_ROBIN, this must be a positive period of time.
+     * The amount of time a URL marked as failed should be avoided for subsequent calls. If the {@link
+     * #nodeSelectionStrategy} is ROUND_ROBIN, this must be a positive period of time.
      */
     Duration failedUrlCooldown();
 
@@ -126,7 +124,8 @@ public interface ClientConfiguration {
             checkArgument(uris().size() == 1, "If meshProxy is configured then uris must contain exactly 1 URI");
         }
         if (nodeSelectionStrategy().equals(NodeSelectionStrategy.ROUND_ROBIN)) {
-            checkArgument(!failedUrlCooldown().isNegative() && !failedUrlCooldown().isZero(),
+            checkArgument(
+                    !failedUrlCooldown().isNegative() && !failedUrlCooldown().isZero(),
                     "If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
         }
         // Assert that timeouts are in milliseconds, not any higher precision, because feign only supports millis.
@@ -136,7 +135,8 @@ public interface ClientConfiguration {
     }
 
     default void checkTimeoutPrecision(Duration duration, String timeoutName) {
-        checkArgument(duration.minusMillis(duration.toMillis()).isZero(),
+        checkArgument(
+                duration.minusMillis(duration.toMillis()).isZero(),
                 "Timeouts with sub-millisecond precision are not supported",
                 SafeArg.of("timeoutName", timeoutName),
                 SafeArg.of("duration", duration),
@@ -154,9 +154,9 @@ public interface ClientConfiguration {
         ENABLED,
 
         /**
-         * Disables the client-side sympathetic QoS. Consumers should almost never use this option, reserving it
-         * for where there are known issues with the QoS interaction. Please consult project maintainers if applying
-         * this option.
+         * Disables the client-side sympathetic QoS. Consumers should almost never use this option, reserving it for
+         * where there are known issues with the QoS interaction. Please consult project maintainers if applying this
+         * option.
          */
         DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS
     }
@@ -166,20 +166,20 @@ public interface ClientConfiguration {
         AUTOMATIC_RETRY,
 
         /**
-         * Propagate QosException.Throttle and QosException.Unavailable (429/503) to the caller. Consumers
-         * should use this when an upstream service has better context on how to handle the QoS error. This delegates
-         * the responsibility to the upstream service, which should use an appropriate conjure client to handle the
+         * Propagate QosException.Throttle and QosException.Unavailable (429/503) to the caller. Consumers should use
+         * this when an upstream service has better context on how to handle the QoS error. This delegates the
+         * responsibility to the upstream service, which should use an appropriate conjure client to handle the
          * response.
          *
-         * For example, let us imagine a proxy server that serves both interactive and long-running background requests
-         * by dispatching requests to some backend. Interactive requests should be retried relatively few times in
-         * comparison to background jobs which run for minutes our even hours. The proxy server should use a backend
+         * <p>For example, let us imagine a proxy server that serves both interactive and long-running background
+         * requests by dispatching requests to some backend. Interactive requests should be retried relatively few times
+         * in comparison to background jobs which run for minutes our even hours. The proxy server should use a backend
          * client that propagates the QoS responses instead of retrying so the proxy client can handle them
          * appropriately. There is no risk of retry storms because the retries are isolated to one layer, the proxy
          * client.
          *
-         * Note that QosException.RetryOther (308) is not propagated. If the proxy server is exposed on the front door
-         * but the backend is not, it makes no sense to redirect the caller to a new backend. The client will still
+         * <p>Note that QosException.RetryOther (308) is not propagated. If the proxy server is exposed on the front
+         * door but the backend is not, it makes no sense to redirect the caller to a new backend. The client will still
          * follow redirects.
          */
         PROPAGATE_429_and_503_TO_CALLER
@@ -193,11 +193,11 @@ public interface ClientConfiguration {
          * Consumers should almost never use this option, reserving it for when their clients have guaranteed that they
          * will never retry on timeout.
          *
-         * The risk of retry storms is severe. If the client times out before the consumer finishes retrying on its
+         * <p>The risk of retry storms is severe. If the client times out before the consumer finishes retrying on its
          * timeout, it will submit a new request which will also retry on timeout. Expensive requests that time out have
          * brought down servers with this behavior enabled.
          *
-         * Note that connect timeouts will always be retried.
+         * <p>Note that connect timeouts will always be retried.
          */
         DANGEROUS_ENABLE_AT_RISK_OF_RETRY_STORMS
     }
@@ -206,12 +206,11 @@ public interface ClientConfiguration {
         /** Default. */
         ENABLED,
         /**
-         * Disables all {@link java.net.SocketException} handling. This is almost always not what you want,
-         * the solitary case where this is desirable being cases where Conjure is used to create single-host clients
-         * with retry on host failure handled outside of the Conjure layer. If you want to use this, please
-         * talk to a relevant party; this is here to enable a very specific workflow.
+         * Disables all {@link java.net.SocketException} handling. This is almost always not what you want, the solitary
+         * case where this is desirable being cases where Conjure is used to create single-host clients with retry on
+         * host failure handled outside of the Conjure layer. If you want to use this, please talk to a relevant party;
+         * this is here to enable a very specific workflow.
          */
         DANGEROUS_DISABLED
     }
-
 }

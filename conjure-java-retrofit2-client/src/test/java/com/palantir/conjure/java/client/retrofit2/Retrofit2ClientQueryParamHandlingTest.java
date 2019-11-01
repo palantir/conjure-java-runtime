@@ -34,8 +34,7 @@ import retrofit2.http.Query;
 
 public final class Retrofit2ClientQueryParamHandlingTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
 
     private Service proxy;
 
@@ -43,10 +42,7 @@ public final class Retrofit2ClientQueryParamHandlingTest extends TestBase {
     public void before() {
         HttpUrl url = server.url("/");
         proxy = Retrofit2Client.create(
-                Service.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(url.toString()));
+                Service.class, AGENT, new HostMetricsRegistry(), createTestConfig(url.toString()));
         MockResponse mockResponse = new MockResponse().setResponseCode(204);
         server.enqueue(mockResponse);
     }

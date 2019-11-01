@@ -33,11 +33,9 @@ import org.junit.rules.ExpectedException;
 
 public final class Retrofit2ClientBuilderTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @Rule public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void testRelativeAndAbsoluteRetrofitEndPoints_workWithArbitraryBaseUrlFormats() throws Exception {
@@ -51,10 +49,8 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
 
     private void assertRequestUrlYieldsHttpPath(String basePath, String expectedQueryPath) throws Exception {
         HttpUrl url = server.url(basePath);
-        TestService service = Retrofit2Client.create(TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(url.toString()));
+        TestService service = Retrofit2Client.create(
+                TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(url.toString()));
 
         server.enqueue(new MockResponse().setBody("\"server\""));
         assertThat(service.get().execute().body()).isEqualTo("server");
@@ -67,12 +63,9 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
 
     @Test
     public void testUserAgent_defaultHeaderIsSent() throws InterruptedException, IOException {
-        TestService service = Retrofit2Client.create(TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(String.format("http://%s:%s/api/",
-                        server.getHostName().toUpperCase(),
-                        server.getPort())));
+        TestService service = Retrofit2Client.create(
+                TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(String.format(
+                        "http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.get().execute();
 
@@ -86,9 +79,8 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
                 TestService.class,
                 UserAgents.tryParse("bogus user agent"),
                 new HostMetricsRegistry(),
-                createTestConfig(String.format("http://%s:%s/api/",
-                        server.getHostName().toUpperCase(),
-                        server.getPort())));
+                createTestConfig(
+                        String.format("http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.get().execute();
 
@@ -98,22 +90,16 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
 
     @Test
     public void testUserAgent_augmentedByHttpRemotingAndServiceComponents() throws Exception {
-        TestService service = Retrofit2Client.create(TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(String.format("http://%s:%s/api/",
-                        server.getHostName().toUpperCase(),
-                        server.getPort())));
+        TestService service = Retrofit2Client.create(
+                TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(String.format(
+                        "http://%s:%s/api/", server.getHostName().toUpperCase(), server.getPort())));
         server.enqueue(new MockResponse().setBody("\"server\""));
         service.get().execute();
 
         RecordedRequest request = server.takeRequest();
         String conjureVersion = OkHttpClients.class.getPackage().getImplementationVersion();
-        UserAgent expected = AGENT
-                .addAgent(UserAgent.Agent.of("TestService", "0.0.0"))
-                .addAgent(UserAgent.Agent.of(
-                        UserAgents.CONJURE_AGENT_NAME,
-                        conjureVersion != null ? conjureVersion : "0.0.0"));
+        UserAgent expected = AGENT.addAgent(UserAgent.Agent.of("TestService", "0.0.0")).addAgent(UserAgent.Agent.of(
+                UserAgents.CONJURE_AGENT_NAME, conjureVersion != null ? conjureVersion : "0.0.0"));
         assertThat(request.getHeader("User-Agent")).isEqualTo(UserAgents.format(expected));
     }
 }

@@ -46,8 +46,8 @@ import org.junit.Test;
 public final class Java8OptionalTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(OptionalTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(OptionalTestServer.class, "src/test/resources/test-server.yml");
 
     private WebTarget target;
 

@@ -26,9 +26,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Similar to {@link feign.jackson.JacksonEncoder}, but optimized to avoid intermediate
- * String representation of request body.
- * See upstream PR https://github.com/OpenFeign/feign/pull/989 .
+ * Similar to {@link feign.jackson.JacksonEncoder}, but optimized to avoid intermediate String representation of request
+ * body. See upstream PR https://github.com/OpenFeign/feign/pull/989 .
  */
 final class ConjureFeignJacksonEncoder implements Encoder {
 

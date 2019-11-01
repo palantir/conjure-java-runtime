@@ -23,24 +23,15 @@ import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
 import com.palantir.conjure.java.okhttp.HostEventsSink;
 
-/**
- * Variant of {@link JaxRsClient} with additional scala serialization support.
- */
+/** Variant of {@link JaxRsClient} with additional scala serialization support. */
 public final class JaxRsScalaClient {
 
     private JaxRsScalaClient() {}
 
-    /**
-     * See {@link JaxRsClient}.
-     */
+    /** See {@link JaxRsClient}. */
     public static <T> T create(
-            Class<T> serviceClass,
-            UserAgent userAgent,
-            HostEventsSink hostEventsSink,
-            ClientConfiguration config) {
-        return new FeignJaxRsScalaClientBuilder(config)
-                .hostEventsSink(hostEventsSink)
-                .build(serviceClass, userAgent);
+            Class<T> serviceClass, UserAgent userAgent, HostEventsSink hostEventsSink, ClientConfiguration config) {
+        return new FeignJaxRsScalaClientBuilder(config).hostEventsSink(hostEventsSink).build(serviceClass, userAgent);
     }
 
     /** See {@link JaxRsClient}. */
@@ -49,9 +40,7 @@ public final class JaxRsScalaClient {
             UserAgent userAgent,
             HostEventsSink hostEventsSink,
             Refreshable<ClientConfiguration> config) {
-        return Reflection.newProxy(serviceClass,
-                RefreshableProxyInvocationHandler.create(
-                        config,
-                        serviceConfiguration -> create(serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
+        return Reflection.newProxy(serviceClass, RefreshableProxyInvocationHandler.create(
+                config, serviceConfiguration -> create(serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
     }
 }

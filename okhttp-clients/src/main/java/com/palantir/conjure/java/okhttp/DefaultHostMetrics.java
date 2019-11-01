@@ -23,9 +23,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Records per-target-host HTTP response code metrics in a {@link TaggedMetricRegistry}.
- */
+/** Records per-target-host HTTP response code metrics in a {@link TaggedMetricRegistry}. */
 final class DefaultHostMetrics implements HostMetrics {
 
     private static final TimeUnit MICROS = TimeUnit.MICROSECONDS;

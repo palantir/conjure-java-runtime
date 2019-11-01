@@ -26,11 +26,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public final class WebPreconditionsTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @Rule public ExpectedException expectedException = ExpectedException.none();
 
-    @Nullable
-    private static Object nullReference = null; // circumvent findbugs
+    @Nullable private static Object nullReference = null; // circumvent findbugs
 
     @Test
     public void testCheckNotNullWithMessage() {

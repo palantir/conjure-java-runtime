@@ -22,8 +22,8 @@ import feign.Param.Expander;
 import java.util.OptionalInt;
 
 /**
- * Expands OptionalInt by using null for {@link OptionalInt#empty()} and the {@link Integer#toString()} of the
- * value otherwise.
+ * Expands OptionalInt by using null for {@link OptionalInt#empty()} and the {@link Integer#toString()} of the value
+ * otherwise.
  */
 public final class Java8NullOptionalIntExpander implements Expander {
 

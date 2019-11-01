@@ -45,8 +45,7 @@ import retrofit2.http.GET;
 @RunWith(Parameterized.class)
 public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
 
     private HttpUrl url;
     private Service proxy;
@@ -54,14 +53,13 @@ public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
     @Parameters(name = "{index}: code {0} body: \"{1}\"")
     public static Collection<Object[]> responses() {
         return Arrays.asList(new Object[][] {
-                {200, "null"},
-                {200, ""},
-                {204, ""}
+            {200, "null"},
+            {200, ""},
+            {204, ""}
         });
     }
 
-    @Parameter
-    public int code;
+    @Parameter public int code;
 
     @Parameter(1)
     public String body;
@@ -70,10 +68,7 @@ public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
     public void before() {
         url = server.url("/");
         proxy = Retrofit2Client.create(
-                Service.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(url.toString()));
+                Service.class, AGENT, new HostMetricsRegistry(), createTestConfig(url.toString()));
         MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
         server.enqueue(mockResponse);
     }

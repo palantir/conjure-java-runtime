@@ -28,5 +28,4 @@ public final class BouncyCastlePkcs1Reader implements Pkcs1Reader {
         RSAPrivateKey asn1PrivKey = RSAPrivateKey.getInstance(ASN1Sequence.fromByteArray(privateKeyDerBytes));
         return new RSAPrivateKeySpec(asn1PrivKey.getModulus(), asn1PrivKey.getPrivateExponent());
     }
-
 }

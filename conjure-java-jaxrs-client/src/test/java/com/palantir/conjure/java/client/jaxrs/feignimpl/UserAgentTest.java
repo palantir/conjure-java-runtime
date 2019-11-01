@@ -35,11 +35,9 @@ import org.junit.rules.ExpectedException;
 
 public final class UserAgentTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @Rule public ExpectedException expectedException = ExpectedException.none();
 
     private String endpointUri;
 
@@ -80,11 +78,8 @@ public final class UserAgentTest extends TestBase {
 
         RecordedRequest request = server.takeRequest();
         String conjureVersion = OkHttpClients.class.getPackage().getImplementationVersion();
-        UserAgent expected = AGENT
-                .addAgent(UserAgent.Agent.of("TestService", "0.0.0"))
-                .addAgent(UserAgent.Agent.of(
-                        UserAgents.CONJURE_AGENT_NAME,
-                        conjureVersion != null ? conjureVersion : "0.0.0"));
+        UserAgent expected = AGENT.addAgent(UserAgent.Agent.of("TestService", "0.0.0")).addAgent(UserAgent.Agent.of(
+                UserAgents.CONJURE_AGENT_NAME, conjureVersion != null ? conjureVersion : "0.0.0"));
         assertThat(request.getHeader("User-Agent")).isEqualTo(UserAgents.format(expected));
     }
 }

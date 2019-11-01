@@ -48,8 +48,7 @@ public final class ClientConfigurations {
     private static final boolean DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION = false;
     private static final NodeSelectionStrategy DEFAULT_NODE_SELECTION_STRATEGY = NodeSelectionStrategy.PIN_UNTIL_ERROR;
     private static final int DEFAULT_MAX_NUM_RETRIES = 4;
-    private static final ClientConfiguration.ClientQoS CLIENT_QOS_DEFAULT =
-            ClientConfiguration.ClientQoS.ENABLED;
+    private static final ClientConfiguration.ClientQoS CLIENT_QOS_DEFAULT = ClientConfiguration.ClientQoS.ENABLED;
     private static final ClientConfiguration.ServerQoS PROPAGATE_QOS_DEFAULT =
             ClientConfiguration.ServerQoS.AUTOMATIC_RETRY;
     private static final ClientConfiguration.RetryOnTimeout RETRY_ON_TIMEOUT_DEFAULT =
@@ -73,11 +72,10 @@ public final class ClientConfigurations {
                 .readTimeout(config.readTimeout().orElse(DEFAULT_READ_TIMEOUT))
                 .writeTimeout(config.writeTimeout().orElse(DEFAULT_WRITE_TIMEOUT))
                 .enableGcmCipherSuites(config.enableGcmCipherSuites().orElse(DEFAULT_ENABLE_GCM_CIPHERS))
-                .fallbackToCommonNameVerification(config.fallbackToCommonNameVerification()
-                        .orElse(DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION))
-                .proxy(config.proxy()
-                        .map(ClientConfigurations::createProxySelector)
-                        .orElseGet(ProxySelector::getDefault))
+                .fallbackToCommonNameVerification(
+                        config.fallbackToCommonNameVerification().orElse(DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION))
+                .proxy(config.proxy().map(ClientConfigurations::createProxySelector).orElseGet(ProxySelector
+                        ::getDefault))
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
                 .meshProxy(meshProxy(config.proxy()))
                 .maxNumRetries(config.maxNumRetries().orElse(DEFAULT_MAX_NUM_RETRIES))
@@ -97,9 +95,7 @@ public final class ClientConfigurations {
      * other configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(
-            List<String> uris,
-            SSLSocketFactory sslSocketFactory,
-            X509TrustManager trustManager) {
+            List<String> uris, SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
         return ClientConfiguration.builder()
                 .sslSocketFactory(new KeepAliveSslSocketFactory(sslSocketFactory))
                 .trustManager(trustManager)
@@ -128,8 +124,8 @@ public final class ClientConfigurations {
             case DIRECT:
                 return fixedProxySelectorFor(Proxy.NO_PROXY);
             case HTTP:
-                HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig.hostAndPort()
-                        .orElseThrow(() -> new SafeIllegalArgumentException(
+                HostAndPort hostAndPort = HostAndPort.fromString(
+                        proxyConfig.hostAndPort().orElseThrow(() -> new SafeIllegalArgumentException(
                                 "Expected to find proxy hostAndPort configuration for HTTP proxy")));
                 InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHost(), hostAndPort.getPort());
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, addr));

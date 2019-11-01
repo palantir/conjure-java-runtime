@@ -37,10 +37,9 @@ import retrofit2.Response;
 public class AsyncSerializableErrorCallAdapterFactoryTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private Response<String> response;
-    @Mock
-    private Call<String> call;
-    @Captor
-    private ArgumentCaptor<Callback<String>> callbackCaptor;
+
+    @Mock private Call<String> call;
+    @Captor private ArgumentCaptor<Callback<String>> callbackCaptor;
 
     @Test
     public void testResponseNotLeakedIfCancelled_completable() {

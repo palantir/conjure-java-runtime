@@ -31,9 +31,7 @@ public final class ZonedDateTimeParamConverterProvider implements ParamConverter
     @Override
     @SuppressWarnings("unchecked")
     public <T> ParamConverter<T> getConverter(
-            final Class<T> rawType,
-            final Type _genericType,
-            final Annotation[] _annotations) {
+            final Class<T> rawType, final Type _genericType, final Annotation[] _annotations) {
         return ZonedDateTime.class.equals(rawType) ? (ParamConverter<T>) paramConverter : null;
     }
 

@@ -89,8 +89,7 @@ public final class ClientConfigurationsTest {
                 .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
                 .connectTimeout(Duration.ofNanos(5))
                 .build();
-        Assertions
-                .assertThatLoggableExceptionThrownBy(() -> ClientConfigurations.of(serviceConfig))
+        Assertions.assertThatLoggableExceptionThrownBy(() -> ClientConfigurations.of(serviceConfig))
                 .hasLogMessage("Timeouts with sub-millisecond precision are not supported");
     }
 
@@ -121,13 +120,12 @@ public final class ClientConfigurationsTest {
                 .build();
 
         assertThatThrownBy(() -> ClientConfiguration.builder()
-                .from(
-                        ClientConfigurations.of(serviceConfig))
-                .nodeSelectionStrategy(NodeSelectionStrategy.ROUND_ROBIN)
-                .failedUrlCooldown(Duration.ofMillis(0))
-                .build())
-                        .isInstanceOf(IllegalArgumentException.class)
-                        .hasMessage("If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
+                        .from(ClientConfigurations.of(serviceConfig))
+                        .nodeSelectionStrategy(NodeSelectionStrategy.ROUND_ROBIN)
+                        .failedUrlCooldown(Duration.ofMillis(0))
+                        .build())
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
     }
 
     @Test
@@ -178,5 +176,4 @@ public final class ClientConfigurationsTest {
                 .maxNumRetries(maxNumRetries)
                 .build();
     }
-
 }

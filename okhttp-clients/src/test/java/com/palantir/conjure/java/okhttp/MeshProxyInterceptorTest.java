@@ -34,10 +34,8 @@ import org.mockito.MockitoAnnotations;
 
 public final class MeshProxyInterceptorTest {
 
-    @Captor
-    private ArgumentCaptor<Request> request;
-    @Mock
-    private Interceptor.Chain chain;
+    @Captor private ArgumentCaptor<Request> request;
+    @Mock private Interceptor.Chain chain;
 
     private MeshProxyInterceptor interceptor;
 
@@ -49,10 +47,9 @@ public final class MeshProxyInterceptorTest {
 
     @Test
     public void intercept_portInAuthority() throws Exception {
-        when(chain.request()).thenReturn(new Request.Builder()
-                .url("https://foo.com:123/foo/bar?baz=norf")
-                .method("GET", null)
-                .build());
+        when(chain.request())
+                .thenReturn(
+                        new Request.Builder().url("https://foo.com:123/foo/bar?baz=norf").method("GET", null).build());
 
         interceptor.intercept(chain);
 
@@ -63,10 +60,8 @@ public final class MeshProxyInterceptorTest {
 
     @Test
     public void intercept_portNotInAuthority() throws Exception {
-        when(chain.request()).thenReturn(new Request.Builder()
-                .url("https://foo.com/foo/bar?baz=norf")
-                .method("GET", null)
-                .build());
+        when(chain.request())
+                .thenReturn(new Request.Builder().url("https://foo.com/foo/bar?baz=norf").method("GET", null).build());
 
         interceptor.intercept(chain);
 

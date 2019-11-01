@@ -28,9 +28,8 @@ public final class Pkcs1Readers {
     private static final Supplier<Pkcs1Reader> PKCS1_READER_SUPPLIER = Suppliers.memoize(() -> {
         Pkcs1Reader reader = Iterators.getNext(PKCS1_READER_LOADER.iterator(), null);
 
-        Preconditions.checkState(reader != null,
-                "No Pkcs1Reader services were present. Ensure that a Pkcs1Reader "
-                        + "with a properly configured META-INF/services/ entry is present on the classpath.");
+        Preconditions.checkState(reader != null, "No Pkcs1Reader services were present. Ensure that a Pkcs1Reader "
+                + "with a properly configured META-INF/services/ entry is present on the classpath.");
 
         return reader;
     });
@@ -40,5 +39,4 @@ public final class Pkcs1Readers {
     }
 
     private Pkcs1Readers() {}
-
 }

@@ -28,8 +28,8 @@ public interface UrlSelector {
      * https://bar.org:8080/a/b/id=123}. Returns {@link Optional#empty} if there is no {@link #getBaseUrls base URL} for
      * which such a substitution can be made, for example, if there is no base URL whose {@link HttpUrl#encodedPath
      * path} is a prefix to the path of the {@code current} URL.
-     * <p>
-     * Changes the "current" URL of this selector so that that a subsequent call to {@link #redirectToCurrent} yields
+     *
+     * <p>Changes the "current" URL of this selector so that that a subsequent call to {@link #redirectToCurrent} yields
      * the same base address as the URL returned by this call.
      */
     Optional<HttpUrl> redirectTo(HttpUrl requestUrl, String redirectBaseUrl);
@@ -40,14 +40,12 @@ public interface UrlSelector {
      */
     Optional<HttpUrl> redirectToNext(HttpUrl requestUrl);
 
-    /**
-     * Similar to {@link #redirectTo}, but redirects the given URL to the current {@link #getBaseUrls baseURL}.
-     */
+    /** Similar to {@link #redirectTo}, but redirects the given URL to the current {@link #getBaseUrls baseURL}. */
     Optional<HttpUrl> redirectToCurrent(HttpUrl requestUrl);
 
     /**
-     * Similar to {@link #redirectTo}, but redirects the given URL to the next (in some undefined order) after the
-     * last URL used.
+     * Similar to {@link #redirectTo}, but redirects the given URL to the next (in some undefined order) after the last
+     * URL used.
      */
     Optional<HttpUrl> redirectToNextRoundRobin(HttpUrl requestUrl);
 

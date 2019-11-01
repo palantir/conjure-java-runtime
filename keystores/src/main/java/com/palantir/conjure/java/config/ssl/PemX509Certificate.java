@@ -28,13 +28,12 @@ public abstract class PemX509Certificate {
 
     /**
      * A X509.1 certificate or certificate chain in PEM format encoded in UTF-8.
-     * <p>
-     * The certificates must be delimited by the the begin and end {@code CERTIFICATE} markers.
+     *
+     * <p>The certificates must be delimited by the the begin and end {@code CERTIFICATE} markers.
      */
     public abstract String pemCertificate();
 
     public static PemX509Certificate of(String pemCertificate) {
         return ImmutablePemX509Certificate.builder().pemCertificate(pemCertificate).build();
     }
-
 }

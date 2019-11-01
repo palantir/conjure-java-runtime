@@ -38,16 +38,15 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class InputStreamDelegateEncoderTest extends TestBase {
-    @Mock
-    private Encoder delegate;
+    @Mock private Encoder delegate;
 
     private final RequestTemplate requestTemplate = new RequestTemplate();
 
     private Encoder inputStreamDelegateEncoder;
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
 
     private GuavaTestServer.TestService service;
 
@@ -57,10 +56,7 @@ public final class InputStreamDelegateEncoderTest extends TestBase {
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(
-                GuavaTestServer.TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(endpointUri));
+                GuavaTestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }
 
     @Test

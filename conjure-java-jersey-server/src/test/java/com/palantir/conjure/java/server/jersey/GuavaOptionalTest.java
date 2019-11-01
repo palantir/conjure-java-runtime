@@ -42,8 +42,8 @@ import org.junit.Test;
 public final class GuavaOptionalTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(OptionalTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(OptionalTestServer.class, "src/test/resources/test-server.yml");
 
     private WebTarget target;
 

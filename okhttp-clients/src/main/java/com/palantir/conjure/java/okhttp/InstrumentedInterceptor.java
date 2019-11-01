@@ -26,9 +26,7 @@ import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Response;
 
-/**
- * Records metrics about the response codes of http requests.
- */
+/** Records metrics about the response codes of http requests. */
 final class InstrumentedInterceptor implements Interceptor {
 
     static final String CLIENT_RESPONSE_METRIC_NAME = "client.response";
@@ -70,9 +68,7 @@ final class InstrumentedInterceptor implements Interceptor {
     }
 
     static InstrumentedInterceptor create(
-            TaggedMetricRegistry registry,
-            HostEventsSink hostEventsSink,
-            Class<?> serviceClass) {
+            TaggedMetricRegistry registry, HostEventsSink hostEventsSink, Class<?> serviceClass) {
         return new InstrumentedInterceptor(registry, hostEventsSink, serviceClass.getSimpleName());
     }
 

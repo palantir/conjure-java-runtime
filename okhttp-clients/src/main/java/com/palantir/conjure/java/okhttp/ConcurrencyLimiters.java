@@ -74,8 +74,8 @@ final class ConcurrencyLimiters {
             boolean useLimiter) {
         this.slowAcquire = taggedMetricRegistry.timer(SLOW_ACQUIRE);
         this.leakSuspected = taggedMetricRegistry.meter(LEAK_SUSPECTED);
-        this.slowAcquireTagged = taggedMetricRegistry.timer(generateMetricNameWithServiceName(SLOW_ACQUIRE_TAGGED,
-                serviceClass));
+        this.slowAcquireTagged =
+                taggedMetricRegistry.timer(generateMetricNameWithServiceName(SLOW_ACQUIRE_TAGGED, serviceClass));
         this.timeout = timeout;
         this.serviceClass = serviceClass;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -112,33 +112,26 @@ final class ConcurrencyLimiters {
                  */
                 .timeout(Long.MAX_VALUE, TimeUnit.NANOSECONDS)
                 /**
-                 * Our initial limit is pretty conservative - only 10 concurrent requests in flight at the same time.
-                 * If a client is consistently maxing out its concurrency permits, this increases additively once per
+                 * Our initial limit is pretty conservative - only 10 concurrent requests in flight at the same time. If
+                 * a client is consistently maxing out its concurrency permits, this increases additively once per
                  * second (see {@link ConjureWindowedLimit#MIN_WINDOW_TIME}.
                  */
                 .initialLimit(10)
                 /**
                  * We reduce concurrency _immediately_ as soon as a request fails, which can result in drastic limit
-                 * reductions, e.g. starting with 30 concurrent permits, 100 failures in a row results in:
-                 * 30 * 0.9^100 = 0.0007 (rounded up to the minLimit of 1).
+                 * reductions, e.g. starting with 30 concurrent permits, 100 failures in a row results in: 30 * 0.9^100
+                 * = 0.0007 (rounded up to the minLimit of 1).
                  */
                 .backoffRatio(0.9)
-                /**
-                 * However many failures we get, we always need at least 1 permit so we can keep trying.
-                 */
+                /** However many failures we get, we always need at least 1 permit so we can keep trying. */
                 .minLimit(1)
-                /**
-                 * Note that the Dispatcher in {@link OkHttpClients} has a max concurrent requests too.
-                 */
+                /** Note that the Dispatcher in {@link OkHttpClients} has a max concurrent requests too. */
                 .maxLimit(Integer.MAX_VALUE)
                 .build());
     }
 
     private MetricName generateMetricNameWithServiceName(String name, Class<?> service) {
-        return MetricName.builder()
-                .safeName(name)
-                .putSafeTags("serviceClass", service.getSimpleName())
-                .build();
+        return MetricName.builder().safeName(name).putSafeTags("serviceClass", service.getSimpleName()).build();
     }
 
     private ConcurrencyLimiter newLimiter(Key limiterKey) {
@@ -173,13 +166,13 @@ final class ConcurrencyLimiters {
 
     /**
      * The Netflix library provides either a blocking approach or a non-blocking approach which might say you can't be
-     * scheduled at this time. All of our HTTP calls are asynchronous, so we really want to get a
-     * {@link ListenableFuture} that we can add a callback to. This class then is a translation of
-     * {@link com.netflix.concurrency.limits.limiter.BlockingLimiter} to be asynchronous, maintaining a queue of
-     * currently waiting requests.
-     * <p>
-     * Upon a request finishing, we check if there are any waiting requests, and if there are we attempt to trigger some
-     * more.
+     * scheduled at this time. All of our HTTP calls are asynchronous, so we really want to get a {@link
+     * ListenableFuture} that we can add a callback to. This class then is a translation of {@link
+     * com.netflix.concurrency.limits.limiter.BlockingLimiter} to be asynchronous, maintaining a queue of currently
+     * waiting requests.
+     *
+     * <p>Upon a request finishing, we check if there are any waiting requests, and if there are we attempt to trigger
+     * some more.
      */
     public interface ConcurrencyLimiter {
         ListenableFuture<Limiter.Listener> acquire();
@@ -216,10 +209,13 @@ final class ConcurrencyLimiters {
     final class DefaultConcurrencyLimiter implements ConcurrencyLimiter {
         @GuardedBy("this")
         private final ThreadWorkQueue<QueuedRequest> waitingRequests = new ThreadWorkQueue<>();
+
         @GuardedBy("this")
         private SimpleLimiter<Void> limiter;
+
         @GuardedBy("this")
         private ScheduledFuture<?> timeoutCleanup;
+
         private final Key limiterKey;
         private final Supplier<SimpleLimiter<Void>> limiterFactory;
         private final LeakDetector<Limiter.Listener> leakDetector = new LeakDetector<>(Limiter.Listener.class);
@@ -232,9 +228,8 @@ final class ConcurrencyLimiters {
 
         @Override
         public synchronized String spanName() {
-            return String.format("OkHttp: client-side-concurrency-limiter %d/%d",
-                    limiter.getInflight(),
-                    limiter.getLimit());
+            return String.format(
+                    "OkHttp: client-side-concurrency-limiter %d/%d", limiter.getInflight(), limiter.getLimit());
         }
 
         @Override
@@ -249,7 +244,8 @@ final class ConcurrencyLimiters {
         synchronized void processQueue() {
             while (!waitingRequests.isEmpty()) {
                 if (log.isDebugEnabled()) {
-                    log.debug("Limit",
+                    log.debug(
+                            "Limit",
                             SafeArg.of("limit", limiter.getLimit()),
                             SafeArg.of("queueLength", waitingRequests.size()),
                             SafeArg.of("method", limiterKey.method()),
@@ -260,9 +256,7 @@ final class ConcurrencyLimiters {
                 if (!maybeAcquired.isPresent()) {
                     if (!timeoutScheduled()) {
                         timeoutCleanup = scheduledExecutorService.schedule(
-                                this::resetLimiter,
-                                timeout.toMillis(),
-                                TimeUnit.MILLISECONDS);
+                                this::resetLimiter, timeout.toMillis(), TimeUnit.MILLISECONDS);
                     }
                     return;
                 }
@@ -288,9 +282,10 @@ final class ConcurrencyLimiters {
         }
 
         private synchronized void resetLimiter() {
-            log.warn("Timed out waiting to get permits for concurrency. In most cases this would indicate some kind of "
-                    + "deadlock. We expect that either this is caused by either service overloading, or not "
-                    + "closing response bodies (consider using the try-with-resources pattern).",
+            log.warn(
+                    "Timed out waiting to get permits for concurrency. In most cases this would indicate some kind of "
+                            + "deadlock. We expect that either this is caused by either service overloading, or not "
+                            + "closing response bodies (consider using the try-with-resources pattern).",
                     SafeArg.of("serviceClass", serviceClass),
                     UnsafeArg.of("hostname", limiterKey.hostname()),
                     SafeArg.of("method", limiterKey.method()),
@@ -303,23 +298,27 @@ final class ConcurrencyLimiters {
 
         private void addSlowAcquireMarker(ListenableFuture<Limiter.Listener> future) {
             long start = System.nanoTime();
-            Futures.addCallback(future, new FutureCallback<Limiter.Listener>() {
-                @Override
-                public void onSuccess(Limiter.Listener _result) {
-                    long end = System.nanoTime();
-                    long durationNanos = end - start;
+            Futures.addCallback(
+                    future,
+                    new FutureCallback<Limiter.Listener>() {
+                        @Override
+                        public void onSuccess(Limiter.Listener _result) {
+                            long end = System.nanoTime();
+                            long durationNanos = end - start;
 
-                    // acquire calls that take less than a millisecond are considered to be successful, so we exclude
-                    // them from the 'slow acquire' metric
-                    if (TimeUnit.NANOSECONDS.toMillis(durationNanos) > 1) {
-                        slowAcquire.update(durationNanos, TimeUnit.NANOSECONDS);
-                        slowAcquireTagged.update(durationNanos, TimeUnit.NANOSECONDS);
-                    }
-                }
+                            // acquire calls that take less than a millisecond are considered to be successful, so we
+                            // exclude
+                            // them from the 'slow acquire' metric
+                            if (TimeUnit.NANOSECONDS.toMillis(durationNanos) > 1) {
+                                slowAcquire.update(durationNanos, TimeUnit.NANOSECONDS);
+                                slowAcquireTagged.update(durationNanos, TimeUnit.NANOSECONDS);
+                            }
+                        }
 
-                @Override
-                public void onFailure(Throwable _error) {}
-            }, MoreExecutors.directExecutor());
+                        @Override
+                        public void onFailure(Throwable _error) {}
+                    },
+                    MoreExecutors.directExecutor());
         }
 
         private Limiter.Listener wrap(Limiter.Listener listener, Optional<RuntimeException> allocationStackTrace) {
@@ -355,8 +354,7 @@ final class ConcurrencyLimiters {
         private final Optional<RuntimeException> allocationStackTrace;
 
         private QueuedRequest(
-                SettableFuture<Limiter.Listener> future,
-                Optional<RuntimeException> allocationStackTrace) {
+                SettableFuture<Limiter.Listener> future, Optional<RuntimeException> allocationStackTrace) {
             this.future = future;
             this.allocationStackTrace = allocationStackTrace;
         }

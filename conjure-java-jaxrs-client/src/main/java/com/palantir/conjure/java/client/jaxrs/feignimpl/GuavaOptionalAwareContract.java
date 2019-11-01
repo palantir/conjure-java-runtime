@@ -28,11 +28,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 /**
- * Decorates a {@link Contract} and uses {@link GuavaNullOptionalExpander} for any {@link QueryParam} parameters,
- * {@link GuavaEmptyOptionalExpander} for any {@link HeaderParam} parameters, and throws a {@link RuntimeException}
- * at first encounter of an {@link com.google.common.base.Optional} typed {@link PathParam}.
- * <p>
- * {@link PathParam}s require a value, and so we explicitly disallow use with {@link com.google.common.base.Optional}.
+ * Decorates a {@link Contract} and uses {@link GuavaNullOptionalExpander} for any {@link QueryParam} parameters, {@link
+ * GuavaEmptyOptionalExpander} for any {@link HeaderParam} parameters, and throws a {@link RuntimeException} at first
+ * encounter of an {@link com.google.common.base.Optional} typed {@link PathParam}.
+ *
+ * <p>{@link PathParam}s require a value, and so we explicitly disallow use with {@link
+ * com.google.common.base.Optional}.
  */
 public final class GuavaOptionalAwareContract extends AbstractDelegatingContract {
 
@@ -56,9 +57,7 @@ public final class GuavaOptionalAwareContract extends AbstractDelegatingContract
                 } else if (paramAnnotations.contains(PathParam.class)) {
                     throw new RuntimeException(String.format(
                             "Cannot use Guava Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
-                            targetType.getName(),
-                            method.getName(),
-                            i));
+                            targetType.getName(), method.getName(), i));
                 }
             }
         }

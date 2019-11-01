@@ -34,10 +34,9 @@ public final class QosErrorDecoder implements ErrorDecoder {
     @Override
     public Exception decode(String methodKey, Response response) {
         Optional<Exception> exception = QosExceptionResponseMapper.mapResponseCodeHeaderStream(
-                response.status(),
-                header -> Optional.ofNullable(response.headers().get(header))
-                        .map(Collection::stream)
-                        .orElseGet(Stream::empty))
+                        response.status(), header -> Optional.ofNullable(response.headers().get(header))
+                                .map(Collection::stream)
+                                .orElseGet(Stream::empty))
                 .map(Function.identity());
         return exception.orElseGet(() -> delegate.decode(methodKey, response));
     }

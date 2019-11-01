@@ -57,13 +57,10 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public final class Retrofit2ClientApiTest extends TestBase {
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
 
-    private static final SerializableError ERROR = SerializableError.builder()
-            .errorCode("errorCode")
-            .errorName("errorName")
-            .build();
+    private static final SerializableError ERROR =
+            SerializableError.builder().errorCode("errorCode").errorName("errorName").build();
 
     private HttpUrl url;
     private TestService service;
@@ -72,10 +69,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     public void before() {
         url = server.url("/");
         service = Retrofit2Client.create(
-                TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(url.toString()));
+                TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(url.toString()));
     }
 
     @Test
@@ -83,26 +77,22 @@ public final class Retrofit2ClientApiTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"pong\""));
         assertThat(service.getGuavaOptionalString(guavaOptional("p"), guavaOptional("q")).execute().body())
                 .isEqualTo(guavaOptional("pong"));
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString/p/?queryString=q");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString/p/?queryString=q");
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
         assertThat(service.getGuavaOptionalString(guavaOptional("p"), guavaEmptyOptional()).execute().body())
                 .isEqualTo(guavaOptional("pong"));
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString/p/");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString/p/");
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
         assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaOptional("q")).execute().body())
                 .isEqualTo(guavaOptional("pong"));
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString//?queryString=q");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString//?queryString=q");
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
         assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaEmptyOptional()).execute().body())
                 .isEqualTo(guavaOptional("pong"));
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString//");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString//");
     }
 
     @Test
@@ -133,8 +123,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(204));
         assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaEmptyOptional()).execute().body())
                 .isEqualTo(guavaEmptyOptional());
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString//");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString//");
     }
 
     @Test
@@ -145,18 +134,15 @@ public final class Retrofit2ClientApiTest extends TestBase {
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalString//");
 
         server.enqueue(new MockResponse().setResponseCode(204));
-        assertThat(service.getJava8OptionalInt().execute().body())
-                .isEqualTo(OptionalInt.empty());
+        assertThat(service.getJava8OptionalInt().execute().body()).isEqualTo(OptionalInt.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalInt");
 
         server.enqueue(new MockResponse().setResponseCode(204));
-        assertThat(service.getJava8OptionalLong().execute().body())
-                .isEqualTo(OptionalLong.empty());
+        assertThat(service.getJava8OptionalLong().execute().body()).isEqualTo(OptionalLong.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalLong");
 
         server.enqueue(new MockResponse().setResponseCode(204));
-        assertThat(service.getJava8OptionalDouble().execute().body())
-                .isEqualTo(OptionalDouble.empty());
+        assertThat(service.getJava8OptionalDouble().execute().body()).isEqualTo(OptionalDouble.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalDouble");
     }
 
@@ -165,8 +151,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
         server.enqueue(new MockResponse().setBody("null"));
         assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaEmptyOptional()).execute().body())
                 .isEqualTo(guavaEmptyOptional());
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString//");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString//");
     }
 
     @Test
@@ -177,18 +162,15 @@ public final class Retrofit2ClientApiTest extends TestBase {
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalString//");
 
         server.enqueue(new MockResponse().setBody("null"));
-        assertThat(service.getJava8OptionalInt().execute().body())
-                .isEqualTo(OptionalInt.empty());
+        assertThat(service.getJava8OptionalInt().execute().body()).isEqualTo(OptionalInt.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalInt");
 
         server.enqueue(new MockResponse().setBody("null"));
-        assertThat(service.getJava8OptionalLong().execute().body())
-                .isEqualTo(OptionalLong.empty());
+        assertThat(service.getJava8OptionalLong().execute().body()).isEqualTo(OptionalLong.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalLong");
 
         server.enqueue(new MockResponse().setBody("null"));
-        assertThat(service.getJava8OptionalDouble().execute().body())
-                .isEqualTo(OptionalDouble.empty());
+        assertThat(service.getJava8OptionalDouble().execute().body()).isEqualTo(OptionalDouble.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalDouble");
     }
 
@@ -217,8 +199,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     @Test
     public void should_reject_body_containing_empty_string() {
         server.enqueue(new MockResponse().setBody(""));
-        assertThatThrownBy(() -> service.getRelative().execute().body())
-                .isInstanceOf(SafeNullPointerException.class);
+        assertThatThrownBy(() -> service.getRelative().execute().body()).isInstanceOf(SafeNullPointerException.class);
     }
 
     @Test
@@ -271,10 +252,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     }
 
     private void makeFutureRequestError(Supplier<Future<String>> futureSupplier) throws JsonProcessingException {
-        SerializableError error = SerializableError.builder()
-                .errorCode("errorCode")
-                .errorName("errorName")
-                .build();
+        SerializableError error = SerializableError.builder().errorCode("errorCode").errorName("errorName").build();
 
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
@@ -299,11 +277,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     private void connectionFailureWithFuture(Supplier<Future<String>> futureSupplier) {
         service = Retrofit2Client.create(
-                TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
                         .from(createTestConfig("https://invalid.service.dev"))
                         .connectTimeout(Duration.ofMillis(10))
                         .build());
@@ -355,11 +329,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     private void future_should_throw_normal_IoException_for_client_side_errors(
             Supplier<Future<String>> futureSupplier) {
         service = Retrofit2Client.create(
-                TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
                         .from(createTestConfig("https://invalid.service.dev"))
                         .connectTimeout(Duration.ofMillis(10))
                         .build());

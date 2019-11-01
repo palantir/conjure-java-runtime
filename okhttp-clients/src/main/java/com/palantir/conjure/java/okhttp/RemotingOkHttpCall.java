@@ -104,9 +104,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     /**
-     * Process the call. If an IOException is encountered, mark the URL as failed, which indicates that it should
-     * be avoided for subsequent calls (if {@link UrlSelector} was initialized with a positive
-     * {@link ClientConfiguration#failedUrlCooldown()}.
+     * Process the call. If an IOException is encountered, mark the URL as failed, which indicates that it should be
+     * avoided for subsequent calls (if {@link UrlSelector} was initialized with a positive {@link
+     * ClientConfiguration#failedUrlCooldown()}.
      */
     @Override
     public Response execute() throws IOException {
@@ -138,17 +138,15 @@ final class RemotingOkHttpCall extends ForwardingCall {
             if (e.getCause() instanceof IoRemoteException) {
                 // TODO(rfink): Consider unwrapping the RemoteException at the Retrofit/Feign layer for symmetry, #626
                 RemoteException wrappedException = ((IoRemoteException) e.getCause()).getWrappedException();
-                RemoteException correctStackTrace = new RemoteException(
-                        wrappedException.getError(),
-                        wrappedException.getStatus());
+                RemoteException correctStackTrace =
+                        new RemoteException(wrappedException.getError(), wrappedException.getStatus());
                 correctStackTrace.initCause(e);
                 throw correctStackTrace;
             } else if (e.getCause() instanceof IoUnknownRemoteException) {
-                UnknownRemoteException wrappedException = ((IoUnknownRemoteException) e.getCause())
-                        .getUnknownRemoteException();
-                UnknownRemoteException correctStackTrace = new UnknownRemoteException(
-                        wrappedException.getStatus(),
-                        wrappedException.getBody());
+                UnknownRemoteException wrappedException =
+                        ((IoUnknownRemoteException) e.getCause()).getUnknownRemoteException();
+                UnknownRemoteException correctStackTrace =
+                        new UnknownRemoteException(wrappedException.getStatus(), wrappedException.getBody());
                 correctStackTrace.initCause(e);
                 throw correctStackTrace;
             } else if (e.getCause() instanceof IOException) {
@@ -160,9 +158,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     private static Response buildFrom(Response unbufferedResponse, byte[] bodyBytes) {
-        return unbufferedResponse.newBuilder()
-                .body(buffer(unbufferedResponse.body().contentType(), bodyBytes))
-                .build();
+        return unbufferedResponse.newBuilder().body(buffer(unbufferedResponse.body().contentType(), bodyBytes)).build();
     }
 
     private static ResponseBody buffer(MediaType mediaType, byte[] bodyBytes) {
@@ -175,23 +171,26 @@ final class RemotingOkHttpCall extends ForwardingCall {
         DetachedSpan concurrencyLimiterSpan = attemptSpan.childDetachedSpan(limiter.spanName());
         ListenableFuture<Limiter.Listener> limiterListener = limiter.acquire();
         request().tag(ConcurrencyLimiterListener.class).setLimiterListener(limiterListener);
-        Futures.addCallback(limiterListener, new FutureCallback<Limiter.Listener>() {
-            @Override
-            public void onSuccess(Limiter.Listener _listener) {
-                concurrencyLimiterSpan.complete();
-                DetachedSpan dispatcherSpan = attemptSpan.childDetachedSpan("OkHttp: dispatcher");
-                request().tag(Tags.SettableDispatcherSpan.class).setDispatcherSpan(dispatcherSpan);
-                enqueueClosingEntireSpan(callback);
-            }
+        Futures.addCallback(
+                limiterListener,
+                new FutureCallback<Limiter.Listener>() {
+                    @Override
+                    public void onSuccess(Limiter.Listener _listener) {
+                        concurrencyLimiterSpan.complete();
+                        DetachedSpan dispatcherSpan = attemptSpan.childDetachedSpan("OkHttp: dispatcher");
+                        request().tag(Tags.SettableDispatcherSpan.class).setDispatcherSpan(dispatcherSpan);
+                        enqueueClosingEntireSpan(callback);
+                    }
 
-            @Override
-            public void onFailure(Throwable throwable) {
-                callback.onFailure(
-                        RemotingOkHttpCall.this,
-                        new IOException(new AssertionError("This should never happen, since it implies "
-                                + "we failed when using the concurrency limiter", throwable)));
-            }
-        }, MoreExecutors.directExecutor());
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        callback.onFailure(RemotingOkHttpCall.this, new IOException(new AssertionError(
+                                "This should never happen, since it implies "
+                                        + "we failed when using the concurrency limiter",
+                                throwable)));
+                    }
+                },
+                MoreExecutors.directExecutor());
     }
 
     private void enqueueClosingEntireSpan(Callback callback) {
@@ -224,33 +223,32 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 // Fail call if backoffs are exhausted or if no retry URL can be determined.
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!shouldRetry(exception, backoff)) {
-                    callback.onFailure(call,
-                            new SafeIoException(
-                                    "Failed to complete the request due to an IOException",
-                                    exception,
-                                    UnsafeArg.of("requestUrl", call.request().url().toString())));
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to complete the request due to an IOException", exception, UnsafeArg.of(
+                                    "requestUrl", call.request().url().toString())));
                     return;
                 }
 
                 Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
                 if (!redirectTo.isPresent()) {
-                    callback.onFailure(call,
-                            new SafeIoException(
-                                    "Failed to determine valid failover URL",
-                                    exception,
-                                    UnsafeArg.of("requestUrl", call.request().url().toString()),
-                                    UnsafeArg.of("baseUrls", urls.getBaseUrls())));
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to determine valid failover URL",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString()),
+                            UnsafeArg.of("baseUrls", urls.getBaseUrls())));
                     return;
                 }
 
                 retryIfAllowed(callback, call, exception, () -> {
-                    log.info("Retrying call after failure",
+                    log.info(
+                            "Retrying call after failure",
                             SafeArg.of("backoffMillis", backoff.get().toMillis()),
                             UnsafeArg.of("requestUrl", call.request().url().toString()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
                             exception);
                     Tags.AttemptSpan nextAttempt = createNextAttempt();
-                    Request redirectedRequest = request().newBuilder()
+                    Request redirectedRequest = request()
+                            .newBuilder()
                             .url(redirectTo.get())
                             .tag(Tags.AttemptSpan.class, nextAttempt)
                             .build();
@@ -298,16 +296,15 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 // Catch-all: handle all other responses
-                Optional<UnknownRemoteException> unknownHttpError = unknownRemoteExceptionHandler.handle(
-                        errorResponseSupplier.get());
+                Optional<UnknownRemoteException> unknownHttpError =
+                        unknownRemoteExceptionHandler.handle(errorResponseSupplier.get());
                 if (unknownHttpError.isPresent()) {
                     callback.onFailure(call, new IoUnknownRemoteException(unknownHttpError.get()));
                     return;
                 }
 
-                callback.onFailure(call,
-                        new SafeIoException("Failed to handle request, "
-                                + "this is an conjure-java-runtime bug."));
+                callback.onFailure(call, new SafeIoException(
+                        "Failed to handle request, " + "this is an conjure-java-runtime bug."));
             }
         });
     }
@@ -331,15 +328,12 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 return backoff.isPresent();
         }
 
-        throw new SafeIllegalStateException("Encountered unknown retry on timeout configuration",
-                SafeArg.of("retryOnTimeout", retryOnTimeout));
+        throw new SafeIllegalStateException(
+                "Encountered unknown retry on timeout configuration", SafeArg.of("retryOnTimeout", retryOnTimeout));
     }
 
     @SuppressWarnings("FutureReturnValueIgnored")
-    private void scheduleExecution(
-            Duration backoff,
-            Tags.AttemptSpan attemptSpan,
-            Runnable execution) {
+    private void scheduleExecution(Duration backoff, Tags.AttemptSpan attemptSpan, Runnable execution) {
         DetachedSpan backoffSpan = attemptSpan.attemptSpan().childDetachedSpan("OkHttp: backoff-with-jitter");
 
         // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
@@ -363,24 +357,22 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 Optional<Duration> nonAdvertizedBackoff = backoffStrategy.nextBackoff();
                 if (!nonAdvertizedBackoff.isPresent()) {
-                    callback.onFailure(call,
-                            new SafeIoException(
-                                    "Failed to complete the request due to QosException.Throttle",
-                                    exception,
-                                    UnsafeArg.of("requestUrl", call.request().url().toString())));
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to complete the request due to QosException.Throttle", exception, UnsafeArg.of(
+                                    "requestUrl", call.request().url().toString())));
                     return null;
                 }
 
                 retryIfAllowed(callback, call, exception, () -> {
                     Duration backoff = exception.getRetryAfter().orElseGet(() -> nonAdvertizedBackoff.get());
-                    log.debug("Rescheduling call after receiving QosException.Throttle",
+                    log.debug(
+                            "Rescheduling call after receiving QosException.Throttle",
                             SafeArg.of("backoffMillis", backoff.toMillis()),
                             exception);
                     // Must create this before scheduling, so the attempt starts right now.
                     Tags.AttemptSpan nextAttempt = createNextAttempt();
-                    Request nextAttemptRequest = request().newBuilder()
-                            .tag(Tags.AttemptSpan.class, nextAttempt)
-                            .build();
+                    Request nextAttemptRequest =
+                            request().newBuilder().tag(Tags.AttemptSpan.class, nextAttempt).build();
                     RemotingOkHttpCall nextCall =
                             client.newCallWithMutableState(nextAttemptRequest, backoffStrategy, maxNumRelocations);
                     scheduleExecution(backoff, nextAttempt, () -> nextCall.enqueue(callback));
@@ -391,34 +383,33 @@ final class RemotingOkHttpCall extends ForwardingCall {
             @Override
             public Void visit(QosException.RetryOther exception) {
                 if (maxNumRelocations <= 0) {
-                    callback.onFailure(call,
-                            new SafeIoException(
-                                    "Exceeded the maximum number of allowed redirects",
-                                    exception,
-                                    UnsafeArg.of("requestUrl", call.request().url().toString())));
+                    callback.onFailure(call, new SafeIoException(
+                            "Exceeded the maximum number of allowed redirects", exception, UnsafeArg.of(
+                                    "requestUrl", call.request().url().toString())));
                     return null;
                 }
 
                 // Redirect to the URL specified by the exception.
                 Optional<HttpUrl> redirectTo = urls.redirectTo(request().url(), exception.getRedirectTo().toString());
                 if (!redirectTo.isPresent()) {
-                    callback.onFailure(call,
-                            new SafeIoException(
-                                    "Failed to determine valid redirect URL after receiving QosException.RetryOther",
-                                    exception,
-                                    UnsafeArg.of("requestUrl", call.request().url().toString()),
-                                    UnsafeArg.of("redirectToUrl", exception.getRedirectTo().toString()),
-                                    UnsafeArg.of("baseUrls", urls.getBaseUrls())));
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to determine valid redirect URL after receiving QosException.RetryOther",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString()),
+                            UnsafeArg.of("redirectToUrl", exception.getRedirectTo().toString()),
+                            UnsafeArg.of("baseUrls", urls.getBaseUrls())));
                     return null;
                 }
 
                 retryIfAllowed(callback, call, exception, () -> {
-                    log.debug("Retrying call after receiving QosException.RetryOther",
+                    log.debug(
+                            "Retrying call after receiving QosException.RetryOther",
                             UnsafeArg.of("requestUrl", call.request().url()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get()),
                             exception);
                     Tags.AttemptSpan nextAttempt = createNextAttempt();
-                    Request redirectedRequest = request().newBuilder()
+                    Request redirectedRequest = request()
+                            .newBuilder()
                             .tag(Tags.AttemptSpan.class, nextAttempt)
                             .url(redirectTo.get())
                             .build();
@@ -438,32 +429,31 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
-                    callback.onFailure(call,
-                            new SafeIoException(
-                                    "Failed to complete the request due to QosException.Unavailable",
-                                    exception,
-                                    UnsafeArg.of("requestUrl", call.request().url().toString())));
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to complete the request due to QosException.Unavailable", exception, UnsafeArg.of(
+                                    "requestUrl", call.request().url().toString())));
                     return null;
                 }
 
                 // Redirect to the "next" URL, whichever that may be, after backing off.
                 Optional<HttpUrl> redirectTo = urls.redirectToNext(request().url());
                 if (!redirectTo.isPresent()) {
-                    callback.onFailure(call,
-                            new SafeIoException(
-                                    "Failed to determine valid redirect URL after receiving QosException.Unavailable",
-                                    UnsafeArg.of("requestUrl", call.request().url().toString()),
-                                    UnsafeArg.of("baseUrls", urls.getBaseUrls())));
+                    callback.onFailure(call, new SafeIoException(
+                            "Failed to determine valid redirect URL after receiving QosException.Unavailable",
+                            UnsafeArg.of("requestUrl", call.request().url().toString()),
+                            UnsafeArg.of("baseUrls", urls.getBaseUrls())));
                     return null;
                 }
 
                 retryIfAllowed(callback, call, exception, () -> {
-                    log.debug("Retrying call after receiving QosException.Unavailable",
+                    log.debug(
+                            "Retrying call after receiving QosException.Unavailable",
                             SafeArg.of("backoffMillis", backoff.get().toMillis()),
                             UnsafeArg.of("redirectToUrl", redirectTo.get()),
                             exception);
                     Tags.AttemptSpan nextAttempt = createNextAttempt();
-                    Request redirectedRequest = request().newBuilder()
+                    Request redirectedRequest = request()
+                            .newBuilder()
                             .tag(Tags.AttemptSpan.class, nextAttempt)
                             .url(redirectTo.get())
                             .build();
@@ -479,11 +469,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     private static void retryIfAllowed(Callback callback, Call call, Exception exception, Runnable retryScheduler) {
         if (isStreamingBody(call)) {
-            callback.onFailure(
-                    call,
-                    new SafeIoException(
-                            "Cannot retry streamed HTTP body",
-                            exception));
+            callback.onFailure(call, new SafeIoException("Cannot retry streamed HTTP body", exception));
         } else {
             retryScheduler.run();
         }
@@ -501,8 +487,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 return false;
         }
 
-        throw new SafeIllegalStateException("Encountered unknown propagate QoS configuration",
-                SafeArg.of("serverQoS", serverQoS));
+        throw new SafeIllegalStateException(
+                "Encountered unknown propagate QoS configuration", SafeArg.of("serverQoS", serverQoS));
     }
 
     private static void propagateResponse(Callback callback, Call call, Response response) {
@@ -516,7 +502,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
     // TODO(rfink): Consider removing RemotingOkHttpCall#doClone method, #627
     @Override
     public RemotingOkHttpCall doClone() {
-        return new RemotingOkHttpCall(getDelegate().clone(),
+        return new RemotingOkHttpCall(
+                getDelegate().clone(),
                 backoffStrategy,
                 urls,
                 client,

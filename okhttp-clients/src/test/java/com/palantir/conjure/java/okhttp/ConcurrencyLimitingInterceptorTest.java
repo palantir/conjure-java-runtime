@@ -42,12 +42,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 public final class ConcurrencyLimitingInterceptorTest {
     private static final ConcurrencyLimitingInterceptor interceptor = new ConcurrencyLimitingInterceptor();
 
-    @Mock
-    private BufferedSource mockSource;
-    @Mock
-    private Interceptor.Chain chain;
-    @Mock
-    private Limiter.Listener listener;
+    @Mock private BufferedSource mockSource;
+    @Mock private Interceptor.Chain chain;
+    @Mock private Limiter.Listener listener;
 
     private Request request;
     private Response response;
@@ -56,16 +53,12 @@ public final class ConcurrencyLimitingInterceptorTest {
     public void before() {
         request = new Request.Builder()
                 .url("https://localhost:1234/call")
-                .tag(ConcurrencyLimiterListener.class,
-                        ConcurrencyLimiterListener.create().setLimiterListener(Futures.immediateFuture(listener)))
+                .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create()
+                        .setLimiterListener(Futures.immediateFuture(listener)))
                 .get()
                 .build();
-        response = new Response.Builder()
-                .code(200)
-                .request(request)
-                .message("message")
-                .protocol(Protocol.HTTP_2)
-                .build();
+        response =
+                new Response.Builder().code(200).request(request).message("message").protocol(Protocol.HTTP_2).build();
         when(chain.request()).thenReturn(request);
     }
 

@@ -47,11 +47,7 @@ public final class GuavaOptionalMessageBodyWriterTest extends JerseyTest {
 
     @Test
     public void presentOptionalsReturnTheirValue() {
-        assertThat(target("/optional-return/")
-                .queryParam("id", "woo")
-                .request()
-                .get(String.class))
-                        .isEqualTo("woo");
+        assertThat(target("/optional-return/").queryParam("id", "woo").request().get(String.class)).isEqualTo("woo");
     }
 
     @Test

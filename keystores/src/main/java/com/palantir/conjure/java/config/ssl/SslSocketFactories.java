@@ -53,8 +53,8 @@ public final class SslSocketFactories {
     /**
      * Create a {@link SSLSocketFactory} from the provided certificates.
      *
-     * @param trustCertificatesByAlias
-     *        a map of X.509 certificate in PEM or DER format by the alias to load the certificate as.
+     * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
+     *     certificate as.
      */
     public static SSLSocketFactory createSslSocketFactory(Map<String, PemX509Certificate> trustCertificatesByAlias) {
         SSLContext sslContext = createSslContext(trustCertificatesByAlias);
@@ -73,10 +73,11 @@ public final class SslSocketFactories {
         KeyManager[] keyManagers = null;
         if (config.keyStorePath().isPresent()) {
             keyManagers = createKeyManagerFactory(
-                    config.keyStorePath().get(),
-                    config.keyStorePassword().get(),
-                    config.keyStoreType(),
-                    config.keyStoreKeyAlias()).getKeyManagers();
+                            config.keyStorePath().get(),
+                            config.keyStorePassword().get(),
+                            config.keyStoreType(),
+                            config.keyStoreKeyAlias())
+                    .getKeyManagers();
         }
 
         return createSslContext(trustManagers, keyManagers);
@@ -85,8 +86,8 @@ public final class SslSocketFactories {
     /**
      * Create an {@link SSLContext} initialized from the provided certificates.
      *
-     * @param trustCertificatesByAlias
-     *        a map of X.509 certificate in PEM or DER format by the alias to load the certificate as.
+     * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
+     *     certificate as.
      */
     public static SSLContext createSslContext(Map<String, PemX509Certificate> trustCertificatesByAlias) {
         TrustManager[] trustManagers = createTrustManagers(trustCertificatesByAlias);
@@ -116,8 +117,8 @@ public final class SslSocketFactories {
     /**
      * Create a {@link TrustManager} array initialized from the given certificates in PEM or DER format.
      *
-     * @param trustCertificatesByAlias
-     *        a map of X.509 certificate in PEM or DER format by the alias to load the certificate as.
+     * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
+     *     certificate as.
      */
     public static TrustManager[] createTrustManagers(Map<String, PemX509Certificate> trustCertificatesByAlias) {
         try {
@@ -144,8 +145,7 @@ public final class SslSocketFactories {
      */
     public static TrustContext createTrustContext(Map<String, PemX509Certificate> trustCertificatesByAlias) {
         return TrustContext.of(
-                createSslSocketFactory(trustCertificatesByAlias),
-                createX509TrustManager(trustCertificatesByAlias));
+                createSslSocketFactory(trustCertificatesByAlias), createX509TrustManager(trustCertificatesByAlias));
     }
 
     /**
@@ -172,14 +172,12 @@ public final class SslSocketFactories {
         } else {
             throw new RuntimeException(String.format(
                     "First TrustManager associated with certificates was expected to be a %s, but was a %s",
-                    X509TrustManager.class.getSimpleName(),
-                    trustManager.getClass().getSimpleName()));
+                    X509TrustManager.class.getSimpleName(), trustManager.getClass().getSimpleName()));
         }
     }
 
     private static TrustManagerFactory createTrustManagerFactory(
-            Path trustStorePath,
-            SslConfiguration.StoreType trustStoreType) {
+            Path trustStorePath, SslConfiguration.StoreType trustStoreType) {
         KeyStore keyStore;
         switch (trustStoreType) {
             case JKS:
@@ -229,11 +227,7 @@ public final class SslSocketFactories {
                 Path puppetKeysDir = keyStorePath.resolve("private_keys");
                 Path puppetCertsDir = keyStorePath.resolve("certs");
                 keyStore = KeyStores.createKeyStoreFromPemDirectories(
-                        puppetKeysDir,
-                        ".pem",
-                        puppetCertsDir,
-                        ".pem",
-                        keyStorePassword);
+                        puppetKeysDir, ".pem", puppetCertsDir, ".pem", keyStorePassword);
                 break;
             default:
                 throw new IllegalStateException("Unrecognized key store type: " + keyStoreType);
@@ -247,8 +241,8 @@ public final class SslSocketFactories {
         }
 
         try {
-            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(
-                    KeyManagerFactory.getDefaultAlgorithm());
+            KeyManagerFactory keyManagerFactory =
+                    KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
 
             return keyManagerFactory;
@@ -256,5 +250,4 @@ public final class SslSocketFactories {
             throw Throwables.propagate(e);
         }
     }
-
 }

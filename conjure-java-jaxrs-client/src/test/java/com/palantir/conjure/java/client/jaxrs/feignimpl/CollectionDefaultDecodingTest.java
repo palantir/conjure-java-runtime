@@ -27,14 +27,12 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-/**
- * Tests that nulls are correctly deserialized into empty collections.
- */
+/** Tests that nulls are correctly deserialized into empty collections. */
 public final class CollectionDefaultDecodingTest extends TestBase {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(Java8TestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(Java8TestServer.class, "src/test/resources/test-server.yml");
 
     private Java8TestServer.TestService service;
 
@@ -42,10 +40,7 @@ public final class CollectionDefaultDecodingTest extends TestBase {
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(
-                Java8TestServer.TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(endpointUri));
+                Java8TestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }
 
     @Test

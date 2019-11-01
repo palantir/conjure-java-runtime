@@ -25,13 +25,9 @@ public interface Pkcs1Reader {
      * Returns the private key represented by the provided byte array. The byte array should contain the bytes for a
      * DER-encoded PKCS#1 private key.
      *
-     * @param privateKeyDerBytes
-     *          the bytes for a DER-encoded PKCS#1 private key
-     * @return
-     *          the private key specification represented by the bytes
-     * @throws IOException
-     *          if an I/O error occurs while decoding the provided bytes.
+     * @param privateKeyDerBytes the bytes for a DER-encoded PKCS#1 private key
+     * @return the private key specification represented by the bytes
+     * @throws IOException if an I/O error occurs while decoding the provided bytes.
      */
     RSAPrivateKeySpec readPrivateKey(byte[] privateKeyDerBytes) throws IOException;
-
 }

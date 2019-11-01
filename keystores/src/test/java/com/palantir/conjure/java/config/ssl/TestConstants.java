@@ -23,9 +23,7 @@ import java.nio.file.Paths;
 import java.util.ServiceLoader;
 import org.junit.Assume;
 
-/**
- * Test constants for trust stores and key stores used in unit tests.
- */
+/** Test constants for trust stores and key stores used in unit tests. */
 final class TestConstants {
 
     static final Path CA_TRUST_STORE_PATH = Paths.get("src", "test", "resources", "testCA", "testCA.jks");
@@ -34,95 +32,44 @@ final class TestConstants {
     static final SslConfiguration.StoreType CA_TRUST_STORE_TYPE = SslConfiguration.StoreType.JKS;
     static final String CA_TRUST_STORE_JKS_PASSWORD = "caStore";
 
-    static final Path SERVER_KEY_STORE_JKS_PATH = Paths.get(
-            "src",
-            "test",
-            "resources",
-            "testServer",
-            "testServer.jks");
+    static final Path SERVER_KEY_STORE_JKS_PATH = Paths.get("src", "test", "resources", "testServer", "testServer.jks");
     static final SslConfiguration.StoreType SERVER_KEY_STORE_JKS_TYPE = SslConfiguration.StoreType.JKS;
     static final String SERVER_KEY_STORE_JKS_PASSWORD = "serverStore";
 
-    static final Path SERVER_KEY_STORE_P12_PATH = Paths.get(
-            "src",
-            "test",
-            "resources",
-            "testServer",
-            "testServer.p12");
+    static final Path SERVER_KEY_STORE_P12_PATH = Paths.get("src", "test", "resources", "testServer", "testServer.p12");
     static final SslConfiguration.StoreType SERVER_KEY_STORE_P12_TYPE = SslConfiguration.StoreType.PKCS12;
     static final String SERVER_KEY_STORE_P12_PASSWORD = "testServer";
 
-    static final Path SERVER_KEY_PEM_PATH = Paths.get(
-            "src",
-            "test",
-            "resources",
-            "testServer",
-            "testServer.key");
-    static final Path SERVER_CERT_PEM_PATH = Paths.get(
-            "src",
-            "test",
-            "resources",
-            "testServer",
-            "testServer.cer");
-    static final Path SERVER_KEY_CERT_COMBINED_PEM_PATH = Paths.get(
-            "src",
-            "test",
-            "resources",
-            "testServer",
-            "testServer.pem");
+    static final Path SERVER_KEY_PEM_PATH = Paths.get("src", "test", "resources", "testServer", "testServer.key");
+    static final Path SERVER_CERT_PEM_PATH = Paths.get("src", "test", "resources", "testServer", "testServer.cer");
+    static final Path SERVER_KEY_CERT_COMBINED_PEM_PATH =
+            Paths.get("src", "test", "resources", "testServer", "testServer.pem");
 
-    static final Path CLIENT_KEY_STORE_JKS_PATH = Paths.get(
-            "src",
-            "test",
-            "resources",
-            "testClient",
-            "testClient.jks");
+    static final Path CLIENT_KEY_STORE_JKS_PATH = Paths.get("src", "test", "resources", "testClient", "testClient.jks");
     static final String CLIENT_KEY_STORE_JKS_PASSWORD = "clientStore";
 
-    static final Path CLIENT_KEY_STORE_P12_PATH = Paths.get(
-            "src",
-            "test",
-            "resources",
-            "testClient",
-            "testClient.p12");
+    static final Path CLIENT_KEY_STORE_P12_PATH = Paths.get("src", "test", "resources", "testClient", "testClient.p12");
     static final SslConfiguration.StoreType CLIENT_KEY_STORE_P12_TYPE = SslConfiguration.StoreType.PKCS12;
     static final String CLIENT_KEY_STORE_P12_PASSWORD = "testClient";
 
-    static final Path CLIENT_CERT_PEM_PATH = Paths.get(
-            "src",
-            "test",
-            "resources",
-            "testClient",
-            "testClient.cer");
-    static final Path CLIENT_KEY_CERT_COMBINED_PEM_PATH = Paths.get(
-            "src",
-            "test",
-            "resources",
-            "testClient",
-            "testClient.pem");
+    static final Path CLIENT_CERT_PEM_PATH = Paths.get("src", "test", "resources", "testClient", "testClient.cer");
+    static final Path CLIENT_KEY_CERT_COMBINED_PEM_PATH =
+            Paths.get("src", "test", "resources", "testClient", "testClient.pem");
 
-    static final Path MULTIPLE_KEY_STORE_JKS_PATH = Paths.get(
-            "src",
-            "test",
-            "resources",
-            "multiple.jks");
+    static final Path MULTIPLE_KEY_STORE_JKS_PATH = Paths.get("src", "test", "resources", "multiple.jks");
     static final String MULTIPLE_KEY_STORE_JKS_PASSWORD = "multiple";
     static final String MULTIPLE_KEY_STORE_CLIENT_ALIAS = "testClient";
     static final String MULTIPLE_KEY_STORE_SERVER_ALIAS = "testServer";
 
-    static final Path CHILD_KEY_CERT_CHAIN_PEM_PATH = Paths.get(
-            "src",
-            "test",
-            "resources",
-            "testChild",
-            "testChild_key_cert_chain.pem");
+    static final Path CHILD_KEY_CERT_CHAIN_PEM_PATH =
+            Paths.get("src", "test", "resources", "testChild", "testChild_key_cert_chain.pem");
     static final Path COMBINED_CRL_PATH = Paths.get("src", "test", "resources", "crl", "combined.crl");
 
     static void assumePkcs1ReaderExists() {
-        Assume.assumeTrue("Test requires at least one Pkcs1Reader service to be present",
+        Assume.assumeTrue(
+                "Test requires at least one Pkcs1Reader service to be present",
                 ServiceLoader.load(Pkcs1Reader.class).iterator().hasNext());
     }
 
     private TestConstants() {}
-
 }

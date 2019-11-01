@@ -34,20 +34,16 @@ import org.junit.Test;
 
 public final class JaxRsClientStackTraceTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server1 = new MockWebServer();
+    @Rule public final MockWebServer server1 = new MockWebServer();
 
     private TestService proxy;
 
     @Before
     public void before() throws Exception {
-        proxy = JaxRsClient.create(TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfiguration.builder()
-                        .from(createTestConfig("http://localhost:" + server1.getPort()))
-                        .maxNumRetries(1)
-                        .build());
+        proxy = JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
+                .from(createTestConfig("http://localhost:" + server1.getPort()))
+                .maxNumRetries(1)
+                .build());
     }
 
     @Test
@@ -78,11 +74,7 @@ public final class JaxRsClientStackTraceTest extends TestBase {
 
     private static MockResponse serializableError() throws JsonProcessingException {
         String json = ObjectMappers.newServerObjectMapper()
-                .writeValueAsString(
-                        SerializableError.forException(new ServiceException(ErrorType.INTERNAL)));
-        return new MockResponse()
-                .setResponseCode(500)
-                .setHeader("Content-Type", "application/json")
-                .setBody(json);
+                .writeValueAsString(SerializableError.forException(new ServiceException(ErrorType.INTERNAL)));
+        return new MockResponse().setResponseCode(500).setHeader("Content-Type", "application/json").setBody(json);
     }
 }

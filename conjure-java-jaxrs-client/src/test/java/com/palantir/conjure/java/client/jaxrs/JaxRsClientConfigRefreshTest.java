@@ -29,10 +29,8 @@ import org.junit.Test;
 
 public final class JaxRsClientConfigRefreshTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server1 = new MockWebServer();
-    @Rule
-    public final MockWebServer server2 = new MockWebServer();
+    @Rule public final MockWebServer server1 = new MockWebServer();
+    @Rule public final MockWebServer server2 = new MockWebServer();
 
     @Test
     public void testConfigRefresh() throws Exception {
@@ -41,10 +39,8 @@ public final class JaxRsClientConfigRefreshTest extends TestBase {
         ClientConfiguration config2 = createTestConfig("http://localhost:" + server2.getPort());
 
         Refreshable<ClientConfiguration> refreshableConfig = Refreshable.of(config1);
-        TestService proxy = JaxRsClient.create(TestService.class,
-                UserAgents.tryParse("agent"),
-                new HostMetricsRegistry(),
-                refreshableConfig);
+        TestService proxy = JaxRsClient.create(
+                TestService.class, UserAgents.tryParse("agent"), new HostMetricsRegistry(), refreshableConfig);
 
         // Call 1
         server1.enqueue(new MockResponse().setBody("\"server1\""));

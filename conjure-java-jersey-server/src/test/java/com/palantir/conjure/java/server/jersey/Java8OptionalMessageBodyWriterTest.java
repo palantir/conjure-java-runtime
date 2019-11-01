@@ -53,29 +53,15 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
 
     @Test
     public void presentOptionalsReturnTheirValue() throws Exception {
-        assertThat(target("/optional-return/")
-                .queryParam("id", "woo")
-                .request()
-                .get(String.class))
-                        .isEqualTo("woo");
+        assertThat(target("/optional-return/").queryParam("id", "woo").request().get(String.class)).isEqualTo("woo");
 
-        assertThat(target("/optional-return/int")
-                .queryParam("id", "123")
-                .request()
-                .get(String.class))
-                        .isEqualTo("123");
+        assertThat(target("/optional-return/int").queryParam("id", "123").request().get(String.class)).isEqualTo("123");
 
-        assertThat(target("/optional-return/long")
-                .queryParam("id", "1234567890123")
-                .request()
-                .get(String.class))
-                        .isEqualTo("1234567890123");
+        assertThat(target("/optional-return/long").queryParam("id", "1234567890123").request().get(String.class))
+                .isEqualTo("1234567890123");
 
-        assertThat(target("/optional-return/double")
-                .queryParam("id", "123.456")
-                .request()
-                .get(String.class))
-                        .isEqualTo("123.456");
+        assertThat(target("/optional-return/double").queryParam("id", "123.456").request().get(String.class))
+                .isEqualTo("123.456");
 
         try (Response binaryResponse = target("/optional-return/binary").queryParam("id", "woo").request().get()) {
             assertThat(binaryResponse.getHeaderString(HttpHeaders.CONTENT_TYPE)).isEqualTo("application/octet-stream");
@@ -136,9 +122,8 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
         @Produces(MediaType.APPLICATION_OCTET_STREAM)
         @GET
         public Optional<StreamingOutput> showOptionalBinaryWithQueryParam(@QueryParam("id") String id) {
-            return Optional.ofNullable(id)
-                    .map(str -> str.getBytes(StandardCharsets.UTF_8))
-                    .map(bytes -> output -> output.write(bytes));
+            return Optional.ofNullable(id).map(str -> str.getBytes(StandardCharsets.UTF_8)).map(bytes ->
+                    output -> output.write(bytes));
         }
     }
 }

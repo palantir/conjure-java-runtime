@@ -26,10 +26,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An {@link ExceptionMapper} that turns {@link QosException}s into appropriate HTTP error codes and
- * headers. Three different cases are distinguished: <ol> <li>Retry any node of this service some time later: HTTP 429
- * Too Many Requests</li> <li>Retry a specific (other) node of this service: HTTP 308 Permanent Redirect + Location
- * header</li> <li>Don't retry any node of this service: HTTP 503 Unavailable</li> </ol>
+ * An {@link ExceptionMapper} that turns {@link QosException}s into appropriate HTTP error codes and headers. Three
+ * different cases are distinguished:
+ *
+ * <ol>
+ *   <li>Retry any node of this service some time later: HTTP 429 Too Many Requests
+ *   <li>Retry a specific (other) node of this service: HTTP 308 Permanent Redirect + Location header
+ *   <li>Don't retry any node of this service: HTTP 503 Unavailable
+ * </ol>
  */
 @Provider
 final class QosExceptionMapper implements ExceptionMapper<QosException> {
@@ -43,18 +47,14 @@ final class QosExceptionMapper implements ExceptionMapper<QosException> {
             @Override
             public Response visit(QosException.Throttle exception) {
                 Response.ResponseBuilder response = Response.status(429);
-                exception.getRetryAfter()
-                        .ifPresent(duration -> response.header(HttpHeaders.RETRY_AFTER,
-                                Long.toString(duration.get(ChronoUnit.SECONDS))));
+                exception.getRetryAfter().ifPresent(duration ->
+                        response.header(HttpHeaders.RETRY_AFTER, Long.toString(duration.get(ChronoUnit.SECONDS))));
                 return response.build();
             }
 
             @Override
             public Response visit(QosException.RetryOther exception) {
-                return Response
-                        .status(308)
-                        .header(HttpHeaders.LOCATION, exception.getRedirectTo().toString())
-                        .build();
+                return Response.status(308).header(HttpHeaders.LOCATION, exception.getRedirectTo().toString()).build();
             }
 
             @Override

@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-/**
- * Defines a strategy for waiting in between successive retries of an operation that is subject to failure.
- */
+/** Defines a strategy for waiting in between successive retries of an operation that is subject to failure. */
 public interface BackoffStrategy {
     /**
      * Blocks for an implementation-defined period of time and returns true iff the backed-off operation should be

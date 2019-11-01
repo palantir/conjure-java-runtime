@@ -36,12 +36,10 @@ import org.junit.rules.ExpectedException;
 public final class GuavaOptionalAwareDecoderTest extends TestBase {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
-            GuavaTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @Rule public ExpectedException expectedException = ExpectedException.none();
 
     private GuavaTestServer.TestService service;
 
@@ -49,18 +47,15 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(
-                GuavaTestServer.TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(endpointUri));
+                GuavaTestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }
 
     @Test
     public void testOptional() {
-        assertThat(service.getOptional("something")).isEqualTo(
-                com.google.common.base.Optional.of(ImmutableMap.of("something", "something")));
-        assertThat(service.getOptional(null)).isEqualTo(
-                com.google.common.base.Optional.<ImmutableMap<String, String>>absent());
+        assertThat(service.getOptional("something"))
+                .isEqualTo(com.google.common.base.Optional.of(ImmutableMap.of("something", "something")));
+        assertThat(service.getOptional(null))
+                .isEqualTo(com.google.common.base.Optional.<ImmutableMap<String, String>>absent());
     }
 
     @Test
@@ -71,11 +66,10 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
 
     @Test
     public void testThrowsNotFound() {
-        assertThatThrownBy(() -> service.getThrowsNotFound(null))
-                .isInstanceOfSatisfying(RemoteException.class, e -> {
-                    assertThat(e.getMessage()).contains("RemoteException: NOT_FOUND (Default:NotFound)");
-                    assertThat(e.getError().errorCode()).isEqualTo("NOT_FOUND");
-                });
+        assertThatThrownBy(() -> service.getThrowsNotFound(null)).isInstanceOfSatisfying(RemoteException.class, e -> {
+            assertThat(e.getMessage()).contains("RemoteException: NOT_FOUND (Default:NotFound)");
+            assertThat(e.getError().errorCode()).isEqualTo("NOT_FOUND");
+        });
     }
 
     @Test
@@ -98,20 +92,18 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
 
     @Test
     public void testThrowsFordidden() {
-        assertThatThrownBy(() -> service.getThrowsForbidden(null))
-                .isInstanceOfSatisfying(RemoteException.class, e -> {
-                    assertThat(e.getMessage()).contains(
-                            "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
-                    assertThat(e.getError().errorCode()).isEqualTo("PERMISSION_DENIED");
-                });
+        assertThatThrownBy(() -> service.getThrowsForbidden(null)).isInstanceOfSatisfying(RemoteException.class, e -> {
+            assertThat(e.getMessage()).contains("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
+            assertThat(e.getError().errorCode()).isEqualTo("PERMISSION_DENIED");
+        });
     }
 
     @Test
     public void testOptionalThrowsForbbbden() {
         assertThatThrownBy(() -> service.getOptionalThrowsForbidden(null))
                 .isInstanceOfSatisfying(RemoteException.class, e -> {
-                    assertThat(e.getMessage()).contains(
-                            "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
+                    assertThat(e.getMessage())
+                            .contains("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
                     assertThat(e.getError().errorCode()).isEqualTo("PERMISSION_DENIED");
                 });
     }
@@ -125,11 +117,9 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     @Test
     public void testComplexType() {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
-                com.google.common.base.Optional.of(
-                        new GuavaOptionalComplexType(
-                                com.google.common.base.Optional.absent(),
-                                com.google.common.base.Optional.absent(),
-                                Paths.get("bar"))),
+                com.google.common.base.Optional.of(new GuavaOptionalComplexType(
+                        com.google.common.base.Optional.absent(), com.google.common.base.Optional.absent(), Paths.get(
+                                "bar"))),
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
@@ -139,11 +129,9 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     @Test
     public void testCborResponse() {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
-                com.google.common.base.Optional.of(
-                        new GuavaOptionalComplexType(
-                                com.google.common.base.Optional.absent(),
-                                com.google.common.base.Optional.absent(),
-                                Paths.get("bar"))),
+                com.google.common.base.Optional.of(new GuavaOptionalComplexType(
+                        com.google.common.base.Optional.absent(), com.google.common.base.Optional.absent(), Paths.get(
+                                "bar"))),
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
         assertThat(service.getCborResponse(value)).isEqualTo(value);
@@ -152,11 +140,9 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     @Test
     public void testCborRequest() {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
-                com.google.common.base.Optional.of(
-                        new GuavaOptionalComplexType(
-                                com.google.common.base.Optional.absent(),
-                                com.google.common.base.Optional.absent(),
-                                Paths.get("bar"))),
+                com.google.common.base.Optional.of(new GuavaOptionalComplexType(
+                        com.google.common.base.Optional.absent(), com.google.common.base.Optional.absent(), Paths.get(
+                                "bar"))),
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
         assertThat(service.postCborRequest(value)).isEqualTo(value);

@@ -34,11 +34,9 @@ import org.junit.Test;
 
 public final class TracerTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
 
-    @Rule
-    public final RenderTracingRule renderTracingRule = new RenderTracingRule();
+    @Rule public final RenderTracingRule renderTracingRule = new RenderTracingRule();
 
     private TestService service;
 

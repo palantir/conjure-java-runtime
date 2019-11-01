@@ -38,8 +38,7 @@ import org.slf4j.LoggerFactory;
 @RunWith(Parameterized.class)
 public class AutoDeserializeTest {
 
-    @ClassRule
-    public static final VerificationServerRule server = new VerificationServerRule();
+    @ClassRule public static final VerificationServerRule server = new VerificationServerRule();
 
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
     private static final AutoDeserializeService testService = VerificationClients.autoDeserializeService(server);
@@ -64,19 +63,12 @@ public class AutoDeserializeTest {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
-            IntStream.range(0, positiveSize)
-                    .forEach(i -> objects.add(new Object[] {
-                            endpointName,
-                            i,
-                            true,
-                            positiveAndNegativeTestCases.getPositive().get(i)}));
+            IntStream.range(0, positiveSize).forEach(i -> objects.add(
+                    new Object[] {endpointName, i, true, positiveAndNegativeTestCases.getPositive().get(i)}));
 
-            IntStream.range(0, negativeSize)
-                    .forEach(i -> objects.add(new Object[] {
-                            endpointName,
-                            positiveSize + i,
-                            false,
-                            positiveAndNegativeTestCases.getNegative().get(i)}));
+            IntStream.range(0, negativeSize).forEach(i -> objects.add(new Object[] {
+                endpointName, positiveSize + i, false, positiveAndNegativeTestCases.getNegative().get(i)
+            }));
         });
         return objects;
     }
@@ -86,7 +78,8 @@ public class AutoDeserializeTest {
     public void runTestCase() throws Error, NoSuchMethodException {
         boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
         Method method = testService.getClass().getMethod(endpointName.get(), int.class);
-        System.out.println(String.format("[%s%s test case %s]: %s(%s), expected client to %s",
+        System.out.println(String.format(
+                "[%s%s test case %s]: %s(%s), expected client to %s",
                 shouldIgnore ? "ignored " : "",
                 shouldSucceed ? "positive" : "negative",
                 index,
@@ -97,8 +90,9 @@ public class AutoDeserializeTest {
         Optional<Error> expectationFailure = shouldSucceed ? expectSuccess(method) : expectFailure(method);
 
         if (shouldIgnore) {
-            assertThat(expectationFailure).describedAs(
-                    "The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
+            assertThat(expectationFailure)
+                    .describedAs(
+                            "The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
                     .isNotEmpty();
         }
 

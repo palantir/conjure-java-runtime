@@ -33,8 +33,7 @@ public final class WebPreconditions {
     /**
      * See {@link Preconditions#checkArgument(boolean, Object)}.
      *
-     * @throws BadRequestException
-     *         when <code>expression</code> is false
+     * @throws BadRequestException when <code>expression</code> is false
      */
     public static void checkArgument(boolean expression, @Nullable Object message) {
         if (!expression) {
@@ -45,13 +44,10 @@ public final class WebPreconditions {
     /**
      * See {@link Preconditions#checkArgument(boolean, String, Object...)}.
      *
-     * @throws BadRequestException
-     *         when <code>expression</code> is false
+     * @throws BadRequestException when <code>expression</code> is false
      */
     public static void checkArgument(
-            boolean expression,
-            @Nullable String messageTemplate,
-            @Nullable Object... messageArgs) {
+            boolean expression, @Nullable String messageTemplate, @Nullable Object... messageArgs) {
         if (!expression) {
             throw new BadRequestException(format(messageTemplate, messageArgs));
         }
@@ -60,8 +56,7 @@ public final class WebPreconditions {
     /**
      * See {@link Preconditions#checkArgument(boolean, Object)} and {@link Strings#isNullOrEmpty(String)}.
      *
-     * @throws BadRequestException
-     *         when <code>reference</code> is null or empty
+     * @throws BadRequestException when <code>reference</code> is null or empty
      */
     public static String checkNotEmpty(String string, @Nullable Object message) {
         checkArgument(!Strings.isNullOrEmpty(string), message);
@@ -72,13 +67,10 @@ public final class WebPreconditions {
     /**
      * See {@link Preconditions#checkArgument(boolean, String, Object...)} and {@link Strings#isNullOrEmpty(String)}.
      *
-     * @throws BadRequestException
-     *         when <code>reference</code> is null or empty
+     * @throws BadRequestException when <code>reference</code> is null or empty
      */
     public static String checkNotEmpty(
-            String string,
-            @Nullable String messageTemplate,
-            @Nullable Object... messageArgs) {
+            String string, @Nullable String messageTemplate, @Nullable Object... messageArgs) {
         checkArgument(!Strings.isNullOrEmpty(string), messageTemplate, messageArgs);
 
         return string;
@@ -87,8 +79,7 @@ public final class WebPreconditions {
     /**
      * See {@link Preconditions#checkNotNull(Object, Object)}.
      *
-     * @throws BadRequestException
-     *         when <code>reference</code> is null
+     * @throws BadRequestException when <code>reference</code> is null
      */
     public static <T> T checkNotNull(T reference, @Nullable Object message) {
         checkArgument(reference != null, message);
@@ -99,8 +90,7 @@ public final class WebPreconditions {
     /**
      * See {@link Preconditions#checkNotNull(Object, Object)}.
      *
-     * @throws BadRequestException
-     *         when <code>reference</code> is null
+     * @throws BadRequestException when <code>reference</code> is null
      */
     public static <T> T checkNotNull(T reference, @Nullable String messageTemplate, @Nullable Object... messageArgs) {
         checkArgument(reference != null, messageTemplate, messageArgs);

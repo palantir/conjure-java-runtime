@@ -41,14 +41,12 @@ import org.junit.runners.Parameterized;
 public class AutoDeserializeTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> serverUnderTestRule = new DropwizardAppRule<>(
-            ServerUnderTestApplication.class,
-            "src/test/resources/config.yml");
+    public static final DropwizardAppRule<Configuration> serverUnderTestRule =
+            new DropwizardAppRule<>(ServerUnderTestApplication.class, "src/test/resources/config.yml");
 
-    @ClassRule
-    public static final VerificationClientRule verificationClientRule = new VerificationClientRule();
-    private static final VerificationClientService verificationService = VerificationClients.verificationClientService(
-            verificationClientRule);
+    @ClassRule public static final VerificationClientRule verificationClientRule = new VerificationClientRule();
+    private static final VerificationClientService verificationService =
+            VerificationClients.verificationClientService(verificationClientRule);
 
     @Parameterized.Parameter(0)
     public EndpointName endpointName;
@@ -69,19 +67,12 @@ public class AutoDeserializeTest {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
-            IntStream.range(0, positiveSize)
-                    .forEach(i -> objects.add(new Object[] {
-                            endpointName,
-                            i,
-                            true,
-                            positiveAndNegativeTestCases.getPositive().get(i)}));
+            IntStream.range(0, positiveSize).forEach(i -> objects.add(
+                    new Object[] {endpointName, i, true, positiveAndNegativeTestCases.getPositive().get(i)}));
 
-            IntStream.range(0, negativeSize)
-                    .forEach(i -> objects.add(new Object[] {
-                            endpointName,
-                            positiveSize + i,
-                            false,
-                            positiveAndNegativeTestCases.getNegative().get(i)}));
+            IntStream.range(0, negativeSize).forEach(i -> objects.add(new Object[] {
+                endpointName, positiveSize + i, false, positiveAndNegativeTestCases.getNegative().get(i)
+            }));
         });
         return objects;
     }
@@ -89,7 +80,8 @@ public class AutoDeserializeTest {
     @Test
     public void runTestCase() throws Exception {
         boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
-        System.out.println(String.format("[%s%s test case %s]: %s(%s), expected client to %s",
+        System.out.println(String.format(
+                "[%s%s test case %s]: %s(%s), expected client to %s",
                 shouldIgnore ? "ignored " : "",
                 shouldSucceed ? "positive" : "negative",
                 index,
@@ -100,8 +92,9 @@ public class AutoDeserializeTest {
         Optional<Error> expectationFailure = shouldSucceed ? expectSuccess() : expectFailure();
 
         if (shouldIgnore) {
-            assertThat(expectationFailure).describedAs(
-                    "The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
+            assertThat(expectationFailure)
+                    .describedAs(
+                            "The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
                     .isNotEmpty();
         }
 

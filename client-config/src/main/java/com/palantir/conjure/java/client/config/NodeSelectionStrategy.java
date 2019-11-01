@@ -25,13 +25,9 @@ public enum NodeSelectionStrategy {
      */
     PIN_UNTIL_ERROR,
 
-    /**
-     * For each new request, select the "next" node (in some undefined order).
-     */
+    /** For each new request, select the "next" node (in some undefined order). */
     ROUND_ROBIN,
 
-    /**
-     * Similar to {@link #PIN_UNTIL_ERROR}, except will not shuffle the URLs throughout the lifetime of the client.
-     */
+    /** Similar to {@link #PIN_UNTIL_ERROR}, except will not shuffle the URLs throughout the lifetime of the client. */
     PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE
 }

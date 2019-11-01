@@ -38,31 +38,25 @@ import org.junit.Test;
 public final class ServiceConfigTest extends TestBase {
 
     @Rule
-    public final DropwizardAppRule<ServiceConfigTestAppConfig> rule =
-            new DropwizardAppRule<>(ServiceConfigTestServer.ServiceConfigTestApp.class,
-                    ServiceConfigTest.class.getClassLoader().getResource("service-config-example.yml").getPath());
+    public final DropwizardAppRule<ServiceConfigTestAppConfig> rule = new DropwizardAppRule<>(
+            ServiceConfigTestServer.ServiceConfigTestApp.class,
+            ServiceConfigTest.class.getClassLoader().getResource("service-config-example.yml").getPath());
 
     @Test
     public void testResource() {
         ServiceConfigurationFactory factory =
                 ServiceConfigurationFactory.of(rule.getConfiguration().getServiceDiscoveryConfiguration());
 
-        TestService full = JaxRsClient.create(TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfigurations.of(factory.get("full")));
-        TestService minimal = JaxRsClient.create(TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfigurations.of(factory.get("minimal")));
+        TestService full = JaxRsClient.create(
+                TestService.class, AGENT, new HostMetricsRegistry(), ClientConfigurations.of(factory.get("full")));
+        TestService minimal = JaxRsClient.create(
+                TestService.class, AGENT, new HostMetricsRegistry(), ClientConfigurations.of(factory.get("minimal")));
 
         assertThat(full.string()).isEqualTo("string");
         assertThat(minimal.string()).isEqualTo("string");
     }
 
-    /**
-     * Configuration class for the {@link ServiceConfigTestServer}.
-     */
+    /** Configuration class for the {@link ServiceConfigTestServer}. */
     static final class ServiceConfigTestAppConfig extends Configuration {
 
         @JsonProperty("serviceDiscovery")

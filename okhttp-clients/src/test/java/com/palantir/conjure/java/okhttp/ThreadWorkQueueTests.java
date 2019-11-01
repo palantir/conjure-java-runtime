@@ -39,8 +39,7 @@ public final class ThreadWorkQueueTests {
 
     @Test
     public void testThrowsIfEmpty() {
-        assertThatExceptionOfType(NoSuchElementException.class)
-                .isThrownBy(queue::remove);
+        assertThatExceptionOfType(NoSuchElementException.class).isThrownBy(queue::remove);
     }
 
     @Test

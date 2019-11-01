@@ -81,15 +81,15 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
 
     @Override
     public Builder newBuilder() {
-        log.warn("Attempting to copy RemotingOkHttpClient. Some of the functionality like rate limiting and qos will "
-                + "not be available to the new client", new SafeRuntimeException("stacktrace"));
+        log.warn(
+                "Attempting to copy RemotingOkHttpClient. Some of the functionality like rate limiting and qos will "
+                        + "not be available to the new client",
+                new SafeRuntimeException("stacktrace"));
         return super.newBuilder();
     }
 
     RemotingOkHttpCall newCallWithMutableState(
-            Request request,
-            BackoffStrategy backoffStrategy,
-            int maxNumRelocations) {
+            Request request, BackoffStrategy backoffStrategy, int maxNumRelocations) {
         return new RemotingOkHttpCall(
                 getDelegate().newCall(request),
                 backoffStrategy,
@@ -136,7 +136,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 return urls.redirectToCurrent(current);
         }
 
-        throw new SafeIllegalStateException("Encountered unknown node selection strategy",
-                SafeArg.of("nodeSelectionStrategy", nodeSelectionStrategy));
+        throw new SafeIllegalStateException("Encountered unknown node selection strategy", SafeArg.of(
+                "nodeSelectionStrategy", nodeSelectionStrategy));
     }
 }

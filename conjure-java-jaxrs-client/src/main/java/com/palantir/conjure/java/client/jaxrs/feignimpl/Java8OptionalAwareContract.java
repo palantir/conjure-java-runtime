@@ -35,23 +35,23 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 /**
- * Decorates a {@link Contract} and uses {@link Java8NullOptionalExpander} for any {@link QueryParam} parameters,
- * {@link Java8EmptyOptionalExpander} for any {@link HeaderParam} parameters, and throws a {@link RuntimeException} at
- * first encounter of an {@link Optional} typed {@link PathParam}.
- * <p>
- * {@link PathParam}s require a value, and so we explicitly disallow use with {@link Optional}.
+ * Decorates a {@link Contract} and uses {@link Java8NullOptionalExpander} for any {@link QueryParam} parameters, {@link
+ * Java8EmptyOptionalExpander} for any {@link HeaderParam} parameters, and throws a {@link RuntimeException} at first
+ * encounter of an {@link Optional} typed {@link PathParam}.
+ *
+ * <p>{@link PathParam}s require a value, and so we explicitly disallow use with {@link Optional}.
  */
 public final class Java8OptionalAwareContract extends AbstractDelegatingContract {
 
     private static final List<ExpanderDef> expanders = ImmutableList.of(
             new ExpanderDef(Optional.class, Java8EmptyOptionalExpander.class, Java8NullOptionalExpander.class),
             new ExpanderDef(OptionalInt.class, Java8EmptyOptionalIntExpander.class, Java8NullOptionalIntExpander.class),
-            new ExpanderDef(OptionalDouble.class,
+            new ExpanderDef(
+                    OptionalDouble.class,
                     Java8EmptyOptionalDoubleExpander.class,
                     Java8NullOptionalDoubleExpander.class),
-            new ExpanderDef(OptionalLong.class,
-                    Java8EmptyOptionalLongExpander.class,
-                    Java8NullOptionalLongExpander.class));
+            new ExpanderDef(
+                    OptionalLong.class, Java8EmptyOptionalLongExpander.class, Java8NullOptionalLongExpander.class));
 
     public Java8OptionalAwareContract(Contract delegate) {
         super(delegate);
@@ -66,7 +66,8 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
             for (ExpanderDef def : expanders) {
                 if (cls.equals(def.match)) {
                     FluentIterable<Class<?>> paramAnnotations = getAnnotations(annotations, i);
-                    configureOptionalExpanders(targetType,
+                    configureOptionalExpanders(
+                            targetType,
                             method,
                             metadata,
                             i,
@@ -97,9 +98,7 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
         } else if (paramAnnotations.contains(PathParam.class)) {
             throw new RuntimeException(String.format(
                     "Cannot use Java8 Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
-                    targetType.getName(),
-                    method.getName(),
-                    index));
+                    targetType.getName(), method.getName(), index));
         }
     }
 

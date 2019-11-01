@@ -31,5 +31,4 @@ public final class SunPkcs1Reader implements Pkcs1Reader {
         BigInteger privateExponent = derValues[3].getBigInteger();
         return new RSAPrivateKeySpec(modulus, privateExponent);
     }
-
 }

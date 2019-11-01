@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 
 /**
  * Use {@link GuavaOptionalAwareDecoder}.
+ *
  * @deprecated Use {@link GuavaOptionalAwareDecoder}.
  */
 @Deprecated

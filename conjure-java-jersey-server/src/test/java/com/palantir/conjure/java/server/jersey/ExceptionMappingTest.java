@@ -61,6 +61,7 @@ public final class ExceptionMappingTest {
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP =
             new DropwizardAppRule<>(ExceptionMappersTestServer.class, "src/test/resources/test-server.yml");
+
     private static final Response.Status SERVER_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
     private static final Response.Status WEB_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
     private static final int REMOTE_EXCEPTION_STATUS_CODE = 400;
@@ -212,31 +213,34 @@ public final class ExceptionMappingTest {
 
         @Override
         public String throwRemoteException() {
-            throw new RemoteException(SerializableError.builder()
-                    .errorInstanceId("errorInstanceId")
-                    .errorCode("errorCode")
-                    .errorName("errorName")
-                    .build(),
+            throw new RemoteException(
+                    SerializableError.builder()
+                            .errorInstanceId("errorInstanceId")
+                            .errorCode("errorCode")
+                            .errorName("errorName")
+                            .build(),
                     REMOTE_EXCEPTION_STATUS_CODE);
         }
 
         @Override
         public String throwUnauthorizedException() {
-            throw new RemoteException(SerializableError.builder()
-                    .errorInstanceId("errorInstanceId")
-                    .errorCode("errorCode")
-                    .errorName("errorName")
-                    .build(),
+            throw new RemoteException(
+                    SerializableError.builder()
+                            .errorInstanceId("errorInstanceId")
+                            .errorCode("errorCode")
+                            .errorName("errorName")
+                            .build(),
                     UNAUTHORIZED_STATUS_CODE);
         }
 
         @Override
         public String throwPermissionDeniedException() {
-            throw new RemoteException(SerializableError.builder()
-                    .errorInstanceId("errorInstanceId")
-                    .errorCode("errorCode")
-                    .errorName("errorName")
-                    .build(),
+            throw new RemoteException(
+                    SerializableError.builder()
+                            .errorInstanceId("errorInstanceId")
+                            .errorCode("errorCode")
+                            .errorName("errorName")
+                            .build(),
                     PERMISSION_DENIED_STATUS_CODE);
         }
 

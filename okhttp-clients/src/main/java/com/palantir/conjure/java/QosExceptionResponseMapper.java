@@ -35,8 +35,7 @@ public final class QosExceptionResponseMapper {
     private QosExceptionResponseMapper() {}
 
     public static Optional<QosException> mapResponseCodeHeaderStream(
-            int code,
-            Function<String, Stream<String>> headerFn) {
+            int code, Function<String, Stream<String>> headerFn) {
         return mapResponseCode(code, header -> headerFn.apply(header).findFirst().orElse(null));
     }
 
@@ -64,7 +63,8 @@ public final class QosExceptionResponseMapper {
         try {
             return Optional.of(QosException.retryOther(new URL(locationHeader)));
         } catch (MalformedURLException e) {
-            log.error("Failed to parse location header, not performing redirect",
+            log.error(
+                    "Failed to parse location header, not performing redirect",
                     UnsafeArg.of("locationHeader", locationHeader),
                     e);
             return Optional.empty();
@@ -82,5 +82,4 @@ public final class QosExceptionResponseMapper {
     private static QosException map503() {
         return QosException.unavailable();
     }
-
 }

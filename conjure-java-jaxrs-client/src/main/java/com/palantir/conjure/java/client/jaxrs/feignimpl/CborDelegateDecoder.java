@@ -30,12 +30,12 @@ import java.util.Collection;
 
 /**
  * Currently this checks the Content-Type of the response on every request.
- * <p>
- * In the cases where we know the Content-Type of the response at compile time, i.e. when the only Accepts header is
+ *
+ * <p>In the cases where we know the Content-Type of the response at compile time, i.e. when the only Accepts header is
  * application/cbor, this is unnecessary work.
- * <p>
- * Ideally we'll codegen a client which handles the content-type switching where necessary (multiple possible response
- * Content-Types from the server) and does not do the checking where this is known at compile time.
+ *
+ * <p>Ideally we'll codegen a client which handles the content-type switching where necessary (multiple possible
+ * response Content-Types from the server) and does not do the checking where this is known at compile time.
  */
 public final class CborDelegateDecoder implements Decoder {
 
@@ -60,9 +60,8 @@ public final class CborDelegateDecoder implements Decoder {
             // some sillyness to test whether the input stram is empty
             // if it's empty, we want to return null rather than having jackson throw
             int pushbackBufferSize = 1;
-            PushbackInputStream pushbackInputStream = new PushbackInputStream(
-                    response.body().asInputStream(),
-                    pushbackBufferSize);
+            PushbackInputStream pushbackInputStream =
+                    new PushbackInputStream(response.body().asInputStream(), pushbackBufferSize);
             int firstByte = pushbackInputStream.read();
             if (firstByte == -1) {
                 return null; // we don't have any data in the stream
@@ -76,5 +75,4 @@ public final class CborDelegateDecoder implements Decoder {
             return delegate.decode(response, type);
         }
     }
-
 }

@@ -35,17 +35,12 @@ import org.glassfish.jersey.message.MessageBodyWorkers;
 @Produces(MediaType.WILDCARD)
 public final class Java8OptionalMessageBodyWriter implements MessageBodyWriter<Optional<?>> {
 
-    @Inject
-    private javax.inject.Provider<MessageBodyWorkers> mbw;
+    @Inject private javax.inject.Provider<MessageBodyWorkers> mbw;
 
     // Jersey ignores this
     @Override
     public long getSize(
-            Optional<?> _entity,
-            Class<?> _type,
-            Type _genericType,
-            Annotation[] _annotations,
-            MediaType _mediaType) {
+            Optional<?> _entity, Class<?> _type, Type _genericType, Annotation[] _annotations, MediaType _mediaType) {
         return 0;
     }
 
@@ -69,18 +64,15 @@ public final class Java8OptionalMessageBodyWriter implements MessageBodyWriter<O
             throw new NoContentException("Absent value for type: " + genericType);
         }
 
-        Type innerGenericType =
-                (genericType instanceof ParameterizedType)
-                        ? ((ParameterizedType) genericType).getActualTypeArguments()[0]
-                        : entity.get().getClass();
+        Type innerGenericType = (genericType instanceof ParameterizedType)
+                ? ((ParameterizedType) genericType).getActualTypeArguments()[0]
+                : entity.get().getClass();
 
-        MessageBodyWriter writer = mbw.get()
-                .getMessageBodyWriter(entity.get().getClass(),
-                        innerGenericType,
-                        annotations,
-                        mediaType);
+        MessageBodyWriter writer =
+                mbw.get().getMessageBodyWriter(entity.get().getClass(), innerGenericType, annotations, mediaType);
 
-        writer.writeTo(entity.get(),
+        writer.writeTo(
+                entity.get(),
                 entity.get().getClass(),
                 innerGenericType,
                 annotations,

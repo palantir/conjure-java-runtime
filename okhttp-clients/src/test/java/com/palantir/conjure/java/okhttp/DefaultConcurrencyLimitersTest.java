@@ -36,14 +36,11 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 public final class DefaultConcurrencyLimitersTest {
-    private static final ConcurrencyLimiters.Key KEY = ImmutableKey.builder()
-            .hostname("")
-            .build();
+    private static final ConcurrencyLimiters.Key KEY = ImmutableKey.builder().hostname("").build();
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
     private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(
-            Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
-                    .setNameFormat("listener-reviver")
-                    .build()),
+            Executors.newSingleThreadScheduledExecutor(
+                    new ThreadFactoryBuilder().setNameFormat("listener-reviver").build()),
             new DefaultTaggedMetricRegistry(),
             TIMEOUT,
             DefaultConcurrencyLimitersTest.class,

@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
-/**
- * A no-op implementation of {@link HostEventsSink} - i.e. it discards all events.
- */
+/** A no-op implementation of {@link HostEventsSink} - i.e. it discards all events. */
 public enum NoOpHostEventsSink implements HostEventsSink {
     INSTANCE;
 

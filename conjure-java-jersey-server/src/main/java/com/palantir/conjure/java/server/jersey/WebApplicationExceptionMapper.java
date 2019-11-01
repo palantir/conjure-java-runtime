@@ -35,10 +35,9 @@ import org.slf4j.LoggerFactory;
 /**
  * While we strongly recommend that users throw {@link ServiceException}s and not {@link WebApplicationException}s,
  * these exceptions are part of the JAX-RS standard and a server such as Jersey will throw them even if user code
- * doesn't.
- * For instance, {@link ServerRuntime} will throw {@link NotFoundException} if a request couldn't be routed, and if we
- * don't handle that in this way, then when using {@link ConjureJerseyFeature} it will get caught by
- * {@link RuntimeExceptionMapper} and transformed into a 500 internal exception, which is not what we want.
+ * doesn't. For instance, {@link ServerRuntime} will throw {@link NotFoundException} if a request couldn't be routed,
+ * and if we don't handle that in this way, then when using {@link ConjureJerseyFeature} it will get caught by {@link
+ * RuntimeExceptionMapper} and transformed into a 500 internal exception, which is not what we want.
  */
 @Provider
 final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
@@ -55,17 +54,11 @@ final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicat
         }
 
         if (exception instanceof ForbiddenException) {
-            return JsonExceptionMapper.createResponse(
-                    ErrorType.PERMISSION_DENIED,
-                    errorInstanceId);
+            return JsonExceptionMapper.createResponse(ErrorType.PERMISSION_DENIED, errorInstanceId);
         } else if (exception instanceof NotFoundException) {
-            return JsonExceptionMapper.createResponse(
-                    ErrorType.NOT_FOUND,
-                    errorInstanceId);
+            return JsonExceptionMapper.createResponse(ErrorType.NOT_FOUND, errorInstanceId);
         } else if (exception instanceof BadRequestException || exception instanceof ParamException) {
-            return JsonExceptionMapper.createResponse(
-                    ErrorType.INVALID_ARGUMENT,
-                    errorInstanceId);
+            return JsonExceptionMapper.createResponse(ErrorType.INVALID_ARGUMENT, errorInstanceId);
         } else {
             return JsonExceptionMapper.createResponse(
                     exception.getResponse().getStatus(),

@@ -22,10 +22,10 @@ import okhttp3.Interceptor;
 import okhttp3.Response;
 
 /**
- * {@link okhttp3.RealCall#execute()} only catches IOExceptions, which means that any non-IOException eventually
- * mean the {@link okhttp3.Dispatcher} runs out of threads and can't make *any* outgoing requests.
+ * {@link okhttp3.RealCall#execute()} only catches IOExceptions, which means that any non-IOException eventually mean
+ * the {@link okhttp3.Dispatcher} runs out of threads and can't make *any* outgoing requests.
  *
- * https://github.com/square/okhttp/issues/5151
+ * <p>https://github.com/square/okhttp/issues/5151
  */
 enum CatchThrowableInterceptor implements Interceptor {
     INSTANCE;
@@ -38,9 +38,11 @@ enum CatchThrowableInterceptor implements Interceptor {
             if (t instanceof IOException) {
                 throw (IOException) t;
             }
-            throw new SafeIoException("Caught a non-IOException. "
-                    + "This is a serious bug and requires investigation. Rethrowing "
-                    + "as an IOException in order to avoid blocking a Dispatcher thread", t);
+            throw new SafeIoException(
+                    "Caught a non-IOException. "
+                            + "This is a serious bug and requires investigation. Rethrowing "
+                            + "as an IOException in order to avoid blocking a Dispatcher thread",
+                    t);
         }
     }
 }

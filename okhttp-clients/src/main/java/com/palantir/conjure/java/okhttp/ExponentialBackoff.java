@@ -54,7 +54,7 @@ final class ExponentialBackoff implements BackoffStrategy {
         }
 
         int upperBound = (int) Math.pow(2, retryNumber);
-        return Optional.of(Duration.ofNanos(Math.round(
-                backoffSlotSize.toNanos() * random.get().nextDouble() * upperBound)));
+        return Optional.of(
+                Duration.ofNanos(Math.round(backoffSlotSize.toNanos() * random.get().nextDouble() * upperBound)));
     }
 }

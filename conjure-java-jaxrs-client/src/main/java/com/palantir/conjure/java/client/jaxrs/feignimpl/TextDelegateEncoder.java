@@ -27,8 +27,8 @@ import java.util.Collection;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Delegates to a {@link feign.codec.Encoder.Default} if the response has a Content-Type of text/plain, or falls back
- * to the given delegate otherwise.
+ * Delegates to a {@link feign.codec.Encoder.Default} if the response has a Content-Type of text/plain, or falls back to
+ * the given delegate otherwise.
  */
 public final class TextDelegateEncoder implements Encoder {
     private static final Encoder defaultEncoder = new Encoder.Default();

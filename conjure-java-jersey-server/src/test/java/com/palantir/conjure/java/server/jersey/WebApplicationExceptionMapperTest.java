@@ -33,8 +33,8 @@ import org.junit.Test;
 public final class WebApplicationExceptionMapperTest {
 
     private final WebApplicationExceptionMapper mapper = new WebApplicationExceptionMapper();
-    private final ObjectMapper objectMapper = ObjectMappers.newServerObjectMapper()
-            .enable(SerializationFeature.INDENT_OUTPUT);
+    private final ObjectMapper objectMapper =
+            ObjectMappers.newServerObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     @Test
     public void testExplicitlyHandledExceptions() throws Exception {
@@ -82,8 +82,7 @@ public final class WebApplicationExceptionMapperTest {
 
         response = mapper.toResponse(new ServiceUnavailableException("secret"));
         entity = objectMapper.writeValueAsString(response.getEntity());
-        assertThat(entity)
-                .contains("\"errorCode\" : \"javax.ws.rs.ServiceUnavailableException\"");
+        assertThat(entity).contains("\"errorCode\" : \"javax.ws.rs.ServiceUnavailableException\"");
         assertThat(entity).contains("\"errorName\" : \"ServiceUnavailableException\"");
         assertThat(response.getStatus()).isEqualTo(503);
         assertThat(entity).doesNotContain("secret");

@@ -84,16 +84,16 @@ public final class OptionalObjectToStringConverterFactoryTest {
                 .isNull();
 
         // Guava
-        assertThat(
-                factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Header.class), null))
-                        .isNotNull();
+        assertThat(factory.stringConverter(
+                        com.google.common.base.Optional.class, createAnnotations(Header.class), null))
+                .isNotNull();
         assertThat(factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Path.class), null))
                 .isNotNull();
         assertThat(factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Query.class), null))
                 .isNotNull();
-        assertThat(
-                factory.stringConverter(com.google.common.base.Optional.class, createAnnotations(Nonnull.class), null))
-                        .isNull();
+        assertThat(factory.stringConverter(
+                        com.google.common.base.Optional.class, createAnnotations(Nonnull.class), null))
+                .isNull();
     }
 
     @Test
@@ -106,23 +106,22 @@ public final class OptionalObjectToStringConverterFactoryTest {
 
     @Test
     public void testUnwrapsJava8OptionalInt() throws Exception {
-        Assertions
-                .assertThat(Java8OptionalIntStringConverter.INSTANCE.convert(OptionalInt.of(12345)))
+        Assertions.assertThat(Java8OptionalIntStringConverter.INSTANCE.convert(OptionalInt.of(12345)))
                 .isEqualTo("12345");
         assertThat(Java8OptionalIntStringConverter.INSTANCE.convert(OptionalInt.empty())).isEqualTo(null);
     }
 
     @Test
     public void testUnwrapsJava8OptionalDouble() throws Exception {
-        Assertions.assertThat(Java8OptionalDoubleStringConverter.INSTANCE.convert(
-                OptionalDouble.of(12345.678))).isEqualTo("12345.678");
+        Assertions.assertThat(Java8OptionalDoubleStringConverter.INSTANCE.convert(OptionalDouble.of(12345.678)))
+                .isEqualTo("12345.678");
         assertThat(Java8OptionalDoubleStringConverter.INSTANCE.convert(OptionalDouble.empty())).isEqualTo(null);
     }
 
     @Test
     public void testUnwrapsJava8OptionalLong() throws Exception {
-        Assertions.assertThat(Java8OptionalLongStringConverter.INSTANCE.convert(
-                OptionalLong.of(1234567890123L))).isEqualTo("1234567890123");
+        Assertions.assertThat(Java8OptionalLongStringConverter.INSTANCE.convert(OptionalLong.of(1234567890123L)))
+                .isEqualTo("1234567890123");
         assertThat(Java8OptionalLongStringConverter.INSTANCE.convert(OptionalLong.empty())).isEqualTo(null);
     }
 
@@ -148,8 +147,7 @@ public final class OptionalObjectToStringConverterFactoryTest {
         for (int i = 0; i < clazz.length; ++i) {
             try {
                 // Set bogus string values for any annotation methods that don't have a default
-                Map<String, Object> map = Arrays
-                        .stream(clazz[i].getDeclaredMethods())
+                Map<String, Object> map = Arrays.stream(clazz[i].getDeclaredMethods())
                         .filter(method -> method.getDefaultValue() == null)
                         .collect(Collectors.toMap(Method::getName, method -> ""));
                 annotations[i] = TypeFactory.annotation(clazz[i], map);

@@ -50,11 +50,9 @@ import org.junit.Test;
 
 public final class TracerTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
 
-    @Rule
-    public final RenderTracingRule renderTracingRule = new RenderTracingRule();
+    @Rule public final RenderTracingRule renderTracingRule = new RenderTracingRule();
 
     private TestService service;
 
@@ -70,20 +68,21 @@ public final class TracerTest extends TestBase {
         Tracer.initTrace(Observability.SAMPLE, Tracers.randomId());
         OpenSpan parentTrace = Tracer.startSpan("");
         List<Map.Entry<SpanType, String>> observedSpans = new ArrayList<>();
-        Tracer.subscribe(TracerTest.class.getName(),
-                span -> observedSpans.add(Maps.immutableEntry(span.type(), span.getOperation())));
+        Tracer.subscribe(TracerTest.class.getName(), span ->
+                observedSpans.add(Maps.immutableEntry(span.type(), span.getOperation())));
 
         String traceId = Tracer.getTraceId();
         service.param("somevalue");
 
         Tracer.unsubscribe(TracerTest.class.getName());
-        assertThat(observedSpans).containsExactlyInAnyOrder(
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: GET /{param}"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: attempt 0"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: client-side-concurrency-limiter 0/10"),
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: dispatcher"),
-                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-headers"),
-                Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-body"));
+        assertThat(observedSpans)
+                .containsExactlyInAnyOrder(
+                        Maps.immutableEntry(SpanType.LOCAL, "OkHttp: GET /{param}"),
+                        Maps.immutableEntry(SpanType.LOCAL, "OkHttp: attempt 0"),
+                        Maps.immutableEntry(SpanType.LOCAL, "OkHttp: client-side-concurrency-limiter 0/10"),
+                        Maps.immutableEntry(SpanType.LOCAL, "OkHttp: dispatcher"),
+                        Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-headers"),
+                        Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-body"));
 
         RecordedRequest request = server.takeRequest();
         assertThat(request.getHeader(TraceHttpHeaders.TRACE_ID)).isEqualTo(traceId);
@@ -121,8 +120,7 @@ public final class TracerTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));
         try (CloseableTracer span = CloseableTracer.startSpan("test-retries")) {
-            Assertions
-                    .assertThatCode(() -> service.param("somevalue"))
+            Assertions.assertThatCode(() -> service.param("somevalue"))
                     .hasRootCauseExactlyInstanceOf(QosException.Unavailable.class);
         }
     }
@@ -143,16 +141,20 @@ public final class TracerTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\""));
 
         ExecutorService executor = Executors.newFixedThreadPool(2);
-        CompletableFuture<?> first = CompletableFuture.runAsync(() -> {
-            Tracer.initTrace(Optional.of(true), "first");
-            Tracer.fastStartSpan("");
-            service.string();
-        }, executor);
-        CompletableFuture<?> second = CompletableFuture.runAsync(() -> {
-            Tracer.initTrace(Optional.of(true), "second");
-            Tracer.fastStartSpan("");
-            service.string();
-        }, executor);
+        CompletableFuture<?> first = CompletableFuture.runAsync(
+                () -> {
+                    Tracer.initTrace(Optional.of(true), "first");
+                    Tracer.fastStartSpan("");
+                    service.string();
+                },
+                executor);
+        CompletableFuture<?> second = CompletableFuture.runAsync(
+                () -> {
+                    Tracer.initTrace(Optional.of(true), "second");
+                    Tracer.fastStartSpan("");
+                    service.string();
+                },
+                executor);
         first.join();
         second.join();
     }

@@ -38,8 +38,7 @@ public final class UserAgentInterceptorTest {
     private static final UserAgent USER_AGENT = UserAgent.of(UserAgent.Agent.of("test", "1.2.3"));
     private static final UserAgentInterceptor interceptor = UserAgentInterceptor.of(USER_AGENT);
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
 
     @Before
     public void before() {

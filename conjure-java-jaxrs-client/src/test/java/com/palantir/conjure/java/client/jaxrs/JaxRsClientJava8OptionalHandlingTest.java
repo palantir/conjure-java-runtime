@@ -39,17 +39,14 @@ import org.junit.Test;
 
 public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
 
     private Service proxy;
 
     @Before
     public void before() {
-        proxy = JaxRsClient.create(Service.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig("http://localhost:" + server.getPort()));
+        proxy = JaxRsClient.create(Service.class, AGENT, new HostMetricsRegistry(), createTestConfig("http://localhost:"
+                + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
 
@@ -109,8 +106,8 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
                     createTestConfig("http://localhost:" + server.getPort()));
             fail("fail");
         } catch (RuntimeException e) {
-            assertThat(e.getMessage()).isEqualTo(
-                    "Cannot use Java8 Optionals with PathParams. (Class: com.palantir.conjure."
+            assertThat(e.getMessage())
+                    .isEqualTo("Cannot use Java8 Optionals with PathParams. (Class: com.palantir.conjure."
                             + "java.client.jaxrs.JaxRsClientJava8OptionalHandlingTest$CannotDecorateInterface,"
                             + " Method: path, Param: arg0)");
         }
@@ -266,5 +263,4 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
         assertThat(takeRequest.getHeader("opt")).isEqualTo("12345678901234");
         assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
-
 }

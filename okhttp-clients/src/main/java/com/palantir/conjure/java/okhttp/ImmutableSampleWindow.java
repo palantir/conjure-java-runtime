@@ -22,11 +22,9 @@ import java.util.concurrent.TimeUnit;
 /**
  * Class used to track immutable samples in an AtomicReference.
  *
- * Changes made to {@link com.netflix.concurrency.limits.limit.ImmutableSampleWindow}
+ * <p>Changes made to {@link com.netflix.concurrency.limits.limit.ImmutableSampleWindow}
  *
- * 1. Package was changed.
- * 2. Fields made private.
- * 3. Fixed a typo (getAverateRttNanos -> getAverageRttNanos)
+ * <p>1. Package was changed. 2. Fields made private. 3. Fixed a typo (getAverateRttNanos -> getAverageRttNanos)
  */
 final class ImmutableSampleWindow {
     private final long minRtt;
@@ -53,11 +51,7 @@ final class ImmutableSampleWindow {
 
     public ImmutableSampleWindow addSample(long rtt, int currentMaxInFlight) {
         return new ImmutableSampleWindow(
-                Math.min(rtt, minRtt),
-                sum + rtt,
-                Math.max(currentMaxInFlight, maxInFlight),
-                sampleCount + 1,
-                didDrop);
+                Math.min(rtt, minRtt), sum + rtt, Math.max(currentMaxInFlight, maxInFlight), sampleCount + 1, didDrop);
     }
 
     public ImmutableSampleWindow addDroppedSample(int currentMaxInFlight) {

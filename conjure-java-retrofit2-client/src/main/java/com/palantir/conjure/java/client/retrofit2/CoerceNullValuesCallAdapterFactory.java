@@ -29,13 +29,13 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 /**
- * We want to be lenient and interpret "null" or empty responses (including 204) as the empty value if the expected
- * type is a collection. Jackson can only do this for fields inside an object, but for top-level fields we have to do
- * this manually.
- * <p>
- * This class is the counterpart of {@link CoerceNullValuesConverterFactory} and handles coercion of 204/205
- * responses to the default values for collections (without this, the {@link Response} body would be null,
- * according to {@link retrofit2.OkHttpCall#parseResponse(okhttp3.Response)}).
+ * We want to be lenient and interpret "null" or empty responses (including 204) as the empty value if the expected type
+ * is a collection. Jackson can only do this for fields inside an object, but for top-level fields we have to do this
+ * manually.
+ *
+ * <p>This class is the counterpart of {@link CoerceNullValuesConverterFactory} and handles coercion of 204/205
+ * responses to the default values for collections (without this, the {@link Response} body would be null, according to
+ * {@link retrofit2.OkHttpCall#parseResponse(okhttp3.Response)}).
  */
 // TODO(dsanduleac): link to spec
 final class CoerceNullValuesCallAdapterFactory extends CallAdapter.Factory {
@@ -50,15 +50,14 @@ final class CoerceNullValuesCallAdapterFactory extends CallAdapter.Factory {
     @Override
     public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
         // we only support Call<T> and CompletableFuture<T>
-        Preconditions.checkState(returnType instanceof ParameterizedType,
-                "Function must return a ParametrizedType",
-                SafeArg.of("type", returnType));
+        Preconditions.checkState(
+                returnType instanceof ParameterizedType, "Function must return a ParametrizedType", SafeArg.of(
+                        "type", returnType));
         Type innerType = getParameterUpperBound(0, (ParameterizedType) returnType);
 
         CallAdapter<?, ?> maybeCallAdapter = delegate.get(returnType, annotations, retrofit);
-        CallAdapter<?, ?> callAdapter = maybeCallAdapter == null
-                ? fallbackCallAdapter(returnType, innerType)
-                : maybeCallAdapter;
+        CallAdapter<?, ?> callAdapter =
+                maybeCallAdapter == null ? fallbackCallAdapter(returnType, innerType) : maybeCallAdapter;
 
         Class rawType = getRawType(innerType);
         if (List.class.isAssignableFrom(rawType)) {
@@ -110,9 +109,9 @@ final class CoerceNullValuesCallAdapterFactory extends CallAdapter.Factory {
     }
 
     /**
-     * An 'operator' {@link CallAdapter} that converts {@code Call<R>} into {@code Call<R>} but upon
-     * executing/enqueing the call, it replaces the resulting {@link Response}'s deserialized body with the given
-     * default value if the body was {@code null}.
+     * An 'operator' {@link CallAdapter} that converts {@code Call<R>} into {@code Call<R>} but upon executing/enqueing
+     * the call, it replaces the resulting {@link Response}'s deserialized body with the given default value if the body
+     * was {@code null}.
      */
     private static final class DefaultingOnNullAdapter<R> implements CallAdapter<R, Object> {
         private final Supplier<R> defaultValue;
@@ -136,8 +135,8 @@ final class CoerceNullValuesCallAdapterFactory extends CallAdapter.Factory {
     }
 
     /**
-     * A {@link retrofit2.Call} that returns a default if the result coming out of the delegate call
-     * (probably {@link retrofit2.OkHttpCall}) is null.
+     * A {@link retrofit2.Call} that returns a default if the result coming out of the delegate call (probably {@link
+     * retrofit2.OkHttpCall}) is null.
      */
     private static final class DefaultingCall<R> implements Call<R> {
         private final Call<R> delegate;
@@ -154,8 +153,8 @@ final class CoerceNullValuesCallAdapterFactory extends CallAdapter.Factory {
         }
 
         /**
-         * If the response was successful and is empty (has no body), then return the default value.
-         * Otherwise, return the response unchanged.
+         * If the response was successful and is empty (has no body), then return the default value. Otherwise, return
+         * the response unchanged.
          */
         private Response<R> adaptResponse(Response<R> response) {
             R body = response.body();

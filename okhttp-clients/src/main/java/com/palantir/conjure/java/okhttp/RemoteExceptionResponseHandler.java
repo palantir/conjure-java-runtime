@@ -43,7 +43,8 @@ enum RemoteExceptionResponseHandler implements ResponseHandler<RemoteException> 
 
     @Override
     public Optional<RemoteException> handle(Response response) {
-        if (response.body() == null || response.body().byteStream() == null
+        if (response.body() == null
+                || response.body().byteStream() == null
                 || response.isSuccessful()
                 || response.code() == MoreHttpCodes.SWITCHING_PROTOCOLS) {
             return Optional.empty();
@@ -62,7 +63,8 @@ enum RemoteExceptionResponseHandler implements ResponseHandler<RemoteException> 
                 SerializableError serializableError = MAPPER.readValue(body, SerializableError.class);
                 return Optional.of(new RemoteException(serializableError, response.code()));
             } catch (Exception e) {
-                log.warn("Failed to deserialize JSON, could not deserialize SerializableError",
+                log.warn(
+                        "Failed to deserialize JSON, could not deserialize SerializableError",
                         SafeArg.of("code", response.code()),
                         UnsafeArg.of("body", body),
                         e);

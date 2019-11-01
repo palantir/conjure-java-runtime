@@ -53,11 +53,6 @@ public abstract class TestBase {
     }
 
     protected static Response responseWithCode(Request request, int code) {
-        return new Response.Builder()
-                .request(request)
-                .protocol(Protocol.HTTP_1_1)
-                .code(code)
-                .message("unused")
-                .build();
+        return new Response.Builder().request(request).protocol(Protocol.HTTP_1_1).code(code).message("unused").build();
     }
 }

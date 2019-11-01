@@ -45,22 +45,20 @@ public final class CipherSuites {
             "TLS_RSA_WITH_AES_256_GCM_SHA384",
             "TLS_RSA_WITH_AES_128_GCM_SHA256");
 
-    private static final ImmutableList<String> ALL_CIPHER_SUITES = ImmutableList.<String>builder()
-            .addAll(FAST_CIPHER_SUITES)
-            .addAll(GCM_CIPHER_SUITES)
-            .build();
+    private static final ImmutableList<String> ALL_CIPHER_SUITES =
+            ImmutableList.<String>builder().addAll(FAST_CIPHER_SUITES).addAll(GCM_CIPHER_SUITES).build();
 
     /**
      * Known fast and safe cipher suites on the JVM.
-     * <p>
-     * In an ideal world, we'd use GCM suites, but they're an order of
-     * magnitude slower than the CBC suites, which have JVM optimizations
-     * already. We should revisit with JDK9.
-     * <p>
-     * See also:
+     *
+     * <p>In an ideal world, we'd use GCM suites, but they're an order of magnitude slower than the CBC suites, which
+     * have JVM optimizations already. We should revisit with JDK9.
+     *
+     * <p>See also:
+     *
      * <ul>
-     * <li>http://openjdk.java.net/jeps/246
-     * <li>https://bugs.openjdk.java.net/secure/attachment/25422/GCM%20Analysis.pdf
+     *   <li>http://openjdk.java.net/jeps/246
+     *   <li>https://bugs.openjdk.java.net/secure/attachment/25422/GCM%20Analysis.pdf
      * </ul>
      */
     public static String[] fastCipherSuites() {

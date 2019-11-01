@@ -48,9 +48,7 @@ import feign.jackson.JacksonDecoder;
 import feign.jaxrs.JAXRSContract;
 import feign.okhttp.OkHttpClient;
 
-/**
- * Not meant to be implemented outside of this library.
- */
+/** Not meant to be implemented outside of this library. */
 abstract class AbstractFeignJaxRsClientBuilder {
 
     private final ClientConfiguration config;
@@ -74,9 +72,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
 
     protected abstract ObjectMapper getCborObjectMapper();
 
-    /**
-     * Set the host metrics registry to use when constructing the OkHttp client.
-     */
+    /** Set the host metrics registry to use when constructing the OkHttp client. */
     public final AbstractFeignJaxRsClientBuilder hostEventsSink(HostEventsSink newHostEventsSink) {
         Preconditions.checkNotNull(newHostEventsSink, "hostEventsSink can't be null");
         hostEventsSink = newHostEventsSink;
@@ -91,12 +87,8 @@ abstract class AbstractFeignJaxRsClientBuilder {
 
         return Feign.builder()
                 .contract(createContract())
-                .encoder(
-                        new InputStreamDelegateEncoder(
-                                new TextDelegateEncoder(
-                                        new CborDelegateEncoder(
-                                                cborObjectMapper,
-                                                new ConjureFeignJacksonEncoder(objectMapper)))))
+                .encoder(new InputStreamDelegateEncoder(new TextDelegateEncoder(
+                        new CborDelegateEncoder(cborObjectMapper, new ConjureFeignJacksonEncoder(objectMapper)))))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
                 .errorDecoder(new QosErrorDecoder(new ErrorDecoder.Default()))
                 .client(new OkHttpClient(okHttpClient))
@@ -107,29 +99,18 @@ abstract class AbstractFeignJaxRsClientBuilder {
     }
 
     private Contract createContract() {
-        return new PathTemplateHeaderEnrichmentContract(
-                new SlashEncodingContract(
-                        new Java8OptionalAwareContract(
-                                new GuavaOptionalAwareContract(
-                                        new JAXRSContract()))));
+        return new PathTemplateHeaderEnrichmentContract(new SlashEncodingContract(
+                new Java8OptionalAwareContract(new GuavaOptionalAwareContract(new JAXRSContract()))));
     }
 
     private Request.Options createRequestOptions() {
         return new Request.Options(
-                Math.toIntExact(config.connectTimeout().toMillis()),
-                Math.toIntExact(config.readTimeout().toMillis()));
+                Math.toIntExact(config.connectTimeout().toMillis()), Math.toIntExact(config.readTimeout().toMillis()));
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
-        return new NeverReturnNullDecoder(
-                new Java8OptionalAwareDecoder(
-                        new GuavaOptionalAwareDecoder(
-                                new EmptyContainerDecoder(
-                                        objectMapper,
-                                        new InputStreamDelegateDecoder(
-                                                new TextDelegateDecoder(
-                                                        new CborDelegateDecoder(
-                                                                cborObjectMapper,
-                                                                new JacksonDecoder(objectMapper))))))));
+        return new NeverReturnNullDecoder(new Java8OptionalAwareDecoder(new GuavaOptionalAwareDecoder(
+                new EmptyContainerDecoder(objectMapper, new InputStreamDelegateDecoder(new TextDelegateDecoder(
+                        new CborDelegateDecoder(cborObjectMapper, new JacksonDecoder(objectMapper))))))));
     }
 }

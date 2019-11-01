@@ -43,10 +43,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Interprets HTTP 204 as an 'empty' type using Jackson initially, then using reflection
- * to manually invoke a static factory annotated with {@link JsonCreator}.
+ * Interprets HTTP 204 as an 'empty' type using Jackson initially, then using reflection to manually invoke a static
+ * factory annotated with {@link JsonCreator}.
  *
- * Empty instances are cached and re-used to avoid reflection and exceptions on a hot codepath.
+ * <p>Empty instances are cached and re-used to avoid reflection and exceptions on a hot codepath.
  */
 public final class EmptyContainerDecoder implements Decoder {
 
@@ -66,12 +66,10 @@ public final class EmptyContainerDecoder implements Decoder {
         Object delegateResult = delegate.decode(response, type);
 
         if (response.status() == 204 || (response.status() == 200 && delegateResult == null)) {
-            @Nullable
-            Object object = blankInstanceCache.get(type);
+            @Nullable Object object = blankInstanceCache.get(type);
             return Preconditions.checkNotNull(
-                    object,
-                    "Received HTTP 204 but unable to construct an empty instance for return type",
-                    SafeArg.of("type", type));
+                    object, "Received HTTP 204 but unable to construct an empty instance for return type", SafeArg.of(
+                            "type", type));
         } else {
             return delegateResult;
         }
@@ -88,8 +86,7 @@ public final class EmptyContainerDecoder implements Decoder {
         @Nullable
         @Override
         public Object load(@Nonnull Type type) {
-            return constructEmptyInstance(RawTypes.get(type), type, 10)
-                    .orElse(null);
+            return constructEmptyInstance(RawTypes.get(type), type, 10).orElse(null);
         }
 
         private Optional<Object> constructEmptyInstance(Class<?> clazz, Type originalType, int maxRecursion) {
@@ -110,22 +107,22 @@ public final class EmptyContainerDecoder implements Decoder {
             if (jsonCreator.isPresent()) {
                 Method method = jsonCreator.get();
                 Class<?> parameterType = method.getParameters()[0].getType();
-                Optional<Object> parameter = constructEmptyInstance(
-                        parameterType,
-                        originalType,
-                        decrement(maxRecursion, originalType));
+                Optional<Object> parameter =
+                        constructEmptyInstance(parameterType, originalType, decrement(maxRecursion, originalType));
 
                 if (parameter.isPresent()) {
                     return invokeStaticFactoryMethod(method, parameter.get());
                 } else {
-                    log.debug("Found a @JsonCreator, but couldn't construct the parameter",
+                    log.debug(
+                            "Found a @JsonCreator, but couldn't construct the parameter",
                             SafeArg.of("type", originalType),
                             SafeArg.of("parameter", parameter));
                     return Optional.empty();
                 }
             }
 
-            log.debug("Jackson couldn't instantiate an empty instance and also couldn't find a usable @JsonCreator",
+            log.debug(
+                    "Jackson couldn't instantiate an empty instance and also couldn't find a usable @JsonCreator",
                     SafeArg.of("type", originalType));
             return Optional.empty();
         }

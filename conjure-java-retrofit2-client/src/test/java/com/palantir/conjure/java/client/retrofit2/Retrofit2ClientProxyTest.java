@@ -37,28 +37,23 @@ import org.junit.Test;
 
 public final class Retrofit2ClientProxyTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
-    @Rule
-    public final MockWebServer proxyServer = new MockWebServer();
+    @Rule public final MockWebServer server = new MockWebServer();
+    @Rule public final MockWebServer proxyServer = new MockWebServer();
 
     @Test
     public void testDirectVersusProxyConnection() throws Exception {
         server.enqueue(new MockResponse().setBody("\"server\""));
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        TestService directService = Retrofit2Client.create(TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig("http://localhost:" + server.getPort()));
+        TestService directService = Retrofit2Client.create(
+                TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig("http://localhost:"
+                        + server.getPort()));
         ClientConfiguration proxiedConfig = ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server.getPort()))
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .build();
-        TestService proxiedService = Retrofit2Client.create(TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                proxiedConfig);
+        TestService proxiedService =
+                Retrofit2Client.create(TestService.class, AGENT, new HostMetricsRegistry(), proxiedConfig);
 
         assertThat(directService.get().execute().body()).isEqualTo("server");
         assertThat(proxiedService.get().execute().body()).isEqualTo("proxyServer");
