@@ -20,6 +20,9 @@ import com.palantir.tracing.DetachedSpan;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
+import okio.ForwardingSource;
+import okio.Okio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,10 +49,26 @@ final class SpanTerminatingInterceptor implements Interceptor {
 
         dispatcherSpan.complete();
         try {
-            return chain.proceed(chain.request());
+            Response response = chain.proceed(chain.request());
+            if (response.body() == null) {
+                return response;
+            }
+            return response.newBuilder()
+                    .body(ResponseBody.create(
+                            response.body().contentType(),
+                            response.body().contentLength(),
+                            Okio.buffer(new ForwardingSource(response.body().source()) {
+                                public void close() throws IOException {
+                                    chain.request()
+                                            .tag(Tags.SettableWaitForBodySpan.class)
+                                            .waitForBodySpan()
+                                            .complete();
+                                    super.close();
+                                }
+                            })))
+                    .build();
         } finally {
             attemptSpan.complete();
-            chain.request().tag(Tags.SettableWaitForBodySpan.class).waitForBodySpan().complete();
         }
     }
 }
