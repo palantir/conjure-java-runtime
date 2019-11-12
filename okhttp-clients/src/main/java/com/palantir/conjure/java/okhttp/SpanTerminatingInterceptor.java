@@ -49,7 +49,10 @@ final class SpanTerminatingInterceptor implements Interceptor {
             return chain.proceed(chain.request());
         } finally {
             attemptSpan.complete();
-            chain.request().tag(Tags.SettableWaitForBodySpan.class).waitForBodySpan().complete();
+            chain.request()
+                    .tag(Tags.SettableWaitForBodySpan.class)
+                    .waitForBodySpan()
+                    .complete();
         }
     }
 }

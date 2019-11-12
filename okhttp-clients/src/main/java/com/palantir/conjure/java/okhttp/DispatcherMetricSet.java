@@ -32,15 +32,21 @@ class DispatcherMetricSet implements TaggedMetricSet {
     DispatcherMetricSet(Dispatcher dispatcher, ConnectionPool connectionPool) {
         ImmutableMap.Builder<MetricName, Metric> map = ImmutableMap.builder();
 
-        map.put(MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.queued").build(), (Gauge)
-                dispatcher::queuedCallsCount);
-        map.put(MetricName.builder().safeName("com.palantir.conjure.java.dispatcher.calls.running").build(), (Gauge)
-                dispatcher::runningCallsCount);
+        map.put(MetricName.builder()
+                .safeName("com.palantir.conjure.java.dispatcher.calls.queued")
+                .build(), (Gauge) dispatcher::queuedCallsCount);
+        map.put(MetricName.builder()
+                .safeName("com.palantir.conjure.java.dispatcher.calls.running")
+                .build(), (Gauge) dispatcher::runningCallsCount);
         map.put(
-                MetricName.builder().safeName("com.palantir.conjure.java.connection-pool.connections.total").build(),
+                MetricName.builder()
+                        .safeName("com.palantir.conjure.java.connection-pool.connections.total")
+                        .build(),
                 (Gauge) connectionPool::connectionCount);
         map.put(
-                MetricName.builder().safeName("com.palantir.conjure.java.connection-pool.connections.idle").build(),
+                MetricName.builder()
+                        .safeName("com.palantir.conjure.java.connection-pool.connections.idle")
+                        .build(),
                 (Gauge) connectionPool::idleConnectionCount);
 
         this.metrics = map.build();

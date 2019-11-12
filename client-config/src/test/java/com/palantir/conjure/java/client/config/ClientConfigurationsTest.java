@@ -71,7 +71,8 @@ public final class ClientConfigurationsTest {
         ClientConfiguration actual = ClientConfigurations.of(uris, sslFactory, trustManager);
 
         assertThat(actual.sslSocketFactory()).isInstanceOf(KeepAliveSslSocketFactory.class);
-        assertThat(((KeepAliveSslSocketFactory) actual.sslSocketFactory()).getDelegate()).isEqualTo(sslFactory);
+        assertThat(((KeepAliveSslSocketFactory) actual.sslSocketFactory()).getDelegate())
+                .isEqualTo(sslFactory);
         assertThat(actual.trustManager()).isEqualTo(trustManager);
         assertThat(actual.uris()).isEqualTo(uris);
         assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(10));

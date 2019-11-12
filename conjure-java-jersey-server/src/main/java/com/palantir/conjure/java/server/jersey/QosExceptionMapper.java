@@ -54,7 +54,9 @@ final class QosExceptionMapper implements ExceptionMapper<QosException> {
 
             @Override
             public Response visit(QosException.RetryOther exception) {
-                return Response.status(308).header(HttpHeaders.LOCATION, exception.getRedirectTo().toString()).build();
+                return Response.status(308)
+                        .header(HttpHeaders.LOCATION, exception.getRedirectTo().toString())
+                        .build();
             }
 
             @Override

@@ -205,7 +205,10 @@ public final class OkHttpClients {
             BasicCredentials basicCreds = config.proxyCredentials().get();
             final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
             client.proxyAuthenticator((route, response) ->
-                    response.request().newBuilder().header(HttpHeaders.PROXY_AUTHORIZATION, credentials).build());
+                    response.request()
+                            .newBuilder()
+                            .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
+                            .build());
         }
 
         // cipher setup

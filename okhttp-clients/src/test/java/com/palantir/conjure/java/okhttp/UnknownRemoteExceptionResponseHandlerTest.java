@@ -42,8 +42,10 @@ public final class UnknownRemoteExceptionResponseHandlerTest {
 
     @Test
     public void doesNotProduceExceptionOn101Or2xx() {
-        assertThat(handler.handle(response(200, MediaType.APPLICATION_JSON, "body"))).isEmpty();
-        assertThat(handler.handle(response(101, MediaType.APPLICATION_JSON, "body"))).isEmpty();
+        assertThat(handler.handle(response(200, MediaType.APPLICATION_JSON, "body")))
+                .isEmpty();
+        assertThat(handler.handle(response(101, MediaType.APPLICATION_JSON, "body")))
+                .isEmpty();
     }
 
     @Test

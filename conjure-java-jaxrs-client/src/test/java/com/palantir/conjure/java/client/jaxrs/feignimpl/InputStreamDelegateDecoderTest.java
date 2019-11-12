@@ -64,7 +64,8 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 
-        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8)).isEqualTo(data);
+        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8))
+                .isEqualTo(data);
     }
 
     @Test
@@ -84,7 +85,8 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 
-        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8)).isEqualTo(data);
+        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8))
+                .isEqualTo(data);
     }
 
     @Test

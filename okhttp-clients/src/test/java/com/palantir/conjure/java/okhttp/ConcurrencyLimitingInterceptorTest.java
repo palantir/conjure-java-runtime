@@ -120,7 +120,8 @@ public final class ConcurrencyLimitingInterceptorTest {
         IOException exception = new IOException();
         when(mockSource.readByteArray()).thenThrow(exception);
         Response erroneousResponse = interceptor.intercept(chain);
-        assertThatThrownBy(() -> erroneousResponse.body().source().readByteArray()).isEqualTo(exception);
+        assertThatThrownBy(() -> erroneousResponse.body().source().readByteArray())
+                .isEqualTo(exception);
     }
 
     @Test

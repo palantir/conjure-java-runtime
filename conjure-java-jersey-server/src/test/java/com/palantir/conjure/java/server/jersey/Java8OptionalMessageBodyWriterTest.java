@@ -53,9 +53,11 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
 
     @Test
     public void presentOptionalsReturnTheirValue() throws Exception {
-        assertThat(target("/optional-return/").queryParam("id", "woo").request().get(String.class)).isEqualTo("woo");
+        assertThat(target("/optional-return/").queryParam("id", "woo").request().get(String.class))
+                .isEqualTo("woo");
 
-        assertThat(target("/optional-return/int").queryParam("id", "123").request().get(String.class)).isEqualTo("123");
+        assertThat(target("/optional-return/int").queryParam("id", "123").request().get(String.class))
+                .isEqualTo("123");
 
         assertThat(target("/optional-return/long").queryParam("id", "1234567890123").request().get(String.class))
                 .isEqualTo("1234567890123");

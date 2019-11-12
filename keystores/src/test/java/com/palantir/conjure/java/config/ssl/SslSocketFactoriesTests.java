@@ -170,8 +170,9 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateWithOnlyTrustStorePath() {
-        SslConfiguration sslConfig =
-                SslConfiguration.builder().trustStorePath(TestConstants.CA_TRUST_STORE_PATH).build();
+        SslConfiguration sslConfig = SslConfiguration.builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .build();
 
         assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).isNotNull();
         assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).isNotNull();
@@ -317,8 +318,9 @@ public final class SslSocketFactoriesTests {
     @Test
     public void testCreateSslSocketFactory_failsWithInvalidPath() {
         assertThatThrownBy(() -> {
-                    SslConfiguration sslConfig =
-                            SslConfiguration.builder().trustStorePath(new File("foo/bar").toPath()).build();
+                    SslConfiguration sslConfig = SslConfiguration.builder()
+                            .trustStorePath(new File("foo/bar").toPath())
+                            .build();
 
                     SslSocketFactories.createSslSocketFactory(sslConfig);
                 })

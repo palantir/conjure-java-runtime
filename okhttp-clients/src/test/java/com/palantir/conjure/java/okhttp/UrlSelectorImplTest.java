@@ -133,16 +133,24 @@ public final class UrlSelectorImplTest extends TestBase {
     @Test
     public void testIsBaseUrlFor() {
         // Negative cases
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("https://foo/a"))).isFalse();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://bar/a"))).isFalse();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo:8080/a"))).isFalse();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/b"), parse("http://foo/a"))).isFalse();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("https://foo/a")))
+                .isFalse();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://bar/a")))
+                .isFalse();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo:8080/a")))
+                .isFalse();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/b"), parse("http://foo/a")))
+                .isFalse();
 
         // Positive cases: schema, host, port must be equal, path must be a prefix
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a"))).isTrue();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a/"))).isTrue();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a/b"))).isTrue();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo"), parse("http://foo/a"))).isTrue();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a")))
+                .isTrue();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a/")))
+                .isTrue();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a/b")))
+                .isTrue();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo"), parse("http://foo/a")))
+                .isTrue();
     }
 
     @Test

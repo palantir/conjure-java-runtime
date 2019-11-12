@@ -59,8 +59,10 @@ import retrofit2.Response;
 public final class Retrofit2ClientApiTest extends TestBase {
     @Rule public final MockWebServer server = new MockWebServer();
 
-    private static final SerializableError ERROR =
-            SerializableError.builder().errorCode("errorCode").errorName("errorName").build();
+    private static final SerializableError ERROR = SerializableError.builder()
+            .errorCode("errorCode")
+            .errorName("errorName")
+            .build();
 
     private HttpUrl url;
     private TestService service;
@@ -180,11 +182,13 @@ public final class Retrofit2ClientApiTest extends TestBase {
         String dateString = "\"2001-02-03\"";
 
         server.enqueue(new MockResponse().setBody(dateString));
-        assertThat(service.getComplexGuavaType(guavaOptional(date)).execute().body()).isEqualTo(guavaOptional(date));
+        assertThat(service.getComplexGuavaType(guavaOptional(date)).execute().body())
+                .isEqualTo(guavaOptional(date));
         assertThat(server.takeRequest().getBody().readUtf8()).isEqualTo(dateString);
 
         server.enqueue(new MockResponse().setBody(dateString));
-        assertThat(service.getComplexJava8Type(java8Optional(date)).execute().body()).isEqualTo(java8Optional(date));
+        assertThat(service.getComplexJava8Type(java8Optional(date)).execute().body())
+                .isEqualTo(java8Optional(date));
         assertThat(server.takeRequest().getBody().readUtf8()).isEqualTo(dateString);
     }
 
@@ -380,20 +384,24 @@ public final class Retrofit2ClientApiTest extends TestBase {
                 assertionsPassed.countDown(); // if you delete this countdown latch then this test will vacuously pass.
             }
         });
-        assertThat(assertionsPassed.await(1, TimeUnit.SECONDS)).as("Callback was executed").isTrue();
+        assertThat(assertionsPassed.await(1, TimeUnit.SECONDS))
+                .as("Callback was executed")
+                .isTrue();
     }
 
     @Test
     public void serializes_java_optional_headers() throws InterruptedException {
         server.enqueue(new MockResponse().setBody("\"body\""));
-        assertThat(Futures.getUnchecked(service.getJavaOptionalHeader(Optional.of("value")))).isEqualTo("body");
+        assertThat(Futures.getUnchecked(service.getJavaOptionalHeader(Optional.of("value"))))
+                .isEqualTo("body");
         assertThat(server.takeRequest().getHeader("Optional-Header")).isEqualTo("value");
     }
 
     @Test
     public void serializes_guava_optional_headers() throws InterruptedException {
         server.enqueue(new MockResponse().setBody("\"body\""));
-        assertThat(Futures.getUnchecked(service.getGuavaOptionalHeader(guavaOptional("value")))).isEqualTo("body");
+        assertThat(Futures.getUnchecked(service.getGuavaOptionalHeader(guavaOptional("value"))))
+                .isEqualTo("body");
         assertThat(server.takeRequest().getHeader("Optional-Header")).isEqualTo("value");
     }
 

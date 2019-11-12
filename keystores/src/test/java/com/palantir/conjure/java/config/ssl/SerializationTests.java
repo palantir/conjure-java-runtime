@@ -36,7 +36,8 @@ public final class SerializationTests {
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
 
-        assertThat(MAPPER.readValue(MAPPER.writeValueAsBytes(sslConfig), SslConfiguration.class)).isEqualTo(sslConfig);
+        assertThat(MAPPER.readValue(MAPPER.writeValueAsBytes(sslConfig), SslConfiguration.class))
+                .isEqualTo(sslConfig);
     }
 
     @Test

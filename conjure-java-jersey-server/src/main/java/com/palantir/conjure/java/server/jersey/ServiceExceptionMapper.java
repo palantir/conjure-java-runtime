@@ -54,8 +54,9 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
 
         ResponseBuilder builder = Response.status(httpStatus);
         try {
-            SerializableError error =
-                    SerializableError.builder().from(SerializableError.forException(exception)).build();
+            SerializableError error = SerializableError.builder()
+                    .from(SerializableError.forException(exception))
+                    .build();
             builder.type(MediaType.APPLICATION_JSON);
             builder.entity(error);
         } catch (RuntimeException e) {

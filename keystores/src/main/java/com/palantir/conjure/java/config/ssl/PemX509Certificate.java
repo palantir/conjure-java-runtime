@@ -34,6 +34,8 @@ public abstract class PemX509Certificate {
     public abstract String pemCertificate();
 
     public static PemX509Certificate of(String pemCertificate) {
-        return ImmutablePemX509Certificate.builder().pemCertificate(pemCertificate).build();
+        return ImmutablePemX509Certificate.builder()
+                .pemCertificate(pemCertificate)
+                .build();
     }
 }

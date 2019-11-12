@@ -50,10 +50,12 @@ final class ConcurrencyLimiters {
     private static final Logger log = LoggerFactory.getLogger(ConcurrencyLimiters.class);
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(1);
     private static final Void NO_CONTEXT = null;
-    private static final MetricName SLOW_ACQUIRE =
-            MetricName.builder().safeName("conjure-java-client.qos.request-permit.slow-acquire").build();
-    private static final MetricName LEAK_SUSPECTED =
-            MetricName.builder().safeName("conjure-java-client.qos.request-permit.leak-suspected").build();
+    private static final MetricName SLOW_ACQUIRE = MetricName.builder()
+            .safeName("conjure-java-client.qos.request-permit.slow-acquire")
+            .build();
+    private static final MetricName LEAK_SUSPECTED = MetricName.builder()
+            .safeName("conjure-java-client.qos.request-permit.leak-suspected")
+            .build();
     private static final String SLOW_ACQUIRE_TAGGED = "conjure-java-client.qos.request-permit.slow-acquire-tagged";
 
     private final Timer slowAcquire;
@@ -131,7 +133,10 @@ final class ConcurrencyLimiters {
     }
 
     private MetricName generateMetricNameWithServiceName(String name, Class<?> service) {
-        return MetricName.builder().safeName(name).putSafeTags("serviceClass", service.getSimpleName()).build();
+        return MetricName.builder()
+                .safeName(name)
+                .putSafeTags("serviceClass", service.getSimpleName())
+                .build();
     }
 
     private ConcurrencyLimiter newLimiter(Key limiterKey) {

@@ -106,6 +106,8 @@ public final class RefreshableProxyInvocationHandlerTest {
                 RefreshableProxyInvocationHandler.create(refreshable, tec -> throwingCallable);
         Callable proxy = Reflection.newProxy(Callable.class, handler);
 
-        assertThatThrownBy(proxy::call).isInstanceOf(IllegalStateException.class).hasMessage("Whoops");
+        assertThatThrownBy(proxy::call)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Whoops");
     }
 }

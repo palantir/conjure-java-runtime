@@ -209,8 +209,10 @@ public final class OkHttpClientsTest extends TestBase {
     /** See {@link DispatcherMetricSet}. */
     public void verifyGlobalMetricsAreRegistered() {
         TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
-        ClientConfiguration clientConfiguration =
-                ClientConfiguration.builder().from(createTestConfig(url)).taggedMetricRegistry(registry).build();
+        ClientConfiguration clientConfiguration = ClientConfiguration.builder()
+                .from(createTestConfig(url))
+                .taggedMetricRegistry(registry)
+                .build();
 
         OkHttpClients.create(clientConfiguration, AGENT, hostEventsSink, OkHttpClientsTest.class);
 
@@ -255,7 +257,9 @@ public final class OkHttpClientsTest extends TestBase {
                     }
                 }
             });
-            assertThat(wasSuccessful.await(500, TimeUnit.MILLISECONDS)).as("Expected code: " + code).isTrue();
+            assertThat(wasSuccessful.await(500, TimeUnit.MILLISECONDS))
+                    .as("Expected code: " + code)
+                    .isTrue();
         }
     }
 
@@ -277,7 +281,8 @@ public final class OkHttpClientsTest extends TestBase {
                 successHandlerExecuted.release();
             }
         });
-        assertThat(successHandlerExecuted.tryAcquire(500, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(successHandlerExecuted.tryAcquire(500, TimeUnit.MILLISECONDS))
+                .isTrue();
         assertThat(failureHandlerExecuted.tryAcquire(500, TimeUnit.MILLISECONDS))
                 .as("onFailure was executed")
                 .isFalse();
@@ -304,7 +309,8 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(successHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS))
                 .as("onSuccess was executed")
                 .isFalse();
-        assertThat(failureHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(failureHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS))
+                .isTrue();
     }
 
     @Test
@@ -841,7 +847,10 @@ public final class OkHttpClientsTest extends TestBase {
 
         while (!server2WasHit) {
             OkHttpClient client = OkHttpClients.create(
-                    ClientConfiguration.builder().from(createTestConfig(url, url2)).maxNumRetries(0).build(),
+                    ClientConfiguration.builder()
+                            .from(createTestConfig(url, url2))
+                            .maxNumRetries(0)
+                            .build(),
                     AGENT,
                     hostEventsSink,
                     OkHttpClientsTest.class);
@@ -894,7 +903,10 @@ public final class OkHttpClientsTest extends TestBase {
             }
         };
         OkHttpClient client = OkHttpClients.create(
-                ClientConfiguration.builder().from(createTestConfig(url)).maxNumRetries(0).build(),
+                ClientConfiguration.builder()
+                        .from(createTestConfig(url))
+                        .maxNumRetries(0)
+                        .build(),
                 AGENT,
                 throwingSink,
                 OkHttpClientsTest.class);

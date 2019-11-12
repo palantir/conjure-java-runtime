@@ -72,8 +72,10 @@ public final class RemoteExceptionResponseHandlerTest {
 
     @Test
     public void doesNotProduceExceptionOn101Or2xx() throws Exception {
-        assertThat(handler.handle(response(200, MediaType.APPLICATION_JSON, SERIALIZED_EXCEPTION))).isEmpty();
-        assertThat(handler.handle(response(101, MediaType.APPLICATION_JSON, SERIALIZED_EXCEPTION))).isEmpty();
+        assertThat(handler.handle(response(200, MediaType.APPLICATION_JSON, SERIALIZED_EXCEPTION)))
+                .isEmpty();
+        assertThat(handler.handle(response(101, MediaType.APPLICATION_JSON, SERIALIZED_EXCEPTION)))
+                .isEmpty();
     }
 
     @Test
@@ -88,8 +90,9 @@ public final class RemoteExceptionResponseHandlerTest {
             Class<? extends WebApplicationException> exceptionClass, Response.Status status) {
         WebApplicationException exceptionToProcess;
         try {
-            exceptionToProcess =
-                    exceptionClass.getConstructor(String.class, Response.Status.class).newInstance(message, status);
+            exceptionToProcess = exceptionClass
+                    .getConstructor(String.class, Response.Status.class)
+                    .newInstance(message, status);
         } catch (InstantiationException
                 | IllegalAccessException
                 | IllegalArgumentException
@@ -149,9 +152,12 @@ public final class RemoteExceptionResponseHandlerTest {
 
     @Test
     public void doesNotHandleNonJsonMediaTypes() {
-        assertThat(decode(MediaType.TEXT_PLAIN, STATUS_500, SERIALIZED_EXCEPTION)).isEmpty();
-        assertThat(decode(MediaType.TEXT_HTML, STATUS_500, SERIALIZED_EXCEPTION)).isEmpty();
-        assertThat(decode(MediaType.MULTIPART_FORM_DATA, STATUS_500, SERIALIZED_EXCEPTION)).isEmpty();
+        assertThat(decode(MediaType.TEXT_PLAIN, STATUS_500, SERIALIZED_EXCEPTION))
+                .isEmpty();
+        assertThat(decode(MediaType.TEXT_HTML, STATUS_500, SERIALIZED_EXCEPTION))
+                .isEmpty();
+        assertThat(decode(MediaType.MULTIPART_FORM_DATA, STATUS_500, SERIALIZED_EXCEPTION))
+                .isEmpty();
     }
 
     @Test

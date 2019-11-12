@@ -158,7 +158,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     private static Response buildFrom(Response unbufferedResponse, byte[] bodyBytes) {
-        return unbufferedResponse.newBuilder().body(buffer(unbufferedResponse.body().contentType(), bodyBytes)).build();
+        return unbufferedResponse
+                .newBuilder()
+                .body(buffer(unbufferedResponse.body().contentType(), bodyBytes))
+                .build();
     }
 
     private static ResponseBody buffer(MediaType mediaType, byte[] bodyBytes) {
@@ -371,8 +374,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             exception);
                     // Must create this before scheduling, so the attempt starts right now.
                     Tags.AttemptSpan nextAttempt = createNextAttempt();
-                    Request nextAttemptRequest =
-                            request().newBuilder().tag(Tags.AttemptSpan.class, nextAttempt).build();
+                    Request nextAttemptRequest = request()
+                            .newBuilder()
+                            .tag(Tags.AttemptSpan.class, nextAttempt)
+                            .build();
                     RemotingOkHttpCall nextCall =
                             client.newCallWithMutableState(nextAttemptRequest, backoffStrategy, maxNumRelocations);
                     scheduleExecution(backoff, nextAttempt, () -> nextCall.enqueue(callback));

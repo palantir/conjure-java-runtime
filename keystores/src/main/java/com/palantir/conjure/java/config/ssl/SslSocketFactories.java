@@ -73,10 +73,8 @@ public final class SslSocketFactories {
         KeyManager[] keyManagers = null;
         if (config.keyStorePath().isPresent()) {
             keyManagers = createKeyManagerFactory(
-                            config.keyStorePath().get(),
-                            config.keyStorePassword().get(),
-                            config.keyStoreType(),
-                            config.keyStoreKeyAlias())
+                            config.keyStorePath().get(), config.keyStorePassword()
+                                    .get(), config.keyStoreType(), config.keyStoreKeyAlias())
                     .getKeyManagers();
         }
 
@@ -111,7 +109,8 @@ public final class SslSocketFactories {
      * @return an {@link TrustManager} array according to the input configuration
      */
     public static TrustManager[] createTrustManagers(SslConfiguration config) {
-        return createTrustManagerFactory(config.trustStorePath(), config.trustStoreType()).getTrustManagers();
+        return createTrustManagerFactory(config.trustStorePath(), config.trustStoreType())
+                .getTrustManagers();
     }
 
     /**

@@ -140,7 +140,9 @@ public final class KeyStoresTests {
                 .contains("CN=testCA");
         assertThat(
                         keyStore.getKey(
-                                        TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH.getFileName().toString(),
+                                        TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH
+                                                .getFileName()
+                                                .toString(),
                                         password.toCharArray())
                                 .getFormat())
                 .isEqualTo("PKCS#8");
@@ -163,9 +165,11 @@ public final class KeyStoresTests {
 
         assertThat(keyStore.size()).isEqualTo(2);
         assertThat(keyStore.getCertificate("server.pkcs1").toString()).contains("CN=localhost");
-        assertThat(keyStore.getKey("server.pkcs1", password.toCharArray()).getFormat()).isEqualTo("PKCS#8");
+        assertThat(keyStore.getKey("server.pkcs1", password.toCharArray()).getFormat())
+                .isEqualTo("PKCS#8");
         assertThat(keyStore.getCertificate("client.pkcs1").toString()).contains("CN=client");
-        assertThat(keyStore.getKey("client.pkcs1", password.toCharArray()).getFormat()).isEqualTo("PKCS#8");
+        assertThat(keyStore.getKey("client.pkcs1", password.toCharArray()).getFormat())
+                .isEqualTo("PKCS#8");
     }
 
     @Test
@@ -204,7 +208,8 @@ public final class KeyStoresTests {
 
         assertThat(keyStore.size()).isEqualTo(1);
         assertThat(keyStore.getCertificate("server").toString()).contains("CN=localhost");
-        assertThat(keyStore.getKey("server", password.toCharArray()).getFormat()).isEqualTo("PKCS#8");
+        assertThat(keyStore.getKey("server", password.toCharArray()).getFormat())
+                .isEqualTo("PKCS#8");
     }
 
     @Test
