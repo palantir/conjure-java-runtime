@@ -39,7 +39,10 @@ public final class Cases {
 
     private static ClientTestCases deserializeTestCases(File file) {
         try {
-            return new ObjectMapper().registerModule(new Jdk8Module()).readValue(file, TestCases.class).getClient();
+            return new ObjectMapper()
+                    .registerModule(new Jdk8Module())
+                    .readValue(file, TestCases.class)
+                    .getClient();
         } catch (IOException e) {
             throw new RuntimeException(
                     String.format("Unable to read %s, you may need to run ./gradlew copyTestCases", file), e);

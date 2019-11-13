@@ -34,7 +34,9 @@ public final class JaxRsClient {
      */
     public static <T> T create(
             Class<T> serviceClass, UserAgent userAgent, HostEventsSink hostEventsSink, ClientConfiguration config) {
-        return new FeignJaxRsClientBuilder(config).hostEventsSink(hostEventsSink).build(serviceClass, userAgent);
+        return new FeignJaxRsClientBuilder(config)
+                .hostEventsSink(hostEventsSink)
+                .build(serviceClass, userAgent);
     }
 
     /**

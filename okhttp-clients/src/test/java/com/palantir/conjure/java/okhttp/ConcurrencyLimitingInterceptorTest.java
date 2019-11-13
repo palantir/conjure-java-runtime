@@ -57,8 +57,12 @@ public final class ConcurrencyLimitingInterceptorTest {
                         .setLimiterListener(Futures.immediateFuture(listener)))
                 .get()
                 .build();
-        response =
-                new Response.Builder().code(200).request(request).message("message").protocol(Protocol.HTTP_2).build();
+        response = new Response.Builder()
+                .code(200)
+                .request(request)
+                .message("message")
+                .protocol(Protocol.HTTP_2)
+                .build();
         when(chain.request()).thenReturn(request);
     }
 

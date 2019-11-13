@@ -31,7 +31,9 @@ public final class JaxRsScalaClient {
     /** See {@link JaxRsClient}. */
     public static <T> T create(
             Class<T> serviceClass, UserAgent userAgent, HostEventsSink hostEventsSink, ClientConfiguration config) {
-        return new FeignJaxRsScalaClientBuilder(config).hostEventsSink(hostEventsSink).build(serviceClass, userAgent);
+        return new FeignJaxRsScalaClientBuilder(config)
+                .hostEventsSink(hostEventsSink)
+                .build(serviceClass, userAgent);
     }
 
     /** See {@link JaxRsClient}. */

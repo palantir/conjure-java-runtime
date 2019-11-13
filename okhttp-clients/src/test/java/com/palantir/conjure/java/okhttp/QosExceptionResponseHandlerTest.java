@@ -88,6 +88,10 @@ public final class QosExceptionResponseHandlerTest extends TestBase {
     }
 
     private static Response.Builder response(Request request, int code) {
-        return new Response.Builder().request(request).protocol(Protocol.HTTP_1_1).code(code).message("unused");
+        return new Response.Builder()
+                .request(request)
+                .protocol(Protocol.HTTP_1_1)
+                .code(code)
+                .message("unused");
     }
 }

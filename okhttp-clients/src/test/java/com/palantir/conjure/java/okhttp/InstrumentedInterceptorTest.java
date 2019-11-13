@@ -123,8 +123,12 @@ public final class InstrumentedInterceptorTest {
     }
 
     private void successfulRequest(Request request) throws IOException {
-        Response response =
-                new Response.Builder().request(request).message("").protocol(Protocol.HTTP_1_1).code(200).build();
+        Response response = new Response.Builder()
+                .request(request)
+                .message("")
+                .protocol(Protocol.HTTP_1_1)
+                .code(200)
+                .build();
         when(chain.request()).thenReturn(request);
         when(chain.proceed(request)).thenReturn(response);
     }
