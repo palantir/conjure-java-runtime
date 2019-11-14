@@ -55,6 +55,7 @@ public final class Retrofit2ClientBuilder {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(addTrailingSlash(config.uris().get(0)))
+                .addConverterFactory(OptionalResponseBodyConverterFactory.INSTANCE)
                 .addConverterFactory(
                         new CborConverterFactory(
                                 new NeverReturnNullConverterFactory(
