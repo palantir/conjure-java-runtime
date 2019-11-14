@@ -38,8 +38,8 @@ public final class OptionalResponseBodyConverterFactory extends Converter.Factor
             Retrofit _retrofit) {
         if (type instanceof ParameterizedType) {
             Type innerType = getParameterUpperBound(0, (ParameterizedType) type);
-            Class<?> rwaInnerClass = getRawType(innerType);
-            if (ResponseBody.class.isAssignableFrom(rwaInnerClass)) {
+            Class<?> rawInnerClass = getRawType(innerType);
+            if (ResponseBody.class.isAssignableFrom(rawInnerClass)) {
                 return OptionalResponseBodyConverter.INSTANCE;
             }
         }
