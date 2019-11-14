@@ -55,6 +55,7 @@ public final class Retrofit2ClientBuilder {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(addTrailingSlash(config.uris().get(0)))
+                // These get evaluated first, but only for successful responses that are not 204 or 205
                 .addConverterFactory(OptionalResponseBodyConverterFactory.INSTANCE)
                 .addConverterFactory(
                         new CborConverterFactory(
@@ -63,6 +64,7 @@ public final class Retrofit2ClientBuilder {
                                                 JacksonConverterFactory.create(OBJECT_MAPPER))),
                                 CBOR_OBJECT_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
+                // These get evaluated last, to convert the original Call into the response type expected by the client
                 .addCallAdapterFactory(
                         new QosExceptionThrowingCallAdapterFactory(
                                 new CoerceNullValuesCallAdapterFactory(

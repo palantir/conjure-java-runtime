@@ -51,7 +51,7 @@ public final class OptionalResponseBodyConverterFactory extends Converter.Factor
 
         @Override
         public Optional<ResponseBody> convert(ResponseBody value) {
-            return Optional.ofNullable(value);
+            return Optional.of(value);
         }
     }
 
