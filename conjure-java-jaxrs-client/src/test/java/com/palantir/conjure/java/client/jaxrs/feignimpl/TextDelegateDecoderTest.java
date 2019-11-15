@@ -86,10 +86,11 @@ public final class TextDelegateDecoderTest extends TestBase {
     }
 
     @Test
-    public void testCannotReturnStringWithMediaTypeJson() throws Exception {
+    public void testCannotReturnStringWithMediaTypeJson() {
         assertThatThrownBy(() -> service.getJsonString("foo"))
                 .isInstanceOf(FeignException.class)
-                .hasMessageStartingWith("Unrecognized token 'foo': was expecting 'null', 'true', 'false' or NaN");
+                .hasMessageStartingWith("Unrecognized token 'foo': was expecting "
+                        + "(JSON String, Number, Array, Object or token 'null', 'true' or 'false')");
     }
 
     @Test
