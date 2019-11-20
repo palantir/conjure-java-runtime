@@ -43,7 +43,7 @@ public final class Java8OptionalLongParamConverterProvider implements ParamConve
     public static final class OptionalLongParamConverter implements ParamConverter<OptionalLong> {
         @Override
         public OptionalLong fromString(final String value) {
-            if (value == null) {
+            if (value == null || value.isEmpty()) {
                 return OptionalLong.empty();
             }
 
