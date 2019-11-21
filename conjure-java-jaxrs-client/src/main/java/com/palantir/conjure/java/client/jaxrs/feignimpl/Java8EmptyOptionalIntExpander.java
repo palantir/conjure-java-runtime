@@ -24,7 +24,10 @@ import java.util.OptionalInt;
 /**
  * Expands OptionalInt by using the empty string for {@link OptionalInt#empty()} and the {@link Integer#toString()} of
  * the value otherwise.
+ *
+ * @deprecated no longer used
  */
+@Deprecated
 public final class Java8EmptyOptionalIntExpander implements Expander {
 
     @Override

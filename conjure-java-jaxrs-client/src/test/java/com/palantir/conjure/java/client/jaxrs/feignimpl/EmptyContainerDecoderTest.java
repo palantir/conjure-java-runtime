@@ -31,11 +31,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import feign.Request;
+import feign.Request.Body;
+import feign.Request.HttpMethod;
 import feign.Response;
 import feign.codec.Decoder;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,8 +53,18 @@ import org.junit.Test;
 public class EmptyContainerDecoderTest {
 
     private static final ObjectMapper mapper = ObjectMappers.newClientObjectMapper();
-    private static final Response HTTP_204 =
-            Response.create(204, "No Content", Collections.emptyMap(), new byte[] {});
+    private static final Request REQUEST = Request.create(
+            HttpMethod.GET,
+            "",
+            ImmutableMap.of(),
+            Body.empty(),
+            null);
+    private static final Response HTTP_204 = Response.builder()
+            .request(REQUEST)
+            .status(204)
+            .reason("No Content")
+            .body("", StandardCharsets.UTF_8)
+            .build();
     private final Decoder delegate = mock(Decoder.class);
     private final EmptyContainerDecoder emptyContainerDecoder =
             new EmptyContainerDecoder(mapper, delegate);
@@ -60,13 +72,15 @@ public class EmptyContainerDecoderTest {
     @Test
     public void http_200_uses_delegate_decoder() throws IOException {
         when(delegate.decode(any(), eq(String.class))).thenReturn("text response");
-        Response http200 = Response.create(200,
-                "OK",
-                ImmutableMap.of(
+        Response http200 = Response.builder()
+                .request(REQUEST)
+                .status(200)
+                .reason("OK")
+                .headers(ImmutableMap.of(
                         HttpHeaders.CONTENT_TYPE,
-                        ImmutableSet.of(MediaType.TEXT_PLAIN)),
-                "text response",
-                StandardCharsets.UTF_8);
+                        ImmutableSet.of(MediaType.TEXT_PLAIN)))
+                .body("text response", StandardCharsets.UTF_8)
+                .build();
 
         emptyContainerDecoder.decode(http200, String.class);
         verify(delegate, times(1)).decode(any(), any());

@@ -10,18 +10,18 @@ dependencies {
     implementation "com.palantir.safe-logging:preconditions"
 
     testImplementation project(":conjure-java-jackson-serialization")
-    testImplementation("com.netflix.feign:feign-jaxrs") {
+    testImplementation("io.github.openfeign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
     }
-    testImplementation("com.netflix.feign:feign-core")
-    testImplementation "com.netflix.feign:feign-okhttp"
     testImplementation "com.squareup.okhttp3:okhttp"
-    testImplementation "org.hamcrest:hamcrest-all"
     testImplementation("io.dropwizard:dropwizard-core") { exclude module: 'metrics-core' }
     testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
     testImplementation "io.dropwizard.metrics:metrics-core"
+    testImplementation "io.github.openfeign:feign-core"
+    testImplementation "io.github.openfeign:feign-okhttp"
     testImplementation "junit:junit"
+    testImplementation "org.hamcrest:hamcrest-all"
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'
@@ -45,7 +45,7 @@ task testSun(type: Test) {
 [tasks.testBouncyCastle, tasks.testSun].each { it.dependsOn(generateCerts) }
 
 
-private void configureTestTask(Test test, String name) {
+private void configureTestTask(test, name) {
     test.classpath = test.classpath + project(":pkcs1-reader-${name}").sourceSets.main.getOutput() +
             project(":pkcs1-reader-${name}").sourceSets.main.runtimeClasspath
 
@@ -53,6 +53,6 @@ private void configureTestTask(Test test, String name) {
     test.reports.html.destination file("${project.test.reports.html.getDestination().absolutePath}-${name}")
 
     project.plugins.withType(JacocoPlugin) {
-        ((JacocoTaskExtension) test.jacoco).destinationFile = project.file("${project.getBuildDir()}/jacoco/${name}.exec")
+        test.jacoco.destinationFile = project.file("${project.getBuildDir()}/jacoco/${name}.exec")
     }
 }

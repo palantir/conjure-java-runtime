@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.verification.server.EndpointName;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -129,8 +130,12 @@ public class SingleParamServicesTest {
                     }
 
                     log.info("Successfully post param to endpoint {} and index {}", endpointName, index);
-                } catch (RemoteException e) {
-                    log.error("Caught exception with params: {}", e.getError().parameters(), e);
+                } catch (InvocationTargetException e) {
+                    Throwable targetException = e.getTargetException();
+                    if (targetException instanceof RemoteException) {
+                        RemoteException remoteException = (RemoteException) targetException;
+                        log.error("Caught exception with params: {}", remoteException.getError().parameters(), e);
+                    }
                     throw e;
                 }
             }

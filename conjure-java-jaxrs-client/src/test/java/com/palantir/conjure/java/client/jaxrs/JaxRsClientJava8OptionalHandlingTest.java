@@ -134,7 +134,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     public void testEmptyStringQuery() throws Exception {
         proxy.query(Optional.of(""), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo?opt=&req=str2 HTTP/1.1");
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /foo?opt&req=str2 HTTP/1.1");
     }
 
     @Test
@@ -148,7 +148,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     public void testAbsentHeader() throws Exception {
         proxy.header(Optional.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("opt")).isEqualTo(null);
         assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
@@ -156,7 +156,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     public void testEmptyStringHeader() throws Exception {
         proxy.header(Optional.of(""), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("opt")).isEqualTo(null);
         assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
@@ -195,7 +195,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     public void testAbsentIntHeader() throws Exception {
         proxy.headerInt(OptionalInt.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("opt")).isEqualTo(null);
         assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
@@ -225,7 +225,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     public void testAbsentDoubleHeader() throws Exception {
         proxy.headerDouble(OptionalDouble.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("opt")).isEqualTo(null);
         assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
@@ -255,7 +255,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
     public void testAbsentLongHeader() throws Exception {
         proxy.headerLong(OptionalLong.empty(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("opt")).isEqualTo(null);
         assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 

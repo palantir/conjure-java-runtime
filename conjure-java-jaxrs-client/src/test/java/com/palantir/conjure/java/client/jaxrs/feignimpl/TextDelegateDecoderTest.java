@@ -24,21 +24,22 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import feign.FeignException;
+import feign.Request;
+import feign.Request.Body;
+import feign.Request.HttpMethod;
 import feign.Response;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
 import io.dropwizard.Configuration;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -47,6 +48,13 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public final class TextDelegateDecoderTest extends TestBase {
+
+    private static final Request REQUEST = Request.create(
+            HttpMethod.GET,
+            "",
+            ImmutableMap.of(),
+            Body.empty(),
+            null);
     private static final String DELEGATE_RESPONSE = "delegate response";
 
     @ClassRule
@@ -57,14 +65,12 @@ public final class TextDelegateDecoderTest extends TestBase {
     public ExpectedException expectedException = ExpectedException.none();
 
     private GuavaTestServer.TestService service;
-    private Map<String, Collection<String>> headers;
     private Decoder delegate;
     private Decoder textDelegateDecoder;
 
     @Before
     public void before() {
         delegate = mock(Decoder.class);
-        headers = new HashMap<>();
         textDelegateDecoder = new TextDelegateDecoder(delegate);
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
@@ -77,8 +83,15 @@ public final class TextDelegateDecoderTest extends TestBase {
 
     @Test
     public void testUsesStringDecoderWithTextPlain() throws Exception {
-        headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN));
-        Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .request(REQUEST)
+                .status(200)
+                .reason("OK")
+                .headers(ImmutableMap.of(
+                        HttpHeaders.CONTENT_TYPE,
+                        ImmutableSet.of(MediaType.TEXT_PLAIN)))
+                .body("text response", StandardCharsets.UTF_8)
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat("text response").isEqualTo(decodedObject);
@@ -95,8 +108,15 @@ public final class TextDelegateDecoderTest extends TestBase {
 
     @Test
     public void testUsesStringDecoderWithTextPlainAndCharset() throws Exception {
-        headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN + "; charset=utf-8"));
-        Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .request(REQUEST)
+                .status(200)
+                .reason("OK")
+                .headers(ImmutableMap.of(
+                        HttpHeaders.CONTENT_TYPE,
+                        ImmutableSet.of(MediaType.TEXT_PLAIN + "; charset=utf-8")))
+                .body("text response", StandardCharsets.UTF_8)
+                .build();
 
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
@@ -106,8 +126,15 @@ public final class TextDelegateDecoderTest extends TestBase {
 
     @Test
     public void testUsesStringDecoderWithTextPlainWithWeirdHeaderCapitalization() throws Exception {
-        headers.put("content-TYPE", ImmutableSet.of(MediaType.TEXT_PLAIN));
-        Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .request(REQUEST)
+                .status(200)
+                .reason("OK")
+                .headers(ImmutableMap.of(
+                        "content-TYPE",
+                        ImmutableSet.of(MediaType.TEXT_PLAIN)))
+                .body("text response", StandardCharsets.UTF_8)
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat("text response").isEqualTo(decodedObject);
@@ -116,8 +143,15 @@ public final class TextDelegateDecoderTest extends TestBase {
 
     @Test
     public void testReturnsEmptyStringForNullResponseBodyWithTextPlain() throws Exception {
-        headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN));
-        Response response = Response.create(200, "OK", headers, null, StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .request(REQUEST)
+                .status(200)
+                .reason("OK")
+                .headers(ImmutableMap.of(
+                        HttpHeaders.CONTENT_TYPE,
+                        ImmutableSet.of(MediaType.TEXT_PLAIN)))
+                .body(null, StandardCharsets.UTF_8)
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat(decodedObject).isEqualTo("");
@@ -127,7 +161,12 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Test
     public void testUsesDelegateWithNoHeader() throws Exception {
         when(delegate.decode(any(), any())).thenReturn(DELEGATE_RESPONSE);
-        Response response = Response.create(200, "OK", headers, new byte[0]);
+        Response response = Response.builder()
+                .request(REQUEST)
+                .status(200)
+                .reason("OK")
+                .body("", StandardCharsets.UTF_8)
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat(DELEGATE_RESPONSE).isEqualTo(decodedObject);
@@ -135,9 +174,16 @@ public final class TextDelegateDecoderTest extends TestBase {
 
     @Test
     public void testUsesDelegateWithComplexHeader() throws Exception {
-        headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON));
         when(delegate.decode(any(), any())).thenReturn(DELEGATE_RESPONSE);
-        Response response = Response.create(200, "OK", headers, new byte[0]);
+        Response response = Response.builder()
+                .request(REQUEST)
+                .status(200)
+                .reason("OK")
+                .headers(ImmutableMap.of(
+                        HttpHeaders.CONTENT_TYPE,
+                        ImmutableSet.of(MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON)))
+                .body("", StandardCharsets.UTF_8)
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat(DELEGATE_RESPONSE).isEqualTo(decodedObject);
@@ -145,9 +191,16 @@ public final class TextDelegateDecoderTest extends TestBase {
 
     @Test
     public void testUsesDelegateWithNonTextContentType() throws Exception {
-        headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.APPLICATION_JSON));
         when(delegate.decode(any(), any())).thenReturn(DELEGATE_RESPONSE);
-        Response response = Response.create(200, "OK", headers, new byte[0]);
+        Response response = Response.builder()
+                .request(REQUEST)
+                .status(200)
+                .reason("OK")
+                .headers(ImmutableMap.of(
+                        HttpHeaders.CONTENT_TYPE,
+                        ImmutableSet.of(MediaType.APPLICATION_JSON)))
+                .body("", StandardCharsets.UTF_8)
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat(DELEGATE_RESPONSE).isEqualTo(decodedObject);

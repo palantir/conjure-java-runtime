@@ -6,3 +6,36 @@ acceptedBreaks:
       old: null
       new: "method com.codahale.metrics.Timer com.palantir.conjure.java.okhttp.HostMetrics::getQos()"
       justification: "ABI-safe change to rarely used class, low impact"
+  4.43.0:
+    com.palantir.conjure.java.runtime:okhttp-clients: []
+    com.palantir.conjure.java.runtime:refresh-utils: []
+    com.palantir.conjure.java.runtime:jetty-http2-agent: []
+    com.palantir.conjure.java.runtime:keystores: []
+    com.palantir.conjure.java.runtime:pkcs1-reader-bouncy-castle: []
+    com.palantir.conjure.java.runtime:conjure-java-jackson-serialization: []
+    com.palantir.conjure.java.runtime:conjure-scala-jaxrs-client: []
+    com.palantir.conjure.java.runtime:conjure-java-jaxrs-client:
+    - code: "java.method.removed"
+      old: "method java.util.List<feign.MethodMetadata> com.palantir.conjure.java.client.jaxrs.feignimpl.AbstractDelegatingContract::parseAndValidatateMetadata(java.lang.Class<?>)\
+        \ @ com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract"
+      new: null
+      justification: "{Feign method was renamed}"
+    - code: "java.method.removed"
+      old: "method java.util.List<feign.MethodMetadata> com.palantir.conjure.java.client.jaxrs.feignimpl.AbstractDelegatingContract::parseAndValidatateMetadata(java.lang.Class<?>)\
+        \ @ com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareContract"
+      new: null
+      justification: "{Feign method was renamed}"
+    - code: "java.method.removed"
+      old: "method java.util.List<feign.MethodMetadata> com.palantir.conjure.java.client.jaxrs.feignimpl.AbstractDelegatingContract::parseAndValidatateMetadata(java.lang.Class<?>)\
+        \ @ com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaOptionalAwareContract"
+      new: null
+      justification: "{Feign method was renamed}"
+    - code: "java.method.removed"
+      old: "method java.util.List<feign.MethodMetadata> com.palantir.conjure.java.client.jaxrs.feignimpl.AbstractDelegatingContract::parseAndValidatateMetadata(java.lang.Class<?>)\
+        \ @ com.palantir.conjure.java.client.jaxrs.feignimpl.SlashEncodingContract"
+      new: null
+      justification: "{Feign method was renamed}"
+    com.palantir.conjure.java.runtime:conjure-java-retrofit2-client: []
+    com.palantir.conjure.java.runtime:conjure-java-jersey-server: []
+    com.palantir.conjure.java.runtime:pkcs1-reader-sun: []
+    com.palantir.conjure.java.runtime:client-config: []

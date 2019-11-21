@@ -23,7 +23,10 @@ import java.util.Objects;
 /**
  * Expands Optional by using the empty string for {@link com.google.common.base.Optional#absent()} and
  * the {@link Object#toString()} of the value otherwise.
+ *
+ * @deprecated no longer used
  */
+@Deprecated
 public final class GuavaEmptyOptionalExpander implements Expander {
 
     @Override

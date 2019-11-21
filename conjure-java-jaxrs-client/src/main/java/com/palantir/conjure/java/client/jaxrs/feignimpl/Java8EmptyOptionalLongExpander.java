@@ -24,7 +24,10 @@ import java.util.OptionalLong;
 /**
  * Expands OptionalLong by using the empty string for {@link OptionalLong#empty()} and the {@link Long#toString()} of
  * the value otherwise.
+ *
+ * @deprecated no longer used
  */
+@Deprecated
 public final class Java8EmptyOptionalLongExpander implements Expander {
 
     @Override

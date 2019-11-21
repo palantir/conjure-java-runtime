@@ -91,7 +91,7 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
-    public void test503_eventually_works() throws InterruptedException {
+    public void test503_eventually_works() {
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setBody("\"foo\""));
@@ -101,7 +101,7 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
-    public void give_me_some_delays() throws InterruptedException {
+    public void give_me_some_delays() {
         server.enqueue(new MockResponse()
                 .setHeadersDelay(100, TimeUnit.MILLISECONDS)
                 .setHeader("Content-Type", "application/json")
@@ -113,7 +113,7 @@ public final class TracerTest extends TestBase {
     }
 
     @Test
-    public void test503_exhausting_retries() throws InterruptedException {
+    public void test503_exhausting_retries() {
         // Default is 4 retries, so doing 5
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setResponseCode(503));

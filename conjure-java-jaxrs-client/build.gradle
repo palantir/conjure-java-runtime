@@ -8,26 +8,26 @@ dependencies {
     api "com.google.code.findbugs:jsr305"
     api "javax.ws.rs:javax.ws.rs-api"
     // TODO(dsanduleac): Should be implementation, but can't because we expose feign.TextDelegateEncoder
-    api "com.netflix.feign:feign-core"
+    api "io.github.openfeign:feign-core"
 
     implementation project(":conjure-java-jackson-serialization")
     implementation project(":keystores")
     implementation "com.google.guava:guava"
     implementation "com.github.ben-manes.caffeine:caffeine"
-    implementation "com.netflix.feign:feign-jackson"
-    implementation("com.netflix.feign:feign-jaxrs") {
+    implementation "com.palantir.tracing:tracing-okhttp3"
+    implementation "io.github.openfeign:feign-jackson"
+    implementation("io.github.openfeign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
     }
-    implementation "com.netflix.feign:feign-okhttp"
-    implementation "com.netflix.feign:feign-slf4j"
-    implementation "com.palantir.tracing:tracing-okhttp3"
+    implementation "io.github.openfeign:feign-okhttp"
+    implementation "io.github.openfeign:feign-slf4j"
     implementation "org.slf4j:slf4j-api"
 
     testImplementation project(":conjure-java-retrofit2-client")
     testImplementation project(":conjure-java-jersey-server")
     testImplementation project(':keystores')
-    testImplementation "com.netflix.feign:feign-jackson"
+    testImplementation "io.github.openfeign:feign-jackson"
     testImplementation "com.squareup.okhttp3:mockwebserver"
     testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
     testImplementation "com.palantir.tracing:tracing-test-utils"
