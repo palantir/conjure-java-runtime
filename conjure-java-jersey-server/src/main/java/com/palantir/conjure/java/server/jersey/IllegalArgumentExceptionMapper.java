@@ -16,11 +16,16 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import com.codahale.metrics.Meter;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
 final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalArgumentException> {
+
+    IllegalArgumentExceptionMapper(Meter internalExceptionMeter) {
+        super(internalExceptionMeter);
+    }
 
     @Override
     ErrorType getErrorType(IllegalArgumentException _exception) {

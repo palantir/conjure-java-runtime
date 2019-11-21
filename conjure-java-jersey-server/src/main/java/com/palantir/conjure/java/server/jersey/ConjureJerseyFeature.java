@@ -42,14 +42,14 @@ public class ConjureJerseyFeature implements Feature {
     @Override
     public boolean configure(FeatureContext context) {
         // Exception mappers
-        context.register(new IllegalArgumentExceptionMapper());
+        context.register(new IllegalArgumentExceptionMapper(internalExceptionMeter));
         context.register(new NoContentExceptionMapper());
-        context.register(new RuntimeExceptionMapper());
+        context.register(new RuntimeExceptionMapper(internalExceptionMeter));
         context.register(new WebApplicationExceptionMapper());
         context.register(new RemoteExceptionMapper());
         context.register(new ServiceExceptionMapper(internalExceptionMeter));
         context.register(new QosExceptionMapper());
-        context.register(new ThrowableExceptionMapper());
+        context.register(new ThrowableExceptionMapper(internalExceptionMeter));
 
         // Cbor handling
         context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));

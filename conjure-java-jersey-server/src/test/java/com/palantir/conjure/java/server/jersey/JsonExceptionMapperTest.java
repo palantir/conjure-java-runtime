@@ -18,16 +18,25 @@ package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import javax.ws.rs.core.Response;
 import org.junit.Test;
 
 public final class JsonExceptionMapperTest {
 
-    private final JsonExceptionMapper<RuntimeException> mapper = new JsonExceptionMapper<RuntimeException>() {
+    private final TaggedMetricRegistry taggedMetrics = new DefaultTaggedMetricRegistry();
+    private final Meter internalExceptionMeter  = taggedMetrics.meter(MetricName.builder()
+            .safeName("conjure.server.exception")
+            .build());
+    private final JsonExceptionMapper<RuntimeException> mapper =
+            new JsonExceptionMapper<RuntimeException>(internalExceptionMeter) {
         @Override
         ErrorType getErrorType(RuntimeException _exception) {
             return ErrorType.INVALID_ARGUMENT;
@@ -48,7 +57,7 @@ public final class JsonExceptionMapperTest {
 
     @Test
     public void testDoesNotPropagateExceptionMessage() throws Exception {
-        Response response = new RuntimeExceptionMapper().toResponse(new NullPointerException("secret"));
+        Response response = new RuntimeExceptionMapper(internalExceptionMeter).toResponse(new NullPointerException("secret"));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).doesNotContain("secret");
     }
