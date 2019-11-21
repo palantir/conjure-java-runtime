@@ -11,6 +11,8 @@ dependencies {
     implementation "com.jcraft:jzlib"
     implementation "com.palantir.safe-logging:safe-logging"
     implementation "com.palantir.tracing:tracing-jersey"
+    implementation 'com.palantir.tritium:tritium-registry'
+    implementation 'io.dropwizard.metrics:metrics-core'
 
     runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation"
 
