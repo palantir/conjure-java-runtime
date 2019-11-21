@@ -16,14 +16,24 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.jaxrs.cbor.JacksonCBORProvider;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.tracing.jersey.TraceEnrichingFilter;
+import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 
-public enum ConjureJerseyFeature implements Feature {
-    INSTANCE;
+public class ConjureJerseyFeature implements Feature {
+
+    private final Meter internalExceptionMeter;
+
+    public ConjureJerseyFeature(TaggedMetricRegistry registry) {
+        this.internalExceptionMeter = registry.meter(MetricName.builder()
+                .safeName("conjure.server.exception")
+                .build());
+    }
 
     /**
      * Configures a Jersey server w.r.t. conjure-java-runtime conventions: registers tracer filters and exception
@@ -37,7 +47,7 @@ public enum ConjureJerseyFeature implements Feature {
         context.register(new RuntimeExceptionMapper());
         context.register(new WebApplicationExceptionMapper());
         context.register(new RemoteExceptionMapper());
-        context.register(new ServiceExceptionMapper());
+        context.register(new ServiceExceptionMapper(internalExceptionMeter));
         context.register(new QosExceptionMapper());
         context.register(new ThrowableExceptionMapper());
 
