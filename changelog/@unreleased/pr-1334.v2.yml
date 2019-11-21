@@ -1,5 +1,5 @@
 type: fix
 fix:
-  description: Consistnetly specify jackson version as 2.10.1
+  description: Consistently specify jackson version as 2.10.1
   links:
   - https://github.com/palantir/conjure-java-runtime/pull/1334
