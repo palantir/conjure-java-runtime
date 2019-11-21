@@ -23,6 +23,7 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import io.dropwizard.jersey.DropwizardResourceConfig;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
@@ -41,7 +42,7 @@ public final class JerseyExceptionMapperTest extends JerseyTest {
     protected Application configure() {
         forceSet(TestProperties.CONTAINER_PORT, "0");
         return DropwizardResourceConfig.forTesting(new MetricRegistry())
-                .register(ConjureJerseyFeature.INSTANCE)
+                .register(new ConjureJerseyFeature(new DefaultTaggedMetricRegistry()))
                 .register(AngryResource.class);
     }
 

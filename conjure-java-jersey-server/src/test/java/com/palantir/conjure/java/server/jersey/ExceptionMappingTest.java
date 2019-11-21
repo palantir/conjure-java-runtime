@@ -28,6 +28,7 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -184,7 +185,7 @@ public final class ExceptionMappingTest {
     public static class ExceptionMappersTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration _config, final Environment env) {
-            env.jersey().register(ConjureJerseyFeature.INSTANCE);
+            env.jersey().register(new ConjureJerseyFeature(new DefaultTaggedMetricRegistry()));
             env.jersey().register(new ExceptionTestResource());
         }
     }

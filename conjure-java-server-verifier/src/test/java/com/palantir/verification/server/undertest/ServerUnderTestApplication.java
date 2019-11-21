@@ -23,6 +23,7 @@ import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
 import com.palantir.conjure.verification.client.AutoDeserializeService;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.jackson.DiscoverableSubtypeResolver;
@@ -50,7 +51,7 @@ public final class ServerUnderTestApplication extends Application<Configuration>
                         Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()));
 
         // must register ConjureJerseyFeature to map conjure error types.
-        environment.jersey().register(ConjureJerseyFeature.INSTANCE);
+        environment.jersey().register(new ConjureJerseyFeature(new DefaultTaggedMetricRegistry()));
     }
 
     /**

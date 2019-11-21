@@ -20,6 +20,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -52,7 +53,7 @@ import javax.ws.rs.ext.Provider;
 public class Java8TestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration _config, final Environment env) throws Exception {
-        env.jersey().register(ConjureJerseyFeature.INSTANCE);
+        env.jersey().register(new ConjureJerseyFeature(new DefaultTaggedMetricRegistry()));
         env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerObjectMapper()));
         env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
         env.jersey().register(new TestResource());
