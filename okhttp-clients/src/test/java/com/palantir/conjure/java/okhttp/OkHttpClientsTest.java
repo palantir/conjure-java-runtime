@@ -65,7 +65,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.internal.http.UnrepeatableRequestBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.SocketPolicy;
@@ -160,7 +159,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(body.retried).hasValue(0);
     }
 
-    private static final class StreamingRequestBody extends RequestBody implements UnrepeatableRequestBody {
+    private static final class StreamingRequestBody extends RequestBody {
         private static final MediaType OCTET_STREAM = MediaType.parse("application/octet-stream");
 
         private final Source source;
@@ -186,6 +185,11 @@ public final class OkHttpClientsTest extends TestBase {
                     sink.writeAll(closeableSource);
                 }
             }
+        }
+
+        @Override
+        public boolean isOneShot() {
+            return true;
         }
     }
 

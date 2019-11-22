@@ -48,7 +48,6 @@ import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import okhttp3.internal.http.UnrepeatableRequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -493,7 +492,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     private static boolean isStreamingBody(Call call) {
-        return call.request().body() instanceof UnrepeatableRequestBody;
+        return call.request().body().isOneShot();
     }
 
     private static boolean shouldPropagateQos(ClientConfiguration.ServerQoS serverQoS) {
