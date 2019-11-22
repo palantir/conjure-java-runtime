@@ -19,7 +19,6 @@ package com.palantir.conjure.java.okhttp;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Stopwatch;
-import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -32,9 +31,6 @@ import okhttp3.Response;
  */
 final class InstrumentedInterceptor implements Interceptor {
 
-    static final String CLIENT_RESPONSE_METRIC_NAME = "client.response";
-    static final String SERVICE_NAME_TAG = "service-name";
-
     private final HostEventsSink hostEventsSink;
     private final String serviceName;
     private final Timer responseTimer;
@@ -43,12 +39,12 @@ final class InstrumentedInterceptor implements Interceptor {
     InstrumentedInterceptor(TaggedMetricRegistry registry, HostEventsSink hostEventsSink, String serviceName) {
         this.hostEventsSink = hostEventsSink;
         this.serviceName = serviceName;
-        this.responseTimer = registry.timer(name());
-        this.ioExceptionMeter = registry.meter(MetricName.builder()
-                .safeName("client.response.error")
-                .putSafeTags("reason", "IOException")
-                .putSafeTags(SERVICE_NAME_TAG, serviceName)
-                .build());
+        ClientMetrics clientMetrics = ClientMetrics.of(registry);
+        this.responseTimer = clientMetrics.response(serviceName);
+        this.ioExceptionMeter = clientMetrics.responseError()
+                .reason("IOException")
+                .serviceName(serviceName)
+                .build();
     }
 
     @Override
@@ -82,12 +78,5 @@ final class InstrumentedInterceptor implements Interceptor {
             HostEventsSink hostEventsSink,
             Class<?> serviceClass) {
         return new InstrumentedInterceptor(registry, hostEventsSink, serviceClass.getSimpleName());
-    }
-
-    private MetricName name() {
-        return MetricName.builder()
-                .safeName(CLIENT_RESPONSE_METRIC_NAME)
-                .putSafeTags(SERVICE_NAME_TAG, serviceName)
-                .build();
     }
 }

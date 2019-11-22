@@ -2,6 +2,7 @@ apply plugin: "org.inferred.processors"
 
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 apply plugin: 'com.palantir.revapi'
+apply plugin: 'com.palantir.metric-schema'
 
 dependencies {
     api project(':client-config')
