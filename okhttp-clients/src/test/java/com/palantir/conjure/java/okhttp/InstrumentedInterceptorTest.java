@@ -82,8 +82,8 @@ public final class InstrumentedInterceptorTest {
     @Test
     public void testResponseMetricRegistered() throws IOException {
         MetricName name = MetricName.builder()
-                .safeName(InstrumentedInterceptor.CLIENT_RESPONSE_METRIC_NAME)
-                .putSafeTags(InstrumentedInterceptor.SERVICE_NAME_TAG, "client")
+                .safeName("client.response")
+                .putSafeTags("service-name", "client")
                 .build();
         Timer timer = registry.timer(name);
 

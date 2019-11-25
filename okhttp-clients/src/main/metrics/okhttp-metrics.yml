@@ -1,0 +1,60 @@
+options:
+  javaPackage: com.palantir.conjure.java.okhttp
+  javaVisibility: packagePrivate
+namespaces:
+  conjure-java-client.qos:
+    docs: Conjure okhttp client quality of service metrics.
+    metrics:
+      request-permit.slow-acquire:
+        type: timer
+        docs: |
+          Timer representing how long it takes to acquire ConcurrencyLimiter permits. (<1ms acquisitions are considered successful, so not included in this 'slow-acquire' timer).
+
+          OkHttpClients acquire a ConcurrencyLimiter permit (scoped to each particular endpoint) to constrain the number of in-flight requests if the server is overloaded.
+          Any acquire that takes less than a millisecond is considered to be successful - this 'slow-acquire' timer measures any that take longer than a millisecond,
+          indicating that conjure-java-runtime is trying to avoid overloading a server.
+
+          See https://github.com/palantir/conjure-java-runtime#quality-of-service-retry-failover-throttling-backpressure
+      request-permit.leak-suspected:
+        type: meter
+        docs: |
+          Meter indicating a client timed out waiting for a ConcurrencyLimiter permit, so the limiter was reset to avoid infinite waiting.
+          An associated WARN log line includes detailed information about the serviceClass, hostname, method, pathTemplate and timeout.
+      request-permit.slow-acquire-tagged:
+        type: timer
+        tags: [serviceClass]
+        docs: |
+          Per serviceClass timer representing how long it takes to acquire ConcurrencyLimiter permits. (<1ms acquisitions are considered successful, so not included in this 'slow-acquire' timer).
+
+          OkHttpClients acquire a ConcurrencyLimiter permit (scoped to each particular endpoint) to constrain the number of in-flight requests if the server is overloaded.
+          Any acquire that takes less than a millisecond is considered to be successful - this 'slow-acquire' timer measures any that take longer than a millisecond,
+          indicating that conjure-java-runtime is trying to avoid overloading a server.
+
+          See https://github.com/palantir/conjure-java-runtime#quality-of-service-retry-failover-throttling-backpressure
+  client:
+    docs: Conjure okhttp client response metrics.
+    metrics:
+      response:
+        type: timer
+        tags: [service-name]
+        docs: Request time, note that this does not include time spent reading the response body.
+      response.error:
+        type: meter
+        tags: [reason, service-name]
+        docs: Rate of errors received by reason and service-name. Currently only errors with reason `IOException` are reported.
+  com.palantir.conjure.java:
+    shortName: Okhttp
+    docs: Conjure okhttp client metrics.
+    metrics:
+      dispatcher.calls.queued:
+        type: gauge
+        docs: Reports the number of queued outgoing requests.
+      dispatcher.calls.running:
+        type: gauge
+        docs: Reports the number of active outgoing requests.
+      connection-pool.connections.total:
+        type: gauge
+        docs: Total number of connections in the connection pool.
+      connection-pool.connections.idle:
+        type: gauge
+        docs: Number of idle connections in the connection pool.
