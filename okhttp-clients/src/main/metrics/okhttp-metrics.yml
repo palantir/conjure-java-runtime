@@ -7,14 +7,30 @@ namespaces:
     metrics:
       request-permit.slow-acquire:
         type: timer
-        docs: Concurrency limiter request permit slow acquisition time.
+        docs: |
+          Timer representing how long it takes to acquire ConcurrencyLimiter permits. (<1ms acquisitions are considered successful, so not included in this 'slow-acquire' timer).
+
+          OkHttpClients acquire a ConcurrencyLimiter permit (scoped to each particular endpoint) to constrain the number of in-flight requests if the server is overloaded.
+          Any acquire that takes less than a millisecond is considered to be successful - this 'slow-acquire' timer measures any that take longer than a millisecond,
+          indicating that conjure-java-runtime is trying to avoid overloading a server.
+
+          See https://github.com/palantir/conjure-java-runtime#quality-of-service-retry-failover-throttling-backpressure
       request-permit.leak-suspected:
         type: meter
-        docs: Rate of suspected request permit leaks.
+        docs: |
+          Meter indicating a client timed out waiting for a ConcurrencyLimiter permit, so the limiter was reset to avoid infinite waiting.
+          An associated WARN log line includes detailed information about the serviceClass, hostname, method, pathTemplate and timeout.
       request-permit.slow-acquire-tagged:
         type: timer
         tags: [serviceClass]
-        docs: Concurrency limiter request permit slow acquisition time. Idential to `slow-acquire`, but tagged by service.
+        docs: |
+          Per serviceClass timer representing how long it takes to acquire ConcurrencyLimiter permits. (<1ms acquisitions are considered successful, so not included in this 'slow-acquire' timer).
+
+          OkHttpClients acquire a ConcurrencyLimiter permit (scoped to each particular endpoint) to constrain the number of in-flight requests if the server is overloaded.
+          Any acquire that takes less than a millisecond is considered to be successful - this 'slow-acquire' timer measures any that take longer than a millisecond,
+          indicating that conjure-java-runtime is trying to avoid overloading a server.
+
+          See https://github.com/palantir/conjure-java-runtime#quality-of-service-retry-failover-throttling-backpressure
   client:
     docs: Conjure okhttp client response metrics.
     metrics:
