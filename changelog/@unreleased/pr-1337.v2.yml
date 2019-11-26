@@ -1,6 +1,7 @@
 type: improvement
 improvement:
-  description: Feign has been upgraded to 10.6.0. This fixes the serialization of
-    absent optional header parameters.
+  description: Feign has been upgraded to 10.6.0. This involved a maven group change
+    from `com.netflix.feign` -> `io.github.openfeign`. This fixes the serialization
+    of absent optional header parameters.
   links:
   - https://github.com/palantir/conjure-java-runtime/pull/1337
