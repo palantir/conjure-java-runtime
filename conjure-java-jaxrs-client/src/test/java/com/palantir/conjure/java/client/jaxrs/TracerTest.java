@@ -78,7 +78,7 @@ public final class TracerTest extends TestBase {
 
         Tracer.unsubscribe(TracerTest.class.getName());
         assertThat(observedSpans).containsExactlyInAnyOrder(
-                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: GET /{param}"),
+                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: GET /<param>"),
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: attempt 0"),
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: client-side-concurrency-limiter 0/10"),
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: dispatcher"),

@@ -34,8 +34,7 @@ public final class PathTemplateHeaderEnrichmentContract extends AbstractDelegati
                         metadata.template().method() + " "
                                 + metadata.template()
                                         .url()
-                                        // escape from feign string interpolation
-                                        // See RequestTemplate.expand
-                                        .replace("{", "{{"));
+                                        .replace("{", "<")
+                                        .replace("}", ">"));
     }
 }
