@@ -20,7 +20,6 @@ import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.jaxrs.cbor.JacksonCBORProvider;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.tracing.jersey.TraceEnrichingFilter;
-import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
@@ -30,9 +29,8 @@ public class ConjureJerseyFeature implements Feature {
     private final Meter internalExceptionMeter;
 
     public ConjureJerseyFeature(TaggedMetricRegistry registry) {
-        this.internalExceptionMeter = registry.meter(MetricName.builder()
-                .safeName("conjure.server.exception")
-                .build());
+        ServerMetrics serverMetrics = ServerMetrics.of(registry);
+        this.internalExceptionMeter = serverMetrics.exception();
     }
 
     /**

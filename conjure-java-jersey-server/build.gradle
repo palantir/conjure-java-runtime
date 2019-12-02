@@ -1,5 +1,6 @@
 apply from: "${rootDir}/gradle/publish-jar.gradle"
 apply plugin: 'com.palantir.revapi'
+apply plugin: 'com.palantir.metric-schema'
 
 dependencies {
     api "com.palantir.conjure.java.api:errors"

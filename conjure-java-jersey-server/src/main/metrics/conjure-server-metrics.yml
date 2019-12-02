@@ -1,0 +1,11 @@
+options:
+  javaPackage: com.palantir.conjure.java.server.jersey
+  javaVisibility: packagePrivate
+namespaces:
+  server:
+    docs: Conjure server metrics
+    metrics:
+      exception:
+        type: meter
+        docs: |
+          Meter of the number of non-RemoteException internal exceptions produced by this server.
