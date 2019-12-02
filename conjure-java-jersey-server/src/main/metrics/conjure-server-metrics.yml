@@ -2,7 +2,8 @@ options:
   javaPackage: com.palantir.conjure.java.server.jersey
   javaVisibility: packagePrivate
 namespaces:
-  server:
+  conjure.server:
+    shortName: ConjureServer
     docs: Conjure server metrics
     metrics:
       exception:

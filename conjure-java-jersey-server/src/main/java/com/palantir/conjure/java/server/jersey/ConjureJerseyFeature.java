@@ -29,8 +29,8 @@ public class ConjureJerseyFeature implements Feature {
     private final Meter internalExceptionMeter;
 
     public ConjureJerseyFeature(TaggedMetricRegistry registry) {
-        ServerMetrics serverMetrics = ServerMetrics.of(registry);
-        this.internalExceptionMeter = serverMetrics.exception();
+        ConjureServerMetrics conjureServerMetrics = ConjureServerMetrics.of(registry);
+        this.internalExceptionMeter = conjureServerMetrics.exception();
     }
 
     /**
