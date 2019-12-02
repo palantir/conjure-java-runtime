@@ -30,7 +30,6 @@ import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
-import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.time.Duration;
 import java.util.Optional;
@@ -50,11 +49,6 @@ final class ConcurrencyLimiters {
     private static final Logger log = LoggerFactory.getLogger(ConcurrencyLimiters.class);
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(1);
     private static final Void NO_CONTEXT = null;
-    private static final MetricName SLOW_ACQUIRE =
-            MetricName.builder().safeName("conjure-java-client.qos.request-permit.slow-acquire").build();
-    private static final MetricName LEAK_SUSPECTED =
-            MetricName.builder().safeName("conjure-java-client.qos.request-permit.leak-suspected").build();
-    private static final String SLOW_ACQUIRE_TAGGED = "conjure-java-client.qos.request-permit.slow-acquire-tagged";
 
     private final Timer slowAcquire;
     private final Timer slowAcquireTagged;
@@ -72,10 +66,10 @@ final class ConcurrencyLimiters {
             Duration timeout,
             Class<?> serviceClass,
             boolean useLimiter) {
-        this.slowAcquire = taggedMetricRegistry.timer(SLOW_ACQUIRE);
-        this.leakSuspected = taggedMetricRegistry.meter(LEAK_SUSPECTED);
-        this.slowAcquireTagged = taggedMetricRegistry.timer(generateMetricNameWithServiceName(SLOW_ACQUIRE_TAGGED,
-                serviceClass));
+        ConjureJavaClientQosMetrics metrics = ConjureJavaClientQosMetrics.of(taggedMetricRegistry);
+        this.slowAcquire = metrics.requestPermitSlowAcquire();
+        this.leakSuspected = metrics.requestPermitLeakSuspected();
+        this.slowAcquireTagged = metrics.requestPermitSlowAcquireTagged(serviceClass.getSimpleName());
         this.timeout = timeout;
         this.serviceClass = serviceClass;
         this.scheduledExecutorService = scheduledExecutorService;
@@ -132,13 +126,6 @@ final class ConcurrencyLimiters {
                  */
                 .maxLimit(Integer.MAX_VALUE)
                 .build());
-    }
-
-    private MetricName generateMetricNameWithServiceName(String name, Class<?> service) {
-        return MetricName.builder()
-                .safeName(name)
-                .putSafeTags("serviceClass", service.getSimpleName())
-                .build();
     }
 
     private ConcurrencyLimiter newLimiter(Key limiterKey) {
