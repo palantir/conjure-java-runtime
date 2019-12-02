@@ -57,7 +57,8 @@ public final class JsonExceptionMapperTest {
 
     @Test
     public void testDoesNotPropagateExceptionMessage() throws Exception {
-        Response response = new RuntimeExceptionMapper(internalExceptionMeter).toResponse(new NullPointerException("secret"));
+        Response response =
+                new RuntimeExceptionMapper(internalExceptionMeter).toResponse(new NullPointerException("secret"));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).doesNotContain("secret");
     }
