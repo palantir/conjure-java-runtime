@@ -32,16 +32,16 @@ import org.junit.Test;
 public final class JsonExceptionMapperTest {
 
     private final TaggedMetricRegistry taggedMetrics = new DefaultTaggedMetricRegistry();
-    private final Meter internalExceptionMeter  = taggedMetrics.meter(MetricName.builder()
+    private final Meter internalExceptionMeter = taggedMetrics.meter(MetricName.builder()
             .safeName("conjure.server.exception")
             .build());
     private final JsonExceptionMapper<RuntimeException> mapper =
             new JsonExceptionMapper<RuntimeException>(internalExceptionMeter) {
-        @Override
-        ErrorType getErrorType(RuntimeException _exception) {
-            return ErrorType.INVALID_ARGUMENT;
-        }
-    };
+                @Override
+                ErrorType getErrorType(RuntimeException _exception) {
+                    return ErrorType.INVALID_ARGUMENT;
+                }
+            };
 
     private final ObjectMapper objectMapper = ObjectMappers.newServerObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
