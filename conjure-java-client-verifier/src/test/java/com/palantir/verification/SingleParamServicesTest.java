@@ -44,12 +44,9 @@ public class SingleParamServicesTest {
     private static final Logger log = LoggerFactory.getLogger(SingleParamServicesTest.class);
     private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
     private static ImmutableMap<String, Object> servicesMaps = ImmutableMap.of(
-            "singlePathParamService",
-            VerificationClients.singlePathParamService(server),
-            "singleHeaderService",
-            VerificationClients.singleHeaderService(server),
-            "singleQueryParamService",
-            VerificationClients.singleQueryParamService(server));
+            "singlePathParamService", VerificationClients.singlePathParamService(server),
+            "singleHeaderService", VerificationClients.singleHeaderService(server),
+            "singleQueryParamService", VerificationClients.singleQueryParamService(server));
 
     @Parameterized.Parameter(0)
     public String serviceName;
