@@ -39,10 +39,7 @@ final class InstrumentedInterceptor implements Interceptor {
         this.serviceName = serviceName;
         ClientMetrics clientMetrics = ClientMetrics.of(registry);
         this.responseTimer = clientMetrics.response(serviceName);
-        this.ioExceptionMeter = clientMetrics.responseError()
-                .reason("IOException")
-                .serviceName(serviceName)
-                .build();
+        this.ioExceptionMeter = clientMetrics.responseError().reason("IOException").serviceName(serviceName).build();
     }
 
     @Override
