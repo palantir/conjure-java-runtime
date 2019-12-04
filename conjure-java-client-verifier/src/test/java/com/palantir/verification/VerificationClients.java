@@ -18,9 +18,11 @@ package com.palantir.verification;
 
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
+import com.palantir.conjure.java.client.retrofit2.Retrofit2Client;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.verification.server.AutoDeserializeConfirmService;
 import com.palantir.conjure.verification.server.AutoDeserializeService;
+import com.palantir.conjure.verification.server.AutoDeserializeServiceRetrofit;
 import com.palantir.conjure.verification.server.SingleHeaderService;
 import com.palantir.conjure.verification.server.SinglePathParamService;
 import com.palantir.conjure.verification.server.SingleQueryParamService;
@@ -28,9 +30,17 @@ import com.palantir.conjure.verification.server.SingleQueryParamService;
 public final class VerificationClients {
     private VerificationClients() {}
 
-    public static AutoDeserializeService autoDeserializeService(VerificationServerRule server) {
+    public static AutoDeserializeService autoDeserializeServiceJersey(VerificationServerRule server) {
         return JaxRsClient.create(
                 AutoDeserializeService.class,
+                getUserAgent(),
+                new HostMetricsRegistry(),
+                server.getClientConfiguration());
+    }
+
+    public static AutoDeserializeServiceRetrofit autoDeserializeServiceRetrofit(VerificationServerRule server) {
+        return Retrofit2Client.create(
+                AutoDeserializeServiceRetrofit.class,
                 getUserAgent(),
                 new HostMetricsRegistry(),
                 server.getClientConfiguration());

@@ -96,7 +96,7 @@ public class SingleParamServicesTest {
 
     @Test
     public void runTestCase() throws Exception {
-        Assume.assumeFalse(Cases.shouldIgnore(endpointName, jsonString));
+        Assume.assumeFalse(Cases.shouldIgnoreJersey(endpointName, jsonString));
 
         log.info("Invoking {} {}({})", serviceName, endpointName, jsonString);
 
