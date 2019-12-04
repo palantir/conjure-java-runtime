@@ -2,11 +2,11 @@ versionOverrides: {}
 acceptedBreaks:
   "4.43.1":
     com.palantir.conjure.java.runtime:conjure-java-jersey-server:
-    - code: "\"java.class.noLongerInheritsFromClass\""
-      old: "\"enum com.palantir.conjure.java.server.jersey.ConjureJerseyFeature\""
-      new: "\"class com.palantir.conjure.java.server.jersey.ConjureJerseyFeature\""
-      justification: "\"Adding TaggedMetricRegistry to ConjureJerseyFeature required\
-        \ changing from enum to class\""
+    - code: "java.class.noLongerInheritsFromClass"
+      old: "enum com.palantir.conjure.java.server.jersey.ConjureJerseyFeature"
+      new: "class com.palantir.conjure.java.server.jersey.ConjureJerseyFeature"
+      justification: "Adding TaggedMetricRegistry to ConjureJerseyFeature required\
+        \ changing from enum to class"
   "4.37.0":
     com.palantir.conjure.java.runtime:okhttp-clients:
     - code: "java.method.addedToInterface"
