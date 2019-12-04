@@ -96,9 +96,10 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
         } else if (paramAnnotations.contains(QueryParam.class)) {
             metadata.indexToExpanderClass().put(index, nullExpanderClass);
         } else if (paramAnnotations.contains(PathParam.class)) {
-            throw new RuntimeException(String.format(
-                    "Cannot use Java8 Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
-                    targetType.getName(), method.getName(), index));
+            throw new RuntimeException(
+                    String.format(
+                            "Cannot use Java8 Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
+                            targetType.getName(), method.getName(), index));
         }
     }
 

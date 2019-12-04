@@ -100,10 +100,11 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
     }
 
     private static BufferedSource wrapSource(BufferedSource currentSource, Limiter.Listener listener) {
-        return (BufferedSource) Proxy.newProxyInstance(
-                BufferedSource.class.getClassLoader(),
-                new Class<?>[] {BufferedSource.class},
-                new ReleaseConcurrencyLimitProxy(currentSource, listener));
+        return (BufferedSource)
+                Proxy.newProxyInstance(
+                        BufferedSource.class.getClassLoader(),
+                        new Class<?>[] {BufferedSource.class},
+                        new ReleaseConcurrencyLimitProxy(currentSource, listener));
     }
 
     /** This proxy enables e.g. Okio to make additive additions to their API without breaking us. */

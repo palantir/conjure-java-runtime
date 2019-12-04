@@ -120,11 +120,12 @@ public final class ClientConfigurationsTest {
                 .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
                 .build();
 
-        assertThatThrownBy(() -> ClientConfiguration.builder()
-                        .from(ClientConfigurations.of(serviceConfig))
-                        .nodeSelectionStrategy(NodeSelectionStrategy.ROUND_ROBIN)
-                        .failedUrlCooldown(Duration.ofMillis(0))
-                        .build())
+        assertThatThrownBy(() ->
+                        ClientConfiguration.builder()
+                                .from(ClientConfigurations.of(serviceConfig))
+                                .nodeSelectionStrategy(NodeSelectionStrategy.ROUND_ROBIN)
+                                .failedUrlCooldown(Duration.ofMillis(0))
+                                .build())
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
     }
@@ -146,10 +147,11 @@ public final class ClientConfigurationsTest {
 
     @Test
     public void sslSocketFactory_has_keepalives_enabled() throws IOException {
-        ClientConfiguration config = ClientConfigurations.of(ServiceConfiguration.builder()
-                .uris(uris)
-                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
-                .build());
+        ClientConfiguration config = ClientConfigurations.of(
+                ServiceConfiguration.builder()
+                        .uris(uris)
+                        .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                        .build());
 
         try (Socket socket = config.sslSocketFactory().createSocket("google.com", 443)) {
             assertThat(socket.getKeepAlive()).describedAs("keepAlives enabled").isTrue();

@@ -227,8 +227,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!shouldRetry(exception, backoff)) {
                     callback.onFailure(call, new SafeIoException(
-                            "Failed to complete the request due to an IOException", exception, UnsafeArg.of(
-                                    "requestUrl", call.request().url().toString())));
+                            "Failed to complete the request due to an IOException",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString())));
                     return;
                 }
 
@@ -361,8 +362,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 Optional<Duration> nonAdvertizedBackoff = backoffStrategy.nextBackoff();
                 if (!nonAdvertizedBackoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
-                            "Failed to complete the request due to QosException.Throttle", exception, UnsafeArg.of(
-                                    "requestUrl", call.request().url().toString())));
+                            "Failed to complete the request due to QosException.Throttle",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString())));
                     return null;
                 }
 
@@ -389,8 +391,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
             public Void visit(QosException.RetryOther exception) {
                 if (maxNumRelocations <= 0) {
                     callback.onFailure(call, new SafeIoException(
-                            "Exceeded the maximum number of allowed redirects", exception, UnsafeArg.of(
-                                    "requestUrl", call.request().url().toString())));
+                            "Exceeded the maximum number of allowed redirects",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString())));
                     return null;
                 }
 
@@ -435,8 +438,9 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 Optional<Duration> backoff = backoffStrategy.nextBackoff();
                 if (!backoff.isPresent()) {
                     callback.onFailure(call, new SafeIoException(
-                            "Failed to complete the request due to QosException.Unavailable", exception, UnsafeArg.of(
-                                    "requestUrl", call.request().url().toString())));
+                            "Failed to complete the request due to QosException.Unavailable",
+                            exception,
+                            UnsafeArg.of("requestUrl", call.request().url().toString())));
                     return null;
                 }
 

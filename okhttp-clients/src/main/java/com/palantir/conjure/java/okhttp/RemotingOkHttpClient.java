@@ -136,7 +136,8 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 return urls.redirectToCurrent(current);
         }
 
-        throw new SafeIllegalStateException("Encountered unknown node selection strategy", SafeArg.of(
-                "nodeSelectionStrategy", nodeSelectionStrategy));
+        throw new SafeIllegalStateException(
+                "Encountered unknown node selection strategy",
+                SafeArg.of("nodeSelectionStrategy", nodeSelectionStrategy));
     }
 }

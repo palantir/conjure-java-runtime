@@ -144,7 +144,10 @@ public final class JaxRsClientFailoverTest extends TestBase {
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
 
         TestService bogusHostProxy = JaxRsClient.create(
-                TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
+                TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://foo-bar-bogus-host.unresolvable:80", "http://localhost:"
                                 + failoverTestCase.server1.getPort()))
                         .maxNumRetries(2)
@@ -160,7 +163,10 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
         TestService anotherProxy = JaxRsClient.create(
-                TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
+                TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(2)
                         .build());
@@ -175,7 +181,10 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
         TestService anotherProxy = JaxRsClient.create(
-                TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
+                TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(2)
                         .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
@@ -189,7 +198,10 @@ public final class JaxRsClientFailoverTest extends TestBase {
         MockWebServer server1 = new MockWebServer();
 
         TestService anotherProxy = JaxRsClient.create(
-                TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
+                TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(1)
                         .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
@@ -246,13 +258,17 @@ public final class JaxRsClientFailoverTest extends TestBase {
         }
 
         public TestService getProxy() {
-            return JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), ClientConfiguration.builder()
-                    .from(createTestConfig("http://localhost:" + server1.getPort(), "http://localhost:"
-                            + server2.getPort()))
-                    .maxNumRetries(2)
-                    .nodeSelectionStrategy(nodeSelectionStrategy)
-                    .failedUrlCooldown(Duration.ofMillis(duration))
-                    .build());
+            return JaxRsClient.create(
+                    TestService.class,
+                    AGENT,
+                    new HostMetricsRegistry(),
+                    ClientConfiguration.builder()
+                            .from(createTestConfig("http://localhost:" + server1.getPort(), "http://localhost:"
+                                    + server2.getPort()))
+                            .maxNumRetries(2)
+                            .nodeSelectionStrategy(nodeSelectionStrategy)
+                            .failedUrlCooldown(Duration.ofMillis(duration))
+                            .build());
         }
     }
 }

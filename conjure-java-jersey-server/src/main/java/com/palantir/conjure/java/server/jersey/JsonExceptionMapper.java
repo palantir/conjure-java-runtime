@@ -76,11 +76,12 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
     static Response createResponse(int httpErrorCode, String errorCode, String errorName, String errorInstanceId) {
         ResponseBuilder builder = Response.status(httpErrorCode);
         try {
-            builder.entity(SerializableError.builder()
-                            .errorCode(errorCode)
-                            .errorName(errorName)
-                            .errorInstanceId(errorInstanceId)
-                            .build())
+            builder.entity(
+                            SerializableError.builder()
+                                    .errorCode(errorCode)
+                                    .errorName(errorName)
+                                    .errorInstanceId(errorInstanceId)
+                                    .build())
                     .type(MediaType.APPLICATION_JSON);
         } catch (RuntimeException e) {
             log.warn(

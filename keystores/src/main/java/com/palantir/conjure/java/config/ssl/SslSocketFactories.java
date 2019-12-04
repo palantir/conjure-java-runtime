@@ -73,8 +73,10 @@ public final class SslSocketFactories {
         KeyManager[] keyManagers = null;
         if (config.keyStorePath().isPresent()) {
             keyManagers = createKeyManagerFactory(
-                            config.keyStorePath().get(), config.keyStorePassword()
-                                    .get(), config.keyStoreType(), config.keyStoreKeyAlias())
+                            config.keyStorePath().get(),
+                            config.keyStorePassword().get(),
+                            config.keyStoreType(),
+                            config.keyStoreKeyAlias())
                     .getKeyManagers();
         }
 
@@ -156,11 +158,13 @@ public final class SslSocketFactories {
         if (trustManager instanceof X509TrustManager) {
             return (X509TrustManager) trustManager;
         } else {
-            throw new RuntimeException(String.format(
-                    "First TrustManager associated with SslConfiguration was expected to be a %s, but was a %s: %s",
-                    X509TrustManager.class.getSimpleName(),
-                    trustManager.getClass().getSimpleName(),
-                    config.trustStorePath()));
+            throw new RuntimeException(
+                    String.format(
+                            "First TrustManager associated with SslConfiguration was expected to be a %s, but was a"
+                                    + " %s: %s",
+                            X509TrustManager.class.getSimpleName(),
+                            trustManager.getClass().getSimpleName(),
+                            config.trustStorePath()));
         }
     }
 
@@ -169,9 +173,10 @@ public final class SslSocketFactories {
         if (trustManager instanceof X509TrustManager) {
             return (X509TrustManager) trustManager;
         } else {
-            throw new RuntimeException(String.format(
-                    "First TrustManager associated with certificates was expected to be a %s, but was a %s",
-                    X509TrustManager.class.getSimpleName(), trustManager.getClass().getSimpleName()));
+            throw new RuntimeException(
+                    String.format(
+                            "First TrustManager associated with certificates was expected to be a %s, but was a %s",
+                            X509TrustManager.class.getSimpleName(), trustManager.getClass().getSimpleName()));
         }
     }
 

@@ -86,8 +86,10 @@ public final class KeyStoresTests {
         assertThatThrownBy(() -> KeyStores.createTrustStoreFromCertificates(certFolder.toPath()))
                 .isInstanceOf(RuntimeException.class)
                 .hasCauseInstanceOf(CertificateParsingException.class)
-                .hasMessageContaining(String.format(
-                        "Could not read file at \"%s\" as an X.509 certificate", tempCertFile.getAbsolutePath()));
+                .hasMessageContaining(
+                        String.format(
+                                "Could not read file at \"%s\" as an X.509 certificate",
+                                tempCertFile.getAbsolutePath()));
     }
 
     @Test
@@ -100,8 +102,10 @@ public final class KeyStoresTests {
         assertThatThrownBy(() -> KeyStores.createTrustStoreFromCertificates(certFolder.toPath()))
                 .isInstanceOf(RuntimeException.class)
                 .hasCauseInstanceOf(CertificateException.class)
-                .hasMessageContaining(String.format(
-                        "Could not read file at \"%s\" as an X.509 certificate", tempDirFile.getAbsolutePath()));
+                .hasMessageContaining(
+                        String.format(
+                                "Could not read file at \"%s\" as an X.509 certificate",
+                                tempDirFile.getAbsolutePath()));
     }
 
     @Test
@@ -117,8 +121,9 @@ public final class KeyStoresTests {
     public void createTrustStoreFromCertificatesFromCertificatesByAliasInvalidCert() throws Exception {
         String cert = Files.toString(TestConstants.COMBINED_CRL_PATH.toFile(), StandardCharsets.UTF_8);
 
-        assertThatThrownBy(() -> KeyStores.createTrustStoreFromCertificates(
-                        ImmutableMap.of("invalid.crt", PemX509Certificate.of(cert))))
+        assertThatThrownBy(() ->
+                        KeyStores.createTrustStoreFromCertificates(
+                                ImmutableMap.of("invalid.crt", PemX509Certificate.of(cert))))
                 .isInstanceOf(RuntimeException.class)
                 .hasCauseInstanceOf(CertificateParsingException.class)
                 .hasMessageContaining("Could not read certificate alias \"invalid.crt\" as an X.509 certificate");
@@ -189,8 +194,9 @@ public final class KeyStoresTests {
         assertThatThrownBy(() -> KeyStores.createKeyStoreFromCombinedPems(keyFolder.toPath(), "changeit"))
                 .isInstanceOf(RuntimeException.class)
                 .hasCauseInstanceOf(GeneralSecurityException.class)
-                .hasMessageContaining(String.format(
-                        "Failed to read private key from file at \"%s\"", tempCertFile.getAbsolutePath()));
+                .hasMessageContaining(
+                        String.format(
+                                "Failed to read private key from file at \"%s\"", tempCertFile.getAbsolutePath()));
     }
 
     @Test
@@ -221,12 +227,14 @@ public final class KeyStoresTests {
         File certFolder = tempFolder.newFolder();
         Files.copy(TestConstants.SERVER_KEY_PEM_PATH.toFile(), keyFolder.toPath().resolve("server.key").toFile());
 
-        assertThatThrownBy(() -> KeyStores.createKeyStoreFromPemDirectories(
-                        keyFolder.toPath(), ".key", certFolder.toPath(), ".cer", password))
+        assertThatThrownBy(() ->
+                        KeyStores.createKeyStoreFromPemDirectories(
+                                keyFolder.toPath(), ".key", certFolder.toPath(), ".cer", password))
                 .hasCauseInstanceOf(NoSuchFileException.class)
-                .hasMessageContaining(String.format(
-                        "Failed to read certificates from file at \"%s\"",
-                        certFolder.toPath().resolve("server.cer").toString()));
+                .hasMessageContaining(
+                        String.format(
+                                "Failed to read certificates from file at \"%s\"",
+                                certFolder.toPath().resolve("server.cer").toString()));
     }
 
     @Test
@@ -235,13 +243,15 @@ public final class KeyStoresTests {
         File folder = tempFolder.newFolder();
         File file = tempFolder.newFile();
 
-        assertThatThrownBy(() -> KeyStores.createKeyStoreFromPemDirectories(
-                        file.toPath(), ".key", folder.toPath(), ".cer", password))
+        assertThatThrownBy(() ->
+                        KeyStores.createKeyStoreFromPemDirectories(
+                                file.toPath(), ".key", folder.toPath(), ".cer", password))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining(String.format("keyDirPath is not a directory: \"%s\"", file.toPath().toString()));
 
-        assertThatThrownBy(() -> KeyStores.createKeyStoreFromPemDirectories(
-                        folder.toPath(), ".key", file.toPath(), ".cer", password))
+        assertThatThrownBy(() ->
+                        KeyStores.createKeyStoreFromPemDirectories(
+                                folder.toPath(), ".key", file.toPath(), ".cer", password))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining(
                         String.format("certDirPath is not a directory: \"%s\"", file.toPath().toString()));

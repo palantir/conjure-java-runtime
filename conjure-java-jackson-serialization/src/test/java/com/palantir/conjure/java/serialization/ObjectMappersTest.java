@@ -106,8 +106,9 @@ public final class ObjectMappersTest {
     @Test
     public void testMapWithNullValues() throws IOException {
         // This is potentially a bug, see conjure-java#291
-        assertThat(MAPPER.<Map<String, String>>readValue(
-                        "{\"test\":null}", new TypeReference<Map<String, String>>() {}))
+        assertThat(
+                        MAPPER.<Map<String, String>>readValue(
+                                "{\"test\":null}", new TypeReference<Map<String, String>>() {}))
                 .isEqualTo(Collections.singletonMap("test", null));
     }
 

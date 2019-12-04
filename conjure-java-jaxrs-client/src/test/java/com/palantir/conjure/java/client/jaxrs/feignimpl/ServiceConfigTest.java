@@ -39,7 +39,8 @@ public final class ServiceConfigTest extends TestBase {
 
     @Rule
     public final DropwizardAppRule<ServiceConfigTestAppConfig> rule = new DropwizardAppRule<>(
-            ServiceConfigTestServer.ServiceConfigTestApp.class, ServiceConfigTest.class
+            ServiceConfigTestServer.ServiceConfigTestApp.class,
+            ServiceConfigTest.class
                     .getClassLoader()
                     .getResource("service-config-example.yml")
                     .getPath());

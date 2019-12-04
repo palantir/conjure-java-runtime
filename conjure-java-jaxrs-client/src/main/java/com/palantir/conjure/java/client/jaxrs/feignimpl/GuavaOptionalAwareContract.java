@@ -55,9 +55,10 @@ public final class GuavaOptionalAwareContract extends AbstractDelegatingContract
                 } else if (paramAnnotations.contains(QueryParam.class)) {
                     metadata.indexToExpanderClass().put(i, GuavaNullOptionalExpander.class);
                 } else if (paramAnnotations.contains(PathParam.class)) {
-                    throw new RuntimeException(String.format(
-                            "Cannot use Guava Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
-                            targetType.getName(), method.getName(), i));
+                    throw new RuntimeException(
+                            String.format(
+                                    "Cannot use Guava Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
+                                    targetType.getName(), method.getName(), i));
                 }
             }
         }

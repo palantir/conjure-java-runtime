@@ -63,8 +63,9 @@ public class AutoDeserializeTest {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
-            IntStream.range(0, positiveSize).forEach(i -> objects.add(
-                    new Object[] {endpointName, i, true, positiveAndNegativeTestCases.getPositive().get(i)}));
+            IntStream.range(0, positiveSize).forEach(i ->
+                    objects.add(
+                            new Object[] {endpointName, i, true, positiveAndNegativeTestCases.getPositive().get(i)}));
 
             IntStream.range(0, negativeSize).forEach(i -> objects.add(new Object[] {
                 endpointName, positiveSize + i, false, positiveAndNegativeTestCases.getNegative().get(i)
@@ -78,14 +79,15 @@ public class AutoDeserializeTest {
     public void runTestCase() throws Error, NoSuchMethodException {
         boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
         Method method = testService.getClass().getMethod(endpointName.get(), int.class);
-        System.out.println(String.format(
-                "[%s%s test case %s]: %s(%s), expected client to %s",
-                shouldIgnore ? "ignored " : "",
-                shouldSucceed ? "positive" : "negative",
-                index,
-                endpointName,
-                jsonString,
-                shouldSucceed ? "succeed" : "fail"));
+        System.out.println(
+                String.format(
+                        "[%s%s test case %s]: %s(%s), expected client to %s",
+                        shouldIgnore ? "ignored " : "",
+                        shouldSucceed ? "positive" : "negative",
+                        index,
+                        endpointName,
+                        jsonString,
+                        shouldSucceed ? "succeed" : "fail"));
 
         Optional<Error> expectationFailure = shouldSucceed ? expectSuccess(method) : expectFailure(method);
 

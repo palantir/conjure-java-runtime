@@ -51,8 +51,9 @@ final class CoerceNullValuesCallAdapterFactory extends CallAdapter.Factory {
     public CallAdapter<?, ?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
         // we only support Call<T> and CompletableFuture<T>
         Preconditions.checkState(
-                returnType instanceof ParameterizedType, "Function must return a ParametrizedType", SafeArg.of(
-                        "type", returnType));
+                returnType instanceof ParameterizedType,
+                "Function must return a ParametrizedType",
+                SafeArg.of("type", returnType));
         Type innerType = getParameterUpperBound(0, (ParameterizedType) returnType);
 
         CallAdapter<?, ?> maybeCallAdapter = delegate.get(returnType, annotations, retrofit);

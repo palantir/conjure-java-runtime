@@ -53,8 +53,9 @@ public final class ConcurrencyLimitingInterceptorTest {
     public void before() {
         request = new Request.Builder()
                 .url("https://localhost:1234/call")
-                .tag(ConcurrencyLimiterListener.class, ConcurrencyLimiterListener.create()
-                        .setLimiterListener(Futures.immediateFuture(listener)))
+                .tag(
+                        ConcurrencyLimiterListener.class,
+                        ConcurrencyLimiterListener.create().setLimiterListener(Futures.immediateFuture(listener)))
                 .get()
                 .build();
         response = new Response.Builder()

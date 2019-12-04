@@ -68,8 +68,9 @@ public final class EmptyContainerDecoder implements Decoder {
         if (response.status() == 204 || (response.status() == 200 && delegateResult == null)) {
             @Nullable Object object = blankInstanceCache.get(type);
             return Preconditions.checkNotNull(
-                    object, "Received HTTP 204 but unable to construct an empty instance for return type", SafeArg.of(
-                            "type", type));
+                    object,
+                    "Received HTTP 204 but unable to construct an empty instance for return type",
+                    SafeArg.of("type", type));
         } else {
             return delegateResult;
         }
