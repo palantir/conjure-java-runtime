@@ -96,8 +96,8 @@ public final class VerificationServerRule extends ExternalResource {
         thread.start();
 
         Preconditions.checkState(
-                latch.await(10, TimeUnit.SECONDS),
-                "verification-server failed to start up within 10 seconds");
+                latch.await(3, TimeUnit.SECONDS),
+                "verification-server failed to start up within 2 seconds");
     }
 
     @Override
