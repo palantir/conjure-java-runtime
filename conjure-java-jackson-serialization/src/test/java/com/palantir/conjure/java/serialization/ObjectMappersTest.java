@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.exc.InputCoercionException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
@@ -162,7 +163,7 @@ public final class ObjectMappersTest {
     public void testLongOverflowDeserialization() {
         BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
         assertThatThrownBy(() -> MAPPER.readValue("" + large, Long.TYPE))
-                .isInstanceOf(JsonParseException.class)
+                .isInstanceOf(InputCoercionException.class)
                 .hasMessageContaining("out of range of long");
     }
 
@@ -178,7 +179,7 @@ public final class ObjectMappersTest {
     public void testOptionalLongOverflowDeserialization() {
         BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
         assertThatThrownBy(() -> MAPPER.readValue("" + large, OptionalLong.class))
-                .isInstanceOf(JsonParseException.class)
+                .isInstanceOf(InputCoercionException.class)
                 .hasMessageContaining("out of range of long");
     }
 
@@ -193,14 +194,14 @@ public final class ObjectMappersTest {
     @Test
     public void testIntegerOverflowDeserialization() {
         assertThatThrownBy(() -> MAPPER.readValue("" + Long.MAX_VALUE, Integer.TYPE))
-                .isInstanceOf(JsonParseException.class)
+                .isInstanceOf(InputCoercionException.class)
                 .hasMessageContaining("out of range of int");
     }
 
     @Test
     public void testOptionalIntOverflowDeserialization() {
         assertThatThrownBy(() -> MAPPER.readValue("" + Long.MAX_VALUE, OptionalInt.class))
-                .isInstanceOf(JsonParseException.class)
+                .isInstanceOf(InputCoercionException.class)
                 .hasMessageContaining("out of range of int");
     }
 

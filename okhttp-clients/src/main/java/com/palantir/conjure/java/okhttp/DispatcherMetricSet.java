@@ -16,10 +16,11 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
 import com.google.common.collect.ImmutableMap;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.MetricName;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.TaggedMetricSet;
 import java.util.Map;
 import okhttp3.ConnectionPool;
@@ -30,30 +31,13 @@ class DispatcherMetricSet implements TaggedMetricSet {
     private final ImmutableMap<MetricName, Metric> metrics;
 
     DispatcherMetricSet(Dispatcher dispatcher, ConnectionPool connectionPool) {
-        ImmutableMap.Builder<MetricName, Metric> map = ImmutableMap.builder();
-
-        map.put(
-                MetricName.builder()
-                        .safeName("com.palantir.conjure.java.dispatcher.calls.queued")
-                        .build(),
-                (Gauge) dispatcher::queuedCallsCount);
-        map.put(
-                MetricName.builder()
-                        .safeName("com.palantir.conjure.java.dispatcher.calls.running")
-                        .build(),
-                (Gauge) dispatcher::runningCallsCount);
-        map.put(
-                MetricName.builder()
-                        .safeName("com.palantir.conjure.java.connection-pool.connections.total")
-                        .build(),
-                (Gauge) connectionPool::connectionCount);
-        map.put(
-                MetricName.builder()
-                        .safeName("com.palantir.conjure.java.connection-pool.connections.idle")
-                        .build(),
-                (Gauge) connectionPool::idleConnectionCount);
-
-        this.metrics = map.build();
+        TaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
+        OkhttpMetrics okhttpMetrics = OkhttpMetrics.of(registry);
+        okhttpMetrics.dispatcherCallsQueued(dispatcher::queuedCallsCount);
+        okhttpMetrics.dispatcherCallsRunning(dispatcher::runningCallsCount);
+        okhttpMetrics.connectionPoolConnectionsTotal(connectionPool::connectionCount);
+        okhttpMetrics.connectionPoolConnectionsIdle(connectionPool::idleConnectionCount);
+        this.metrics = ImmutableMap.copyOf(registry.getMetrics());
     }
 
     @Override

@@ -106,6 +106,7 @@ public final class ObjectMappers {
                 .registerModule(new JavaTimeModule())
                 .registerModule(new LenientLongModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
                 .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
                 .disable(DeserializationFeature.WRAP_EXCEPTIONS)
                 .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)

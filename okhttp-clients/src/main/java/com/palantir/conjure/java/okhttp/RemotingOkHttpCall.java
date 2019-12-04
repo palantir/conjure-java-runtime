@@ -131,8 +131,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
             return future.get();
         } catch (InterruptedException e) {
             getDelegate().cancel();
+            // Regardless of the cancel above, the call may have succeeded or is going to succeed, and we need to make
+            // sure the response body is closed correctly in those cases.
+            Futures.addCallback(future, ResponseClosingCallback.INSTANCE, MoreExecutors.directExecutor());
             Thread.currentThread().interrupt();
-            throw new InterruptedIOException("Call was interrupted during execution");
+            throw new InterruptedIOException("Call cancelled via interruption");
         } catch (ExecutionException e) {
             getDelegate().cancel();
             if (e.getCause() instanceof IoRemoteException) {
@@ -529,6 +532,22 @@ final class RemotingOkHttpCall extends ForwardingCall {
         Tags.AttemptSpan previousAttempt = request().tag(Tags.AttemptSpan.class);
         DetachedSpan entireSpan = request().tag(Tags.EntireSpan.class).get();
         return previousAttempt.nextAttempt(entireSpan);
+    }
+
+    private enum ResponseClosingCallback implements FutureCallback<Response> {
+        INSTANCE;
+
+        @Override
+        public void onSuccess(Response response) {
+            if (response.body() != null) {
+                response.close();
+            }
+        }
+
+        @Override
+        public void onFailure(Throwable _throwable) {
+            // do nothing
+        }
     }
 
     private static final class IoUnknownRemoteException extends IOException {

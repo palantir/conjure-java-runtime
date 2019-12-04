@@ -29,7 +29,7 @@ public abstract class TestBase {
 
     protected static final UserAgent AGENT = UserAgent.of(UserAgent.Agent.of("test", "0.0.1"));
 
-    protected static final ClientConfiguration createTestConfig(String... uri) {
+    protected static ClientConfiguration createTestConfig(String... uri) {
         SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
         return ClientConfigurations.of(
                 ImmutableList.copyOf(uri),
