@@ -111,7 +111,7 @@ public class NullRequestBodyTest {
     public static class TestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration _config, final Environment env) throws Exception {
-            env.jersey().register(new ConjureJerseyFeature(new DefaultTaggedMetricRegistry()));
+            env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new TestResource());
         }
     }

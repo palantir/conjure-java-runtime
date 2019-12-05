@@ -19,7 +19,6 @@ package com.palantir.conjure.java.server.jersey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.base.Strings;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -150,7 +149,7 @@ public final class Java8OptionalTest {
     public static class OptionalTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration _config, final Environment env) throws Exception {
-            env.jersey().register(new ConjureJerseyFeature(new DefaultTaggedMetricRegistry()));
+            env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
             env.jersey().register(new OptionalTestResource());
         }

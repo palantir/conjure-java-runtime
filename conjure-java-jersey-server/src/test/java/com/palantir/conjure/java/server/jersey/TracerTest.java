@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.api.TraceHttpHeaders;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
@@ -112,7 +111,7 @@ public final class TracerTest {
     public static class TracingTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration _config, final Environment env) throws Exception {
-            env.jersey().register(new ConjureJerseyFeature(new DefaultTaggedMetricRegistry()));
+            env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new TracingTestResource());
         }
     }

@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.net.HttpHeaders;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import io.dropwizard.jersey.DropwizardResourceConfig;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -47,7 +46,7 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
     protected Application configure() {
         forceSet(TestProperties.CONTAINER_PORT, "0");
         return DropwizardResourceConfig.forTesting(new MetricRegistry())
-                .register(new ConjureJerseyFeature(new DefaultTaggedMetricRegistry()))
+                .register(ConjureJerseyFeature.INSTANCE)
                 .register(new EmptyOptionalTo204ExceptionMapper())
                 .register(OptionalReturnResource.class);
     }

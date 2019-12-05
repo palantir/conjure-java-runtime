@@ -185,7 +185,7 @@ public final class ExceptionMappingTest {
     public static class ExceptionMappersTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration _config, final Environment env) {
-            env.jersey().register(new ConjureJerseyFeature(new DefaultTaggedMetricRegistry()));
+            env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new ExceptionTestResource());
         }
     }

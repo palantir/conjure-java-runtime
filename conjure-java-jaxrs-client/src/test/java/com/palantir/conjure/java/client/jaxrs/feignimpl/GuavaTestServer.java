@@ -19,7 +19,6 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import feign.Util;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
@@ -45,7 +44,7 @@ import org.assertj.core.util.Strings;
 public class GuavaTestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration _config, final Environment env) throws Exception {
-        env.jersey().register(new ConjureJerseyFeature(new DefaultTaggedMetricRegistry()));
+        env.jersey().register(ConjureJerseyFeature.INSTANCE);
         env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerObjectMapper()));
         env.jersey().register(new TestResource());
     }

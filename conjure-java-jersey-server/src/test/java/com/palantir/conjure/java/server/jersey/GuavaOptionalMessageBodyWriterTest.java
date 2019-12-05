@@ -21,7 +21,6 @@ package com.palantir.conjure.java.server.jersey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.codahale.metrics.MetricRegistry;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import io.dropwizard.jersey.DropwizardResourceConfig;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -42,7 +41,7 @@ public final class GuavaOptionalMessageBodyWriterTest extends JerseyTest {
     protected Application configure() {
         forceSet(TestProperties.CONTAINER_PORT, "0");
         return DropwizardResourceConfig.forTesting(new MetricRegistry())
-                .register(new ConjureJerseyFeature(new DefaultTaggedMetricRegistry()))
+                .register(ConjureJerseyFeature.INSTANCE)
                 .register(OptionalReturnResource.class);
     }
 
