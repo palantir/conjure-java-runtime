@@ -35,6 +35,7 @@ import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import com.palantir.logsafe.testing.Assertions;
+import com.palantir.tracing.Observability;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.Tracers;
 import java.io.IOException;
@@ -261,38 +262,37 @@ public final class Retrofit2ClientApiTest extends TestBase {
     }
 
     private void makeListenableFutureRequest(Supplier<ListenableFuture<String>> futureSupplier) {
-        Tracers.wrapWithNewTrace("test-future-request", () -> {
-            String traceId = Tracer.getTraceId();
-            String value = "value";
+        Tracer.initTrace(Observability.SAMPLE, Tracers.randomId());
+        String traceId = Tracer.getTraceId();
+        String value = "value";
 
-            ListenableFuture<String> future = futureSupplier.get();
+        ListenableFuture<String> future = futureSupplier.get();
 
-            // Ensure that the trace ID is propagated
-            CompletableFuture<String> callbackTraceId = new CompletableFuture<>();
-            Futures.addCallback(
-                    future,
-                    new FutureCallback<String>() {
-                        @Override
-                        public void onSuccess(@Nullable String result) {
-                            assertThat(result).isEqualTo("value");
-                            try {
-                                callbackTraceId.complete(Tracer.getTraceId());
-                            } catch (RuntimeException e) {
-                                callbackTraceId.completeExceptionally(e);
-                            }
+        // Ensure that the trace ID is propagated
+        CompletableFuture<String> callbackTraceId = new CompletableFuture<>();
+        Futures.addCallback(
+                future,
+                new FutureCallback<String>() {
+                    @Override
+                    public void onSuccess(@Nullable String result) {
+                        assertThat(result).isEqualTo("value");
+                        try {
+                            callbackTraceId.complete(Tracer.getTraceId());
+                        } catch (RuntimeException e) {
+                            callbackTraceId.completeExceptionally(e);
                         }
+                    }
 
-                        @Override
-                        public void onFailure(Throwable throwable) {
-                            callbackTraceId.completeExceptionally(throwable);
-                        }
-                    },
-                    MoreExecutors.directExecutor());
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        callbackTraceId.completeExceptionally(throwable);
+                    }
+                },
+                MoreExecutors.directExecutor());
 
-            server.enqueue(new MockResponse().setBody("\"" + value + "\""));
-            assertThat(Futures.getUnchecked(future)).isEqualTo("value");
-            assertThat(Futures.getUnchecked(callbackTraceId)).isEqualTo(traceId);
-        }).run();
+        server.enqueue(new MockResponse().setBody("\"" + value + "\""));
+        assertThat(Futures.getUnchecked(future)).isEqualTo("value");
+        assertThat(Futures.getUnchecked(callbackTraceId)).isEqualTo(traceId);
     }
 
     private void makeCompletableFutureRequest(Supplier<CompletableFuture<String>> futureSupplier) {

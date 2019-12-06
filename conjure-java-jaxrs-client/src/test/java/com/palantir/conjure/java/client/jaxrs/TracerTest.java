@@ -82,6 +82,7 @@ public final class TracerTest extends TestBase {
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: attempt 0"),
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: client-side-concurrency-limiter 0/10"),
                 Maps.immutableEntry(SpanType.LOCAL, "OkHttp: dispatcher"),
+                Maps.immutableEntry(SpanType.LOCAL, "OkHttp: callback"),
                 Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-headers"),
                 Maps.immutableEntry(SpanType.CLIENT_OUTGOING, "OkHttp: wait-for-body"));
 

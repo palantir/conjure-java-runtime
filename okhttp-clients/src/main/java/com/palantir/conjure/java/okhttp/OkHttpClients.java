@@ -70,7 +70,7 @@ public final class OkHttpClients {
             .build();
     /**
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
-     * Similar to OkHttp's default, but with two modifications:
+     * Similar to OkHttp's default, but with three modifications:
      * <ol>
      *     <li>A logging uncaught exception handler</li>
      *     <li>
@@ -78,10 +78,13 @@ public final class OkHttpClients {
      *         thread blocks waiting for the result. Most of our usage falls into this category. This allows
      *         JVM shutdown to occur cleanly without waiting a full minute after the last request completes.
      *     </li>
+     *     <li>
+     *         Tracing information is propagated from the caller to the OkHtttp callback.
+     *     </li>
      * </ol>
      */
     private static final ExecutorService executionExecutor =
-            Tracers.wrap(Executors.newCachedThreadPool(executionThreads));
+            Tracers.wrap("OkHttp: callback", Executors.newCachedThreadPool(executionThreads));
 
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
