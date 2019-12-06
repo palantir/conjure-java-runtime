@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Fix Retrofit ListenableFuture trace propagation (and maybe others?)
+    by wrapping OkHttpClient dispatcher executor service with Tracers.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1361
