@@ -23,7 +23,10 @@ import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
+import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
@@ -32,6 +35,8 @@ import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import com.palantir.logsafe.testing.Assertions;
+import com.palantir.tracing.Tracer;
+import com.palantir.tracing.Tracers;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -39,6 +44,7 @@ import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
@@ -49,6 +55,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -245,18 +252,53 @@ public final class Retrofit2ClientApiTest extends TestBase {
 
     @Test
     public void makeFutureRequest_completable() {
-        makeFutureRequest(() -> service.makeCompletableFutureRequest());
+        makeCompletableFutureRequest(() -> service.makeCompletableFutureRequest());
     }
 
     @Test
     public void makeFutureRequest_listenable() {
-        makeFutureRequest(() -> service.makeListenableFutureRequest());
+        makeListenableFutureRequest(() -> service.makeListenableFutureRequest());
     }
 
-    private void makeFutureRequest(Supplier<Future<String>> futureSupplier) {
+    private void makeListenableFutureRequest(Supplier<ListenableFuture<String>> futureSupplier) {
+        Tracers.wrapWithNewTrace("test-future-request", () -> {
+            String traceId = Tracer.getTraceId();
+            String value = "value";
+
+            ListenableFuture<String> future = futureSupplier.get();
+
+            // Ensure that the trace ID is propagated
+            CompletableFuture<String> callbackTraceId = new CompletableFuture<>();
+            Futures.addCallback(
+                    future,
+                    new FutureCallback<String>() {
+                        @Override
+                        public void onSuccess(@Nullable String result) {
+                            assertThat(result).isEqualTo("value");
+                            try {
+                                callbackTraceId.complete(Tracer.getTraceId());
+                            } catch (RuntimeException e) {
+                                callbackTraceId.completeExceptionally(e);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Throwable throwable) {
+                            callbackTraceId.completeExceptionally(throwable);
+                        }
+                    },
+                    MoreExecutors.directExecutor());
+
+            server.enqueue(new MockResponse().setBody("\"" + value + "\""));
+            assertThat(Futures.getUnchecked(future)).isEqualTo("value");
+            assertThat(Futures.getUnchecked(callbackTraceId)).isEqualTo(traceId);
+        }).run();
+    }
+
+    private void makeCompletableFutureRequest(Supplier<CompletableFuture<String>> futureSupplier) {
         String value = "value";
         server.enqueue(new MockResponse().setBody("\"" + value + "\""));
-        Future<String> future = futureSupplier.get();
+        CompletableFuture<?> future = futureSupplier.get();
         assertThat(Futures.getUnchecked(future)).isEqualTo("value");
     }
 
