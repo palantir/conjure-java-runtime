@@ -28,12 +28,12 @@ import javax.ws.rs.core.FeatureContext;
 public enum ConjureJerseyFeature implements Feature {
     INSTANCE;
 
-    private final Meter internalExceptionMeter;
+    private final Meter internalErrorMeter;
 
     ConjureJerseyFeature() {
-        TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
+        TaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
         ConjureServerMetrics conjureServerMetrics = ConjureServerMetrics.of(registry);
-        this.internalExceptionMeter = conjureServerMetrics.exception();
+        this.internalErrorMeter = conjureServerMetrics.internalerrorAll();
     }
 
     /**
@@ -43,14 +43,14 @@ public enum ConjureJerseyFeature implements Feature {
     @Override
     public boolean configure(FeatureContext context) {
         // Exception mappers
-        context.register(new IllegalArgumentExceptionMapper(internalExceptionMeter));
+        context.register(new IllegalArgumentExceptionMapper(internalErrorMeter));
         context.register(new NoContentExceptionMapper());
-        context.register(new RuntimeExceptionMapper(internalExceptionMeter));
+        context.register(new RuntimeExceptionMapper(internalErrorMeter));
         context.register(new WebApplicationExceptionMapper());
         context.register(new RemoteExceptionMapper());
-        context.register(new ServiceExceptionMapper(internalExceptionMeter));
+        context.register(new ServiceExceptionMapper(internalErrorMeter));
         context.register(new QosExceptionMapper());
-        context.register(new ThrowableExceptionMapper(internalExceptionMeter));
+        context.register(new ThrowableExceptionMapper(internalErrorMeter));
 
         // Cbor handling
         context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));

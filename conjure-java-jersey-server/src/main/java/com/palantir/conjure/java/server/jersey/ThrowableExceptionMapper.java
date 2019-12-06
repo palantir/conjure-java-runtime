@@ -23,8 +23,8 @@ import javax.ws.rs.ext.Provider;
 @Provider
 final class ThrowableExceptionMapper extends JsonExceptionMapper<Throwable> {
 
-    ThrowableExceptionMapper(Meter internalExceptionMeter) {
-        super(internalExceptionMeter);
+    ThrowableExceptionMapper(Meter internalErrorMeter) {
+        super(internalErrorMeter);
     }
 
     @Override

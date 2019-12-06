@@ -23,8 +23,8 @@ import javax.ws.rs.ext.Provider;
 @Provider
 final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalArgumentException> {
 
-    IllegalArgumentExceptionMapper(Meter internalExceptionMeter) {
-        super(internalExceptionMeter);
+    IllegalArgumentExceptionMapper(Meter internalErrorMeter) {
+        super(internalErrorMeter);
     }
 
     @Override

@@ -23,8 +23,8 @@ import javax.ws.rs.ext.Provider;
 @Provider
 final class RuntimeExceptionMapper extends JsonExceptionMapper<RuntimeException> {
 
-    RuntimeExceptionMapper(Meter internalExceptionMeter) {
-        super(internalExceptionMeter);
+    RuntimeExceptionMapper(Meter internalErrorMeter) {
+        super(internalErrorMeter);
     }
 
     @Override

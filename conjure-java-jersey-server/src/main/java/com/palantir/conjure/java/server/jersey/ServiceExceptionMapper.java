@@ -37,16 +37,16 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
 
     private static final Logger log = LoggerFactory.getLogger(ServiceExceptionMapper.class);
 
-    private final Meter internalExceptionMeter;
+    private final Meter internalErrorMeter;
 
-    ServiceExceptionMapper(Meter internalExceptionMeter) {
-        this.internalExceptionMeter = internalExceptionMeter;
+    ServiceExceptionMapper(Meter internalErrorMeter) {
+        this.internalErrorMeter = internalErrorMeter;
     }
 
     @Override
     public Response toResponse(ServiceException exception) {
         if (exception.getErrorType().equals(ErrorType.INTERNAL)) {
-            internalExceptionMeter.mark();
+            internalErrorMeter.mark();
         }
         int httpStatus = exception.getErrorType().httpErrorCode();
         if (httpStatus / 100 == 4 /* client error */) {
