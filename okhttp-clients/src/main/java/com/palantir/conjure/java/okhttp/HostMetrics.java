@@ -82,7 +82,7 @@ public interface HostMetrics {
     Timer getOther();
 
     /**
-     * A timer of all failed requests.
+     * A meter of all failed requests.
      */
     Meter getIoExceptions();
 }
