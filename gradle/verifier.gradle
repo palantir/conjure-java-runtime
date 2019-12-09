@@ -25,8 +25,9 @@ dependencies {
     generatedJerseyCompile 'com.palantir.conjure.java:conjure-lib'
     generatedJerseyCompile 'javax.ws.rs:javax.ws.rs-api'
     generatedJerseyCompile sourceSets.generatedObjects.output
-    generatedRetrofitCompile 'com.squareup.retrofit2:retrofit'
+    generatedRetrofitCompile 'com.google.guava:guava'
     generatedRetrofitCompile 'com.palantir.conjure.java:conjure-lib'
+    generatedRetrofitCompile 'com.squareup.retrofit2:retrofit'
     generatedRetrofitCompile sourceSets.generatedObjects.output
 
     testCompile 'com.palantir.conjure.java:conjure-lib'
@@ -100,7 +101,7 @@ task conjureJavaJersey(type: Exec, dependsOn: unpackGenerator) {
 
 task conjureJavaRetrofit(type: Exec, dependsOn: unpackGenerator) {
     executable "${-> unpackGenerator.getExecutable()}"
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedRetrofit/java', '--retrofit'
+    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedRetrofit/java', '--retrofit', '--retrofitListenableFutures'
 
     inputs.file "${-> configurations.verificationApi.singleFile}"
     outputs.dir "src/generatedRetrofit/java"
