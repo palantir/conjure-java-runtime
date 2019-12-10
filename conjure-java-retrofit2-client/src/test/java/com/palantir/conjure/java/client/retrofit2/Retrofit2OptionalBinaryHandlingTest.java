@@ -43,7 +43,8 @@ import retrofit2.http.GET;
 
 @RunWith(Parameterized.class)
 public final class Retrofit2OptionalBinaryHandlingTest extends TestBase {
-    @Rule public final MockWebServer server = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
 
     private HttpUrl url;
     private Service proxy;
@@ -60,7 +61,8 @@ public final class Retrofit2OptionalBinaryHandlingTest extends TestBase {
         });
     }
 
-    @Parameterized.Parameter public int code;
+    @Parameterized.Parameter
+    public int code;
 
     @Parameterized.Parameter(1)
     public Buffer body;

@@ -15,13 +15,15 @@ public final class PathTemplateHeaderEnrichmentContract extends AbstractDelegati
      *
      * @deprecated no longer used
      */
-    @Deprecated public static final char OPEN_BRACE_REPLACEMENT = '\0';
+    @Deprecated
+    public static final char OPEN_BRACE_REPLACEMENT = '\0';
     /**
      * No longer used.
      *
      * @deprecated no longer used
      */
-    @Deprecated public static final char CLOSE_BRACE_REPLACEMENT = '\1';
+    @Deprecated
+    public static final char CLOSE_BRACE_REPLACEMENT = '\1';
 
     public PathTemplateHeaderEnrichmentContract(Contract delegate) {
         super(delegate);

@@ -29,7 +29,8 @@ import org.junit.Test;
 
 public final class JaxRsClientMeshProxyConfigTest extends TestBase {
 
-    @Rule public final MockWebServer server = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
 
     @Test
     public void meshProxy() throws Exception {

@@ -33,9 +33,11 @@ import org.junit.rules.ExpectedException;
 
 public final class Retrofit2ClientBuilderTest extends TestBase {
 
-    @Rule public final MockWebServer server = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
 
-    @Rule public ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void testRelativeAndAbsoluteRetrofitEndPoints_workWithArbitraryBaseUrlFormats() throws Exception {
@@ -105,9 +107,8 @@ public final class Retrofit2ClientBuilderTest extends TestBase {
         RecordedRequest request = server.takeRequest();
         String conjureVersion = OkHttpClients.class.getPackage().getImplementationVersion();
         UserAgent expected = AGENT.addAgent(UserAgent.Agent.of("TestService", "0.0.0"))
-                .addAgent(
-                        UserAgent.Agent.of(
-                                UserAgents.CONJURE_AGENT_NAME, conjureVersion != null ? conjureVersion : "0.0.0"));
+                .addAgent(UserAgent.Agent.of(
+                        UserAgents.CONJURE_AGENT_NAME, conjureVersion != null ? conjureVersion : "0.0.0"));
         assertThat(request.getHeader("User-Agent")).isEqualTo(UserAgents.format(expected));
     }
 }

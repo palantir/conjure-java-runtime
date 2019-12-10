@@ -39,7 +39,8 @@ import org.junit.runners.Parameterized.Parameters;
 @RunWith(Parameterized.class)
 public final class JaxRsClientCollectionHandlingTest extends TestBase {
 
-    @Rule public final MockWebServer server = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
 
     private Service proxy;
 
@@ -52,15 +53,19 @@ public final class JaxRsClientCollectionHandlingTest extends TestBase {
         });
     }
 
-    @Parameter public int code;
+    @Parameter
+    public int code;
 
     @Parameter(1)
     public String body;
 
     @Before
     public void before() {
-        proxy = JaxRsClient.create(Service.class, AGENT, new HostMetricsRegistry(), createTestConfig("http://localhost:"
-                + server.getPort()));
+        proxy = JaxRsClient.create(
+                Service.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig("http://localhost:" + server.getPort()));
         MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
         server.enqueue(mockResponse);
     }

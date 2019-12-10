@@ -263,8 +263,8 @@ public final class JaxRsClientFailoverTest extends TestBase {
                     AGENT,
                     new HostMetricsRegistry(),
                     ClientConfiguration.builder()
-                            .from(createTestConfig("http://localhost:" + server1.getPort(), "http://localhost:"
-                                    + server2.getPort()))
+                            .from(createTestConfig(
+                                    "http://localhost:" + server1.getPort(), "http://localhost:" + server2.getPort()))
                             .maxNumRetries(2)
                             .nodeSelectionStrategy(nodeSelectionStrategy)
                             .failedUrlCooldown(Duration.ofMillis(duration))

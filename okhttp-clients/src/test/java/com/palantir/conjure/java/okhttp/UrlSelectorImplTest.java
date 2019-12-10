@@ -39,7 +39,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public final class UrlSelectorImplTest extends TestBase {
 
-    @Mock Clock clock;
+    @Mock
+    Clock clock;
 
     @Before
     public void before() {

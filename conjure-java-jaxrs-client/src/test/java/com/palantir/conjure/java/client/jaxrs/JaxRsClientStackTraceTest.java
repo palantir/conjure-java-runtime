@@ -34,7 +34,8 @@ import org.junit.Test;
 
 public final class JaxRsClientStackTraceTest extends TestBase {
 
-    @Rule public final MockWebServer server1 = new MockWebServer();
+    @Rule
+    public final MockWebServer server1 = new MockWebServer();
 
     private TestService proxy;
 

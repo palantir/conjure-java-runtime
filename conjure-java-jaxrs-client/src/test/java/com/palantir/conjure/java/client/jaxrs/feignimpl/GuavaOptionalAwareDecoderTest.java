@@ -39,7 +39,8 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     public static final DropwizardAppRule<Configuration> APP =
             new DropwizardAppRule<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
 
-    @Rule public ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     private GuavaTestServer.TestService service;
 

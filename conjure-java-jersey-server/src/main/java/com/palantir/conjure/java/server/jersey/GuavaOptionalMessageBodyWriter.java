@@ -39,7 +39,8 @@ import org.glassfish.jersey.message.MessageBodyWorkers;
 @Produces({MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN})
 public final class GuavaOptionalMessageBodyWriter implements MessageBodyWriter<com.google.common.base.Optional<?>> {
 
-    @Inject private javax.inject.Provider<MessageBodyWorkers> mbw;
+    @Inject
+    private javax.inject.Provider<MessageBodyWorkers> mbw;
 
     // Jersey ignores this
     @Override

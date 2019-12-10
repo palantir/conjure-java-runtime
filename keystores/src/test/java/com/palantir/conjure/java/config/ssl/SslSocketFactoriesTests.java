@@ -35,7 +35,8 @@ import org.junit.rules.TemporaryFolder;
 
 public final class SslSocketFactoriesTests {
 
-    @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
+    @Rule
+    public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test
     public void testCreateSslSocketFactory_withPemCertificatesByAlias() throws IOException {

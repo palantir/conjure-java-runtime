@@ -34,14 +34,18 @@ import org.junit.Test;
 
 public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
 
-    @Rule public final MockWebServer server = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
 
     private Service proxy;
 
     @Before
     public void before() {
-        proxy = JaxRsClient.create(Service.class, AGENT, new HostMetricsRegistry(), createTestConfig("http://localhost:"
-                + server.getPort()));
+        proxy = JaxRsClient.create(
+                Service.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
 

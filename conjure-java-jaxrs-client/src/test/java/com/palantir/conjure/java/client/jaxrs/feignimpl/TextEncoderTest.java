@@ -34,15 +34,18 @@ import org.junit.Test;
 
 public final class TextEncoderTest extends TestBase {
 
-    @Rule public final MockWebServer server = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
 
     private Service service;
 
     @Before
     public void before() {
         service = JaxRsClient.create(
-                Service.class, AGENT, new HostMetricsRegistry(), createTestConfig("http://localhost:"
-                        + server.getPort()));
+                Service.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("{}"));
     }
 

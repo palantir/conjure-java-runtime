@@ -54,15 +54,15 @@ public final class OkHttpClients {
     private static final boolean RANDOMIZE = true;
     private static final boolean RESHUFFLE = true;
 
-    @VisibleForTesting static final int NUM_SCHEDULING_THREADS = 5;
+    @VisibleForTesting
+    static final int NUM_SCHEDULING_THREADS = 5;
 
     private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
-            .setUncaughtExceptionHandler((thread, uncaughtException) ->
-                    log.error(
-                            "An exception was uncaught in an execution thread. "
-                                    + "This likely left a thread blocked, and is as such a serious bug "
-                                    + "which requires debugging.",
-                            uncaughtException))
+            .setUncaughtExceptionHandler((thread, uncaughtException) -> log.error(
+                    "An exception was uncaught in an execution thread. "
+                            + "This likely left a thread blocked, and is as such a serious bug "
+                            + "which requires debugging.",
+                    uncaughtException))
             .setNameFormat("remoting-okhttp-dispatcher-%d")
             // This diverges from the OkHttp default value, allowing the JVM to cleanly exit
             // while idle dispatcher threads are still alive.
@@ -100,10 +100,9 @@ public final class OkHttpClients {
     }
 
     /** The {@link ScheduledExecutorService} used for recovering leaked limits. */
-    private static final Supplier<ScheduledExecutorService> limitReviver = Suppliers.memoize(() ->
-            Tracers.wrap(
-                    Executors.newSingleThreadScheduledExecutor(
-                            Util.threadFactory("conjure-java-runtime/leaked limit reviver", true))));
+    private static final Supplier<ScheduledExecutorService> limitReviver = Suppliers.memoize(
+            () -> Tracers.wrap(Executors.newSingleThreadScheduledExecutor(
+                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", true))));
 
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
@@ -113,11 +112,9 @@ public final class OkHttpClients {
      * #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
      * Javadoc. Since this executor will never hit zero threads, it must use daemon threads.
      */
-    private static final Supplier<ScheduledExecutorService> schedulingExecutor = Suppliers.memoize(() ->
-            Tracers.wrap(
-                    Executors.newScheduledThreadPool(
-                            NUM_SCHEDULING_THREADS,
-                            Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true))));
+    private static final Supplier<ScheduledExecutorService> schedulingExecutor = Suppliers.memoize(
+            () -> Tracers.wrap(Executors.newScheduledThreadPool(
+                    NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true))));
 
     private OkHttpClients() {}
 
@@ -208,11 +205,10 @@ public final class OkHttpClients {
         if (config.proxyCredentials().isPresent()) {
             BasicCredentials basicCreds = config.proxyCredentials().get();
             final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
-            client.proxyAuthenticator((route, response) ->
-                    response.request()
-                            .newBuilder()
-                            .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
-                            .build());
+            client.proxyAuthenticator((route, response) -> response.request()
+                    .newBuilder()
+                    .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
+                    .build());
         }
 
         // cipher setup
@@ -261,14 +257,12 @@ public final class OkHttpClients {
         UserAgent augmentedAgent = agent;
 
         String maybeServiceVersion = serviceClass.getPackage().getImplementationVersion();
-        augmentedAgent = augmentedAgent.addAgent(
-                UserAgent.Agent.of(
-                        serviceClass.getSimpleName(), maybeServiceVersion != null ? maybeServiceVersion : "0.0.0"));
+        augmentedAgent = augmentedAgent.addAgent(UserAgent.Agent.of(
+                serviceClass.getSimpleName(), maybeServiceVersion != null ? maybeServiceVersion : "0.0.0"));
 
         String maybeRemotingVersion = OkHttpClients.class.getPackage().getImplementationVersion();
-        augmentedAgent = augmentedAgent.addAgent(
-                UserAgent.Agent.of(
-                        UserAgents.CONJURE_AGENT_NAME, maybeRemotingVersion != null ? maybeRemotingVersion : "0.0.0"));
+        augmentedAgent = augmentedAgent.addAgent(UserAgent.Agent.of(
+                UserAgents.CONJURE_AGENT_NAME, maybeRemotingVersion != null ? maybeRemotingVersion : "0.0.0"));
         return augmentedAgent;
     }
 

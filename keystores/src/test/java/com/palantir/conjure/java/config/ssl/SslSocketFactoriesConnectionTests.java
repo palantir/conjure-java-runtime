@@ -47,7 +47,8 @@ public final class SslSocketFactoriesConnectionTests {
         NO_CLIENT_AUTH,
     }
 
-    @Rule public Timeout testTimeout = Timeout.seconds(5);
+    @Rule
+    public Timeout testTimeout = Timeout.seconds(5);
 
     @Test
     public void testSslNoClientAuthenticationJks() {

@@ -34,8 +34,11 @@ import org.mockito.MockitoAnnotations;
 
 public final class MeshProxyInterceptorTest {
 
-    @Captor private ArgumentCaptor<Request> request;
-    @Mock private Interceptor.Chain chain;
+    @Captor
+    private ArgumentCaptor<Request> request;
+
+    @Mock
+    private Interceptor.Chain chain;
 
     private MeshProxyInterceptor interceptor;
 

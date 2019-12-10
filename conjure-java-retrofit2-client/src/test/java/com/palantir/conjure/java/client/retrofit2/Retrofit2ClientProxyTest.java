@@ -37,8 +37,11 @@ import org.junit.Test;
 
 public final class Retrofit2ClientProxyTest extends TestBase {
 
-    @Rule public final MockWebServer server = new MockWebServer();
-    @Rule public final MockWebServer proxyServer = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
+
+    @Rule
+    public final MockWebServer proxyServer = new MockWebServer();
 
     @Test
     public void testDirectVersusProxyConnection() throws Exception {
@@ -46,8 +49,10 @@ public final class Retrofit2ClientProxyTest extends TestBase {
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
         TestService directService = Retrofit2Client.create(
-                TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig("http://localhost:"
-                        + server.getPort()));
+                TestService.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig("http://localhost:" + server.getPort()));
         ClientConfiguration proxiedConfig = ClientConfiguration.builder()
                 .from(createTestConfig("http://localhost:" + server.getPort()))
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))

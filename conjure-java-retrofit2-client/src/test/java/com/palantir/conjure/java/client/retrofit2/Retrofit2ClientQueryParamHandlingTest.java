@@ -34,7 +34,8 @@ import retrofit2.http.Query;
 
 public final class Retrofit2ClientQueryParamHandlingTest extends TestBase {
 
-    @Rule public final MockWebServer server = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
 
     private Service proxy;
 

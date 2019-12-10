@@ -44,7 +44,9 @@ public class AutoDeserializeTest {
     public static final DropwizardAppRule<Configuration> serverUnderTestRule =
             new DropwizardAppRule<>(ServerUnderTestApplication.class, "src/test/resources/config.yml");
 
-    @ClassRule public static final VerificationClientRule verificationClientRule = new VerificationClientRule();
+    @ClassRule
+    public static final VerificationClientRule verificationClientRule = new VerificationClientRule();
+
     private static final VerificationClientService verificationService =
             VerificationClients.verificationClientService(verificationClientRule);
 
@@ -67,9 +69,8 @@ public class AutoDeserializeTest {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
-            IntStream.range(0, positiveSize).forEach(i ->
-                    objects.add(
-                            new Object[] {endpointName, i, true, positiveAndNegativeTestCases.getPositive().get(i)}));
+            IntStream.range(0, positiveSize).forEach(i -> objects.add(
+                    new Object[] {endpointName, i, true, positiveAndNegativeTestCases.getPositive().get(i)}));
 
             IntStream.range(0, negativeSize).forEach(i -> objects.add(new Object[] {
                 endpointName, positiveSize + i, false, positiveAndNegativeTestCases.getNegative().get(i)
@@ -81,15 +82,14 @@ public class AutoDeserializeTest {
     @Test
     public void runTestCase() {
         boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
-        System.out.println(
-                String.format(
-                        "[%s%s test case %s]: %s(%s), expected client to %s",
-                        shouldIgnore ? "ignored " : "",
-                        shouldSucceed ? "positive" : "negative",
-                        index,
-                        endpointName,
-                        jsonString,
-                        shouldSucceed ? "succeed" : "fail"));
+        System.out.println(String.format(
+                "[%s%s test case %s]: %s(%s), expected client to %s",
+                shouldIgnore ? "ignored " : "",
+                shouldSucceed ? "positive" : "negative",
+                index,
+                endpointName,
+                jsonString,
+                shouldSucceed ? "succeed" : "fail"));
 
         Optional<Error> expectationFailure = shouldSucceed ? expectSuccess() : expectFailure();
 
@@ -109,12 +109,11 @@ public class AutoDeserializeTest {
 
     private Optional<Error> expectSuccess() {
         try {
-            verificationService.runTestCase(
-                    VerificationClientRequest.builder()
-                            .endpointName(endpointName)
-                            .testCase(index)
-                            .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
-                            .build());
+            verificationService.runTestCase(VerificationClientRequest.builder()
+                    .endpointName(endpointName)
+                    .testCase(index)
+                    .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
+                    .build());
             return Optional.empty();
         } catch (RemoteException e) {
             return Optional.of(new AssertionError("Expected call to succeed, but caught exception", e));
@@ -123,12 +122,11 @@ public class AutoDeserializeTest {
 
     private Optional<Error> expectFailure() {
         try {
-            verificationService.runTestCase(
-                    VerificationClientRequest.builder()
-                            .endpointName(endpointName)
-                            .testCase(index)
-                            .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
-                            .build());
+            verificationService.runTestCase(VerificationClientRequest.builder()
+                    .endpointName(endpointName)
+                    .testCase(index)
+                    .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
+                    .build());
             return Optional.of(new AssertionError("Result should have caused an exception"));
         } catch (RemoteException e) {
             // It's not an expected failure to get a 404 or 403 back

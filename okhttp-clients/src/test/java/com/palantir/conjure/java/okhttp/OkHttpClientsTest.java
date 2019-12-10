@@ -81,9 +81,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public final class OkHttpClientsTest extends TestBase {
 
-    @Rule public final MockWebServer server = new MockWebServer();
-    @Rule public final MockWebServer server2 = new MockWebServer();
-    @Rule public final MockWebServer server3 = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
+
+    @Rule
+    public final MockWebServer server2 = new MockWebServer();
+
+    @Rule
+    public final MockWebServer server3 = new MockWebServer();
 
     private final HostMetricsRegistry hostEventsSink = new HostMetricsRegistry();
 
@@ -822,14 +827,13 @@ public final class OkHttpClientsTest extends TestBase {
                 .setBody("Hello, world!"));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                ClientConfigurations.of(
-                        ServiceConfiguration.builder()
-                                .addUris(url)
-                                // ClientConfigurations has a connectTimeout default of 10 seconds
-                                .readTimeout(Duration.ZERO) // unlimited pls
-                                .writeTimeout(Duration.ZERO) // unlimited pls
-                                .security(SslConfiguration.of(Paths.get("src", "test", "resources", "trustStore.jks")))
-                                .build()),
+                ClientConfigurations.of(ServiceConfiguration.builder()
+                        .addUris(url)
+                        // ClientConfigurations has a connectTimeout default of 10 seconds
+                        .readTimeout(Duration.ZERO) // unlimited pls
+                        .writeTimeout(Duration.ZERO) // unlimited pls
+                        .security(SslConfiguration.of(Paths.get("src", "test", "resources", "trustStore.jks")))
+                        .build()),
                 AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);

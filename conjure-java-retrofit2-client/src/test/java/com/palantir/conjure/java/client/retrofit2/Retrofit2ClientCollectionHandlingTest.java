@@ -45,7 +45,8 @@ import retrofit2.http.GET;
 @RunWith(Parameterized.class)
 public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
 
-    @Rule public final MockWebServer server = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
 
     private HttpUrl url;
     private Service proxy;
@@ -59,7 +60,8 @@ public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
         });
     }
 
-    @Parameter public int code;
+    @Parameter
+    public int code;
 
     @Parameter(1)
     public String body;

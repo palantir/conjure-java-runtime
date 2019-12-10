@@ -29,8 +29,11 @@ import org.junit.Test;
 
 public final class JaxRsClientConfigRefreshTest extends TestBase {
 
-    @Rule public final MockWebServer server1 = new MockWebServer();
-    @Rule public final MockWebServer server2 = new MockWebServer();
+    @Rule
+    public final MockWebServer server1 = new MockWebServer();
+
+    @Rule
+    public final MockWebServer server2 = new MockWebServer();
 
     @Test
     public void testConfigRefresh() throws Exception {

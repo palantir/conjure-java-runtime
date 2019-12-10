@@ -51,7 +51,8 @@ public final class SlashEncodingContractTest extends TestBase {
     private static final String PATH_PARAM = "slash/path";
     private static final String QUERY_PARAM = "slash/query";
 
-    @Rule public final MockWebServer server = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
 
     private Service jerseyProxy;
     private Service inMemoryProxy;
@@ -59,11 +60,15 @@ public final class SlashEncodingContractTest extends TestBase {
     @Before
     public void before() {
         jerseyProxy = JaxRsClient.create(
-                Service.class, AGENT, new HostMetricsRegistry(), createTestConfig("http://localhost:"
-                        + APP.getLocalPort()));
+                Service.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig("http://localhost:" + APP.getLocalPort()));
         inMemoryProxy = JaxRsClient.create(
-                Service.class, AGENT, new HostMetricsRegistry(), createTestConfig("http://localhost:"
-                        + server.getPort()));
+                Service.class,
+                AGENT,
+                new HostMetricsRegistry(),
+                createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
     }
 

@@ -143,15 +143,14 @@ final class UrlSelectorImpl implements UrlSelector {
             return Optional.empty();
         }
 
-        return Optional.of(
-                requestUrl
-                        .newBuilder()
-                        .scheme(redirectBaseUrl.scheme())
-                        .host(redirectBaseUrl.host())
-                        .port(redirectBaseUrl.port())
-                        .encodedPath(redirectBaseUrl.encodedPath() // matching prefix
-                                + requestUrl.encodedPath().substring(redirectBaseUrl.encodedPath().length()))
-                        .build());
+        return Optional.of(requestUrl
+                .newBuilder()
+                .scheme(redirectBaseUrl.scheme())
+                .host(redirectBaseUrl.host())
+                .port(redirectBaseUrl.port())
+                .encodedPath(redirectBaseUrl.encodedPath() // matching prefix
+                        + requestUrl.encodedPath().substring(redirectBaseUrl.encodedPath().length()))
+                .build());
     }
 
     @Override

@@ -35,7 +35,8 @@ import org.glassfish.jersey.message.MessageBodyWorkers;
 @Produces(MediaType.WILDCARD)
 public final class Java8OptionalMessageBodyWriter implements MessageBodyWriter<Optional<?>> {
 
-    @Inject private javax.inject.Provider<MessageBodyWorkers> mbw;
+    @Inject
+    private javax.inject.Provider<MessageBodyWorkers> mbw;
 
     // Jersey ignores this
     @Override

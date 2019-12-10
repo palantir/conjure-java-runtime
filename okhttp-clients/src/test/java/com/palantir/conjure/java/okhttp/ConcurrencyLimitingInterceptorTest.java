@@ -42,9 +42,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 public final class ConcurrencyLimitingInterceptorTest {
     private static final ConcurrencyLimitingInterceptor interceptor = new ConcurrencyLimitingInterceptor();
 
-    @Mock private BufferedSource mockSource;
-    @Mock private Interceptor.Chain chain;
-    @Mock private Limiter.Listener listener;
+    @Mock
+    private BufferedSource mockSource;
+
+    @Mock
+    private Interceptor.Chain chain;
+
+    @Mock
+    private Limiter.Listener listener;
 
     private Request request;
     private Response response;

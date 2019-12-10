@@ -57,7 +57,8 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public final class Retrofit2ClientApiTest extends TestBase {
-    @Rule public final MockWebServer server = new MockWebServer();
+    @Rule
+    public final MockWebServer server = new MockWebServer();
 
     private static final SerializableError ERROR = SerializableError.builder()
             .errorCode("errorCode")

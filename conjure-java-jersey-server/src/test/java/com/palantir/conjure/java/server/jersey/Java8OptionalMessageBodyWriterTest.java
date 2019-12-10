@@ -124,8 +124,9 @@ public final class Java8OptionalMessageBodyWriterTest extends JerseyTest {
         @Produces(MediaType.APPLICATION_OCTET_STREAM)
         @GET
         public Optional<StreamingOutput> showOptionalBinaryWithQueryParam(@QueryParam("id") String id) {
-            return Optional.ofNullable(id).map(str -> str.getBytes(StandardCharsets.UTF_8)).map(bytes ->
-                    output -> output.write(bytes));
+            return Optional.ofNullable(id)
+                    .map(str -> str.getBytes(StandardCharsets.UTF_8))
+                    .map(bytes -> output -> output.write(bytes));
         }
     }
 }

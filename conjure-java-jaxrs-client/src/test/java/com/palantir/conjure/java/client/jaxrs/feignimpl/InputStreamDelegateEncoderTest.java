@@ -38,7 +38,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class InputStreamDelegateEncoderTest extends TestBase {
-    @Mock private Encoder delegate;
+    @Mock
+    private Encoder delegate;
 
     private final RequestTemplate requestTemplate = new RequestTemplate();
 

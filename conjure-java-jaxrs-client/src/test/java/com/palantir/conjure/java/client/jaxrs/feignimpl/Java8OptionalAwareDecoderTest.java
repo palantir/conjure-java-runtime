@@ -41,7 +41,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     public static final DropwizardAppRule<Configuration> APP =
             new DropwizardAppRule<>(Java8TestServer.class, "src/test/resources/test-server.yml");
 
-    @Rule public ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     private Java8TestServer.TestService service;
 
