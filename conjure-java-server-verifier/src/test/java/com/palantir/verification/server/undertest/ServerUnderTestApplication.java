@@ -18,11 +18,13 @@ package com.palantir.verification.server.undertest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteStreams;
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
 import com.palantir.conjure.verification.client.AutoDeserializeService;
+import com.palantir.conjure.verification.types.BinaryAliasExample;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.jackson.DiscoverableSubtypeResolver;
@@ -31,6 +33,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import javax.ws.rs.core.StreamingOutput;
 
 public final class ServerUnderTestApplication extends Application<Configuration> {
 
@@ -61,7 +64,13 @@ public final class ServerUnderTestApplication extends Application<Configuration>
         @Override
         protected Object handleInvocation(Object _proxy, Method method, Object[] args) {
             Preconditions.checkArgument(args.length == 1, "Expected single argument. Method: %s", method);
-            return args[0];
+            if (args[0] instanceof BinaryAliasExample) {
+                return (StreamingOutput) output -> ByteStreams.copy(
+                        ((BinaryAliasExample) args[0]).get().getInputStream(),
+                        output);
+            } else {
+                return args[0];
+            }
         }
     }
 }

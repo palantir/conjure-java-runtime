@@ -79,7 +79,7 @@ public class AutoDeserializeTest {
     }
 
     @Test
-    public void runTestCase() throws Exception {
+    public void runTestCase() {
         boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
         System.out.println(
                 String.format(
@@ -107,7 +107,7 @@ public class AutoDeserializeTest {
         }
     }
 
-    private Optional<Error> expectSuccess() throws Exception {
+    private Optional<Error> expectSuccess() {
         try {
             verificationService.runTestCase(
                     VerificationClientRequest.builder()
