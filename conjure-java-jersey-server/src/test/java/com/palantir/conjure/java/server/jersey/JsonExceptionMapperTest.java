@@ -28,9 +28,9 @@ import org.junit.Test;
 
 public final class JsonExceptionMapperTest {
 
-    private final Meter internalExceptionMeter = new Meter();
+    private final Meter jsonExceptionMapperMeter = new Meter();
     private final JsonExceptionMapper<RuntimeException> mapper =
-            new JsonExceptionMapper<RuntimeException>(internalExceptionMeter) {
+            new JsonExceptionMapper<RuntimeException>(jsonExceptionMapperMeter) {
                 @Override
                 ErrorType getErrorType(RuntimeException _exception) {
                     return ErrorType.INVALID_ARGUMENT;
@@ -47,7 +47,7 @@ public final class JsonExceptionMapperTest {
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
-        assertThat(internalExceptionMeter.getCount()).isEqualTo(0);
+        assertThat(jsonExceptionMapperMeter.getCount()).isEqualTo(0);
     }
 
     @Test
