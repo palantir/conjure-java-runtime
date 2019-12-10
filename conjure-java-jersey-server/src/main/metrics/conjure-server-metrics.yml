@@ -3,8 +3,8 @@ options:
   javaVisibility: packagePrivate
 namespaces:
   server.response:
-    shortName: ConjureServer
-    docs: Conjure server metrics
+    shortName: JerseyServer
+    docs: Metrics produced by Jersey servers using the ConjureJerseyFeature.INSTANCE
     metrics:
       internalerror.all:
         type: meter

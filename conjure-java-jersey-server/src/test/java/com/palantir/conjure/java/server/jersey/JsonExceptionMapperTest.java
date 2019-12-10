@@ -23,18 +23,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
-import com.palantir.tritium.metrics.registry.MetricName;
-import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import javax.ws.rs.core.Response;
 import org.junit.Test;
 
 public final class JsonExceptionMapperTest {
 
-    private final TaggedMetricRegistry taggedMetrics = new DefaultTaggedMetricRegistry();
-    private final Meter internalExceptionMeter = taggedMetrics.meter(MetricName.builder()
-            .safeName("conjure.server.exception")
-            .build());
+    private final Meter internalExceptionMeter = new Meter();
     private final JsonExceptionMapper<RuntimeException> mapper =
             new JsonExceptionMapper<RuntimeException>(internalExceptionMeter) {
                 @Override
@@ -53,13 +47,16 @@ public final class JsonExceptionMapperTest {
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
+        assertThat(internalExceptionMeter.getCount()).isEqualTo(0);
     }
 
     @Test
     public void testDoesNotPropagateExceptionMessage() throws Exception {
+        Meter runtimeExceptionMapperMeter = new Meter();
         Response response =
-                new RuntimeExceptionMapper(internalExceptionMeter).toResponse(new NullPointerException("secret"));
+                new RuntimeExceptionMapper(runtimeExceptionMapperMeter).toResponse(new NullPointerException("secret"));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).doesNotContain("secret");
+        assertThat(runtimeExceptionMapperMeter.getCount()).isEqualTo(1);
     }
 }
