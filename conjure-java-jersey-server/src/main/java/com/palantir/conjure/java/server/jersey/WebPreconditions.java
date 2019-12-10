@@ -25,7 +25,10 @@ import javax.ws.rs.BadRequestException;
  * Wrapper around some of Guava's {@link Preconditions} to make its exceptions more http-friendly exceptions. It
  * includes other useful web-oriented checks like {@link #checkNotEmpty(String, Object)} and excludes less relevant ones
  * (like {@link Preconditions#checkState(boolean)}.
+ *
+ * @deprecated Use {@link com.palantir.conjure.java.api.errors.ServiceException}.
  */
+@Deprecated
 public final class WebPreconditions {
 
     private WebPreconditions() {}

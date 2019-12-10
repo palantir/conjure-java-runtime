@@ -8,6 +8,7 @@ client:
    - '{"value":["a","a"]}' # client turns this into a set of ["a"] without error
    receiveDateTimeAliasExample:
    - '"1523040070"' # jackson coerces things to other types
+   - 'null'
    receiveDateTimeExample:
    - '{"value":"1523040070"}' # jackson coerces things to other types
    - '{"value":1523040070}' # jackson coerces things to other types
@@ -65,6 +66,46 @@ client:
    - 'null'
    receiveListOptionalAnyAliasExample:
    - 'null' # jackson coerces this to [], which is kinda OK, but other conjure languages might not do this
+   receiveRawOptionalExample:
+   - 'null'
+   receiveStringAliasExample:
+   - 'null'
+   receiveDoubleAliasExample:
+   - 'null'
+   receiveIntegerAliasExample:
+   - 'null'
+   receiveBooleanAliasExample:
+   - 'null'
+   receiveSafeLongAliasExample:
+   - 'null'
+   receiveRidAliasExample:
+   - 'null'
+   receiveBearerTokenAliasExample:
+   - 'null'
+   receiveUuidAliasExample:
+   - 'null'
+   receiveReferenceAliasExample:
+   - 'null'
+   receiveOptionalBearerTokenAliasExample:
+   - 'null'
+   receiveOptionalBooleanAliasExample:
+   - 'null'
+   receiveOptionalDateTimeAliasExample:
+   - 'null'
+   receiveOptionalDoubleAliasExample:
+   - 'null'
+   receiveOptionalIntegerAliasExample:
+   - 'null'
+   receiveOptionalRidAliasExample:
+   - 'null'
+   receiveOptionalSafeLongAliasExample:
+   - 'null'
+   receiveOptionalStringAliasExample:
+   - 'null'
+   receiveOptionalUuidAliasExample:
+   - 'null'
+   receiveOptionalAnyAliasExample:
+   - 'null'
 
    receiveEnumExample:
    - '"!!!"'
