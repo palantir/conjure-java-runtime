@@ -1,0 +1,12 @@
+options:
+  javaPackage: com.palantir.conjure.java.server.jersey
+  javaVisibility: packagePrivate
+namespaces:
+  server.response:
+    shortName: JerseyServer
+    docs: Metrics produced by Jersey servers using the ConjureJerseyFeature.INSTANCE
+    metrics:
+      internalerror.all:
+        type: meter
+        docs: |
+          Meter of the number of non-RemoteException internal exceptions produced by this server.

@@ -22,7 +22,7 @@ import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -88,7 +88,7 @@ public final class ClientConfigurations {
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
                 .retryOnSocketException(RETRY_ON_SOCKET_EXCEPTION_DEFAULT)
-                .taggedMetricRegistry(DefaultTaggedMetricRegistry.getDefault())
+                .taggedMetricRegistry(SharedTaggedMetricRegistries.getSingleton())
                 .build();
     }
 
@@ -119,7 +119,7 @@ public final class ClientConfigurations {
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
                 .retryOnSocketException(RETRY_ON_SOCKET_EXCEPTION_DEFAULT)
-                .taggedMetricRegistry(DefaultTaggedMetricRegistry.getDefault())
+                .taggedMetricRegistry(SharedTaggedMetricRegistries.getSingleton())
                 .build();
     }
 

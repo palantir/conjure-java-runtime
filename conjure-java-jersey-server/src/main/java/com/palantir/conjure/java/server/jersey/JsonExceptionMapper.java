@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import com.codahale.metrics.Meter;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.SafeArg;
@@ -44,6 +45,12 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
 
+    private final Meter internalExceptionMeter;
+
+    JsonExceptionMapper(Meter internalExceptionMeter) {
+        this.internalExceptionMeter = internalExceptionMeter;
+    }
+
     /** Returns the {@link ErrorType} that this exception corresponds to. */
     abstract ErrorType getErrorType(T exception);
 
@@ -51,6 +58,9 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
     public final Response toResponse(T exception) {
         String errorInstanceId = UUID.randomUUID().toString();
         ErrorType errorType = getErrorType(exception);
+        if (errorType.equals(ErrorType.INTERNAL)) {
+            internalExceptionMeter.mark();
+        }
 
         if (errorType.httpErrorCode() / 100 == 4 /* client error */) {
             log.info("Error handling request",

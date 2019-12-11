@@ -18,6 +18,7 @@ package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.conjure.java.api.errors.ErrorType;
@@ -27,12 +28,14 @@ import org.junit.Test;
 
 public final class JsonExceptionMapperTest {
 
-    private final JsonExceptionMapper<RuntimeException> mapper = new JsonExceptionMapper<RuntimeException>() {
-        @Override
-        ErrorType getErrorType(RuntimeException _exception) {
-            return ErrorType.INVALID_ARGUMENT;
-        }
-    };
+    private final Meter jsonExceptionMapperMeter = new Meter();
+    private final JsonExceptionMapper<RuntimeException> mapper =
+            new JsonExceptionMapper<RuntimeException>(jsonExceptionMapperMeter) {
+                @Override
+                ErrorType getErrorType(RuntimeException _exception) {
+                    return ErrorType.INVALID_ARGUMENT;
+                }
+            };
 
     private final ObjectMapper objectMapper = ObjectMappers.newServerObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
@@ -44,12 +47,16 @@ public final class JsonExceptionMapperTest {
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
+        assertThat(jsonExceptionMapperMeter.getCount()).isEqualTo(0);
     }
 
     @Test
     public void testDoesNotPropagateExceptionMessage() throws Exception {
-        Response response = new RuntimeExceptionMapper().toResponse(new NullPointerException("secret"));
+        Meter runtimeExceptionMapperMeter = new Meter();
+        Response response =
+                new RuntimeExceptionMapper(runtimeExceptionMapperMeter).toResponse(new NullPointerException("secret"));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).doesNotContain("secret");
+        assertThat(runtimeExceptionMapperMeter.getCount()).isEqualTo(1);
     }
 }

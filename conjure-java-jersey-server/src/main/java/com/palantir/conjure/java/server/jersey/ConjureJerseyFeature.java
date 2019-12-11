@@ -16,14 +16,23 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.jaxrs.cbor.JacksonCBORProvider;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.tracing.jersey.TraceEnrichingFilter;
+import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 
 public enum ConjureJerseyFeature implements Feature {
     INSTANCE;
+
+    private final Meter internalErrorMeter;
+
+    ConjureJerseyFeature() {
+        JerseyServerMetrics jerseyServerMetrics = JerseyServerMetrics.of(SharedTaggedMetricRegistries.getSingleton());
+        this.internalErrorMeter = jerseyServerMetrics.internalerrorAll();
+    }
 
     /**
      * Configures a Jersey server w.r.t. conjure-java-runtime conventions: registers tracer filters and exception
@@ -32,14 +41,14 @@ public enum ConjureJerseyFeature implements Feature {
     @Override
     public boolean configure(FeatureContext context) {
         // Exception mappers
-        context.register(new IllegalArgumentExceptionMapper());
+        context.register(new IllegalArgumentExceptionMapper(internalErrorMeter));
         context.register(new NoContentExceptionMapper());
-        context.register(new RuntimeExceptionMapper());
+        context.register(new RuntimeExceptionMapper(internalErrorMeter));
         context.register(new WebApplicationExceptionMapper());
         context.register(new RemoteExceptionMapper());
-        context.register(new ServiceExceptionMapper());
+        context.register(new ServiceExceptionMapper(internalErrorMeter));
         context.register(new QosExceptionMapper());
-        context.register(new ThrowableExceptionMapper());
+        context.register(new ThrowableExceptionMapper(internalErrorMeter));
 
         // Cbor handling
         context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));
