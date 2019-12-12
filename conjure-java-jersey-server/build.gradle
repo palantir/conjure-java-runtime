@@ -6,14 +6,15 @@ dependencies {
     api "com.palantir.conjure.java.api:errors"
     api "org.glassfish.jersey.core:jersey-server"
 
-    implementation project(':conjure-java-jackson-serialization')
+    implementation 'com.palantir.tritium:tritium-registry'
+    implementation 'io.dropwizard.metrics:metrics-core'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2'
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
     implementation "com.fasterxml.jackson.module:jackson-module-afterburner"
     implementation "com.jcraft:jzlib"
     implementation "com.palantir.safe-logging:safe-logging"
     implementation "com.palantir.tracing:tracing-jersey"
-    implementation 'com.palantir.tritium:tritium-registry'
-    implementation 'io.dropwizard.metrics:metrics-core'
+    implementation project(':conjure-java-jackson-serialization')
 
     runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation"
 
