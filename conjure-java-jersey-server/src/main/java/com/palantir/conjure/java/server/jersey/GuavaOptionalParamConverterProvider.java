@@ -23,11 +23,13 @@ import javax.inject.Inject;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.internal.inject.Custom;
 import org.glassfish.jersey.internal.inject.InjectionManager;
 import org.glassfish.jersey.internal.inject.Providers;
 import org.glassfish.jersey.internal.util.ReflectionHelper;
 import org.glassfish.jersey.internal.util.collection.ClassTypePair;
 
+@Custom
 @Provider
 public final class GuavaOptionalParamConverterProvider implements ParamConverterProvider {
     private final InjectionManager injectionManager;

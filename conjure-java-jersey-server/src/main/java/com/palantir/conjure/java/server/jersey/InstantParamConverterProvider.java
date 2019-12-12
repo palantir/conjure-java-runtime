@@ -23,7 +23,9 @@ import java.time.Instant;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.internal.inject.Custom;
 
+@Custom
 @Provider
 public final class InstantParamConverterProvider implements ParamConverterProvider {
     private final InstantParamConverter paramConverter = new InstantParamConverter();

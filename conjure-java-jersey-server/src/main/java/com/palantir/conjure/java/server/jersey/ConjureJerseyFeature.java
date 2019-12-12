@@ -53,6 +53,10 @@ public enum ConjureJerseyFeature implements Feature {
         // Cbor handling
         context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));
 
+        // Auth handling
+        context.register(AuthHeaderParamConverterProvider.class);
+        context.register(BearerTokenParamConverterProvider.class);
+
         // Optional handling
         context.register(GuavaOptionalMessageBodyWriter.class);
         context.register(GuavaOptionalParamConverterProvider.class);
@@ -65,7 +69,7 @@ public enum ConjureJerseyFeature implements Feature {
         context.register(Java8OptionalLongMessageBodyWriter.class);
         context.register(Java8OptionalLongParamConverterProvider.class);
 
-        // DateTime
+        // DateTime handling
         context.register(InstantParamConverterProvider.class);
         context.register(ZonedDateTimeParamConverterProvider.class);
         context.register(OffsetDateTimeParamConverterProvider.class);

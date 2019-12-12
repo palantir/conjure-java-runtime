@@ -26,7 +26,9 @@ import java.util.OptionalDouble;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.internal.inject.Custom;
 
+@Custom
 @Provider
 public final class Java8OptionalDoubleParamConverterProvider implements ParamConverterProvider {
     private final OptionalDoubleParamConverter paramConverter = new OptionalDoubleParamConverter();

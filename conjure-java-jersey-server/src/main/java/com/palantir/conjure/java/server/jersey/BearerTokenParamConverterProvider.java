@@ -13,16 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
- * Adapted from https://github.com/dropwizard/dropwizard/blob/master/dropwizard-jersey/src/main/java/io/dropwizard/jersey/optional/OptionalIntParamConverterProvider.java
- */
 
 package com.palantir.conjure.java.server.jersey;
 
 import com.palantir.logsafe.Preconditions;
+import com.palantir.tokens.auth.BearerToken;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.OptionalInt;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
@@ -30,8 +27,8 @@ import org.glassfish.jersey.internal.inject.Custom;
 
 @Custom
 @Provider
-public final class Java8OptionalIntParamConverterProvider implements ParamConverterProvider {
-    private final OptionalIntParamConverter paramConverter = new OptionalIntParamConverter();
+public final class BearerTokenParamConverterProvider implements ParamConverterProvider {
+    private final BearerTokenParamConverter paramConverter = new BearerTokenParamConverter();
 
     @Override
     @SuppressWarnings("unchecked")
@@ -39,27 +36,26 @@ public final class Java8OptionalIntParamConverterProvider implements ParamConver
             final Class<T> rawType,
             final Type _genericType,
             final Annotation[] _annotations) {
-        return OptionalInt.class.equals(rawType) ? (ParamConverter<T>) paramConverter : null;
+        return BearerToken.class.equals(rawType) ? (ParamConverter<T>) paramConverter : null;
     }
 
-    public static final class OptionalIntParamConverter implements ParamConverter<OptionalInt> {
+    public static final class BearerTokenParamConverter implements ParamConverter<BearerToken> {
         @Override
-        public OptionalInt fromString(final String value) {
+        public BearerToken fromString(final String value) {
             if (value == null) {
-                return OptionalInt.empty();
+                throw UnauthorizedException.missingCredentials();
             }
-
             try {
-                return OptionalInt.of(Integer.parseInt(value));
-            } catch (NumberFormatException e) {
-                throw new IllegalStateException(e);
+                return BearerToken.valueOf(value);
+            } catch (RuntimeException e) {
+                throw UnauthorizedException.malformedCredentials(e);
             }
         }
 
         @Override
-        public String toString(final OptionalInt value) {
+        public String toString(final BearerToken value) {
             Preconditions.checkArgument(value != null);
-            return value.isPresent() ? Integer.toString(value.getAsInt()) : "";
+            return value.toString();
         }
     }
 }

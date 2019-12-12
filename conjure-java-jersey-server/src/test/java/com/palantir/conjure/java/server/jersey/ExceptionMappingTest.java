@@ -18,26 +18,19 @@ package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.ByteStreams;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
-import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
@@ -106,56 +99,47 @@ public final class ExceptionMappingTest {
     }
 
     @Test
-    public void testRemoteException() throws IOException {
+    public void testRemoteException() {
         Response response = target.path("throw-remote-exception").request().get();
         assertThat(response.getStatus()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
-        String body = readBody(response);
 
-        SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
+        SerializableError error = response.readEntity(SerializableError.class);
         assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
         assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
         assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
     }
 
     @Test
-    public void testUnauthorizedException() throws IOException {
+    public void testUnauthorizedException() {
         Response response = target.path("throw-unauthorized-exception").request().get();
         assertThat(response.getStatus()).isEqualTo(ErrorType.UNAUTHORIZED.httpErrorCode());
-        String body = readBody(response);
 
-        SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
+        SerializableError error = response.readEntity(SerializableError.class);
         assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
         assertThat(error.errorCode()).isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
         assertThat(error.errorName()).isEqualTo(ErrorType.UNAUTHORIZED.name());
     }
 
     @Test
-    public void testPermissionDeniedException() throws IOException {
+    public void testPermissionDeniedException() {
         Response response = target.path("throw-permission-denied-exception").request().get();
         assertThat(response.getStatus()).isEqualTo(ErrorType.PERMISSION_DENIED.httpErrorCode());
-        String body = readBody(response);
 
-        SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
+        SerializableError error = response.readEntity(SerializableError.class);
         assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
         assertThat(error.errorCode()).isEqualTo(ErrorType.PERMISSION_DENIED.code().toString());
         assertThat(error.errorName()).isEqualTo(ErrorType.PERMISSION_DENIED.name());
     }
 
     @Test
-    public void testServiceException() throws IOException {
+    public void testServiceException() {
         Response response = target.path("throw-service-exception").request().get();
         assertThat(response.getStatus()).isEqualTo(ErrorType.INVALID_ARGUMENT.httpErrorCode());
-        String body = readBody(response);
 
-        SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
+        SerializableError error = response.readEntity(SerializableError.class);
         assertThat(error.errorCode()).isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
         assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
-
-        Map<String, Object> rawError =
-                ObjectMappers.newClientObjectMapper().readValue(body, new TypeReference<Map<String, Object>>() {});
-        assertThat(rawError).containsEntry("errorCode", ErrorType.INVALID_ARGUMENT.code().toString());
-        assertThat(rawError).containsEntry("errorName", ErrorType.INVALID_ARGUMENT.name());
-        assertThat(rawError).containsEntry("parameters", ImmutableMap.of("arg", "value"));
+        assertThat(error.parameters()).isEqualTo(ImmutableMap.of("arg", "value"));
     }
 
     @Test
@@ -167,18 +151,13 @@ public final class ExceptionMappingTest {
     }
 
     @Test
-    public void testAssertionErrorIsJsonException() throws IOException {
+    public void testAssertionErrorIsJsonException() {
         Response response = target.path("throw-assertion-error").request().get();
         assertThat(response.getStatus()).isEqualTo(SERVER_EXCEPTION_STATUS.getStatusCode());
-        String body = readBody(response);
 
-        SerializableError error = ObjectMappers.newClientObjectMapper().readValue(body, SerializableError.class);
+        SerializableError error = response.readEntity(SerializableError.class);
         assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
         assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
-    }
-
-    private String readBody(Response response) throws IOException {
-        return new String(ByteStreams.toByteArray(response.readEntity(InputStream.class)), StandardCharsets.UTF_8);
     }
 
     public static class ExceptionMappersTestServer extends Application<Configuration> {

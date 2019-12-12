@@ -23,7 +23,9 @@ import java.time.ZonedDateTime;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.internal.inject.Custom;
 
+@Custom
 @Provider
 public final class ZonedDateTimeParamConverterProvider implements ParamConverterProvider {
     private final ZonedDateTimeParamConverter paramConverter = new ZonedDateTimeParamConverter();
