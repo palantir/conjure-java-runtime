@@ -60,7 +60,8 @@ public final class GuavaOptionalParamConverterProvider implements ParamConverter
                 };
             }
 
-            for (ParamConverterProvider provider : Providers.getProviders(injectionManager, ParamConverterProvider.class)) {
+            for (ParamConverterProvider provider : Providers.getProviders(injectionManager,
+                    ParamConverterProvider.class)) {
                 final ParamConverter<?> converter = provider.getConverter(ctp.rawClass(), ctp.type(), annotations);
                 if (converter != null) {
                     return new ParamConverter<T>() {
