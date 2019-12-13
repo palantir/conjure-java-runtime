@@ -1,6 +1,18 @@
 versionOverrides: {}
 acceptedBreaks:
-  4.37.0:
+  "4.45.0":
+    com.palantir.conjure.java.runtime:conjure-java-jersey-server:
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void com.palantir.conjure.java.server.jersey.GuavaOptionalParamConverterProvider::<init>(===org.glassfish.hk2.api.ServiceLocator===)"
+      new: "parameter void com.palantir.conjure.java.server.jersey.GuavaOptionalParamConverterProvider::<init>(===org.glassfish.jersey.internal.inject.InjectionManager===)"
+      justification: "Classes are implementation details - only public for injection\
+        \ purposes"
+    - code: "java.method.parameterTypeChanged"
+      old: "parameter void com.palantir.conjure.java.server.jersey.Java8OptionalParamConverterProvider::<init>(===org.glassfish.hk2.api.ServiceLocator===)"
+      new: "parameter void com.palantir.conjure.java.server.jersey.Java8OptionalParamConverterProvider::<init>(===org.glassfish.jersey.internal.inject.InjectionManager===)"
+      justification: "Classes are implementation details - only public for injection\
+        \ purposes"
+  "4.37.0":
     com.palantir.conjure.java.runtime:okhttp-clients:
     - code: "java.method.addedToInterface"
       old: null
