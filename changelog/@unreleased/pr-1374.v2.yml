@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: Missing or malformed credentials will result in a 401 UNAUTHORIZED
+    from Jersey servers. Previously we responded with a 400, which isn't as accurate
+    as we would like.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1374
