@@ -47,7 +47,7 @@ public final class JsonExceptionMapperTest {
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
-        assertThat(jsonExceptionMapperMeter.getCount()).isEqualTo(0);
+        assertThat(jsonExceptionMapperMeter.getCount()).isZero();
     }
 
     @Test
