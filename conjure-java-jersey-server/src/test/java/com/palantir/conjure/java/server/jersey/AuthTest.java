@@ -27,10 +27,12 @@ import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
@@ -62,8 +64,9 @@ public final class AuthTest {
     public void testAuthHeader() throws SecurityException {
         Response response = target.path("authHeader")
                 .request()
-                .header("value", "Bearer bearerToken")
+                .header("Authorization", "Bearer bearerToken")
                 .get();
+
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("Bearer bearerToken");
     }
@@ -86,7 +89,7 @@ public final class AuthTest {
     public void testAuthHeader_malformedCredentials() throws SecurityException {
         Response response = target.path("authHeader")
                 .request()
-                .header("value", "")
+                .header("Authorization", "!")
                 .get();
 
         assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
@@ -98,11 +101,42 @@ public final class AuthTest {
     }
 
     @Test
+    public void testAuthHeaderOtherHeader_illegalArgument() throws SecurityException {
+        Response response = target.path("authHeaderOtherHeader")
+                .request()
+                .header("Other", "!")
+                .get();
+
+        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
+
+        SerializableError error = response.readEntity(SerializableError.class);
+        assertThat(error.errorCode()).isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+        assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
+        assertThat(error.parameters()).isEmpty();
+    }
+
+    @Test
+    public void testAuthHeaderOtherParam_illegalArgument() throws SecurityException {
+        Response response = target.path("authHeaderOtherParam")
+                .queryParam("Authorization", "!")
+                .request()
+                .get();
+
+        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
+
+        SerializableError error = response.readEntity(SerializableError.class);
+        assertThat(error.errorCode()).isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+        assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
+        assertThat(error.parameters()).isEmpty();
+    }
+
+    @Test
     public void testBearerToken() throws SecurityException {
         Response response = target.path("bearerToken")
                 .request()
-                .header("value", "bearerToken")
+                .cookie("PALANTIR_TOKEN", "bearerToken")
                 .get();
+
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("bearerToken");
     }
@@ -125,7 +159,7 @@ public final class AuthTest {
     public void testBearerToken_malformedCredentials() throws SecurityException {
         Response response = target.path("bearerToken")
                 .request()
-                .header("value", "")
+                .cookie("PALANTIR_TOKEN", "!")
                 .get();
 
         assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
@@ -133,6 +167,21 @@ public final class AuthTest {
         SerializableError error = response.readEntity(SerializableError.class);
         assertThat(error.errorCode()).isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
         assertThat(error.errorName()).isEqualTo("Conjure:MalformedCredentials");
+        assertThat(error.parameters()).isEmpty();
+    }
+
+    @Test
+    public void testBearerTokenOtherParam_illegalArgument() throws SecurityException {
+        Response response = target.path("bearerTokenOtherParam")
+                .queryParam("PALANTIR_TOKEN", "!")
+                .request()
+                .get();
+
+        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
+
+        SerializableError error = response.readEntity(SerializableError.class);
+        assertThat(error.errorCode()).isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+        assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
         assertThat(error.parameters()).isEmpty();
     }
 
@@ -151,7 +200,22 @@ public final class AuthTest {
         }
 
         @Override
+        public String getAuthHeaderOtherHeader(AuthHeader value) {
+            return value.toString();
+        }
+
+        @Override
+        public String getAuthHeaderOtherParam(AuthHeader value) {
+            return value.toString();
+        }
+
+        @Override
         public String getBearerToken(BearerToken value) {
+            return value.toString();
+        }
+
+        @Override
+        public String getBearerTokenOtherParam(BearerToken value) {
             return value.toString();
         }
     }
@@ -162,10 +226,22 @@ public final class AuthTest {
     public interface AuthTestService {
         @GET
         @Path("/authHeader")
-        String getAuthHeader(@HeaderParam("value") AuthHeader value);
+        String getAuthHeader(@HeaderParam("Authorization") AuthHeader value);
+
+        @GET
+        @Path("/authHeaderOtherHeader")
+        String getAuthHeaderOtherHeader(@HeaderParam("Other") AuthHeader value);
+
+        @GET
+        @Path("/authHeaderOtherParam")
+        String getAuthHeaderOtherParam(@QueryParam("Authorization") AuthHeader value);
 
         @GET
         @Path("/bearerToken")
-        String getBearerToken(@HeaderParam("value") BearerToken value);
+        String getBearerToken(@CookieParam("PALANTIR_TOKEN") BearerToken value);
+
+        @GET
+        @Path("/bearerTokenOtherParam")
+        String getBearerTokenOtherParam(@QueryParam("PALANTIR_TOKEN") BearerToken value);
     }
 }

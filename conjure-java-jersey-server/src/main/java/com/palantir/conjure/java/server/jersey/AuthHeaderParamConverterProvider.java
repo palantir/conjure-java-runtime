@@ -20,6 +20,8 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
@@ -35,8 +37,10 @@ public final class AuthHeaderParamConverterProvider implements ParamConverterPro
     public <T> ParamConverter<T> getConverter(
             final Class<T> rawType,
             final Type _genericType,
-            final Annotation[] _annotations) {
-        return AuthHeader.class.equals(rawType) ? (ParamConverter<T>) paramConverter : null;
+            final Annotation[] annotations) {
+        return AuthHeader.class.equals(rawType) && hasAuthAnnotation(annotations)
+                ? (ParamConverter<T>) paramConverter
+                : null;
     }
 
     public static final class AuthHeaderParamConverter implements ParamConverter<AuthHeader> {
@@ -57,5 +61,18 @@ public final class AuthHeaderParamConverterProvider implements ParamConverterPro
             Preconditions.checkArgument(value != null);
             return value.toString();
         }
+    }
+
+    private static boolean hasAuthAnnotation(Annotation[] annotations) {
+        for (Annotation annotation : annotations) {
+            if (annotation.annotationType() == HeaderParam.class) {
+                String value = ((HeaderParam) annotation).value();
+                if (value.equals(HttpHeaders.AUTHORIZATION)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

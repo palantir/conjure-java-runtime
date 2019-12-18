@@ -20,6 +20,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.BearerToken;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
@@ -35,8 +36,10 @@ public final class BearerTokenParamConverterProvider implements ParamConverterPr
     public <T> ParamConverter<T> getConverter(
             final Class<T> rawType,
             final Type _genericType,
-            final Annotation[] _annotations) {
-        return BearerToken.class.equals(rawType) ? (ParamConverter<T>) paramConverter : null;
+            final Annotation[] annotations) {
+        return BearerToken.class.equals(rawType) && hasAuthAnnotation(annotations)
+                ? (ParamConverter<T>) paramConverter
+                : null;
     }
 
     public static final class BearerTokenParamConverter implements ParamConverter<BearerToken> {
@@ -57,5 +60,15 @@ public final class BearerTokenParamConverterProvider implements ParamConverterPr
             Preconditions.checkArgument(value != null);
             return value.toString();
         }
+    }
+
+    private static boolean hasAuthAnnotation(Annotation[] annotations) {
+        for (Annotation annotation : annotations) {
+            if (annotation.annotationType() == CookieParam.class) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
