@@ -46,7 +46,7 @@ public final class BearerTokenParamConverterProvider implements ParamConverterPr
         @Override
         public BearerToken fromString(final String value) {
             if (value == null) {
-                throw UnauthorizedException.missingCredentials();
+                return null;
             }
             try {
                 return BearerToken.valueOf(value);

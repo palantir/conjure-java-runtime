@@ -47,7 +47,7 @@ public final class AuthHeaderParamConverterProvider implements ParamConverterPro
         @Override
         public AuthHeader fromString(final String value) {
             if (value == null) {
-                throw UnauthorizedException.missingCredentials();
+                return null;
             }
             try {
                 return AuthHeader.valueOf(value);
