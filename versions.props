@@ -1,6 +1,6 @@
 ch.qos.logback:logback-classic = 1.1.7
 # catch-all jackson version
-com.fasterxml.jackson.*:jackson-* = 2.10.1
+com.fasterxml.jackson.*:jackson-* = 2.10.2
 com.github.ben-manes.caffeine:caffeine = 2.8.0
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 23.6.1-jre
