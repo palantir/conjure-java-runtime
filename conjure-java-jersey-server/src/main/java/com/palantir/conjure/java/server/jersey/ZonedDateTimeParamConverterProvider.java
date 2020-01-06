@@ -23,7 +23,10 @@ import java.time.ZonedDateTime;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.internal.inject.Custom;
 
+// The Custom annotation ensures that our custom param converters are considered first. See ParamConverterFactory.
+@Custom
 @Provider
 public final class ZonedDateTimeParamConverterProvider implements ParamConverterProvider {
     private final ZonedDateTimeParamConverter paramConverter = new ZonedDateTimeParamConverter();

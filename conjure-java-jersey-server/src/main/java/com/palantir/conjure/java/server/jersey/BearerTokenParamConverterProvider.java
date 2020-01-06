@@ -17,39 +17,61 @@
 package com.palantir.conjure.java.server.jersey;
 
 import com.palantir.logsafe.Preconditions;
+import com.palantir.tokens.auth.BearerToken;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.time.Instant;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.internal.inject.Custom;
 
 // The Custom annotation ensures that our custom param converters are considered first. See ParamConverterFactory.
+// This is particularly important for the BearerToken param converter to ensure that we do not fallback to the
+// TypeValueOf param converter.
 @Custom
 @Provider
-public final class InstantParamConverterProvider implements ParamConverterProvider {
-    private final InstantParamConverter paramConverter = new InstantParamConverter();
+public final class BearerTokenParamConverterProvider implements ParamConverterProvider {
+    private final BearerTokenParamConverter paramConverter = new BearerTokenParamConverter();
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> ParamConverter<T> getConverter(
             final Class<T> rawType,
             final Type _genericType,
-            final Annotation[] _annotations) {
-        return Instant.class.equals(rawType) ? (ParamConverter<T>) paramConverter : null;
+            final Annotation[] annotations) {
+        return BearerToken.class.equals(rawType) && hasAuthAnnotation(annotations)
+                ? (ParamConverter<T>) paramConverter
+                : null;
     }
 
-    public static final class InstantParamConverter implements ParamConverter<Instant> {
+    public static final class BearerTokenParamConverter implements ParamConverter<BearerToken> {
         @Override
-        public Instant fromString(final String value) {
-            return Instant.parse(value);
+        public BearerToken fromString(final String value) {
+            if (value == null) {
+                return null;
+            }
+            try {
+                return BearerToken.valueOf(value);
+            } catch (RuntimeException e) {
+                throw UnauthorizedException.malformedCredentials(e);
+            }
         }
 
         @Override
-        public String toString(final Instant value) {
+        public String toString(final BearerToken value) {
             Preconditions.checkArgument(value != null);
             return value.toString();
         }
+    }
+
+    private static boolean hasAuthAnnotation(Annotation[] annotations) {
+        for (Annotation annotation : annotations) {
+            if (CookieParam.class.equals(annotation.annotationType())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

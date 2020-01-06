@@ -13,6 +13,7 @@ dependencies {
     implementation "com.fasterxml.jackson.module:jackson-module-afterburner"
     implementation "com.jcraft:jzlib"
     implementation "com.palantir.safe-logging:safe-logging"
+    implementation 'com.palantir.tokens:auth-tokens'
     implementation "com.palantir.tracing:tracing-jersey"
     implementation project(':conjure-java-jackson-serialization')
 

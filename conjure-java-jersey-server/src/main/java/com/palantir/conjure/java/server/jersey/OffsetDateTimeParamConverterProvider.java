@@ -23,7 +23,10 @@ import java.time.OffsetDateTime;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.internal.inject.Custom;
 
+// The Custom annotation ensures that our custom param converters are considered first. See ParamConverterFactory.
+@Custom
 @Provider
 public final class OffsetDateTimeParamConverterProvider implements ParamConverterProvider {
     private final OffsetDateTimeParamConverter paramConverter = new OffsetDateTimeParamConverter();

@@ -82,8 +82,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     public void testThrowsNotAuthorized() {
         assertThatThrownBy(() -> service.getThrowsNotAuthorized(null))
                 .isInstanceOfSatisfying(RemoteException.class, e -> {
-                    assertThat(e.getMessage()).contains("RemoteException: javax.ws.rs.NotAuthorizedException");
-                    assertThat(e.getError().errorCode()).isEqualTo("javax.ws.rs.NotAuthorizedException");
+                    assertThat(e.getMessage()).contains("RemoteException: UNAUTHORIZED (Default:Unauthorized)");
+                    assertThat(e.getError().errorCode()).isEqualTo("UNAUTHORIZED");
                 });
     }
 
@@ -91,8 +91,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     public void testOptionalThrowsNotAuthorized() {
         assertThatThrownBy(() -> service.getOptionalThrowsNotAuthorized(null))
                 .isInstanceOfSatisfying(RemoteException.class, e -> {
-                    assertThat(e.getMessage()).contains("RemoteException: javax.ws.rs.NotAuthorizedException");
-                    assertThat(e.getError().errorCode()).isEqualTo("javax.ws.rs.NotAuthorizedException");
+                    assertThat(e.getMessage()).contains("RemoteException: UNAUTHORIZED (Default:Unauthorized)");
+                    assertThat(e.getError().errorCode()).isEqualTo("UNAUTHORIZED");
                 });
     }
 

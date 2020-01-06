@@ -43,7 +43,8 @@ import org.junit.Test;
 public final class DateTimeTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(OptionalTestServer.class,
+    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
+            DateTimeTestServer.class,
             "src/test/resources/test-server.yml");
 
     private WebTarget target;
@@ -80,7 +81,7 @@ public final class DateTimeTest {
         assertThat(response.readEntity(String.class)).isEqualTo("2017-01-02T03:04:05.060Z");
     }
 
-    public static class OptionalTestServer extends Application<Configuration> {
+    public static class DateTimeTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration _config, final Environment env) {
             env.jersey().register(ConjureJerseyFeature.INSTANCE);

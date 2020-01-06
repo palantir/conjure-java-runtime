@@ -22,6 +22,7 @@ import com.palantir.logsafe.SafeArg;
 import java.util.UUID;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -54,7 +55,15 @@ final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicat
             log.error("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         }
 
-        if (exception instanceof ForbiddenException) {
+        if (exception instanceof NotAuthorizedException) {
+            return JsonExceptionMapper.createResponse(
+                    ErrorType.UNAUTHORIZED,
+                    errorInstanceId);
+        } else if (exception instanceof UnauthorizedException) {
+            return JsonExceptionMapper.createResponse(
+                    ((UnauthorizedException) exception).getErrorType(),
+                    errorInstanceId);
+        } else if (exception instanceof ForbiddenException) {
             return JsonExceptionMapper.createResponse(
                     ErrorType.PERMISSION_DENIED,
                     errorInstanceId);

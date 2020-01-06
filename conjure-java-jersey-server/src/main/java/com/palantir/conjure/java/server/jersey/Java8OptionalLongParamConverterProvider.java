@@ -26,7 +26,10 @@ import java.util.OptionalLong;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
+import org.glassfish.jersey.internal.inject.Custom;
 
+// The Custom annotation ensures that our custom param converters are considered first. See ParamConverterFactory.
+@Custom
 @Provider
 public final class Java8OptionalLongParamConverterProvider implements ParamConverterProvider {
     private final OptionalLongParamConverter paramConverter = new OptionalLongParamConverter();

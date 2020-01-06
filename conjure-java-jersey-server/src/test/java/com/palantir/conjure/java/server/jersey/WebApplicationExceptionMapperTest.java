@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ServiceUnavailableException;
 import javax.ws.rs.WebApplicationException;
@@ -38,30 +39,42 @@ public final class WebApplicationExceptionMapperTest {
 
     @Test
     public void testExplicitlyHandledExceptions() throws Exception {
-        Response response;
+        Response response = mapper.toResponse(new NotAuthorizedException("secret"));
+        String entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity).contains("\"errorCode\" : \"UNAUTHORIZED\"");
+        assertThat(entity).contains("\"errorName\" : \"Default:Unauthorized\"");
+        assertThat(response.getStatus()).isEqualTo(401);
+        assertThat(entity).doesNotContain("secret");
+
+        response = mapper.toResponse(UnauthorizedException.missingCredentials());
+        entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity).contains("\"errorCode\" : \"UNAUTHORIZED\"");
+        assertThat(entity).contains("\"errorName\" : \"Conjure:MissingCredentials\"");
+        assertThat(response.getStatus()).isEqualTo(401);
+        assertThat(entity).doesNotContain("secret");
 
         response = mapper.toResponse(new ForbiddenException("secret"));
-        String entity = objectMapper.writeValueAsString(response.getEntity());
+        entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"PERMISSION_DENIED\"");
         assertThat(entity).contains("\"errorName\" : \"Default:PermissionDenied\"");
         assertThat(response.getStatus()).isEqualTo(403);
         assertThat(entity).doesNotContain("secret");
 
-        response = mapper.toResponse(new NotFoundException());
+        response = mapper.toResponse(new NotFoundException("secret"));
         entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"NOT_FOUND\"");
         assertThat(entity).contains("\"errorName\" : \"Default:NotFound\"");
         assertThat(response.getStatus()).isEqualTo(404);
         assertThat(entity).doesNotContain("secret");
 
-        response = mapper.toResponse(new BadRequestException());
+        response = mapper.toResponse(new BadRequestException("secret"));
         entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
         assertThat(response.getStatus()).isEqualTo(400);
         assertThat(entity).doesNotContain("secret");
 
-        response = mapper.toResponse(new ParamException.CookieParamException(null, null, null));
+        response = mapper.toResponse(new ParamException.CookieParamException(null, "secret", "secret"));
         entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
