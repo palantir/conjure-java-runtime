@@ -27,6 +27,9 @@ import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.internal.inject.Custom;
 
+// The Custom annotation ensures that our custom param converters are considered first. See ParamConverterFactory.
+// This is particularly important for the AuthHeader param converter to ensure that we do not fallback to the
+// TypeValueOf param converter.
 @Custom
 @Provider
 public final class AuthHeaderParamConverterProvider implements ParamConverterProvider {
@@ -65,9 +68,9 @@ public final class AuthHeaderParamConverterProvider implements ParamConverterPro
 
     private static boolean hasAuthAnnotation(Annotation[] annotations) {
         for (Annotation annotation : annotations) {
-            if (annotation.annotationType() == HeaderParam.class) {
+            if (HeaderParam.class.equals(annotation.annotationType())) {
                 String value = ((HeaderParam) annotation).value();
-                if (value.equals(HttpHeaders.AUTHORIZATION)) {
+                if (HttpHeaders.AUTHORIZATION.equals(value)) {
                     return true;
                 }
             }

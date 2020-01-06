@@ -26,6 +26,9 @@ import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.internal.inject.Custom;
 
+// The Custom annotation ensures that our custom param converters are considered first. See ParamConverterFactory.
+// This is particularly important for the BearerToken param converter to ensure that we do not fallback to the
+// TypeValueOf param converter.
 @Custom
 @Provider
 public final class BearerTokenParamConverterProvider implements ParamConverterProvider {
@@ -64,7 +67,7 @@ public final class BearerTokenParamConverterProvider implements ParamConverterPr
 
     private static boolean hasAuthAnnotation(Annotation[] annotations) {
         for (Annotation annotation : annotations) {
-            if (annotation.annotationType() == CookieParam.class) {
+            if (CookieParam.class.equals(annotation.annotationType())) {
                 return true;
             }
         }
