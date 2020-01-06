@@ -41,7 +41,6 @@ import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public final class AuthTest {
@@ -73,17 +72,6 @@ public final class AuthTest {
     }
 
     @Test
-    public void testAuthHeader_allowsNull() throws SecurityException {
-        Response response = target.path("authHeader")
-                .request()
-                .get();
-
-        assertThat(response.getStatus()).isEqualTo(Status.NO_CONTENT.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEmpty();
-    }
-
-    @Test
-    @Ignore
     public void testAuthHeader_missingCredentials() throws SecurityException {
         Response response = target.path("authHeader")
                 .request()
@@ -154,17 +142,6 @@ public final class AuthTest {
     }
 
     @Test
-    public void testBearerToken_allowsNull() throws SecurityException {
-        Response response = target.path("bearerToken")
-                .request()
-                .get();
-
-        assertThat(response.getStatus()).isEqualTo(Status.NO_CONTENT.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("");
-    }
-
-    @Test
-    @Ignore
     public void testBearerToken_missingCredentials() throws SecurityException {
         Response response = target.path("bearerToken")
                 .request()
@@ -219,7 +196,7 @@ public final class AuthTest {
     public static final class AuthTestResource implements AuthTestService {
         @Override
         public String getAuthHeader(AuthHeader value) {
-            return value != null ? value.toString() : null;
+            return value.toString();
         }
 
         @Override
@@ -234,7 +211,7 @@ public final class AuthTest {
 
         @Override
         public String getBearerToken(BearerToken value) {
-            return value != null ? value.toString() : null;
+            return value.toString();
         }
 
         @Override
