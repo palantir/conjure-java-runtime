@@ -69,15 +69,7 @@ public final class SslSocketFactories {
      */
     public static SSLContext createSslContext(SslConfiguration config) {
         TrustManager[] trustManagers = createTrustManagers(config);
-
-        KeyManager[] keyManagers = null;
-        if (config.keyStorePath().isPresent()) {
-            keyManagers = createKeyManagerFactory(
-                    config.keyStorePath().get(),
-                    config.keyStorePassword().get(),
-                    config.keyStoreType(),
-                    config.keyStoreKeyAlias()).getKeyManagers();
-        }
+        KeyManager[] keyManagers = createKeyManagers(config);
 
         return createSslContext(trustManagers, keyManagers);
     }
@@ -175,6 +167,22 @@ public final class SslSocketFactories {
                     X509TrustManager.class.getSimpleName(),
                     trustManager.getClass().getSimpleName()));
         }
+    }
+
+    /**
+     * Create {@link KeyManager} array from the provided configuration.
+     *
+     * @param config an {@link SslConfiguration} describing at least the trust store configuration
+     * @return an {@link KeyManager} array according to the input configuration
+     */
+    public static KeyManager[] createKeyManagers(SslConfiguration config) {
+        return config.keyStorePath()
+                .map(keyStorePath -> createKeyManagerFactory(
+                        keyStorePath,
+                        config.keyStorePassword().get(),
+                        config.keyStoreType(),
+                        config.keyStoreKeyAlias()).getKeyManagers())
+                .orElse(null);
     }
 
     private static TrustManagerFactory createTrustManagerFactory(
