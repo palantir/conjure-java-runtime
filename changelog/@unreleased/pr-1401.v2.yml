@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Expose method for converting SslConfiguration into a KeyManager. Allows
+    augmenting sslsockets used by conjure java runtime with additional certificates.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1401
