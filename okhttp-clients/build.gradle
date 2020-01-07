@@ -20,6 +20,7 @@ dependencies {
     implementation 'javax.ws.rs:javax.ws.rs-api'
     implementation 'org.slf4j:slf4j-api'
 
+    testImplementation "io.undertow:undertow-core:2.0.26.Final"
     testImplementation project(":conjure-java-jersey-server")
     testImplementation project(":keystores")
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
