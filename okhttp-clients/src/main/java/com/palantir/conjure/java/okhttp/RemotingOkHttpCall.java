@@ -26,6 +26,7 @@ import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.UnknownRemoteException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
@@ -40,6 +41,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -118,8 +120,12 @@ final class RemotingOkHttpCall extends ForwardingCall {
             }
 
             @Override
-            public void onResponse(Call _call, Response response) {
-                future.set(response);
+            public void onResponse(Call call, Response response) {
+                if (!future.set(response)) {
+                    close(response);
+                    log.warn("Future has already completed, closing the response",
+                            UnsafeArg.of("requestUrl", call.request().url().toString()));
+                }
             }
         });
 
@@ -164,7 +170,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     private static Response buildFrom(Response unbufferedResponse, byte[] bodyBytes) {
         return unbufferedResponse.newBuilder()
-                .body(buffer(unbufferedResponse.body().contentType(), bodyBytes))
+                .body(bodyBytes == null ? null
+                        : buffer(
+                                Preconditions.checkNotNull(unbufferedResponse.body(), "Expected a response body")
+                                        .contentType(),
+                                bodyBytes))
                 .build();
     }
 
@@ -191,8 +201,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
             public void onFailure(Throwable throwable) {
                 callback.onFailure(
                         RemotingOkHttpCall.this,
-                        new IOException(new AssertionError("This should never happen, since it implies "
-                                + "we failed when using the concurrency limiter", throwable)));
+                        new SafeIoException("This should never happen, since it implies "
+                                + "we failed when using the concurrency limiter", throwable));
             }
         }, MoreExecutors.directExecutor());
     }
@@ -201,14 +211,20 @@ final class RemotingOkHttpCall extends ForwardingCall {
         enqueueInternal(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {
-                call.request().tag(Tags.EntireSpan.class).get().complete();
-                callback.onFailure(call, exception);
+                try {
+                    call.request().tag(Tags.EntireSpan.class).get().complete();
+                } finally {
+                    callback.onFailure(call, exception);
+                }
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                call.request().tag(Tags.EntireSpan.class).get().complete();
-                callback.onResponse(call, response);
+                try {
+                    call.request().tag(Tags.EntireSpan.class).get().complete();
+                } finally {
+                    callback.onResponse(call, response);
+                }
             }
         });
     }
@@ -259,7 +275,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             .build();
                     RemotingOkHttpCall retryCall =
                             client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
-                    scheduleExecution(backoff.get(), nextAttempt, () -> retryCall.enqueue(callback));
+                    scheduleExecution(backoff.get(), nextAttempt, retryCall::enqueue, callback);
                 });
             }
 
@@ -274,16 +290,19 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     return;
                 }
 
+                ResponseBody maybeResponseBody = response.body();
                 // Buffer the response into a byte[] so that multiple handler can safely consume the body.
                 // This consumes and closes the original response body.
                 Supplier<Response> errorResponseSupplier;
                 try {
-                    byte[] body = response.body().bytes();
+                    byte[] body = maybeResponseBody == null ? null : maybeResponseBody.bytes();
                     // so error handlers can read the body without breaking subsequent handlers
                     errorResponseSupplier = () -> buildFrom(response, body);
                 } catch (IOException e) {
                     onFailure(call, e);
                     return;
+                } finally {
+                    close(response);
                 }
 
                 // Handle to handle QoS situations: retry, failover, etc.
@@ -309,8 +328,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 callback.onFailure(call,
-                        new SafeIoException("Failed to handle request, "
-                                + "this is an conjure-java-runtime bug."));
+                        new SafeIoException(
+                                "Failed to handle request, this is an conjure-java-runtime bug."));
             }
         });
     }
@@ -342,14 +361,19 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private void scheduleExecution(
             Duration backoff,
             Tags.AttemptSpan attemptSpan,
-            Runnable execution) {
+            Consumer<Callback> enqueueFunction,
+            Callback callback) {
         DetachedSpan backoffSpan = attemptSpan.attemptSpan().childDetachedSpan("OkHttp: backoff-with-jitter");
 
         // TODO(rfink): Investigate whether ignoring the ScheduledFuture is safe, #629.
         schedulingExecutor.schedule(
-                () -> executionExecutor.submit(() -> {
+                () -> executionExecutor.execute(() -> {
                     backoffSpan.complete();
-                    execution.run();
+                    if (isCanceled()) {
+                        callback.onFailure(this, new SafeIoException("Request is cancelled"));
+                    } else {
+                        enqueueFunction.accept(callback);
+                    }
                 }),
                 backoff.toMillis(),
                 TimeUnit.MILLISECONDS);
@@ -386,7 +410,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             .build();
                     RemotingOkHttpCall nextCall =
                             client.newCallWithMutableState(nextAttemptRequest, backoffStrategy, maxNumRelocations);
-                    scheduleExecution(backoff, nextAttempt, () -> nextCall.enqueue(callback));
+                    scheduleExecution(backoff, nextAttempt, nextCall::enqueue, callback);
                 });
                 return null;
             }
@@ -470,10 +494,13 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             .tag(Tags.AttemptSpan.class, nextAttempt)
                             .url(redirectTo.get())
                             .build();
-                    scheduleExecution(backoff.get(), nextAttempt, () -> {
-                        client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations)
-                                .enqueue(callback);
-                    });
+                    scheduleExecution(backoff.get(),
+                            nextAttempt,
+                            client.newCallWithMutableState(
+                                    redirectedRequest,
+                                    backoffStrategy,
+                                    maxNumRelocations)::enqueue,
+                            callback);
                 });
                 return null;
             }
@@ -543,14 +570,18 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
         @Override
         public void onSuccess(Response response) {
-            if (response.body() != null) {
-                response.close();
-            }
+            close(response);
         }
 
         @Override
         public void onFailure(Throwable _throwable) {
             // do nothing
+        }
+    }
+
+    private static void close(Response response) {
+        if (response != null && response.body() != null) {
+            response.close();
         }
     }
 
