@@ -115,8 +115,12 @@ final class RemotingOkHttpCall extends ForwardingCall {
         SettableFuture<Response> future = SettableFuture.create();
         enqueue(new Callback() {
             @Override
-            public void onFailure(Call _call, IOException exception) {
-                future.setException(exception);
+            public void onFailure(Call call, IOException exception) {
+                if (!future.setException(exception)) {
+                    log.warn("Future has already completed",
+                            UnsafeArg.of("requestUrl", call.request().url().toString()),
+                            exception);
+                }
             }
 
             @Override
