@@ -1,5 +1,7 @@
 type: improvement
 improvement:
-  description: General safety and cleanup in RemotingOkHttpCall
+  description:
+    General safety and cleanup in RemotingOkHttpCall. Requests awaiting backoff are no longer
+    silently retried when the requesting thread is interrupted.
   links:
   - https://github.com/palantir/conjure-java-runtime/pull/1391
