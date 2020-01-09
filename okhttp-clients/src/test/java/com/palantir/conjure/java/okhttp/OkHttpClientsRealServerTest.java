@@ -24,6 +24,7 @@ import com.palantir.conjure.java.client.config.ClientConfiguration;
 import io.undertow.Undertow;
 import io.undertow.server.handlers.BlockingHandler;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -55,7 +56,7 @@ public class OkHttpClientsRealServerTest extends TestBase {
         ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         server.start();
         try {
-            OkHttpClient client = OkHttpClients.withStableUris(
+            OkHttpClient client = OkHttpClients.withStableUrisAndBackoff(
                     ClientConfiguration.builder()
                             .from(createTestConfig(url))
                             .maxNumRetries(10)
@@ -63,7 +64,8 @@ public class OkHttpClientsRealServerTest extends TestBase {
                             .build(),
                     AGENT,
                     hostEventsSink,
-                    OkHttpClientsTest.class);
+                    OkHttpClientsTest.class,
+                    () -> new ReproducibleExponentialBackoff(10, Duration.ofSeconds(3)));
             Future<?> future = executorService.submit((Callable<Void>) () -> {
                 try {
                     client.newCall(new Request.Builder().url(url).build()).execute().close();
@@ -105,15 +107,16 @@ public class OkHttpClientsRealServerTest extends TestBase {
         ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         server.start();
         try {
-            OkHttpClient client = OkHttpClients.withStableUris(
+            OkHttpClient client = OkHttpClients.withStableUrisAndBackoff(
                     ClientConfiguration.builder()
                             .from(createTestConfig(url))
                             .maxNumRetries(10)
-                            .backoffSlotSize(Duration.ofSeconds(3))
+                            .backoffSlotSize(Duration.ofSeconds(2))
                             .build(),
                     AGENT,
                     hostEventsSink,
-                    OkHttpClientsTest.class);
+                    OkHttpClientsTest.class,
+                    () -> new ReproducibleExponentialBackoff(10, Duration.ofSeconds(2)));
             Future<?> future = executorService.submit((Callable<Void>) () -> {
                 try {
                     client.newCall(new Request.Builder().url(url).build()).execute().close();
@@ -139,5 +142,19 @@ public class OkHttpClientsRealServerTest extends TestBase {
         assertThat(requests)
                 .as("Expected a single request to be cancelled before a scheduled retry that is never executed")
                 .hasValue(2);
+    }
+
+    private static final class ReproducibleExponentialBackoff implements BackoffStrategy {
+
+        private final ExponentialBackoff delegate;
+
+        ReproducibleExponentialBackoff(int maxRetries, Duration backoffSlotSize) {
+            this.delegate = new ExponentialBackoff(maxRetries, backoffSlotSize, () -> 1D);
+        }
+
+        @Override
+        public Optional<Duration> nextBackoff() {
+            return delegate.nextBackoff();
+        }
     }
 }

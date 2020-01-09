@@ -148,7 +148,15 @@ public final class OkHttpClients {
             Class<?> serviceClass) {
         boolean reshuffle =
                 !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
-        return createInternal(client, config, userAgent, hostEventsSink, serviceClass, RANDOMIZE, reshuffle);
+        return createInternal(
+                client,
+                config,
+                userAgent,
+                hostEventsSink,
+                serviceClass,
+                RANDOMIZE,
+                reshuffle,
+                () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize()));
     }
 
     @VisibleForTesting
@@ -164,7 +172,26 @@ public final class OkHttpClients {
                 hostEventsSink,
                 serviceClass,
                 !RANDOMIZE,
-                !RESHUFFLE);
+                !RESHUFFLE,
+                () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize()));
+    }
+
+    @VisibleForTesting
+    static RemotingOkHttpClient withStableUrisAndBackoff(
+            ClientConfiguration config,
+            UserAgent userAgent,
+            HostEventsSink hostEventsSink,
+            Class<?> serviceClass,
+            Supplier<BackoffStrategy> backoffStrategy) {
+        return createInternal(
+                new OkHttpClient.Builder(),
+                config,
+                userAgent,
+                hostEventsSink,
+                serviceClass,
+                !RANDOMIZE,
+                !RESHUFFLE,
+                backoffStrategy);
     }
 
     private static RemotingOkHttpClient createInternal(
@@ -174,7 +201,8 @@ public final class OkHttpClients {
             HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             boolean randomizeUrlOrder,
-            boolean reshuffle) {
+            boolean reshuffle,
+            Supplier<BackoffStrategy> backoffStrategyFunction) {
         boolean enableClientQoS = shouldEnableQos(config.clientQoS());
         ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(
                 limitReviver.get(),
@@ -249,7 +277,7 @@ public final class OkHttpClients {
 
         return new RemotingOkHttpClient(
                 client.build(),
-                () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize()),
+                backoffStrategyFunction,
                 config.nodeSelectionStrategy(),
                 urlSelector,
                 schedulingExecutor.get(),
