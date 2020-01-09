@@ -17,11 +17,9 @@
 package com.palantir.conjure.java.okhttp;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import java.time.Duration;
-import java.util.Random;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -32,24 +30,24 @@ public final class ExponentialBackoffTest {
 
     @Test
     public void testNoRetry() {
-        Random random = mock(Random.class);
-        ExponentialBackoff backoff = new ExponentialBackoff(0, ONE_SECOND, random::nextDouble);
+        AtomicDouble random = new AtomicDouble();
+        ExponentialBackoff backoff = new ExponentialBackoff(0, ONE_SECOND, random::get);
 
         assertThat(backoff.nextBackoff()).isEmpty();
     }
 
     @Test
     public void testRetriesCorrectNumberOfTimesAndFindsRandomBackoffWithInExponentialInterval() {
-        Random random = mock(Random.class);
-        ExponentialBackoff backoff = new ExponentialBackoff(3, ONE_SECOND, random::nextDouble);
+        AtomicDouble random = new AtomicDouble();
+        ExponentialBackoff backoff = new ExponentialBackoff(3, ONE_SECOND, random::get);
 
-        when(random.nextDouble()).thenReturn(1.0);
+        random.set(1.0);
         assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(2));
 
-        when(random.nextDouble()).thenReturn(1.0);
+        random.set(1.0);
         assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(4));
 
-        when(random.nextDouble()).thenReturn(0.5);
+        random.set(0.5);
         assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(4 /* 8 * 0.5 (exp * jitter), see above */));
 
         assertThat(backoff.nextBackoff()).isEmpty();
