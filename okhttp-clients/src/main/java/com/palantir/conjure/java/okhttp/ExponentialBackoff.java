@@ -35,7 +35,7 @@ final class ExponentialBackoff implements BackoffStrategy {
     private int retryNumber = 0;
 
     ExponentialBackoff(int maxNumRetries, Duration backoffSlotSize) {
-        this(maxNumRetries, backoffSlotSize, () -> ThreadLocalRandom.current().nextDouble());
+        this(maxNumRetries, backoffSlotSize, ExponentialBackoff::random);
     }
 
     @VisibleForTesting
@@ -55,5 +55,9 @@ final class ExponentialBackoff implements BackoffStrategy {
         int upperBound = (int) Math.pow(2, retryNumber);
         return Optional.of(Duration.ofNanos(Math.round(
                 backoffSlotSize.toNanos() * random.getAsDouble() * upperBound)));
+    }
+
+    private static double random() {
+        return ThreadLocalRandom.current().nextDouble();
     }
 }
