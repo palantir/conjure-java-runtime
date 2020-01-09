@@ -25,10 +25,12 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -70,6 +72,16 @@ public final class StringFormatTest {
         assertThat(response.readEntity(String.class)).isEqualTo("val");
     }
 
+    @Test
+    public void testJsonStringBodyDeserializedAsPlainString() {
+        // This behaviour is somewhat unexpected since a valid JSON string is deserialized as a raw string, even
+        // though the endpoint consumes application/json
+        Response response = target.path("bodyString").request().post(null);
+        assertThat(response.readEntity(String.class)).isEqualTo("");
+        response = target.path("bodyString").request().post(Entity.json("\"val\""));
+        assertThat(response.readEntity(String.class)).isEqualTo("\"val\"");
+    }
+
     public static class TestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration _config, final Environment env) throws Exception {
@@ -88,6 +100,11 @@ public final class StringFormatTest {
         public String getTextString(@Nullable String value) {
             return value;
         }
+
+        @Override
+        public String postJsonString(String value) {
+            return value;
+        }
     }
 
     @Path("/")
@@ -103,5 +120,10 @@ public final class StringFormatTest {
         @Path("/textString")
         @Produces(MediaType.TEXT_PLAIN)
         String getTextString(@QueryParam("value") @Nullable String value);
+
+        @POST
+        @Path("/bodyString")
+        @Produces(MediaType.TEXT_PLAIN)
+        String postJsonString(@Nullable String value);
     }
 }
