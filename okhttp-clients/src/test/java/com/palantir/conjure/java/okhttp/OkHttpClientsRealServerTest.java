@@ -89,4 +89,55 @@ public class OkHttpClientsRealServerTest extends TestBase {
                 .as("Expected a single request to be cancelled before a scheduled retry that is never executed")
                 .hasValue(1);
     }
+
+    @Test
+    public void testInterruptionPreventsAdditionalRequests_afterRetry() throws Exception {
+        AtomicInteger requests = new AtomicInteger();
+        CountDownLatch completionLatch = new CountDownLatch(1);
+        Undertow server = Undertow.builder()
+                .addHttpListener(PORT, null)
+                .setHandler(new BlockingHandler(exchange -> {
+                    requests.incrementAndGet();
+                    exchange.setStatusCode(503);
+                }))
+                .build();
+        String url = "http://localhost:" + PORT;
+        ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        server.start();
+        try {
+            OkHttpClient client = OkHttpClients.withStableUris(
+                    ClientConfiguration.builder()
+                            .from(createTestConfig(url))
+                            .maxNumRetries(10)
+                            .backoffSlotSize(Duration.ofSeconds(3))
+                            .build(),
+                    AGENT,
+                    hostEventsSink,
+                    OkHttpClientsTest.class);
+            Future<?> future = executorService.submit((Callable<Void>) () -> {
+                try {
+                    client.newCall(new Request.Builder().url(url).build()).execute().close();
+                } finally {
+                    completionLatch.countDown();
+                }
+                return null;
+            });
+            // Wait long enough that we're confident the client is retrying
+            Uninterruptibles.sleepUninterruptibly(Duration.ofSeconds(7));
+            future.cancel(true);
+            System.err.println("CANCEL");
+            assertThat(completionLatch.await(1, TimeUnit.SECONDS))
+                    .as("Expected the client invocation to terminate quickly upon interruption")
+                    .isTrue();
+            // Provide enough time to capture a retry if the interrupted request is retried.
+            Uninterruptibles.sleepUninterruptibly(Duration.ofSeconds(10));
+        } finally {
+            server.stop();
+            assertThat(MoreExecutors.shutdownAndAwaitTermination(executorService, Duration.ofSeconds(5)))
+                    .isTrue();
+        }
+        assertThat(requests)
+                .as("Expected a single request to be cancelled before a scheduled retry that is never executed")
+                .hasValue(2);
+    }
 }

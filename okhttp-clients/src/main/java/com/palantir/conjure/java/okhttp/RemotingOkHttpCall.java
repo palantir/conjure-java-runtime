@@ -41,7 +41,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -77,11 +76,14 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private final ClientConfiguration.ServerQoS serverQoS;
     private final ClientConfiguration.RetryOnTimeout retryOnTimeout;
     private final ClientConfiguration.RetryOnSocketException retryOnSocketException;
+    // Previous call in the chain if this is a retry request
+    private final Optional<Call> previous;
 
     private final int maxNumRelocations;
 
     RemotingOkHttpCall(
             Call delegate,
+            Optional<Call> previous,
             BackoffStrategy backoffStrategy,
             UrlSelector urls,
             RemotingOkHttpClient client,
@@ -93,6 +95,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
             ClientConfiguration.RetryOnTimeout retryOnTimeout,
             ClientConfiguration.RetryOnSocketException retryOnSocketException) {
         super(delegate);
+        this.previous = previous;
         this.backoffStrategy = backoffStrategy;
         this.urls = urls;
         this.client = client;
@@ -211,6 +214,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }, MoreExecutors.directExecutor());
     }
 
+    @Override
+    public boolean isCanceled() {
+        return getDelegate().isCanceled() || previous.map(Call::isCanceled).orElse(Boolean.FALSE);
+    }
+
     private void enqueueClosingEntireSpan(Callback callback) {
         enqueueInternal(new Callback() {
             @Override
@@ -278,8 +286,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             .tag(Tags.AttemptSpan.class, nextAttempt)
                             .build();
                     RemotingOkHttpCall retryCall =
-                            client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1);
-                    scheduleExecution(backoff.get(), nextAttempt, retryCall::enqueue, callback);
+                            client.newCallWithMutableState(redirectedRequest,
+                                    backoffStrategy,
+                                    maxNumRelocations - 1,
+                                    Optional.of(call));
+                    scheduleExecution(backoff.get(), nextAttempt, retryCall, callback);
                 });
             }
 
@@ -365,7 +376,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     private void scheduleExecution(
             Duration backoff,
             Tags.AttemptSpan attemptSpan,
-            Consumer<Callback> enqueueFunction,
+            Call nextCall,
             Callback callback) {
         DetachedSpan backoffSpan = attemptSpan.attemptSpan().childDetachedSpan("OkHttp: backoff-with-jitter");
 
@@ -376,7 +387,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     if (isCanceled()) {
                         callback.onFailure(this, new SafeIoException("Request is cancelled"));
                     } else {
-                        enqueueFunction.accept(callback);
+                        nextCall.enqueue(callback);
                     }
                 }),
                 backoff.toMillis(),
@@ -413,8 +424,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             .tag(Tags.AttemptSpan.class, nextAttempt)
                             .build();
                     RemotingOkHttpCall nextCall =
-                            client.newCallWithMutableState(nextAttemptRequest, backoffStrategy, maxNumRelocations);
-                    scheduleExecution(backoff, nextAttempt, nextCall::enqueue, callback);
+                            client.newCallWithMutableState(nextAttemptRequest,
+                                    backoffStrategy,
+                                    maxNumRelocations,
+                                    Optional.of(call));
+                    scheduleExecution(backoff, nextAttempt, nextCall, callback);
                 });
                 return null;
             }
@@ -453,7 +467,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             .tag(Tags.AttemptSpan.class, nextAttempt)
                             .url(redirectTo.get())
                             .build();
-                    client.newCallWithMutableState(redirectedRequest, backoffStrategy, maxNumRelocations - 1)
+                    client.newCallWithMutableState(redirectedRequest,
+                            backoffStrategy,
+                            maxNumRelocations - 1,
+                            Optional.of(call))
                             .enqueue(callback);
                 });
 
@@ -503,7 +520,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
                             client.newCallWithMutableState(
                                     redirectedRequest,
                                     backoffStrategy,
-                                    maxNumRelocations)::enqueue,
+                                    maxNumRelocations,
+                                    Optional.of(call)),
                             callback);
                 });
                 return null;
@@ -551,6 +569,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     @Override
     public RemotingOkHttpCall doClone() {
         return new RemotingOkHttpCall(getDelegate().clone(),
+                Optional.empty(),
                 backoffStrategy,
                 urls,
                 client,
