@@ -29,6 +29,7 @@ dependencies {
     testImplementation "org.assertj:assertj-core"
     testImplementation "org.jmock:jmock"
     testImplementation "org.mockito:mockito-core"
+    testImplementation "io.undertow:undertow-core"
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'
