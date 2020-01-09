@@ -33,7 +33,7 @@ public final class ExponentialBackoffTest {
     @Test
     public void testNoRetry() {
         Random random = mock(Random.class);
-        ExponentialBackoff backoff = new ExponentialBackoff(0, ONE_SECOND, () -> random);
+        ExponentialBackoff backoff = new ExponentialBackoff(0, ONE_SECOND, random::nextDouble);
 
         assertThat(backoff.nextBackoff()).isEmpty();
     }
@@ -41,7 +41,7 @@ public final class ExponentialBackoffTest {
     @Test
     public void testRetriesCorrectNumberOfTimesAndFindsRandomBackoffWithInExponentialInterval() {
         Random random = mock(Random.class);
-        ExponentialBackoff backoff = new ExponentialBackoff(3, ONE_SECOND, () -> random);
+        ExponentialBackoff backoff = new ExponentialBackoff(3, ONE_SECOND, random::nextDouble);
 
         when(random.nextDouble()).thenReturn(1.0);
         assertThat(backoff.nextBackoff()).contains(ONE_SECOND.multipliedBy(2));

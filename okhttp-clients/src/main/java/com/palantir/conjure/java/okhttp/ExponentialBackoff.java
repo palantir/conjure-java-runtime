@@ -19,9 +19,8 @@ package com.palantir.conjure.java.okhttp;
 import com.google.common.annotations.VisibleForTesting;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Supplier;
+import java.util.function.DoubleSupplier;
 
 /**
  * Implements "exponential backoff with full jitter", suggesting a backoff duration chosen randomly from the interval
@@ -31,16 +30,16 @@ final class ExponentialBackoff implements BackoffStrategy {
 
     private final int maxNumRetries;
     private final Duration backoffSlotSize;
-    private final Supplier<Random> random;
+    private final DoubleSupplier random;
 
     private int retryNumber = 0;
 
     ExponentialBackoff(int maxNumRetries, Duration backoffSlotSize) {
-        this(maxNumRetries, backoffSlotSize, ThreadLocalRandom::current);
+        this(maxNumRetries, backoffSlotSize, () -> ThreadLocalRandom.current().nextDouble());
     }
 
     @VisibleForTesting
-    ExponentialBackoff(int maxNumRetries, Duration backoffSlotSize, Supplier<Random> random) {
+    ExponentialBackoff(int maxNumRetries, Duration backoffSlotSize, DoubleSupplier random) {
         this.maxNumRetries = maxNumRetries;
         this.backoffSlotSize = backoffSlotSize;
         this.random = random;
@@ -55,6 +54,6 @@ final class ExponentialBackoff implements BackoffStrategy {
 
         int upperBound = (int) Math.pow(2, retryNumber);
         return Optional.of(Duration.ofNanos(Math.round(
-                backoffSlotSize.toNanos() * random.get().nextDouble() * upperBound)));
+                backoffSlotSize.toNanos() * random.getAsDouble() * upperBound)));
     }
 }
