@@ -55,7 +55,8 @@ final class KeyStores {
      * (everything that occurs between the header and footer).
      */
     private static final Pattern KEY_PATTERN = Pattern.compile(
-            "-----BEGIN (RSA)? ?PRIVATE KEY-----\n?(.+?)\n?-----END (RSA)? ?PRIVATE KEY-----", Pattern.DOTALL);
+            "-----BEGIN (RSA)? ?PRIVATE KEY-----\n?(.+?)\n?-----END (RSA)? ?PRIVATE KEY-----",
+            Pattern.DOTALL);
 
     /**
      * Pattern that matches a single certificate in a PEM file. Has a capture group that captures the content of the
@@ -415,6 +416,7 @@ final class KeyStores {
     static PKCS8EncodedKeySpec parsePkcs8PrivateKey(byte[] pkcs8DerBytes) {
         return new PKCS8EncodedKeySpec(pkcs8DerBytes);
     }
+
     /**
      * Returns a List of certificates representing the PEM formatted X.509 certificates in the provided string. The
      * order of the certificates in the list will match the order that the certificates occur in the string.

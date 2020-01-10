@@ -266,10 +266,10 @@ public final class KeyStoresTests {
 
     @Test
     public void testMismatchedTags() {
-        assertThatThrownBy(() ->
-                KeyStores.getPrivateKeyFromString("-----BEGIN PRIVATE KEY-----\n-----END RSA PRIVATE KEY-----\n"))
-                .isInstanceOf(GeneralSecurityException.class)
-                .hasMessageStartingWith("unable to find valid RSA key in the provided string");
+        assertThatThrownBy(
+                () -> KeyStores.getPrivateKeyFromString("-----BEGIN PRIVATE KEY-----\n-----END RSA PRIVATE KEY-----\n"))
+                        .isInstanceOf(GeneralSecurityException.class)
+                        .hasMessageStartingWith("unable to find valid RSA key in the provided string");
     }
 
     private void assertKey(RSAPrivateCrtKey privateKey) {
