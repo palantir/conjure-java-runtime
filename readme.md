@@ -31,10 +31,6 @@ dependencies {
   compile "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client:$version"
   compile "com.palantir.conjure.java.runtime:conjure-java-retrofit2-client:$version"
   compile "com.palantir.conjure.java.runtime:conjure-java-jersey-server:$version"
-  // optional support for PEM key store type using Bouncy Castle libraries:
-  //     compile "com.palantir.conjure.java.runtime:pkcs1-reader-bouncy-castle:$version"
-  // optional support for PEM key store type using Sun libraries:
-  //     compile "com.palantir.conjure.java.runtime:pkcs1-reader-sun:$version"
 }
 ```
 

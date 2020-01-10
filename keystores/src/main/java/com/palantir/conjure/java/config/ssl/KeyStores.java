@@ -18,7 +18,7 @@ package com.palantir.conjure.java.config.ssl;
 
 import com.google.common.base.Throwables;
 import com.google.common.io.BaseEncoding;
-import com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1Readers;
+import com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1PrivateKeyReader;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -37,10 +37,13 @@ import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,8 +55,7 @@ final class KeyStores {
      * (everything that occurs between the header and footer).
      */
     private static final Pattern KEY_PATTERN = Pattern.compile(
-            "-----BEGIN RSA PRIVATE KEY-----\n?(.+?)\n?-----END RSA PRIVATE KEY-----",
-            Pattern.DOTALL);
+            "-----BEGIN (RSA)? ?PRIVATE KEY-----\n?(.+?)\n?-----END (RSA)? ?PRIVATE KEY-----", Pattern.DOTALL);
 
     /**
      * Pattern that matches a single certificate in a PEM file. Has a capture group that captures the content of the
@@ -266,7 +268,7 @@ final class KeyStores {
         try {
             KeyStore keyStore = KeyStore.getInstance(storeType);
             try (InputStream stream = Files.newInputStream(path)) {
-                char[] passwordChars = password.isPresent() ? password.get().toCharArray() : null;
+                char[] passwordChars = password.map(String::toCharArray).orElse(null);
                 keyStore.load(stream, passwordChars);
             }
             return keyStore;
@@ -387,24 +389,32 @@ final class KeyStores {
      *        string.
      * @return PrivateKey representing the first RSA key in the provided string
      */
-    private static PrivateKey getPrivateKeyFromString(String pemFileString) throws IOException,
-            GeneralSecurityException {
+    static PrivateKey getPrivateKeyFromString(String pemFileString) throws GeneralSecurityException {
         Matcher matcher = KEY_PATTERN.matcher(pemFileString);
-        if (!matcher.find()) {
+        if (!matcher.find() || !Objects.equals(matcher.group(1), matcher.group(3))) {
             throw new GeneralSecurityException(
                     String.format("unable to find valid RSA key in the provided string: %s", pemFileString));
         }
 
         // get content between headers and strip newlines to get Base64 encoded ASN1 DER only
-        String privateKeyString = matcher.group(1).replace("\n", "");
+        String privateKeyString = matcher.group(2).replace("\n", "");
 
         // read private key
         byte[] privateKeyDerBytes = BaseEncoding.base64().decode(privateKeyString);
-        RSAPrivateKeySpec rsaPrivKeySpec = Pkcs1Readers.getInstance().readPrivateKey(privateKeyDerBytes);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        return kf.generatePrivate(rsaPrivKeySpec);
+
+        KeySpec rsaPrivKeySpec = "RSA".equals(matcher.group(1))
+                ? parsePkcs1PrivateKey(privateKeyDerBytes)
+                : parsePkcs8PrivateKey(privateKeyDerBytes);
+        return KeyFactory.getInstance("RSA").generatePrivate(rsaPrivKeySpec);
     }
 
+    static RSAPrivateKeySpec parsePkcs1PrivateKey(byte[] pkcs1DerBytes) {
+        return new Pkcs1PrivateKeyReader(pkcs1DerBytes).readRsaKey();
+    }
+
+    static PKCS8EncodedKeySpec parsePkcs8PrivateKey(byte[] pkcs8DerBytes) {
+        return new PKCS8EncodedKeySpec(pkcs8DerBytes);
+    }
     /**
      * Returns a List of certificates representing the PEM formatted X.509 certificates in the provided string. The
      * order of the certificates in the list will match the order that the certificates occur in the string.

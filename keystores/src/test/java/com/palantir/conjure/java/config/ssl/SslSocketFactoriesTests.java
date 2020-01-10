@@ -136,8 +136,6 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateKeyStorePuppetFromDirectory() throws IOException {
-        TestConstants.assumePkcs1ReaderExists();
-
         File puppetFolder = tempFolder.newFolder();
 
         File keysFolder = puppetFolder.toPath().resolve("private_keys").toFile();
@@ -163,8 +161,6 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateKeyStorePemType() {
-        TestConstants.assumePkcs1ReaderExists();
-
         SslConfiguration sslConfig = SslConfiguration
                 .builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)

@@ -26,9 +26,16 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
 import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.RSAPrivateKeySpec;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -39,7 +46,7 @@ public final class KeyStoresTests {
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test
-    public void testCreateTrustStoreFromCertificateFile() throws GeneralSecurityException, IOException {
+    public void testCreateTrustStoreFromCertificateFile() throws GeneralSecurityException {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(TestConstants.CA_DER_CERT_PATH);
 
         assertThat(trustStore.size()).isEqualTo(1);
@@ -79,7 +86,7 @@ public final class KeyStoresTests {
     }
 
     @Test
-    public void testCreateTrustStoreFromDirectoryFailsWithNonCertFiles() throws IOException, GeneralSecurityException {
+    public void testCreateTrustStoreFromDirectoryFailsWithNonCertFiles() throws IOException {
         File certFolder = tempFolder.newFolder();
         File tempCertFile = certFolder.toPath().resolve("crl.pkcs1").toFile();
         Files.copy(TestConstants.COMBINED_CRL_PATH.toFile(), tempCertFile);
@@ -92,7 +99,7 @@ public final class KeyStoresTests {
     }
 
     @Test
-    public void testCreateTrustStoreFromDirectoryFailsWithDirectories() throws IOException, GeneralSecurityException {
+    public void testCreateTrustStoreFromDirectoryFailsWithDirectories() throws IOException {
         File certFolder = tempFolder.newFolder();
         File tempDirFile = certFolder.toPath().resolve("childDir").toFile();
         boolean childDir = tempDirFile.mkdir();
@@ -127,9 +134,7 @@ public final class KeyStoresTests {
     }
 
     @Test
-    public void testCreateKeyStoreFromPemFile() throws GeneralSecurityException, IOException {
-        TestConstants.assumePkcs1ReaderExists();
-
+    public void testCreateKeyStoreFromPemFile() throws GeneralSecurityException {
         KeyStore keyStore = KeyStores.createKeyStoreFromCombinedPems(TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH);
 
         assertThat(keyStore.size()).isEqualTo(1);
@@ -142,8 +147,6 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateKeyStoreFromKeyDirectory() throws GeneralSecurityException, IOException {
-        TestConstants.assumePkcs1ReaderExists();
-
         File keyFolder = tempFolder.newFolder();
         Files.copy(TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH.toFile(),
                 keyFolder.toPath().resolve("server.pkcs1").toFile());
@@ -181,8 +184,6 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateKeyStoreFromPemDirectories() throws GeneralSecurityException, IOException {
-        TestConstants.assumePkcs1ReaderExists();
-
         File keyFolder = tempFolder.newFolder();
         File certFolder = tempFolder.newFolder();
         Files.copy(TestConstants.SERVER_KEY_PEM_PATH.toFile(), keyFolder.toPath().resolve("server.key").toFile());
@@ -201,8 +202,6 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateKeyStoreFromPemDirectoriesFailsIfCertMissing() throws IOException {
-        TestConstants.assumePkcs1ReaderExists();
-
         File keyFolder = tempFolder.newFolder();
         File certFolder = tempFolder.newFolder();
         Files.copy(TestConstants.SERVER_KEY_PEM_PATH.toFile(), keyFolder.toPath().resolve("server.key").toFile());
@@ -239,5 +238,48 @@ public final class KeyStoresTests {
                         .isInstanceOf(IllegalStateException.class)
                         .hasMessageContaining(String.format("certDirPath is not a directory: \"%s\"",
                                 file.toPath().toString()));
+    }
+
+    @Test
+    public void testReadingPkcs1PrivateKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
+        RSAPrivateKeySpec privateKeySpec = KeyStores.parsePkcs1PrivateKey(TestConstants.PRIVATE_KEY_DER);
+        assertKey((RSAPrivateCrtKey) KeyFactory.getInstance("RSA").generatePrivate(privateKeySpec));
+    }
+
+    @Test
+    public void testReadingPkcs8PrivateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        PKCS8EncodedKeySpec privateKeySpec = KeyStores.parsePkcs8PrivateKey(TestConstants.PKCS8_PRIVATE_KEY_DER);
+        assertKey((RSAPrivateCrtKey) KeyFactory.getInstance("RSA").generatePrivate(privateKeySpec));
+    }
+
+    @Test
+    public void testReadingPkcs1PrivateKeyString() throws GeneralSecurityException {
+        PrivateKey privateKey = KeyStores.getPrivateKeyFromString(TestConstants.RSA_PRIVATE_KEY_TAGGED_STRING);
+        assertKey((RSAPrivateCrtKey) privateKey);
+    }
+
+    @Test
+    public void testReadingPkcs8PrivateKeyString() throws GeneralSecurityException {
+        PrivateKey privateKey = KeyStores.getPrivateKeyFromString(TestConstants.PKCS8_PRIVATE_KEY_TAGGED_STRING);
+        assertKey((RSAPrivateCrtKey) privateKey);
+    }
+
+    @Test
+    public void testMismatchedTags() {
+        assertThatThrownBy(() ->
+                KeyStores.getPrivateKeyFromString("-----BEGIN PRIVATE KEY-----\n-----END RSA PRIVATE KEY-----\n"))
+                .isInstanceOf(GeneralSecurityException.class)
+                .hasMessageStartingWith("unable to find valid RSA key in the provided file");
+    }
+
+    private void assertKey(RSAPrivateCrtKey privateKey) {
+        assertThat(privateKey.getModulus()).isEqualTo(TestConstants.MODULUS);
+        assertThat(privateKey.getPrivateExponent()).isEqualTo(TestConstants.PRIVATE_EXPONENT);
+        assertThat(privateKey.getPublicExponent()).isEqualTo(TestConstants.PUBLIC_EXPONENT);
+        assertThat(privateKey.getPrimeP()).isEqualTo(TestConstants.PRIME_P);
+        assertThat(privateKey.getPrimeQ()).isEqualTo(TestConstants.PRIME_Q);
+        assertThat(privateKey.getPrimeExponentP()).isEqualTo(TestConstants.EXPONENT_P);
+        assertThat(privateKey.getPrimeExponentQ()).isEqualTo(TestConstants.EXPONENT_Q);
+        assertThat(privateKey.getCrtCoefficient()).isEqualTo(TestConstants.CTR_COEFFICIENT);
     }
 }
