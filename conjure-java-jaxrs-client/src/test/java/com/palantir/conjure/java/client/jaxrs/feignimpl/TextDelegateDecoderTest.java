@@ -81,7 +81,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertThat("text response").isEqualTo(decodedObject);
+        assertThat(decodedObject).isEqualTo("text response");
         verifyNoMoreInteractions(delegate);
     }
 
@@ -100,7 +100,7 @@ public final class TextDelegateDecoderTest extends TestBase {
 
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertThat("text response").isEqualTo(decodedObject);
+        assertThat(decodedObject).isEqualTo("text response");
         verifyNoMoreInteractions(delegate);
     }
 
@@ -110,7 +110,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertThat("text response").isEqualTo(decodedObject);
+        assertThat(decodedObject).isEqualTo("text response");
         verifyNoMoreInteractions(delegate);
     }
 
@@ -130,7 +130,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Response response = Response.create(200, "OK", headers, new byte[0]);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertThat(DELEGATE_RESPONSE).isEqualTo(decodedObject);
+        assertThat(decodedObject).isEqualTo(DELEGATE_RESPONSE);
     }
 
     @Test
@@ -140,7 +140,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Response response = Response.create(200, "OK", headers, new byte[0]);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertThat(DELEGATE_RESPONSE).isEqualTo(decodedObject);
+        assertThat(decodedObject).isEqualTo(DELEGATE_RESPONSE);
     }
 
     @Test
@@ -150,7 +150,7 @@ public final class TextDelegateDecoderTest extends TestBase {
         Response response = Response.create(200, "OK", headers, new byte[0]);
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
-        assertThat(DELEGATE_RESPONSE).isEqualTo(decodedObject);
+        assertThat(decodedObject).isEqualTo(DELEGATE_RESPONSE);
     }
 
     @Test

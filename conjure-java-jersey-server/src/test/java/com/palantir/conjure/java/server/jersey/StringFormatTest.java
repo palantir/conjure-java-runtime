@@ -58,7 +58,7 @@ public final class StringFormatTest {
     @Test
     public void testTextPlainMediaTypeReturnsPlainStrings() {
         Response response = target.path("textString").request().get();
-        assertThat(response.readEntity(String.class)).isEqualTo("");
+        assertThat(response.readEntity(String.class)).isEmpty();
         response = target.path("textString").queryParam("value", "val").request().get();
         assertThat(response.readEntity(String.class)).isEqualTo("val");
     }
@@ -67,7 +67,7 @@ public final class StringFormatTest {
     public void testJsonMediaTypeReturnsPlainStrings() {
         // This behaviour is somewhat unexpected since a valid JSON response object would be "\"val\"" rather than "val"
         Response response = target.path("jsonString").request().get();
-        assertThat(response.readEntity(String.class)).isEqualTo("");
+        assertThat(response.readEntity(String.class)).isEmpty();
         response = target.path("jsonString").queryParam("value", "val").request().get();
         assertThat(response.readEntity(String.class)).isEqualTo("val");
     }
@@ -77,7 +77,7 @@ public final class StringFormatTest {
         // This behaviour is somewhat unexpected since a valid JSON string is deserialized as a raw string, even
         // though the endpoint consumes application/json
         Response response = target.path("bodyString").request().post(null);
-        assertThat(response.readEntity(String.class)).isEqualTo("");
+        assertThat(response.readEntity(String.class)).isEmpty();
         response = target.path("bodyString").request().post(Entity.json("\"val\""));
         assertThat(response.readEntity(String.class)).isEqualTo("\"val\"");
     }
