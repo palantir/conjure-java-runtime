@@ -269,7 +269,7 @@ public final class KeyStoresTests {
         assertThatThrownBy(() ->
                 KeyStores.getPrivateKeyFromString("-----BEGIN PRIVATE KEY-----\n-----END RSA PRIVATE KEY-----\n"))
                 .isInstanceOf(GeneralSecurityException.class)
-                .hasMessageStartingWith("unable to find valid RSA key in the provided file");
+                .hasMessageStartingWith("unable to find valid RSA key in the provided string");
     }
 
     private void assertKey(RSAPrivateCrtKey privateKey) {
