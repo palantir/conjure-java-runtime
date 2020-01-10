@@ -1,5 +1,32 @@
 versionOverrides: {}
 acceptedBreaks:
+  "4.49.0":
+    com.palantir.conjure.java.runtime:okhttp-clients: []
+    com.palantir.conjure.java.runtime:refresh-utils: []
+    com.palantir.conjure.java.runtime:jetty-http2-agent: []
+    com.palantir.conjure.java.runtime:keystores:
+    - code: "java.class.removed"
+      old: "class com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1Readers"
+      new: null
+      justification: "Replaced by internal implementation that doesn't require service\
+        \ loading"
+    - code: "java.class.removed"
+      old: "interface com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1Reader"
+      new: null
+      justification: "Replaced by internal implementation that doesn't require service\
+        \ loading"
+    com.palantir.conjure.java.runtime:conjure-java-jackson-serialization: []
+    com.palantir.conjure.java.runtime:conjure-scala-jaxrs-client: []
+    com.palantir.conjure.java.runtime:conjure-java-jaxrs-client: []
+    com.palantir.conjure.java.runtime:conjure-java-jersey-server: []
+    com.palantir.conjure.java.runtime:conjure-java-retrofit2-client: []
+    com.palantir.conjure.java.runtime:client-config: []
+  "4.37.0":
+    com.palantir.conjure.java.runtime:okhttp-clients:
+    - code: "java.method.addedToInterface"
+      old: null
+      new: "method com.codahale.metrics.Timer com.palantir.conjure.java.okhttp.HostMetrics::getQos()"
+      justification: "ABI-safe change to rarely used class, low impact"
   "4.45.0":
     com.palantir.conjure.java.runtime:conjure-java-jersey-server:
     - code: "java.method.parameterTypeChanged"
@@ -12,9 +39,3 @@ acceptedBreaks:
       new: "parameter void com.palantir.conjure.java.server.jersey.Java8OptionalParamConverterProvider::<init>(===org.glassfish.jersey.internal.inject.InjectionManager===)"
       justification: "Classes are implementation details - only public for injection\
         \ purposes"
-  "4.37.0":
-    com.palantir.conjure.java.runtime:okhttp-clients:
-    - code: "java.method.addedToInterface"
-      old: null
-      new: "method com.codahale.metrics.Timer com.palantir.conjure.java.okhttp.HostMetrics::getQos()"
-      justification: "ABI-safe change to rarely used class, low impact"
