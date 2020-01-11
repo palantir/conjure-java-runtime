@@ -119,7 +119,7 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
     public void testAbsentHeader() throws Exception {
         proxy.header(com.google.common.base.Optional.absent(), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("opt")).isEmpty();
         assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
@@ -127,7 +127,7 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
     public void testEmptyStringHeader() throws Exception {
         proxy.header(com.google.common.base.Optional.of(""), "str2");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getHeader("opt")).isEqualTo("");
+        assertThat(takeRequest.getHeader("opt")).isEmpty();
         assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
