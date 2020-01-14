@@ -135,7 +135,7 @@ final class TestConstants {
             + "TgGD5I/JOeUZhLCRYmYQoWQA9hl24cVcoY/85KHPN+PxKDtbGwOlnc9Dyw14XN2";
     static final byte[] PRIVATE_KEY_DER = BaseEncoding.base64().decode(RSA_KEY_STRING);
 
-    static final String RSA_PRIVATE_KEY_TAGGED_STRING =
+    static final String RSA_PRIVATE_KEY_PEM =
             "-----BEGIN RSA PRIVATE KEY-----\n" + RSA_KEY_STRING + "\n-----END RSA PRIVATE KEY-----";
 
     private static final String PKCS8_KEY_STRING = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC21BomckLi+/DOBRe"
@@ -156,7 +156,7 @@ final class TestConstants {
             + "BtcpAxhR05Wi61UbVpXexYvV4GtH3ePzHexD5OAYPkj8k55RmEsJFiZhChZAD2GXbhxVyhj/zkoc834/EoO1sbA6Wdz0PLDXhc3Y=";
     static final byte[] PKCS8_PRIVATE_KEY_DER = BaseEncoding.base64().decode(PKCS8_KEY_STRING);
 
-    static final String PKCS8_PRIVATE_KEY_TAGGED_STRING =
+    static final String PKCS8_PRIVATE_KEY_PEM =
             "-----BEGIN PRIVATE KEY-----\n" + PKCS8_KEY_STRING + "\n-----END PRIVATE KEY-----";
 
     static final BigInteger MODULUS = new BigInteger("00b6d41a267242e2fbf0ce05179b79"

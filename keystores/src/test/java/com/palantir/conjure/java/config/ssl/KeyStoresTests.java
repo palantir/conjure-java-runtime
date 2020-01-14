@@ -254,13 +254,13 @@ public final class KeyStoresTests {
 
     @Test
     public void testReadingPkcs1PrivateKeyString() throws GeneralSecurityException {
-        PrivateKey privateKey = KeyStores.getPrivateKeyFromString(TestConstants.RSA_PRIVATE_KEY_TAGGED_STRING);
+        PrivateKey privateKey = KeyStores.getPrivateKeyFromString(TestConstants.RSA_PRIVATE_KEY_PEM);
         assertKey((RSAPrivateCrtKey) privateKey);
     }
 
     @Test
     public void testReadingPkcs8PrivateKeyString() throws GeneralSecurityException {
-        PrivateKey privateKey = KeyStores.getPrivateKeyFromString(TestConstants.PKCS8_PRIVATE_KEY_TAGGED_STRING);
+        PrivateKey privateKey = KeyStores.getPrivateKeyFromString(TestConstants.PKCS8_PRIVATE_KEY_PEM);
         assertKey((RSAPrivateCrtKey) privateKey);
     }
 
