@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Don't assume password is present on keystore and don't password encrypt
+    constructed keystores
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1411
