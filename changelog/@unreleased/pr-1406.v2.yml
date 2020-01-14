@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Provide standardised private key parser that's always included.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1406

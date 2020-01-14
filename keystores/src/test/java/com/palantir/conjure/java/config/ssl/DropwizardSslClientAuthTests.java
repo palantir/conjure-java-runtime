@@ -85,8 +85,6 @@ public final class DropwizardSslClientAuthTests {
 
     @Test
     public void testConnectionWorksWithClientCertsWithIntermediateCa() {
-        TestConstants.assumePkcs1ReaderExists();
-
         SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .keyStorePath(TestConstants.CHILD_KEY_CERT_CHAIN_PEM_PATH)

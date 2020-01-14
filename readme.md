@@ -31,10 +31,6 @@ dependencies {
   compile "com.palantir.conjure.java.runtime:conjure-java-jaxrs-client:$version"
   compile "com.palantir.conjure.java.runtime:conjure-java-retrofit2-client:$version"
   compile "com.palantir.conjure.java.runtime:conjure-java-jersey-server:$version"
-  // optional support for PEM key store type using Bouncy Castle libraries:
-  //     compile "com.palantir.conjure.java.runtime:pkcs1-reader-bouncy-castle:$version"
-  // optional support for PEM key store type using Sun libraries:
-  //     compile "com.palantir.conjure.java.runtime:pkcs1-reader-sun:$version"
 }
 ```
 
@@ -157,8 +153,8 @@ The following values are supported as store types:
   `TrustedCertificateEntry` entries are used as certificates. When used as a key store, the
   `PrivateKeyEntry` specified by the `keyStoreAlias` parameter (or the first such entry returned if
   the parameter is not specifeid) is used as the private key.
-* `PEM`: for trust stores, an X.509 certificate file in PEM or DER format, or a directory of such
-  files. For key stores, a PEM file that contains a PKCS#1 RSA private key followed by the
+* `PEM`: for trust stores, an X.509 certificate file in PEM format, or a directory of such
+  files. For key stores, a PEM file that contains a PKCS#1 RSA private key or PKCS#8 followed by the
   certificates that form the trust chain for the key in PEM format, or a directory of such files. In
   either case, if a directory is specified, every non-hidden file in the directory must be a file of
   the specified format (they will all be read).
@@ -169,20 +165,6 @@ The following values are supported as store types:
   certificates in the `certs` directory are added to the trust store.  For key stores, the PEM files in the
   `private_keys` directory are added as the private keys and the corresponding files in `certs` are used as the trust
   chain for the key.
-
-#### Note on the PEM Key Store Type
-
-When `PEM` is used as the key store type, the runtime classpath must provide a `Pkcs1Reader`
-implementation and it must be defined as a service in `META-INF/services`. This project provides an
-implementation that uses BouncyCastle libraries and another implementation that uses Sun libraries.
-
-The `pkcs1-reader-bouncy-castle` library includes the Bouncy Castle
-`PKIX/CMS/EAC/DVCS/PKCS/TSP/OPENSSL` library as a dependency.
-
-The `pkcs1-reader-sun` does not include any extra dependencies, but assumes the availability of the
-`sun.security.utils` package. Although this is a package in the Sun namespace, it is generally
-available as part of most popular JVM implementations, including the Oracle and OpenJDK JVMs for
-Java 7 and Java 8.
 
 ## errors (conjure-java-runtime-api)
 Provides utilities for relaying service errors across service boundaries (see below).

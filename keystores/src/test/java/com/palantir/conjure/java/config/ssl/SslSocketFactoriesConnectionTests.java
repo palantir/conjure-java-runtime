@@ -156,8 +156,6 @@ public final class SslSocketFactoriesConnectionTests {
 
     @Test
     public void testSslWithClientAuthenticationIntermediateCa() {
-        TestConstants.assumePkcs1ReaderExists();
-
         SslConfiguration serverConfig = SslConfiguration.of(
                 TestConstants.CA_TRUST_STORE_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
