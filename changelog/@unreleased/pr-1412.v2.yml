@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: RemotingOkHttpCall safe-logs backoff state prior to retry including
+    the slot size, retry number, and max retries.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1412
