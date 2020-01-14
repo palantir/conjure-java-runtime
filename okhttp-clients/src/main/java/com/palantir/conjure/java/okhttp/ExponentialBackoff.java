@@ -60,4 +60,10 @@ final class ExponentialBackoff implements BackoffStrategy {
     private static double random() {
         return ThreadLocalRandom.current().nextDouble();
     }
+
+    @Override
+    public String toString() {
+        return "ExponentialBackoff{maxNumRetries="
+                + maxNumRetries + ", backoffSlotSize=" + backoffSlotSize + ", retryNumber=" + retryNumber + '}';
+    }
 }
