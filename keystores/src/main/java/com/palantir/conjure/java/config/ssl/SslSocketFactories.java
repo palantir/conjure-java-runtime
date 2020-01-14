@@ -179,7 +179,7 @@ public final class SslSocketFactories {
         return config.keyStorePath()
                 .map(keyStorePath -> createKeyManagerFactory(
                         keyStorePath,
-                        config.keyStorePassword().get(),
+                        config.keyStorePassword(),
                         config.keyStoreType(),
                         config.keyStoreKeyAlias()).getKeyManagers())
                 .orElse(null);
@@ -221,17 +221,17 @@ public final class SslSocketFactories {
 
     private static KeyManagerFactory createKeyManagerFactory(
             Path keyStorePath,
-            String keyStorePassword,
+            Optional<String> keyStorePassword,
             SslConfiguration.StoreType keyStoreType,
             Optional<String> keyStoreKeyAlias) {
         KeyStore keyStore;
         switch (keyStoreType) {
             case JKS:
             case PKCS12:
-                keyStore = KeyStores.loadKeyStore(keyStoreType.name(), keyStorePath, Optional.of(keyStorePassword));
+                keyStore = KeyStores.loadKeyStore(keyStoreType.name(), keyStorePath, keyStorePassword);
                 break;
             case PEM:
-                keyStore = KeyStores.createKeyStoreFromCombinedPems(keyStorePath, keyStorePassword);
+                keyStore = KeyStores.createKeyStoreFromCombinedPems(keyStorePath);
                 break;
             case PUPPET:
                 Path puppetKeysDir = keyStorePath.resolve("private_keys");
@@ -240,8 +240,7 @@ public final class SslSocketFactories {
                         puppetKeysDir,
                         ".pem",
                         puppetCertsDir,
-                        ".pem",
-                        keyStorePassword);
+                        ".pem");
                 break;
             default:
                 throw new IllegalStateException("Unrecognized key store type: " + keyStoreType);
@@ -257,7 +256,7 @@ public final class SslSocketFactories {
         try {
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(
                     KeyManagerFactory.getDefaultAlgorithm());
-            keyManagerFactory.init(keyStore, keyStorePassword.toCharArray());
+            keyManagerFactory.init(keyStore, keyStorePassword.map(String::toCharArray).orElse(null));
 
             return keyManagerFactory;
         } catch (GeneralSecurityException e) {

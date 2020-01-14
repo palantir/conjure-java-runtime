@@ -138,23 +138,21 @@ final class KeyStores {
      *        a path to a PEM file containing a PKCS#1 RSA private key and the certificate(s) for that key in PEM
      *        format, or to a directory containing such files. If the path specifies a directory, every non-hidden file
      *        in the directory must be a file of the specified format or an exception is thrown.
-     * @param keyStorePassword
-     *        the password that will be set on the returned key store
      * @return a new KeyStore of type {@link KeyStore#getDefaultType()} that contains the key entries specified by the
      *         provided path. The name of the file used to create a key entry is used as the alias for the entry. The
      *         provided password is used to secure the key store and all of the key entries.
      */
-    static KeyStore createKeyStoreFromCombinedPems(Path filePathOrDirectory, String keyStorePassword) {
+    static KeyStore createKeyStoreFromCombinedPems(Path filePathOrDirectory) {
         try {
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(null, keyStorePassword.toCharArray());
+            KeyStore keyStore = KeyStore.getInstance("pkcs12");
+            keyStore.load(null, null);
 
             for (File currFile : getFilesForPath(filePathOrDirectory)) {
                 KeyStore.PrivateKeyEntry privateKeyEntry = readKeyEntryFromPems(currFile.toPath(), currFile.toPath());
                 keyStore.setKeyEntry(
                         currFile.getName(),
                         privateKeyEntry.getPrivateKey(),
-                        keyStorePassword.toCharArray(),
+                        null,
                         privateKeyEntry.getCertificateChain());
             }
 
@@ -185,8 +183,6 @@ final class KeyStores {
      *        file extension for the files in certDirPath directory that should be considered certificate files. For
      *        every key file, the file "fileName - keyExtension + certExtension" must exist in the certDirPath.
      *        Case-sensitive and should include a period character if it is desired (for example, ".cer", ".pem").
-     * @param keyStorePassword
-     *        the password that will be set on the returned key store
      * @return a new KeyStore of type {@link KeyStore#getDefaultType()} that contains the key entries specified by the
      *         arguments. The base name of the file used to create a key entry is used as the alias for the entry. The
      *         provided password is used to secure the key store and all of the key entries.
@@ -195,8 +191,7 @@ final class KeyStores {
             Path keyDirPath,
             String keyExtension,
             Path certDirPath,
-            String certExtension,
-            String keyStorePassword) {
+            String certExtension) {
         if (!keyDirPath.toFile().isDirectory()) {
             throw new IllegalStateException(String.format("keyDirPath is not a directory: \"%s\"", keyDirPath));
         } else if (!certDirPath.toFile().isDirectory()) {
@@ -204,8 +199,8 @@ final class KeyStores {
         }
 
         try {
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(null, keyStorePassword.toCharArray());
+            KeyStore keyStore = KeyStore.getInstance("pkcs12");
+            keyStore.load(null, null);
 
             File[] keyFiles = getFilesForPath(keyDirPath);
             for (File currKeyFile : keyFiles) {
@@ -220,7 +215,7 @@ final class KeyStores {
                     keyStore.setKeyEntry(
                             baseName,
                             privateKeyEntry.getPrivateKey(),
-                            keyStorePassword.toCharArray(),
+                            null,
                             privateKeyEntry.getCertificateChain());
                 }
             }
@@ -296,12 +291,13 @@ final class KeyStores {
      * @throws IllegalStateException
      *         if the provided key store does not contain a key and certificate chain with the given alias
      */
-    static KeyStore newKeyStoreWithEntry(KeyStore original, String password, String alias) {
+    static KeyStore newKeyStoreWithEntry(KeyStore original, Optional<String> password, String alias) {
         try {
             KeyStore newKeyStore = KeyStore.getInstance(original.getType());
-            newKeyStore.load(null, password.toCharArray());
+            char[] passwordChar = password.map(String::toCharArray).orElse(null);
+            newKeyStore.load(null, passwordChar);
 
-            Key aliasKey = original.getKey(alias, password.toCharArray());
+            Key aliasKey = original.getKey(alias, passwordChar);
             if (aliasKey == null) {
                 throw new IllegalStateException(
                         String.format("Could not find key with alias \"%s\" in key store", alias));
@@ -312,7 +308,7 @@ final class KeyStores {
                         String.format("Could not find certificate chain with alias \"%s\" in key store", alias));
             }
 
-            newKeyStore.setKeyEntry(alias, aliasKey, password.toCharArray(), certificateChain);
+            newKeyStore.setKeyEntry(alias, aliasKey, passwordChar, certificateChain);
             return newKeyStore;
         } catch (GeneralSecurityException | IOException e) {
             throw Throwables.propagate(e);
