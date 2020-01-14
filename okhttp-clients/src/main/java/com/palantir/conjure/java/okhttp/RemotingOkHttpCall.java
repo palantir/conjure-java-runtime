@@ -275,11 +275,17 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 retryIfAllowed(callback, call, exception, () -> {
-                    log.info("Retrying call after failure",
-                            SafeArg.of("backoffMillis", backoff.get().toMillis()),
-                            UnsafeArg.of("requestUrl", call.request().url().toString()),
-                            UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
-                            exception);
+                    if (log.isInfoEnabled()) {
+                        log.info(
+                                "Retrying call after failure",
+                                SafeArg.of("backoffMillis", backoff.get().toMillis()),
+                                // toString required because this object is mutable, and the logger may
+                                // format this value asynchronously.
+                                SafeArg.of("backoffState", backoffStrategy.toString()),
+                                UnsafeArg.of("requestUrl", call.request().url().toString()),
+                                UnsafeArg.of("redirectToUrl", redirectTo.get().toString()),
+                                exception);
+                    }
                     Tags.AttemptSpan nextAttempt = createNextAttempt();
                     Request redirectedRequest = request().newBuilder()
                             .url(redirectTo.get())
