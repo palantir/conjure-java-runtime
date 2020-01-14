@@ -63,10 +63,7 @@ final class ExponentialBackoff implements BackoffStrategy {
 
     @Override
     public String toString() {
-        return "ExponentialBackoff{" +
-                "maxNumRetries=" + maxNumRetries +
-                ", backoffSlotSize=" + backoffSlotSize +
-                ", retryNumber=" + retryNumber +
-                '}';
+        return "ExponentialBackoff{maxNumRetries="
+                + maxNumRetries + ", backoffSlotSize=" + backoffSlotSize + ", retryNumber=" + retryNumber + '}';
     }
 }
