@@ -36,4 +36,6 @@ dependencies {
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
+    testImplementation "io.undertow:undertow-core"
+    testImplementation 'org.slf4j:jul-to-slf4j'
 }
