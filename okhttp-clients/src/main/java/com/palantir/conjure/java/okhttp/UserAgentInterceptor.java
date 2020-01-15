@@ -38,7 +38,8 @@ public final class UserAgentInterceptor implements Interceptor {
     @Override
     public Response intercept(Chain chain) throws IOException {
         Request originalRequest = chain.request();
-        Request requestWithUserAgent = originalRequest.newBuilder()
+        Request requestWithUserAgent = originalRequest
+                .newBuilder()
                 .header("User-Agent", userAgent)
                 .build();
         return chain.proceed(requestWithUserAgent);

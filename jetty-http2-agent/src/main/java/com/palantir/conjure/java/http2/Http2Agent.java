@@ -20,6 +20,7 @@ import java.lang.instrument.Instrumentation;
 
 /**
  * No-op.
+ *
  * @deprecated this class no longer has any effect.
  */
 @Deprecated
@@ -28,6 +29,7 @@ public final class Http2Agent {
 
     /**
      * No-op.
+     *
      * @deprecated this method no longer has any effect and is safe to stop calling.
      */
     @Deprecated
@@ -37,6 +39,7 @@ public final class Http2Agent {
 
     /**
      * No-op.
+     *
      * @deprecated this method no longer has any effect and is safe to stop calling.
      */
     @Deprecated

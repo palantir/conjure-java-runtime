@@ -24,9 +24,9 @@ import okhttp3.Interceptor;
 import okhttp3.Response;
 
 /**
- * An {@link Interceptor} that changes the {@link okhttp3.Request#url Request URL's} authority to a given {@link
- * HostAndPort}, and adds an explicit "Host" header that is set to the original Request's authority. This allows the use
- * of a L4 service mesh proxy over SSL.
+ * An {@link Interceptor} that changes the {@link okhttp3.Request#url Request URL's} authority to a given
+ * {@link HostAndPort}, and adds an explicit "Host" header that is set to the original Request's authority. This allows
+ * the use of a L4 service mesh proxy over SSL.
  */
 final class MeshProxyInterceptor implements Interceptor {
 
@@ -41,7 +41,8 @@ final class MeshProxyInterceptor implements Interceptor {
         HttpUrl originalUri = chain.request().url();
 
         // Not using URL#getAuthority since we are removing the userinfo portion.
-        // Note that userinfo is not allowed in http2 :authority headers: https://tools.ietf.org/html/rfc7540#section-8.1.2.3
+        // Note that userinfo is not allowed in http2 :authority headers:
+        // https://tools.ietf.org/html/rfc7540#section-8.1.2.3
         // or in the HTTP/1.1 Host header: https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.23
         StringBuilder host = new StringBuilder(originalUri.uri().getHost());
         if (originalUri.uri().getPort() != -1) {
@@ -51,7 +52,8 @@ final class MeshProxyInterceptor implements Interceptor {
 
         return chain.proceed(chain.request()
                 .newBuilder()
-                .url(originalUri.newBuilder()
+                .url(originalUri
+                        .newBuilder()
                         .host(meshProxy.getHost())
                         .port(meshProxy.getPort())
                         .build())

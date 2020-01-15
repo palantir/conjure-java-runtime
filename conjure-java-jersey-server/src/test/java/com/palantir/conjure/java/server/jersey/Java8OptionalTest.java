@@ -46,8 +46,8 @@ import org.junit.Test;
 public final class Java8OptionalTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(OptionalTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(OptionalTestServer.class, "src/test/resources/test-server.yml");
 
     private WebTarget target;
 
@@ -61,7 +61,10 @@ public final class Java8OptionalTest {
 
     @Test
     public void testOptionalPresent() throws NoSuchMethodException, SecurityException {
-        Response response = target.path("optional").queryParam("value", "val").request().get();
+        Response response = target.path("optional")
+                .queryParam("value", "val")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("valval");
     }
@@ -74,7 +77,10 @@ public final class Java8OptionalTest {
 
     @Test
     public void testQueryParam_optionalPresent() throws NoSuchMethodException, SecurityException {
-        Response response = target.path("optional/string").queryParam("value", "val").request().get();
+        Response response = target.path("optional/string")
+                .queryParam("value", "val")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("val");
     }
@@ -88,7 +94,10 @@ public final class Java8OptionalTest {
 
     @Test
     public void testQueryParam_optionalIntPresent() throws NoSuchMethodException, SecurityException {
-        Response response = target.path("optional/int").queryParam("value", "10").request().get();
+        Response response = target.path("optional/int")
+                .queryParam("value", "10")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("10");
     }
@@ -102,13 +111,19 @@ public final class Java8OptionalTest {
 
     @Test
     public void testQueryParam_optionalIntInvalid() {
-        Response response = target.path("optional/int").queryParam("value", "foo").request().get();
+        Response response = target.path("optional/int")
+                .queryParam("value", "foo")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
     }
 
     @Test
     public void testQueryParam_optionalDoublePresent() throws NoSuchMethodException, SecurityException {
-        Response response = target.path("optional/double").queryParam("value", "1.5").request().get();
+        Response response = target.path("optional/double")
+                .queryParam("value", "1.5")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("1.5");
     }
@@ -122,13 +137,19 @@ public final class Java8OptionalTest {
 
     @Test
     public void testQueryParam_optionalDoubleInvalid() {
-        Response response = target.path("optional/double").queryParam("value", "foo").request().get();
+        Response response = target.path("optional/double")
+                .queryParam("value", "foo")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
     }
 
     @Test
     public void testQueryParam_optionalLongPresent() throws NoSuchMethodException, SecurityException {
-        Response response = target.path("optional/long").queryParam("value", "100").request().get();
+        Response response = target.path("optional/long")
+                .queryParam("value", "100")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("100");
     }
@@ -142,7 +163,10 @@ public final class Java8OptionalTest {
 
     @Test
     public void testQueryParam_optionalLongInvalid() {
-        Response response = target.path("optional/long").queryParam("value", "foo").request().get();
+        Response response = target.path("optional/long")
+                .queryParam("value", "foo")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
     }
 

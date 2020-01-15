@@ -54,6 +54,7 @@ public final class ExceptionMappingTest {
     @ClassRule
     public static final DropwizardAppRule<Configuration> APP =
             new DropwizardAppRule<>(ExceptionMappersTestServer.class, "src/test/resources/test-server.yml");
+
     private static final Response.Status SERVER_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
     private static final Response.Status WEB_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
     private static final int REMOTE_EXCEPTION_STATUS_CODE = 400;
@@ -71,8 +72,8 @@ public final class ExceptionMappingTest {
     }
 
     /**
-     * These tests confirm that {@link WebApplicationException}s are handled by the {@link
-     * WebApplicationExceptionMapper} rather than the {@link RuntimeExceptionMapper}
+     * These tests confirm that {@link WebApplicationException}s are handled by the
+     * {@link WebApplicationExceptionMapper} rather than the {@link RuntimeExceptionMapper}
      */
     @Test
     public void testForbiddenException() {
@@ -88,13 +89,17 @@ public final class ExceptionMappingTest {
 
     @Test
     public void testServerErrorException() {
-        Response response = target.path("throw-server-error-exception").request().get();
+        Response response = target.path("throw-server-error-exception")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(SERVER_EXCEPTION_STATUS.getStatusCode());
     }
 
     @Test
     public void testWebApplicationException() {
-        Response response = target.path("throw-web-application-exception").request().get();
+        Response response = target.path("throw-web-application-exception")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(WEB_EXCEPTION_STATUS.getStatusCode());
     }
 
@@ -111,7 +116,9 @@ public final class ExceptionMappingTest {
 
     @Test
     public void testUnauthorizedException() {
-        Response response = target.path("throw-unauthorized-exception").request().get();
+        Response response = target.path("throw-unauthorized-exception")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(ErrorType.UNAUTHORIZED.httpErrorCode());
 
         SerializableError error = response.readEntity(SerializableError.class);
@@ -122,12 +129,15 @@ public final class ExceptionMappingTest {
 
     @Test
     public void testPermissionDeniedException() {
-        Response response = target.path("throw-permission-denied-exception").request().get();
+        Response response = target.path("throw-permission-denied-exception")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(ErrorType.PERMISSION_DENIED.httpErrorCode());
 
         SerializableError error = response.readEntity(SerializableError.class);
         assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
-        assertThat(error.errorCode()).isEqualTo(ErrorType.PERMISSION_DENIED.code().toString());
+        assertThat(error.errorCode())
+                .isEqualTo(ErrorType.PERMISSION_DENIED.code().toString());
         assertThat(error.errorName()).isEqualTo(ErrorType.PERMISSION_DENIED.name());
     }
 
@@ -137,14 +147,17 @@ public final class ExceptionMappingTest {
         assertThat(response.getStatus()).isEqualTo(ErrorType.INVALID_ARGUMENT.httpErrorCode());
 
         SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode()).isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+        assertThat(error.errorCode())
+                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
         assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
         assertThat(error.parameters()).isEqualTo(ImmutableMap.of("arg", "value"));
     }
 
     @Test
     public void testQosException() {
-        Response response = target.path("throw-qos-retry-foo-exception").request().get();
+        Response response = target.path("throw-qos-retry-foo-exception")
+                .request()
+                .get();
 
         assertThat(response.getStatus()).isEqualTo(308);
         assertThat(response.getHeaderString("Location")).isEqualTo("http://foo");
@@ -191,31 +204,34 @@ public final class ExceptionMappingTest {
 
         @Override
         public String throwRemoteException() {
-            throw new RemoteException(SerializableError.builder()
-                    .errorInstanceId("errorInstanceId")
-                    .errorCode("errorCode")
-                    .errorName("errorName")
-                    .build(),
+            throw new RemoteException(
+                    SerializableError.builder()
+                            .errorInstanceId("errorInstanceId")
+                            .errorCode("errorCode")
+                            .errorName("errorName")
+                            .build(),
                     REMOTE_EXCEPTION_STATUS_CODE);
         }
 
         @Override
         public String throwUnauthorizedException() {
-            throw new RemoteException(SerializableError.builder()
-                    .errorInstanceId("errorInstanceId")
-                    .errorCode("errorCode")
-                    .errorName("errorName")
-                    .build(),
+            throw new RemoteException(
+                    SerializableError.builder()
+                            .errorInstanceId("errorInstanceId")
+                            .errorCode("errorCode")
+                            .errorName("errorName")
+                            .build(),
                     UNAUTHORIZED_STATUS_CODE);
         }
 
         @Override
         public String throwPermissionDeniedException() {
-            throw new RemoteException(SerializableError.builder()
-                    .errorInstanceId("errorInstanceId")
-                    .errorCode("errorCode")
-                    .errorName("errorName")
-                    .build(),
+            throw new RemoteException(
+                    SerializableError.builder()
+                            .errorInstanceId("errorInstanceId")
+                            .errorCode("errorCode")
+                            .errorName("errorName")
+                            .build(),
                     PERMISSION_DENIED_STATUS_CODE);
         }
 

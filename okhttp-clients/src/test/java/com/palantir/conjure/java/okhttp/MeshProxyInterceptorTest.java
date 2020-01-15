@@ -36,6 +36,7 @@ public final class MeshProxyInterceptorTest {
 
     @Captor
     private ArgumentCaptor<Request> request;
+
     @Mock
     private Interceptor.Chain chain;
 

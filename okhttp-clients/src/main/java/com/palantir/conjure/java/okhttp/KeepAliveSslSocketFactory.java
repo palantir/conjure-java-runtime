@@ -23,12 +23,10 @@ import java.util.Objects;
 import javax.net.ssl.SSLSocketFactory;
 
 /**
- * Enables {@link java.net.StandardSocketOptions#SO_KEEPALIVE}. By default this will only send a packet after two
- * hours (which is long after our timeouts), but this can be lowered to be useful in the kernel, e.g.:
+ * Enables {@link java.net.StandardSocketOptions#SO_KEEPALIVE}. By default this will only send a packet after two hours
+ * (which is long after our timeouts), but this can be lowered to be useful in the kernel, e.g.:
  *
- * net.ipv4.tcp_keepalive_time = 20
- * net.ipv4.tcp_keepalive_intvl = 5
- * net.ipv4.tcp_keepalive_probes = 3
+ * <p>net.ipv4.tcp_keepalive_time = 20 net.ipv4.tcp_keepalive_intvl = 5 net.ipv4.tcp_keepalive_probes = 3
  */
 final class KeepAliveSslSocketFactory extends ForwardingSslSocketFactory {
     private final SSLSocketFactory delegate;

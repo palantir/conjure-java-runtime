@@ -41,9 +41,8 @@ public final class DefaultConcurrencyLimitersTest {
             .build();
     private static final Duration TIMEOUT = Duration.ofSeconds(1);
     private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(
-            Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
-                    .setNameFormat("listener-reviver")
-                    .build()),
+            Executors.newSingleThreadScheduledExecutor(
+                    new ThreadFactoryBuilder().setNameFormat("listener-reviver").build()),
             new DefaultTaggedMetricRegistry(),
             TIMEOUT,
             DefaultConcurrencyLimitersTest.class,
@@ -61,7 +60,9 @@ public final class DefaultConcurrencyLimitersTest {
 
     @Test
     public void testAimdLimiterDoesNotApplyTimeBasedLimits() {
-        AIMDLimit limit = AIMDLimit.newBuilder().timeout(Long.MAX_VALUE, TimeUnit.NANOSECONDS).build();
+        AIMDLimit limit = AIMDLimit.newBuilder()
+                .timeout(Long.MAX_VALUE, TimeUnit.NANOSECONDS)
+                .build();
         int initialLimit = limit.getLimit();
         limit.onSample(0, Long.MAX_VALUE, 0, false);
         int resultLimit = limit.getLimit();

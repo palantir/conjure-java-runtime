@@ -32,10 +32,7 @@ public final class OptionalResponseBodyConverterFactory extends Converter.Factor
 
     @Nullable
     @Override
-    public Converter<ResponseBody, ?> responseBodyConverter(
-            Type type,
-            Annotation[] _annotations,
-            Retrofit _retrofit) {
+    public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] _annotations, Retrofit _retrofit) {
         if (type instanceof ParameterizedType) {
             Type innerType = getParameterUpperBound(0, (ParameterizedType) type);
             Class<?> rawInnerClass = getRawType(innerType);
@@ -54,5 +51,4 @@ public final class OptionalResponseBodyConverterFactory extends Converter.Factor
             return Optional.of(value);
         }
     }
-
 }

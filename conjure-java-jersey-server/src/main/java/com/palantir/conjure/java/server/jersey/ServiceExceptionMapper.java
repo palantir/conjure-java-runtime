@@ -29,9 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Serializes {@link ServiceException}s into a JSON representation of a {@link SerializableError}s (see {@link
- * SerializableError#forException}). Also see {@link JsonExceptionMapper} for more information on the interplay of
- * Jersey and exception mappers.
+ * Serializes {@link ServiceException}s into a JSON representation of a {@link SerializableError}s (see
+ * {@link SerializableError#forException}). Also see {@link JsonExceptionMapper} for more information on the interplay
+ * of Jersey and exception mappers.
  */
 final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> {
 
@@ -50,12 +50,14 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
         }
         int httpStatus = exception.getErrorType().httpErrorCode();
         if (httpStatus / 100 == 4 /* client error */) {
-            log.info("Error handling request",
+            log.info(
+                    "Error handling request",
                     SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
                     SafeArg.of("errorName", exception.getErrorType().name()),
                     exception);
         } else {
-            log.error("Error handling request",
+            log.error(
+                    "Error handling request",
                     SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
                     SafeArg.of("errorName", exception.getErrorType().name()),
                     exception);
@@ -63,12 +65,14 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
 
         ResponseBuilder builder = Response.status(httpStatus);
         try {
-            SerializableError error =
-                    SerializableError.builder().from(SerializableError.forException(exception)).build();
+            SerializableError error = SerializableError.builder()
+                    .from(SerializableError.forException(exception))
+                    .build();
             builder.type(MediaType.APPLICATION_JSON);
             builder.entity(error);
         } catch (RuntimeException e) {
-            log.warn("Unable to translate exception to json",
+            log.warn(
+                    "Unable to translate exception to json",
                     SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
                     e);
             // simply write out the exception message

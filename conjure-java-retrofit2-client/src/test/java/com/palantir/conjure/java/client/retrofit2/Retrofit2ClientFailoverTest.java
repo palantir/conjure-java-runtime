@@ -44,38 +44,28 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
 
     @DataPoints("PinStrategies")
     public static FailoverTestCase[] pinStrategies() {
-        FailoverTestCase pinNoCache = new FailoverTestCase(new MockWebServer(),
-                new MockWebServer(),
-                0,
-                NodeSelectionStrategy.PIN_UNTIL_ERROR);
-        FailoverTestCase pinWithCache = new FailoverTestCase(new MockWebServer(),
-                new MockWebServer(),
-                CACHE_DURATION,
-                NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase pinNoCache = new FailoverTestCase(
+                new MockWebServer(), new MockWebServer(), 0, NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase pinWithCache = new FailoverTestCase(
+                new MockWebServer(), new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.PIN_UNTIL_ERROR);
         return new FailoverTestCase[] {pinNoCache, pinWithCache};
     }
 
     @DataPoints("AllStrategies")
     public static FailoverTestCase[] allStrategies() {
-        FailoverTestCase pinNoCache = new FailoverTestCase(new MockWebServer(),
-                new MockWebServer(),
-                0,
-                NodeSelectionStrategy.PIN_UNTIL_ERROR);
-        FailoverTestCase pinWithCache = new FailoverTestCase(new MockWebServer(),
-                new MockWebServer(),
-                CACHE_DURATION,
-                NodeSelectionStrategy.PIN_UNTIL_ERROR);
-        FailoverTestCase roundRobin = new FailoverTestCase(new MockWebServer(),
-                new MockWebServer(),
-                CACHE_DURATION,
-                NodeSelectionStrategy.ROUND_ROBIN);
+        FailoverTestCase pinNoCache = new FailoverTestCase(
+                new MockWebServer(), new MockWebServer(), 0, NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase pinWithCache = new FailoverTestCase(
+                new MockWebServer(), new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase roundRobin = new FailoverTestCase(
+                new MockWebServer(), new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.ROUND_ROBIN);
         return new FailoverTestCase[] {pinNoCache, pinWithCache, roundRobin};
     }
 
     @Test
     @Theory
-    public void testConnectionError_performsFailover(
-            @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws IOException {
+    public void testConnectionError_performsFailover(@FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase)
+            throws IOException {
         TestService proxy = failoverTestCase.getProxy();
 
         failoverTestCase.server1.shutdown();
@@ -148,11 +138,13 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
             @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws Exception {
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService bogusHostProxy = Retrofit2Client.create(TestService.class,
+        TestService bogusHostProxy = Retrofit2Client.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
                 ClientConfiguration.builder()
-                        .from(createTestConfig("http://foo-bar-bogus-host.unresolvable:80",
+                        .from(createTestConfig(
+                                "http://foo-bar-bogus-host.unresolvable:80",
                                 "http://localhost:" + failoverTestCase.server1.getPort()))
                         .maxNumRetries(2)
                         .build());
@@ -166,11 +158,11 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(TestService.class,
+        TestService anotherProxy = Retrofit2Client.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(2)
                         .build());
@@ -184,11 +176,11 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(TestService.class,
+        TestService anotherProxy = Retrofit2Client.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(2)
                         .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
@@ -203,11 +195,11 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(TestService.class,
+        TestService anotherProxy = Retrofit2Client.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(2)
                         .build());
@@ -234,11 +226,11 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(TestService.class,
+        TestService anotherProxy = Retrofit2Client.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(2)
                         .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
@@ -264,11 +256,11 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
     public void testCache_recovery() throws Exception {
         MockWebServer server1 = new MockWebServer();
 
-        TestService anotherProxy = Retrofit2Client.create(TestService.class,
+        TestService anotherProxy = Retrofit2Client.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(1)
                         .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
@@ -315,11 +307,9 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
                     TestService.class,
                     AGENT,
                     new HostMetricsRegistry(),
-                    ClientConfiguration
-                            .builder()
-                            .from(createTestConfig(String.format("http://%s:%s/api/",
-                                    server1.getHostName(),
-                                    server1.getPort()),
+                    ClientConfiguration.builder()
+                            .from(createTestConfig(
+                                    String.format("http://%s:%s/api/", server1.getHostName(), server1.getPort()),
                                     String.format("http://%s:%s/api/", server2.getHostName(), server2.getPort())))
                             .maxNumRetries(2) // need 2 retries because URL order is not deterministic
                             .nodeSelectionStrategy(nodeSelectionStrategy)

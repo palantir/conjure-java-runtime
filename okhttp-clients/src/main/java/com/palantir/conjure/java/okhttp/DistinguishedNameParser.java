@@ -19,15 +19,16 @@ package com.palantir.conjure.java.okhttp;
 import javax.security.auth.x500.X500Principal;
 
 /**
- * A distinguished name (DN) parser. This parser only supports extracting a string value from a DN.
- * It doesn't support values in the hex-string style.
+ * A distinguished name (DN) parser. This parser only supports extracting a string value from a DN. It doesn't support
+ * values in the hex-string style.
  *
- * Copied from https://raw.githubusercontent.com/square/okhttp/parent-3.9.1/okhttp/src/main/java/okhttp3/internal/tls/DistinguishedNameParser.java
+ * <p>Copied from
+ * https://raw.githubusercontent.com/square/okhttp/parent-3.9.1/okhttp/src/main/java/okhttp3/internal/tls/DistinguishedNameParser.java
  * Original license preserved. Changes made:
  *
  * <ol>
- * <li>Changed indentation from 2 spaces to 4 spaces</li>
- * <li>Suppressed checkstyle</li>
+ *   <li>Changed indentation from 2 spaces to 4 spaces
+ *   <li>Suppressed checkstyle
  * </ol>
  */
 final class DistinguishedNameParser {
@@ -86,7 +87,7 @@ final class DistinguishedNameParser {
             }
         }
 
-        pos++; //skip '=' char
+        pos++; // skip '=' char
 
         // skip space chars between '=' and attribute value
         // (compatibility with RFC 1779)
@@ -94,7 +95,8 @@ final class DistinguishedNameParser {
 
         // in case of oid attribute type skip its prefix: "oid." or "OID."
         // (compatibility with RFC 1779)
-        if ((end - beg > 4) && (chars[beg + 3] == '.')
+        if ((end - beg > 4)
+                && (chars[beg + 3] == '.')
                 && (chars[beg] == 'O' || chars[beg] == 'o')
                 && (chars[beg + 1] == 'I' || chars[beg + 1] == 'i')
                 && (chars[beg + 2] == 'D' || chars[beg + 2] == 'd')) {
@@ -147,9 +149,7 @@ final class DistinguishedNameParser {
         while (true) {
             // check for end of attribute value
             // looks for space and component separators
-            if (pos == length || chars[pos] == '+'
-                    || chars[pos] == ','
-                    || chars[pos] == ';') {
+            if (pos == length || chars[pos] == '+' || chars[pos] == ',' || chars[pos] == ';') {
                 end = pos;
                 break;
             }
@@ -162,7 +162,7 @@ final class DistinguishedNameParser {
                 for (; pos < length && chars[pos] == ' '; pos++) {}
                 break;
             } else if (chars[pos] >= 'A' && chars[pos] <= 'F') {
-                chars[pos] += 32; //to low case
+                chars[pos] += 32; // to low case
             }
 
             pos++;
@@ -216,9 +216,7 @@ final class DistinguishedNameParser {
                     for (; pos < length && chars[pos] == ' '; pos++) {
                         chars[end++] = ' ';
                     }
-                    if (pos == length || chars[pos] == ','
-                            || chars[pos] == '+'
-                            || chars[pos] == ';') {
+                    if (pos == length || chars[pos] == ',' || chars[pos] == '+' || chars[pos] == ';') {
                         // separator char or the end of DN has been found
                         return new String(chars, beg, cur - beg);
                     }
@@ -251,7 +249,7 @@ final class DistinguishedNameParser {
             case '*':
             case '%':
             case '_':
-                //FIXME: escaping is allowed only for leading or trailing space char
+                // FIXME: escaping is allowed only for leading or trailing space char
                 return chars[pos];
             default:
                 // RFC doesn't explicitly say that escaped hex pair is
@@ -264,7 +262,7 @@ final class DistinguishedNameParser {
     // see http://www.unicode.org for UTF-8 bit distribution table
     private char getUTF8() {
         int res = getByte(pos);
-        pos++; //FIXME tmp
+        pos++; // FIXME tmp
 
         if (res < 128) { // one byte: 0-7F
             return (char) res;
@@ -285,21 +283,21 @@ final class DistinguishedNameParser {
             for (int i = 0; i < count; i++) {
                 pos++;
                 if (pos == length || chars[pos] != '\\') {
-                    return 0x3F; //FIXME failed to decode UTF-8 char - return '?'
+                    return 0x3F; // FIXME failed to decode UTF-8 char - return '?'
                 }
                 pos++;
 
                 b = getByte(pos);
-                pos++; //FIXME tmp
+                pos++; // FIXME tmp
                 if ((b & 0xC0) != 0x80) {
-                    return 0x3F; //FIXME failed to decode UTF-8 char - return '?'
+                    return 0x3F; // FIXME failed to decode UTF-8 char - return '?'
                 }
 
                 res = (res << 6) + (b & 0x3F);
             }
             return (char) res;
         } else {
-            return 0x3F; //FIXME failed to decode UTF-8 char - return '?'
+            return 0x3F; // FIXME failed to decode UTF-8 char - return '?'
         }
     }
 
@@ -342,8 +340,7 @@ final class DistinguishedNameParser {
     }
 
     /**
-     * Parses the DN and returns the most significant attribute value for an attribute type, or null
-     * if none found.
+     * Parses the DN and returns the most significant attribute value for an attribute type, or null if none found.
      *
      * @param attributeType attribute type to look for (e.g. "ca")
      */
@@ -376,7 +373,7 @@ final class DistinguishedNameParser {
                 case '+':
                 case ',':
                 case ';': // compatibility with RFC 1779: semicolon can separate RDNs
-                    //empty attribute value
+                    // empty attribute value
                     break;
                 default:
                     attValue = escapedAV();
@@ -393,7 +390,8 @@ final class DistinguishedNameParser {
                 return null;
             }
 
-            if (chars[pos] == ',' || chars[pos] == ';') {} else if (chars[pos] != '+') {
+            if (chars[pos] == ',' || chars[pos] == ';') {
+            } else if (chars[pos] != '+') {
                 throw new IllegalStateException("Malformed DN: " + dn);
             }
 

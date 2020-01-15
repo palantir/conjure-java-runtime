@@ -28,5 +28,4 @@ final class NoContentExceptionMapper implements ExceptionMapper<NoContentExcepti
     public Response toResponse(NoContentException _exception) {
         return Response.noContent().build();
     }
-
 }

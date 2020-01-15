@@ -83,8 +83,10 @@ public final class OkHttpClientsTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
+
     @Rule
     public final MockWebServer server2 = new MockWebServer();
+
     @Rule
     public final MockWebServer server3 = new MockWebServer();
 
@@ -105,10 +107,12 @@ public final class OkHttpClientsTest extends TestBase {
     public void canceledCallsDoNotRetryAndDoNotReportToHostEventSink() {
         server.enqueue(new MockResponse().setHeadersDelay(1, TimeUnit.SECONDS).setBody("pong"));
         OkHttpClient client = createRetryingClient(1);
-        AsyncRequest future = AsyncRequest.of(client.newCall(new Request.Builder().url(url).build()));
+        AsyncRequest future = AsyncRequest.of(
+                client.newCall(new Request.Builder().url(url).build()));
         future.cancelCall();
 
-        assertThatExceptionOfType(UncheckedExecutionException.class).isThrownBy(() -> Futures.getUnchecked(future))
+        assertThatExceptionOfType(UncheckedExecutionException.class)
+                .isThrownBy(() -> Futures.getUnchecked(future))
                 .satisfies(e -> assertThat(e.getCause()).hasMessage("Canceled").isInstanceOf(IOException.class));
         assertThat(hostEventsSink.getMetrics()).isEmpty();
     }
@@ -147,12 +151,11 @@ public final class OkHttpClientsTest extends TestBase {
 
         OkHttpClient client = createRetryingClient(1);
 
-        StreamingRequestBody body =
-                new StreamingRequestBody(
-                        Okio.buffer(
-                                Okio.source(
-                                        new ByteArrayInputStream("hello".getBytes(StandardCharsets.UTF_8)))));
-        assertThatThrownBy(() -> client.newCall(new Request.Builder().url(url).post(body).build()).execute())
+        StreamingRequestBody body = new StreamingRequestBody(
+                Okio.buffer(Okio.source(new ByteArrayInputStream("hello".getBytes(StandardCharsets.UTF_8)))));
+        assertThatThrownBy(() ->
+                        client.newCall(new Request.Builder().url(url).post(body).build())
+                                .execute())
                 .isInstanceOf(SafeIoException.class)
                 .hasMessage("Cannot retry streamed HTTP body");
 
@@ -200,8 +203,7 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setBody("pong"));
         createRetryingClient(1).newCall(new Request.Builder().url(url).build()).execute();
 
-        List<HostMetrics> hostMetrics = hostEventsSink.getMetrics()
-                .stream()
+        List<HostMetrics> hostMetrics = hostEventsSink.getMetrics().stream()
                 .filter(metrics -> metrics.hostname().equals("localhost"))
                 .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
                 .filter(metrics -> metrics.port() == server.getPort())
@@ -222,21 +224,21 @@ public final class OkHttpClientsTest extends TestBase {
 
         OkHttpClients.create(clientConfiguration, AGENT, hostEventsSink, OkHttpClientsTest.class);
 
-        assertThat(Collections2.transform(registry.getMetrics().keySet(), MetricName::safeName)).contains(
-                "com.palantir.conjure.java.connection-pool.connections.idle",
-                "com.palantir.conjure.java.connection-pool.connections.total",
-                "com.palantir.conjure.java.dispatcher.calls.queued",
-                "com.palantir.conjure.java.dispatcher.calls.running");
+        assertThat(Collections2.transform(registry.getMetrics().keySet(), MetricName::safeName))
+                .contains(
+                        "com.palantir.conjure.java.connection-pool.connections.idle",
+                        "com.palantir.conjure.java.connection-pool.connections.total",
+                        "com.palantir.conjure.java.dispatcher.calls.queued",
+                        "com.palantir.conjure.java.dispatcher.calls.running");
     }
 
     @Test
     public void verifyIoExceptionMetricsAreRegistered() {
-        Call call = createRetryingClient(0, "http://bogus").newCall(new Request.Builder().url("http://bogus").build());
-        assertThatExceptionOfType(IOException.class)
-                .isThrownBy(call::execute);
+        Call call = createRetryingClient(0, "http://bogus")
+                .newCall(new Request.Builder().url("http://bogus").build());
+        assertThatExceptionOfType(IOException.class).isThrownBy(call::execute);
 
-        List<HostMetrics> hostMetrics = hostEventsSink.getMetrics()
-                .stream()
+        List<HostMetrics> hostMetrics = hostEventsSink.getMetrics().stream()
                 .filter(metrics -> metrics.hostname().equals("bogus"))
                 .filter(metrics -> metrics.serviceName().equals("OkHttpClientsTest"))
                 .collect(Collectors.toList());
@@ -251,7 +253,8 @@ public final class OkHttpClientsTest extends TestBase {
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/100
         for (int code : new int[] {101, 200, 204}) {
             server.enqueue(new MockResponse().setResponseCode(code));
-            Call call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
+            Call call = createRetryingClient(0)
+                    .newCall(new Request.Builder().url(url).build());
             CountDownLatch wasSuccessful = new CountDownLatch(1);
             call.enqueue(new Callback() {
                 @Override
@@ -264,7 +267,9 @@ public final class OkHttpClientsTest extends TestBase {
                     }
                 }
             });
-            assertThat(wasSuccessful.await(500, TimeUnit.MILLISECONDS)).as("Expected code: " + code).isTrue();
+            assertThat(wasSuccessful.await(500, TimeUnit.MILLISECONDS))
+                    .as("Expected code: " + code)
+                    .isTrue();
         }
     }
 
@@ -272,7 +277,8 @@ public final class OkHttpClientsTest extends TestBase {
     public void successfulCallDoesNotInvokeFailureHandler() throws Exception {
         server.enqueue(new MockResponse().setBody("pong"));
 
-        Call call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
+        Call call = createRetryingClient(0)
+                .newCall(new Request.Builder().url(url).build());
         Semaphore failureHandlerExecuted = new Semaphore(0);
         Semaphore successHandlerExecuted = new Semaphore(0);
         call.enqueue(new Callback() {
@@ -286,7 +292,8 @@ public final class OkHttpClientsTest extends TestBase {
                 successHandlerExecuted.release();
             }
         });
-        assertThat(successHandlerExecuted.tryAcquire(500, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(successHandlerExecuted.tryAcquire(500, TimeUnit.MILLISECONDS))
+                .isTrue();
         assertThat(failureHandlerExecuted.tryAcquire(500, TimeUnit.MILLISECONDS))
                 .as("onFailure was executed")
                 .isFalse();
@@ -296,7 +303,8 @@ public final class OkHttpClientsTest extends TestBase {
     public void unsuccessfulCallDoesNotInvokeSuccessHandler() throws Exception {
         server.shutdown();
 
-        Call call = createRetryingClient(0).newCall(new Request.Builder().url(url).build());
+        Call call = createRetryingClient(0)
+                .newCall(new Request.Builder().url(url).build());
         Semaphore failureHandlerExecuted = new Semaphore(0);
         Semaphore successHandlerExecuted = new Semaphore(0);
         call.enqueue(new Callback() {
@@ -313,7 +321,8 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(successHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS))
                 .as("onSuccess was executed")
                 .isFalse();
-        assertThat(failureHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS)).isTrue();
+        assertThat(failureHandlerExecuted.tryAcquire(100, TimeUnit.MILLISECONDS))
+                .isTrue();
     }
 
     @Test
@@ -334,7 +343,10 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(503));
 
         // then we get a RemoteException
-        SerializableError error = SerializableError.builder().errorCode("error code").errorName("error name").build();
+        SerializableError error = SerializableError.builder()
+                .errorCode("error code")
+                .errorName("error name")
+                .build();
         MockResponse mockResponse = new MockResponse()
                 .setBody(new ObjectMapper().writeValueAsString(error))
                 .addHeader("Content-Type", "application/json")
@@ -358,11 +370,10 @@ public final class OkHttpClientsTest extends TestBase {
         OkHttpClient client = createRetryingClient(1);
         Call call = client.newCall(new Request.Builder().url(url).build());
 
-        assertThatThrownBy(call::execute)
-                .isInstanceOfSatisfying(UnknownRemoteException.class, exception -> {
-                    assertThat(exception.getStatus()).isEqualTo(400);
-                    assertThat(exception.getBody()).isEqualTo(responseJson);
-                });
+        assertThatThrownBy(call::execute).isInstanceOfSatisfying(UnknownRemoteException.class, exception -> {
+            assertThat(exception.getStatus()).isEqualTo(400);
+            assertThat(exception.getBody()).isEqualTo(responseJson);
+        });
     }
 
     @Test
@@ -394,7 +405,8 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setBody("pong"));
 
-        Call call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
+        Call call = createRetryingClient(2)
+                .newCall(new Request.Builder().url(url).build());
         assertThat(call.execute().body().string()).isEqualTo("pong");
         assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
@@ -427,7 +439,8 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
         server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
         server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
-        Call call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
+        Call call = createRetryingClient(2)
+                .newCall(new Request.Builder().url(url).build());
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Failed to complete the request due to QosException.Throttle")
@@ -441,7 +454,8 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(429));
         server.enqueue(new MockResponse().setBody("pong"));
 
-        Call call = createRetryingClient(2).newCall(new Request.Builder().url(url).build());
+        Call call = createRetryingClient(2)
+                .newCall(new Request.Builder().url(url).build());
         assertThat(call.execute().body().string()).isEqualTo("pong");
         assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
@@ -495,7 +509,8 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setBody("pong"));
 
-        Call call = createRetryingClient(2, Duration.ofMillis(10)).newCall(new Request.Builder().url(url).build());
+        Call call = createRetryingClient(2, Duration.ofMillis(10))
+                .newCall(new Request.Builder().url(url).build());
         CompletableFuture<String> future = new CompletableFuture<>();
         call.enqueue(new Callback() {
             @Override
@@ -520,7 +535,8 @@ public final class OkHttpClientsTest extends TestBase {
             server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url));
         }
 
-        Call call = createRetryingClient(1).newCall(new Request.Builder().url(url).build());
+        Call call = createRetryingClient(1)
+                .newCall(new Request.Builder().url(url).build());
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Exceeded the maximum number of allowed redirects")
@@ -702,8 +718,7 @@ public final class OkHttpClientsTest extends TestBase {
                 hostEventsSink,
                 OkHttpClientsTest.class);
         Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
-        assertThatIOException()
-                .isThrownBy(() -> call.execute().body().string());
+        assertThatIOException().isThrownBy(() -> call.execute().body().string());
     }
 
     @Test
@@ -814,9 +829,7 @@ public final class OkHttpClientsTest extends TestBase {
                 hostEventsSink,
                 OkHttpClientsTest.class);
 
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
+        Request request = new Request.Builder().url(url).build();
 
         Response synchronousCall = client.newCall(request).execute();
         assertThat(synchronousCall.body().string()).isEqualTo("Hello, world!");
@@ -829,21 +842,18 @@ public final class OkHttpClientsTest extends TestBase {
                 .setBody("Hello, world!"));
 
         OkHttpClient client = OkHttpClients.withStableUris(
-                ClientConfigurations.of(
-                        ServiceConfiguration.builder()
-                                .addUris(url)
-                                // ClientConfigurations has a connectTimeout default of 10 seconds
-                                .readTimeout(Duration.ZERO) // unlimited pls
-                                .writeTimeout(Duration.ZERO) // unlimited pls
-                                .security(SslConfiguration.of(Paths.get("src", "test", "resources", "trustStore.jks")))
-                                .build()),
+                ClientConfigurations.of(ServiceConfiguration.builder()
+                        .addUris(url)
+                        // ClientConfigurations has a connectTimeout default of 10 seconds
+                        .readTimeout(Duration.ZERO) // unlimited pls
+                        .writeTimeout(Duration.ZERO) // unlimited pls
+                        .security(SslConfiguration.of(Paths.get("src", "test", "resources", "trustStore.jks")))
+                        .build()),
                 AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
 
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
+        Request request = new Request.Builder().url(url).build();
 
         Response synchronousCall = client.newCall(request).execute();
         assertThat(synchronousCall.body().string()).isEqualTo("Hello, world!");
@@ -892,7 +902,10 @@ public final class OkHttpClientsTest extends TestBase {
                 .build();
         OkHttpClient client = OkHttpClients.create(proxiedConfig, AGENT, hostEventsSink, OkHttpClientsTest.class);
 
-        assertThat(client.newCall(new Request.Builder().url(serviceUrl).build()).execute().body().string())
+        assertThat(client.newCall(new Request.Builder().url(serviceUrl).build())
+                        .execute()
+                        .body()
+                        .string())
                 .isEqualTo("foo");
         assertThat(server.takeRequest().getHeader(HttpHeaders.HOST)).isEqualTo("foo.com");
     }
@@ -909,7 +922,7 @@ public final class OkHttpClientsTest extends TestBase {
 
             @Override
             public void recordIoException(String _serviceName, String _hostname, int _port) {
-                //empty;
+                // empty;
             }
         };
         OkHttpClient client = OkHttpClients.create(
@@ -921,7 +934,8 @@ public final class OkHttpClientsTest extends TestBase {
                 throwingSink,
                 OkHttpClientsTest.class);
 
-        assertThatThrownBy(() -> client.newCall(new Request.Builder().url(url).build()).execute())
+        assertThatThrownBy(() ->
+                        client.newCall(new Request.Builder().url(url).build()).execute())
                 .hasStackTraceContaining("Caught a non-IOException. This is a serious bug and requires investigation");
     }
 

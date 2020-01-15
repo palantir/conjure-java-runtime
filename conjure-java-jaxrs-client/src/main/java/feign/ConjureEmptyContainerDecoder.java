@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 
 /**
  * Use {@link EmptyContainerDecoder}.
+ *
  * @deprecated Use {@link EmptyContainerDecoder}.
  */
 @Deprecated

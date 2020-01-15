@@ -16,9 +16,7 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-/**
- * A {@link BackoffStrategy} that attempts the operation exactly once, i.e., returns false always.
- */
+/** A {@link BackoffStrategy} that attempts the operation exactly once, i.e., returns false always. */
 public enum NeverRetryingBackoffStrategy implements BackoffStrategy {
     INSTANCE;
 

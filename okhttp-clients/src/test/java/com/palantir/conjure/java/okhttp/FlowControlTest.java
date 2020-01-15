@@ -47,11 +47,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is a simulation of the flow control primitives used by this library, in order to allow the developer
- * to try different strategies.
- * <p>
- * It is run in CI, but only to prevent code breakages - this is in general an expensive test which should be run
- * as a dev tool. If you want to run for dev purposes, please increase REQUESTS_PER_THREAD.
+ * This class is a simulation of the flow control primitives used by this library, in order to allow the developer to
+ * try different strategies.
+ *
+ * <p>It is run in CI, but only to prevent code breakages - this is in general an expensive test which should be run as
+ * a dev tool. If you want to run for dev purposes, please increase REQUESTS_PER_THREAD.
  */
 public final class FlowControlTest {
     private static final Logger log = LoggerFactory.getLogger(FlowControlTest.class);
@@ -63,9 +63,8 @@ public final class FlowControlTest {
     private static ListeningExecutorService executorService;
 
     private final ConcurrencyLimiters limiters = new ConcurrencyLimiters(
-            Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder()
-                    .setNameFormat("listener-reviver")
-                    .build()),
+            Executors.newSingleThreadScheduledExecutor(
+                    new ThreadFactoryBuilder().setNameFormat("listener-reviver").build()),
             new DefaultTaggedMetricRegistry(),
             FlowControlTest.class,
             true);
@@ -93,7 +92,8 @@ public final class FlowControlTest {
         while (!task.isDone()) {
             sleep(1000);
             log.info("Average rate is {}, 1 minute rate is {}", rate.getMeanRate(), rate.getOneMinuteRate());
-            log.info("Average number of retries is {}, max is {}",
+            log.info(
+                    "Average number of retries is {}, max is {}",
                     avgRetries.getSnapshot().getMean(),
                     avgRetries.getSnapshot().getMax());
             if (Duration.between(start, Instant.now()).compareTo(GRACE) > 0) {
@@ -104,20 +104,15 @@ public final class FlowControlTest {
     }
 
     private Stream<Worker> createWorkers(
-            Meter rate,
-            Histogram avgRetries,
-            int numThreads,
-            int rateLimit,
-            Duration delay) {
+            Meter rate, Histogram avgRetries, int numThreads, int rateLimit, Duration delay) {
         RateLimiter rateLimiter = RateLimiter.create(rateLimit);
-        return IntStream.range(0, numThreads)
-                .mapToObj(unused -> new Worker(
-                        () -> new ExponentialBackoff(4, Duration.ofMillis(250)),
-                        limiters,
-                        delay,
-                        rateLimiter,
-                        rate,
-                        avgRetries));
+        return IntStream.range(0, numThreads).mapToObj(unused -> new Worker(
+                () -> new ExponentialBackoff(4, Duration.ofMillis(250)),
+                limiters,
+                delay,
+                rateLimiter,
+                rate,
+                avgRetries));
     }
 
     private static final class Worker implements Runnable {
@@ -148,8 +143,9 @@ public final class FlowControlTest {
 
         @Override
         public void run() {
-            for (int i = 0; i < REQUESTS_PER_THREAD;) {
-                Limiter.Listener listener = Futures.getUnchecked(limiters.acquireLimiterInternal(KEY).acquire());
+            for (int i = 0; i < REQUESTS_PER_THREAD; ) {
+                Limiter.Listener listener = Futures.getUnchecked(
+                        limiters.acquireLimiterInternal(KEY).acquire());
                 boolean gotRateLimited = !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS);
                 if (!gotRateLimited) {
                     meter.mark();

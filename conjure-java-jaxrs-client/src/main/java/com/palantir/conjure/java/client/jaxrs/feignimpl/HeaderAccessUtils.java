@@ -21,11 +21,11 @@ import java.util.LinkedList;
 import java.util.Map;
 
 /**
- * Used to access headers in a case-insensitive manner. This is necessary for compatibility with OkHttp 3.3.0+ as
- * it lower-cases header names whereas we use constants from {@link com.google.common.net.HttpHeaders} where header
- * names are in Train-Case. This can be removed once {@link feign.Request} and {@link feign.Response} expose the
- * headers as a map which is case-insensitive with respect to the key. com.netflix.feign:feign-core:8.18.0 will
- * have it for the {@link feign.Response} headers due to https://github.com/Netflix/feign/pull/418.
+ * Used to access headers in a case-insensitive manner. This is necessary for compatibility with OkHttp 3.3.0+ as it
+ * lower-cases header names whereas we use constants from {@link com.google.common.net.HttpHeaders} where header names
+ * are in Train-Case. This can be removed once {@link feign.Request} and {@link feign.Response} expose the headers as a
+ * map which is case-insensitive with respect to the key. com.netflix.feign:feign-core:8.18.0 will have it for the
+ * {@link feign.Response} headers due to https://github.com/Netflix/feign/pull/418.
  */
 public final class HeaderAccessUtils {
     private HeaderAccessUtils() {}
@@ -40,8 +40,8 @@ public final class HeaderAccessUtils {
     }
 
     /**
-     * Compares the keys of the map to the headerName in a case-insensitive manner and returns null
-     * if it was never found.
+     * Compares the keys of the map to the headerName in a case-insensitive manner and returns null if it was never
+     * found.
      */
     public static Collection<String> caseInsensitiveGet(Map<String, Collection<String>> headers, String headerName) {
         Collection<String> result = new LinkedList<>();

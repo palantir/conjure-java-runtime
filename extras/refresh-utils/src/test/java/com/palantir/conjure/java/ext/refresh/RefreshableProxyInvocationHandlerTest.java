@@ -39,8 +39,10 @@ public final class RefreshableProxyInvocationHandlerTest {
 
     @Mock
     private Function<Object, Callable> supplier;
+
     @Mock
     private Callable delegate1;
+
     @Mock
     private Callable delegate2;
 

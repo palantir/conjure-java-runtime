@@ -26,7 +26,10 @@ import java.io.IOException;
 
 /**
  * Provides support for the {@link Long} deserialization from JSON string and numeric values regardless of
- * <pre>MapperFeature.ALLOW_COERCION_OF_SCALARS</pre> configuration.
+ *
+ * <pre>MapperFeature.ALLOW_COERCION_OF_SCALARS</pre>
+ *
+ * configuration.
  */
 final class LenientLongModule extends SimpleModule {
 

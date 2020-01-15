@@ -22,12 +22,10 @@ import javax.ws.rs.core.Response.Status;
 
 final class UnauthorizedException extends WebApplicationException {
 
-    private static final ErrorType MISSING_CREDENTIALS_ERROR_TYPE = ErrorType.create(
-            ErrorType.Code.UNAUTHORIZED,
-            "Conjure:MissingCredentials");
-    private static final ErrorType MALFORMED_CREDENTIALS_ERROR_TYPE = ErrorType.create(
-            ErrorType.Code.UNAUTHORIZED,
-            "Conjure:MalformedCredentials");
+    private static final ErrorType MISSING_CREDENTIALS_ERROR_TYPE =
+            ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MissingCredentials");
+    private static final ErrorType MALFORMED_CREDENTIALS_ERROR_TYPE =
+            ErrorType.create(ErrorType.Code.UNAUTHORIZED, "Conjure:MalformedCredentials");
 
     private final ErrorType errorType;
 

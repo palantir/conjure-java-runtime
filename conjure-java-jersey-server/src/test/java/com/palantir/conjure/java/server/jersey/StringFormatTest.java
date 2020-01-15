@@ -42,8 +42,8 @@ import org.junit.Test;
 public final class StringFormatTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(TestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(TestServer.class, "src/test/resources/test-server.yml");
 
     private WebTarget target;
 
@@ -59,7 +59,8 @@ public final class StringFormatTest {
     public void testTextPlainMediaTypeReturnsPlainStrings() {
         Response response = target.path("textString").request().get();
         assertThat(response.readEntity(String.class)).isEmpty();
-        response = target.path("textString").queryParam("value", "val").request().get();
+        response =
+                target.path("textString").queryParam("value", "val").request().get();
         assertThat(response.readEntity(String.class)).isEqualTo("val");
     }
 
@@ -68,7 +69,8 @@ public final class StringFormatTest {
         // This behaviour is somewhat unexpected since a valid JSON response object would be "\"val\"" rather than "val"
         Response response = target.path("jsonString").request().get();
         assertThat(response.readEntity(String.class)).isEmpty();
-        response = target.path("jsonString").queryParam("value", "val").request().get();
+        response =
+                target.path("jsonString").queryParam("value", "val").request().get();
         assertThat(response.readEntity(String.class)).isEqualTo("val");
     }
 

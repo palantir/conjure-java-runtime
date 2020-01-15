@@ -34,12 +34,14 @@ import javax.security.auth.x500.X500Principal;
 /**
  * A HostnameVerifier consistent with <a href="http://www.ietf.org/rfc/rfc2818.txt">RFC 2818</a>.
  *
- * Copied from https://github.com/square/okhttp/blob/parent-3.9.1/okhttp-tests/src/test/java/okhttp3/internal/tls/HostnameVerifierTest.java
+ * <p>Copied from
+ * https://github.com/square/okhttp/blob/parent-3.9.1/okhttp-tests/src/test/java/okhttp3/internal/tls/HostnameVerifierTest.java
  * The original license is preserved and the following changes were made:
+ *
  * <ol>
- * <li>Made non-public</li>
- * <li>Changed indentation from 2 spaces to 4 spaces</li>
- * <li>Renamed from OkHostNameVerifier to Okhttp39HostnameVerifier</li>
+ *   <li>Made non-public
+ *   <li>Changed indentation from 2 spaces to 4 spaces
+ *   <li>Renamed from OkHostNameVerifier to Okhttp39HostnameVerifier
  * </ol>
  */
 final class Okhttp39HostnameVerifier implements HostnameVerifier {
@@ -61,9 +63,7 @@ final class Okhttp39HostnameVerifier implements HostnameVerifier {
     }
 
     public boolean verify(String host, X509Certificate certificate) {
-        return verifyAsIpAddress(host)
-                ? verifyIpAddress(host, certificate)
-                : verifyHostname(host, certificate);
+        return verifyAsIpAddress(host) ? verifyIpAddress(host, certificate) : verifyHostname(host, certificate);
     }
 
     /** Returns true if {@code certificate} matches {@code ipAddress}. */
@@ -143,21 +143,16 @@ final class Okhttp39HostnameVerifier implements HostnameVerifier {
      * Returns {@code true} iff {@code hostname} matches the domain name {@code pattern}.
      *
      * @param hostname lower-case host name.
-     * @param pattern domain name pattern from certificate. May be a wildcard pattern such as {@code
-     * *.android.com}.
+     * @param pattern domain name pattern from certificate. May be a wildcard pattern such as {@code *.android.com}.
      */
     public boolean verifyHostname(String hostname, String pattern) {
         // Basic sanity checks
         // Check length == 0 instead of .isEmpty() to support Java 5.
-        if ((hostname == null) || (hostname.length() == 0)
-                || hostname.startsWith(".")
-                || hostname.endsWith("..")) {
+        if ((hostname == null) || (hostname.length() == 0) || hostname.startsWith(".") || hostname.endsWith("..")) {
             // Invalid domain name
             return false;
         }
-        if ((pattern == null) || (pattern.length() == 0)
-                || pattern.startsWith(".")
-                || pattern.endsWith("..")) {
+        if ((pattern == null) || (pattern.length() == 0) || pattern.startsWith(".") || pattern.endsWith("..")) {
             // Invalid pattern/domain name
             return false;
         }
@@ -226,8 +221,7 @@ final class Okhttp39HostnameVerifier implements HostnameVerifier {
 
         // Check that asterisk did not match across domain name labels.
         int suffixStartIndexInHostname = hostname.length() - suffix.length();
-        if ((suffixStartIndexInHostname > 0)
-                && (hostname.lastIndexOf('.', suffixStartIndexInHostname - 1) != -1)) {
+        if ((suffixStartIndexInHostname > 0) && (hostname.lastIndexOf('.', suffixStartIndexInHostname - 1) != -1)) {
             // Asterisk is matching across domain name labels -- not permitted.
             return false;
         }

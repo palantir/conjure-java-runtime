@@ -71,17 +71,15 @@ public final class OkHttpClients {
     /**
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
      * Similar to OkHttp's default, but with two modifications:
+     *
      * <ol>
-     *     <li>A logging uncaught exception handler</li>
-     *     <li>
-     *         Daemon threads: active request will not block JVM shutdown <b>unless</b> another non-daemon
-     *         thread blocks waiting for the result. Most of our usage falls into this category. This allows
-     *         JVM shutdown to occur cleanly without waiting a full minute after the last request completes.
-     *     </li>
+     *   <li>A logging uncaught exception handler
+     *   <li>Daemon threads: active request will not block JVM shutdown <b>unless</b> another non-daemon thread blocks
+     *       waiting for the result. Most of our usage falls into this category. This allows JVM shutdown to occur
+     *       cleanly without waiting a full minute after the last request completes.
      * </ol>
      */
-    private static final ExecutorService executionExecutor =
-            Executors.newCachedThreadPool(executionThreads);
+    private static final ExecutorService executionExecutor = Executors.newCachedThreadPool(executionThreads);
 
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
@@ -101,44 +99,39 @@ public final class OkHttpClients {
         dispatcherMetricSet = new DispatcherMetricSet(dispatcher, connectionPool);
     }
 
-    /**
-     * The {@link ScheduledExecutorService} used for recovering leaked limits.
-     */
-    private static final Supplier<ScheduledExecutorService> limitReviver = Suppliers.memoize(() -> Tracers.wrap(
-            Executors.newSingleThreadScheduledExecutor(
+    /** The {@link ScheduledExecutorService} used for recovering leaked limits. */
+    private static final Supplier<ScheduledExecutorService> limitReviver = Suppliers.memoize(
+            () -> Tracers.wrap(Executors.newSingleThreadScheduledExecutor(
                     Util.threadFactory("conjure-java-runtime/leaked limit reviver", true))));
 
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
      * internal thread pool and from the thread pool used by {@link #executionExecutor}.
-     * <p>
-     * Note: In contrast to the {@link java.util.concurrent.ThreadPoolExecutor} used by OkHttp's {@link
-     * #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see its
-     * Javadoc. Since this executor will never hit zero threads, it must use daemon threads.
+     *
+     * <p>Note: In contrast to the {@link java.util.concurrent.ThreadPoolExecutor} used by OkHttp's
+     * {@link #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see
+     * its Javadoc. Since this executor will never hit zero threads, it must use daemon threads.
      */
-    private static final Supplier<ScheduledExecutorService> schedulingExecutor =
-            Suppliers.memoize(() -> Tracers.wrap(Executors.newScheduledThreadPool(NUM_SCHEDULING_THREADS,
-                    Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true))));
+    private static final Supplier<ScheduledExecutorService> schedulingExecutor = Suppliers.memoize(
+            () -> Tracers.wrap(Executors.newScheduledThreadPool(
+                    NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true))));
 
     private OkHttpClients() {}
 
     /**
-     * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured {@link
-     * ClientConfiguration#uris URIs} are initialized in random order.
+     * Creates an OkHttp client from the given {@link ClientConfiguration}. Note that the configured
+     * {@link ClientConfiguration#uris URIs} are initialized in random order.
      */
     public static OkHttpClient create(
-            ClientConfiguration config,
-            UserAgent userAgent,
-            HostEventsSink hostEventsSink,
-            Class<?> serviceClass) {
+            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
         return create(new OkHttpClient.Builder(), config, userAgent, hostEventsSink, serviceClass);
     }
 
     /**
      * Creates an OkHttp client from the given {@link ClientConfiguration} and {@link OkHttpClient.Builder}.
      *
-     * Note that the builder configuration will be overwritten by any options required by Conjure.
-     * Note that the configured {@link ClientConfiguration#uris URIs} are initialized in random order.
+     * <p>Note that the builder configuration will be overwritten by any options required by Conjure. Note that the
+     * configured {@link ClientConfiguration#uris URIs} are initialized in random order.
      */
     public static OkHttpClient create(
             OkHttpClient.Builder client,
@@ -148,23 +141,13 @@ public final class OkHttpClients {
             Class<?> serviceClass) {
         boolean reshuffle =
                 !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
-        return createInternal(
-                client,
-                config,
-                userAgent,
-                hostEventsSink,
-                serviceClass,
-                RANDOMIZE,
-                reshuffle,
-                () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize()));
+        return createInternal(client, config, userAgent, hostEventsSink, serviceClass, RANDOMIZE, reshuffle, () ->
+                new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize()));
     }
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
-            ClientConfiguration config,
-            UserAgent userAgent,
-            HostEventsSink hostEventsSink,
-            Class<?> serviceClass) {
+            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
         return createInternal(
                 new OkHttpClient.Builder(),
                 config,
@@ -205,10 +188,7 @@ public final class OkHttpClients {
             Supplier<BackoffStrategy> backoffStrategyFunction) {
         boolean enableClientQoS = shouldEnableQos(config.clientQoS());
         ConcurrencyLimiters concurrencyLimiters = new ConcurrencyLimiters(
-                limitReviver.get(),
-                config.taggedMetricRegistry(),
-                serviceClass,
-                enableClientQoS);
+                limitReviver.get(), config.taggedMetricRegistry(), serviceClass, enableClientQoS);
 
         client.addInterceptor(CatchThrowableInterceptor.INSTANCE);
         client.addInterceptor(SpanTerminatingInterceptor.INSTANCE);
@@ -238,10 +218,8 @@ public final class OkHttpClients {
         if (enableClientQoS) {
             client.addInterceptor(new ConcurrencyLimitingInterceptor());
         }
-        client.addInterceptor(InstrumentedInterceptor.create(
-                config.taggedMetricRegistry(),
-                hostEventsSink,
-                serviceClass));
+        client.addInterceptor(
+                InstrumentedInterceptor.create(config.taggedMetricRegistry(), hostEventsSink, serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
         client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
 
@@ -273,10 +251,7 @@ public final class OkHttpClients {
 
         // global metrics (addMetrics is idempotent, so this works even when multiple clients are created)
         config.taggedMetricRegistry()
-                .addMetrics(
-                        "from",
-                        DispatcherMetricSet.class.getSimpleName(),
-                        dispatcherMetricSet);
+                .addMetrics("from", DispatcherMetricSet.class.getSimpleName(), dispatcherMetricSet);
 
         return new RemotingOkHttpClient(
                 client.build(),
@@ -299,8 +274,8 @@ public final class OkHttpClients {
                 return false;
         }
 
-        throw new SafeIllegalStateException("Encountered unknown client QoS configuration",
-                SafeArg.of("ClientQoS", clientQoS));
+        throw new SafeIllegalStateException(
+                "Encountered unknown client QoS configuration", SafeArg.of("ClientQoS", clientQoS));
     }
 
     /**
@@ -313,13 +288,11 @@ public final class OkHttpClients {
 
         String maybeServiceVersion = serviceClass.getPackage().getImplementationVersion();
         augmentedAgent = augmentedAgent.addAgent(UserAgent.Agent.of(
-                serviceClass.getSimpleName(),
-                maybeServiceVersion != null ? maybeServiceVersion : "0.0.0"));
+                serviceClass.getSimpleName(), maybeServiceVersion != null ? maybeServiceVersion : "0.0.0"));
 
         String maybeRemotingVersion = OkHttpClients.class.getPackage().getImplementationVersion();
         augmentedAgent = augmentedAgent.addAgent(UserAgent.Agent.of(
-                UserAgents.CONJURE_AGENT_NAME,
-                maybeRemotingVersion != null ? maybeRemotingVersion : "0.0.0"));
+                UserAgents.CONJURE_AGENT_NAME, maybeRemotingVersion != null ? maybeRemotingVersion : "0.0.0"));
         return augmentedAgent;
     }
 
@@ -327,11 +300,11 @@ public final class OkHttpClients {
         return ImmutableList.of(
                 new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
                         .tlsVersions(TlsVersion.TLS_1_2)
-                        .cipherSuites(enableGcmCipherSuites
-                                ? CipherSuites.allCipherSuites()
-                                : CipherSuites.fastCipherSuites())
+                        .cipherSuites(
+                                enableGcmCipherSuites
+                                        ? CipherSuites.allCipherSuites()
+                                        : CipherSuites.fastCipherSuites())
                         .build(),
                 ConnectionSpec.CLEARTEXT);
     }
-
 }

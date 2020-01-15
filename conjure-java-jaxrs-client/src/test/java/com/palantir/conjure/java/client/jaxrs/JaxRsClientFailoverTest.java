@@ -47,38 +47,28 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
     @DataPoints("PinStrategies")
     public static FailoverTestCase[] pinStrategies() {
-        FailoverTestCase pinNoCache = new FailoverTestCase(new MockWebServer(),
-                new MockWebServer(),
-                0,
-                NodeSelectionStrategy.PIN_UNTIL_ERROR);
-        FailoverTestCase pinWithCache = new FailoverTestCase(new MockWebServer(),
-                new MockWebServer(),
-                CACHE_DURATION,
-                NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase pinNoCache = new FailoverTestCase(
+                new MockWebServer(), new MockWebServer(), 0, NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase pinWithCache = new FailoverTestCase(
+                new MockWebServer(), new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.PIN_UNTIL_ERROR);
         return new FailoverTestCase[] {pinNoCache, pinWithCache};
     }
 
     @DataPoints("AllStrategies")
     public static FailoverTestCase[] allStrategies() {
-        FailoverTestCase pinNoCache = new FailoverTestCase(new MockWebServer(),
-                new MockWebServer(),
-                0,
-                NodeSelectionStrategy.PIN_UNTIL_ERROR);
-        FailoverTestCase pinWithCache = new FailoverTestCase(new MockWebServer(),
-                new MockWebServer(),
-                CACHE_DURATION,
-                NodeSelectionStrategy.PIN_UNTIL_ERROR);
-        FailoverTestCase roundRobin = new FailoverTestCase(new MockWebServer(),
-                new MockWebServer(),
-                CACHE_DURATION,
-                NodeSelectionStrategy.ROUND_ROBIN);
+        FailoverTestCase pinNoCache = new FailoverTestCase(
+                new MockWebServer(), new MockWebServer(), 0, NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase pinWithCache = new FailoverTestCase(
+                new MockWebServer(), new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.PIN_UNTIL_ERROR);
+        FailoverTestCase roundRobin = new FailoverTestCase(
+                new MockWebServer(), new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.ROUND_ROBIN);
         return new FailoverTestCase[] {pinNoCache, pinWithCache, roundRobin};
     }
 
     @Test
     @Theory
-    public void testConnectionError_performsFailover(
-            @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws IOException {
+    public void testConnectionError_performsFailover(@FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase)
+            throws IOException {
         TestService proxy = failoverTestCase.getProxy();
 
         failoverTestCase.server1.shutdown();
@@ -136,8 +126,8 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
     @Test
     @Theory
-    public void testQosError_performsFailover(
-            @FromDataPoints("PinStrategies") FailoverTestCase failoverTestCase) throws Exception {
+    public void testQosError_performsFailover(@FromDataPoints("PinStrategies") FailoverTestCase failoverTestCase)
+            throws Exception {
         TestService proxy = failoverTestCase.getProxy();
 
         failoverTestCase.server1.enqueue(new MockResponse().setResponseCode(503));
@@ -153,11 +143,13 @@ public final class JaxRsClientFailoverTest extends TestBase {
             @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws Exception {
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService bogusHostProxy = JaxRsClient.create(TestService.class,
+        TestService bogusHostProxy = JaxRsClient.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
                 ClientConfiguration.builder()
-                        .from(createTestConfig("http://foo-bar-bogus-host.unresolvable:80",
+                        .from(createTestConfig(
+                                "http://foo-bar-bogus-host.unresolvable:80",
                                 "http://localhost:" + failoverTestCase.server1.getPort()))
                         .maxNumRetries(2)
                         .build());
@@ -171,11 +163,11 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = JaxRsClient.create(TestService.class,
+        TestService anotherProxy = JaxRsClient.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(2)
                         .build());
@@ -189,11 +181,11 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server1.enqueue(new MockResponse().setResponseCode(503));
         server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = JaxRsClient.create(TestService.class,
+        TestService anotherProxy = JaxRsClient.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(2)
                         .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
@@ -206,11 +198,11 @@ public final class JaxRsClientFailoverTest extends TestBase {
     public void testCache_recovery() throws Exception {
         MockWebServer server1 = new MockWebServer();
 
-        TestService anotherProxy = JaxRsClient.create(TestService.class,
+        TestService anotherProxy = JaxRsClient.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(1)
                         .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
@@ -235,10 +227,8 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
     @Test
     public void testPerformsRoundRobin() throws Exception {
-        FailoverTestCase failoverTestCase = new FailoverTestCase(new MockWebServer(),
-                new MockWebServer(),
-                CACHE_DURATION,
-                NodeSelectionStrategy.ROUND_ROBIN);
+        FailoverTestCase failoverTestCase = new FailoverTestCase(
+                new MockWebServer(), new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.ROUND_ROBIN);
 
         TestService proxy = failoverTestCase.getProxy();
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
@@ -269,12 +259,13 @@ public final class JaxRsClientFailoverTest extends TestBase {
         }
 
         public TestService getProxy() {
-            return JaxRsClient.create(TestService.class,
+            return JaxRsClient.create(
+                    TestService.class,
                     AGENT,
                     new HostMetricsRegistry(),
                     ClientConfiguration.builder()
-                            .from(createTestConfig("http://localhost:" + server1.getPort(),
-                                    "http://localhost:" + server2.getPort()))
+                            .from(createTestConfig(
+                                    "http://localhost:" + server1.getPort(), "http://localhost:" + server2.getPort()))
                             .maxNumRetries(2)
                             .nodeSelectionStrategy(nodeSelectionStrategy)
                             .failedUrlCooldown(Duration.ofMillis(duration))

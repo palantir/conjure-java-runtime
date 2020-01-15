@@ -26,8 +26,8 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
- * Decorates a Feign {@link Decoder} such that it returns {@link com.google.common.base.Optional#absent}
- * when observing an HTTP 204 error code for a method with {@link Type} {@link com.google.common.base.Optional}.
+ * Decorates a Feign {@link Decoder} such that it returns {@link com.google.common.base.Optional#absent} when observing
+ * an HTTP 204 error code for a method with {@link Type} {@link com.google.common.base.Optional}.
  */
 public final class GuavaOptionalAwareDecoder implements Decoder {
 
@@ -43,7 +43,8 @@ public final class GuavaOptionalAwareDecoder implements Decoder {
             if (response.status() == 204) {
                 return com.google.common.base.Optional.absent();
             } else {
-                Object decoded = checkNotNull(delegate.decode(response, getInnerType(type)),
+                Object decoded = checkNotNull(
+                        delegate.decode(response, getInnerType(type)),
                         "Unexpected null content for response status %s",
                         response.status());
                 return com.google.common.base.Optional.of(decoded);

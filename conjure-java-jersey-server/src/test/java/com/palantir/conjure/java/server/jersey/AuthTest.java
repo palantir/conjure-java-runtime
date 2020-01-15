@@ -46,9 +46,8 @@ import org.junit.Test;
 public final class AuthTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
-            AuthTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(AuthTestServer.class, "src/test/resources/test-server.yml");
 
     private WebTarget target;
 
@@ -73,9 +72,7 @@ public final class AuthTest {
 
     @Test
     public void testAuthHeader_missingCredentials() throws SecurityException {
-        Response response = target.path("authHeader")
-                .request()
-                .get();
+        Response response = target.path("authHeader").request().get();
 
         assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
 
@@ -110,7 +107,8 @@ public final class AuthTest {
         assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
 
         SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode()).isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+        assertThat(error.errorCode())
+                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
         assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
         assertThat(error.parameters()).isEmpty();
     }
@@ -125,7 +123,8 @@ public final class AuthTest {
         assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
 
         SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode()).isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+        assertThat(error.errorCode())
+                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
         assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
         assertThat(error.parameters()).isEmpty();
     }
@@ -143,9 +142,7 @@ public final class AuthTest {
 
     @Test
     public void testBearerToken_missingCredentials() throws SecurityException {
-        Response response = target.path("bearerToken")
-                .request()
-                .get();
+        Response response = target.path("bearerToken").request().get();
 
         assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
 
@@ -180,7 +177,8 @@ public final class AuthTest {
         assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
 
         SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode()).isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+        assertThat(error.errorCode())
+                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
         assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
         assertThat(error.parameters()).isEmpty();
     }

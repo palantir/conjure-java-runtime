@@ -67,23 +67,21 @@ public final class GuavaOptionalMessageBodyWriter implements MessageBodyWriter<c
             Annotation[] annotations,
             MediaType mediaType,
             MultivaluedMap<String, Object> httpHeaders,
-            OutputStream entityStream) throws IOException {
+            OutputStream entityStream)
+            throws IOException {
         if (!entity.isPresent()) {
             throw new NoContentException("Absent value for type: " + genericType);
         }
 
-        Type innerGenericType =
-                (genericType instanceof ParameterizedType)
-                        ? ((ParameterizedType) genericType).getActualTypeArguments()[0]
-                        : entity.get().getClass();
+        Type innerGenericType = (genericType instanceof ParameterizedType)
+                ? ((ParameterizedType) genericType).getActualTypeArguments()[0]
+                : entity.get().getClass();
 
-        MessageBodyWriter writer = mbw.get()
-                .getMessageBodyWriter(entity.get().getClass(),
-                        innerGenericType,
-                        annotations,
-                        mediaType);
+        MessageBodyWriter writer =
+                mbw.get().getMessageBodyWriter(entity.get().getClass(), innerGenericType, annotations, mediaType);
 
-        writer.writeTo(entity.get(),
+        writer.writeTo(
+                entity.get(),
                 entity.get().getClass(),
                 innerGenericType,
                 annotations,

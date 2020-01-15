@@ -71,19 +71,19 @@ public class AutoDeserializeTest {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
-            IntStream.range(0, positiveSize)
-                    .forEach(i -> objects.add(new Object[] {
-                            endpointName,
-                            i,
-                            true,
-                            positiveAndNegativeTestCases.getPositive().get(i)}));
+            IntStream.range(0, positiveSize).forEach(i -> objects.add(new Object[] {
+                endpointName,
+                i,
+                true,
+                positiveAndNegativeTestCases.getPositive().get(i)
+            }));
 
-            IntStream.range(0, negativeSize)
-                    .forEach(i -> objects.add(new Object[] {
-                            endpointName,
-                            positiveSize + i,
-                            false,
-                            positiveAndNegativeTestCases.getNegative().get(i)}));
+            IntStream.range(0, negativeSize).forEach(i -> objects.add(new Object[] {
+                endpointName,
+                positiveSize + i,
+                false,
+                positiveAndNegativeTestCases.getNegative().get(i)
+            }));
         });
         return objects;
     }
@@ -93,7 +93,8 @@ public class AutoDeserializeTest {
     public void runTestCaseRetrofit() throws Error, NoSuchMethodException {
         boolean shouldIgnore = Cases.shouldIgnoreRetrofit(endpointName, jsonString);
         Method method = testServiceRetrofit.getClass().getMethod(endpointName.get(), int.class);
-        System.out.println(String.format("[%s%s test case %s]: %s(%s), expected client to %s",
+        System.out.println(String.format(
+                "[%s%s test case %s]: %s(%s), expected client to %s",
                 shouldIgnore ? "ignored " : "",
                 shouldSucceed ? "positive" : "negative",
                 index,
@@ -105,8 +106,9 @@ public class AutoDeserializeTest {
                 shouldSucceed ? expectSuccessRetrofit(method) : expectFailureRetrofit(method);
 
         if (shouldIgnore) {
-            assertThat(expectationFailure).describedAs(
-                    "The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
+            assertThat(expectationFailure)
+                    .describedAs(
+                            "The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
                     .isNotEmpty();
         }
 
@@ -122,7 +124,8 @@ public class AutoDeserializeTest {
     public void runTestCaseJersey() throws Error, NoSuchMethodException {
         boolean shouldIgnore = Cases.shouldIgnoreJersey(endpointName, jsonString);
         Method method = testServiceJersey.getClass().getMethod(endpointName.get(), int.class);
-        System.out.println(String.format("[%s%s test case %s]: %s(%s), expected client to %s",
+        System.out.println(String.format(
+                "[%s%s test case %s]: %s(%s), expected client to %s",
                 shouldIgnore ? "ignored " : "",
                 shouldSucceed ? "positive" : "negative",
                 index,
@@ -133,8 +136,9 @@ public class AutoDeserializeTest {
         Optional<Error> expectationFailure = shouldSucceed ? expectSuccessJersey(method) : expectFailureJersey(method);
 
         if (shouldIgnore) {
-            assertThat(expectationFailure).describedAs(
-                    "The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
+            assertThat(expectationFailure)
+                    .describedAs(
+                            "The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
                     .isNotEmpty();
         }
 
@@ -163,8 +167,7 @@ public class AutoDeserializeTest {
 
     private Optional<Error> expectFailureRetrofit(Method method) {
         try {
-            Object result =
-                    Futures.getUnchecked((ListenableFuture<?>) method.invoke(testServiceRetrofit, index));
+            Object result = Futures.getUnchecked((ListenableFuture<?>) method.invoke(testServiceRetrofit, index));
             return Optional.of(new AssertionError(
                     String.format("Result should have caused an exception but deserialized to: %s", result)));
         } catch (Exception e) {

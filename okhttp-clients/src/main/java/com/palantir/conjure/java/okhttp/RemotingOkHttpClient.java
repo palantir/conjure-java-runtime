@@ -77,24 +77,21 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
 
     @Override
     public RemotingOkHttpCall newCall(Request request) {
-        return newCallWithMutableState(createNewRequest(request),
-                backoffStrategyFactory.get(),
-                MAX_NUM_RELOCATIONS,
-                Optional.empty());
+        return newCallWithMutableState(
+                createNewRequest(request), backoffStrategyFactory.get(), MAX_NUM_RELOCATIONS, Optional.empty());
     }
 
     @Override
     public Builder newBuilder() {
-        log.warn("Attempting to copy RemotingOkHttpClient. Some of the functionality like rate limiting and qos will "
-                + "not be available to the new client", new SafeRuntimeException("stacktrace"));
+        log.warn(
+                "Attempting to copy RemotingOkHttpClient. Some of the functionality like rate limiting and qos will "
+                        + "not be available to the new client",
+                new SafeRuntimeException("stacktrace"));
         return super.newBuilder();
     }
 
     RemotingOkHttpCall newCallWithMutableState(
-            Request request,
-            BackoffStrategy backoffStrategy,
-            int maxNumRelocations,
-            Optional<Call> previousCall) {
+            Request request, BackoffStrategy backoffStrategy, int maxNumRelocations, Optional<Call> previousCall) {
         return new RemotingOkHttpCall(
                 getDelegate().newCall(request),
                 previousCall,
@@ -142,7 +139,8 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
                 return urls.redirectToCurrent(current);
         }
 
-        throw new SafeIllegalStateException("Encountered unknown node selection strategy",
+        throw new SafeIllegalStateException(
+                "Encountered unknown node selection strategy",
                 SafeArg.of("nodeSelectionStrategy", nodeSelectionStrategy));
     }
 }
