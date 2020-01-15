@@ -242,7 +242,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     private void enqueueInternal(Callback callback) {
-        super.enqueue(new Callback() {
+        super.enqueue(new LeakedResponseClosingCallback(new Callback() {
             @Override
             public void onFailure(Call call, IOException exception) {
                 if (isCanceled()) {
@@ -352,7 +352,29 @@ final class RemotingOkHttpCall extends ForwardingCall {
                         new SafeIoException(
                                 "Failed to handle request, this is an conjure-java-runtime bug."));
             }
-        });
+        }));
+    }
+
+    private static final class LeakedResponseClosingCallback implements Callback {
+
+        private final Callback delegate;
+
+        LeakedResponseClosingCallback(Callback delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void onFailure(Call call, IOException exception) {
+            ResponseCapturingInterceptor.getResponse().ifPresent(RemotingOkHttpCall::close);
+            ResponseCapturingInterceptor.clearThreadState();
+            delegate.onFailure(call, exception);
+        }
+
+        @Override
+        public void onResponse(Call call, Response response) throws IOException {
+            ResponseCapturingInterceptor.clearThreadState();
+            delegate.onResponse(call, response);
+        }
     }
 
     private boolean shouldRetry(IOException exception, Optional<Duration> backoff) {
