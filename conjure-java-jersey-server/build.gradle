@@ -12,6 +12,7 @@ dependencies {
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
     implementation "com.fasterxml.jackson.module:jackson-module-afterburner"
     implementation "com.jcraft:jzlib"
+    implementation "com.netflix.feign:feign-core"
     implementation "com.palantir.safe-logging:safe-logging"
     implementation 'com.palantir.tokens:auth-tokens'
     implementation "com.palantir.tracing:tracing-jersey"
