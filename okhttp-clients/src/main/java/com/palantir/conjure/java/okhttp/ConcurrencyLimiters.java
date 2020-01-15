@@ -333,7 +333,49 @@ final class ConcurrencyLimiters {
                 }
             };
             leakDetector.register(result, allocationStackTrace);
-            return result;
+            return new AtMostOneInteractionListener(result);
+        }
+    }
+
+    /** Prevent multiple interactions with the same listener from modifying state in unexpected ways. */
+    @VisibleForTesting
+    static final class AtMostOneInteractionListener implements Limiter.Listener {
+
+        private final Limiter.Listener delegate;
+        private boolean completed;
+
+        AtMostOneInteractionListener(Limiter.Listener delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void onSuccess() {
+            if (canComplete()) {
+                delegate.onSuccess();
+            }
+        }
+
+        @Override
+        public void onIgnore() {
+            if (canComplete()) {
+                delegate.onIgnore();
+            }
+        }
+
+        @Override
+        public void onDropped() {
+            if (canComplete()) {
+                delegate.onDropped();
+            }
+        }
+
+        private boolean canComplete() {
+            if (!completed) {
+                completed = true;
+                return true;
+            }
+            log.debug("Listener has already been completed");
+            return false;
         }
     }
 
