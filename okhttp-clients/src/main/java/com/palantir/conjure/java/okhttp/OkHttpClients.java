@@ -210,6 +210,9 @@ public final class OkHttpClients {
                 serviceClass,
                 enableClientQoS);
 
+        // Order is important, this interceptor must be registered first in order to
+        // minimize the race condition.
+        client.addInterceptor(CanceledRequestResponseLeakInterceptor.INSTANCE);
         client.addInterceptor(CatchThrowableInterceptor.INSTANCE);
         client.addInterceptor(SpanTerminatingInterceptor.INSTANCE);
 
