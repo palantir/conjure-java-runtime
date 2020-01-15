@@ -35,6 +35,11 @@ public final class JsonExceptionMapperTest {
                 ErrorType getErrorType(RuntimeException _exception) {
                     return ErrorType.INVALID_ARGUMENT;
                 }
+
+                @Override
+                boolean isInternalError() {
+                    return false;
+                }
             };
 
     private final ObjectMapper objectMapper = ObjectMappers.newServerObjectMapper()

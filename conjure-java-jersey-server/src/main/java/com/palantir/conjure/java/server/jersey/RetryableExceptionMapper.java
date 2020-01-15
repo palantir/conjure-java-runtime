@@ -18,22 +18,23 @@ package com.palantir.conjure.java.server.jersey;
 
 import com.codahale.metrics.Meter;
 import com.palantir.conjure.java.api.errors.ErrorType;
+import feign.RetryableException;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-final class RuntimeExceptionMapper extends JsonExceptionMapper<RuntimeException> {
+final class RetryableExceptionMapper extends JsonExceptionMapper<RetryableException> {
 
-    RuntimeExceptionMapper(Meter internalErrorMeter) {
+    RetryableExceptionMapper(Meter internalErrorMeter) {
         super(internalErrorMeter);
     }
 
     @Override
-    ErrorType getErrorType(RuntimeException _exception) {
+    ErrorType getErrorType(RetryableException _exception) {
         return ErrorType.INTERNAL;
     }
 
     @Override
     boolean isInternalError() {
-        return true;
+        return false;
     }
 }

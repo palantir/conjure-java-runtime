@@ -31,4 +31,9 @@ final class ThrowableExceptionMapper extends JsonExceptionMapper<Throwable> {
     ErrorType getErrorType(Throwable _exception) {
         return ErrorType.INTERNAL;
     }
+
+    @Override
+    boolean isInternalError() {
+        return true;
+    }
 }

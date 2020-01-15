@@ -31,4 +31,8 @@ final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalAr
     ErrorType getErrorType(IllegalArgumentException _exception) {
         return ErrorType.INVALID_ARGUMENT;
     }
+    @Override
+    boolean isInternalError() {
+        return false;
+    }
 }

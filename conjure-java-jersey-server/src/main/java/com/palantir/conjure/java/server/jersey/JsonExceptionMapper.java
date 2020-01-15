@@ -54,11 +54,13 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
     /** Returns the {@link ErrorType} that this exception corresponds to. */
     abstract ErrorType getErrorType(T exception);
 
+    abstract boolean isInternalError();
+
     @Override
     public final Response toResponse(T exception) {
         String errorInstanceId = UUID.randomUUID().toString();
         ErrorType errorType = getErrorType(exception);
-        if (errorType.equals(ErrorType.INTERNAL)) {
+        if (isInternalError()) {
             internalExceptionMeter.mark();
         }
 
