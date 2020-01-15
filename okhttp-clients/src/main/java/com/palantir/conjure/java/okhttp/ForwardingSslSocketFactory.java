@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.client.config;
+package com.palantir.conjure.java.okhttp;
 
 import java.io.IOException;
 import java.io.InputStream;

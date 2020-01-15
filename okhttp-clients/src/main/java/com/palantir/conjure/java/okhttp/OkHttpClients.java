@@ -229,7 +229,7 @@ public final class OkHttpClients {
         client.followRedirects(false); // We implement our own redirect logic.
 
         // SSL
-        client.sslSocketFactory(config.sslSocketFactory(), config.trustManager());
+        client.sslSocketFactory(new KeepAliveSslSocketFactory(config.sslSocketFactory()), config.trustManager());
         if (config.fallbackToCommonNameVerification()) {
             client.hostnameVerifier(Okhttp39HostnameVerifier.INSTANCE);
         }
