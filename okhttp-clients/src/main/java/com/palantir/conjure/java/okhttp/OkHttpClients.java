@@ -212,6 +212,9 @@ public final class OkHttpClients {
 
         client.addInterceptor(CatchThrowableInterceptor.INSTANCE);
         client.addInterceptor(SpanTerminatingInterceptor.INSTANCE);
+        // Order is important, this interceptor must be applied prior to ConcurrencyLimitingInterceptor
+        // in order to prevent concurrency limiters from leaking.
+        client.addInterceptor(ResponseCapturingInterceptor.INSTANCE);
 
         // Routing
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(
