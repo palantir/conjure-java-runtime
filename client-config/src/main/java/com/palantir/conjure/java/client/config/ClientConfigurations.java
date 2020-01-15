@@ -65,8 +65,7 @@ public final class ClientConfigurations {
      */
     public static ClientConfiguration of(ServiceConfiguration config) {
         return ClientConfiguration.builder()
-                .sslSocketFactory(
-                        new KeepAliveSslSocketFactory(SslSocketFactories.createSslSocketFactory(config.security())))
+                .sslSocketFactory(SslSocketFactories.createSslSocketFactory(config.security()))
                 .trustManager(SslSocketFactories.createX509TrustManager(config.security()))
                 .uris(config.uris())
                 .connectTimeout(config.connectTimeout().orElse(DEFAULT_CONNECT_TIMEOUT))
@@ -101,7 +100,7 @@ public final class ClientConfigurations {
             SSLSocketFactory sslSocketFactory,
             X509TrustManager trustManager) {
         return ClientConfiguration.builder()
-                .sslSocketFactory(new KeepAliveSslSocketFactory(sslSocketFactory))
+                .sslSocketFactory(sslSocketFactory)
                 .trustManager(trustManager)
                 .uris(uris)
                 .connectTimeout(DEFAULT_CONNECT_TIMEOUT)
