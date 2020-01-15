@@ -1,0 +1,7 @@
+type: fix
+fix:
+  description: |-
+    Fix a response leak when requests are canceled. This is a workaround for an upstream bug in okhttp.
+    The race is still possible to hit, but substantially less likely, showing severl orders of magnitude of difference in testing.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1414
