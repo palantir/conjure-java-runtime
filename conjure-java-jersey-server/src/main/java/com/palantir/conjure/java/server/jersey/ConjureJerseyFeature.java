@@ -26,7 +26,7 @@ import javax.ws.rs.core.FeatureContext;
 public enum ConjureJerseyFeature implements Feature {
     INSTANCE;
 
-    private final JerseyServerMetrics metrics;
+    private JerseyServerMetrics metrics;
 
     ConjureJerseyFeature() {
         this.metrics = JerseyServerMetrics.of(SharedTaggedMetricRegistries.getSingleton());
