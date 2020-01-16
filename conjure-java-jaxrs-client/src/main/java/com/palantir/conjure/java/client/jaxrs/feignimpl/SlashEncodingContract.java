@@ -20,9 +20,7 @@ import feign.Contract;
 import feign.MethodMetadata;
 import java.lang.reflect.Method;
 
-/**
- * Decorates a {@link Contract} and forces slashes to be encoded when they are part of a URL.
- */
+/** Decorates a {@link Contract} and forces slashes to be encoded when they are part of a URL. */
 public final class SlashEncodingContract extends AbstractDelegatingContract {
 
     public SlashEncodingContract(Contract delegate) {

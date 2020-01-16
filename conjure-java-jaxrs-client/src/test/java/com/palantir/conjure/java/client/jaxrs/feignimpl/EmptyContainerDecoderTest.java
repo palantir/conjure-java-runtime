@@ -51,20 +51,17 @@ import org.junit.Test;
 public class EmptyContainerDecoderTest {
 
     private static final ObjectMapper mapper = ObjectMappers.newClientObjectMapper();
-    private static final Response HTTP_204 =
-            Response.create(204, "No Content", Collections.emptyMap(), new byte[] {});
+    private static final Response HTTP_204 = Response.create(204, "No Content", Collections.emptyMap(), new byte[] {});
     private final Decoder delegate = mock(Decoder.class);
-    private final EmptyContainerDecoder emptyContainerDecoder =
-            new EmptyContainerDecoder(mapper, delegate);
+    private final EmptyContainerDecoder emptyContainerDecoder = new EmptyContainerDecoder(mapper, delegate);
 
     @Test
     public void http_200_uses_delegate_decoder() throws IOException {
         when(delegate.decode(any(), eq(String.class))).thenReturn("text response");
-        Response http200 = Response.create(200,
+        Response http200 = Response.create(
+                200,
                 "OK",
-                ImmutableMap.of(
-                        HttpHeaders.CONTENT_TYPE,
-                        ImmutableSet.of(MediaType.TEXT_PLAIN)),
+                ImmutableMap.of(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN)),
                 "text response",
                 StandardCharsets.UTF_8);
 
@@ -143,9 +140,7 @@ public class EmptyContainerDecoderTest {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof Alias1
-                            && this.value.equals(((Alias1) other).value));
+            return this == other || (other instanceof Alias1 && this.value.equals(((Alias1) other).value));
         }
 
         @Override
@@ -180,9 +175,7 @@ public class EmptyContainerDecoderTest {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof Alias2
-                            && this.value.equals(((Alias2) other).value));
+            return this == other || (other instanceof Alias2 && this.value.equals(((Alias2) other).value));
         }
 
         @Override
@@ -217,9 +210,7 @@ public class EmptyContainerDecoderTest {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof Alias3
-                            && this.value.equals(((Alias3) other).value));
+            return this == other || (other instanceof Alias3 && this.value.equals(((Alias3) other).value));
         }
 
         @Override
@@ -254,9 +245,7 @@ public class EmptyContainerDecoderTest {
 
         @Override
         public boolean equals(Object other) {
-            return this == other
-                    || (other instanceof AliasAlias1
-                            && this.value.equals(((AliasAlias1) other).value));
+            return this == other || (other instanceof AliasAlias1 && this.value.equals(((AliasAlias1) other).value));
         }
 
         @Override

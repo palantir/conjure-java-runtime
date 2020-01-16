@@ -38,9 +38,8 @@ import org.junit.rules.ExpectedException;
 public final class Java8OptionalAwareDecoderTest extends TestBase {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
-            Java8TestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(Java8TestServer.class, "src/test/resources/test-server.yml");
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -50,11 +49,8 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     @Before
     public void before() {
         String endpointUri = "http://localhost:" + APP.getLocalPort();
-        service = JaxRsClient.create(
-                TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(endpointUri));
+        service =
+                JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }
 
     @Test
@@ -71,11 +67,10 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
 
     @Test
     public void testThrowsNotFound() {
-        assertThatThrownBy(() -> service.getThrowsNotFound(null))
-                .isInstanceOfSatisfying(RemoteException.class, e -> {
-                    assertThat(e.getMessage()).contains("RemoteException: NOT_FOUND (Default:NotFound)");
-                    assertThat(e.getError().errorCode()).isEqualTo("NOT_FOUND");
-                });
+        assertThatThrownBy(() -> service.getThrowsNotFound(null)).isInstanceOfSatisfying(RemoteException.class, e -> {
+            assertThat(e.getMessage()).contains("RemoteException: NOT_FOUND (Default:NotFound)");
+            assertThat(e.getError().errorCode()).isEqualTo("NOT_FOUND");
+        });
     }
 
     @Test
@@ -98,20 +93,18 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
 
     @Test
     public void testThrowsFordidden() {
-        assertThatThrownBy(() -> service.getThrowsForbidden(null))
-                .isInstanceOfSatisfying(RemoteException.class, e -> {
-                    assertThat(e.getMessage()).contains(
-                            "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
-                    assertThat(e.getError().errorCode()).isEqualTo("PERMISSION_DENIED");
-                });
+        assertThatThrownBy(() -> service.getThrowsForbidden(null)).isInstanceOfSatisfying(RemoteException.class, e -> {
+            assertThat(e.getMessage()).contains("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
+            assertThat(e.getError().errorCode()).isEqualTo("PERMISSION_DENIED");
+        });
     }
 
     @Test
     public void testOptionalThrowsFordidden() {
         assertThatThrownBy(() -> service.getOptionalThrowsForbidden(null))
                 .isInstanceOfSatisfying(RemoteException.class, e -> {
-                    assertThat(e.getMessage()).contains(
-                            "RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
+                    assertThat(e.getMessage())
+                            .contains("RemoteException: PERMISSION_DENIED (Default:PermissionDenied)");
                     assertThat(e.getError().errorCode()).isEqualTo("PERMISSION_DENIED");
                 });
     }
@@ -125,11 +118,7 @@ public final class Java8OptionalAwareDecoderTest extends TestBase {
     @Test
     public void testComplexType() {
         Java8ComplexType value = new Java8ComplexType(
-                Optional.of(
-                        new Java8ComplexType(
-                                Optional.empty(),
-                                Optional.empty(),
-                                Paths.get("bar"))),
+                Optional.of(new Java8ComplexType(Optional.empty(), Optional.empty(), Paths.get("bar"))),
                 Optional.of("baz"),
                 Paths.get("foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.

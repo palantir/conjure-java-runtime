@@ -41,7 +41,8 @@ public final class TextEncoderTest extends TestBase {
 
     @Before
     public void before() {
-        service = JaxRsClient.create(Service.class,
+        service = JaxRsClient.create(
+                Service.class,
                 AGENT,
                 new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
@@ -63,5 +64,4 @@ public final class TextEncoderTest extends TestBase {
         @Consumes(MediaType.TEXT_PLAIN)
         Object post(String test);
     }
-
 }

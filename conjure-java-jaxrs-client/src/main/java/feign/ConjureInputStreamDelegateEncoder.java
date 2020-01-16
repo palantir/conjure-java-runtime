@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 
 /**
  * Use {@link InputStreamDelegateEncoder}.
+ *
  * @deprecated Use {@link InputStreamDelegateEncoder}.
  */
 @Deprecated

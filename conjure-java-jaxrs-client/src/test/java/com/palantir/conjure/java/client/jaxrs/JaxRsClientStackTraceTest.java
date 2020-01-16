@@ -41,7 +41,8 @@ public final class JaxRsClientStackTraceTest extends TestBase {
 
     @Before
     public void before() throws Exception {
-        proxy = JaxRsClient.create(TestService.class,
+        proxy = JaxRsClient.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
                 ClientConfiguration.builder()
@@ -58,8 +59,9 @@ public final class JaxRsClientStackTraceTest extends TestBase {
             proxy.string();
             failBecauseExceptionWasNotThrown(Exception.class);
         } catch (Exception e) {
-            assertThat(e).hasStackTraceContaining("JaxRsClientStackTraceTest."
-                    + "stack_trace_from_ioexception_should_include_call_site(JaxRsClientStackTraceTest.java:");
+            assertThat(e)
+                    .hasStackTraceContaining("JaxRsClientStackTraceTest."
+                            + "stack_trace_from_ioexception_should_include_call_site(JaxRsClientStackTraceTest.java:");
         }
     }
 
@@ -71,15 +73,15 @@ public final class JaxRsClientStackTraceTest extends TestBase {
             proxy.string();
             failBecauseExceptionWasNotThrown(Exception.class);
         } catch (Exception e) {
-            assertThat(e).hasStackTraceContaining("JaxRsClientStackTraceTest."
-                    + "stack_trace_from_remote_exception_should_include_call_site(JaxRsClientStackTraceTest.java:");
+            assertThat(e)
+                    .hasStackTraceContaining("JaxRsClientStackTraceTest."
+                                                 + "stack_trace_from_remote_exception_should_include_call_site(JaxRsClientStackTraceTest.java:");
         }
     }
 
     private static MockResponse serializableError() throws JsonProcessingException {
         String json = ObjectMappers.newServerObjectMapper()
-                .writeValueAsString(
-                        SerializableError.forException(new ServiceException(ErrorType.INTERNAL)));
+                .writeValueAsString(SerializableError.forException(new ServiceException(ErrorType.INTERNAL)));
         return new MockResponse()
                 .setResponseCode(500)
                 .setHeader("Content-Type", "application/json")

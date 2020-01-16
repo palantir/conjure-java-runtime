@@ -25,33 +25,25 @@ import java.util.function.Consumer;
 /**
  * Changes made from {@link com.netflix.concurrency.limits.limit.WindowedLimit}:
  *
- *  1. Modify to reduce window size whenever a dropped sample is seen, rather than awaiting the whole window.
- *  2. Change package and make package private.
- *  3. Code style.
- *  4. Inlined constants.
+ * <p>1. Modify to reduce window size whenever a dropped sample is seen, rather than awaiting the whole window. 2.
+ * Change package and make package private. 3. Code style. 4. Inlined constants.
  */
 class ConjureWindowedLimit implements Limit {
     private static final long MIN_WINDOW_TIME = TimeUnit.SECONDS.toNanos(1);
     private static final long MAX_WINDOW_TIME = TimeUnit.SECONDS.toNanos(1);
     private static final long MIN_RTT_THRESHOLD = TimeUnit.MICROSECONDS.toNanos(100);
 
-    /**
-     * Minimum observed samples to filter out sample windows with not enough significant samples.
-     */
+    /** Minimum observed samples to filter out sample windows with not enough significant samples. */
     private static final int WINDOW_SIZE = 10;
 
     private final Limit delegate;
 
-    /**
-     * End time for the sampling window at which point the limit should be updated.
-     */
+    /** End time for the sampling window at which point the limit should be updated. */
     private volatile long nextUpdateTime = 0;
 
     private final Object lock = new Object();
 
-    /**
-     * Object tracking stats for the current sample window.
-     */
+    /** Object tracking stats for the current sample window. */
     private final AtomicReference<ImmutableSampleWindow> sample = new AtomicReference<>(new ImmutableSampleWindow());
 
     ConjureWindowedLimit(Limit delegate) {
@@ -85,15 +77,12 @@ class ConjureWindowedLimit implements Limit {
                     ImmutableSampleWindow current = sample.get();
                     if (isWindowReady(current)) {
                         sample.set(new ImmutableSampleWindow());
-                        nextUpdateTime = endTime + Math.min(
-                                Math.max(current.getCandidateRttNanos() * 2, MIN_WINDOW_TIME),
-                                MAX_WINDOW_TIME);
+                        nextUpdateTime = endTime
+                                + Math.min(
+                                        Math.max(current.getCandidateRttNanos() * 2, MIN_WINDOW_TIME), MAX_WINDOW_TIME);
                         // +1 ensures that average rtt in nanos is never 0, which has a precond check in VegasLimit.
                         delegate.onSample(
-                                startTime,
-                                current.getAverageRttNanos() + 1,
-                                current.getMaxInFlight(),
-                                didDrop);
+                                startTime, current.getAverageRttNanos() + 1, current.getMaxInFlight(), didDrop);
                     }
                 }
             }

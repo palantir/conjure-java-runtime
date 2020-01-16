@@ -46,18 +46,17 @@ public final class DropwizardSslClientAuthTests {
     public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
             TestEchoServer.class,
             "src/test/resources/test-server.yml",
-            ConfigOverride.config("server.applicationConnectors[0].keyStorePath",
-                    TestConstants.SERVER_KEY_STORE_JKS_PATH.toString()),
-            ConfigOverride.config("server.applicationConnectors[0].keyStorePassword",
-                    TestConstants.SERVER_KEY_STORE_JKS_PASSWORD),
-            ConfigOverride.config("server.applicationConnectors[0].trustStorePath",
-                    TestConstants.CA_TRUST_STORE_PATH.toString()),
-            ConfigOverride.config("server.applicationConnectors[0].trustStorePassword",
-                    TestConstants.CA_TRUST_STORE_JKS_PASSWORD),
-            ConfigOverride.config("server.applicationConnectors[0].crlPath",
-                    TestConstants.COMBINED_CRL_PATH.toString()),
-            ConfigOverride.config("server.applicationConnectors[0].needClientAuth",
-                    "true"));
+            ConfigOverride.config(
+                    "server.applicationConnectors[0].keyStorePath", TestConstants.SERVER_KEY_STORE_JKS_PATH.toString()),
+            ConfigOverride.config(
+                    "server.applicationConnectors[0].keyStorePassword", TestConstants.SERVER_KEY_STORE_JKS_PASSWORD),
+            ConfigOverride.config(
+                    "server.applicationConnectors[0].trustStorePath", TestConstants.CA_TRUST_STORE_PATH.toString()),
+            ConfigOverride.config(
+                    "server.applicationConnectors[0].trustStorePassword", TestConstants.CA_TRUST_STORE_JKS_PASSWORD),
+            ConfigOverride.config(
+                    "server.applicationConnectors[0].crlPath", TestConstants.COMBINED_CRL_PATH.toString()),
+            ConfigOverride.config("server.applicationConnectors[0].needClientAuth", "true"));
 
     @Test
     public void testConnectionFailsWithoutClientCerts() {
@@ -101,7 +100,9 @@ public final class DropwizardSslClientAuthTests {
         X509TrustManager trustManager = SslSocketFactories.createX509TrustManager(sslConfig);
 
         String endpointUri = "https://localhost:" + APP.getLocalPort();
-        OkHttpClient okHttpClient = new OkHttpClient.Builder().sslSocketFactory(factory, trustManager).build();
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .sslSocketFactory(factory, trustManager)
+                .build();
         return Feign.builder()
                 .client(new feign.okhttp.OkHttpClient(okHttpClient))
                 .contract(new JAXRSContract())
@@ -120,7 +121,6 @@ public final class DropwizardSslClientAuthTests {
                 return value;
             }
         }
-
     }
 
     @Path("/")

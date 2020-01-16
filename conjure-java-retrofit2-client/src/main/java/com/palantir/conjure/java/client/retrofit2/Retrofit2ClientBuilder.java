@@ -39,9 +39,7 @@ public final class Retrofit2ClientBuilder {
         this.config = config;
     }
 
-    /**
-     * Set the host metrics registry to use when constructing the OkHttp client.
-     */
+    /** Set the host metrics registry to use when constructing the OkHttp client. */
     public Retrofit2ClientBuilder hostEventsSink(HostEventsSink newHostEventsSink) {
         Preconditions.checkNotNull(newHostEventsSink, "hostEventsSink can't be null");
         hostEventsSink = newHostEventsSink;
@@ -57,18 +55,14 @@ public final class Retrofit2ClientBuilder {
                 .baseUrl(addTrailingSlash(config.uris().get(0)))
                 // These get evaluated first, but only for successful responses that are not 204 or 205
                 .addConverterFactory(OptionalResponseBodyConverterFactory.INSTANCE)
-                .addConverterFactory(
-                        new CborConverterFactory(
-                                new NeverReturnNullConverterFactory(
-                                        new CoerceNullValuesConverterFactory(
-                                                JacksonConverterFactory.create(OBJECT_MAPPER))),
-                                CBOR_OBJECT_MAPPER))
+                .addConverterFactory(new CborConverterFactory(
+                        new NeverReturnNullConverterFactory(
+                                new CoerceNullValuesConverterFactory(JacksonConverterFactory.create(OBJECT_MAPPER))),
+                        CBOR_OBJECT_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
                 // These get evaluated last, to convert the original Call into the response type expected by the client
-                .addCallAdapterFactory(
-                        new QosExceptionThrowingCallAdapterFactory(
-                                new CoerceNullValuesCallAdapterFactory(
-                                        AsyncSerializableErrorCallAdapterFactory.INSTANCE)))
+                .addCallAdapterFactory(new QosExceptionThrowingCallAdapterFactory(
+                        new CoerceNullValuesCallAdapterFactory(AsyncSerializableErrorCallAdapterFactory.INSTANCE)))
                 .build();
         return retrofit.create(serviceClass);
     }
@@ -76,5 +70,4 @@ public final class Retrofit2ClientBuilder {
     private static String addTrailingSlash(String url) {
         return url.charAt(url.length() - 1) == '/' ? url : url + "/";
     }
-
 }

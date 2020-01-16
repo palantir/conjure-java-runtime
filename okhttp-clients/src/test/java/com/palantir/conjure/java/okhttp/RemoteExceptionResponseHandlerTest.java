@@ -54,7 +54,9 @@ public final class RemoteExceptionResponseHandlerTest {
 
     private static final ObjectMapper SERVER_MAPPER = ObjectMappers.newServerObjectMapper();
 
-    private static final Request request = new Request.Builder().url("http://url").build();
+    private static final Request request = new Request.Builder()
+            .url("http://url")
+            .build();
     private static final ServiceException SERVICE_EXCEPTION =
             new ServiceException(ErrorType.FAILED_PRECONDITION, SafeArg.of("key", "value"));
     private static final String SERIALIZED_EXCEPTION = createServiceException(SERVICE_EXCEPTION);
@@ -72,26 +74,27 @@ public final class RemoteExceptionResponseHandlerTest {
 
     @Test
     public void doesNotProduceExceptionOn101Or2xx() throws Exception {
-        assertThat(handler.handle(response(200, MediaType.APPLICATION_JSON, SERIALIZED_EXCEPTION))).isEmpty();
-        assertThat(handler.handle(response(101, MediaType.APPLICATION_JSON, SERIALIZED_EXCEPTION))).isEmpty();
+        assertThat(handler.handle(response(200, MediaType.APPLICATION_JSON, SERIALIZED_EXCEPTION)))
+                .isEmpty();
+        assertThat(handler.handle(response(101, MediaType.APPLICATION_JSON, SERIALIZED_EXCEPTION)))
+                .isEmpty();
     }
 
     @Test
     public void handlesWebApplicationExceptions() {
         testEncodingAndDecodingWebException(ClientErrorException.class, Response.Status.NOT_ACCEPTABLE);
         testEncodingAndDecodingWebException(ServerErrorException.class, javax.ws.rs.core.Response.Status.BAD_GATEWAY);
-        testEncodingAndDecodingWebException(WebApplicationException.class,
-                javax.ws.rs.core.Response.Status.NOT_MODIFIED);
+        testEncodingAndDecodingWebException(
+                WebApplicationException.class, javax.ws.rs.core.Response.Status.NOT_MODIFIED);
     }
 
     private static void testEncodingAndDecodingWebException(
-            Class<? extends WebApplicationException> exceptionClass,
-            Response.Status status) {
+            Class<? extends WebApplicationException> exceptionClass, Response.Status status) {
         WebApplicationException exceptionToProcess;
         try {
-            exceptionToProcess = exceptionClass.getConstructor(String.class, Response.Status.class)
-                    .newInstance(message,
-                            status);
+            exceptionToProcess = exceptionClass
+                    .getConstructor(String.class, Response.Status.class)
+                    .newInstance(message, status);
         } catch (InstantiationException
                 | IllegalAccessException
                 | IllegalArgumentException
@@ -112,13 +115,16 @@ public final class RemoteExceptionResponseHandlerTest {
     @Test
     public void extractsRemoteExceptionForAllErrorCodes() throws Exception {
         for (int code : ImmutableList.of(300, 400, 404, 500)) {
-            RemoteException exception = decode(MediaType.APPLICATION_JSON, code, SERIALIZED_EXCEPTION).get();
+            RemoteException exception = decode(MediaType.APPLICATION_JSON, code, SERIALIZED_EXCEPTION)
+                    .get();
             assertThat(exception.getCause()).isNull();
             assertThat(exception.getStatus()).isEqualTo(code);
-            assertThat(exception.getError().errorCode()).isEqualTo(ErrorType.FAILED_PRECONDITION.code().name());
+            assertThat(exception.getError().errorCode())
+                    .isEqualTo(ErrorType.FAILED_PRECONDITION.code().name());
             assertThat(exception.getError().errorName()).isEqualTo(ErrorType.FAILED_PRECONDITION.name());
-            assertThat(exception.getMessage()).isEqualTo(
-                    "RemoteException: " + ErrorType.FAILED_PRECONDITION.code().name()
+            assertThat(exception.getMessage())
+                    .isEqualTo("RemoteException: "
+                            + ErrorType.FAILED_PRECONDITION.code().name()
                             + " ("
                             + ErrorType.FAILED_PRECONDITION.name()
                             + ") with instance ID "
@@ -128,8 +134,8 @@ public final class RemoteExceptionResponseHandlerTest {
 
     @Test
     public void handlesNotAuthorizedException() throws Exception {
-        NotAuthorizedException originalException = new NotAuthorizedException(message,
-                javax.ws.rs.core.Response.Status.UNAUTHORIZED);
+        NotAuthorizedException originalException =
+                new NotAuthorizedException(message, javax.ws.rs.core.Response.Status.UNAUTHORIZED);
 
         RemoteException exception = encodeAndDecode(originalException).get();
         assertThat(exception.getCause()).isNull();
@@ -137,23 +143,28 @@ public final class RemoteExceptionResponseHandlerTest {
         assertThat(exception.getError().errorCode()).isEqualTo(NotAuthorizedException.class.getName());
         assertThat(exception.getError().errorName()).isEqualTo(message);
         assertThat(exception.getMessage())
-                .isEqualTo("RemoteException: javax.ws.rs.NotAuthorizedException (" + message
+                .isEqualTo("RemoteException: javax.ws.rs.NotAuthorizedException ("
+                        + message
                         + ") with instance ID "
                         + exception.getError().errorInstanceId());
     }
 
     @Test
     public void testSpecificException() {
-        RemoteException exception = encodeAndDecode(new IllegalArgumentException("msg")).get();
+        RemoteException exception = encodeAndDecode(new IllegalArgumentException("msg"))
+                .get();
         assertThat(exception).isInstanceOf(RemoteException.class);
         assertThat(exception.getMessage()).startsWith("RemoteException: java.lang.IllegalArgumentException (msg)");
     }
 
     @Test
     public void doesNotHandleNonJsonMediaTypes() {
-        assertThat(decode(MediaType.TEXT_PLAIN, STATUS_500, SERIALIZED_EXCEPTION)).isEmpty();
-        assertThat(decode(MediaType.TEXT_HTML, STATUS_500, SERIALIZED_EXCEPTION)).isEmpty();
-        assertThat(decode(MediaType.MULTIPART_FORM_DATA, STATUS_500, SERIALIZED_EXCEPTION)).isEmpty();
+        assertThat(decode(MediaType.TEXT_PLAIN, STATUS_500, SERIALIZED_EXCEPTION))
+                .isEmpty();
+        assertThat(decode(MediaType.TEXT_HTML, STATUS_500, SERIALIZED_EXCEPTION))
+                .isEmpty();
+        assertThat(decode(MediaType.MULTIPART_FORM_DATA, STATUS_500, SERIALIZED_EXCEPTION))
+                .isEmpty();
     }
 
     @Test

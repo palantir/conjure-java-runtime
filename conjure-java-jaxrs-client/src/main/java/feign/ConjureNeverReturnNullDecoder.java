@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 
 /**
  * Use {@link NeverReturnNullDecoder}.
+ *
  * @deprecated Use {@link NeverReturnNullDecoder}.
  */
 @Deprecated

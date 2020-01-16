@@ -72,58 +72,67 @@ public final class Retrofit2ClientApiTest extends TestBase {
     public void before() {
         url = server.url("/");
         service = Retrofit2Client.create(
-                TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(url.toString()));
+                TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(url.toString()));
     }
 
     @Test
     public void testGuavaOptionalParamStringHandling() throws IOException, InterruptedException {
         server.enqueue(new MockResponse().setBody("\"pong\""));
-        assertThat(service.getGuavaOptionalString(guavaOptional("p"), guavaOptional("q")).execute().body())
+        assertThat(service.getGuavaOptionalString(guavaOptional("p"), guavaOptional("q"))
+                        .execute()
+                        .body())
                 .isEqualTo(guavaOptional("pong"));
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString/p/?queryString=q");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString/p/?queryString=q");
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
-        assertThat(service.getGuavaOptionalString(guavaOptional("p"), guavaEmptyOptional()).execute().body())
+        assertThat(service.getGuavaOptionalString(guavaOptional("p"), guavaEmptyOptional())
+                        .execute()
+                        .body())
                 .isEqualTo(guavaOptional("pong"));
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString/p/");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString/p/");
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
-        assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaOptional("q")).execute().body())
+        assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaOptional("q"))
+                        .execute()
+                        .body())
                 .isEqualTo(guavaOptional("pong"));
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString//?queryString=q");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString//?queryString=q");
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
-        assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaEmptyOptional()).execute().body())
+        assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaEmptyOptional())
+                        .execute()
+                        .body())
                 .isEqualTo(guavaOptional("pong"));
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString//");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString//");
     }
 
     @Test
     public void testOptionalParamStringHandling() throws IOException, InterruptedException {
         server.enqueue(new MockResponse().setBody("\"pong\""));
-        assertThat(service.getJava8OptionalString(java8Optional("p"), java8Optional("q")).execute().body())
+        assertThat(service.getJava8OptionalString(java8Optional("p"), java8Optional("q"))
+                        .execute()
+                        .body())
                 .isEqualTo(java8Optional("pong"));
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalString/p/?queryString=q");
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
-        assertThat(service.getJava8OptionalString(java8Optional("p"), java8EmptyOptional()).execute().body())
+        assertThat(service.getJava8OptionalString(java8Optional("p"), java8EmptyOptional())
+                        .execute()
+                        .body())
                 .isEqualTo(java8Optional("pong"));
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalString/p/");
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
-        assertThat(service.getJava8OptionalString(java8EmptyOptional(), java8Optional("q")).execute().body())
+        assertThat(service.getJava8OptionalString(java8EmptyOptional(), java8Optional("q"))
+                        .execute()
+                        .body())
                 .isEqualTo(java8Optional("pong"));
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalString//?queryString=q");
 
         server.enqueue(new MockResponse().setBody("\"pong\""));
-        assertThat(service.getJava8OptionalString(java8EmptyOptional(), java8EmptyOptional()).execute().body())
+        assertThat(service.getJava8OptionalString(java8EmptyOptional(), java8EmptyOptional())
+                        .execute()
+                        .body())
                 .isEqualTo(java8Optional("pong"));
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalString//");
     }
@@ -131,64 +140,64 @@ public final class Retrofit2ClientApiTest extends TestBase {
     @Test
     public void testEmptyGuavaOptionalResponseStringHandling() throws IOException, InterruptedException {
         server.enqueue(new MockResponse().setResponseCode(204));
-        assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaEmptyOptional()).execute().body())
+        assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaEmptyOptional())
+                        .execute()
+                        .body())
                 .isEqualTo(guavaEmptyOptional());
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString//");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString//");
     }
 
     @Test
     public void testEmptyOptionalResponseStringHandling() throws IOException, InterruptedException {
         server.enqueue(new MockResponse().setResponseCode(204));
-        assertThat(service.getJava8OptionalString(java8EmptyOptional(), java8EmptyOptional()).execute().body())
+        assertThat(service.getJava8OptionalString(java8EmptyOptional(), java8EmptyOptional())
+                        .execute()
+                        .body())
                 .isEqualTo(java8EmptyOptional());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalString//");
 
         server.enqueue(new MockResponse().setResponseCode(204));
-        assertThat(service.getJava8OptionalInt().execute().body())
-                .isEqualTo(OptionalInt.empty());
+        assertThat(service.getJava8OptionalInt().execute().body()).isEqualTo(OptionalInt.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalInt");
 
         server.enqueue(new MockResponse().setResponseCode(204));
-        assertThat(service.getJava8OptionalLong().execute().body())
-                .isEqualTo(OptionalLong.empty());
+        assertThat(service.getJava8OptionalLong().execute().body()).isEqualTo(OptionalLong.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalLong");
 
         server.enqueue(new MockResponse().setResponseCode(204));
-        assertThat(service.getJava8OptionalDouble().execute().body())
-                .isEqualTo(OptionalDouble.empty());
+        assertThat(service.getJava8OptionalDouble().execute().body()).isEqualTo(OptionalDouble.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalDouble");
     }
 
     @Test
     public void testNullGuavaOptionalResponseStringHandling() throws IOException, InterruptedException {
         server.enqueue(new MockResponse().setBody("null"));
-        assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaEmptyOptional()).execute().body())
+        assertThat(service.getGuavaOptionalString(guavaEmptyOptional(), guavaEmptyOptional())
+                        .execute()
+                        .body())
                 .isEqualTo(guavaEmptyOptional());
-        assertThat(server.takeRequest().getPath())
-                .isEqualTo("/getGuavaOptionalString//");
+        assertThat(server.takeRequest().getPath()).isEqualTo("/getGuavaOptionalString//");
     }
 
     @Test
     public void testNullOptionalResponseStringHandling() throws IOException, InterruptedException {
         server.enqueue(new MockResponse().setBody("null"));
-        assertThat(service.getJava8OptionalString(java8EmptyOptional(), java8EmptyOptional()).execute().body())
+        assertThat(service.getJava8OptionalString(java8EmptyOptional(), java8EmptyOptional())
+                        .execute()
+                        .body())
                 .isEqualTo(java8EmptyOptional());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalString//");
 
         server.enqueue(new MockResponse().setBody("null"));
-        assertThat(service.getJava8OptionalInt().execute().body())
-                .isEqualTo(OptionalInt.empty());
+        assertThat(service.getJava8OptionalInt().execute().body()).isEqualTo(OptionalInt.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalInt");
 
         server.enqueue(new MockResponse().setBody("null"));
-        assertThat(service.getJava8OptionalLong().execute().body())
-                .isEqualTo(OptionalLong.empty());
+        assertThat(service.getJava8OptionalLong().execute().body()).isEqualTo(OptionalLong.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalLong");
 
         server.enqueue(new MockResponse().setBody("null"));
-        assertThat(service.getJava8OptionalDouble().execute().body())
-                .isEqualTo(OptionalDouble.empty());
+        assertThat(service.getJava8OptionalDouble().execute().body()).isEqualTo(OptionalDouble.empty());
         assertThat(server.takeRequest().getPath()).isEqualTo("/getJava8OptionalDouble");
     }
 
@@ -198,18 +207,21 @@ public final class Retrofit2ClientApiTest extends TestBase {
         String dateString = "\"2001-02-03\"";
 
         server.enqueue(new MockResponse().setBody(dateString));
-        assertThat(service.getComplexGuavaType(guavaOptional(date)).execute().body()).isEqualTo(guavaOptional(date));
+        assertThat(service.getComplexGuavaType(guavaOptional(date)).execute().body())
+                .isEqualTo(guavaOptional(date));
         assertThat(server.takeRequest().getBody().readUtf8()).isEqualTo(dateString);
 
         server.enqueue(new MockResponse().setBody(dateString));
-        assertThat(service.getComplexJava8Type(java8Optional(date)).execute().body()).isEqualTo(java8Optional(date));
+        assertThat(service.getComplexJava8Type(java8Optional(date)).execute().body())
+                .isEqualTo(java8Optional(date));
         assertThat(server.takeRequest().getBody().readUtf8()).isEqualTo(dateString);
     }
 
     @Test
     public void should_reject_body_containing_json_null() {
         server.enqueue(new MockResponse().setBody("null"));
-        Assertions.assertThatLoggableExceptionThrownBy(() -> service.getRelative().execute().body())
+        Assertions.assertThatLoggableExceptionThrownBy(
+                        () -> service.getRelative().execute().body())
                 .hasMessage("Unexpected null body")
                 .isInstanceOf(SafeNullPointerException.class);
     }
@@ -217,8 +229,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     @Test
     public void should_reject_body_containing_empty_string() {
         server.enqueue(new MockResponse().setBody(""));
-        assertThatThrownBy(() -> service.getRelative().execute().body())
-                .isInstanceOf(SafeNullPointerException.class);
+        assertThatThrownBy(() -> service.getRelative().execute().body()).isInstanceOf(SafeNullPointerException.class);
     }
 
     @Test
@@ -284,7 +295,8 @@ public final class Retrofit2ClientApiTest extends TestBase {
         assertThatThrownBy(() -> Futures.getUnchecked(futureSupplier.get()))
                 .isInstanceOf(UncheckedExecutionException.class)
                 .hasCauseInstanceOf(RemoteException.class)
-                .satisfies(e -> assertThat(((RemoteException) e.getCause()).getError()).isEqualTo(error));
+                .satisfies(e ->
+                        assertThat(((RemoteException) e.getCause()).getError()).isEqualTo(error));
     }
 
     @Test
@@ -302,8 +314,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
                 TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                ClientConfiguration.builder()
                         .from(createTestConfig("https://invalid.service.dev"))
                         .connectTimeout(Duration.ofMillis(10))
                         .build());
@@ -358,8 +369,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
                 TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                ClientConfiguration
-                        .builder()
+                ClientConfiguration.builder()
                         .from(createTestConfig("https://invalid.service.dev"))
                         .connectTimeout(Duration.ofMillis(10))
                         .build());
@@ -410,20 +420,24 @@ public final class Retrofit2ClientApiTest extends TestBase {
                 assertionsPassed.countDown(); // if you delete this countdown latch then this test will vacuously pass.
             }
         });
-        assertThat(assertionsPassed.await(1, TimeUnit.SECONDS)).as("Callback was executed").isTrue();
+        assertThat(assertionsPassed.await(1, TimeUnit.SECONDS))
+                .as("Callback was executed")
+                .isTrue();
     }
 
     @Test
     public void serializes_java_optional_headers() throws InterruptedException {
         server.enqueue(new MockResponse().setBody("\"body\""));
-        assertThat(Futures.getUnchecked(service.getJavaOptionalHeader(Optional.of("value")))).isEqualTo("body");
+        assertThat(Futures.getUnchecked(service.getJavaOptionalHeader(Optional.of("value"))))
+                .isEqualTo("body");
         assertThat(server.takeRequest().getHeader("Optional-Header")).isEqualTo("value");
     }
 
     @Test
     public void serializes_guava_optional_headers() throws InterruptedException {
         server.enqueue(new MockResponse().setBody("\"body\""));
-        assertThat(Futures.getUnchecked(service.getGuavaOptionalHeader(guavaOptional("value")))).isEqualTo("body");
+        assertThat(Futures.getUnchecked(service.getGuavaOptionalHeader(guavaOptional("value"))))
+                .isEqualTo("body");
         assertThat(server.takeRequest().getHeader("Optional-Header")).isEqualTo("value");
     }
 

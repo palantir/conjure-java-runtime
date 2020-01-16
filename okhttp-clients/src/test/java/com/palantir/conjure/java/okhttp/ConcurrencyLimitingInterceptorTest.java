@@ -44,8 +44,10 @@ public final class ConcurrencyLimitingInterceptorTest {
 
     @Mock
     private BufferedSource mockSource;
+
     @Mock
     private Interceptor.Chain chain;
+
     @Mock
     private Limiter.Listener listener;
 
@@ -56,7 +58,8 @@ public final class ConcurrencyLimitingInterceptorTest {
     public void before() {
         request = new Request.Builder()
                 .url("https://localhost:1234/call")
-                .tag(ConcurrencyLimiterListener.class,
+                .tag(
+                        ConcurrencyLimiterListener.class,
                         ConcurrencyLimiterListener.create().setLimiterListener(Futures.immediateFuture(listener)))
                 .get()
                 .build();
@@ -127,7 +130,8 @@ public final class ConcurrencyLimitingInterceptorTest {
         IOException exception = new IOException();
         when(mockSource.readByteArray()).thenThrow(exception);
         Response erroneousResponse = interceptor.intercept(chain);
-        assertThatThrownBy(() -> erroneousResponse.body().source().readByteArray()).isEqualTo(exception);
+        assertThatThrownBy(() -> erroneousResponse.body().source().readByteArray())
+                .isEqualTo(exception);
     }
 
     @Test

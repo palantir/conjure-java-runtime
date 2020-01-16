@@ -46,10 +46,12 @@ public final class HostMetricsRegistry implements HostEventsSink {
     @Override
     public void record(String serviceName, String hostname, int port, int statusCode, long micros) {
         try {
-            hostMetrics.get(
-                    ImmutableServiceHostAndPort.of(serviceName, hostname, port)).record(statusCode, micros);
+            hostMetrics
+                    .get(ImmutableServiceHostAndPort.of(serviceName, hostname, port))
+                    .record(statusCode, micros);
         } catch (Exception e) {
-            log.warn("Unable to record metrics for host and port",
+            log.warn(
+                    "Unable to record metrics for host and port",
                     UnsafeArg.of("hostname", hostname),
                     SafeArg.of("port", port),
                     e);
@@ -59,9 +61,12 @@ public final class HostMetricsRegistry implements HostEventsSink {
     @Override
     public void recordIoException(String serviceName, String hostname, int port) {
         try {
-            hostMetrics.get(ImmutableServiceHostAndPort.of(serviceName, hostname, port)).recordIoException();
+            hostMetrics
+                    .get(ImmutableServiceHostAndPort.of(serviceName, hostname, port))
+                    .recordIoException();
         } catch (Exception e) {
-            log.warn("Unable to record IO exception for host and port",
+            log.warn(
+                    "Unable to record IO exception for host and port",
                     UnsafeArg.of("hostname", hostname),
                     SafeArg.of("port", port),
                     e);

@@ -41,7 +41,8 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
 
     @Before
     public void before() {
-        proxy = JaxRsClient.create(Service.class,
+        proxy = JaxRsClient.create(
+                Service.class,
                 AGENT,
                 new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
@@ -80,8 +81,8 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
                     createTestConfig("http://localhost:" + server.getPort()));
             fail("fail");
         } catch (RuntimeException e) {
-            assertThat(e.getMessage()).isEqualTo(
-                    "Cannot use Guava Optionals with PathParams. (Class: com.palantir.conjure"
+            assertThat(e.getMessage())
+                    .isEqualTo("Cannot use Guava Optionals with PathParams. (Class: com.palantir.conjure"
                             + ".java.client.jaxrs.JaxRsClientGuavaOptionalHandlingTest$CannotDecorateInterface,"
                             + " Method: path, Param: arg0)");
         }
@@ -138,5 +139,4 @@ public final class JaxRsClientGuavaOptionalHandlingTest extends TestBase {
         assertThat(takeRequest.getHeader("opt")).isEqualTo("str");
         assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
-
 }

@@ -41,9 +41,8 @@ import org.junit.Test;
 
 public class NullRequestBodyTest {
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
-            TestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(TestServer.class, "src/test/resources/test-server.yml");
 
     private WebTarget target;
 
@@ -60,15 +59,11 @@ public class NullRequestBodyTest {
         Entity empty = Entity.entity(null, MediaType.APPLICATION_JSON);
 
         // this endpoint does not have any annotation
-        Response postResponse = target.path("post")
-                .request()
-                .post(empty);
+        Response postResponse = target.path("post").request().post(empty);
         assertThat(postResponse.getStatus()).isEqualTo(204);
 
         // this endpoint has the @NotNull annotation
-        Response postNotNullResponse = target.path("post-not-null")
-                .request()
-                .post(empty);
+        Response postNotNullResponse = target.path("post-not-null").request().post(empty);
         assertThat(postNotNullResponse.getStatus()).isEqualTo(422);
     }
 
@@ -77,15 +72,11 @@ public class NullRequestBodyTest {
         Entity explicitlyNull = Entity.entity("null", MediaType.APPLICATION_JSON);
 
         // this endpoint does not have any annotation
-        Response postResponse = target.path("post")
-                .request()
-                .post(explicitlyNull);
+        Response postResponse = target.path("post").request().post(explicitlyNull);
         assertThat(postResponse.getStatus()).isEqualTo(204);
 
         // this endpoint has the @NotNull annotation
-        Response postNotNullResponse = target.path("post-not-null")
-                .request()
-                .post(explicitlyNull);
+        Response postNotNullResponse = target.path("post-not-null").request().post(explicitlyNull);
         assertThat(postNotNullResponse.getStatus()).isEqualTo(422);
     }
 
@@ -94,16 +85,12 @@ public class NullRequestBodyTest {
         Entity emptyMap = Entity.entity(ImmutableMap.of(), MediaType.APPLICATION_JSON);
 
         // this endpoint's handler method does not throw
-        Response postResponse = target.path("post")
-                .request()
-                .post(emptyMap);
+        Response postResponse = target.path("post").request().post(emptyMap);
         System.out.println(postResponse);
         assertThat(postResponse.getStatus()).isEqualTo(204);
 
         // this endpoint's handler method throws -> 500
-        Response postNotNullResponse = target.path("post-not-null")
-                .request()
-                .post(emptyMap);
+        Response postNotNullResponse = target.path("post-not-null").request().post(emptyMap);
         assertThat(postNotNullResponse.getStatus()).isEqualTo(500);
     }
 

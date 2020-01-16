@@ -21,9 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
-/**
- * A layman's Observable: Stores a reference to a value until it is {@link #getAndClear retrieved} once.
- */
+/** A layman's Observable: Stores a reference to a value until it is {@link #getAndClear retrieved} once. */
 @ThreadSafe
 public final class Refreshable<T> {
 
@@ -48,8 +46,8 @@ public final class Refreshable<T> {
 
     /**
      * Returns the currently stored value if it exists and clears it. For instance, the following sequence of events,
-     * {@code set(a), getAndClear, getAndClear, set(b), getAndClear, getAndClear} yield values {@code a, empty, b,
-     * empty} for the four {@link #getAndClear} calls.
+     * {@code set(a), getAndClear, getAndClear, set(b), getAndClear, getAndClear} yield values
+     * {@code a, empty, b, empty} for the four {@link #getAndClear} calls.
      */
     public Optional<T> getAndClear() {
         return Optional.ofNullable(value.getAndSet(null));

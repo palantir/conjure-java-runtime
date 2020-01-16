@@ -168,8 +168,7 @@ final class AsyncSerializableErrorCallAdapterFactory extends CallAdapter.Factory
                 public void onFailure(Call<R> _call, Throwable throwable) {
                     // TODO(rfink): Would be good to not leak okhttp internals here
                     if (throwable instanceof IoRemoteException) {
-                        future.completeExceptionally(
-                                ((IoRemoteException) throwable).getWrappedException());
+                        future.completeExceptionally(((IoRemoteException) throwable).getWrappedException());
                     } else {
                         future.completeExceptionally(throwable);
                     }

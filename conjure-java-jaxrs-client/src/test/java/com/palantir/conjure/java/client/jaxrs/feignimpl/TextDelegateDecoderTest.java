@@ -50,8 +50,8 @@ public final class TextDelegateDecoderTest extends TestBase {
     private static final String DELEGATE_RESPONSE = "delegate response";
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -69,10 +69,7 @@ public final class TextDelegateDecoderTest extends TestBase {
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(
-                GuavaTestServer.TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(endpointUri));
+                GuavaTestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }
 
     @Test

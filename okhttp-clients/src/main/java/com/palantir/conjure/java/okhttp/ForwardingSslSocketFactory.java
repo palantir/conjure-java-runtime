@@ -70,11 +70,8 @@ abstract class ForwardingSslSocketFactory extends SSLSocketFactory {
     }
 
     @Override
-    public Socket createSocket(
-            InetAddress address,
-            int port,
-            InetAddress localAddress,
-            int localPort) throws IOException {
+    public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort)
+            throws IOException {
         return wrap(getDelegate().createSocket(address, port, localAddress, localPort));
     }
 }

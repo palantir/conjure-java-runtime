@@ -56,10 +56,7 @@ public final class UrlSelectorImplTest extends TestBase {
 
     @Test
     public void baseUrlsMustBeCanonical() {
-        for (String url : new String[] {
-                "user:pass@foo.com/path",
-                ""
-        }) {
+        for (String url : new String[] {"user:pass@foo.com/path", ""}) {
             Assertions.assertThatLoggableExceptionThrownBy(() -> UrlSelectorImpl.create(list(url), false))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasLogMessage("Not a valid URL")
@@ -67,20 +64,16 @@ public final class UrlSelectorImplTest extends TestBase {
         }
 
         for (String url : new String[] {
-                "http://user:pass@foo.com/path",
-                "http://foo.com/path?bar",
+            "http://user:pass@foo.com/path", "http://foo.com/path?bar",
         }) {
             Assertions.assertThatLoggableExceptionThrownBy(() -> UrlSelectorImpl.create(list(url), false))
                     .isInstanceOf(IllegalArgumentException.class)
-                    .hasLogMessage(
-                            "Base URLs must be 'canonical' and consist of schema, host, port, and path only")
+                    .hasLogMessage("Base URLs must be 'canonical' and consist of schema, host, port, and path only")
                     .hasExactlyArgs(UnsafeArg.of("url", url));
         }
 
         for (String url : new String[] {
-                "http://foo.com/path",
-                "http://foo.com:80/path",
-                "http://foo.com:8080",
+            "http://foo.com/path", "http://foo.com:80/path", "http://foo.com:8080",
         }) {
             UrlSelectorImpl.create(list(url), false);
         }
@@ -141,16 +134,24 @@ public final class UrlSelectorImplTest extends TestBase {
     @Test
     public void testIsBaseUrlFor() {
         // Negative cases
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("https://foo/a"))).isFalse();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://bar/a"))).isFalse();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo:8080/a"))).isFalse();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/b"), parse("http://foo/a"))).isFalse();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("https://foo/a")))
+                .isFalse();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://bar/a")))
+                .isFalse();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo:8080/a")))
+                .isFalse();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/b"), parse("http://foo/a")))
+                .isFalse();
 
         // Positive cases: schema, host, port must be equal, path must be a prefix
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a"))).isTrue();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a/"))).isTrue();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a/b"))).isTrue();
-        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo"), parse("http://foo/a"))).isTrue();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a")))
+                .isTrue();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a/")))
+                .isTrue();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo/a"), parse("http://foo/a/b")))
+                .isTrue();
+        assertThat(UrlSelectorImpl.isBaseUrlFor(parse("http://foo"), parse("http://foo/a")))
+                .isTrue();
     }
 
     @Test
@@ -217,10 +218,7 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"),
-                false,
-                failedUrlCooldown,
-                clock);
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
@@ -248,10 +246,7 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"),
-                false,
-                failedUrlCooldown,
-                clock);
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));
@@ -273,10 +268,7 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"),
-                false,
-                failedUrlCooldown,
-                clock);
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://bar/a/b/path"));
@@ -304,10 +296,7 @@ public final class UrlSelectorImplTest extends TestBase {
         Duration failedUrlCooldown = Duration.ofMillis(100);
 
         UrlSelectorImpl selector = UrlSelectorImpl.createWithFailedUrlCooldown(
-                list("http://foo/a", "http://bar/a"),
-                false,
-                failedUrlCooldown,
-                clock);
+                list("http://foo/a", "http://bar/a"), false, failedUrlCooldown, clock);
         HttpUrl requestUrl = HttpUrl.parse("http://ignored/a/b/path");
 
         selector.markAsFailed(HttpUrl.parse("http://foo/a/b/path"));
@@ -332,9 +321,7 @@ public final class UrlSelectorImplTest extends TestBase {
 
     @Test
     public void testWorksWithWebSockets() {
-        Request wsRequest = new Request.Builder()
-                .url("wss://foo/a")
-                .build();
+        Request wsRequest = new Request.Builder().url("wss://foo/a").build();
         UrlSelectorImpl selector = UrlSelectorImpl.create(ImmutableList.of("wss://foo/", "wss://bar/"), false);
 
         // Silently replace web socket URLs with HTTP URLs. See https://github.com/square/okhttp/issues/1652.

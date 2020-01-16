@@ -24,6 +24,7 @@ import java.lang.reflect.Type;
 
 /**
  * Use {@link CborDelegateDecoder}.
+ *
  * @deprecated Use {@link CborDelegateDecoder}.
  */
 @Deprecated

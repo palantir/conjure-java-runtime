@@ -64,10 +64,8 @@ public final class RefreshableTest {
 
         // Observable that emits o1 for the first 10 seconds, and then o2 after 10 seconds
         DeterministicScheduler executor = new DeterministicScheduler();
-        Observable<Object> observable = Observable
-                .interval(1, TimeUnit.SECONDS, Schedulers.from(executor))
-                .flatMapIterable(
-                        e -> e < 10 ? ImmutableList.of(o1) : ImmutableList.of(o2));
+        Observable<Object> observable = Observable.interval(1, TimeUnit.SECONDS, Schedulers.from(executor))
+                .flatMapIterable(e -> e < 10 ? ImmutableList.of(o1) : ImmutableList.of(o2));
 
         Refreshable<Object> refreshable = Refreshable.empty();
         Disposable disposable = observable

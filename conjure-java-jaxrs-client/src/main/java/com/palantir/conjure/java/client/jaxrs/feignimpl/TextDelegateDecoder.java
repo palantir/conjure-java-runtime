@@ -49,7 +49,8 @@ public final class TextDelegateDecoder implements Decoder {
             contentTypes = ImmutableSet.of();
         }
         // In the case of multiple content types, or an unknown content type, we'll use the delegate instead.
-        if (contentTypes.size() == 1 && Iterables.getOnlyElement(contentTypes, "").startsWith(MediaType.TEXT_PLAIN)) {
+        if (contentTypes.size() == 1
+                && Iterables.getOnlyElement(contentTypes, "").startsWith(MediaType.TEXT_PLAIN)) {
             Object decoded = stringDecoder.decode(response, type);
             if (decoded == null) {
                 return "";
