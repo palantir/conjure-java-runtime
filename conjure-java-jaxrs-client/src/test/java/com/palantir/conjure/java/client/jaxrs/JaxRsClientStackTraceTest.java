@@ -74,8 +74,9 @@ public final class JaxRsClientStackTraceTest extends TestBase {
             failBecauseExceptionWasNotThrown(Exception.class);
         } catch (Exception e) {
             assertThat(e)
-                    .hasStackTraceContaining("JaxRsClientStackTraceTest."
-                                                 + "stack_trace_from_remote_exception_should_include_call_site(JaxRsClientStackTraceTest.java:");
+                    .hasStackTraceContaining(
+                            "JaxRsClientStackTraceTest.stack_trace_from_remote_exception_should_include_call_site("
+                                    + "JaxRsClientStackTraceTest.java:");
         }
     }
 

@@ -20,6 +20,7 @@ import static com.palantir.logsafe.Preconditions.checkArgument;
 
 import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.BasicCredentials;
+import com.palantir.conjure.java.api.config.service.PartialServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
@@ -40,31 +41,28 @@ import org.immutables.value.Value;
 @ImmutablesStyle
 public interface ClientConfiguration {
 
-    /** See {@link com.palantir.conjure.java.api.config.service.PartialServiceConfiguration#security}. */
+    /** See {@link PartialServiceConfiguration#security}. */
     SSLSocketFactory sslSocketFactory();
 
-    /** See {@link com.palantir.conjure.java.api.config.service.PartialServiceConfiguration#security}. */
+    /** See {@link PartialServiceConfiguration#security}. */
     X509TrustManager trustManager();
 
-    /** See {@link com.palantir.conjure.java.api.config.service.PartialServiceConfiguration#uris}. */
+    /** See {@link PartialServiceConfiguration#uris}. */
     List<String> uris();
 
-    /** See {@link com.palantir.conjure.java.api.config.service.PartialServiceConfiguration#connectTimeout}. */
+    /** See {@link PartialServiceConfiguration#connectTimeout}. */
     Duration connectTimeout();
 
-    /** See {@link com.palantir.conjure.java.api.config.service.PartialServiceConfiguration#readTimeout}. */
+    /** See {@link PartialServiceConfiguration#readTimeout}. */
     Duration readTimeout();
 
-    /** See {@link com.palantir.conjure.java.api.config.service.PartialServiceConfiguration#writeTimeout}. */
+    /** See {@link PartialServiceConfiguration#writeTimeout}. */
     Duration writeTimeout();
 
-    /** See {@link com.palantir.conjure.java.api.config.service.PartialServiceConfiguration#enableGcmCipherSuites}. */
+    /** See {@link PartialServiceConfiguration#enableGcmCipherSuites}. */
     boolean enableGcmCipherSuites();
 
-    /**
-     * See
-     * {@link com.palantir.conjure.java.api.config.service.PartialServiceConfiguration#fallbackToCommonNameVerification}.
-     */
+    /** See {@link PartialServiceConfiguration#fallbackToCommonNameVerification}. */
     boolean fallbackToCommonNameVerification();
 
     /** The proxy to use for the HTTP connection. */
