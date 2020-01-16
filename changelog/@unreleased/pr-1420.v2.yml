@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Tags the internal error metric with cause
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1420
