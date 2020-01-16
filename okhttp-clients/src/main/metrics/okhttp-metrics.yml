@@ -58,3 +58,7 @@ namespaces:
       connection-pool.connections.idle:
         type: gauge
         docs: Number of idle connections in the connection pool.
+      leak.detection:
+        type: meter
+        tags: [resource]
+        docs: Reports the rate that resource leaks are detected by resource type.

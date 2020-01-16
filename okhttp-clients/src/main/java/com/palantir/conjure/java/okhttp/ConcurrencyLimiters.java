@@ -58,6 +58,7 @@ final class ConcurrencyLimiters {
     private final Class<?> serviceClass;
     private final ScheduledExecutorService scheduledExecutorService;
     private final boolean useLimiter;
+    private final Meter concurrencyLimiterLeakMeter;
 
     @VisibleForTesting
     ConcurrencyLimiters(
@@ -74,6 +75,8 @@ final class ConcurrencyLimiters {
         this.serviceClass = serviceClass;
         this.scheduledExecutorService = scheduledExecutorService;
         this.useLimiter = useLimiter;
+        this.concurrencyLimiterLeakMeter =
+                OkhttpMetrics.of(taggedMetricRegistry).leakDetection("ConcurrencyLimiters");
     }
 
     ConcurrencyLimiters(
@@ -209,12 +212,32 @@ final class ConcurrencyLimiters {
 
         private final Key limiterKey;
         private final Supplier<SimpleLimiter<Void>> limiterFactory;
-        private final LeakDetector<Limiter.Listener> leakDetector = new LeakDetector<>(Limiter.Listener.class);
+        private final LeakDetector<Limiter.Listener> leakDetector;
 
         DefaultConcurrencyLimiter(Key limiterKey, Supplier<SimpleLimiter<Void>> limiterFactory) {
             this.limiterKey = limiterKey;
             this.limiterFactory = limiterFactory;
             this.limiter = limiterFactory.get();
+            this.leakDetector = new LeakDetector<>(
+                    Limiter.Listener.class,
+                    // Create stack traces for five minutes after a leak is detected
+                    new LeakDetector.Reporter() {
+
+                        private final long timeout = Duration.ofMinutes(5).toMillis();
+                        private volatile long lastLeakMillis = 0;
+
+                        @Override
+                        public void onLeakDetected(Optional<RuntimeException> _stacktrace) {
+                            concurrencyLimiterLeakMeter.mark();
+                            lastLeakMillis = System.currentTimeMillis();
+                        }
+
+                        @Override
+                        public boolean createStackTrace() {
+                            return LeakDetector.isTraceLoggingEnabled()
+                                    || System.currentTimeMillis() - lastLeakMillis < timeout;
+                        }
+                    });
         }
 
         @Override
@@ -227,7 +250,7 @@ final class ConcurrencyLimiters {
         public synchronized ListenableFuture<Limiter.Listener> acquire() {
             SettableFuture<Limiter.Listener> future = SettableFuture.create();
             addSlowAcquireMarker(future);
-            waitingRequests.add(new QueuedRequest(future, LeakDetector.maybeCreateStackTrace()));
+            waitingRequests.add(new QueuedRequest(future, leakDetector.maybeCreateStackTrace()));
             processQueue();
             return future;
         }

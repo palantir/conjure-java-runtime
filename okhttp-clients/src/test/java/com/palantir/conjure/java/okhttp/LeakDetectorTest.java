@@ -26,7 +26,17 @@ import org.junit.Test;
 
 public class LeakDetectorTest {
     private final List<Optional<RuntimeException>> leaks = new ArrayList<>();
-    private final LeakDetector<String> leakDetector = new LeakDetector<>(String.class, leaks::add);
+    private final LeakDetector<String> leakDetector = new LeakDetector<>(String.class, new LeakDetector.Reporter() {
+        @Override
+        public void onLeakDetected(Optional<RuntimeException> stacktrace) {
+            leaks.add(stacktrace);
+        }
+
+        @Override
+        public boolean createStackTrace() {
+            return LeakDetector.isTraceLoggingEnabled();
+        }
+    });
 
     @Test
     public void detectsLeaks() {

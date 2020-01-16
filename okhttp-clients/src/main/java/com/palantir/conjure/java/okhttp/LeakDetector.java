@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.lang.ref.WeakReference;
@@ -25,7 +24,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,21 +31,16 @@ final class LeakDetector<T> {
     private static final Logger log = LoggerFactory.getLogger(LeakDetector.class);
 
     private final Class<T> resourceType;
-    private final Consumer<Optional<RuntimeException>> subscriber;
+    private final Reporter reporter;
     private final List<LeakDetectingReference<T>> references = new ArrayList<>();
 
-    LeakDetector(Class<T> resourceType) {
-        this(resourceType, unused -> {});
-    }
-
-    @VisibleForTesting
-    LeakDetector(Class<T> resourceType, Consumer<Optional<RuntimeException>> subscriber) {
+    LeakDetector(Class<T> resourceType, Reporter reporter) {
         this.resourceType = resourceType;
-        this.subscriber = subscriber;
+        this.reporter = reporter;
     }
 
-    static Optional<RuntimeException> maybeCreateStackTrace() {
-        if (log.isTraceEnabled()) {
+    Optional<RuntimeException> maybeCreateStackTrace() {
+        if (reporter.createStackTrace()) {
             return Optional.of(new SafeRuntimeException("Runtime exception for stack trace"));
         }
         return Optional.empty();
@@ -74,7 +67,7 @@ final class LeakDetector<T> {
         while (iterator.hasNext()) {
             LeakDetectingReference<T> reference = iterator.next();
             if (reference.get() == null) {
-                subscriber.accept(reference.stackTrace);
+                reporter.onLeakDetected(reference.stackTrace);
                 logLeak(reference.stackTrace);
                 iterator.remove();
             }
@@ -107,5 +100,16 @@ final class LeakDetector<T> {
             super(referent);
             this.stackTrace = stackTrace;
         }
+    }
+
+    static boolean isTraceLoggingEnabled() {
+        return log.isTraceEnabled();
+    }
+
+    interface Reporter {
+
+        void onLeakDetected(Optional<RuntimeException> stacktrace);
+
+        boolean createStackTrace();
     }
 }
