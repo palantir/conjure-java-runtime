@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import com.codahale.metrics.Meter;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
@@ -37,16 +36,16 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
 
     private static final Logger log = LoggerFactory.getLogger(ServiceExceptionMapper.class);
 
-    private final Meter internalErrorMeter;
+    private final JerseyServerMetrics metrics;
 
-    ServiceExceptionMapper(Meter internalErrorMeter) {
-        this.internalErrorMeter = internalErrorMeter;
+    ServiceExceptionMapper(JerseyServerMetrics metrics) {
+        this.metrics = metrics;
     }
 
     @Override
     public Response toResponse(ServiceException exception) {
         if (exception.getErrorType().equals(ErrorType.INTERNAL)) {
-            internalErrorMeter.mark();
+            metrics.internalerrorAll(InternalErrorCause.SERVICE_INTERNAL.toString()).mark();
         }
         int httpStatus = exception.getErrorType().httpErrorCode();
         if (httpStatus / 100 == 4 /* client error */) {

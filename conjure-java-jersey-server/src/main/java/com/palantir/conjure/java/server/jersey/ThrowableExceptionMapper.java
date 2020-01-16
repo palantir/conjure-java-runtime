@@ -16,15 +16,14 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import com.codahale.metrics.Meter;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
 final class ThrowableExceptionMapper extends JsonExceptionMapper<Throwable> {
 
-    ThrowableExceptionMapper(Meter internalErrorMeter) {
-        super(internalErrorMeter);
+    ThrowableExceptionMapper(JerseyServerMetrics metrics) {
+        super(metrics);
     }
 
     @Override
@@ -33,7 +32,7 @@ final class ThrowableExceptionMapper extends JsonExceptionMapper<Throwable> {
     }
 
     @Override
-    boolean isInternalError() {
-        return true;
+    InternalErrorCause getCause() {
+        return InternalErrorCause.INTERNAL;
     }
 }

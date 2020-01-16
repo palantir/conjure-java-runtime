@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2020 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +16,14 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import com.palantir.conjure.java.api.errors.ErrorType;
-import feign.RetryableException;
-import javax.ws.rs.ext.Provider;
+public enum InternalErrorCause {
+    RPC("rpc"),
+    SERVICE_INTERNAL("serviceInternal"),
+    INTERNAL("internal"),
+    REMOTE_INTERNAL("remoteInternal");
 
-@Provider
-final class RetryableExceptionMapper extends JsonExceptionMapper<RetryableException> {
-
-    RetryableExceptionMapper(JerseyServerMetrics metrics) {
-        super(metrics);
-    }
-
-    @Override
-    ErrorType getErrorType(RetryableException _exception) {
-        return ErrorType.INTERNAL;
-    }
-
-    @Override
-    InternalErrorCause getCause() {
-        return InternalErrorCause.RPC;
+    private final String cause;
+    InternalErrorCause(String cause) {
+        this.cause = cause;
     }
 }

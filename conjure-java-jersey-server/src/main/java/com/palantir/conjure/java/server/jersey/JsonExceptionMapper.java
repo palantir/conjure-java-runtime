@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import com.codahale.metrics.Meter;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.SafeArg;
@@ -45,23 +44,23 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
 
-    private final Meter internalExceptionMeter;
+    private final JerseyServerMetrics metrics;
 
-    JsonExceptionMapper(Meter internalExceptionMeter) {
-        this.internalExceptionMeter = internalExceptionMeter;
+    JsonExceptionMapper(JerseyServerMetrics metrics) {
+        this.metrics = metrics;
     }
 
     /** Returns the {@link ErrorType} that this exception corresponds to. */
     abstract ErrorType getErrorType(T exception);
 
-    abstract boolean isInternalError();
+    abstract InternalErrorCause getCause();
 
     @Override
     public final Response toResponse(T exception) {
         String errorInstanceId = UUID.randomUUID().toString();
         ErrorType errorType = getErrorType(exception);
-        if (isInternalError()) {
-            internalExceptionMeter.mark();
+        if (errorType.equals(ErrorType.INTERNAL)) {
+            this.metrics.internalerrorAll(getCause().toString()).mark();
         }
 
         if (errorType.httpErrorCode() / 100 == 4 /* client error */) {
