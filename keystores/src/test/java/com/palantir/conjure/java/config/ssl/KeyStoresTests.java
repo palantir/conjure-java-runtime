@@ -66,9 +66,9 @@ public final class KeyStoresTests {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
 
         assertThat(trustStore.size()).isEqualTo(3);
-        assertThat(trustStore.getCertificate("ca.der0").toString()).contains("CN=testCA");
-        assertThat(trustStore.getCertificate("server.crt0").toString()).contains("CN=localhost");
-        assertThat(trustStore.getCertificate("client.cer0").toString()).contains("CN=client");
+        assertThat(trustStore.getCertificate("ca.der-0").toString()).contains("CN=testCA");
+        assertThat(trustStore.getCertificate("server.crt-0").toString()).contains("CN=localhost");
+        assertThat(trustStore.getCertificate("client.cer-0").toString()).contains("CN=client");
     }
 
     @Test
@@ -134,7 +134,7 @@ public final class KeyStoresTests {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(
                 ImmutableMap.of("server.crt", PemX509Certificate.of(cert)));
 
-        assertThat(trustStore.getCertificate("server.crt0").toString()).contains("CN=localhost");
+        assertThat(trustStore.getCertificate("server.crt-0").toString()).contains("CN=localhost");
     }
 
     @Test
