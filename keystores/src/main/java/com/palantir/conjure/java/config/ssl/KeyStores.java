@@ -92,12 +92,7 @@ final class KeyStores {
 
         for (File currFile : getFilesForPath(path)) {
             try (InputStream in = Files.newInputStream(currFile.toPath())) {
-                List<Certificate> certificates = readX509Certificates(in);
-                int certIndex = 0;
-                for (Certificate cert : certificates) {
-                    keyStore.setCertificateEntry(currFile.getName() + certIndex, cert);
-                    certIndex++;
-                }
+                addCertificatesToKeystore(keyStore, currFile.getName(), readX509Certificates(in));
             } catch (IOException e) {
                 throw new RuntimeException(String.format(
                         "IOException encountered when opening '%s'",
@@ -125,12 +120,7 @@ final class KeyStores {
         for (Map.Entry<String, PemX509Certificate> entry : certificatesByAlias.entrySet()) {
             try (InputStream certIn = new ByteArrayInputStream(
                     entry.getValue().pemCertificate().getBytes(StandardCharsets.UTF_8))) {
-                List<Certificate> certificates = readX509Certificates(certIn);
-                int certIndex = 0;
-                for (Certificate cert : certificates) {
-                    keyStore.setCertificateEntry(entry.getKey() + certIndex, cert);
-                    certIndex++;
-                }
+                addCertificatesToKeystore(keyStore, entry.getKey(), readX509Certificates(certIn));
             } catch (IOException e) {
                 throw Throwables.propagate(e);
             } catch (KeyStoreException | CertificateException e) {
@@ -141,6 +131,18 @@ final class KeyStores {
         }
 
         return keyStore;
+    }
+
+    private static void addCertificatesToKeystore(
+            KeyStore keyStore,
+            String certificateEntryNamePrefix,
+            List<Certificate> certificates)
+            throws KeyStoreException {
+        int certIndex = 0;
+        for (Certificate cert : certificates) {
+            keyStore.setCertificateEntry(certificateEntryNamePrefix + "-" + certIndex, cert);
+            certIndex++;
+        }
     }
 
     /**
