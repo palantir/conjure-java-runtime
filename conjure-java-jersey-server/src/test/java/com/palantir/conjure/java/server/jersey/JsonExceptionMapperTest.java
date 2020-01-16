@@ -18,27 +18,27 @@ package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import javax.ws.rs.core.Response;
 import org.junit.Test;
 
 public final class JsonExceptionMapperTest {
 
-    private final Meter jsonExceptionMapperMeter = new Meter();
+    private final JerseyServerMetrics metrics = JerseyServerMetrics.of(new DefaultTaggedMetricRegistry());
     private final JsonExceptionMapper<RuntimeException> mapper =
-            new JsonExceptionMapper<RuntimeException>(jsonExceptionMapperMeter) {
+            new JsonExceptionMapper<RuntimeException>(metrics) {
                 @Override
                 ErrorType getErrorType(RuntimeException _exception) {
                     return ErrorType.INVALID_ARGUMENT;
                 }
 
                 @Override
-                boolean isInternalError() {
-                    return false;
+                InternalErrorCause getCause() {
+                    return InternalErrorCause.INTERNAL;
                 }
             };
 
@@ -52,16 +52,17 @@ public final class JsonExceptionMapperTest {
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
-        assertThat(jsonExceptionMapperMeter.getCount()).isZero();
+        assertThat(metrics.internalerrorAll(InternalErrorCause.INTERNAL.toString()).getCount()).isZero();
     }
 
     @Test
     public void testDoesNotPropagateExceptionMessage() throws Exception {
-        Meter runtimeExceptionMapperMeter = new Meter();
+        JerseyServerMetrics runtimeExceptionMetrics = JerseyServerMetrics.of(new DefaultTaggedMetricRegistry());
         Response response =
-                new RuntimeExceptionMapper(runtimeExceptionMapperMeter).toResponse(new NullPointerException("secret"));
+                new RuntimeExceptionMapper(runtimeExceptionMetrics).toResponse(new NullPointerException("secret"));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).doesNotContain("secret");
-        assertThat(runtimeExceptionMapperMeter.getCount()).isEqualTo(1);
+        assertThat(runtimeExceptionMetrics.internalerrorAll(InternalErrorCause.INTERNAL.toString())
+                .getCount()).isEqualTo(1);
     }
 }

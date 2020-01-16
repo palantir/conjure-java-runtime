@@ -19,10 +19,10 @@ package com.palantir.conjure.java.server.jersey;
 public enum InternalErrorCause {
     RPC("rpc"),
     SERVICE_INTERNAL("serviceInternal"),
-    INTERNAL("internal"),
-    REMOTE_INTERNAL("remoteInternal");
+    INTERNAL("internal");
 
     private final String cause;
+
     InternalErrorCause(String cause) {
         this.cause = cause;
     }
