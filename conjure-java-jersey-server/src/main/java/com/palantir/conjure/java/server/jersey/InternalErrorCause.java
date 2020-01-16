@@ -21,6 +21,7 @@ public enum InternalErrorCause {
     SERVICE_INTERNAL("serviceInternal"),
     INTERNAL("internal");
 
+    @SuppressWarnings("unused")
     private final String cause;
 
     InternalErrorCause(String cause) {
