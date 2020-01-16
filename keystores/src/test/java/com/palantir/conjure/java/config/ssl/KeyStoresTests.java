@@ -84,7 +84,8 @@ public final class KeyStoresTests {
         File certFolder = tempFolder.newFolder();
         Path caCer = certFolder.toPath().resolve("ca.cer");
         java.nio.file.Files.copy(TestConstants.SERVER_CERT_PEM_PATH, caCer);
-        java.nio.file.Files.write(caCer, java.nio.file.Files.readAllBytes(TestConstants.SERVER_CERT_PEM_PATH),
+        java.nio.file.Files.write(caCer,
+                java.nio.file.Files.readAllBytes(TestConstants.SERVER_CERT_PEM_PATH),
                 StandardOpenOption.APPEND);
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(caCer);
 
