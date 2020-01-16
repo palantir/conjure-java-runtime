@@ -68,7 +68,9 @@ public class OkHttpClientsRealServerTest extends TestBase {
                     () -> new ReproducibleExponentialBackoff(10, Duration.ofSeconds(3)));
             Future<?> future = executorService.submit((Callable<Void>) () -> {
                 try {
-                    client.newCall(new Request.Builder().url(url).build()).execute().close();
+                    client.newCall(new Request.Builder().url(url).build())
+                            .execute()
+                            .close();
                 } finally {
                     completionLatch.countDown();
                 }
@@ -119,7 +121,9 @@ public class OkHttpClientsRealServerTest extends TestBase {
                     () -> new ReproducibleExponentialBackoff(10, Duration.ofSeconds(2)));
             Future<?> future = executorService.submit((Callable<Void>) () -> {
                 try {
-                    client.newCall(new Request.Builder().url(url).build()).execute().close();
+                    client.newCall(new Request.Builder().url(url).build())
+                            .execute()
+                            .close();
                 } finally {
                     completionLatch.countDown();
                 }

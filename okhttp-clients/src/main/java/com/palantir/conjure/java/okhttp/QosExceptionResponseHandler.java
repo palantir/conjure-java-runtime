@@ -21,9 +21,7 @@ import com.palantir.conjure.java.api.errors.QosException;
 import java.util.Optional;
 import okhttp3.Response;
 
-/**
- * A {@link ResponseHandler} that turns QOS-related HTTP responses into {@link QosException}s.
- */
+/** A {@link ResponseHandler} that turns QOS-related HTTP responses into {@link QosException}s. */
 enum QosExceptionResponseHandler implements ResponseHandler<QosException> {
     INSTANCE;
 

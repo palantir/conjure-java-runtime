@@ -36,7 +36,8 @@ public final class SerializationTests {
                 TestConstants.SERVER_KEY_STORE_JKS_PATH,
                 TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
 
-        assertThat(MAPPER.readValue(MAPPER.writeValueAsBytes(sslConfig), SslConfiguration.class)).isEqualTo(sslConfig);
+        assertThat(MAPPER.readValue(MAPPER.writeValueAsBytes(sslConfig), SslConfiguration.class))
+                .isEqualTo(sslConfig);
     }
 
     @Test
@@ -49,14 +50,12 @@ public final class SerializationTests {
         assertThat(MAPPER.readValue(JSON_STRING, SslConfiguration.class)).isEqualTo(sslConfig);
     }
 
-    private static final String JSON_STRING =
-            "{"
-                    + "\"trustStorePath\":\"src/test/resources/testCA/testCA.jks\","
-                    + "\"trustStoreType\":\"JKS\","
-                    + "\"keyStorePath\":\"src/test/resources/testServer/testServer.jks\","
-                    + "\"keyStorePassword\":\"serverStore\","
-                    + "\"keyStoreType\":\"JKS\","
-                    + "\"keyStoreKeyAlias\":null"
-                    + "}";
-
+    private static final String JSON_STRING = "{"
+            + "\"trustStorePath\":\"src/test/resources/testCA/testCA.jks\","
+            + "\"trustStoreType\":\"JKS\","
+            + "\"keyStorePath\":\"src/test/resources/testServer/testServer.jks\","
+            + "\"keyStorePassword\":\"serverStore\","
+            + "\"keyStoreType\":\"JKS\","
+            + "\"keyStoreKeyAlias\":null"
+            + "}";
 }

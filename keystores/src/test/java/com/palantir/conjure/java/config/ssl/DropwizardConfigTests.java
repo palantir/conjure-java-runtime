@@ -31,9 +31,8 @@ import org.junit.Test;
 
 public final class DropwizardConfigTests {
     @ClassRule
-    public static final DropwizardAppRule<DropwizardConfigTestsConfiguration> APP = new DropwizardAppRule<>(
-            DropwizardConfigTestsServer.class,
-            "src/test/resources/test-server-no-ssl.yml");
+    public static final DropwizardAppRule<DropwizardConfigTestsConfiguration> APP =
+            new DropwizardAppRule<>(DropwizardConfigTestsServer.class, "src/test/resources/test-server-no-ssl.yml");
 
     @Test
     public void testUriInConfig() {

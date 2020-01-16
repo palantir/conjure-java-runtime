@@ -18,9 +18,7 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 import com.google.common.reflect.TypeToken;
 import java.lang.reflect.Type;
 
-/**
- * Utility functionality to detect raw types.
- */
+/** Utility functionality to detect raw types. */
 final class RawTypes {
 
     /** Attempts to extract the raw type class from a {@link Type}. */

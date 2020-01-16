@@ -30,8 +30,8 @@ public class KeepAliveSslSocketFactoryTest {
 
     @Test
     public void sslSocketFactory_has_keepalives_enabled() throws IOException {
-        SSLSocketFactory sslSocketFactory = SslSocketFactories.createSslSocketFactory(SslConfiguration.of(Paths.get(
-                "src/test/resources/trustStore.jks")));
+        SSLSocketFactory sslSocketFactory = SslSocketFactories.createSslSocketFactory(
+                SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")));
         KeepAliveSslSocketFactory keepalive = new KeepAliveSslSocketFactory(sslSocketFactory);
         try (Socket socket = keepalive.createSocket("google.com", 443)) {
             assertThat(socket.getKeepAlive()).describedAs("keepAlives enabled").isTrue();

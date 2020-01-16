@@ -103,9 +103,10 @@ public final class SslSocketFactoriesConnectionTests {
         SslConfiguration clientConfig = SslConfiguration.of(TestConstants.CLIENT_KEY_STORE_JKS_PATH);
 
         assertThatThrownBy(() -> {
-            runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
-            fail("fail");
-        }).isInstanceOf(RuntimeException.class)
+                    runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
+                    fail("fail");
+                })
+                .isInstanceOf(RuntimeException.class)
                 .hasCauseInstanceOf(SSLHandshakeException.class)
                 .hasMessageContaining("PKIX path building failed");
     }
@@ -219,8 +220,9 @@ public final class SslSocketFactoriesConnectionTests {
         SslConfiguration clientConfig = SslConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
 
         assertThatThrownBy(() -> {
-            runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
-        }).isInstanceOf(RuntimeException.class)
+                    runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
+                })
+                .isInstanceOf(RuntimeException.class)
                 .hasCauseInstanceOf(SSLHandshakeException.class)
                 .hasMessageContaining("bad_certificate");
     }
@@ -240,23 +242,25 @@ public final class SslSocketFactoriesConnectionTests {
                 TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
 
         assertThatThrownBy(() -> {
-            runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
-        }).isInstanceOfSatisfying(RuntimeException.class, ex -> {
-            if (System.getProperty("java.version").startsWith("1.8")) {
-                assertThat(ex).hasCauseInstanceOf(SSLHandshakeException.class).hasMessageContaining("bad_certificate");
-            } else {
-                assertThat(ex.getCause()).isInstanceOfAny(SSLException.class, SSLHandshakeException.class);
-                assertThat(ex.getMessage()).satisfiesAnyOf(
-                        message -> assertThat(message).contains("readHandshakeRecord"),
-                        message -> assertThat(message).contains("certificate_unknown"));
-            }
-        });
+                    runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
+                })
+                .isInstanceOfSatisfying(RuntimeException.class, ex -> {
+                    if (System.getProperty("java.version").startsWith("1.8")) {
+                        assertThat(ex)
+                                .hasCauseInstanceOf(SSLHandshakeException.class)
+                                .hasMessageContaining("bad_certificate");
+                    } else {
+                        assertThat(ex.getCause()).isInstanceOfAny(SSLException.class, SSLHandshakeException.class);
+                        assertThat(ex.getMessage())
+                                .satisfiesAnyOf(
+                                        message -> assertThat(message).contains("readHandshakeRecord"),
+                                        message -> assertThat(message).contains("certificate_unknown"));
+                    }
+                });
     }
 
     private void runSslConnectionTest(
-            SslConfiguration serverConfig,
-            SslConfiguration clientConfig,
-            ClientAuth clientAuth) {
+            SslConfiguration serverConfig, SslConfiguration clientConfig, ClientAuth clientAuth) {
         String message = UUID.randomUUID().toString();
 
         SSLContext sslContext = SslSocketFactories.createSslContext(serverConfig);
@@ -274,14 +278,14 @@ public final class SslSocketFactoriesConnectionTests {
     }
 
     /**
-     * Verify that an SSL connection can be established. Creates an SSL socket with the provided {@link
-     * SSLSocketFactory} that connect to localhost on the specified port and waits for expectedMessage to be sent by the
-     * server.
+     * Verify that an SSL connection can be established. Creates an SSL socket with the provided
+     * {@link SSLSocketFactory} that connect to localhost on the specified port and waits for expectedMessage to be sent
+     * by the server.
      */
     private void verifySslConnection(SSLSocketFactory factory, int port, String expectedMessage) {
         try (Socket clientSocket = factory.createSocket("localhost", port)) {
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8));
+            BufferedReader in =
+                    new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), StandardCharsets.UTF_8));
 
             String fromServer;
             while ((fromServer = in.readLine()) != null) {
@@ -297,9 +301,7 @@ public final class SslSocketFactoriesConnectionTests {
      * connection is established, the specified message is sent to the client and the socket is closed.
      */
     private Thread createSslServerThread(
-            final SSLServerSocket sslServerSocket,
-            final ClientAuth clientAuth,
-            final String message) {
+            final SSLServerSocket sslServerSocket, final ClientAuth clientAuth, final String message) {
         Runnable serverThread = new Runnable() {
             @Override
             public void run() {
@@ -308,9 +310,8 @@ public final class SslSocketFactoriesConnectionTests {
                     sslServerSocket.setReuseAddress(true);
                     Socket clientSocket = sslServerSocket.accept();
 
-                    OutputStreamWriter streamWriter = new OutputStreamWriter(
-                            clientSocket.getOutputStream(),
-                            StandardCharsets.UTF_8);
+                    OutputStreamWriter streamWriter =
+                            new OutputStreamWriter(clientSocket.getOutputStream(), StandardCharsets.UTF_8);
 
                     PrintWriter out = new PrintWriter(streamWriter, true);
                     out.println(message);

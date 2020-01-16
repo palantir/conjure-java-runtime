@@ -31,12 +31,11 @@ import javax.annotation.Nullable;
 
 public final class Cases {
 
-    public static final ClientTestCases TEST_CASES = deserializeTestCases(
-            new File("build/test-cases/test-cases.json"));
-    private static final IgnoredClientTestCases IGNORED_TEST_CASES_JERSEY = deserializeIgnoredClientTestCases(
-            new File("src/test/resources/ignored-test-cases.jersey.yml"));
-    private static final IgnoredClientTestCases IGNORED_TEST_CASES_RETROFIT = deserializeIgnoredClientTestCases(
-            new File("src/test/resources/ignored-test-cases.retrofit.yml"));
+    public static final ClientTestCases TEST_CASES = deserializeTestCases(new File("build/test-cases/test-cases.json"));
+    private static final IgnoredClientTestCases IGNORED_TEST_CASES_JERSEY =
+            deserializeIgnoredClientTestCases(new File("src/test/resources/ignored-test-cases.jersey.yml"));
+    private static final IgnoredClientTestCases IGNORED_TEST_CASES_RETROFIT =
+            deserializeIgnoredClientTestCases(new File("src/test/resources/ignored-test-cases.retrofit.yml"));
 
     private Cases() {}
 
@@ -48,8 +47,7 @@ public final class Cases {
                     .getClient();
         } catch (IOException e) {
             throw new RuntimeException(
-                    String.format("Unable to read %s, you may need to run ./gradlew copyTestCases", file),
-                    e);
+                    String.format("Unable to read %s, you may need to run ./gradlew copyTestCases", file), e);
         }
     }
 
@@ -60,24 +58,28 @@ public final class Cases {
                     .readValue(file, IgnoredTestCases.class)
                     .getClient();
         } catch (IOException e) {
-            throw new RuntimeException(
-                    String.format("Unable to read %s", file),
-                    e);
+            throw new RuntimeException(String.format("Unable to read %s", file), e);
         }
     }
 
     public static boolean shouldIgnoreRetrofit(EndpointName endpointName, String json) {
         return setContains(IGNORED_TEST_CASES_RETROFIT.getAutoDeserialize().get(endpointName), json)
-                || setContains(IGNORED_TEST_CASES_RETROFIT.getSingleHeaderService().get(endpointName), json)
-                || setContains(IGNORED_TEST_CASES_RETROFIT.getSinglePathParamService().get(endpointName), json)
-                || setContains(IGNORED_TEST_CASES_RETROFIT.getSingleQueryParamService().get(endpointName), json);
+                || setContains(
+                        IGNORED_TEST_CASES_RETROFIT.getSingleHeaderService().get(endpointName), json)
+                || setContains(
+                        IGNORED_TEST_CASES_RETROFIT.getSinglePathParamService().get(endpointName), json)
+                || setContains(
+                        IGNORED_TEST_CASES_RETROFIT.getSingleQueryParamService().get(endpointName), json);
     }
 
     public static boolean shouldIgnoreJersey(EndpointName endpointName, String json) {
         return setContains(IGNORED_TEST_CASES_JERSEY.getAutoDeserialize().get(endpointName), json)
-                || setContains(IGNORED_TEST_CASES_JERSEY.getSingleHeaderService().get(endpointName), json)
-                || setContains(IGNORED_TEST_CASES_JERSEY.getSinglePathParamService().get(endpointName), json)
-                || setContains(IGNORED_TEST_CASES_JERSEY.getSingleQueryParamService().get(endpointName), json);
+                || setContains(
+                        IGNORED_TEST_CASES_JERSEY.getSingleHeaderService().get(endpointName), json)
+                || setContains(
+                        IGNORED_TEST_CASES_JERSEY.getSinglePathParamService().get(endpointName), json)
+                || setContains(
+                        IGNORED_TEST_CASES_JERSEY.getSingleQueryParamService().get(endpointName), json);
     }
 
     private static boolean setContains(@Nullable Set<String> set, String item) {

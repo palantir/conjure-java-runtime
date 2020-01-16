@@ -58,11 +58,11 @@ public final class VerificationServerRule extends ExternalResource {
     @Override
     public void before() throws Exception {
         ProcessBuilder processBuilder = new ProcessBuilder(
-                "build/verification/verifier",
-                "build/test-cases/test-cases.json",
-                "build/test-cases/verification-api.json")
-                        .redirectErrorStream(true)
-                        .redirectOutput(ProcessBuilder.Redirect.PIPE);
+                        "build/verification/verifier",
+                        "build/test-cases/test-cases.json",
+                        "build/test-cases/verification-api.json")
+                .redirectErrorStream(true)
+                .redirectOutput(ProcessBuilder.Redirect.PIPE);
 
         processBuilder.environment().put("PORT", String.valueOf(PORT));
         process = processBuilder.start();
@@ -74,9 +74,8 @@ public final class VerificationServerRule extends ExternalResource {
     private static void blockUntilServerStarted(InputStream inputStream) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
         Thread thread = new Thread(() -> {
-            try (
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,
-                            StandardCharsets.UTF_8))) {
+            try (BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
                 while (true) {
                     String line = reader.readLine();
                     if (line == null) {
@@ -96,8 +95,7 @@ public final class VerificationServerRule extends ExternalResource {
         thread.start();
 
         Preconditions.checkState(
-                latch.await(3, TimeUnit.SECONDS),
-                "verification-server failed to start up within 2 seconds");
+                latch.await(3, TimeUnit.SECONDS), "verification-server failed to start up within 2 seconds");
     }
 
     @Override

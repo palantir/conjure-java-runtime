@@ -52,15 +52,15 @@ public final class CipherSuites {
 
     /**
      * Known fast and safe cipher suites on the JVM.
-     * <p>
-     * In an ideal world, we'd use GCM suites, but they're an order of
-     * magnitude slower than the CBC suites, which have JVM optimizations
-     * already. We should revisit with JDK9.
-     * <p>
-     * See also:
+     *
+     * <p>In an ideal world, we'd use GCM suites, but they're an order of magnitude slower than the CBC suites, which
+     * have JVM optimizations already. We should revisit with JDK9.
+     *
+     * <p>See also:
+     *
      * <ul>
-     * <li>http://openjdk.java.net/jeps/246
-     * <li>https://bugs.openjdk.java.net/secure/attachment/25422/GCM%20Analysis.pdf
+     *   <li>http://openjdk.java.net/jeps/246
+     *   <li>https://bugs.openjdk.java.net/secure/attachment/25422/GCM%20Analysis.pdf
      * </ul>
      */
     public static String[] fastCipherSuites() {

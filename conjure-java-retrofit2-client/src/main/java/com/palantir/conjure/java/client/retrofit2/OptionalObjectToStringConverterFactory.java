@@ -40,8 +40,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
 
     @Override
     public Converter<?, String> stringConverter(Type type, Annotation[] annotations, Retrofit _retrofit) {
-        Optional<?> pathQueryAnnotation = ImmutableList.copyOf(annotations)
-                .stream()
+        Optional<?> pathQueryAnnotation = ImmutableList.copyOf(annotations).stream()
                 .map(Annotation::annotationType)
                 .filter(t -> t == Path.class || t == Query.class || t == Header.class)
                 .findAny();
@@ -55,7 +54,8 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
                             // for paths, we want to turn null -> empty string
                             @SuppressWarnings("unchecked")
                             Converter<Object, String> castConverter = (Converter<Object, String>) conv;
-                            return val -> Optional.ofNullable(castConverter.convert(val)).orElse("");
+                            return val -> Optional.ofNullable(castConverter.convert(val))
+                                    .orElse("");
                         } else {
                             return conv;
                         }
@@ -67,9 +67,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
         return null;
     }
 
-    /**
-     * Optionally returns a converter which returns null when the value is not present.
-     */
+    /** Optionally returns a converter which returns null when the value is not present. */
     private static Optional<Converter<?, String>> getNullableConverterForRawType(Class<?> rawType) {
         if (rawType == java.util.Optional.class) {
             return Optional.of(Java8OptionalStringConverter.INSTANCE);

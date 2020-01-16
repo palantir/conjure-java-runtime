@@ -39,6 +39,7 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
 
     @Rule
     public final MockWebServer server = new MockWebServer();
+
     @Rule
     public final MockWebServer proxyServer = new MockWebServer();
 
@@ -47,7 +48,8 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
         server.enqueue(new MockResponse().setBody("\"server\""));
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
-        TestService directService = JaxRsClient.create(TestService.class,
+        TestService directService = JaxRsClient.create(
+                TestService.class,
                 AGENT,
                 new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
@@ -55,10 +57,8 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
                 .from(createTestConfig("http://localhost:" + server.getPort()))
                 .proxy(createProxySelector("localhost", proxyServer.getPort()))
                 .build();
-        TestService proxiedService = JaxRsClient.create(TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                proxiedConfig);
+        TestService proxiedService =
+                JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), proxiedConfig);
 
         assertThat(directService.string()).isEqualTo("server");
         assertThat(proxiedService.string()).isEqualTo("proxyServer");

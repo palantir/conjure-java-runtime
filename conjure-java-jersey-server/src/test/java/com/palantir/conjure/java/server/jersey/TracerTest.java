@@ -104,7 +104,10 @@ public final class TracerTest {
 
         // Invoke server and observe servers log messages; note that the server uses the same logger at INFO.
         log.setLevel(ch.qos.logback.classic.Level.INFO);
-        target.path("trace").request().header(TraceHttpHeaders.TRACE_ID, "myTraceId").get();
+        target.path("trace")
+                .request()
+                .header(TraceHttpHeaders.TRACE_ID, "myTraceId")
+                .get();
         assertThat(byteStream.toString(StandardCharsets.UTF_8.name())).startsWith("traceId: myTraceId");
     }
 

@@ -23,6 +23,7 @@ import java.lang.reflect.Type;
 
 /**
  * Use {@link TextDelegateDecoder}.
+ *
  * @deprecated Use {@link TextDelegateDecoder}.
  */
 @Deprecated

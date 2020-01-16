@@ -39,6 +39,7 @@ public final class HostMetricsTest {
     private static final long secondInstant = 1;
 
     private DefaultHostMetrics hostMetrics;
+
     @Mock
     private Clock clock;
 

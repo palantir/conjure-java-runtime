@@ -42,8 +42,8 @@ import org.junit.Test;
 public final class GuavaOptionalTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(OptionalTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(OptionalTestServer.class, "src/test/resources/test-server.yml");
 
     private WebTarget target;
 
@@ -57,7 +57,10 @@ public final class GuavaOptionalTest {
 
     @Test
     public void testOptionalPresent() throws SecurityException {
-        Response response = target.path("optional").queryParam("value", "val").request().get();
+        Response response = target.path("optional")
+                .queryParam("value", "val")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("valval");
     }

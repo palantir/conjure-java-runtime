@@ -34,17 +34,20 @@ public final class HeaderAccessUtilsTest {
 
     @Test
     public void caseInsensitiveContainsShouldReturnTrueIgnoringCase() {
-        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "hEaDeR")).isTrue();
+        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "hEaDeR"))
+                .isTrue();
     }
 
     @Test
     public void caseInsensitiveContainsShouldReturnFalseForNonExistentKey() {
-        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "invalid")).isFalse();
+        assertThat(HeaderAccessUtils.caseInsensitiveContains(TEST_HEADERS_MAP, "invalid"))
+                .isFalse();
     }
 
     @Test
     public void caseInsensitiveGetReturnsNullForNotExistingHeader() {
-        assertThat(HeaderAccessUtils.caseInsensitiveGet(TEST_HEADERS_MAP, "invalid")).isNull();
+        assertThat(HeaderAccessUtils.caseInsensitiveGet(TEST_HEADERS_MAP, "invalid"))
+                .isNull();
     }
 
     @Test

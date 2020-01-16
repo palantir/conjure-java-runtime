@@ -43,9 +43,8 @@ import org.junit.Test;
 public final class DateTimeTest {
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
-            DateTimeTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(DateTimeTestServer.class, "src/test/resources/test-server.yml");
 
     private WebTarget target;
 
@@ -69,14 +68,20 @@ public final class DateTimeTest {
 
     @Test
     public void testZonedDateTimeParam() throws SecurityException {
-        Response response = target.path("zonedDateTime").queryParam("value", "2017-01-02T03:04:05.06Z").request().get();
+        Response response = target.path("zonedDateTime")
+                .queryParam("value", "2017-01-02T03:04:05.06Z")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("2017-01-02T03:04:05.060Z");
     }
 
     @Test
     public void testInstantParam() {
-        Response response = target.path("instant").queryParam("value", "2017-01-02T03:04:05.06Z").request().get();
+        Response response = target.path("instant")
+                .queryParam("value", "2017-01-02T03:04:05.06Z")
+                .request()
+                .get();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("2017-01-02T03:04:05.060Z");
     }

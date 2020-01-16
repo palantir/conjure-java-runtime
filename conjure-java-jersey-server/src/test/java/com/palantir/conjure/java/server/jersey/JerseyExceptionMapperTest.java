@@ -69,9 +69,7 @@ public final class JerseyExceptionMapperTest extends JerseyTest {
         assertThat(entity.errorName()).isEqualTo("Default:Internal");
     }
 
-    /**
-     * Tests the exception that we get when we couldn't find a route to the target is correct.
-     */
+    /** Tests the exception that we get when we couldn't find a route to the target is correct. */
     @Test
     public void testRoutingException() {
         Response response = target("/angry/cant-route").request().get();

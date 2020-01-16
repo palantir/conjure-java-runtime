@@ -54,9 +54,9 @@ public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
     @Parameters(name = "{index}: code {0} body: \"{1}\"")
     public static Collection<Object[]> responses() {
         return Arrays.asList(new Object[][] {
-                {200, "null"},
-                {200, ""},
-                {204, ""}
+            {200, "null"},
+            {200, ""},
+            {204, ""}
         });
     }
 
@@ -70,10 +70,7 @@ public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
     public void before() {
         url = server.url("/");
         proxy = Retrofit2Client.create(
-                Service.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(url.toString()));
+                Service.class, AGENT, new HostMetricsRegistry(), createTestConfig(url.toString()));
         MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
         server.enqueue(mockResponse);
     }

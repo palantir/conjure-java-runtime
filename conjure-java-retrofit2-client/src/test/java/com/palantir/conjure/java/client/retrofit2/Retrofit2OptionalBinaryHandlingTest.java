@@ -55,9 +55,9 @@ public final class Retrofit2OptionalBinaryHandlingTest extends TestBase {
         nullValueBuffer.write("null".getBytes(StandardCharsets.UTF_8));
         Buffer emptyBuffer = new Buffer();
         return Arrays.asList(new Object[][] {
-                {200, nullValueBuffer, false},
-                {200, emptyBuffer, false},
-                {204, emptyBuffer, true}
+            {200, nullValueBuffer, false},
+            {200, emptyBuffer, false},
+            {204, emptyBuffer, true}
         });
     }
 
@@ -74,10 +74,7 @@ public final class Retrofit2OptionalBinaryHandlingTest extends TestBase {
     public void before() {
         url = server.url("/");
         proxy = Retrofit2Client.create(
-                Service.class,
-                AGENT,
-                NoOpHostEventsSink.INSTANCE,
-                createTestConfig(url.toString()));
+                Service.class, AGENT, NoOpHostEventsSink.INSTANCE, createTestConfig(url.toString()));
         MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
         server.enqueue(mockResponse);
     }
@@ -92,26 +89,24 @@ public final class Retrofit2OptionalBinaryHandlingTest extends TestBase {
 
     @Test
     public void testOptional() throws IOException {
-        assertCallBody(proxy.getOptional(),
-                optional -> {
-                    if (empty) {
-                        assertThat(optional).isEmpty();
-                    } else {
-                        assertThat(optional).isPresent();
-                    }
-                });
+        assertCallBody(proxy.getOptional(), optional -> {
+            if (empty) {
+                assertThat(optional).isEmpty();
+            } else {
+                assertThat(optional).isPresent();
+            }
+        });
     }
 
     @Test
     public void testOptionalFuture() throws Exception {
-        assertFuture(proxy.getOptionalFuture(),
-                optional -> {
-                    if (empty) {
-                        assertThat(optional).isEmpty();
-                    } else {
-                        assertThat(optional).isPresent();
-                    }
-                });
+        assertFuture(proxy.getOptionalFuture(), optional -> {
+            if (empty) {
+                assertThat(optional).isEmpty();
+            } else {
+                assertThat(optional).isPresent();
+            }
+        });
     }
 
     private static <T> void assertCallBody(Call<T> call, Consumer<T> assertions) throws IOException {
@@ -124,5 +119,4 @@ public final class Retrofit2OptionalBinaryHandlingTest extends TestBase {
         T value = future.get(1, TimeUnit.SECONDS);
         assertions.accept(value);
     }
-
 }

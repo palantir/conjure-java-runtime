@@ -27,8 +27,8 @@ import java.util.Collection;
 import javax.ws.rs.core.MediaType;
 
 /**
- * Delegates to a {@link feign.codec.Encoder.Default} if the response has a Content-Type of text/plain, or falls back
- * to the given delegate otherwise.
+ * Delegates to a {@link feign.codec.Encoder.Default} if the response has a Content-Type of text/plain, or falls back to
+ * the given delegate otherwise.
  */
 public final class TextDelegateEncoder implements Encoder {
     private static final Encoder defaultEncoder = new Encoder.Default();
@@ -48,7 +48,8 @@ public final class TextDelegateEncoder implements Encoder {
         }
 
         // In the case of multiple content types, or an unknown content type, we'll use the delegate instead.
-        if (contentTypes.size() == 1 && Iterables.getOnlyElement(contentTypes, "").equals(MediaType.TEXT_PLAIN)) {
+        if (contentTypes.size() == 1
+                && Iterables.getOnlyElement(contentTypes, "").equals(MediaType.TEXT_PLAIN)) {
             defaultEncoder.encode(object, bodyType, template);
         } else {
             delegate.encode(object, bodyType, template);

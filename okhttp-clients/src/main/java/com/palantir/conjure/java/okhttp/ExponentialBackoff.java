@@ -53,8 +53,7 @@ final class ExponentialBackoff implements BackoffStrategy {
         }
 
         int upperBound = (int) Math.pow(2, retryNumber);
-        return Optional.of(Duration.ofNanos(Math.round(
-                backoffSlotSize.toNanos() * random.getAsDouble() * upperBound)));
+        return Optional.of(Duration.ofNanos(Math.round(backoffSlotSize.toNanos() * random.getAsDouble() * upperBound)));
     }
 
     private static double random() {
@@ -64,6 +63,11 @@ final class ExponentialBackoff implements BackoffStrategy {
     @Override
     public String toString() {
         return "ExponentialBackoff{maxNumRetries="
-                + maxNumRetries + ", backoffSlotSize=" + backoffSlotSize + ", retryNumber=" + retryNumber + '}';
+                + maxNumRetries
+                + ", backoffSlotSize="
+                + backoffSlotSize
+                + ", retryNumber="
+                + retryNumber
+                + '}';
     }
 }

@@ -22,8 +22,8 @@ import feign.Param.Expander;
 import java.util.OptionalLong;
 
 /**
- * Expands OptionalLong by using null for {@link OptionalLong#empty()} and the {@link Long#toString()} of the
- * value otherwise.
+ * Expands OptionalLong by using null for {@link OptionalLong#empty()} and the {@link Long#toString()} of the value
+ * otherwise.
  */
 public final class Java8NullOptionalLongExpander implements Expander {
 

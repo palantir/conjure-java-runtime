@@ -49,8 +49,7 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateWithAllTrustStoreParams() {
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .trustStoreType(TestConstants.CA_TRUST_STORE_TYPE)
                 .build();
@@ -61,8 +60,7 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateWithAllTrustStoreParamsPkcs12Format() {
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.SERVER_KEY_STORE_P12_PATH)
                 .trustStoreType(TestConstants.SERVER_KEY_STORE_P12_TYPE)
                 .build();
@@ -73,8 +71,7 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateTrustStorePemTypePemFormat() {
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_PEM_CERT_PATH)
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
@@ -85,8 +82,7 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateTrustStorePemTypeDerFormat() {
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_DER_CERT_PATH)
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
@@ -99,12 +95,17 @@ public final class SslSocketFactoriesTests {
     public void testCreateSslSocketFactory_canCreateTrustStorePemFromDirectory() throws IOException {
         File certFolder = tempFolder.newFolder();
 
-        Files.copy(TestConstants.CA_DER_CERT_PATH.toFile(), certFolder.toPath().resolve("ca.der").toFile());
-        Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), certFolder.toPath().resolve("server.crt").toFile());
-        Files.copy(TestConstants.CLIENT_CERT_PEM_PATH.toFile(), certFolder.toPath().resolve("client.crt").toFile());
+        Files.copy(
+                TestConstants.CA_DER_CERT_PATH.toFile(),
+                certFolder.toPath().resolve("ca.der").toFile());
+        Files.copy(
+                TestConstants.SERVER_CERT_PEM_PATH.toFile(),
+                certFolder.toPath().resolve("server.crt").toFile());
+        Files.copy(
+                TestConstants.CLIENT_CERT_PEM_PATH.toFile(),
+                certFolder.toPath().resolve("client.crt").toFile());
 
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(certFolder.toPath())
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
@@ -120,12 +121,17 @@ public final class SslSocketFactoriesTests {
         File certsFolder = puppetFolder.toPath().resolve("certs").toFile();
         assertThat(certsFolder.mkdir()).isTrue();
 
-        Files.copy(TestConstants.CA_PEM_CERT_PATH.toFile(), certsFolder.toPath().resolve("ca.pem").toFile());
-        Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), certsFolder.toPath().resolve("server.pem").toFile());
-        Files.copy(TestConstants.CLIENT_CERT_PEM_PATH.toFile(), certsFolder.toPath().resolve("client.pem").toFile());
+        Files.copy(
+                TestConstants.CA_PEM_CERT_PATH.toFile(),
+                certsFolder.toPath().resolve("ca.pem").toFile());
+        Files.copy(
+                TestConstants.SERVER_CERT_PEM_PATH.toFile(),
+                certsFolder.toPath().resolve("server.pem").toFile());
+        Files.copy(
+                TestConstants.CLIENT_CERT_PEM_PATH.toFile(),
+                certsFolder.toPath().resolve("client.pem").toFile());
 
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(puppetFolder.toPath())
                 .trustStoreType(SslConfiguration.StoreType.PUPPET)
                 .build();
@@ -144,11 +150,14 @@ public final class SslSocketFactoriesTests {
         File certsFolder = puppetFolder.toPath().resolve("certs").toFile();
         assertThat(certsFolder.mkdir()).isTrue();
 
-        Files.copy(TestConstants.SERVER_KEY_PEM_PATH.toFile(), keysFolder.toPath().resolve("server.pem").toFile());
-        Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), certsFolder.toPath().resolve("server.pem").toFile());
+        Files.copy(
+                TestConstants.SERVER_KEY_PEM_PATH.toFile(),
+                keysFolder.toPath().resolve("server.pem").toFile());
+        Files.copy(
+                TestConstants.SERVER_CERT_PEM_PATH.toFile(),
+                certsFolder.toPath().resolve("server.pem").toFile());
 
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .keyStorePath(puppetFolder.toPath())
                 .keyStorePassword("")
@@ -161,8 +170,7 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateKeyStorePemType() {
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .keyStorePath(TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH)
                 .keyStorePassword("")
@@ -175,8 +183,7 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateWithOnlyTrustStorePath() {
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .build();
 
@@ -186,8 +193,7 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateWithAllKeyStoreParams() {
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .keyStorePath(TestConstants.SERVER_KEY_STORE_JKS_PATH)
                 .keyStorePassword(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
@@ -200,8 +206,7 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateWithoutKeyStoreTypeJks() {
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .keyStorePath(TestConstants.SERVER_KEY_STORE_JKS_PATH)
                 .keyStorePassword(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
@@ -214,8 +219,7 @@ public final class SslSocketFactoriesTests {
     @Test
     public void testCreateSslSocketFactory_jksKeyStoreTypeCannotBePkcs12Type() {
         try {
-            SslConfiguration sslConfig = SslConfiguration
-                    .builder()
+            SslConfiguration sslConfig = SslConfiguration.builder()
                     .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                     .keyStorePath(TestConstants.SERVER_KEY_STORE_JKS_PATH)
                     .keyStorePassword(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
@@ -238,16 +242,16 @@ public final class SslSocketFactoriesTests {
     @Test
     public void testCreateSslSocketFactory_keyStorePasswordMustBeCorrectJks() {
         assertThatThrownBy(() -> {
-            SslConfiguration sslConfig = SslConfiguration
-                    .builder()
-                    .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
-                    .keyStorePath(TestConstants.SERVER_KEY_STORE_JKS_PATH)
-                    // bad configuration: keyStorePassword is incorrect
-                    .keyStorePassword("a")
-                    .build();
+                    SslConfiguration sslConfig = SslConfiguration.builder()
+                            .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                            .keyStorePath(TestConstants.SERVER_KEY_STORE_JKS_PATH)
+                            // bad configuration: keyStorePassword is incorrect
+                            .keyStorePassword("a")
+                            .build();
 
-            SslSocketFactories.createSslSocketFactory(sslConfig);
-        }).isInstanceOf(RuntimeException.class)
+                    SslSocketFactories.createSslSocketFactory(sslConfig);
+                })
+                .isInstanceOf(RuntimeException.class)
                 .hasCauseInstanceOf(IOException.class)
                 .hasMessageContaining("Keystore was tampered with, or password was incorrect");
     }
@@ -255,88 +259,91 @@ public final class SslSocketFactoriesTests {
     @Test
     public void testCreateSslSocketFactory_keyStorePasswordMustBeCorrectPkcs12() {
         assertThatThrownBy(() -> {
-            SslConfiguration sslConfig = SslConfiguration
-                    .builder()
-                    .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
-                    .keyStorePath(TestConstants.SERVER_KEY_STORE_P12_PATH)
-                    // bad configuration: keyStorePassword is incorrect
-                    .keyStorePassword("a")
-                    .build();
+                    SslConfiguration sslConfig = SslConfiguration.builder()
+                            .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                            .keyStorePath(TestConstants.SERVER_KEY_STORE_P12_PATH)
+                            // bad configuration: keyStorePassword is incorrect
+                            .keyStorePassword("a")
+                            .build();
 
-            SslSocketFactories.createSslSocketFactory(sslConfig);
-        }).isInstanceOf(RuntimeException.class).hasCauseInstanceOf(IOException.class).hasMessageContaining("keystore");
+                    SslSocketFactories.createSslSocketFactory(sslConfig);
+                })
+                .isInstanceOf(RuntimeException.class)
+                .hasCauseInstanceOf(IOException.class)
+                .hasMessageContaining("keystore");
     }
 
     @Test
     public void testCreateSslSocketFactory_nonexistentKeyStoreAliasFails() {
         assertThatThrownBy(() -> {
-            SslConfiguration sslConfig = SslConfiguration
-                    .builder()
-                    .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
-                    .keyStorePath(TestConstants.MULTIPLE_KEY_STORE_JKS_PATH)
-                    .keyStorePassword(TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD)
-                    // bad configuration: specified key alias does not exist in key store
-                    .keyStoreKeyAlias("nonexistent")
-                    .build();
-            SslSocketFactories.createSslSocketFactory(sslConfig);
-        }).isInstanceOf(IllegalStateException.class).hasMessageContaining("Could not find key with alias");
+                    SslConfiguration sslConfig = SslConfiguration.builder()
+                            .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                            .keyStorePath(TestConstants.MULTIPLE_KEY_STORE_JKS_PATH)
+                            .keyStorePassword(TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD)
+                            // bad configuration: specified key alias does not exist in key store
+                            .keyStoreKeyAlias("nonexistent")
+                            .build();
+                    SslSocketFactories.createSslSocketFactory(sslConfig);
+                })
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Could not find key with alias");
     }
 
     @Test
     public void testCreateSslSocketFactory_keystorePasswordRequiredIfUriPresent() {
         assertThatThrownBy(() -> {
-            SslConfiguration sslConfig = SslConfiguration
-                    .builder()
-                    .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
-                    .keyStorePath(TestConstants.MULTIPLE_KEY_STORE_JKS_PATH)
-                    .build();
+                    SslConfiguration sslConfig = SslConfiguration.builder()
+                            .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                            .keyStorePath(TestConstants.MULTIPLE_KEY_STORE_JKS_PATH)
+                            .build();
 
-            SslSocketFactories.createSslSocketFactory(sslConfig);
-        }).hasMessageContaining("keyStorePath and keyStorePassword must both be present or both be absent");
+                    SslSocketFactories.createSslSocketFactory(sslConfig);
+                })
+                .hasMessageContaining("keyStorePath and keyStorePassword must both be present or both be absent");
     }
 
     @Test
     public void testCreateSslSocketFactory_keyStorePathRequiredIfPasswordPresent() {
         assertThatThrownBy(() -> {
-            SslConfiguration sslConfig = SslConfiguration
-                    .builder()
-                    .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
-                    .keyStorePassword(TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD)
-                    .build();
+                    SslConfiguration sslConfig = SslConfiguration.builder()
+                            .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                            .keyStorePassword(TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD)
+                            .build();
 
-            SslSocketFactories.createSslSocketFactory(sslConfig);
-        }).hasMessageContaining("keyStorePath and keyStorePassword must both be present or both be absent");
+                    SslSocketFactories.createSslSocketFactory(sslConfig);
+                })
+                .hasMessageContaining("keyStorePath and keyStorePassword must both be present or both be absent");
     }
 
     @Test
     public void testCreateSslSocketFactory_keyStorePathRequiredIfAliasPresent() {
         assertThatThrownBy(() -> {
-            SslConfiguration sslConfig = SslConfiguration
-                    .builder()
-                    .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
-                    .keyStoreKeyAlias(TestConstants.MULTIPLE_KEY_STORE_CLIENT_ALIAS)
-                    .build();
+                    SslConfiguration sslConfig = SslConfiguration.builder()
+                            .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                            .keyStoreKeyAlias(TestConstants.MULTIPLE_KEY_STORE_CLIENT_ALIAS)
+                            .build();
 
-            SslSocketFactories.createSslSocketFactory(sslConfig);
-        }).hasMessageContaining("keyStorePath must be present if keyStoreKeyAlias is present");
+                    SslSocketFactories.createSslSocketFactory(sslConfig);
+                })
+                .hasMessageContaining("keyStorePath must be present if keyStoreKeyAlias is present");
     }
 
     @Test
     public void testCreateSslSocketFactory_failsWithInvalidPath() {
         assertThatThrownBy(() -> {
-            SslConfiguration sslConfig = SslConfiguration
-                    .builder()
-                    .trustStorePath(new File("foo/bar").toPath())
-                    .build();
+                    SslConfiguration sslConfig = SslConfiguration.builder()
+                            .trustStorePath(new File("foo/bar").toPath())
+                            .build();
 
-            SslSocketFactories.createSslSocketFactory(sslConfig);
-        }).hasMessageContaining("foo/bar").hasCauseInstanceOf(NoSuchFileException.class);
+                    SslSocketFactories.createSslSocketFactory(sslConfig);
+                })
+                .hasMessageContaining("foo/bar")
+                .hasCauseInstanceOf(NoSuchFileException.class);
     }
 
     @Test
     public void testCreateSslSocketFactory_supportsRelativePath() {
-        SslConfiguration sslConfig = SslConfiguration
-                .builder()
+        SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(new File("src/test/resources/testCA/testCA.jks").toPath())
                 .build();
 

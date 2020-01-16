@@ -34,15 +34,14 @@ import retrofit2.Converter;
 import retrofit2.Retrofit;
 
 /**
- * Handles 2xx HTTP responses and interprets "null" or empty responses as the empty value if the expected
- * type is a collection.
- * <p>
- * Note that {@link retrofit2.OkHttpCall#parseResponse(Response)} does not call this
- * ConverterFactory if the response is 204 or 205 - those cases are handled by
- * {@link CoerceNullCollectionsCallAdapterFactory}.
- * <p>
- * (Jackson can only do this coercion for fields inside an object, but for top-level fields we have to do
- * this manually.)
+ * Handles 2xx HTTP responses and interprets "null" or empty responses as the empty value if the expected type is a
+ * collection.
+ *
+ * <p>Note that {@link retrofit2.OkHttpCall#parseResponse(Response)} does not call this ConverterFactory if the response
+ * is 204 or 205 - those cases are handled by {@link CoerceNullCollectionsCallAdapterFactory}.
+ *
+ * <p>(Jackson can only do this coercion for fields inside an object, but for top-level fields we have to do this
+ * manually.)
  */
 // TODO(dsanduleac): link to spec
 final class CoerceNullValuesConverterFactory extends Converter.Factory {
@@ -60,10 +59,7 @@ final class CoerceNullValuesConverterFactory extends Converter.Factory {
 
     @Override
     public Converter<?, RequestBody> requestBodyConverter(
-            Type type,
-            Annotation[] parameterAnnotations,
-            Annotation[] methodAnnotations,
-            Retrofit retrofit) {
+            Type type, Annotation[] parameterAnnotations, Annotation[] methodAnnotations, Retrofit retrofit) {
         return delegate.requestBodyConverter(type, parameterAnnotations, methodAnnotations, retrofit);
     }
 

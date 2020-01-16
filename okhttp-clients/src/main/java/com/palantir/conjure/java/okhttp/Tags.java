@@ -25,7 +25,7 @@ import org.immutables.value.Value;
  * When constructing a brand new {@link okhttp3.Request}, we can save typed objects that can be accessed later in a
  * typed way from event listeners, interceptors and callbacks.
  *
- * The 'SettableX' pattern is necessary because we need to store a span, but don't actually want to start it just
+ * <p>The 'SettableX' pattern is necessary because we need to store a span, but don't actually want to start it just
  * yet, so these containers contain null initially and are populated later on.
  */
 final class Tags {

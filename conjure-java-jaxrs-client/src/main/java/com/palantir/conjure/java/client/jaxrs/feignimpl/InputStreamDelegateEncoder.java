@@ -25,9 +25,7 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
-/**
- * If the body type is an InputStream, write it into the body, otherwise pass to delegate.
- */
+/** If the body type is an InputStream, write it into the body, otherwise pass to delegate. */
 public final class InputStreamDelegateEncoder implements Encoder {
     private final Encoder delegate;
 

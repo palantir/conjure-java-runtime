@@ -46,8 +46,8 @@ public final class InputStreamDelegateEncoderTest extends TestBase {
     private Encoder inputStreamDelegateEncoder;
 
     @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(GuavaTestServer.class,
-            "src/test/resources/test-server.yml");
+    public static final DropwizardAppRule<Configuration> APP =
+            new DropwizardAppRule<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
 
     private GuavaTestServer.TestService service;
 
@@ -57,10 +57,7 @@ public final class InputStreamDelegateEncoderTest extends TestBase {
 
         String endpointUri = "http://localhost:" + APP.getLocalPort();
         service = JaxRsClient.create(
-                GuavaTestServer.TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                createTestConfig(endpointUri));
+                GuavaTestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }
 
     @Test
@@ -82,7 +79,8 @@ public final class InputStreamDelegateEncoderTest extends TestBase {
     @Test
     public void testStandardClientsUseByteArrayDelegateEncoder() {
         String data = "bytes";
-        assertThat(service.readInputStream(new ByteArrayInputStream(bytes(data)))).isEqualTo(data);
+        assertThat(service.readInputStream(new ByteArrayInputStream(bytes(data))))
+                .isEqualTo(data);
     }
 
     private static byte[] bytes(String text) {

@@ -82,28 +82,21 @@ public final class QosExceptionThrowingCallAdapterFactoryTest {
                 .build();
         when(delegateFactory.get(type, NO_ANNOTATIONS, retrofit))
                 .thenAnswer((Answer<CallAdapter<Void, Void>>) invocation -> delegateAdapter);
-        when(delegateAdapter.adapt(argument.capture()))
-                .thenReturn(null);
+        when(delegateAdapter.adapt(argument.capture())).thenReturn(null);
     }
 
     @Test
     public void http_429_throw_qos_throttle() throws IOException {
-        when(call.execute())
-                .thenReturn(Response.error(429, NO_CONTENT_RESPONSE_BODY));
+        when(call.execute()).thenReturn(Response.error(429, NO_CONTENT_RESPONSE_BODY));
         CallAdapter<Void, Void> adapter = (CallAdapter<Void, Void>) factory.get(type, NO_ANNOTATIONS, retrofit);
         adapter.adapt(call);
-        assertThatThrownBy(() -> argument.getValue().execute())
-                .isInstanceOfSatisfying(
-                        QosException.Throttle.class,
-                        e -> assertThat(e.getRetryAfter()).isEmpty());
+        assertThatThrownBy(() -> argument.getValue().execute()).isInstanceOfSatisfying(QosException.Throttle.class, e ->
+                assertThat(e.getRetryAfter()).isEmpty());
     }
 
     @Test
     public void http_429_throw_qos_throttle_with_retry_after() throws IOException {
-        okhttp3.Request request = new okhttp3.Request.Builder()
-                .url(url)
-                .get()
-                .build();
+        okhttp3.Request request = new okhttp3.Request.Builder().url(url).get().build();
         okhttp3.Response response = new okhttp3.Response.Builder()
                 .code(429)
                 .header(HttpHeaders.RETRY_AFTER, "5")
@@ -111,24 +104,18 @@ public final class QosExceptionThrowingCallAdapterFactoryTest {
                 .protocol(Protocol.HTTP_1_1)
                 .message("test")
                 .build();
-        when(call.execute())
-                .thenReturn(Response.error(NO_CONTENT_RESPONSE_BODY, response));
+        when(call.execute()).thenReturn(Response.error(NO_CONTENT_RESPONSE_BODY, response));
         CallAdapter<Void, Void> adapter = (CallAdapter<Void, Void>) factory.get(type, NO_ANNOTATIONS, retrofit);
         adapter.adapt(call);
-        assertThatThrownBy(() -> argument.getValue().execute())
-                .isInstanceOfSatisfying(
-                        QosException.Throttle.class,
-                        e -> assertThat(e.getRetryAfter()).contains(Duration.ofSeconds(5)));
+        assertThatThrownBy(() -> argument.getValue().execute()).isInstanceOfSatisfying(QosException.Throttle.class, e ->
+                assertThat(e.getRetryAfter()).contains(Duration.ofSeconds(5)));
     }
 
     @Test
     public void http_503_throw_qos_unavailable() throws IOException {
-        when(call.execute())
-                .thenReturn(Response.error(503, NO_CONTENT_RESPONSE_BODY));
+        when(call.execute()).thenReturn(Response.error(503, NO_CONTENT_RESPONSE_BODY));
         CallAdapter<Void, Void> adapter = (CallAdapter<Void, Void>) factory.get(type, NO_ANNOTATIONS, retrofit);
         adapter.adapt(call);
-        assertThatThrownBy(() -> argument.getValue().execute())
-                .isInstanceOf(QosException.Unavailable.class);
+        assertThatThrownBy(() -> argument.getValue().execute()).isInstanceOf(QosException.Unavailable.class);
     }
-
 }

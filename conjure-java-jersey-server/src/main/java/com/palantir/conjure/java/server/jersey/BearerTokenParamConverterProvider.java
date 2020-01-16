@@ -37,9 +37,7 @@ public final class BearerTokenParamConverterProvider implements ParamConverterPr
     @Override
     @SuppressWarnings("unchecked")
     public <T> ParamConverter<T> getConverter(
-            final Class<T> rawType,
-            final Type _genericType,
-            final Annotation[] annotations) {
+            final Class<T> rawType, final Type _genericType, final Annotation[] annotations) {
         return BearerToken.class.equals(rawType) && hasAuthAnnotation(annotations)
                 ? (ParamConverter<T>) paramConverter
                 : null;

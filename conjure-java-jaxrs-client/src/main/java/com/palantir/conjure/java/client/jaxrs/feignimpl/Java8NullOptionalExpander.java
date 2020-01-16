@@ -22,8 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Expands Optional by using null for {@link Optional#empty()} and the {@link Object#toString()} of the
- * value otherwise.
+ * Expands Optional by using null for {@link Optional#empty()} and the {@link Object#toString()} of the value otherwise.
  */
 public final class Java8NullOptionalExpander implements Expander {
 
