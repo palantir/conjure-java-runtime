@@ -92,7 +92,12 @@ final class KeyStores {
 
         for (File currFile : getFilesForPath(path)) {
             try (InputStream in = Files.newInputStream(currFile.toPath())) {
-                keyStore.setCertificateEntry(currFile.getName(), readX509Certificate(in));
+                List<Certificate> certificates = readX509Certificates(in);
+                int certIndex = 0;
+                for (Certificate cert : certificates) {
+                    keyStore.setCertificateEntry(currFile.getName() + certIndex, cert);
+                    certIndex++;
+                }
             } catch (IOException e) {
                 throw new RuntimeException(String.format(
                         "IOException encountered when opening '%s'",
@@ -120,7 +125,12 @@ final class KeyStores {
         for (Map.Entry<String, PemX509Certificate> entry : certificatesByAlias.entrySet()) {
             try (InputStream certIn = new ByteArrayInputStream(
                     entry.getValue().pemCertificate().getBytes(StandardCharsets.UTF_8))) {
-                keyStore.setCertificateEntry(entry.getKey(), readX509Certificate(certIn));
+                List<Certificate> certificates = readX509Certificates(certIn);
+                int certIndex = 0;
+                for (Certificate cert : certificates) {
+                    keyStore.setCertificateEntry(entry.getKey() + certIndex, cert);
+                    certIndex++;
+                }
             } catch (IOException e) {
                 throw Throwables.propagate(e);
             } catch (KeyStoreException | CertificateException e) {
@@ -329,9 +339,9 @@ final class KeyStores {
         return keyStore;
     }
 
-    private static Certificate readX509Certificate(InputStream certificateIn) throws CertificateException {
+    private static List<Certificate> readX509Certificates(InputStream certificateIn) throws CertificateException {
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        return certFactory.generateCertificate(certificateIn);
+        return new ArrayList<>(certFactory.generateCertificates(certificateIn));
     }
 
     /**
