@@ -53,7 +53,7 @@ public final class KeyStoresTests {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(TestConstants.CA_DER_CERT_PATH);
 
         assertThat(trustStore.size()).isEqualTo(1);
-        assertThat(trustStore.getCertificate(TestConstants.CA_DER_CERT_PATH.getFileName().toString() + "0").toString())
+        assertThat(trustStore.getCertificate(TestConstants.CA_DER_CERT_PATH.getFileName().toString() + "-0").toString())
                 .contains("CN=testCA");
     }
 
