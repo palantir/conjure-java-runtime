@@ -25,9 +25,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
@@ -50,7 +53,7 @@ public final class KeyStoresTests {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(TestConstants.CA_DER_CERT_PATH);
 
         assertThat(trustStore.size()).isEqualTo(1);
-        assertThat(trustStore.getCertificate(TestConstants.CA_DER_CERT_PATH.getFileName().toString()).toString())
+        assertThat(trustStore.getCertificate(TestConstants.CA_DER_CERT_PATH.getFileName().toString() + "-0").toString())
                 .contains("CN=testCA");
     }
 
@@ -63,9 +66,9 @@ public final class KeyStoresTests {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
 
         assertThat(trustStore.size()).isEqualTo(3);
-        assertThat(trustStore.getCertificate("ca.der").toString()).contains("CN=testCA");
-        assertThat(trustStore.getCertificate("server.crt").toString()).contains("CN=localhost");
-        assertThat(trustStore.getCertificate("client.cer").toString()).contains("CN=client");
+        assertThat(trustStore.getCertificate("ca.der-0").toString()).contains("CN=testCA");
+        assertThat(trustStore.getCertificate("server.crt-0").toString()).contains("CN=localhost");
+        assertThat(trustStore.getCertificate("client.cer-0").toString()).contains("CN=client");
     }
 
     @Test
@@ -74,6 +77,19 @@ public final class KeyStoresTests {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
 
         assertThat(trustStore.size()).isZero();
+    }
+
+    @Test
+    public void testCreateTrustStoreFromMultiCertificateFile() throws IOException, KeyStoreException {
+        File certFolder = tempFolder.newFolder();
+        Path caCer = certFolder.toPath().resolve("ca.cer");
+        java.nio.file.Files.copy(TestConstants.SERVER_CERT_PEM_PATH, caCer);
+        java.nio.file.Files.write(caCer,
+                java.nio.file.Files.readAllBytes(TestConstants.SERVER_CERT_PEM_PATH),
+                StandardOpenOption.APPEND);
+        KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(caCer);
+
+        assertThat(trustStore.size()).isEqualTo(2);
     }
 
     @Test
@@ -118,7 +134,7 @@ public final class KeyStoresTests {
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(
                 ImmutableMap.of("server.crt", PemX509Certificate.of(cert)));
 
-        assertThat(trustStore.getCertificate("server.crt").toString()).contains("CN=localhost");
+        assertThat(trustStore.getCertificate("server.crt-0").toString()).contains("CN=localhost");
     }
 
     @Test

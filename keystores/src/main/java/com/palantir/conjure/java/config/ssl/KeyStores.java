@@ -92,7 +92,7 @@ final class KeyStores {
 
         for (File currFile : getFilesForPath(path)) {
             try (InputStream in = Files.newInputStream(currFile.toPath())) {
-                keyStore.setCertificateEntry(currFile.getName(), readX509Certificate(in));
+                addCertificatesToKeystore(keyStore, currFile.getName(), readX509Certificates(in));
             } catch (IOException e) {
                 throw new RuntimeException(String.format(
                         "IOException encountered when opening '%s'",
@@ -120,7 +120,7 @@ final class KeyStores {
         for (Map.Entry<String, PemX509Certificate> entry : certificatesByAlias.entrySet()) {
             try (InputStream certIn = new ByteArrayInputStream(
                     entry.getValue().pemCertificate().getBytes(StandardCharsets.UTF_8))) {
-                keyStore.setCertificateEntry(entry.getKey(), readX509Certificate(certIn));
+                addCertificatesToKeystore(keyStore, entry.getKey(), readX509Certificates(certIn));
             } catch (IOException e) {
                 throw Throwables.propagate(e);
             } catch (KeyStoreException | CertificateException e) {
@@ -131,6 +131,18 @@ final class KeyStores {
         }
 
         return keyStore;
+    }
+
+    private static void addCertificatesToKeystore(
+            KeyStore keyStore,
+            String certificateEntryNamePrefix,
+            List<Certificate> certificates)
+            throws KeyStoreException {
+        int certIndex = 0;
+        for (Certificate cert : certificates) {
+            keyStore.setCertificateEntry(certificateEntryNamePrefix + "-" + certIndex, cert);
+            certIndex++;
+        }
     }
 
     /**
@@ -329,9 +341,9 @@ final class KeyStores {
         return keyStore;
     }
 
-    private static Certificate readX509Certificate(InputStream certificateIn) throws CertificateException {
+    private static List<Certificate> readX509Certificates(InputStream certificateIn) throws CertificateException {
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        return certFactory.generateCertificate(certificateIn);
+        return new ArrayList<>(certFactory.generateCertificates(certificateIn));
     }
 
     /**
