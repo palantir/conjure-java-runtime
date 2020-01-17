@@ -18,11 +18,16 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
+import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import io.undertow.Undertow;
+import io.undertow.UndertowOptions;
 import io.undertow.server.handlers.BlockingHandler;
 import io.undertow.util.Headers;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -54,7 +59,11 @@ public class Repro extends TestBase {
         }
         Logger.getLogger("okhttp3.OkHttpClient").setLevel(Level.FINE);
         Undertow server = Undertow.builder()
-                .addHttpListener(PORT, null)
+                .setServerOption(UndertowOptions.ENABLE_HTTP2, true)
+                .addHttpsListener(PORT, null, SslSocketFactories.createSslContext(SslConfiguration.of(
+                        Paths.get("src/test/resources/trustStore.jks"),
+                        Paths.get("src/test/resources/keyStore.jks"),
+                        "keystore")))
                 .setHandler(new BlockingHandler(exchange -> {
                     long current = requests.incrementAndGet();
                     if (current % 1000 == 0) {
@@ -72,7 +81,10 @@ public class Repro extends TestBase {
                 SimpleService.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                createTestConfig("http://localhost:" + PORT));
+                ClientConfiguration.builder()
+                        .from(createTestConfig("https://localhost:" + PORT))
+                        .enableGcmCipherSuites(true)
+                        .build());
 
         ExecutorService executor = Executors.newCachedThreadPool();
         List<Thread> threads = new CopyOnWriteArrayList<>();
