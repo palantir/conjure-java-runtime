@@ -33,7 +33,7 @@ final class RetryableExceptionMapper extends JsonExceptionMapper<RetryableExcept
     }
 
     @Override
-    InternalErrorCause getCause() {
-        return InternalErrorCause.RPC;
+    ErrorCause getCause() {
+        return ErrorCause.RPC;
     }
 }

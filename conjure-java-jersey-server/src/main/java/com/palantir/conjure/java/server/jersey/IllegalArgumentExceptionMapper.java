@@ -32,7 +32,7 @@ final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalAr
     }
 
     @Override
-    InternalErrorCause getCause() {
-        return null;
+    ErrorCause getCause() {
+        return ErrorCause.OTHER;
     }
 }

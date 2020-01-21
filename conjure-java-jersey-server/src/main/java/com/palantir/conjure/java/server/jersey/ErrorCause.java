@@ -16,15 +16,16 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-public enum InternalErrorCause {
+public enum ErrorCause {
     RPC("rpc"),
     SERVICE_INTERNAL("serviceInternal"),
-    INTERNAL("internal");
+    INTERNAL("internal"),
+    OTHER("other");
 
     @SuppressWarnings("unused")
     private final String cause;
 
-    InternalErrorCause(String cause) {
+    ErrorCause(String cause) {
         this.cause = cause;
     }
 }

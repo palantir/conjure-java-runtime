@@ -37,8 +37,8 @@ public final class JsonExceptionMapperTest {
                 }
 
                 @Override
-                InternalErrorCause getCause() {
-                    return InternalErrorCause.INTERNAL;
+                ErrorCause getCause() {
+                    return ErrorCause.INTERNAL;
                 }
             };
 
@@ -52,7 +52,7 @@ public final class JsonExceptionMapperTest {
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
-        assertThat(metrics.internalerrorAll(InternalErrorCause.INTERNAL.toString()).getCount()).isZero();
+        assertThat(metrics.internalerrorAll(ErrorCause.INTERNAL.toString()).getCount()).isZero();
     }
 
     @Test
@@ -62,7 +62,7 @@ public final class JsonExceptionMapperTest {
                 new RuntimeExceptionMapper(runtimeExceptionMetrics).toResponse(new NullPointerException("secret"));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).doesNotContain("secret");
-        assertThat(runtimeExceptionMetrics.internalerrorAll(InternalErrorCause.INTERNAL.toString())
+        assertThat(runtimeExceptionMetrics.internalerrorAll(ErrorCause.INTERNAL.toString())
                 .getCount()).isEqualTo(1);
     }
 }

@@ -32,7 +32,7 @@ final class ThrowableExceptionMapper extends JsonExceptionMapper<Throwable> {
     }
 
     @Override
-    InternalErrorCause getCause() {
-        return InternalErrorCause.INTERNAL;
+    ErrorCause getCause() {
+        return ErrorCause.INTERNAL;
     }
 }

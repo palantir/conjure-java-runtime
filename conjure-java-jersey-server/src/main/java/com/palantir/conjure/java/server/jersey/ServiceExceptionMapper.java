@@ -45,7 +45,7 @@ final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> 
     @Override
     public Response toResponse(ServiceException exception) {
         if (exception.getErrorType().equals(ErrorType.INTERNAL)) {
-            metrics.internalerrorAll(InternalErrorCause.SERVICE_INTERNAL.toString()).mark();
+            metrics.internalerrorAll(ErrorCause.SERVICE_INTERNAL.toString()).mark();
         }
         int httpStatus = exception.getErrorType().httpErrorCode();
         if (httpStatus / 100 == 4 /* client error */) {
