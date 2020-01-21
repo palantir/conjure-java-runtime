@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Apply client-side concurrency limiting only to network requests.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1431

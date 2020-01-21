@@ -216,7 +216,7 @@ public final class OkHttpClients {
 
         // Intercept calls to augment request meta data
         if (enableClientQoS) {
-            client.addInterceptor(new ConcurrencyLimitingInterceptor());
+            client.addNetworkInterceptor(new ConcurrencyLimitingInterceptor());
         }
         client.addInterceptor(
                 InstrumentedInterceptor.create(config.taggedMetricRegistry(), hostEventsSink, serviceClass));
