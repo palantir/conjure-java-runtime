@@ -20,7 +20,7 @@ public enum ErrorCause {
     RPC("rpc"),
     SERVICE_INTERNAL("serviceInternal"),
     INTERNAL("internal"),
-    OTHER("other");
+    UNKNOWN("unknown");
 
     @SuppressWarnings("unused")
     private final String cause;

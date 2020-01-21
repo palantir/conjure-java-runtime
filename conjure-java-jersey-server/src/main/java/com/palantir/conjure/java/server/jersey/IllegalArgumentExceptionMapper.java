@@ -33,6 +33,6 @@ final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalAr
 
     @Override
     ErrorCause getCause() {
-        return ErrorCause.OTHER;
+        return ErrorCause.UNKNOWN;
     }
 }
