@@ -32,6 +32,10 @@ public enum ConjureJerseyFeature implements Feature {
         this.metrics = JerseyServerMetrics.of(SharedTaggedMetricRegistries.getSingleton());
     }
 
+    public JerseyServerMetrics getMetrics() {
+        return  metrics;
+    }
+
     /**
      * Configures a Jersey server w.r.t. conjure-java-runtime conventions: registers tracer filters and exception
      * mappers.
