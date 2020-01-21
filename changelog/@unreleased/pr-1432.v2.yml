@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Revert concurrency limiter interceptor order change which could prevent
+    cached resources from releasing concurrency limiters.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1432
