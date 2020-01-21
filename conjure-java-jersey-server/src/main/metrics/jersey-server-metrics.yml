@@ -8,5 +8,6 @@ namespaces:
     metrics:
       internalerror.all:
         type: meter
+        tags: [cause]
         docs: |
-          Meter of the number of non-RemoteException internal exceptions produced by this server.
+          Meter of the number of non-RemoteException internal exceptions produced by this server, tagged by cause.

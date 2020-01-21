@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.jaxrs.cbor.JacksonCBORProvider;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.tracing.jersey.TraceEnrichingFilter;
@@ -27,11 +26,14 @@ import javax.ws.rs.core.FeatureContext;
 public enum ConjureJerseyFeature implements Feature {
     INSTANCE;
 
-    private final Meter internalErrorMeter;
+    private JerseyServerMetrics metrics;
 
     ConjureJerseyFeature() {
-        JerseyServerMetrics jerseyServerMetrics = JerseyServerMetrics.of(SharedTaggedMetricRegistries.getSingleton());
-        this.internalErrorMeter = jerseyServerMetrics.internalerrorAll();
+        this.metrics = JerseyServerMetrics.of(SharedTaggedMetricRegistries.getSingleton());
+    }
+
+    public JerseyServerMetrics getMetrics() {
+        return metrics;
     }
 
     /**
@@ -41,14 +43,15 @@ public enum ConjureJerseyFeature implements Feature {
     @Override
     public boolean configure(FeatureContext context) {
         // Exception mappers
-        context.register(new IllegalArgumentExceptionMapper(internalErrorMeter));
+        context.register(new IllegalArgumentExceptionMapper(metrics));
         context.register(new NoContentExceptionMapper());
-        context.register(new RuntimeExceptionMapper(internalErrorMeter));
+        context.register(new RetryableExceptionMapper(metrics));
+        context.register(new RuntimeExceptionMapper(metrics));
         context.register(new WebApplicationExceptionMapper());
         context.register(new RemoteExceptionMapper());
-        context.register(new ServiceExceptionMapper(internalErrorMeter));
+        context.register(new ServiceExceptionMapper(metrics));
         context.register(new QosExceptionMapper());
-        context.register(new ThrowableExceptionMapper(internalErrorMeter));
+        context.register(new ThrowableExceptionMapper(metrics));
 
         // Cbor handling
         context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));

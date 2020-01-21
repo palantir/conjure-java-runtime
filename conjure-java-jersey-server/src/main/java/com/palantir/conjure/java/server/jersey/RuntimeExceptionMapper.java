@@ -16,19 +16,23 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import com.codahale.metrics.Meter;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import javax.ws.rs.ext.Provider;
 
 @Provider
 final class RuntimeExceptionMapper extends JsonExceptionMapper<RuntimeException> {
 
-    RuntimeExceptionMapper(Meter internalErrorMeter) {
-        super(internalErrorMeter);
+    RuntimeExceptionMapper(JerseyServerMetrics metrics) {
+        super(metrics);
     }
 
     @Override
     ErrorType getErrorType(RuntimeException _exception) {
         return ErrorType.INTERNAL;
+    }
+
+    @Override
+    ErrorCause getCause() {
+        return ErrorCause.INTERNAL;
     }
 }

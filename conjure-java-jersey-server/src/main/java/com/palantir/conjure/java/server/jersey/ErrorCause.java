@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2020 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,16 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import com.palantir.conjure.java.api.errors.ErrorType;
-import javax.ws.rs.ext.Provider;
+public enum ErrorCause {
+    RPC("rpc"),
+    SERVICE_INTERNAL("serviceInternal"),
+    INTERNAL("internal"),
+    UNKNOWN("unknown");
 
-@Provider
-final class ThrowableExceptionMapper extends JsonExceptionMapper<Throwable> {
+    @SuppressWarnings("unused")
+    private final String cause;
 
-    ThrowableExceptionMapper(JerseyServerMetrics metrics) {
-        super(metrics);
-    }
-
-    @Override
-    ErrorType getErrorType(Throwable _exception) {
-        return ErrorType.INTERNAL;
-    }
-
-    @Override
-    ErrorCause getCause() {
-        return ErrorCause.INTERNAL;
+    ErrorCause(String cause) {
+        this.cause = cause;
     }
 }
