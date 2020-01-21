@@ -33,7 +33,7 @@ public enum ConjureJerseyFeature implements Feature {
     }
 
     public JerseyServerMetrics getMetrics() {
-        return  metrics;
+        return metrics;
     }
 
     /**
