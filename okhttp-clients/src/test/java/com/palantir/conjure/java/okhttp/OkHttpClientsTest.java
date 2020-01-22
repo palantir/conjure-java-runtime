@@ -107,8 +107,8 @@ public final class OkHttpClientsTest extends TestBase {
     public void canceledCallsDoNotRetryAndDoNotReportToHostEventSink() {
         server.enqueue(new MockResponse().setHeadersDelay(1, TimeUnit.SECONDS).setBody("pong"));
         OkHttpClient client = createRetryingClient(1);
-        AsyncRequest future = AsyncRequest.of(
-                client.newCall(new Request.Builder().url(url).build()));
+        AsyncRequest future =
+                AsyncRequest.of(client.newCall(new Request.Builder().url(url).build()));
         future.cancelCall();
 
         assertThatExceptionOfType(UncheckedExecutionException.class)
@@ -277,8 +277,8 @@ public final class OkHttpClientsTest extends TestBase {
     public void successfulCallDoesNotInvokeFailureHandler() throws Exception {
         server.enqueue(new MockResponse().setBody("pong"));
 
-        Call call = createRetryingClient(0)
-                .newCall(new Request.Builder().url(url).build());
+        Call call =
+                createRetryingClient(0).newCall(new Request.Builder().url(url).build());
         Semaphore failureHandlerExecuted = new Semaphore(0);
         Semaphore successHandlerExecuted = new Semaphore(0);
         call.enqueue(new Callback() {
@@ -303,8 +303,8 @@ public final class OkHttpClientsTest extends TestBase {
     public void unsuccessfulCallDoesNotInvokeSuccessHandler() throws Exception {
         server.shutdown();
 
-        Call call = createRetryingClient(0)
-                .newCall(new Request.Builder().url(url).build());
+        Call call =
+                createRetryingClient(0).newCall(new Request.Builder().url(url).build());
         Semaphore failureHandlerExecuted = new Semaphore(0);
         Semaphore successHandlerExecuted = new Semaphore(0);
         call.enqueue(new Callback() {
@@ -405,8 +405,8 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(503));
         server.enqueue(new MockResponse().setBody("pong"));
 
-        Call call = createRetryingClient(2)
-                .newCall(new Request.Builder().url(url).build());
+        Call call =
+                createRetryingClient(2).newCall(new Request.Builder().url(url).build());
         assertThat(call.execute().body().string()).isEqualTo("pong");
         assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
@@ -439,8 +439,8 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
         server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
         server.enqueue(new MockResponse().setResponseCode(429).addHeader(HttpHeaders.RETRY_AFTER, "0"));
-        Call call = createRetryingClient(2)
-                .newCall(new Request.Builder().url(url).build());
+        Call call =
+                createRetryingClient(2).newCall(new Request.Builder().url(url).build());
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Failed to complete the request due to QosException.Throttle")
@@ -454,8 +454,8 @@ public final class OkHttpClientsTest extends TestBase {
         server.enqueue(new MockResponse().setResponseCode(429));
         server.enqueue(new MockResponse().setBody("pong"));
 
-        Call call = createRetryingClient(2)
-                .newCall(new Request.Builder().url(url).build());
+        Call call =
+                createRetryingClient(2).newCall(new Request.Builder().url(url).build());
         assertThat(call.execute().body().string()).isEqualTo("pong");
         assertThat(server.getRequestCount()).isEqualTo(3 /* original plus two retries */);
     }
@@ -535,8 +535,8 @@ public final class OkHttpClientsTest extends TestBase {
             server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url));
         }
 
-        Call call = createRetryingClient(1)
-                .newCall(new Request.Builder().url(url).build());
+        Call call =
+                createRetryingClient(1).newCall(new Request.Builder().url(url).build());
         assertThatLoggableExceptionThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasLogMessage("Exceeded the maximum number of allowed redirects")

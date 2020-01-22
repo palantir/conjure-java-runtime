@@ -26,9 +26,8 @@ import java.util.Map;
 
 /**
  * Base class that provides the structure for a delegating {@link Contract}. Delegates the initial
- * {@link #parseAndValidatateMetadata(Class)} call to the wrapped Contract and then calls
- * {@link #processMetadata(Class, Method, MethodMetadata)} on all of the methods that have metadata from the initial
- * call.
+ * {@link #parseAndValidatateMetadata(Class)} call to the wrapped Contract and then calls {@link #processMetadata(Class,
+ * Method, MethodMetadata)} on all of the methods that have metadata from the initial call.
  */
 abstract class AbstractDelegatingContract implements Contract {
 

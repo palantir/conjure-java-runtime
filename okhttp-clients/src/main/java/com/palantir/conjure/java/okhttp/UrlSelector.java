@@ -23,11 +23,11 @@ import okhttp3.HttpUrl;
 public interface UrlSelector {
     /**
      * Given a (non-base) URL {@code current}, returns the URL obtained from {@code current} by replacing scheme, host,
-     * port, and path prefix with those of the given {@code baseUrl}. For example, assume
-     * {@code current = http://foo.com/a/b/id=123} and {@code baseUrl = https://bar.org:8080/a}; then this method
-     * returns {@code https://bar.org:8080/a/b/id=123}. Returns {@link Optional#empty} if there is no
-     * {@link #getBaseUrls base URL} for which such a substitution can be made, for example, if there is no base URL
-     * whose {@link HttpUrl#encodedPath path} is a prefix to the path of the {@code current} URL.
+     * port, and path prefix with those of the given {@code baseUrl}. For example, assume {@code current =
+     * http://foo.com/a/b/id=123} and {@code baseUrl = https://bar.org:8080/a}; then this method returns
+     * {@code https://bar.org:8080/a/b/id=123}. Returns {@link Optional#empty} if there is no {@link #getBaseUrls base
+     * URL} for which such a substitution can be made, for example, if there is no base URL whose
+     * {@link HttpUrl#encodedPath path} is a prefix to the path of the {@code current} URL.
      *
      * <p>Changes the "current" URL of this selector so that that a subsequent call to {@link #redirectToCurrent} yields
      * the same base address as the URL returned by this call.

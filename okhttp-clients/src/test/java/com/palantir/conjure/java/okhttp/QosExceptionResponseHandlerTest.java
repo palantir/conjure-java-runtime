@@ -33,9 +33,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public final class QosExceptionResponseHandlerTest extends TestBase {
 
-    private static final Request REQUEST = new Request.Builder()
-            .url("http://127.0.0.1")
-            .build();
+    private static final Request REQUEST =
+            new Request.Builder().url("http://127.0.0.1").build();
     private static final QosExceptionResponseHandler handler = QosExceptionResponseHandler.INSTANCE;
     private static final URL LOCAL_URL = parseUrl("https://localhost");
 

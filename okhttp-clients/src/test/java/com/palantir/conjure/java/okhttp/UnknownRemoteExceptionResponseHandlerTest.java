@@ -36,9 +36,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 public final class UnknownRemoteExceptionResponseHandlerTest {
 
     private static final int STATUS_500 = 500;
-    private static final Request request = new Request.Builder()
-            .url("http://url")
-            .build();
+    private static final Request request =
+            new Request.Builder().url("http://url").build();
 
     private static final UnknownRemoteExceptionResponseHandler handler = UnknownRemoteExceptionResponseHandler.INSTANCE;
 
@@ -53,8 +52,8 @@ public final class UnknownRemoteExceptionResponseHandlerTest {
     @Test
     public void extractsIoExceptionForAllErrorCodes() {
         for (int code : ImmutableList.of(300, 400, 404, 500)) {
-            UnknownRemoteException exception = decode(MediaType.APPLICATION_JSON, code, "body")
-                    .get();
+            UnknownRemoteException exception =
+                    decode(MediaType.APPLICATION_JSON, code, "body").get();
             assertThat(exception.getStatus()).isEqualTo(code);
             assertThat(exception.getBody()).isEqualTo("body");
             assertThat(exception.getMessage())

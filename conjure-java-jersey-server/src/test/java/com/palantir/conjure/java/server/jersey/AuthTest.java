@@ -84,10 +84,8 @@ public final class AuthTest {
 
     @Test
     public void testAuthHeader_malformedCredentials() throws SecurityException {
-        Response response = target.path("authHeader")
-                .request()
-                .header("Authorization", "!")
-                .get();
+        Response response =
+                target.path("authHeader").request().header("Authorization", "!").get();
 
         assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
 

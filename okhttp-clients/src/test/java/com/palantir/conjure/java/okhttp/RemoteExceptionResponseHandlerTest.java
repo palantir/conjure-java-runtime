@@ -54,9 +54,8 @@ public final class RemoteExceptionResponseHandlerTest {
 
     private static final ObjectMapper SERVER_MAPPER = ObjectMappers.newServerObjectMapper();
 
-    private static final Request request = new Request.Builder()
-            .url("http://url")
-            .build();
+    private static final Request request =
+            new Request.Builder().url("http://url").build();
     private static final ServiceException SERVICE_EXCEPTION =
             new ServiceException(ErrorType.FAILED_PRECONDITION, SafeArg.of("key", "value"));
     private static final String SERIALIZED_EXCEPTION = createServiceException(SERVICE_EXCEPTION);
@@ -151,8 +150,8 @@ public final class RemoteExceptionResponseHandlerTest {
 
     @Test
     public void testSpecificException() {
-        RemoteException exception = encodeAndDecode(new IllegalArgumentException("msg"))
-                .get();
+        RemoteException exception =
+                encodeAndDecode(new IllegalArgumentException("msg")).get();
         assertThat(exception).isInstanceOf(RemoteException.class);
         assertThat(exception.getMessage()).startsWith("RemoteException: java.lang.IllegalArgumentException (msg)");
     }
