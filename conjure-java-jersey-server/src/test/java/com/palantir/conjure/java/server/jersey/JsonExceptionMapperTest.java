@@ -29,18 +29,17 @@ import org.junit.Test;
 public final class JsonExceptionMapperTest {
 
     private final JerseyServerMetrics metrics = JerseyServerMetrics.of(new DefaultTaggedMetricRegistry());
-    private final JsonExceptionMapper<RuntimeException> mapper =
-            new JsonExceptionMapper<RuntimeException>(metrics) {
-                @Override
-                ErrorType getErrorType(RuntimeException _exception) {
-                    return ErrorType.INVALID_ARGUMENT;
-                }
+    private final JsonExceptionMapper<RuntimeException> mapper = new JsonExceptionMapper<RuntimeException>(metrics) {
+        @Override
+        ErrorType getErrorType(RuntimeException _exception) {
+            return ErrorType.INVALID_ARGUMENT;
+        }
 
-                @Override
-                ErrorCause getCause() {
-                    return ErrorCause.INTERNAL;
-                }
-            };
+        @Override
+        ErrorCause getCause() {
+            return ErrorCause.INTERNAL;
+        }
+    };
 
     private final ObjectMapper objectMapper =
             ObjectMappers.newServerObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
@@ -52,7 +51,8 @@ public final class JsonExceptionMapperTest {
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
-        assertThat(metrics.internalerrorAll(ErrorCause.INTERNAL.toString()).getCount()).isZero();
+        assertThat(metrics.internalerrorAll(ErrorCause.INTERNAL.toString()).getCount())
+                .isZero();
     }
 
     @Test
@@ -62,7 +62,9 @@ public final class JsonExceptionMapperTest {
                 new RuntimeExceptionMapper(runtimeExceptionMetrics).toResponse(new NullPointerException("secret"));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).doesNotContain("secret");
-        assertThat(runtimeExceptionMetrics.internalerrorAll(ErrorCause.INTERNAL.toString())
-                .getCount()).isEqualTo(1);
+        assertThat(runtimeExceptionMetrics
+                        .internalerrorAll(ErrorCause.INTERNAL.toString())
+                        .getCount())
+                .isEqualTo(1);
     }
 }
