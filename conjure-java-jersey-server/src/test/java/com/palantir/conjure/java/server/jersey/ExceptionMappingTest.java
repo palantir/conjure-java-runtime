@@ -89,17 +89,15 @@ public final class ExceptionMappingTest {
 
     @Test
     public void testServerErrorException() {
-        Response response = target.path("throw-server-error-exception")
-                .request()
-                .get();
+        Response response =
+                target.path("throw-server-error-exception").request().get();
         assertThat(response.getStatus()).isEqualTo(SERVER_EXCEPTION_STATUS.getStatusCode());
     }
 
     @Test
     public void testWebApplicationException() {
-        Response response = target.path("throw-web-application-exception")
-                .request()
-                .get();
+        Response response =
+                target.path("throw-web-application-exception").request().get();
         assertThat(response.getStatus()).isEqualTo(WEB_EXCEPTION_STATUS.getStatusCode());
     }
 
@@ -116,9 +114,8 @@ public final class ExceptionMappingTest {
 
     @Test
     public void testUnauthorizedException() {
-        Response response = target.path("throw-unauthorized-exception")
-                .request()
-                .get();
+        Response response =
+                target.path("throw-unauthorized-exception").request().get();
         assertThat(response.getStatus()).isEqualTo(ErrorType.UNAUTHORIZED.httpErrorCode());
 
         SerializableError error = response.readEntity(SerializableError.class);
@@ -129,9 +126,8 @@ public final class ExceptionMappingTest {
 
     @Test
     public void testPermissionDeniedException() {
-        Response response = target.path("throw-permission-denied-exception")
-                .request()
-                .get();
+        Response response =
+                target.path("throw-permission-denied-exception").request().get();
         assertThat(response.getStatus()).isEqualTo(ErrorType.PERMISSION_DENIED.httpErrorCode());
 
         SerializableError error = response.readEntity(SerializableError.class);
@@ -155,9 +151,8 @@ public final class ExceptionMappingTest {
 
     @Test
     public void testQosException() {
-        Response response = target.path("throw-qos-retry-foo-exception")
-                .request()
-                .get();
+        Response response =
+                target.path("throw-qos-retry-foo-exception").request().get();
 
         assertThat(response.getStatus()).isEqualTo(308);
         assertThat(response.getHeaderString("Location")).isEqualTo("http://foo");

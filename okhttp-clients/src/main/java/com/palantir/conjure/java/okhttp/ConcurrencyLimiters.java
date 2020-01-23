@@ -128,8 +128,8 @@ final class ConcurrencyLimiters {
         if (!useLimiter) {
             return NoOpConcurrencyLimiter.INSTANCE;
         }
-        Supplier<SimpleLimiter<Void>> limiter = () ->
-                SimpleLimiter.newBuilder().limit(newLimit()).build();
+        Supplier<SimpleLimiter<Void>> limiter =
+                () -> SimpleLimiter.newBuilder().limit(newLimit()).build();
         return new DefaultConcurrencyLimiter(limiterKey, limiter);
     }
 

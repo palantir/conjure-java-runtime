@@ -28,10 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Writes out generic exceptions as serialized {@link SerializableError}s with
- * {@link MediaType#APPLICATION_JSON JSON media type}. Never forwards the exception message. Subclasses provide an
- * {@link ErrorType} that is used to populate the {@link SerializableError#errorCode} and
- * {@link SerializableError#errorName()} fields as well as the HTTP response status code.
+ * Writes out generic exceptions as serialized {@link SerializableError}s with {@link MediaType#APPLICATION_JSON JSON
+ * media type}. Never forwards the exception message. Subclasses provide an {@link ErrorType} that is used to populate
+ * the {@link SerializableError#errorCode} and {@link SerializableError#errorName()} fields as well as the HTTP response
+ * status code.
  *
  * <p>Consider this call stack, where a caller/browser calls a remote method in a server:
  *

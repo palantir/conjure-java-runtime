@@ -61,10 +61,8 @@ public final class Java8OptionalTest {
 
     @Test
     public void testOptionalPresent() throws NoSuchMethodException, SecurityException {
-        Response response = target.path("optional")
-                .queryParam("value", "val")
-                .request()
-                .get();
+        Response response =
+                target.path("optional").queryParam("value", "val").request().get();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("valval");
     }
@@ -94,10 +92,8 @@ public final class Java8OptionalTest {
 
     @Test
     public void testQueryParam_optionalIntPresent() throws NoSuchMethodException, SecurityException {
-        Response response = target.path("optional/int")
-                .queryParam("value", "10")
-                .request()
-                .get();
+        Response response =
+                target.path("optional/int").queryParam("value", "10").request().get();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("10");
     }
@@ -111,10 +107,8 @@ public final class Java8OptionalTest {
 
     @Test
     public void testQueryParam_optionalIntInvalid() {
-        Response response = target.path("optional/int")
-                .queryParam("value", "foo")
-                .request()
-                .get();
+        Response response =
+                target.path("optional/int").queryParam("value", "foo").request().get();
         assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
     }
 

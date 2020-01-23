@@ -55,9 +55,8 @@ import org.slf4j.LoggerFactory;
  */
 public final class FlowControlTest {
     private static final Logger log = LoggerFactory.getLogger(FlowControlTest.class);
-    private static final ConcurrencyLimiters.Key KEY = ImmutableKey.builder()
-            .hostname("")
-            .build();
+    private static final ConcurrencyLimiters.Key KEY =
+            ImmutableKey.builder().hostname("").build();
     private static final Duration GRACE = Duration.ofMinutes(2);
     private static final int REQUESTS_PER_THREAD = 50;
     private static ListeningExecutorService executorService;

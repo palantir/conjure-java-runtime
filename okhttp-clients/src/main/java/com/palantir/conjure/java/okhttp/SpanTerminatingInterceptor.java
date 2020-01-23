@@ -36,9 +36,8 @@ final class SpanTerminatingInterceptor implements Interceptor {
             return chain.proceed(chain.request());
         }
         DetachedSpan attemptSpan = attemptSpanTag.attemptSpan();
-        DetachedSpan dispatcherSpan = chain.request()
-                .tag(Tags.SettableDispatcherSpan.class)
-                .dispatcherSpan();
+        DetachedSpan dispatcherSpan =
+                chain.request().tag(Tags.SettableDispatcherSpan.class).dispatcherSpan();
 
         if (attemptSpan == null || dispatcherSpan == null) {
             log.warn("Missing attemptSpan / dispatcherSpan, which will result in missing spans. Likely a "
