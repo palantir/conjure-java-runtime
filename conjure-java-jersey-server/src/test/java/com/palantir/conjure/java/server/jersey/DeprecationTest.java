@@ -88,6 +88,11 @@ public final class DeprecationTest {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public interface DeprecationTestService {
+        /**
+         * Deprecated endpoint.
+         *
+         * @deprecated for testing
+         */
         @GET
         @Deprecated
         @Path("/deprecated")
