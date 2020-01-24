@@ -19,7 +19,6 @@ package com.palantir.conjure.java.okhttp;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Stopwatch;
-import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import okhttp3.HttpUrl;
@@ -34,10 +33,9 @@ final class InstrumentedInterceptor implements Interceptor {
     private final Timer responseTimer;
     private final Meter ioExceptionMeter;
 
-    InstrumentedInterceptor(TaggedMetricRegistry registry, HostEventsSink hostEventsSink, String serviceName) {
+    InstrumentedInterceptor(ClientMetrics clientMetrics, HostEventsSink hostEventsSink, String serviceName) {
         this.hostEventsSink = hostEventsSink;
         this.serviceName = serviceName;
-        ClientMetrics clientMetrics = ClientMetrics.of(registry);
         this.responseTimer = clientMetrics.response(serviceName);
         this.ioExceptionMeter = clientMetrics
                 .responseError()
@@ -73,7 +71,9 @@ final class InstrumentedInterceptor implements Interceptor {
     }
 
     static InstrumentedInterceptor create(
-            TaggedMetricRegistry registry, HostEventsSink hostEventsSink, Class<?> serviceClass) {
-        return new InstrumentedInterceptor(registry, hostEventsSink, serviceClass.getSimpleName());
+            ClientMetrics clientMetrics,
+            HostEventsSink hostEventsSink,
+            Class<?> serviceClass) {
+        return new InstrumentedInterceptor(clientMetrics, hostEventsSink, serviceClass.getSimpleName());
     }
 }

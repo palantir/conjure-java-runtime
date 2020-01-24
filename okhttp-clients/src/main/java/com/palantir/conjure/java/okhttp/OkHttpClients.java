@@ -218,9 +218,9 @@ public final class OkHttpClients {
         if (enableClientQoS) {
             client.addInterceptor(new ConcurrencyLimitingInterceptor());
         }
-        client.addInterceptor(DeprecationWarningInterceptor.create(serviceClass));
-        client.addInterceptor(
-                InstrumentedInterceptor.create(config.taggedMetricRegistry(), hostEventsSink, serviceClass));
+        ClientMetrics clientMetrics = ClientMetrics.of(config.taggedMetricRegistry());
+        client.addInterceptor(DeprecationWarningInterceptor.create(clientMetrics, serviceClass));
+        client.addInterceptor(InstrumentedInterceptor.create(clientMetrics, hostEventsSink, serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
         client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
 

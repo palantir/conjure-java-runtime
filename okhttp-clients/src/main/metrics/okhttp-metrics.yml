@@ -42,6 +42,10 @@ namespaces:
         type: meter
         tags: [reason, service-name]
         docs: Rate of errors received by reason and service-name. Currently only errors with reason `IOException` are reported.
+      deprecations:
+        type: meter
+        tags: [service-name]
+        docs: Rate of deprecated endpoints being invoked.
   com.palantir.conjure.java:
     shortName: Okhttp
     docs: Conjure okhttp client metrics.

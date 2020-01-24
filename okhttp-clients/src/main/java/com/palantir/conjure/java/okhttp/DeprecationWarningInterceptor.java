@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.palantir.logsafe.SafeArg;
 import java.io.IOException;
 import okhttp3.Interceptor;
@@ -32,9 +33,13 @@ import org.slf4j.LoggerFactory;
  */
 final class DeprecationWarningInterceptor implements Interceptor {
     private static final Logger log = LoggerFactory.getLogger(DeprecationWarningInterceptor.class);
+    // log at most once per minute
+    private final RateLimiter loggingRateLimiter = RateLimiter.create(1.0 / 60.0);
+    private final ClientMetrics clientMetrics;
     private final String serviceClassName;
 
-    private DeprecationWarningInterceptor(String serviceClassName) {
+    private DeprecationWarningInterceptor(ClientMetrics clientMetrics, String serviceClassName) {
+        this.clientMetrics = clientMetrics;
         this.serviceClassName = serviceClassName;
     }
 
@@ -42,10 +47,13 @@ final class DeprecationWarningInterceptor implements Interceptor {
     public Response intercept(Chain chain) throws IOException {
         Response response = chain.proceed(chain.request());
 
-        if (response.isSuccessful()) {
-            String deprecationHeader = response.header("deprecation");
-            if (deprecationHeader != null) {
-                log.warn("Using a deprecated endpoint when connecting to service",
+        String deprecationHeader = response.header("deprecation");
+        if (deprecationHeader != null) {
+            clientMetrics.deprecations(serviceClassName);
+
+            if (loggingRateLimiter.tryAcquire(1)) {
+                log.warn(
+                        "Using a deprecated endpoint when connecting to service",
                         SafeArg.of("serviceClass", serviceClassName),
                         SafeArg.of("service", response.header("server", "no server header provided")));
             }
@@ -54,7 +62,7 @@ final class DeprecationWarningInterceptor implements Interceptor {
         return response;
     }
 
-    static Interceptor create(Class<?> serviceClass) {
-        return new DeprecationWarningInterceptor(serviceClass.getSimpleName());
+    static Interceptor create(ClientMetrics clientMetrics, Class<?> serviceClass) {
+        return new DeprecationWarningInterceptor(clientMetrics, serviceClass.getSimpleName());
     }
 }
