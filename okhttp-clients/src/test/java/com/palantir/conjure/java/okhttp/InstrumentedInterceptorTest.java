@@ -62,7 +62,7 @@ public final class InstrumentedInterceptorTest {
     public void before() {
         registry = new DefaultTaggedMetricRegistry();
         hostMetrics = new HostMetricsRegistry();
-        interceptor = new InstrumentedInterceptor(registry, hostMetrics, "client");
+        interceptor = new InstrumentedInterceptor(ClientMetrics.of(registry), hostMetrics, "client");
     }
 
     @Test
