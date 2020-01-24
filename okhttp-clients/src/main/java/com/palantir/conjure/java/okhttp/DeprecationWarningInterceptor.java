@@ -23,6 +23,13 @@ import okhttp3.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * An interceptor that logs warnings when the response from a server contains the "deprecation" header. Logs include
+ * the content of the "server" header when it is provided, and always include the provided {@code serviceClassName} so
+ * that consumers applying this interceptor can locate the cause of the deprecation.
+ *
+ * <p>Note: endpoint information is not included because endpoint-level details are not available at this level.
+ */
 final class DeprecationWarningInterceptor implements Interceptor {
     private static final Logger log = LoggerFactory.getLogger(DeprecationWarningInterceptor.class);
     private final String serviceClassName;
