@@ -17,23 +17,15 @@
 package com.palantir.conjure.java.client.jaxrs;
 
 import com.google.common.base.Strings;
-import com.google.common.util.concurrent.Uninterruptibles;
+import com.google.common.io.ByteStreams;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
-import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
-import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
 import io.undertow.server.handlers.BlockingHandler;
-import io.undertow.util.Headers;
+import io.undertow.util.Protocols;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.time.Duration;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -49,7 +41,7 @@ public class Repro extends TestBase {
     private static final AtomicLong requests = new AtomicLong();
     private static final AtomicLong sent = new AtomicLong();
     private static final AtomicLong success = new AtomicLong();
-    private static final byte[] responseData = ('"' + Strings.repeat("Hello, World!", 16 * 1024) + '"')
+    private static final byte[] responseData = ('"' + Strings.repeat("Hello, World!", 8*1024) + '"')
             .getBytes(StandardCharsets.UTF_8);
 
     public static void main(String[] args) {
@@ -69,51 +61,57 @@ public class Repro extends TestBase {
                     if (current % 1000 == 0) {
                         System.out.printf("Received %d requests\n", current);
                     }
-                    Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(1));
-                    exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
+                    if (!Protocols.HTTP_2_0.equals(exchange.getProtocol())) {
+                        System.err.println("Bad protocol: " + exchange.getProtocol());
+                    }
+                    // Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(1));
+                    // exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "application/json");
                     // exchange.getOutputStream().write("1234".getBytes(StandardCharsets.UTF_8));
-                    exchange.getOutputStream().write(responseData);
+                    // exchange.getOutputStream().write(responseData);
+                    ByteStreams.copy(exchange.getInputStream(), ByteStreams.nullOutputStream());
                 }))
                 .build();
         server.start();
 
-        SimpleService client = JaxRsClient.create(
-                SimpleService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfiguration.builder()
-                        .from(createTestConfig("https://localhost:" + PORT))
-                        .enableGcmCipherSuites(true)
-                        .build());
-
-        ExecutorService executor = Executors.newCachedThreadPool();
-        List<Thread> threads = new CopyOnWriteArrayList<>();
-        for (int i = 0; i < THREADS; i++) {
-            executor.execute(() -> {
-                threads.add(Thread.currentThread());
-                while (true) {
-                    sent.incrementAndGet();
-                    // reset interruption
-                    Thread.interrupted();
-                    try {
-                        client.ping();
-                        success.incrementAndGet();
-                    } catch (RuntimeException e) {
-                        // ignored
-                    }
-                }
-            });
-        }
-        int iterations = 0;
-        while (true) {
-            iterations++;
-            if (iterations % 1000 == 0) {
-                System.out.println("Total: " + sent.get() + " success: " + success.get());
-            }
-            Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(10));
-            Thread randomThread = threads.get(ThreadLocalRandom.current().nextInt(threads.size()));
-            randomThread.interrupt();
-        }
+        // SimpleService client = JaxRsClient.create(
+        //         SimpleService.class,
+        //         AGENT,
+        //         new HostMetricsRegistry(),
+        //         ClientConfiguration.builder()
+        //                 .from(createTestConfig("https://localhost:" + PORT))
+        //                 .enableGcmCipherSuites(true)
+        //                 .backoffSlotSize(Duration.ZERO)
+        //                 .maxNumRetries(0)
+        //                 .build());
+        //
+        // ExecutorService executor = Executors.newCachedThreadPool();
+        // List<Thread> threads = new CopyOnWriteArrayList<>();
+        // for (int i = 0; i < THREADS; i++) {
+        //     executor.execute(() -> {
+        //         threads.add(Thread.currentThread());
+        //         while (true) {
+        //             sent.incrementAndGet();
+        //             // reset interruption
+        //             Thread.interrupted();
+        //             try {
+        //                 client.ping(responseData);
+        //                 success.incrementAndGet();
+        //             } catch (RuntimeException e) {
+        //                 // ignored
+        //             }
+        //         }
+        //     });
+        // }
+        // int iterations = 0;
+        // while (true) {
+        //     iterations++;
+        //     if (iterations % 1000 == 0) {
+        //         System.out.println("Total: " + sent.get() + " success: " + success.get());
+        //     }
+        //     Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(5));
+        //     Thread randomThread = threads.get(ThreadLocalRandom.current().nextInt(threads.size()));
+        //     randomThread.interrupt();
+        // }
     }
 
     @Path("/simple")
@@ -123,7 +121,7 @@ public class Repro extends TestBase {
 
         @POST
         @Path("/ping")
-        String ping();
+        void ping(byte[] data);
 
     }
 }
