@@ -1,6 +1,6 @@
 options:
   javaPackage: com.palantir.conjure.java.server.jersey
-  javaVisibility: public
+  javaVisibility: packagePrivate
 namespaces:
   server.response:
     shortName: JerseyServer
