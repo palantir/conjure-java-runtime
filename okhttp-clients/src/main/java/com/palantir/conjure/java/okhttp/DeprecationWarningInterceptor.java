@@ -49,7 +49,7 @@ final class DeprecationWarningInterceptor implements Interceptor {
 
         String deprecationHeader = response.header("deprecation");
         if (deprecationHeader != null) {
-            clientMetrics.deprecations(serviceClassName);
+            clientMetrics.deprecations(serviceClassName).mark();
 
             if (loggingRateLimiter.tryAcquire(1)) {
                 log.warn(
