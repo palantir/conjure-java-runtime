@@ -71,9 +71,7 @@ final class InstrumentedInterceptor implements Interceptor {
     }
 
     static InstrumentedInterceptor create(
-            ClientMetrics clientMetrics,
-            HostEventsSink hostEventsSink,
-            Class<?> serviceClass) {
+            ClientMetrics clientMetrics, HostEventsSink hostEventsSink, Class<?> serviceClass) {
         return new InstrumentedInterceptor(clientMetrics, hostEventsSink, serviceClass.getSimpleName());
     }
 }
