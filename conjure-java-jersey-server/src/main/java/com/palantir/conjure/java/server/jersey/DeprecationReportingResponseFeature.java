@@ -47,7 +47,7 @@ enum DeprecationReportingResponseFeature implements DynamicFeature {
         INSTANCE;
 
         @Override
-        public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
+        public void filter(ContainerRequestContext _requestContext, ContainerResponseContext responseContext) {
             responseContext.getHeaders().add(DEPRECATION, IS_DEPRECATED);
         }
     }
