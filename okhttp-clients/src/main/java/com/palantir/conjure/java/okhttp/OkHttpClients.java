@@ -218,6 +218,7 @@ public final class OkHttpClients {
         if (enableClientQoS) {
             client.addInterceptor(new ConcurrencyLimitingInterceptor());
         }
+        client.addInterceptor(DeprecationWarningInterceptor.create(serviceClass));
         client.addInterceptor(
                 InstrumentedInterceptor.create(config.taggedMetricRegistry(), hostEventsSink, serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
