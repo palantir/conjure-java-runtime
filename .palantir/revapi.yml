@@ -27,6 +27,16 @@ acceptedBreaks:
       old: null
       new: "method com.codahale.metrics.Timer com.palantir.conjure.java.okhttp.HostMetrics::getQos()"
       justification: "ABI-safe change to rarely used class, low impact"
+  "4.58.0":
+    com.palantir.conjure.java.runtime:conjure-java-jersey-server:
+    - code: "java.method.visibilityReduced"
+      old: "method com.codahale.metrics.Meter com.palantir.conjure.java.server.jersey.JerseyServerMetrics::internalerrorAll(java.lang.String)"
+      new: "method com.codahale.metrics.Meter com.palantir.conjure.java.server.jersey.JerseyServerMetrics::internalerrorAll(java.lang.String)"
+      justification: "Reverting after discussion. Not used by any consumer."
+    - code: "java.class.visibilityReduced"
+      old: "class com.palantir.conjure.java.server.jersey.JerseyServerMetrics"
+      new: "class com.palantir.conjure.java.server.jersey.JerseyServerMetrics"
+      justification: "Reverting after discussion. Not used by any consumer."
   "4.45.0":
     com.palantir.conjure.java.runtime:conjure-java-jersey-server:
     - code: "java.method.parameterTypeChanged"
