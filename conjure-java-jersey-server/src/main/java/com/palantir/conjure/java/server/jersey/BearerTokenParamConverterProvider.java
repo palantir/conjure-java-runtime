@@ -20,6 +20,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.BearerToken;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import javax.annotation.Nullable;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.ext.ParamConverter;
 import javax.ws.rs.ext.ParamConverterProvider;
@@ -32,21 +33,34 @@ import org.glassfish.jersey.internal.inject.Custom;
 @Custom
 @Provider
 public final class BearerTokenParamConverterProvider implements ParamConverterProvider {
-    private final BearerTokenParamConverter paramConverter = new BearerTokenParamConverter();
+    private final BearerTokenParamConverter nonNullParamConverter = new BearerTokenParamConverter(false);
+    private final BearerTokenParamConverter nullableParamConverter = new BearerTokenParamConverter(true);
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> ParamConverter<T> getConverter(
             final Class<T> rawType, final Type _genericType, final Annotation[] annotations) {
-        return BearerToken.class.equals(rawType) && hasAuthAnnotation(annotations)
-                ? (ParamConverter<T>) paramConverter
-                : null;
+        if (BearerToken.class.equals(rawType) && hasAnnotation(annotations, CookieParam.class)) {
+            return (ParamConverter<T>)
+                    (hasAnnotation(annotations, Nullable.class) ? nullableParamConverter : nonNullParamConverter);
+        }
+        return null;
     }
 
     public static final class BearerTokenParamConverter implements ParamConverter<BearerToken> {
+
+        private final boolean nullable;
+
+        private BearerTokenParamConverter(boolean nullable) {
+            this.nullable = nullable;
+        }
+
         @Override
         public BearerToken fromString(final String value) {
             if (value == null) {
+                if (nullable) {
+                    return null;
+                }
                 throw UnauthorizedException.missingCredentials();
             }
             try {
@@ -63,13 +77,12 @@ public final class BearerTokenParamConverterProvider implements ParamConverterPr
         }
     }
 
-    private static boolean hasAuthAnnotation(Annotation[] annotations) {
+    private static boolean hasAnnotation(Annotation[] annotations, Class<? extends Annotation> target) {
         for (Annotation annotation : annotations) {
-            if (CookieParam.class.equals(annotation.annotationType())) {
+            if (target.equals(annotation.annotationType())) {
                 return true;
             }
         }
-
         return false;
     }
 }
