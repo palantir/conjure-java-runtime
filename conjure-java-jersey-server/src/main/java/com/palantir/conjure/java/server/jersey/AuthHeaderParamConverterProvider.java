@@ -52,6 +52,16 @@ public final class AuthHeaderParamConverterProvider implements ParamConverterPro
 
         private final boolean nullable;
 
+        /**
+         * This class should not be used directly.
+         *
+         * @deprecated Use AuthHeaderParamConverterProvider
+         */
+        @Deprecated
+        public AuthHeaderParamConverter() {
+            this(false);
+        }
+
         private AuthHeaderParamConverter(boolean nullable) {
             this.nullable = nullable;
         }

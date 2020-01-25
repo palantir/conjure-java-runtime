@@ -51,6 +51,16 @@ public final class BearerTokenParamConverterProvider implements ParamConverterPr
 
         private final boolean nullable;
 
+        /**
+         * This class should not be used directly.
+         *
+         * @deprecated Use BearerTokenParamConverterProvider
+         */
+        @Deprecated
+        public BearerTokenParamConverter() {
+            this(false);
+        }
+
         private BearerTokenParamConverter(boolean nullable) {
             this.nullable = nullable;
         }
