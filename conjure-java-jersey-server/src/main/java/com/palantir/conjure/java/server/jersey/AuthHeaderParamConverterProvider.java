@@ -34,8 +34,8 @@ import org.glassfish.jersey.internal.inject.Custom;
 @Custom
 @Provider
 public final class AuthHeaderParamConverterProvider implements ParamConverterProvider {
-    private final AuthHeaderParamConverter nonNullParamConverter = new AuthHeaderParamConverter(false);
-    private final AuthHeaderParamConverter nullableParamConverter = new AuthHeaderParamConverter(true);
+    private static final AuthHeaderParamConverter nonNullParamConverter = new AuthHeaderParamConverter(false);
+    private static final AuthHeaderParamConverter nullableParamConverter = new AuthHeaderParamConverter(true);
 
     @Override
     @SuppressWarnings("unchecked")

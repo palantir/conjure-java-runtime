@@ -87,7 +87,7 @@ public final class AuthTest {
         Response response = target.path("authHeaderNullable").request().get();
 
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("");
+        assertThat(response.readEntity(String.class)).isEqualTo("[no value]");
     }
 
     @Test
@@ -174,7 +174,7 @@ public final class AuthTest {
         Response response = target.path("bearerTokenNullable").request().get();
 
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("");
+        assertThat(response.readEntity(String.class)).isEqualTo("[no value]");
     }
 
     @Test
@@ -236,7 +236,7 @@ public final class AuthTest {
 
         @Override
         public String getAuthHeaderNullable(@Nullable AuthHeader value) {
-            return value == null ? "" : value.toString();
+            return value == null ? "[no value]" : value.toString();
         }
 
         @Override
@@ -256,7 +256,7 @@ public final class AuthTest {
 
         @Override
         public String getBearerTokenNullable(@Nullable BearerToken value) {
-            return value == null ? "" : value.toString();
+            return value == null ? "[no value]" : value.toString();
         }
 
         @Override

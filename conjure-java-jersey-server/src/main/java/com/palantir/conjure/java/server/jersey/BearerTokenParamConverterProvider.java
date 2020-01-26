@@ -33,8 +33,8 @@ import org.glassfish.jersey.internal.inject.Custom;
 @Custom
 @Provider
 public final class BearerTokenParamConverterProvider implements ParamConverterProvider {
-    private final BearerTokenParamConverter nonNullParamConverter = new BearerTokenParamConverter(false);
-    private final BearerTokenParamConverter nullableParamConverter = new BearerTokenParamConverter(true);
+    private static final BearerTokenParamConverter nonNullParamConverter = new BearerTokenParamConverter(false);
+    private static final BearerTokenParamConverter nullableParamConverter = new BearerTokenParamConverter(true);
 
     @Override
     @SuppressWarnings("unchecked")
