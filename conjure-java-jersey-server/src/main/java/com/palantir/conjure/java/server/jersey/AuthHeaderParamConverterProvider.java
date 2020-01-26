@@ -20,6 +20,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import javax.annotation.Nullable;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.ParamConverter;
@@ -33,21 +34,44 @@ import org.glassfish.jersey.internal.inject.Custom;
 @Custom
 @Provider
 public final class AuthHeaderParamConverterProvider implements ParamConverterProvider {
-    private final AuthHeaderParamConverter paramConverter = new AuthHeaderParamConverter();
+    private static final AuthHeaderParamConverter nonNullParamConverter = new AuthHeaderParamConverter(false);
+    private static final AuthHeaderParamConverter nullableParamConverter = new AuthHeaderParamConverter(true);
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> ParamConverter<T> getConverter(
             final Class<T> rawType, final Type _genericType, final Annotation[] annotations) {
-        return AuthHeader.class.equals(rawType) && hasAuthAnnotation(annotations)
-                ? (ParamConverter<T>) paramConverter
-                : null;
+        if (AuthHeader.class.equals(rawType) && hasAuthAnnotation(annotations)) {
+            return (ParamConverter<T>)
+                    (hasNullableAnnotation(annotations) ? nullableParamConverter : nonNullParamConverter);
+        }
+        return null;
     }
 
     public static final class AuthHeaderParamConverter implements ParamConverter<AuthHeader> {
+
+        private final boolean nullable;
+
+        /**
+         * This class should not be used directly.
+         *
+         * @deprecated Use AuthHeaderParamConverterProvider
+         */
+        @Deprecated
+        public AuthHeaderParamConverter() {
+            this(false);
+        }
+
+        private AuthHeaderParamConverter(boolean nullable) {
+            this.nullable = nullable;
+        }
+
         @Override
         public AuthHeader fromString(final String value) {
             if (value == null) {
+                if (nullable) {
+                    return null;
+                }
                 throw UnauthorizedException.missingCredentials();
             }
             try {
@@ -74,6 +98,15 @@ public final class AuthHeaderParamConverterProvider implements ParamConverterPro
             }
         }
 
+        return false;
+    }
+
+    private static boolean hasNullableAnnotation(Annotation[] annotations) {
+        for (Annotation annotation : annotations) {
+            if (Nullable.class.equals(annotation.annotationType())) {
+                return true;
+            }
+        }
         return false;
     }
 }

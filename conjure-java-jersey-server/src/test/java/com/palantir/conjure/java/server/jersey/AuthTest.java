@@ -26,6 +26,7 @@ import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.GET;
@@ -68,6 +69,25 @@ public final class AuthTest {
 
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("Bearer bearerToken");
+    }
+
+    @Test
+    public void testAuthHeaderNullable_present() throws SecurityException {
+        Response response = target.path("authHeaderNullable")
+                .request()
+                .header("Authorization", "Bearer bearerToken")
+                .get();
+
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("Bearer bearerToken");
+    }
+
+    @Test
+    public void testAuthHeaderNullable_absent() throws SecurityException {
+        Response response = target.path("authHeaderNullable").request().get();
+
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("[no value]");
     }
 
     @Test
@@ -139,6 +159,25 @@ public final class AuthTest {
     }
 
     @Test
+    public void testBearerTokenNullable_present() {
+        Response response = target.path("bearerTokenNullable")
+                .request()
+                .cookie("PALANTIR_TOKEN", "bearerToken")
+                .get();
+
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("bearerToken");
+    }
+
+    @Test
+    public void testBearerTokenNullable_absent() {
+        Response response = target.path("bearerTokenNullable").request().get();
+
+        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.readEntity(String.class)).isEqualTo("[no value]");
+    }
+
+    @Test
     public void testBearerToken_missingCredentials() throws SecurityException {
         Response response = target.path("bearerToken").request().get();
 
@@ -196,6 +235,11 @@ public final class AuthTest {
         }
 
         @Override
+        public String getAuthHeaderNullable(@Nullable AuthHeader value) {
+            return value == null ? "[no value]" : value.toString();
+        }
+
+        @Override
         public String getAuthHeaderOtherHeader(AuthHeader value) {
             return value.toString();
         }
@@ -208,6 +252,11 @@ public final class AuthTest {
         @Override
         public String getBearerToken(BearerToken value) {
             return value.toString();
+        }
+
+        @Override
+        public String getBearerTokenNullable(@Nullable BearerToken value) {
+            return value == null ? "[no value]" : value.toString();
         }
 
         @Override
@@ -225,6 +274,10 @@ public final class AuthTest {
         String getAuthHeader(@HeaderParam("Authorization") AuthHeader value);
 
         @GET
+        @Path("/authHeaderNullable")
+        String getAuthHeaderNullable(@Nullable @HeaderParam("Authorization") AuthHeader value);
+
+        @GET
         @Path("/authHeaderOtherHeader")
         String getAuthHeaderOtherHeader(@HeaderParam("Other") AuthHeader value);
 
@@ -235,6 +288,10 @@ public final class AuthTest {
         @GET
         @Path("/bearerToken")
         String getBearerToken(@CookieParam("PALANTIR_TOKEN") BearerToken value);
+
+        @GET
+        @Path("/bearerTokenNullable")
+        String getBearerTokenNullable(@Nullable @CookieParam("PALANTIR_TOKEN") BearerToken value);
 
         @GET
         @Path("/bearerTokenOtherParam")
