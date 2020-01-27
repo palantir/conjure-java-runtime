@@ -80,6 +80,9 @@ public enum ConjureJerseyFeature implements Feature {
         // Tracing
         context.register(new TraceEnrichingFilter());
 
+        // Deprecation
+        context.register(DeprecationReportingResponseFeature.INSTANCE);
+
         return true;
     }
 }
