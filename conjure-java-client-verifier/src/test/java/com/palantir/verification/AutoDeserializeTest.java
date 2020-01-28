@@ -168,8 +168,8 @@ public class AutoDeserializeTest {
     private Optional<Error> expectFailureRetrofit(Method method) {
         try {
             Object result = Futures.getUnchecked((ListenableFuture<?>) method.invoke(testServiceRetrofit, index));
-            return Optional.of(new AssertionError(
-                    String.format("Result should have caused an exception but deserialized to: %s", result)));
+            return Optional.of(new AssertionError(String.format(
+                    "Result should have caused an exception but deserialized to: %s", result)));
         } catch (Exception e) {
             return Optional.empty(); // we expected the method to throw and it did, so this expectation was satisifed
         }
@@ -189,8 +189,8 @@ public class AutoDeserializeTest {
     private Optional<Error> expectFailureJersey(Method method) {
         try {
             Object result = method.invoke(testServiceJersey, index);
-            return Optional.of(new AssertionError(
-                    String.format("Result should have caused an exception but deserialized to: %s", result)));
+            return Optional.of(new AssertionError(String.format(
+                    "Result should have caused an exception but deserialized to: %s", result)));
         } catch (Exception e) {
             return Optional.empty(); // we expected the method to throw and it did, so this expectation was satisifed
         }

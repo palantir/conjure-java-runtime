@@ -43,8 +43,11 @@ public final class ScalaObjectMappers {
     }
 
     private static ObjectMapper withScalaSupport(ObjectMapper objectMapper) {
-        objectMapper.registerModule(new DefaultScalaModule()).setAnnotationIntrospector(new AnnotationIntrospectorPair(
-                ScalaAnnotationIntrospector$.MODULE$, new JacksonAnnotationIntrospector()));
+        objectMapper
+                .registerModule(new DefaultScalaModule())
+                .setAnnotationIntrospector(
+                        new AnnotationIntrospectorPair(
+                                ScalaAnnotationIntrospector$.MODULE$, new JacksonAnnotationIntrospector()));
 
         return objectMapper;
     }
