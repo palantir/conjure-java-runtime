@@ -31,6 +31,7 @@ import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.Tracers;
+import com.palantir.tritium.metrics.MetricRegistries;
 import java.time.Clock;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,6 +40,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import javax.net.ssl.SSLSocketFactory;
 import okhttp3.ConnectionPool;
 import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
@@ -209,7 +211,11 @@ public final class OkHttpClients {
         client.followRedirects(false); // We implement our own redirect logic.
 
         // SSL
-        client.sslSocketFactory(new KeepAliveSslSocketFactory(config.sslSocketFactory()), config.trustManager());
+        SSLSocketFactory sslSocketFactory = MetricRegistries.instrument(
+                config.taggedMetricRegistry(),
+                new KeepAliveSslSocketFactory(config.sslSocketFactory()),
+                serviceClass.getSimpleName());
+        client.sslSocketFactory(sslSocketFactory, config.trustManager());
         if (config.fallbackToCommonNameVerification()) {
             client.hostnameVerifier(Okhttp39HostnameVerifier.INSTANCE);
         }
