@@ -85,7 +85,12 @@ public final class OkHttpClients {
     private static final Dispatcher dispatcher;
 
     /** Shared connection pool. */
-    private static final ConnectionPool connectionPool = new ConnectionPool(100, 10, TimeUnit.MINUTES);
+    private static final ConnectionPool connectionPool = new ConnectionPool(
+            1000,
+            // Most servers use a one minute keepalive for idle connections, by using a shorter keepalive on
+            // clients we can avoid race conditions where the attempts to reuse a connection as the server
+            // closes it, resulting in unnecessary I/O exceptions and retrial.
+            55, TimeUnit.SECONDS);
 
     private static DispatcherMetricSet dispatcherMetricSet;
 
