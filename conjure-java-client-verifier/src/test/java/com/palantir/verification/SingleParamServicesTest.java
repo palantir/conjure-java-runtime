@@ -69,8 +69,8 @@ public class SingleParamServicesTest {
         List<Object[]> objects = new ArrayList<>();
         Cases.TEST_CASES.getSingleHeaderService().forEach((endpointName, singleHeaderTestCases) -> {
             int size = singleHeaderTestCases.size();
-            IntStream.range(0, size).forEach(i -> objects.add(
-                    new Object[] {"singleHeaderService", endpointName, i, singleHeaderTestCases.get(i)}));
+            IntStream.range(0, size).forEach(i ->
+                    objects.add(new Object[] {"singleHeaderService", endpointName, i, singleHeaderTestCases.get(i)}));
         });
 
         Cases.TEST_CASES.getSinglePathParamService().forEach((endpointName, singleHeaderTestCases) -> {

@@ -46,10 +46,8 @@ public final class QosExceptionResponseHandlerTest extends TestBase {
         response = response(REQUEST, 308)
                 .header(HttpHeaders.LOCATION, LOCAL_URL.toString())
                 .build();
-        assertThat(handler.handle(response).get())
-                .isInstanceOfSatisfying(
-                        QosException.RetryOther.class,
-                        retryOther -> assertThat(retryOther.getRedirectTo()).isEqualTo(LOCAL_URL));
+        assertThat(handler.handle(response).get()).isInstanceOfSatisfying(QosException.RetryOther.class, retryOther ->
+                assertThat(retryOther.getRedirectTo()).isEqualTo(LOCAL_URL));
 
         // with header
         response = response(REQUEST, 308).build();
@@ -60,20 +58,16 @@ public final class QosExceptionResponseHandlerTest extends TestBase {
     public void test429WithoutRetryAfter() throws Exception {
         Response response = responseWithCode(REQUEST, 429);
 
-        assertThat(handler.handle(response).get())
-                .isInstanceOfSatisfying(
-                        QosException.Throttle.class,
-                        retryAfter -> assertThat(retryAfter.getRetryAfter()).isEmpty());
+        assertThat(handler.handle(response).get()).isInstanceOfSatisfying(QosException.Throttle.class, retryAfter ->
+                assertThat(retryAfter.getRetryAfter()).isEmpty());
     }
 
     @Test
     public void test429WithRetryAfter() throws Exception {
         Response response = response(REQUEST, 429).header("Retry-After", "120").build();
 
-        assertThat(handler.handle(response).get())
-                .isInstanceOfSatisfying(
-                        QosException.Throttle.class,
-                        retryAfter -> assertThat(retryAfter.getRetryAfter()).contains(Duration.ofMinutes(2)));
+        assertThat(handler.handle(response).get()).isInstanceOfSatisfying(QosException.Throttle.class, retryAfter ->
+                assertThat(retryAfter.getRetryAfter()).contains(Duration.ofMinutes(2)));
     }
 
     @Test

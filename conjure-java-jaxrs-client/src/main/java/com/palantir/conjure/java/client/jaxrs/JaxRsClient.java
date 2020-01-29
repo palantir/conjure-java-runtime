@@ -50,7 +50,7 @@ public final class JaxRsClient {
             HostEventsSink hostEventsSink,
             Refreshable<ClientConfiguration> config) {
         return Reflection.newProxy(
-                serviceClass, RefreshableProxyInvocationHandler.create(config, serviceConfiguration -> create(
-                        serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
+                serviceClass, RefreshableProxyInvocationHandler.create(config, serviceConfiguration ->
+                        create(serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
     }
 }

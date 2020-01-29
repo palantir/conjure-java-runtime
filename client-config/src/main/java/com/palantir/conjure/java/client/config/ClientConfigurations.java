@@ -126,9 +126,8 @@ public final class ClientConfigurations {
             case HTTP:
                 HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig
                         .hostAndPort()
-                        .orElseThrow(() ->
-                                new SafeIllegalArgumentException(
-                                        "Expected to find proxy hostAndPort configuration for HTTP proxy")));
+                        .orElseThrow(() -> new SafeIllegalArgumentException(
+                                "Expected to find proxy hostAndPort configuration for HTTP proxy")));
                 InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHost(), hostAndPort.getPort());
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, addr));
             case MESH:

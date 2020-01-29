@@ -70,8 +70,8 @@ public final class TracerTest extends TestBase {
         Tracer.initTrace(Observability.SAMPLE, Tracers.randomId());
         OpenSpan parentTrace = Tracer.startSpan("");
         List<Map.Entry<SpanType, String>> observedSpans = new ArrayList<>();
-        Tracer.subscribe(TracerTest.class.getName(), span -> observedSpans.add(
-                Maps.immutableEntry(span.type(), span.getOperation())));
+        Tracer.subscribe(TracerTest.class.getName(), span ->
+                observedSpans.add(Maps.immutableEntry(span.type(), span.getOperation())));
 
         String traceId = Tracer.getTraceId();
         service.param("somevalue");
