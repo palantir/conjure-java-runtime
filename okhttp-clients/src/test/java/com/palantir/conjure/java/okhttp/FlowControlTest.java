@@ -105,13 +105,14 @@ public final class FlowControlTest {
     private Stream<Worker> createWorkers(
             Meter rate, Histogram avgRetries, int numThreads, int rateLimit, Duration delay) {
         RateLimiter rateLimiter = RateLimiter.create(rateLimit);
-        return IntStream.range(0, numThreads).mapToObj(unused -> new Worker(
-                () -> new ExponentialBackoff(4, Duration.ofMillis(250)),
-                limiters,
-                delay,
-                rateLimiter,
-                rate,
-                avgRetries));
+        return IntStream.range(0, numThreads).mapToObj(unused ->
+                new Worker(
+                        () -> new ExponentialBackoff(4, Duration.ofMillis(250)),
+                        limiters,
+                        delay,
+                        rateLimiter,
+                        rate,
+                        avgRetries));
     }
 
     private static final class Worker implements Runnable {

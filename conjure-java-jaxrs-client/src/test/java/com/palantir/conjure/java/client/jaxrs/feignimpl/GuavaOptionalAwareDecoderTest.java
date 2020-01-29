@@ -118,10 +118,11 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     @Test
     public void testComplexType() {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
-                com.google.common.base.Optional.of(new GuavaOptionalComplexType(
-                        com.google.common.base.Optional.absent(),
-                        com.google.common.base.Optional.absent(),
-                        Paths.get("bar"))),
+                com.google.common.base.Optional.of(
+                        new GuavaOptionalComplexType(
+                                com.google.common.base.Optional.absent(),
+                                com.google.common.base.Optional.absent(),
+                                Paths.get("bar"))),
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
@@ -131,10 +132,11 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     @Test
     public void testCborResponse() {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
-                com.google.common.base.Optional.of(new GuavaOptionalComplexType(
-                        com.google.common.base.Optional.absent(),
-                        com.google.common.base.Optional.absent(),
-                        Paths.get("bar"))),
+                com.google.common.base.Optional.of(
+                        new GuavaOptionalComplexType(
+                                com.google.common.base.Optional.absent(),
+                                com.google.common.base.Optional.absent(),
+                                Paths.get("bar"))),
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
         assertThat(service.getCborResponse(value)).isEqualTo(value);
@@ -143,10 +145,11 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
     @Test
     public void testCborRequest() {
         GuavaOptionalComplexType value = new GuavaOptionalComplexType(
-                com.google.common.base.Optional.of(new GuavaOptionalComplexType(
-                        com.google.common.base.Optional.absent(),
-                        com.google.common.base.Optional.absent(),
-                        Paths.get("bar"))),
+                com.google.common.base.Optional.of(
+                        new GuavaOptionalComplexType(
+                                com.google.common.base.Optional.absent(),
+                                com.google.common.base.Optional.absent(),
+                                Paths.get("bar"))),
                 com.google.common.base.Optional.of("baz"),
                 Paths.get("foo"));
         assertThat(service.postCborRequest(value)).isEqualTo(value);
