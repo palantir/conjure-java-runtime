@@ -248,6 +248,7 @@ public final class OkHttpClients {
         // gcm ciphers are required for http/2 per https://tools.ietf.org/html/rfc7540#section-9.2.2
         // some servers fail to implement this piece of the specification, which can violate our
         // assumptions.
+        // This check can be removed once we've migrated to TLSv1.3+
         if (!config.enableGcmCipherSuites()) {
             client.protocols(ImmutableList.of(Protocol.HTTP_1_1));
         }
