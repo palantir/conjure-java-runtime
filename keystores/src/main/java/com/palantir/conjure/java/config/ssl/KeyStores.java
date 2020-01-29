@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.config.ssl;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Throwables;
 import com.google.common.io.BaseEncoding;
 import com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1PrivateKeyReader;
@@ -35,20 +37,29 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 final class KeyStores {
+
+    private static final Cache<EqualByteArray, X509Certificate> certCache = Caffeine.newBuilder()
+            .maximumSize(1024)
+            .softValues()
+            .build();
 
     /**
      * Pattern that matches a single RSA key in a PEM file. Has a capture group that captures the content of the key
@@ -319,8 +330,11 @@ final class KeyStores {
     }
 
     private static List<Certificate> readX509Certificates(InputStream certificateIn) throws CertificateException {
-        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-        return new ArrayList<>(certFactory.generateCertificates(certificateIn));
+        return CertificateFactory.getInstance("X.509")
+                .generateCertificates(certificateIn)
+                .stream()
+                .map(cert -> getCertFromCache((X509Certificate) cert))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -420,15 +434,47 @@ final class KeyStores {
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
         List<Certificate> certList = new ArrayList<>();
         while (matcher.find()) {
-            Certificate certificate;
-
             try (InputStream stream = new ByteArrayInputStream(matcher.group().getBytes(StandardCharsets.UTF_8))) {
-                certificate = certFactory.generateCertificate(stream);
+                certList.add(getCertFromCache((X509Certificate) certFactory.generateCertificate(stream)));
             }
-
-            certList.add(certificate);
         }
 
         return certList;
+    }
+
+    private static X509Certificate getCertFromCache(X509Certificate certificate) {
+        try {
+            return certCache.get(new EqualByteArray(certificate.getEncoded()), input -> certificate);
+        } catch (CertificateEncodingException e) {
+            throw new SafeRuntimeException("Unable to get certificate bytes", e);
+        }
+    }
+
+    private static class EqualByteArray {
+
+        private final byte[] bytes;
+        private int hash;
+
+        EqualByteArray(byte[] bytes) {
+            this.bytes = bytes;
+        }
+
+        public int hashCode() {
+            if (hash == 0 && bytes.length > 0) {
+                hash = Arrays.hashCode(bytes);
+            }
+            return hash;
+        }
+
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof EqualByteArray)) {
+                return false;
+            }
+            EqualByteArray other = (EqualByteArray) obj;
+            return Arrays.equals(this.bytes, other.bytes);
+        }
     }
 }
