@@ -56,10 +56,8 @@ import java.util.stream.Collectors;
 
 final class KeyStores {
 
-    private static final Cache<EqualByteArray, X509Certificate> certCache = Caffeine.newBuilder()
-            .maximumSize(1024)
-            .softValues()
-            .build();
+    private static final Cache<EqualByteArray, X509Certificate> certCache =
+            Caffeine.newBuilder().maximumSize(1024).softValues().build();
 
     /**
      * Pattern that matches a single RSA key in a PEM file. Has a capture group that captures the content of the key
@@ -330,9 +328,7 @@ final class KeyStores {
     }
 
     private static List<Certificate> readX509Certificates(InputStream certificateIn) throws CertificateException {
-        return CertificateFactory.getInstance("X.509")
-                .generateCertificates(certificateIn)
-                .stream()
+        return CertificateFactory.getInstance("X.509").generateCertificates(certificateIn).stream()
                 .map(cert -> getCertFromCache((X509Certificate) cert))
                 .collect(Collectors.toList());
     }
