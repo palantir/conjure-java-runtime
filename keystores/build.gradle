@@ -8,6 +8,7 @@ dependencies {
     api "com.palantir.conjure.java.api:ssl-config"
     implementation "com.google.guava:guava"
     implementation "com.palantir.safe-logging:preconditions"
+    implementation "com.github.ben-manes.caffeine:caffeine"
 
     testImplementation project(":conjure-java-jackson-serialization")
     testImplementation("com.netflix.feign:feign-jaxrs") {
