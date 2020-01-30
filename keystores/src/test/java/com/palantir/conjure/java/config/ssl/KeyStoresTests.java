@@ -33,6 +33,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
 import java.security.interfaces.RSAPrivateCrtKey;
@@ -58,6 +59,20 @@ public final class KeyStoresTests {
                                 TestConstants.CA_DER_CERT_PATH.getFileName().toString() + "-0")
                         .toString())
                 .contains("CN=testCA");
+    }
+
+    @Test
+    public void testCertificatesEqualityFromSameFile() throws GeneralSecurityException {
+        String certName = TestConstants.CA_DER_CERT_PATH.getFileName().toString() + "-0";
+
+        KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(TestConstants.CA_DER_CERT_PATH);
+        assertThat(trustStore.size()).isEqualTo(1);
+        Certificate certificate = trustStore.getCertificate(certName);
+
+        KeyStore secondTrustStore = KeyStores.createTrustStoreFromCertificates(TestConstants.CA_DER_CERT_PATH);
+        assertThat(secondTrustStore.size()).isEqualTo(1);
+        Certificate secondCertificate = secondTrustStore.getCertificate(certName);
+        assertThat(certificate).isSameAs(secondCertificate);
     }
 
     @Test
