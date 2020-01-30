@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: Update the conjure okhttp client connection pool to allow up to 1000
+    idle connections (increased from 100) and reduce the keepalive time to 55 seconds
+    (from 10 minutes). This should provide greater throughput in RPC bound environments.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1450
