@@ -44,6 +44,7 @@ import okhttp3.ConnectionSpec;
 import okhttp3.Credentials;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.TlsVersion;
 import okhttp3.internal.Util;
 import org.slf4j.Logger;
@@ -250,6 +251,13 @@ public final class OkHttpClients {
 
         // cipher setup
         client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
+        // gcm ciphers are required for http/2 per https://tools.ietf.org/html/rfc7540#section-9.2.2
+        // some servers fail to implement this piece of the specification, which can violate our
+        // assumptions.
+        // This check can be removed once we've migrated to TLSv1.3+
+        if (!config.enableGcmCipherSuites()) {
+            client.protocols(ImmutableList.of(Protocol.HTTP_1_1));
+        }
 
         // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
         client.connectionPool(connectionPool);
