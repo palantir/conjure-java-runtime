@@ -20,12 +20,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.Uninterruptibles;
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import io.undertow.Undertow;
 import io.undertow.server.handlers.BlockingHandler;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 import org.junit.Test;
 
 public class OkHttpClientsRealServerTest extends TestBase {
@@ -146,6 +154,45 @@ public class OkHttpClientsRealServerTest extends TestBase {
         assertThat(requests)
                 .as("Expected a single request to be cancelled before a scheduled retry that is never executed")
                 .hasValue(2);
+    }
+
+    @Test
+    public void testClientInstancesShareConnections() throws Exception {
+        SslConfiguration serverSslConfig = SslConfiguration.of(
+                Paths.get("src/test/resources/trustStore.jks"),
+                Paths.get("src/test/resources/keyStore.jks"),
+                "keystore");
+        Set<String> sslSessionIds = ConcurrentHashMap.newKeySet();
+        Undertow server = Undertow.builder()
+                .addHttpsListener(PORT, null, SslSocketFactories.createSslContext(serverSslConfig))
+                .setHandler(exchange -> {
+                    byte[] sessionId =
+                            exchange.getConnection().getSslSessionInfo().getSessionId();
+                    sslSessionIds.add(new String(Base64.getEncoder().encode(sessionId), StandardCharsets.UTF_8));
+                })
+                .build();
+        String url = "https://localhost:" + PORT;
+        ClientConfiguration config = createTestConfig(url);
+        OkHttpClient client1 = OkHttpClients.create(config, AGENT, hostEventsSink, OkHttpClientsRealServerTest.class);
+        OkHttpClient client2 = OkHttpClients.create(config, AGENT, hostEventsSink, OkHttpClientsRealServerTest.class);
+        server.start();
+        try {
+            try (Response response = client1.newCall(
+                            new Request.Builder().url(url).get().build())
+                    .execute()) {
+                assertThat(response.code()).isEqualTo(200);
+            }
+            try (Response response = client2.newCall(
+                            new Request.Builder().url(url).get().build())
+                    .execute()) {
+                assertThat(response.code()).isEqualTo(200);
+            }
+        } finally {
+            server.stop();
+        }
+        assertThat(sslSessionIds)
+                .as("Expected the same session to be reused between clients")
+                .hasSize(1);
     }
 
     private static final class ReproducibleExponentialBackoff implements BackoffStrategy {

@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: Http2 requires gcm ciphers to be enabled. Previously http/2 could be
+    negotiated with servers that failed to fully implement the http/2 specification
+    as defined in https://tools.ietf.org/html/rfc7540#section-9.2.2
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1445
