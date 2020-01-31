@@ -62,6 +62,9 @@ public interface ClientConfiguration {
     /** See {@link PartialServiceConfiguration#enableGcmCipherSuites}. */
     boolean enableGcmCipherSuites();
 
+    /** See {@link PartialServiceConfiguration#enableHttp2()}. */
+    Optional<Boolean> enableHttp2();
+
     /** See {@link PartialServiceConfiguration#fallbackToCommonNameVerification}. */
     boolean fallbackToCommonNameVerification();
 
