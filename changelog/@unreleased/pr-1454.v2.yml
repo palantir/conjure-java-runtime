@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: Implement the `enable-http2` client configuration flag to disable client
+    http/2 support for debugging
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1454
+  - https://github.com/palantir/conjure-java-runtime-api/pull/443

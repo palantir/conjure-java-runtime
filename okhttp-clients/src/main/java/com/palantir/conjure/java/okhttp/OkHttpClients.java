@@ -60,6 +60,8 @@ public final class OkHttpClients {
     @VisibleForTesting
     static final int NUM_SCHEDULING_THREADS = 5;
 
+    private static final boolean DEFAULT_ENABLE_HTTP2 = true;
+
     private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler((thread, uncaughtException) -> log.error(
                     "An exception was uncaught in an execution thread. "
@@ -261,7 +263,7 @@ public final class OkHttpClients {
         // some servers fail to implement this piece of the specification, which can violate our
         // assumptions.
         // This check can be removed once we've migrated to TLSv1.3+
-        if (!config.enableGcmCipherSuites()) {
+        if (!config.enableGcmCipherSuites() || !config.enableHttp2().orElse(DEFAULT_ENABLE_HTTP2)) {
             client.protocols(ImmutableList.of(Protocol.HTTP_1_1));
         }
 

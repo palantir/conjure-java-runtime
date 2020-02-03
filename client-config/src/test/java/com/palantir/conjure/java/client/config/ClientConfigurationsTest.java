@@ -57,6 +57,7 @@ public final class ClientConfigurationsTest {
         assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.enableGcmCipherSuites()).isFalse();
+        assertThat(actual.enableHttp2()).isEmpty();
         assertThat(actual.fallbackToCommonNameVerification()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
         assertThat(actual.taggedMetricRegistry()).isSameAs(DefaultTaggedMetricRegistry.getDefault());
@@ -75,6 +76,7 @@ public final class ClientConfigurationsTest {
         assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.enableGcmCipherSuites()).isFalse();
+        assertThat(actual.enableHttp2()).isEmpty();
         assertThat(actual.fallbackToCommonNameVerification()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
     }
