@@ -29,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
 import java.util.Map;
 import javax.net.ssl.SSLSocketFactory;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -305,7 +304,6 @@ public final class SslSocketFactoriesTests {
     }
 
     @Test
-    @Ignore("regression introduced by https://github.com/palantir/conjure-java-runtime-api/pull/427")
     public void testCreateSslSocketFactory_keyStorePathRequiredIfPasswordPresent() {
         assertThatThrownBy(() -> {
                     SslConfiguration sslConfig = SslConfiguration.builder()
@@ -315,7 +313,7 @@ public final class SslSocketFactoriesTests {
 
                     SslSocketFactories.createSslSocketFactory(sslConfig);
                 })
-                .hasMessageContaining("keyStorePath and keyStorePassword must both be present or both be absent");
+                .hasMessageContaining("keyStorePath must be present if a keyStorePassword is provided");
     }
 
     @Test
