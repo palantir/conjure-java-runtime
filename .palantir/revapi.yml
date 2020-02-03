@@ -29,13 +29,13 @@ acceptedBreaks:
       justification: "ABI-safe change to rarely used class, low impact"
   "4.58.0":
     com.palantir.conjure.java.runtime:conjure-java-jersey-server:
-    - code: "java.method.visibilityReduced"
-      old: "method com.codahale.metrics.Meter com.palantir.conjure.java.server.jersey.JerseyServerMetrics::internalerrorAll(java.lang.String)"
-      new: "method com.codahale.metrics.Meter com.palantir.conjure.java.server.jersey.JerseyServerMetrics::internalerrorAll(java.lang.String)"
-      justification: "Reverting after discussion. Not used by any consumer."
     - code: "java.class.visibilityReduced"
       old: "class com.palantir.conjure.java.server.jersey.JerseyServerMetrics"
       new: "class com.palantir.conjure.java.server.jersey.JerseyServerMetrics"
+      justification: "Reverting after discussion. Not used by any consumer."
+    - code: "java.method.visibilityReduced"
+      old: "method com.codahale.metrics.Meter com.palantir.conjure.java.server.jersey.JerseyServerMetrics::internalerrorAll(java.lang.String)"
+      new: "method com.codahale.metrics.Meter com.palantir.conjure.java.server.jersey.JerseyServerMetrics::internalerrorAll(java.lang.String)"
       justification: "Reverting after discussion. Not used by any consumer."
   "4.45.0":
     com.palantir.conjure.java.runtime:conjure-java-jersey-server:
@@ -49,3 +49,18 @@ acceptedBreaks:
       new: "parameter void com.palantir.conjure.java.server.jersey.Java8OptionalParamConverterProvider::<init>(===org.glassfish.jersey.internal.inject.InjectionManager===)"
       justification: "Classes are implementation details - only public for injection\
         \ purposes"
+  "4.64.0":
+    com.palantir.conjure.java.runtime:okhttp-clients: []
+    com.palantir.conjure.java.runtime:refresh-utils: []
+    com.palantir.conjure.java.runtime:jetty-http2-agent: []
+    com.palantir.conjure.java.runtime:keystores: []
+    com.palantir.conjure.java.runtime:conjure-java-jackson-serialization: []
+    com.palantir.conjure.java.runtime:conjure-scala-jaxrs-client: []
+    com.palantir.conjure.java.runtime:conjure-java-jaxrs-client: []
+    com.palantir.conjure.java.runtime:conjure-java-jersey-server: []
+    com.palantir.conjure.java.runtime:conjure-java-retrofit2-client: []
+    com.palantir.conjure.java.runtime:client-config:
+    - code: "java.method.addedToInterface"
+      old: null
+      new: "method java.util.Optional<java.lang.Boolean> com.palantir.conjure.java.client.config.ClientConfiguration::enableHttp2()"
+      justification: "immutables interfaces are not for extension"
