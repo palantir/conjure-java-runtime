@@ -455,6 +455,7 @@ final class KeyStores {
             this.bytes = bytes;
         }
 
+        @Override
         public int hashCode() {
             if (hash == 0 && bytes.length > 0) {
                 hash = Arrays.hashCode(bytes);
@@ -462,6 +463,7 @@ final class KeyStores {
             return hash;
         }
 
+        @Override
         public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
