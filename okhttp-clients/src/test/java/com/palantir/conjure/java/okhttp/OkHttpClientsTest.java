@@ -153,9 +153,9 @@ public final class OkHttpClientsTest extends TestBase {
 
         StreamingRequestBody body = new StreamingRequestBody(
                 Okio.buffer(Okio.source(new ByteArrayInputStream("hello".getBytes(StandardCharsets.UTF_8)))));
-        assertThatThrownBy(() ->
-                        client.newCall(new Request.Builder().url(url).post(body).build())
-                                .execute())
+        assertThatThrownBy(() -> client.newCall(
+                                new Request.Builder().url(url).post(body).build())
+                        .execute())
                 .isInstanceOf(SafeIoException.class)
                 .hasMessage("Cannot retry streamed HTTP body");
 

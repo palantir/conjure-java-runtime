@@ -111,8 +111,8 @@ public final class OkHttpClients {
     }
 
     /** The {@link ScheduledExecutorService} used for recovering leaked limits. */
-    private static final Supplier<ScheduledExecutorService> limitReviver = Suppliers.memoize(
-            () -> Tracers.wrap(Executors.newSingleThreadScheduledExecutor(
+    private static final Supplier<ScheduledExecutorService> limitReviver =
+            Suppliers.memoize(() -> Tracers.wrap(Executors.newSingleThreadScheduledExecutor(
                     Util.threadFactory("conjure-java-runtime/leaked limit reviver", true))));
 
     /**
@@ -123,8 +123,8 @@ public final class OkHttpClients {
      * {@link #executionExecutor}, {@code corePoolSize} must not be zero for a {@link ScheduledThreadPoolExecutor}, see
      * its Javadoc. Since this executor will never hit zero threads, it must use daemon threads.
      */
-    private static final Supplier<ScheduledExecutorService> schedulingExecutor = Suppliers.memoize(
-            () -> Tracers.wrap(Executors.newScheduledThreadPool(
+    private static final Supplier<ScheduledExecutorService> schedulingExecutor =
+            Suppliers.memoize(() -> Tracers.wrap(Executors.newScheduledThreadPool(
                     NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true))));
 
     private OkHttpClients() {}
@@ -152,8 +152,15 @@ public final class OkHttpClients {
             Class<?> serviceClass) {
         boolean reshuffle =
                 !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
-        return createInternal(client, config, userAgent, hostEventsSink, serviceClass, RANDOMIZE, reshuffle, () ->
-                new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize()));
+        return createInternal(
+                client,
+                config,
+                userAgent,
+                hostEventsSink,
+                serviceClass,
+                RANDOMIZE,
+                reshuffle,
+                () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize()));
     }
 
     @VisibleForTesting

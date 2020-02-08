@@ -90,8 +90,9 @@ public final class QosExceptionThrowingCallAdapterFactoryTest {
         when(call.execute()).thenReturn(Response.error(429, NO_CONTENT_RESPONSE_BODY));
         CallAdapter<Void, Void> adapter = (CallAdapter<Void, Void>) factory.get(type, NO_ANNOTATIONS, retrofit);
         adapter.adapt(call);
-        assertThatThrownBy(() -> argument.getValue().execute()).isInstanceOfSatisfying(QosException.Throttle.class, e ->
-                assertThat(e.getRetryAfter()).isEmpty());
+        assertThatThrownBy(() -> argument.getValue().execute())
+                .isInstanceOfSatisfying(QosException.Throttle.class, e -> assertThat(e.getRetryAfter())
+                        .isEmpty());
     }
 
     @Test
@@ -107,8 +108,9 @@ public final class QosExceptionThrowingCallAdapterFactoryTest {
         when(call.execute()).thenReturn(Response.error(NO_CONTENT_RESPONSE_BODY, response));
         CallAdapter<Void, Void> adapter = (CallAdapter<Void, Void>) factory.get(type, NO_ANNOTATIONS, retrofit);
         adapter.adapt(call);
-        assertThatThrownBy(() -> argument.getValue().execute()).isInstanceOfSatisfying(QosException.Throttle.class, e ->
-                assertThat(e.getRetryAfter()).contains(Duration.ofSeconds(5)));
+        assertThatThrownBy(() -> argument.getValue().execute())
+                .isInstanceOfSatisfying(QosException.Throttle.class, e -> assertThat(e.getRetryAfter())
+                        .contains(Duration.ofSeconds(5)));
     }
 
     @Test

@@ -110,8 +110,10 @@ abstract class AbstractFeignJaxRsClientBuilder {
     }
 
     private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
-        return new NeverReturnNullDecoder(new Java8OptionalAwareDecoder(new GuavaOptionalAwareDecoder(
-                new EmptyContainerDecoder(objectMapper, new InputStreamDelegateDecoder(new TextDelegateDecoder(
-                        new CborDelegateDecoder(cborObjectMapper, new JacksonDecoder(objectMapper))))))));
+        return new NeverReturnNullDecoder(
+                new Java8OptionalAwareDecoder(new GuavaOptionalAwareDecoder(new EmptyContainerDecoder(
+                        objectMapper,
+                        new InputStreamDelegateDecoder(new TextDelegateDecoder(
+                                new CborDelegateDecoder(cborObjectMapper, new JacksonDecoder(objectMapper))))))));
     }
 }

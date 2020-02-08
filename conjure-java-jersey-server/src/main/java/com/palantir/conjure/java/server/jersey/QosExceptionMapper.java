@@ -47,8 +47,10 @@ final class QosExceptionMapper implements ExceptionMapper<QosException> {
             @Override
             public Response visit(QosException.Throttle exception) {
                 Response.ResponseBuilder response = Response.status(429);
-                exception.getRetryAfter().ifPresent(duration ->
-                        response.header(HttpHeaders.RETRY_AFTER, Long.toString(duration.get(ChronoUnit.SECONDS))));
+                exception
+                        .getRetryAfter()
+                        .ifPresent(duration -> response.header(
+                                HttpHeaders.RETRY_AFTER, Long.toString(duration.get(ChronoUnit.SECONDS))));
                 return response.build();
             }
 
