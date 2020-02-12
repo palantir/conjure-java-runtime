@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*
- * Adapted from https://github.com/dropwizard/dropwizard/blob/master/dropwizard-jersey/src/main/java/io/dropwizard/jersey/optional/OptionalIntParamConverterProvider.java
- */
 
 package com.palantir.conjure.java.server.jersey;
 
@@ -28,6 +25,9 @@ import javax.ws.rs.ext.ParamConverterProvider;
 import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.internal.inject.Custom;
 
+/*
+ * Adapted from https://github.com/dropwizard/dropwizard/blob/master/dropwizard-jersey/src/main/java/io/dropwizard/jersey/optional/OptionalIntParamConverterProvider.java
+ */
 // The Custom annotation ensures that our custom param converters are considered first. See ParamConverterFactory.
 @Custom
 @Provider
