@@ -78,11 +78,7 @@ final class QosExceptionThrowingCallAdapterFactory extends CallAdapter.Factory {
         @Override
         public Response<R> execute() throws IOException {
             Response<R> response = delegate.execute();
-            Map<String, List<String>> headers = response.headers().toMultimap();
-            Optional<QosException> exception = QosExceptionResponseMapper.mapResponseCodeHeaderStream(
-                    response.code(), header -> Optional.ofNullable(headers.get(header))
-                            .map(List::stream)
-                            .orElseGet(Stream::empty));
+            Optional<QosException> exception = handlePotentialQosException(response);
             if (exception.isPresent()) {
                 throw exception.get();
             }
@@ -91,7 +87,30 @@ final class QosExceptionThrowingCallAdapterFactory extends CallAdapter.Factory {
 
         @Override
         public void enqueue(Callback<R> callback) {
-            delegate.enqueue(callback);
+            delegate.enqueue(new Callback<R>() {
+                @Override
+                public void onResponse(Call<R> call, Response<R> response) {
+                    Optional<QosException> exception = handlePotentialQosException(response);
+                    if (exception.isPresent()) {
+                        callback.onFailure(call, exception.get());
+                    } else {
+                        callback.onResponse(call, response);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<R> call, Throwable throwable) {
+                    callback.onFailure(call, throwable);
+                }
+            });
+        }
+
+        private Optional<QosException> handlePotentialQosException(Response<R> response) {
+            Map<String, List<String>> headers = response.headers().toMultimap();
+            return QosExceptionResponseMapper.mapResponseCodeHeaderStream(
+                    response.code(), header -> Optional.ofNullable(headers.get(header))
+                            .map(List::stream)
+                            .orElseGet(Stream::empty));
         }
 
         @Override

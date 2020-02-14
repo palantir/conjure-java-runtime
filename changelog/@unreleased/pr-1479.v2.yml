@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Retrofit2 clients now correctly propagate QoS exceptions when client
+    is configured with `ServerQoS.PROPAGATE_429_and_503_TO_CALLER`
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1479

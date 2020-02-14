@@ -20,6 +20,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -84,4 +85,11 @@ public interface TestService {
     @GET("getJavaOptionalHeader")
     ListenableFuture<String> getGuavaOptionalHeader(
             @Header("Optional-Header") com.google.common.base.Optional<String> optionalHeader);
+
+    @GET("getResponseBody")
+    ListenableFuture<ResponseBody> getResponseBody();
+
+    /** This is to ensure that conjure-java 4.x clients still work. */
+    @GET("getCallOfResponseBody")
+    Call<ResponseBody> getCallOfResponseBody();
 }
