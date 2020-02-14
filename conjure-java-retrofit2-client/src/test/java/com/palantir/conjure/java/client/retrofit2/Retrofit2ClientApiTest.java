@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import com.palantir.conjure.java.api.errors.QosException.Throttle;
 import com.palantir.conjure.java.api.errors.QosException.Unavailable;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
@@ -458,6 +459,21 @@ public final class Retrofit2ClientApiTest extends TestBase {
         tweakClientConfiguration(builder -> builder.serverQoS(ServerQoS.PROPAGATE_429_and_503_TO_CALLER));
         server.enqueue(new MockResponse().setResponseCode(503));
         assertThatExceptionOfType(Unavailable.class)
+                .isThrownBy(() -> service.getCallOfResponseBody().execute());
+    }
+
+    @Test
+    public void listenableFuture_propagates_429_correctly() {
+        tweakClientConfiguration(builder -> builder.serverQoS(ServerQoS.PROPAGATE_429_and_503_TO_CALLER));
+        server.enqueue(new MockResponse().setResponseCode(429));
+        assertThatCode(() -> Futures.getUnchecked(service.getResponseBody())).hasCauseExactlyInstanceOf(Throttle.class);
+    }
+
+    @Test
+    public void call_execute_propagates_429_correctly() {
+        tweakClientConfiguration(builder -> builder.serverQoS(ServerQoS.PROPAGATE_429_and_503_TO_CALLER));
+        server.enqueue(new MockResponse().setResponseCode(429));
+        assertThatExceptionOfType(Throttle.class)
                 .isThrownBy(() -> service.getCallOfResponseBody().execute());
     }
 
