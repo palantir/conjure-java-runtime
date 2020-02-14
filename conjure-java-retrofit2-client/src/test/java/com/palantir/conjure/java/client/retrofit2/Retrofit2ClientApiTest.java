@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.client.retrofit2;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
@@ -25,9 +26,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import com.palantir.conjure.java.api.errors.QosException.Unavailable;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.config.ClientConfiguration.ServerQoS;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
@@ -43,6 +46,7 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -439,6 +443,28 @@ public final class Retrofit2ClientApiTest extends TestBase {
         assertThat(Futures.getUnchecked(service.getGuavaOptionalHeader(guavaOptional("value"))))
                 .isEqualTo("body");
         assertThat(server.takeRequest().getHeader("Optional-Header")).isEqualTo("value");
+    }
+
+    @Test
+    public void listenableFuture_propagates_503_correctly() {
+        tweakClientConfiguration(builder -> builder.serverQoS(ServerQoS.PROPAGATE_429_and_503_TO_CALLER));
+        server.enqueue(new MockResponse().setResponseCode(503));
+        assertThatCode(() -> Futures.getUnchecked(service.getResponseBody()))
+                .hasCauseExactlyInstanceOf(Unavailable.class);
+    }
+
+    @Test
+    public void call_execute_propagates_503_correctly() {
+        tweakClientConfiguration(builder -> builder.serverQoS(ServerQoS.PROPAGATE_429_and_503_TO_CALLER));
+        server.enqueue(new MockResponse().setResponseCode(503));
+        assertThatExceptionOfType(Unavailable.class)
+                .isThrownBy(() -> service.getCallOfResponseBody().execute());
+    }
+
+    private void tweakClientConfiguration(Consumer<ClientConfiguration.Builder> configuration) {
+        ClientConfiguration.Builder builder = ClientConfiguration.builder().from(createTestConfig(url.toString()));
+        configuration.accept(builder);
+        service = Retrofit2Client.create(TestService.class, AGENT, new HostMetricsRegistry(), builder.build());
     }
 
     private static <T> com.google.common.base.Optional<T> guavaOptional(T value) {
