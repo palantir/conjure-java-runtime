@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.config.ssl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import feign.Feign;
@@ -63,12 +63,7 @@ public final class DropwizardSslClientAuthTests {
         SslConfiguration sslConfig = SslConfiguration.of(TestConstants.CA_TRUST_STORE_PATH);
         TestEchoService service = createTestService(sslConfig);
 
-        try {
-            service.echo("foo");
-            fail("fail");
-        } catch (RetryableException ex) {
-            // expected
-        }
+        assertThatThrownBy(() -> service.echo("foo")).isInstanceOf(RetryableException.class);
     }
 
     @Test
