@@ -1,3 +1,5 @@
+import java.nio.charset.StandardCharsets
+
 apply plugin: 'org.inferred.processors'
 
 apply from: "${rootDir}/gradle/publish-jar.gradle"
