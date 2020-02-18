@@ -327,7 +327,7 @@ final class KeyStores {
         return keyStore;
     }
 
-    private static List<Certificate> readX509Certificates(InputStream certificateIn) throws CertificateException {
+    static List<Certificate> readX509Certificates(InputStream certificateIn) throws CertificateException {
         return CertificateFactory.getInstance("X.509").generateCertificates(certificateIn).stream()
                 .map(cert -> getCertFromCache((X509Certificate) cert))
                 .collect(Collectors.toList());

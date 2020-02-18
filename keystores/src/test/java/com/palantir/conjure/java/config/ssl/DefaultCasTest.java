@@ -12,6 +12,6 @@ public final class DefaultCasTest {
     @Test
     public void checkCanParseCertificates() {
         // this varies when the .crt file is updated, so not checking exactly
-        assertThat(DefaultCas.getTrustManager().getAcceptedIssuers()).hasSizeGreaterThan(50);
+        assertThat(DefaultCas.getCertificates()).hasSizeGreaterThan(50);
     }
 }
