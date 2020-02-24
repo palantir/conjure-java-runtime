@@ -18,6 +18,8 @@ package com.palantir.conjure.java.config.ssl;
 
 import com.google.common.base.Throwables;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -208,6 +210,16 @@ public final class SslSocketFactories {
             default:
                 throw new IllegalStateException("Unrecognized trust store type: " + trustStoreType);
         }
+
+        // Add globally trusted root CAs
+        DefaultCas.getCertificates().forEach((certAlias, cert) -> {
+            try {
+                keyStore.setCertificateEntry(certAlias, cert);
+            } catch (KeyStoreException e) {
+                throw new SafeRuntimeException(
+                        "Unable to add certificate to store", e, SafeArg.of("certificateAlias", certAlias));
+            }
+        });
 
         try {
             TrustManagerFactory trustManagerFactory =

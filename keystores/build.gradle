@@ -1,3 +1,5 @@
+import java.nio.charset.StandardCharsets
+
 apply plugin: 'org.inferred.processors'
 
 apply from: "${rootDir}/gradle/publish-jar.gradle"
@@ -7,6 +9,7 @@ dependencies {
     api "com.fasterxml.jackson.core:jackson-databind"
     api "com.palantir.conjure.java.api:ssl-config"
     implementation "com.google.guava:guava"
+    implementation "org.slf4j:slf4j-api"
     implementation "com.palantir.safe-logging:preconditions"
     implementation "com.github.ben-manes.caffeine:caffeine"
 
@@ -31,6 +34,33 @@ dependencies {
 task generateCerts(type:Exec) {
   workingDir './src/test/resources'
   commandLine './certSetup.sh', '-f'
+}
+
+// requires java 11
+task regenerateCAs(type: Exec) {
+    outputs.cacheIf { false }
+    commandLine 'bash', '-c', '$JAVA_HOME/bin/keytool -list -cacerts -rfc'
+    def outputStream = new ByteArrayOutputStream();
+    doFirst {
+        standardOutput outputStream
+    }
+    doLast {
+        def normalizedOutput = outputStream.toString(StandardCharsets.UTF_8).replaceAll("\\r\\n", "\n")
+        file("src/main/resources/ca-certificates.crt").newWriter().withWriter { w ->
+            w << normalizedOutput
+        }
+        if (System.env.CIRCLE_ARTIFACTS) {
+            file("${System.env.CIRCLE_ARTIFACTS}/ca-certificates.crt") << normalizedOutput
+        }
+    }
+}
+
+task checkCAsNeedUpdating(type: Exec, dependsOn: regenerateCAs) {
+    commandLine 'git', 'diff', '--quiet', 'HEAD', 'src/main/resources/ca-certificates.crt'
+}
+
+if (!JavaVersion.current().isJava8() && System.getenv().containsKey("CI")) {
+    tasks.test.dependsOn checkCAsNeedUpdating
 }
 
 tasks.test.dependsOn(generateCerts)
