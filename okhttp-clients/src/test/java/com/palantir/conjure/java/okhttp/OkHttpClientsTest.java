@@ -548,7 +548,6 @@ public final class OkHttpClientsTest extends TestBase {
     public void handlesRetryOther_redirectsToOtherUrl() throws Exception {
         OkHttpClient client = OkHttpClients.withStableUris(
                 ClientConfiguration.builder().from(createTestConfig(url, url2)).build(),
-                AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
         server.enqueue(new MockResponse().setResponseCode(308).addHeader(HttpHeaders.LOCATION, url2));
@@ -601,7 +600,6 @@ public final class OkHttpClientsTest extends TestBase {
                         .from(createTestConfig(url))
                         .serverQoS(ClientConfiguration.ServerQoS.PROPAGATE_429_and_503_TO_CALLER)
                         .build(),
-                AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
 
@@ -620,7 +618,6 @@ public final class OkHttpClientsTest extends TestBase {
                         .from(createTestConfig(url))
                         .serverQoS(ClientConfiguration.ServerQoS.PROPAGATE_429_and_503_TO_CALLER)
                         .build(),
-                AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
 
@@ -671,7 +668,6 @@ public final class OkHttpClientsTest extends TestBase {
                         .maxNumRetries(1)
                         .backoffSlotSize(Duration.ofMillis(10))
                         .build(),
-                AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
         Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
@@ -695,7 +691,6 @@ public final class OkHttpClientsTest extends TestBase {
                         .connectTimeout(Duration.ofMillis(50))
                         .retryOnTimeout(ClientConfiguration.RetryOnTimeout.DISABLED)
                         .build(),
-                AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
         Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
@@ -714,7 +709,6 @@ public final class OkHttpClientsTest extends TestBase {
                         .from(createTestConfig(url, url2))
                         .retryOnSocketException(ClientConfiguration.RetryOnSocketException.DANGEROUS_DISABLED)
                         .build(),
-                AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
         Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
@@ -734,7 +728,6 @@ public final class OkHttpClientsTest extends TestBase {
                         .backoffSlotSize(Duration.ofMillis(10))
                         .retryOnTimeout(ClientConfiguration.RetryOnTimeout.DANGEROUS_ENABLE_AT_RISK_OF_RETRY_STORMS)
                         .build(),
-                AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
         Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
@@ -773,7 +766,6 @@ public final class OkHttpClientsTest extends TestBase {
                         .from(createTestConfig(url, url2, url3))
                         .nodeSelectionStrategy(NodeSelectionStrategy.PIN_UNTIL_ERROR)
                         .build(),
-                AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
 
@@ -797,7 +789,6 @@ public final class OkHttpClientsTest extends TestBase {
                         .nodeSelectionStrategy(NodeSelectionStrategy.ROUND_ROBIN)
                         .failedUrlCooldown(Duration.ofSeconds(1))
                         .build(),
-                AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
 
@@ -825,7 +816,6 @@ public final class OkHttpClientsTest extends TestBase {
                         .maxNumRetries(0)
                         .backoffSlotSize(Duration.ofMillis(10))
                         .build(),
-                AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
 
@@ -841,15 +831,15 @@ public final class OkHttpClientsTest extends TestBase {
                 .setBodyDelay(Duration.ofSeconds(11).toMillis(), TimeUnit.MILLISECONDS)
                 .setBody("Hello, world!"));
 
+        ClientConfiguration clientConf = ClientConfigurations.of(ServiceConfiguration.builder()
+                .addUris(url)
+                // ClientConfigurations has a connectTimeout default of 10 seconds
+                .readTimeout(Duration.ZERO) // unlimited pls
+                .writeTimeout(Duration.ZERO) // unlimited pls
+                .security(SslConfiguration.of(Paths.get("src", "test", "resources", "trustStore.jks")))
+                .build());
         OkHttpClient client = OkHttpClients.withStableUris(
-                ClientConfigurations.of(ServiceConfiguration.builder()
-                        .addUris(url)
-                        // ClientConfigurations has a connectTimeout default of 10 seconds
-                        .readTimeout(Duration.ZERO) // unlimited pls
-                        .writeTimeout(Duration.ZERO) // unlimited pls
-                        .security(SslConfiguration.of(Paths.get("src", "test", "resources", "trustStore.jks")))
-                        .build()),
-                AGENT,
+                ClientConfiguration.builder().from(clientConf).userAgent(TestBase.AGENT).build(),
                 hostEventsSink,
                 OkHttpClientsTest.class);
 
@@ -967,7 +957,6 @@ public final class OkHttpClientsTest extends TestBase {
                         .maxNumRetries(maxNumRetries)
                         .backoffSlotSize(backoffSlotSize)
                         .build(),
-                AGENT,
                 hostEventsSink,
                 OkHttpClientsTest.class);
     }

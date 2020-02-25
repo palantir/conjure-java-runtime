@@ -49,9 +49,9 @@ idea {
         generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
         generatedSourceDirs += sourceSets.generatedRetrofit.java.srcDirs
         scopes.COMPILE.plus += [
-            configurations.generatedObjectsCompile,
-            configurations.generatedJerseyCompile,
-            configurations.generatedRetrofitCompile]
+            configurations.generatedObjectsCompileClasspath,
+            configurations.generatedJerseyCompileClasspath,
+            configurations.generatedRetrofitCompileClasspath]
     }
 }
 

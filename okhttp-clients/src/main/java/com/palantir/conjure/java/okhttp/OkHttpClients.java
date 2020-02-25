@@ -29,6 +29,7 @@ import com.palantir.conjure.java.client.config.CipherSuites;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.Tracers;
 import com.palantir.tritium.metrics.MetricRegistries;
@@ -152,24 +153,21 @@ public final class OkHttpClients {
             Class<?> serviceClass) {
         boolean reshuffle =
                 !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
-        return createInternal(
-                client,
-                config,
-                userAgent,
-                hostEventsSink,
-                serviceClass,
-                RANDOMIZE,
-                reshuffle,
-                () -> new ExponentialBackoff(config.maxNumRetries(), config.backoffSlotSize()));
+        ClientConfiguration config1 = ClientConfiguration.builder()
+                .from(config)
+                .userAgent(userAgent)
+                .build();
+
+        return createInternal(client, config1, hostEventsSink, serviceClass, RANDOMIZE, reshuffle, () ->
+                new ExponentialBackoff(config1.maxNumRetries(), config1.backoffSlotSize()));
     }
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUris(
-            ClientConfiguration config, UserAgent userAgent, HostEventsSink hostEventsSink, Class<?> serviceClass) {
+            ClientConfiguration config, HostEventsSink hostEventsSink, Class<?> serviceClass) {
         return createInternal(
                 new OkHttpClient.Builder(),
                 config,
-                userAgent,
                 hostEventsSink,
                 serviceClass,
                 !RANDOMIZE,
@@ -180,14 +178,12 @@ public final class OkHttpClients {
     @VisibleForTesting
     static RemotingOkHttpClient withStableUrisAndBackoff(
             ClientConfiguration config,
-            UserAgent userAgent,
             HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             Supplier<BackoffStrategy> backoffStrategy) {
         return createInternal(
                 new OkHttpClient.Builder(),
                 config,
-                userAgent,
                 hostEventsSink,
                 serviceClass,
                 !RANDOMIZE,
@@ -198,7 +194,6 @@ public final class OkHttpClients {
     private static RemotingOkHttpClient createInternal(
             OkHttpClient.Builder client,
             ClientConfiguration config,
-            UserAgent userAgent,
             HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             boolean randomizeUrlOrder,
@@ -244,7 +239,9 @@ public final class OkHttpClients {
         client.addInterceptor(DeprecationWarningInterceptor.create(clientMetrics, serviceClass));
         client.addInterceptor(InstrumentedInterceptor.create(clientMetrics, hostEventsSink, serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
-        client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(userAgent, serviceClass)));
+        UserAgent agent =
+                config.userAgent().orElseThrow(() -> new SafeIllegalArgumentException("UserAgent is required"));
+        client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(agent, serviceClass)));
 
         // timeouts
         // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
