@@ -64,3 +64,19 @@ acceptedBreaks:
       old: null
       new: "method java.util.Optional<java.lang.Boolean> com.palantir.conjure.java.client.config.ClientConfiguration::enableHttp2()"
       justification: "immutables interfaces are not for extension"
+  "4.66.0":
+    com.palantir.conjure.java.runtime:client-config:
+    - code: "java.method.addedToInterface"
+      old: null
+      new: "method java.util.Optional<com.palantir.conjure.java.api.config.service.UserAgent>\
+        \ com.palantir.conjure.java.client.config.ClientConfiguration::userAgent()"
+      justification: "Added optional field to an immutables interface"
+    com.palantir.conjure.java.runtime:conjure-java-jackson-serialization: []
+    com.palantir.conjure.java.runtime:conjure-java-jaxrs-client: []
+    com.palantir.conjure.java.runtime:conjure-java-jersey-server: []
+    com.palantir.conjure.java.runtime:conjure-java-retrofit2-client: []
+    com.palantir.conjure.java.runtime:conjure-scala-jaxrs-client: []
+    com.palantir.conjure.java.runtime:jetty-http2-agent: []
+    com.palantir.conjure.java.runtime:keystores: []
+    com.palantir.conjure.java.runtime:okhttp-clients: []
+    com.palantir.conjure.java.runtime:refresh-utils: []

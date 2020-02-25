@@ -153,13 +153,17 @@ public final class OkHttpClients {
             Class<?> serviceClass) {
         boolean reshuffle =
                 !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
-        ClientConfiguration config1 = ClientConfiguration.builder()
-                .from(config)
-                .userAgent(userAgent)
-                .build();
+        ClientConfiguration config1 =
+                ClientConfiguration.builder().from(config).userAgent(userAgent).build();
 
-        return createInternal(client, config1, hostEventsSink, serviceClass, RANDOMIZE, reshuffle, () ->
-                new ExponentialBackoff(config1.maxNumRetries(), config1.backoffSlotSize()));
+        return createInternal(
+                client,
+                config1,
+                hostEventsSink,
+                serviceClass,
+                RANDOMIZE,
+                reshuffle,
+                () -> new ExponentialBackoff(config1.maxNumRetries(), config1.backoffSlotSize()));
     }
 
     @VisibleForTesting

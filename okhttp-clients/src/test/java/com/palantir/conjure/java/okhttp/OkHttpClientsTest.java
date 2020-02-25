@@ -839,7 +839,10 @@ public final class OkHttpClientsTest extends TestBase {
                 .security(SslConfiguration.of(Paths.get("src", "test", "resources", "trustStore.jks")))
                 .build());
         OkHttpClient client = OkHttpClients.withStableUris(
-                ClientConfiguration.builder().from(clientConf).userAgent(TestBase.AGENT).build(),
+                ClientConfiguration.builder()
+                        .from(clientConf)
+                        .userAgent(TestBase.AGENT)
+                        .build(),
                 hostEventsSink,
                 OkHttpClientsTest.class);
 
