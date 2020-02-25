@@ -46,10 +46,11 @@ public abstract class TestBase {
 
     protected final ClientConfiguration createTestConfig(String... uri) {
         SslConfiguration sslConfig = SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks"));
-        return ClientConfigurations.of(
+        ClientConfiguration config = ClientConfigurations.of(
                 ImmutableList.copyOf(uri),
                 SslSocketFactories.createSslSocketFactory(sslConfig),
                 SslSocketFactories.createX509TrustManager(sslConfig));
+        return ClientConfiguration.builder().from(config).userAgent(AGENT).build();
     }
 
     protected static Response responseWithCode(Request request, int code) {

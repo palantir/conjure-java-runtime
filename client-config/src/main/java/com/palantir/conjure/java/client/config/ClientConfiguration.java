@@ -22,6 +22,7 @@ import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.api.config.service.PartialServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
+import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -117,6 +118,9 @@ public interface ClientConfiguration {
 
     /** Both per-request and global metrics are recorded in this registry. */
     TaggedMetricRegistry taggedMetricRegistry();
+
+    /** An identifier to distinguish this caller in the request logs of upstream services. */
+    Optional<UserAgent> userAgent();
 
     @Value.Check
     default void check() {

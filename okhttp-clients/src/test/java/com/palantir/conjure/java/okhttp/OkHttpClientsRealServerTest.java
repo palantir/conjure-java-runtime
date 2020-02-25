@@ -70,7 +70,6 @@ public class OkHttpClientsRealServerTest extends TestBase {
                             .maxNumRetries(10)
                             .backoffSlotSize(Duration.ofSeconds(3))
                             .build(),
-                    AGENT,
                     hostEventsSink,
                     OkHttpClientsTest.class,
                     () -> new ReproducibleExponentialBackoff(10, Duration.ofSeconds(3)));
@@ -123,7 +122,6 @@ public class OkHttpClientsRealServerTest extends TestBase {
                             .maxNumRetries(10)
                             .backoffSlotSize(Duration.ofSeconds(2))
                             .build(),
-                    AGENT,
                     hostEventsSink,
                     OkHttpClientsTest.class,
                     () -> new ReproducibleExponentialBackoff(10, Duration.ofSeconds(2)));

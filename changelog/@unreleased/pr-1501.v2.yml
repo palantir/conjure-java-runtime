@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: ClientConfiguration contains an optional<UserAgent> field
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1501
