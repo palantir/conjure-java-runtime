@@ -34,12 +34,20 @@ public final class ScalaObjectMappers {
         return withScalaSupport(ObjectMappers.newCborClientObjectMapper());
     }
 
+    public static ObjectMapper newSmileClientObjectMapper() {
+        return withScalaSupport(ObjectMappers.newSmileClientObjectMapper());
+    }
+
     public static ObjectMapper newServerObjectMapper() {
         return withScalaSupport(ObjectMappers.newServerObjectMapper());
     }
 
     public static ObjectMapper newCborServerObjectMapper() {
         return withScalaSupport(ObjectMappers.newCborServerObjectMapper());
+    }
+
+    public static ObjectMapper newSmileServerObjectMapper() {
+        return withScalaSupport(ObjectMappers.newSmileServerObjectMapper());
     }
 
     private static ObjectMapper withScalaSupport(ObjectMapper objectMapper) {

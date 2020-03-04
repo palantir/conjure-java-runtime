@@ -10,6 +10,8 @@ dependencies {
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor"
     compile "com.palantir.safe-logging:preconditions"
 
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-smile"
+
     testCompile "junit:junit"
     testCompile "org.assertj:assertj-core"
 }
