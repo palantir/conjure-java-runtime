@@ -1,0 +1,8 @@
+type: feature
+feature:
+  description: Add smile object mapper factory methods. These are intentionally not
+    applied to frameworks which require manual action to enable specific encodings
+    (feign, jersey, etc) and are reserved for negotiation where they can be transparently
+    tested (conjure-undertow+dialogue).
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1519
