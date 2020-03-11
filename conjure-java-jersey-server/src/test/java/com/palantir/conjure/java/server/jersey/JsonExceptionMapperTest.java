@@ -51,7 +51,7 @@ public final class JsonExceptionMapperTest {
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
-        assertThat(metrics.internalerrorAll(ErrorCause.INTERNAL.toString()).getCount())
+        assertThat(metrics.internalerrorAll(ErrorCause.INTERNAL.name()).getCount())
                 .isZero();
     }
 
@@ -63,7 +63,7 @@ public final class JsonExceptionMapperTest {
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).doesNotContain("secret");
         assertThat(runtimeExceptionMetrics
-                        .internalerrorAll(ErrorCause.INTERNAL.toString())
+                        .internalerrorAll(ErrorCause.INTERNAL.name())
                         .getCount())
                 .isEqualTo(1);
     }

@@ -60,7 +60,7 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
         String errorInstanceId = UUID.randomUUID().toString();
         ErrorType errorType = getErrorType(exception);
         if (errorType.equals(ErrorType.INTERNAL)) {
-            this.metrics.internalerrorAll(getCause().toString()).mark();
+            this.metrics.internalerrorAll(getCause().name()).mark();
         }
 
         if (errorType.httpErrorCode() / 100 == 4 /* client error */) {

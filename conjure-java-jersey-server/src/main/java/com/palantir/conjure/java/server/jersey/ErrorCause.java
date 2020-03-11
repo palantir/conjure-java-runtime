@@ -18,7 +18,7 @@ package com.palantir.conjure.java.server.jersey;
 
 public enum ErrorCause {
     RPC("rpc"),
-    SERVICE_INTERNAL("serviceInternal"),
+    SERVICE_INTERNAL("service_internal"),
     INTERNAL("internal"),
     UNKNOWN("unknown");
 
