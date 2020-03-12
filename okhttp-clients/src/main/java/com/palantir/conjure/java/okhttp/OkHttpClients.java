@@ -265,7 +265,7 @@ public final class OkHttpClients {
         if (!config.enableGcmCipherSuites() || !config.enableHttp2().orElse(DEFAULT_ENABLE_HTTP2)) {
             client.protocols(ImmutableList.of(Protocol.HTTP_1_1));
         }
-        
+
         client.connectionPool(newConnectionPool());
 
         client.dispatcher(dispatcher);
@@ -328,14 +328,14 @@ public final class OkHttpClients {
                         .build(),
                 ConnectionSpec.CLEARTEXT);
     }
-    
+
     private static ConnectionPool newConnectionPool() {
         return new ConnectionPool(
-            1000,
-            // Most servers use a one minute keepalive for idle connections, by using a shorter keepalive on
-            // clients we can avoid race conditions where the attempts to reuse a connection as the server
-            // closes it, resulting in unnecessary I/O exceptions and retrial.
-            55,
-            TimeUnit.SECONDS);
+                1000,
+                // Most servers use a one minute keepalive for idle connections, by using a shorter keepalive on
+                // clients we can avoid race conditions where the attempts to reuse a connection as the server
+                // closes it, resulting in unnecessary I/O exceptions and retrial.
+                55,
+                TimeUnit.SECONDS);
     }
 }
