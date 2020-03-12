@@ -99,7 +99,7 @@ public final class OkHttpClients {
         // Must be less than maxRequests so a single slow host does not block all requests
         dispatcher.setMaxRequestsPerHost(256);
 
-        dispatcherMetricSet = new DispatcherMetricSet(dispatcher, connectionPool);
+        dispatcherMetricSet = new DispatcherMetricSet(dispatcher);
     }
 
     /** The {@link ScheduledExecutorService} used for recovering leaked limits. */
