@@ -23,20 +23,17 @@ import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.TaggedMetricSet;
 import java.util.Map;
-import okhttp3.ConnectionPool;
 import okhttp3.Dispatcher;
 
 class DispatcherMetricSet implements TaggedMetricSet {
 
     private final ImmutableMap<MetricName, Metric> metrics;
 
-    DispatcherMetricSet(Dispatcher dispatcher, ConnectionPool connectionPool) {
+    DispatcherMetricSet(Dispatcher dispatcher) {
         TaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
         OkhttpMetrics okhttpMetrics = OkhttpMetrics.of(registry);
         okhttpMetrics.dispatcherCallsQueued(dispatcher::queuedCallsCount);
         okhttpMetrics.dispatcherCallsRunning(dispatcher::runningCallsCount);
-        okhttpMetrics.connectionPoolConnectionsTotal(connectionPool::connectionCount);
-        okhttpMetrics.connectionPoolConnectionsIdle(connectionPool::idleConnectionCount);
         this.metrics = ImmutableMap.copyOf(registry.getMetrics());
     }
 
