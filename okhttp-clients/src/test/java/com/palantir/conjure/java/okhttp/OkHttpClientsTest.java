@@ -226,8 +226,6 @@ public final class OkHttpClientsTest extends TestBase {
 
         assertThat(Collections2.transform(registry.getMetrics().keySet(), MetricName::safeName))
                 .contains(
-                        "com.palantir.conjure.java.connection-pool.connections.idle",
-                        "com.palantir.conjure.java.connection-pool.connections.total",
                         "com.palantir.conjure.java.dispatcher.calls.queued",
                         "com.palantir.conjure.java.dispatcher.calls.running");
     }
