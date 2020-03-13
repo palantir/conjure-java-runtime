@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Revert "Don't share connection pools (#1533)"
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1534

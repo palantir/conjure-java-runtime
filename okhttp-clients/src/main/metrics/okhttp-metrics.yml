@@ -56,3 +56,9 @@ namespaces:
       dispatcher.calls.running:
         type: gauge
         docs: Reports the number of active outgoing requests.
+      connection-pool.connections.total:
+        type: gauge
+        docs: Total number of connections in the connection pool.
+      connection-pool.connections.idle:
+        type: gauge
+        docs: Number of idle connections in the connection pool.

@@ -90,6 +90,15 @@ public final class OkHttpClients {
     /** Shared dispatcher with static executor service. */
     private static final Dispatcher dispatcher;
 
+    /** Shared connection pool. */
+    private static final ConnectionPool connectionPool = new ConnectionPool(
+            1000,
+            // Most servers use a one minute keepalive for idle connections, by using a shorter keepalive on
+            // clients we can avoid race conditions where the attempts to reuse a connection as the server
+            // closes it, resulting in unnecessary I/O exceptions and retrial.
+            55,
+            TimeUnit.SECONDS);
+
     private static DispatcherMetricSet dispatcherMetricSet;
 
     static {
@@ -99,7 +108,7 @@ public final class OkHttpClients {
         // Must be less than maxRequests so a single slow host does not block all requests
         dispatcher.setMaxRequestsPerHost(256);
 
-        dispatcherMetricSet = new DispatcherMetricSet(dispatcher);
+        dispatcherMetricSet = new DispatcherMetricSet(dispatcher, connectionPool);
     }
 
     /** The {@link ScheduledExecutorService} used for recovering leaked limits. */
@@ -266,7 +275,8 @@ public final class OkHttpClients {
             client.protocols(ImmutableList.of(Protocol.HTTP_1_1));
         }
 
-        client.connectionPool(newConnectionPool());
+        // increase default connection pool from 5 @ 5 minutes to 100 @ 10 minutes
+        client.connectionPool(connectionPool);
 
         client.dispatcher(dispatcher);
 
@@ -327,15 +337,5 @@ public final class OkHttpClients {
                                         : CipherSuites.fastCipherSuites())
                         .build(),
                 ConnectionSpec.CLEARTEXT);
-    }
-
-    private static ConnectionPool newConnectionPool() {
-        return new ConnectionPool(
-                1000,
-                // Most servers use a one minute keepalive for idle connections, by using a shorter keepalive on
-                // clients we can avoid race conditions where the attempts to reuse a connection as the server
-                // closes it, resulting in unnecessary I/O exceptions and retrial.
-                55,
-                TimeUnit.SECONDS);
     }
 }
