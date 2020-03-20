@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Implement a JaxRsClient factory delegating to Dialogue
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1540
