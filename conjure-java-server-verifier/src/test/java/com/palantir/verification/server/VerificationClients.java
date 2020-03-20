@@ -16,8 +16,6 @@
 
 package com.palantir.verification.server;
 
-import com.palantir.conjure.java.api.config.service.UserAgent;
-import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.dialogue.serde.DefaultConjureRuntime;
 import com.palantir.conjure.java.okhttp.NoOpHostEventsSink;
@@ -31,22 +29,17 @@ public final class VerificationClients {
     public static VerificationClientService verificationClientService(VerificationClientRule verificationClientRule) {
         return JaxRsClient.create(
                 VerificationClientService.class,
-                getUserAgent(),
+                verificationClientRule.getClientConfiguration().userAgent().orElseThrow(IllegalArgumentException::new),
                 NoOpHostEventsSink.INSTANCE,
                 verificationClientRule.getClientConfiguration());
     }
 
     public static VerificationClientService verificationClientServiceDialogue(
             VerificationClientRule verificationClientRule) {
-        Channel channel = ApacheHttpClientChannels.create(ClientConfiguration.builder()
-                .from(verificationClientRule.getClientConfiguration())
-                .userAgent(getUserAgent())
-                .build());
+        Channel channel = ApacheHttpClientChannels.create(verificationClientRule.getClientConfiguration());
         return JaxRsClient.create(
-                VerificationClientService.class, DefaultConjureRuntime.builder().build(), channel);
-    }
-
-    private static UserAgent getUserAgent() {
-        return UserAgent.of(UserAgent.Agent.of("test", "develop"));
+                VerificationClientService.class,
+                channel,
+                DefaultConjureRuntime.builder().build());
     }
 }

@@ -126,14 +126,11 @@ final class DialogueFeignClient implements feign.Client {
     }
 
     private static String urlDecode(String input) {
-        if (input.contains("%")) {
-            try {
-                return URLDecoder.decode(input, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new SafeRuntimeException("Failed to decode path segment", e);
-            }
+        try {
+            return URLDecoder.decode(input, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new SafeRuntimeException("Failed to decode path segment", e);
         }
-        return input;
     }
 
     private static Optional<RequestBody> requestBody(Request request) {
@@ -224,6 +221,11 @@ final class DialogueFeignClient implements feign.Client {
         public void close() {
             response.close();
         }
+
+        @Override
+        public String toString() {
+            return "DialogueResponseBody{response=" + response + '}';
+        }
     }
 
     enum IdentityDeserializer implements Deserializer<Response> {
@@ -241,8 +243,8 @@ final class DialogueFeignClient implements feign.Client {
     }
 
     /** Implements exception handling equivalent dialogue decoders. */
-    static final class RemoteExceptionDecoder implements feign.codec.ErrorDecoder {
-        static final feign.codec.ErrorDecoder INSTANCE = new RemoteExceptionDecoder();
+    enum RemoteExceptionDecoder implements feign.codec.ErrorDecoder {
+        INSTANCE;
 
         private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
 
@@ -257,7 +259,8 @@ final class DialogueFeignClient implements feign.Client {
             try {
                 body = toString(response.body().asInputStream());
             } catch (NullPointerException | IOException e) {
-                UnknownRemoteException exception = new UnknownRemoteException(response.status(), "<unparseable>");
+                UnknownRemoteException exception =
+                        new UnknownRemoteException(response.status(), "Failed to read response body");
                 exception.initCause(e);
                 return exception;
             }
@@ -280,7 +283,11 @@ final class DialogueFeignClient implements feign.Client {
 
         private static String toString(InputStream body) throws IOException {
             try (Reader reader = new InputStreamReader(body, StandardCharsets.UTF_8)) {
-                return CharStreams.toString(reader);
+                String value = CharStreams.toString(reader);
+                if (value.isEmpty()) {
+                    return "<empty>";
+                }
+                return value;
             }
         }
 
@@ -296,9 +303,11 @@ final class DialogueFeignClient implements feign.Client {
     private final class FeignRequestEndpoint implements Endpoint {
         private final feign.Request request;
         private final String endpoint;
+        private final HttpMethod method;
 
         FeignRequestEndpoint(feign.Request request) {
             this.request = request;
+            this.method = HttpMethod.valueOf(request.method().toUpperCase(Locale.ENGLISH));
             endpoint = getFirstHeader(request, PATH_TEMPLATE).orElse("feign");
         }
 
@@ -308,6 +317,7 @@ final class DialogueFeignClient implements feign.Client {
             Preconditions.checkState(
                     target.startsWith(baseUrl),
                     "Request URL must start with base url",
+                    UnsafeArg.of("requestUrl", target),
                     UnsafeArg.of("baseUrl", baseUrl));
             String trailing = target.substring(baseUrl.length());
             int queryParamsStart = trailing.indexOf('?');
@@ -325,7 +335,7 @@ final class DialogueFeignClient implements feign.Client {
 
         @Override
         public HttpMethod httpMethod() {
-            return HttpMethod.valueOf(request.method().toUpperCase(Locale.ENGLISH));
+            return method;
         }
 
         @Override

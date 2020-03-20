@@ -33,6 +33,8 @@ import feign.Retryer;
 
 /** Static factory methods for producing creating JAX-RS HTTP proxies. */
 public final class JaxRsClient {
+    private static final ObjectMapper JSON_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
+    private static final ObjectMapper CBOR_OBJECT_MAPPER = ObjectMappers.newCborClientObjectMapper();
 
     private JaxRsClient() {}
 
@@ -67,15 +69,13 @@ public final class JaxRsClient {
     /**
      * Creates a {@code T client} for the given dialogue {@link Channel}.
      */
-    public static <T> T create(Class<T> serviceClass, ConjureRuntime runtime, Channel channel) {
-        ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
-        ObjectMapper cborObjectMapper = ObjectMappers.newCborClientObjectMapper();
+    public static <T> T create(Class<T> serviceClass, Channel channel, ConjureRuntime runtime) {
         // not used, simply for replacement
         String baseUrl = "dialogue://feign";
         return Feign.builder()
                 .contract(AbstractFeignJaxRsClientBuilder.createContract())
-                .encoder(AbstractFeignJaxRsClientBuilder.createEncoder(objectMapper, cborObjectMapper))
-                .decoder(AbstractFeignJaxRsClientBuilder.createDecoder(objectMapper, cborObjectMapper))
+                .encoder(AbstractFeignJaxRsClientBuilder.createEncoder(JSON_OBJECT_MAPPER, CBOR_OBJECT_MAPPER))
+                .decoder(AbstractFeignJaxRsClientBuilder.createDecoder(JSON_OBJECT_MAPPER, CBOR_OBJECT_MAPPER))
                 .errorDecoder(new QosErrorDecoder(DialogueFeignClient.RemoteExceptionDecoder.INSTANCE))
                 .client(new DialogueFeignClient(serviceClass, channel, runtime, baseUrl))
                 .logLevel(Logger.Level.NONE) // we use Dialogue for logging. (note that NONE is the default)
