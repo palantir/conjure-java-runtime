@@ -17,6 +17,7 @@
 package com.palantir.verification;
 
 import com.google.common.collect.ImmutableList;
+import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.ClientConfigurations;
@@ -44,10 +45,13 @@ public final class VerificationServerRule extends ExternalResource {
             .trustStorePath(Paths.get("../conjure-java-jaxrs-client/src/test/resources/trustStore.jks"))
             .build();
     private static final int PORT = 16298;
-    private static final ClientConfiguration clientConfiguration = ClientConfigurations.of(
-            ImmutableList.of("http://localhost:" + PORT + "/"),
-            SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION),
-            SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION));
+    private static final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
+            .from(ClientConfigurations.of(
+                    ImmutableList.of("http://localhost:" + PORT + "/"),
+                    SslSocketFactories.createSslSocketFactory(TRUST_STORE_CONFIGURATION),
+                    SslSocketFactories.createX509TrustManager(TRUST_STORE_CONFIGURATION)))
+            .userAgent(UserAgent.of(UserAgent.Agent.of("test", "0.0.0")))
+            .build();
 
     private Process process;
 

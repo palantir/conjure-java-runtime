@@ -9,6 +9,12 @@ dependencies {
     testImplementation project(':conjure-java-retrofit2-client')
     testImplementation project(':conjure-java-jackson-serialization')
     testImplementation project(':keystores')
+    testImplementation 'com.palantir.dialogue:dialogue-apache-hc4-client', {
+        exclude group: 'com.palantir.conjure.java.runtime'
+    }
+    testImplementation 'com.palantir.dialogue:dialogue-serde', {
+        exclude group: 'com.palantir.conjure.java.runtime'
+    }
     testImplementation 'junit:junit'
     testImplementation "org.slf4j:slf4j-api"
     testImplementation 'org.assertj:assertj-core'

@@ -14,4 +14,10 @@ dependencies {
     testImplementation "io.dropwizard.metrics:metrics-core"
     testImplementation 'junit:junit'
     testImplementation 'org.assertj:assertj-core'
+    testImplementation 'com.palantir.dialogue:dialogue-apache-hc4-client', {
+        exclude group: 'com.palantir.conjure.java.runtime'
+    }
+    testImplementation 'com.palantir.dialogue:dialogue-serde', {
+        exclude group: 'com.palantir.conjure.java.runtime'
+    }
 }

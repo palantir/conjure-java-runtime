@@ -43,6 +43,7 @@ import feign.Logger;
 import feign.Request;
 import feign.Retryer;
 import feign.codec.Decoder;
+import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
 import feign.jackson.JacksonDecoder;
 import feign.jaxrs.JAXRSContract;
@@ -73,13 +74,13 @@ abstract class AbstractFeignJaxRsClientBuilder {
     protected abstract ObjectMapper getCborObjectMapper();
 
     /** Set the host metrics registry to use when constructing the OkHttp client. */
-    public final AbstractFeignJaxRsClientBuilder hostEventsSink(HostEventsSink newHostEventsSink) {
+    final AbstractFeignJaxRsClientBuilder hostEventsSink(HostEventsSink newHostEventsSink) {
         Preconditions.checkNotNull(newHostEventsSink, "hostEventsSink can't be null");
         hostEventsSink = newHostEventsSink;
         return this;
     }
 
-    public final <T> T build(Class<T> serviceClass, UserAgent userAgent) {
+    final <T> T build(Class<T> serviceClass, UserAgent userAgent) {
         ObjectMapper objectMapper = getObjectMapper();
         ObjectMapper cborObjectMapper = getCborObjectMapper();
         Preconditions.checkNotNull(hostEventsSink, "hostEventsSink must be set");
@@ -87,18 +88,17 @@ abstract class AbstractFeignJaxRsClientBuilder {
 
         return Feign.builder()
                 .contract(createContract())
-                .encoder(new InputStreamDelegateEncoder(new TextDelegateEncoder(
-                        new CborDelegateEncoder(cborObjectMapper, new ConjureFeignJacksonEncoder(objectMapper)))))
+                .encoder(createEncoder(objectMapper, cborObjectMapper))
                 .decoder(createDecoder(objectMapper, cborObjectMapper))
                 .errorDecoder(new QosErrorDecoder(new ErrorDecoder.Default()))
+                .logLevel(Logger.Level.NONE) // we use OkHttp interceptors for logging. (note that NONE is the default)
+                .retryer(new Retryer.Default(0, 0, 1)) // use client retry mechanism only
                 .client(new OkHttpClient(okHttpClient))
                 .options(createRequestOptions())
-                .logLevel(Logger.Level.NONE) // we use OkHttp interceptors for logging. (note that NONE is the default)
-                .retryer(new Retryer.Default(0, 0, 1)) // use OkHttp retry mechanism only
                 .target(serviceClass, primaryUri);
     }
 
-    private Contract createContract() {
+    static Contract createContract() {
         return new PathTemplateHeaderEnrichmentContract(new SlashEncodingContract(
                 new Java8OptionalAwareContract(new GuavaOptionalAwareContract(new JAXRSContract()))));
     }
@@ -109,11 +109,16 @@ abstract class AbstractFeignJaxRsClientBuilder {
                 Math.toIntExact(config.readTimeout().toMillis()));
     }
 
-    private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
+    static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
         return new NeverReturnNullDecoder(
                 new Java8OptionalAwareDecoder(new GuavaOptionalAwareDecoder(new EmptyContainerDecoder(
                         objectMapper,
                         new InputStreamDelegateDecoder(new TextDelegateDecoder(
                                 new CborDelegateDecoder(cborObjectMapper, new JacksonDecoder(objectMapper))))))));
+    }
+
+    static Encoder createEncoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
+        return new InputStreamDelegateEncoder(new TextDelegateEncoder(
+                new CborDelegateEncoder(cborObjectMapper, new ConjureFeignJacksonEncoder(objectMapper))));
     }
 }
