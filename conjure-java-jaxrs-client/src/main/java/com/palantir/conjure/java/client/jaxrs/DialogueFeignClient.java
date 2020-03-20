@@ -24,9 +24,6 @@ import com.google.common.collect.Multimaps;
 import com.google.common.io.CharStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.primitives.Ints;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
@@ -77,7 +74,7 @@ final class DialogueFeignClient implements feign.Client {
     private final String version;
 
     DialogueFeignClient(Class<?> jaxrsInterface, Channel channel, ConjureRuntime runtime, String baseUrl) {
-        this.channel = new ErrorDecoderChannel(Preconditions.checkNotNull(channel, "Channel is required"));
+        this.channel = Preconditions.checkNotNull(channel, "Channel is required");
         this.serviceName = jaxrsInterface.getSimpleName();
         this.version = Optional.ofNullable(jaxrsInterface.getPackage().getImplementationVersion())
                 .orElse("0.0.0");
@@ -244,61 +241,55 @@ final class DialogueFeignClient implements feign.Client {
     }
 
     /** Implements exception handling equivalent dialogue decoders. */
-    static final class ErrorDecoderChannel implements Channel {
+    static final class RemoteExceptionDecoder implements feign.codec.ErrorDecoder {
+        static final feign.codec.ErrorDecoder INSTANCE = new RemoteExceptionDecoder();
 
         private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
 
-        private final Channel delegate;
+        private static final feign.codec.ErrorDecoder defaultDecoder = new feign.codec.ErrorDecoder.Default();
 
-        ErrorDecoderChannel(Channel delegate) {
-            this.delegate = delegate;
+        private boolean isError(feign.Response response) {
+            return 300 <= response.status() && response.status() <= 599;
         }
 
-        @Override
-        public ListenableFuture<Response> execute(Endpoint endpoint, com.palantir.dialogue.Request request) {
-            return Futures.transformAsync(
-                    delegate.execute(endpoint, request),
-                    response -> {
-                        if (isError(response)) {
-                            return Futures.immediateFailedFuture(decode(response));
-                        }
-                        return Futures.immediateFuture(response);
-                    },
-                    MoreExecutors.directExecutor());
-        }
-
-        boolean isError(Response response) {
-            return 300 <= response.code() && response.code() <= 599;
-        }
-
-        private RemoteException decode(Response response) {
+        private Exception parse(feign.Response response) {
             String body;
             try {
-                body = toString(response.body());
+                body = toString(response.body().asInputStream());
             } catch (NullPointerException | IOException e) {
-                UnknownRemoteException exception = new UnknownRemoteException(response.code(), "<unparseable>");
+                UnknownRemoteException exception = new UnknownRemoteException(response.status(), "<unparseable>");
                 exception.initCause(e);
-                throw exception;
+                return exception;
             }
 
-            Optional<String> contentType = response.getFirstHeader(javax.ws.rs.core.HttpHeaders.CONTENT_TYPE);
+            Optional<String> contentType = Optional.ofNullable(
+                            response.headers().get(HttpHeaders.CONTENT_TYPE))
+                    .map(values -> Iterables.getFirst(values, null));
             if (contentType.isPresent()
                     && contentType.get().toLowerCase(Locale.ENGLISH).startsWith("application/json")) {
                 try {
                     SerializableError serializableError = MAPPER.readValue(body, SerializableError.class);
-                    return new RemoteException(serializableError, response.code());
+                    return new RemoteException(serializableError, response.status());
                 } catch (Exception e) {
-                    throw new UnknownRemoteException(response.code(), body);
+                    return new UnknownRemoteException(response.status(), body);
                 }
             }
 
-            throw new UnknownRemoteException(response.code(), body);
+            return new UnknownRemoteException(response.status(), body);
         }
 
         private static String toString(InputStream body) throws IOException {
             try (Reader reader = new InputStreamReader(body, StandardCharsets.UTF_8)) {
                 return CharStreams.toString(reader);
             }
+        }
+
+        @Override
+        public Exception decode(String methodKey, feign.Response response) {
+            if (isError(response)) {
+                return parse(response);
+            }
+            return defaultDecoder.decode(methodKey, response);
         }
     }
 

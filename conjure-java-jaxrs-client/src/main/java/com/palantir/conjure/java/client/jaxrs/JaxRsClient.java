@@ -30,7 +30,6 @@ import com.palantir.dialogue.ConjureRuntime;
 import feign.Feign;
 import feign.Logger;
 import feign.Retryer;
-import feign.codec.ErrorDecoder;
 
 /** Static factory methods for producing creating JAX-RS HTTP proxies. */
 public final class JaxRsClient {
@@ -77,7 +76,7 @@ public final class JaxRsClient {
                 .contract(AbstractFeignJaxRsClientBuilder.createContract())
                 .encoder(AbstractFeignJaxRsClientBuilder.createEncoder(objectMapper, cborObjectMapper))
                 .decoder(AbstractFeignJaxRsClientBuilder.createDecoder(objectMapper, cborObjectMapper))
-                .errorDecoder(new QosErrorDecoder(new ErrorDecoder.Default()))
+                .errorDecoder(new QosErrorDecoder(DialogueFeignClient.RemoteExceptionDecoder.INSTANCE))
                 .client(new DialogueFeignClient(serviceClass, channel, runtime, baseUrl))
                 .logLevel(Logger.Level.NONE) // we use Dialogue for logging. (note that NONE is the default)
                 .retryer(new Retryer.Default(0, 0, 1)) // use dialogue retry mechanism only
