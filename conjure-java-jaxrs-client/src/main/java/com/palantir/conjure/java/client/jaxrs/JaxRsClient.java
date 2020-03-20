@@ -16,12 +16,21 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.QosErrorDecoder;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
 import com.palantir.conjure.java.okhttp.HostEventsSink;
+import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.dialogue.Channel;
+import com.palantir.dialogue.ConjureRuntime;
+import feign.Feign;
+import feign.Logger;
+import feign.Retryer;
+import feign.codec.ErrorDecoder;
 
 /** Static factory methods for producing creating JAX-RS HTTP proxies. */
 public final class JaxRsClient {
@@ -54,5 +63,24 @@ public final class JaxRsClient {
                 RefreshableProxyInvocationHandler.create(
                         config,
                         serviceConfiguration -> create(serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
+    }
+
+    /**
+     * Creates a {@code T client} for the given dialogue {@link Channel}.
+     */
+    public static <T> T create(Class<T> serviceClass, ConjureRuntime runtime, Channel channel) {
+        ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
+        ObjectMapper cborObjectMapper = ObjectMappers.newCborClientObjectMapper();
+        // not used, simply for replacement
+        String baseUrl = "dialogue://feign";
+        return Feign.builder()
+                .contract(AbstractFeignJaxRsClientBuilder.createContract())
+                .encoder(AbstractFeignJaxRsClientBuilder.createEncoder(objectMapper, cborObjectMapper))
+                .decoder(AbstractFeignJaxRsClientBuilder.createDecoder(objectMapper, cborObjectMapper))
+                .errorDecoder(new QosErrorDecoder(new ErrorDecoder.Default()))
+                .client(new DialogueFeignClient(serviceClass, channel, runtime, baseUrl))
+                .logLevel(Logger.Level.NONE) // we use Dialogue for logging. (note that NONE is the default)
+                .retryer(new Retryer.Default(0, 0, 1)) // use dialogue retry mechanism only
+                .target(serviceClass, baseUrl);
     }
 }

@@ -10,6 +10,8 @@ dependencies {
     // TODO(dsanduleac): Should be implementation, but can't because we expose feign.TextDelegateEncoder
     api "com.netflix.feign:feign-core"
 
+    implementation "com.palantir.dialogue:dialogue-target"
+
     implementation project(":conjure-java-jackson-serialization")
     implementation project(":keystores")
     implementation "com.google.guava:guava"

@@ -17,6 +17,7 @@
 package com.palantir.verification.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.verification.client.EndpointName;
@@ -47,8 +48,16 @@ public class AutoDeserializeTest {
     @ClassRule
     public static final VerificationClientRule verificationClientRule = new VerificationClientRule();
 
-    private static final VerificationClientService verificationService =
+    private static final VerificationClientService verificationServiceJaxrs =
             VerificationClients.verificationClientService(verificationClientRule);
+
+    private static final VerificationClientService verificationServiceJaxrsDialogue =
+            VerificationClients.verificationClientServiceDialogue(verificationClientRule);
+
+    public enum Client {
+        JAX_RS,
+        JAX_RS_DIALOGUE,
+    }
 
     @Parameterized.Parameter(0)
     public EndpointName endpointName;
@@ -62,34 +71,53 @@ public class AutoDeserializeTest {
     @Parameterized.Parameter(3)
     public String jsonString;
 
-    @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2}")
+    @Parameterized.Parameter(4)
+    public Client client;
+
+    private VerificationClientService verificationService;
+
+    @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2} with client {4}")
     public static Collection<Object[]> data() {
         List<Object[]> objects = new ArrayList<>();
-        Cases.TEST_CASES.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
-            int positiveSize = positiveAndNegativeTestCases.getPositive().size();
-            int negativeSize = positiveAndNegativeTestCases.getNegative().size();
+        for (Client client : Client.values()) {
+            Cases.TEST_CASES.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
+                int positiveSize = positiveAndNegativeTestCases.getPositive().size();
+                int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
-            IntStream.range(0, positiveSize)
-                    .forEach(i -> objects.add(new Object[] {
-                        endpointName,
-                        i,
-                        true,
-                        positiveAndNegativeTestCases.getPositive().get(i)
-                    }));
+                IntStream.range(0, positiveSize)
+                        .forEach(i -> objects.add(new Object[] {
+                            endpointName,
+                            i,
+                            true,
+                            positiveAndNegativeTestCases.getPositive().get(i),
+                            client
+                        }));
 
-            IntStream.range(0, negativeSize)
-                    .forEach(i -> objects.add(new Object[] {
-                        endpointName,
-                        positiveSize + i,
-                        false,
-                        positiveAndNegativeTestCases.getNegative().get(i)
-                    }));
-        });
+                IntStream.range(0, negativeSize)
+                        .forEach(i -> objects.add(new Object[] {
+                            endpointName,
+                            positiveSize + i,
+                            false,
+                            positiveAndNegativeTestCases.getNegative().get(i),
+                            client
+                        }));
+            });
+        }
         return objects;
     }
 
     @Test
     public void runTestCase() {
+        switch (client) {
+            case JAX_RS:
+                verificationService = verificationServiceJaxrs;
+                break;
+            case JAX_RS_DIALOGUE:
+                verificationService = verificationServiceJaxrsDialogue;
+                break;
+            default:
+                fail("Unknown client type %s", client);
+        }
         boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
         System.out.println(String.format(
                 "[%s%s test case %s]: %s(%s), expected client to %s",
