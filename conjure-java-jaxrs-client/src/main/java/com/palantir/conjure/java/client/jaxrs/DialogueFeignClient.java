@@ -94,53 +94,10 @@ final class DialogueFeignClient implements feign.Client {
                 builder.putAllHeaderParams(headerName, values);
             }
         });
-        String target = request.url();
-        Preconditions.checkState(
-                target.startsWith(baseUrl), "Request URL must start with base url", UnsafeArg.of("baseUrl", baseUrl));
-        String trailing = target.substring(baseUrl.length());
-        Endpoint endpoint = new Endpoint() {
 
-            private final String endpoint =
-                    getFirstHeader(request, PATH_TEMPLATE).orElse("feign");
-
-            @Override
-            public void renderPath(Map<String, String> _params, UrlBuilder url) {
-                int queryParamsStart = trailing.indexOf('?');
-                String queryPortion = queryParamsStart == -1 ? trailing : trailing.substring(0, queryParamsStart);
-                for (String pathSegment : pathSplitter.split(queryPortion)) {
-                    url.pathSegment(urlDecode(pathSegment));
-                }
-                if (queryParamsStart != -1) {
-                    String querySegments = trailing.substring(queryParamsStart + 1);
-                    querySplitter
-                            .split(querySegments)
-                            .forEach((name, value) -> url.queryParam(urlDecode(name), urlDecode(value)));
-                }
-            }
-
-            @Override
-            public HttpMethod httpMethod() {
-                return HttpMethod.valueOf(request.method().toUpperCase(Locale.ENGLISH));
-            }
-
-            @Override
-            public String serviceName() {
-                return serviceName;
-            }
-
-            @Override
-            public String endpointName() {
-                return endpoint;
-            }
-
-            @Override
-            public String version() {
-                return version;
-            }
-        };
         try {
-            Response response =
-                    clients.block(clients.call(channel, endpoint, builder.build(), IdentityDeserializer.INSTANCE));
+            Response response = clients.block(clients.call(
+                    channel, new FeignRequestEndpoint(request), builder.build(), IdentityDeserializer.INSTANCE));
             return feign.Response.create(
                     response.code(),
                     null,
@@ -342,6 +299,57 @@ final class DialogueFeignClient implements feign.Client {
             try (Reader reader = new InputStreamReader(body, StandardCharsets.UTF_8)) {
                 return CharStreams.toString(reader);
             }
+        }
+    }
+
+    private final class FeignRequestEndpoint implements Endpoint {
+        private final feign.Request request;
+        private final String endpoint;
+
+        FeignRequestEndpoint(feign.Request request) {
+            this.request = request;
+            endpoint = getFirstHeader(request, PATH_TEMPLATE).orElse("feign");
+        }
+
+        @Override
+        public void renderPath(Map<String, String> _params, UrlBuilder url) {
+            String target = request.url();
+            Preconditions.checkState(
+                    target.startsWith(baseUrl),
+                    "Request URL must start with base url",
+                    UnsafeArg.of("baseUrl", baseUrl));
+            String trailing = target.substring(baseUrl.length());
+            int queryParamsStart = trailing.indexOf('?');
+            String queryPortion = queryParamsStart == -1 ? trailing : trailing.substring(0, queryParamsStart);
+            for (String pathSegment : pathSplitter.split(queryPortion)) {
+                url.pathSegment(urlDecode(pathSegment));
+            }
+            if (queryParamsStart != -1) {
+                String querySegments = trailing.substring(queryParamsStart + 1);
+                querySplitter
+                        .split(querySegments)
+                        .forEach((name, value) -> url.queryParam(urlDecode(name), urlDecode(value)));
+            }
+        }
+
+        @Override
+        public HttpMethod httpMethod() {
+            return HttpMethod.valueOf(request.method().toUpperCase(Locale.ENGLISH));
+        }
+
+        @Override
+        public String serviceName() {
+            return serviceName;
+        }
+
+        @Override
+        public String endpointName() {
+            return endpoint;
+        }
+
+        @Override
+        public String version() {
+            return version;
         }
     }
 }
