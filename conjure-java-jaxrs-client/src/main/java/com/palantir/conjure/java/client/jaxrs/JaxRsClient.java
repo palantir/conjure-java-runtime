@@ -27,6 +27,7 @@ import com.palantir.conjure.java.okhttp.HostEventsSink;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
+import com.palantir.logsafe.Preconditions;
 import feign.Feign;
 import feign.Logger;
 import feign.Retryer;
@@ -70,6 +71,9 @@ public final class JaxRsClient {
      * Creates a {@code T client} for the given dialogue {@link Channel}.
      */
     public static <T> T create(Class<T> serviceClass, Channel channel, ConjureRuntime runtime) {
+        Preconditions.checkNotNull(channel, "Channel is required");
+        Preconditions.checkNotNull(serviceClass, "JAX-RS interface is required");
+        Preconditions.checkNotNull(runtime, "ConjureRuntime is required");
         // not used, simply for replacement
         String baseUrl = "dialogue://feign";
         return Feign.builder()

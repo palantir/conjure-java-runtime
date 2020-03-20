@@ -30,7 +30,6 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.UnknownRemoteException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.dialogue.Channel;
-import com.palantir.dialogue.Clients;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.Endpoint;
@@ -67,7 +66,7 @@ final class DialogueFeignClient implements feign.Client {
     private static final Splitter.MapSplitter querySplitter =
             Splitter.on('&').omitEmptyStrings().withKeyValueSeparator('=');
 
-    private final Clients clients;
+    private final ConjureRuntime runtime;
     private final Channel channel;
     private final String baseUrl;
     private final String serviceName;
@@ -75,11 +74,12 @@ final class DialogueFeignClient implements feign.Client {
 
     DialogueFeignClient(Class<?> jaxrsInterface, Channel channel, ConjureRuntime runtime, String baseUrl) {
         this.channel = Preconditions.checkNotNull(channel, "Channel is required");
-        this.serviceName = jaxrsInterface.getSimpleName();
+        this.baseUrl = Preconditions.checkNotNull(baseUrl, "Base URL is required");
+        this.runtime = Preconditions.checkNotNull(runtime, "ConjureRuntime is required");
+        this.serviceName = Preconditions.checkNotNull(jaxrsInterface, "Service is required")
+                .getSimpleName();
         this.version = Optional.ofNullable(jaxrsInterface.getPackage().getImplementationVersion())
                 .orElse("0.0.0");
-        this.baseUrl = baseUrl;
-        this.clients = runtime.clients();
     }
 
     @Override
@@ -93,13 +93,13 @@ final class DialogueFeignClient implements feign.Client {
         });
 
         try {
-            Response response = clients.block(clients.call(
-                    channel, new FeignRequestEndpoint(request), builder.build(), IdentityDeserializer.INSTANCE));
-            return feign.Response.create(
-                    response.code(),
-                    null,
-                    Multimaps.asMap((Multimap<String, String>) response.headers()),
-                    new DialogueResponseBody(response));
+            return runtime.clients()
+                    .block(runtime.clients()
+                            .call(
+                                    channel,
+                                    new FeignRequestEndpoint(request),
+                                    builder.build(),
+                                    FeignResponseDeserializer.INSTANCE));
         } catch (UncheckedExecutionException e) {
             // Rethrow IOException to match standard feign behavior
             Throwable cause = e.getCause();
@@ -129,7 +129,7 @@ final class DialogueFeignClient implements feign.Client {
         try {
             return URLDecoder.decode(input, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new SafeRuntimeException("Failed to decode path segment", e);
+            throw new SafeRuntimeException("Failed to decode path segment", e, UnsafeArg.of("encoded", input));
         }
     }
 
@@ -228,16 +228,21 @@ final class DialogueFeignClient implements feign.Client {
         }
     }
 
-    enum IdentityDeserializer implements Deserializer<Response> {
+    enum FeignResponseDeserializer implements Deserializer<feign.Response> {
         INSTANCE;
 
         @Override
-        public Response deserialize(Response response) {
-            return response;
+        public feign.Response deserialize(Response response) {
+            return feign.Response.create(
+                    response.code(),
+                    null,
+                    Multimaps.asMap((Multimap<String, String>) response.headers()),
+                    new DialogueResponseBody(response));
         }
 
         @Override
         public Optional<String> accepts() {
+            // The Accept header is already set by Feign based on method annotations and needn't be overridden.
             return Optional.empty();
         }
     }
@@ -263,6 +268,8 @@ final class DialogueFeignClient implements feign.Client {
                         new UnknownRemoteException(response.status(), "Failed to read response body");
                 exception.initCause(e);
                 return exception;
+            } finally {
+                response.close();
             }
 
             Optional<String> contentType = Optional.ofNullable(
