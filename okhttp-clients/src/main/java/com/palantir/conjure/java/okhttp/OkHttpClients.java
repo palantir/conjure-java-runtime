@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.okhttp;
 
+import static com.palantir.logsafe.Preconditions.checkArgument;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
@@ -214,6 +216,12 @@ public final class OkHttpClients {
         client.addInterceptor(ResponseCapturingInterceptor.INSTANCE);
 
         // Routing
+        if (config.nodeSelectionStrategy().equals(NodeSelectionStrategy.ROUND_ROBIN)) {
+            checkArgument(
+                    !config.failedUrlCooldown().isNegative()
+                            && !config.failedUrlCooldown().isZero(),
+                    "If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
+        }
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(
                 randomizeUrlOrder ? UrlSelectorImpl.shuffle(config.uris()) : config.uris(),
                 reshuffle,

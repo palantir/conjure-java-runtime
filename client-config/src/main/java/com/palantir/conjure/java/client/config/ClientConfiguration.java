@@ -128,11 +128,6 @@ public interface ClientConfiguration {
             checkArgument(maxNumRetries() == 0, "If meshProxy is configured then maxNumRetries must be 0");
             checkArgument(uris().size() == 1, "If meshProxy is configured then uris must contain exactly 1 URI");
         }
-        if (nodeSelectionStrategy().equals(NodeSelectionStrategy.ROUND_ROBIN)) {
-            checkArgument(
-                    !failedUrlCooldown().isNegative() && !failedUrlCooldown().isZero(),
-                    "If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
-        }
         // Assert that timeouts are in milliseconds, not any higher precision, because feign only supports millis.
         checkTimeoutPrecision(connectTimeout(), "connectTimeout");
         checkTimeoutPrecision(readTimeout(), "readTimeout");
