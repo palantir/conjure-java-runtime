@@ -28,6 +28,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.UnknownRemoteException;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.EndpointNameHeaderEnrichmentContract;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
@@ -120,6 +121,9 @@ final class DialogueFeignClient implements feign.Client {
         }
         // Tracing path template is informational only
         if (PATH_TEMPLATE.equalsIgnoreCase(headerName)) {
+            return false;
+        }
+        if (EndpointNameHeaderEnrichmentContract.ENDPOINT_NAME_HEADER.equalsIgnoreCase(headerName)) {
             return false;
         }
         return true;
@@ -315,7 +319,8 @@ final class DialogueFeignClient implements feign.Client {
         FeignRequestEndpoint(feign.Request request) {
             this.request = request;
             this.method = HttpMethod.valueOf(request.method().toUpperCase(Locale.ENGLISH));
-            endpoint = getFirstHeader(request, PATH_TEMPLATE).orElse("feign");
+            endpoint = getFirstHeader(request, EndpointNameHeaderEnrichmentContract.ENDPOINT_NAME_HEADER)
+                    .orElse("feign");
         }
 
         @Override
