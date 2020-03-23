@@ -46,6 +46,8 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(250);
     private static final Duration DEFAULT_FAILED_URL_COOLDOWN = Duration.ZERO;
+    // GCM ciphers perform poorly using a java 1.8 runtime, but improve significantly in 9 and beyond.
+    // See http://openjdk.java.net/jeps/246
     private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = !isJava8();
     private static final boolean DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION = false;
     private static final NodeSelectionStrategy DEFAULT_NODE_SELECTION_STRATEGY = NodeSelectionStrategy.PIN_UNTIL_ERROR;
