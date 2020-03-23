@@ -218,8 +218,7 @@ public final class OkHttpClients {
         // Routing
         if (config.nodeSelectionStrategy().equals(NodeSelectionStrategy.ROUND_ROBIN)) {
             checkArgument(
-                    !config.failedUrlCooldown().isNegative()
-                            && !config.failedUrlCooldown().isZero(),
+                    !config.failedUrlCooldown().isZero(),
                     "If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
         }
         UrlSelectorImpl urlSelector = UrlSelectorImpl.createWithFailedUrlCooldown(

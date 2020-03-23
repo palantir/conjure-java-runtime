@@ -132,6 +132,7 @@ public interface ClientConfiguration {
         checkTimeoutPrecision(connectTimeout(), "connectTimeout");
         checkTimeoutPrecision(readTimeout(), "readTimeout");
         checkTimeoutPrecision(writeTimeout(), "writeTimeout");
+        checkArgument(!failedUrlCooldown().isNegative(), "failedUrlCooldown may not be negative");
     }
 
     default void checkTimeoutPrecision(Duration duration, String timeoutName) {
