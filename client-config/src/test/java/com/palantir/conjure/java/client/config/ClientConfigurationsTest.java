@@ -111,23 +111,6 @@ public final class ClientConfigurationsTest {
     }
 
     @Test
-    @SuppressWarnings("CheckReturnValue")
-    public void roundRobin_noCooldown() throws Exception {
-        ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
-                .uris(uris)
-                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
-                .build();
-
-        assertThatThrownBy(() -> ClientConfiguration.builder()
-                        .from(ClientConfigurations.of(serviceConfig))
-                        .nodeSelectionStrategy(NodeSelectionStrategy.ROUND_ROBIN)
-                        .failedUrlCooldown(Duration.ofMillis(0))
-                        .build())
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("If nodeSelectionStrategy is ROUND_ROBIN then failedUrlCooldown must be positive");
-    }
-
-    @Test
     public void overriding_tagged_metric_registry_is_convenient() {
         ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
                 .uris(uris)
