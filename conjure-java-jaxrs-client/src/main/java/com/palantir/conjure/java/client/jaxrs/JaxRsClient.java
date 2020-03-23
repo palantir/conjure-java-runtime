@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.EndpointNameHeaderEnrichmentContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.QosErrorDecoder;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
@@ -77,7 +78,7 @@ public final class JaxRsClient {
         // not used, simply for replacement
         String baseUrl = "dialogue://feign";
         return Feign.builder()
-                .contract(AbstractFeignJaxRsClientBuilder.createContract())
+                .contract(new EndpointNameHeaderEnrichmentContract(AbstractFeignJaxRsClientBuilder.createContract()))
                 .encoder(AbstractFeignJaxRsClientBuilder.createEncoder(JSON_OBJECT_MAPPER, CBOR_OBJECT_MAPPER))
                 .decoder(AbstractFeignJaxRsClientBuilder.createDecoder(JSON_OBJECT_MAPPER, CBOR_OBJECT_MAPPER))
                 .errorDecoder(new QosErrorDecoder(DialogueFeignClient.RemoteExceptionDecoder.INSTANCE))
