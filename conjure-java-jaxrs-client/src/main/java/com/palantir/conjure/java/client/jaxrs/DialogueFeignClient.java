@@ -39,6 +39,7 @@ import com.palantir.dialogue.RequestBody;
 import com.palantir.dialogue.Response;
 import com.palantir.dialogue.UrlBuilder;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
@@ -52,6 +53,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -64,8 +66,8 @@ final class DialogueFeignClient implements feign.Client {
 
     private static final String PATH_TEMPLATE = "hr-path-template";
     private static final Splitter pathSplitter = Splitter.on('/').omitEmptyStrings();
-    private static final Splitter.MapSplitter querySplitter =
-            Splitter.on('&').omitEmptyStrings().withKeyValueSeparator('=');
+    private static final Splitter querySplitter = Splitter.on('&').omitEmptyStrings();
+    private static final Splitter queryValueSplitter = Splitter.on('=');
 
     private final ConjureRuntime runtime;
     private final Channel channel;
@@ -339,9 +341,16 @@ final class DialogueFeignClient implements feign.Client {
             }
             if (queryParamsStart != -1) {
                 String querySegments = trailing.substring(queryParamsStart + 1);
-                querySplitter
-                        .split(querySegments)
-                        .forEach((name, value) -> url.queryParam(urlDecode(name), urlDecode(value)));
+                for (String querySegment : querySplitter.split(querySegments)) {
+                    List<String> keyValuePair = queryValueSplitter.splitToList(querySegment);
+                    if (keyValuePair.size() != 2) {
+                        throw new SafeIllegalStateException(
+                                "Expected two parameters",
+                                SafeArg.of("parameters", keyValuePair.size()),
+                                UnsafeArg.of("values", keyValuePair));
+                    }
+                    url.queryParam(urlDecode(keyValuePair.get(0)), urlDecode(keyValuePair.get(1)));
+                }
             }
         }
 

@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.palantir.conjure.java.dialogue.serde.DefaultConjureRuntime;
 import com.palantir.dialogue.Channel;
@@ -32,12 +33,15 @@ import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Response;
+import com.palantir.dialogue.UrlBuilder;
 import java.io.ByteArrayInputStream;
 import java.util.AbstractMap;
+import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
@@ -69,6 +73,28 @@ public final class JaxRsClientDialogueEndpointTest {
                         new AbstractMap.SimpleImmutableEntry<>("Accept", ImmutableList.of("application/json")));
     }
 
+    @Test
+    public void testQueryParameterCollection() {
+        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
+        Channel channel = mock(Channel.class);
+        Response response = mock(Response.class);
+        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(response.code()).thenReturn(204);
+        when(response.headers()).thenReturn(ImmutableListMultimap.of());
+        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.collectionOfQueryParams(ImmutableList.of("a", "/", ""));
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
+        UrlBuilder urlBuilder = mock(UrlBuilder.class);
+        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        verify(urlBuilder).queryParam("query", "a");
+        verify(urlBuilder).queryParam("query", "/");
+        verify(urlBuilder).queryParam("query", "");
+    }
+
     @Path("foo")
     @Produces("application/json")
     @Consumes("application/json")
@@ -77,5 +103,9 @@ public final class JaxRsClientDialogueEndpointTest {
         @GET
         @Path("path")
         void ping();
+
+        @GET
+        @Path("params")
+        void collectionOfQueryParams(@QueryParam("query") List<String> values);
     }
 }
