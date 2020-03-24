@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Jaxrs dialogue backend supports multi-value query parameters
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1546
