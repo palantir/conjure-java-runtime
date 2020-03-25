@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: dialogue feign client assumes json when no consumes annotation is present
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1548
