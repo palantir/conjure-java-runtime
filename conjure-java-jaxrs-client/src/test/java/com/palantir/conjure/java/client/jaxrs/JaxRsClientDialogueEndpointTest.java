@@ -39,6 +39,7 @@ import java.util.AbstractMap;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -95,6 +96,59 @@ public final class JaxRsClientDialogueEndpointTest {
         verify(urlBuilder).queryParam("query", "");
     }
 
+    @Test
+    public void testPostWithBody() {
+        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
+        Channel channel = mock(Channel.class);
+        Response response = mock(Response.class);
+        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(response.code()).thenReturn(204);
+        when(response.headers()).thenReturn(ImmutableListMultimap.of());
+        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.post("Hello, World!");
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
+        Endpoint endpoint = endpointCaptor.getValue();
+        assertThat(endpoint.serviceName()).isEqualTo("StubService");
+        assertThat(endpoint.endpointName()).isEqualTo("post");
+        assertThat(endpoint.httpMethod()).isEqualTo(HttpMethod.POST);
+        Request request = requestCaptor.getValue();
+        assertThat(request.body()).isPresent();
+        assertThat(request.body().get().contentType()).isEqualTo("text/plain");
+        assertThat(request.headerParams().asMap())
+                .containsExactly(
+                        new AbstractMap.SimpleImmutableEntry<>("Accept", ImmutableList.of("application/json")));
+    }
+
+    @Test
+    public void testPostWithBody_defaultContentType() {
+        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
+        Channel channel = mock(Channel.class);
+        Response response = mock(Response.class);
+        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(response.code()).thenReturn(204);
+        when(response.headers()).thenReturn(ImmutableListMultimap.of());
+        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        StubServiceWithoutContentType service =
+                JaxRsClient.create(StubServiceWithoutContentType.class, channel, runtime);
+        service.post("Hello, World!");
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
+        Endpoint endpoint = endpointCaptor.getValue();
+        assertThat(endpoint.serviceName()).isEqualTo("StubServiceWithoutContentType");
+        assertThat(endpoint.endpointName()).isEqualTo("post");
+        assertThat(endpoint.httpMethod()).isEqualTo(HttpMethod.POST);
+        Request request = requestCaptor.getValue();
+        assertThat(request.body()).isPresent();
+        assertThat(request.body().get().contentType()).isEqualTo("application/json");
+        assertThat(request.headerParams().asMap()).isEmpty();
+    }
+
     @Path("foo")
     @Produces("application/json")
     @Consumes("application/json")
@@ -107,5 +161,18 @@ public final class JaxRsClientDialogueEndpointTest {
         @GET
         @Path("params")
         void collectionOfQueryParams(@QueryParam("query") List<String> values);
+
+        @POST
+        @Path("post")
+        @Consumes("text/plain")
+        void post(String body);
+    }
+
+    @Path("bar")
+    public interface StubServiceWithoutContentType {
+
+        @POST
+        @Path("post")
+        void post(String body);
     }
 }

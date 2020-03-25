@@ -149,9 +149,12 @@ final class DialogueFeignClient implements feign.Client {
             if (requestBodyContent.length == 0) {
                 return Optional.empty();
             }
-            throw new SafeIllegalStateException("A Content-Type header was not present on feign request with a body");
         }
-        return Optional.of(new ByteArrayRequestBody(requestBodyContent, maybeContentType.get()));
+        return Optional.of(new ByteArrayRequestBody(
+                requestBodyContent,
+                // A Content-Type header was not present on feign request
+                // with a body, use the default application/json.
+                maybeContentType.orElse("application/json")));
     }
 
     private static Optional<String> getFirstHeader(Request request, String name) {
