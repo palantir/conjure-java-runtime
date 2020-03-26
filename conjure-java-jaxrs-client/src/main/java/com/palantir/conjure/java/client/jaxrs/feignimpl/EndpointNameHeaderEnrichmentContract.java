@@ -16,9 +16,14 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
+import com.palantir.dialogue.HttpMethod;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.exceptions.SafeNullPointerException;
 import feign.Contract;
 import feign.MethodMetadata;
 import java.lang.reflect.Method;
+import java.util.Locale;
 
 /**
  * Contract to capture the endpoint name (method name) and pass it to a feign client.
@@ -34,7 +39,23 @@ public final class EndpointNameHeaderEnrichmentContract extends AbstractDelegati
     }
 
     @Override
-    protected void processMetadata(Class<?> _targetType, Method method, MethodMetadata metadata) {
+    protected void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
+        String httpMethod = metadata.template().method();
+        if (httpMethod == null) {
+            throw new SafeNullPointerException(
+                    "An HTTP method is required",
+                    SafeArg.of("class", targetType.getSimpleName()),
+                    SafeArg.of("method", method.getName()));
+        }
+        try {
+            HttpMethod.valueOf(httpMethod.toUpperCase(Locale.ENGLISH));
+        } catch (IllegalArgumentException e) {
+            throw new SafeIllegalArgumentException(
+                    "Unsupported HTTP method",
+                    SafeArg.of("class", targetType.getSimpleName()),
+                    SafeArg.of("method", method.getName()),
+                    SafeArg.of("method", httpMethod));
+        }
         metadata.template().header(ENDPOINT_NAME_HEADER, method.getName());
     }
 }

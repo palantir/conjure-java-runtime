@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.client.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -35,10 +36,15 @@ import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Response;
 import com.palantir.dialogue.UrlBuilder;
 import java.io.ByteArrayInputStream;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.AbstractMap;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -149,6 +155,26 @@ public final class JaxRsClientDialogueEndpointTest {
         assertThat(request.headerParams().asMap()).isEmpty();
     }
 
+    @Test
+    public void testUnsupportedHttpMethod_options() {
+        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
+        Channel channel = mock(Channel.class);
+        assertThatThrownBy(() -> JaxRsClient.create(OptionsService.class, channel, runtime))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unsupported HTTP method")
+                .hasMessageContaining("OPTIONS");
+    }
+
+    @Test
+    public void testUnsupportedHttpMethod_arbitrary() {
+        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
+        Channel channel = mock(Channel.class);
+        assertThatThrownBy(() -> JaxRsClient.create(ArbitraryMethodService.class, channel, runtime))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unsupported HTTP method")
+                .hasMessageContaining("ARBITRARY");
+    }
+
     @Path("foo")
     @Produces("application/json")
     @Consumes("application/json")
@@ -174,5 +200,30 @@ public final class JaxRsClientDialogueEndpointTest {
         @POST
         @Path("post")
         void post(String body);
+    }
+
+    @Path("foo")
+    @Produces("application/json")
+    @Consumes("application/json")
+    public interface OptionsService {
+
+        @Path("options")
+        @OPTIONS
+        void options();
+    }
+
+    @Target({ElementType.METHOD})
+    @Retention(RetentionPolicy.RUNTIME)
+    @javax.ws.rs.HttpMethod("ARBITRARY")
+    public @interface ArbitraryHttpMethod {}
+
+    @Path("foo")
+    @Produces("application/json")
+    @Consumes("application/json")
+    public interface ArbitraryMethodService {
+
+        @Path("arbitrary")
+        @ArbitraryHttpMethod
+        void arbitrary();
     }
 }
