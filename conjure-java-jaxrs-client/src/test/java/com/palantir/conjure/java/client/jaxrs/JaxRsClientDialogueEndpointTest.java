@@ -212,7 +212,7 @@ public final class JaxRsClientDialogueEndpointTest {
         void options();
     }
 
-    @Target({ElementType.METHOD})
+    @Target(ElementType.METHOD)
     @Retention(RetentionPolicy.RUNTIME)
     @javax.ws.rs.HttpMethod("ARBITRARY")
     public @interface ArbitraryHttpMethod {}
