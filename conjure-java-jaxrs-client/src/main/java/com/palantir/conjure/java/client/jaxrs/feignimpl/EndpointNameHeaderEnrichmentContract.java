@@ -54,7 +54,7 @@ public final class EndpointNameHeaderEnrichmentContract extends AbstractDelegati
                     "Unsupported HTTP method",
                     SafeArg.of("class", targetType.getSimpleName()),
                     SafeArg.of("method", method.getName()),
-                    SafeArg.of("method", httpMethod));
+                    SafeArg.of("httpMethod", httpMethod));
         }
         metadata.template().header(ENDPOINT_NAME_HEADER, method.getName());
     }
