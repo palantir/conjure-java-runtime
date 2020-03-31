@@ -43,3 +43,6 @@ io.dropwizard.metrics:metrics-core = 3.2.6
 
 # We never actually properly released these yet
 com.palantir.tracing:tracing-test-utils = 3.2.0-rc1
+
+# Allow tests to run on Centos6
+org.conscrypt:conscrypt-openjdk-uber = 1.4.1

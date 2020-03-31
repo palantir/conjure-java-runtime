@@ -21,6 +21,7 @@ dependencies {
     testImplementation("com.netflix.feign:feign-core")
     testImplementation "com.netflix.feign:feign-okhttp"
     testImplementation "com.squareup.okhttp3:okhttp"
+    testImplementation "org.conscrypt:conscrypt-openjdk-uber"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation("io.dropwizard:dropwizard-core") { exclude module: 'metrics-core' }
     testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }

@@ -27,8 +27,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
+import java.security.Provider;
 import java.util.Map;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+import org.conscrypt.Conscrypt;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -349,5 +352,31 @@ public final class SslSocketFactoriesTests {
                 .build();
 
         SslSocketFactories.createSslSocketFactory(sslConfig);
+    }
+
+    @Test
+    public void testConscryptProvider_context() {
+        SslConfiguration sslConfig = SslConfiguration.builder()
+                .trustStorePath(new File("src/test/resources/testCA/testCA.jks").toPath())
+                .build();
+
+        Provider conscryptProvider = Conscrypt.newProvider();
+        SSLContext conscryptContext = SslSocketFactories.createSslContext(sslConfig, conscryptProvider);
+        SSLContext defaultContext = SslSocketFactories.createSslContext(sslConfig);
+        assertThat(Conscrypt.isConscrypt(conscryptContext)).isTrue();
+        assertThat(Conscrypt.isConscrypt(defaultContext)).isFalse();
+    }
+
+    @Test
+    public void testConscryptProvider_socketFactory() {
+        SslConfiguration sslConfig = SslConfiguration.builder()
+                .trustStorePath(new File("src/test/resources/testCA/testCA.jks").toPath())
+                .build();
+
+        Provider conscryptProvider = Conscrypt.newProvider();
+        SSLSocketFactory conscryptFactory = SslSocketFactories.createSslSocketFactory(sslConfig, conscryptProvider);
+        SSLSocketFactory defaultFactory = SslSocketFactories.createSslSocketFactory(sslConfig);
+        assertThat(Conscrypt.isConscrypt(conscryptFactory)).isTrue();
+        assertThat(Conscrypt.isConscrypt(defaultFactory)).isFalse();
     }
 }

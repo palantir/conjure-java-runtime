@@ -25,6 +25,8 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
 import java.util.Map;
 import java.util.Optional;
 import javax.net.ssl.KeyManager;
@@ -53,6 +55,18 @@ public final class SslSocketFactories {
     }
 
     /**
+     * Create an {@link SSLSocketFactory} from the provided configuration.
+     *
+     * @param config an {@link SslConfiguration} describing the trust store and key store configuration
+     * @param provider The preferred security {@link Provider}
+     * @return an {@link SSLSocketFactory} according to the input configuration
+     */
+    public static SSLSocketFactory createSslSocketFactory(SslConfiguration config, Provider provider) {
+        SSLContext sslContext = createSslContext(config, provider);
+        return sslContext.getSocketFactory();
+    }
+
+    /**
      * Create a {@link SSLSocketFactory} from the provided certificates.
      *
      * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
@@ -60,6 +74,19 @@ public final class SslSocketFactories {
      */
     public static SSLSocketFactory createSslSocketFactory(Map<String, PemX509Certificate> trustCertificatesByAlias) {
         SSLContext sslContext = createSslContext(trustCertificatesByAlias);
+        return sslContext.getSocketFactory();
+    }
+
+    /**
+     * Create a {@link SSLSocketFactory} from the provided certificates.
+     *
+     * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
+     *     certificate as.
+     * @param provider The preferred security {@link Provider}
+     */
+    public static SSLSocketFactory createSslSocketFactory(
+            Map<String, PemX509Certificate> trustCertificatesByAlias, Provider provider) {
+        SSLContext sslContext = createSslContext(trustCertificatesByAlias, provider);
         return sslContext.getSocketFactory();
     }
 
@@ -77,6 +104,20 @@ public final class SslSocketFactories {
     }
 
     /**
+     * Create an {@link SSLContext} initialized from the provided configuration.
+     *
+     * @param config an {@link SslConfiguration} describing the trust store and key store configuration
+     * @param provider The preferred security {@link Provider}
+     * @return an {@link SSLContext} according to the input configuration
+     */
+    public static SSLContext createSslContext(SslConfiguration config, Provider provider) {
+        TrustManager[] trustManagers = createTrustManagers(config);
+        KeyManager[] keyManagers = createKeyManagers(config);
+
+        return createSslContext(trustManagers, keyManagers, provider);
+    }
+
+    /**
      * Create an {@link SSLContext} initialized from the provided certificates.
      *
      * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
@@ -87,9 +128,33 @@ public final class SslSocketFactories {
         return createSslContext(trustManagers, new KeyManager[] {});
     }
 
+    /**
+     * Create an {@link SSLContext} initialized from the provided certificates.
+     *
+     * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
+     *     certificate as.
+     * @param provider The preferred security {@link Provider}
+     */
+    public static SSLContext createSslContext(
+            Map<String, PemX509Certificate> trustCertificatesByAlias, Provider provider) {
+        TrustManager[] trustManagers = createTrustManagers(trustCertificatesByAlias);
+        return createSslContext(trustManagers, new KeyManager[] {}, provider);
+    }
+
     private static SSLContext createSslContext(TrustManager[] trustManagers, KeyManager[] keyManagers) {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(keyManagers, trustManagers, null);
+            return sslContext;
+        } catch (GeneralSecurityException e) {
+            throw Throwables.propagate(e);
+        }
+    }
+
+    private static SSLContext createSslContext(
+            TrustManager[] trustManagers, KeyManager[] keyManagers, Provider provider) {
+        try {
+            SSLContext sslContext = SSLContext.getInstance("TLS", provider);
             sslContext.init(keyManagers, trustManagers, null);
             return sslContext;
         } catch (GeneralSecurityException e) {
@@ -271,5 +336,9 @@ public final class SslSocketFactories {
         } catch (GeneralSecurityException e) {
             throw Throwables.propagate(e);
         }
+    }
+
+    private static Provider defaultProvider() {
+        return Security.getProviders()[0];
     }
 }
