@@ -26,7 +26,6 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
-import java.security.Security;
 import java.util.Map;
 import java.util.Optional;
 import javax.net.ssl.KeyManager;
@@ -336,9 +335,5 @@ public final class SslSocketFactories {
         } catch (GeneralSecurityException e) {
             throw Throwables.propagate(e);
         }
-    }
-
-    private static Provider defaultProvider() {
-        return Security.getProviders()[0];
     }
 }
