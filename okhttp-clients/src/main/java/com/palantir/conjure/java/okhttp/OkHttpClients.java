@@ -63,7 +63,7 @@ public final class OkHttpClients {
     @VisibleForTesting
     static final int NUM_SCHEDULING_THREADS = 5;
 
-    private static final boolean DEFAULT_ENABLE_HTTP2 = true;
+    private static final boolean DEFAULT_ENABLE_HTTP2 = false;
 
     private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler((thread, uncaughtException) -> log.error(

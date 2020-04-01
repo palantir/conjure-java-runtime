@@ -1,0 +1,7 @@
+type: break
+break:
+  description: |-
+    GCM ciphers are enabled by default on JRE9 and beyond. This change disables OkHttp http/2 support by default so that library upgrades don't cause OkHttp to begin negotiating http/2. Consumers which rely on http/2 must set `enable-http2: true` in the service configuration or client configuration, but keep in mind this has been found to reduce throughput by a factor of twenty.
+    Servers which still run using jdk8 are expected to incur a performance penalty due to a software GCM implementation and are recommended to upgrade as soon as possible.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1539
