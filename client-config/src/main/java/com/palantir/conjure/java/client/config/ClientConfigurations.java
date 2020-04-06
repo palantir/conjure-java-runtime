@@ -131,11 +131,11 @@ public final class ClientConfigurations {
             case DIRECT:
                 return fixedProxySelectorFor(Proxy.NO_PROXY);
             case FROM_ENVIRONMENT:
-                Preconditions.checkNotNull(
+                String defaultEnvProxy = Preconditions.checkNotNull(
                         System.getenv(ENV_HTTPS_PROXY),
                         "Missing environment variable",
                         SafeArg.of("name", ENV_HTTPS_PROXY));
-                HostAndPort defaultHostAndPort = HostAndPort.fromString(System.getenv(ENV_HTTPS_PROXY));
+                HostAndPort defaultHostAndPort = HostAndPort.fromString(defaultEnvProxy);
                 InetSocketAddress address =
                         new InetSocketAddress(defaultHostAndPort.getHost(), defaultHostAndPort.getPort());
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
