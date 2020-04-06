@@ -128,16 +128,16 @@ public final class ClientConfigurations {
 
     public static ProxySelector createProxySelector(ProxyConfiguration proxyConfig) {
         switch (proxyConfig.type()) {
+            case DIRECT:
+                return fixedProxySelectorFor(Proxy.NO_PROXY);
             case FROM_ENVIRONMENT:
                 String defaultEnvProxy = System.getenv(ENV_HTTPS_PROXY);
                 Preconditions.checkNotNull(
                         defaultEnvProxy, "Missing environment variable", SafeArg.of("name", ENV_HTTPS_PROXY));
                 HostAndPort defaultHostAndPort = HostAndPort.fromString(defaultEnvProxy);
-                InetSocketAddress addr =
+                InetSocketAddress address =
                         new InetSocketAddress(defaultHostAndPort.getHost(), defaultHostAndPort.getPort());
-                return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, addr));
-            case DIRECT:
-                return fixedProxySelectorFor(Proxy.NO_PROXY);
+                return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
             case HTTP:
                 HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig
                         .hostAndPort()
