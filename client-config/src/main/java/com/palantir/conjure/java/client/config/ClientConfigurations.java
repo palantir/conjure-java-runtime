@@ -128,7 +128,7 @@ public final class ClientConfigurations {
 
     public static ProxySelector createProxySelector(ProxyConfiguration proxyConfig) {
         switch (proxyConfig.type()) {
-            case DEFAULT:
+            case FROM_ENVIRONMENT:
                 String defaultEnvProxy = System.getenv(ENV_HTTPS_PROXY);
                 Preconditions.checkNotNull(
                         defaultEnvProxy, "Missing environment variable", SafeArg.of("name", ENV_HTTPS_PROXY));
