@@ -26,4 +26,25 @@ public interface HostEventsSink {
     void record(String serviceName, String hostname, int port, int statusCode, long micros);
 
     void recordIoException(String serviceName, String hostname, int port);
+
+    default HostEventCallback callback(String serviceName, String hostname, int port) {
+        return new HostEventCallback() {
+            @Override
+            public void record(int statusCode, long micros) {
+                HostEventsSink.this.record(serviceName, hostname, port, statusCode, micros);
+            }
+
+            @Override
+            public void recordIoException() {
+                HostEventsSink.this.recordIoException(serviceName, hostname, port);
+            }
+        };
+    }
+
+    interface HostEventCallback {
+
+        void record(int statusCode, long micros);
+
+        void recordIoException();
+    }
 }

@@ -18,6 +18,7 @@ package com.palantir.conjure.java.okhttp;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.google.common.base.Suppliers;
 import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
@@ -25,6 +26,7 @@ import java.time.Clock;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import org.immutables.value.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +75,11 @@ public final class HostMetricsRegistry implements HostEventsSink {
         }
     }
 
+    @Override
+    public HostEventCallback callback(String serviceName, String hostname, int port) {
+        return new HostEventRegistryCallback(serviceName, hostname, port);
+    }
+
     public Collection<HostMetrics> getMetrics() {
         return Collections.unmodifiableCollection(hostMetrics.asMap().values());
     }
@@ -88,5 +95,50 @@ public final class HostMetricsRegistry implements HostEventsSink {
 
         @Value.Parameter
         int port();
+    }
+
+    private final class HostEventRegistryCallback implements HostEventCallback {
+
+        private final ServiceHostAndPort target;
+        private final Supplier<DefaultHostMetrics> hostMetricsSupplier;
+
+        HostEventRegistryCallback(String serviceName, String hostname, int port) {
+            this.target = ImmutableServiceHostAndPort.of(serviceName, hostname, port);
+            // recomputed each hour, must be shorter than the 1 day timeout used by the cache.
+            // This avoids an unnecessary cache load to record metrics.
+            this.hostMetricsSupplier =
+                    Suppliers.memoizeWithExpiration(() -> hostMetrics.get(target), 1, TimeUnit.HOURS);
+        }
+
+        @Override
+        public void record(int statusCode, long micros) {
+            try {
+                hostMetricsSupplier.get().record(statusCode, micros);
+            } catch (Exception e) {
+                log.warn(
+                        "Unable to record metrics for host and port",
+                        UnsafeArg.of("hostname", target.hostname()),
+                        SafeArg.of("port", target.port()),
+                        e);
+            }
+        }
+
+        @Override
+        public void recordIoException() {
+            try {
+                hostMetricsSupplier.get().recordIoException();
+            } catch (Exception e) {
+                log.warn(
+                        "Unable to record IO exception for host and port",
+                        UnsafeArg.of("hostname", target.hostname()),
+                        SafeArg.of("port", target.port()),
+                        e);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "HostEventRegistryCallback{target=" + target + '}';
+        }
     }
 }
