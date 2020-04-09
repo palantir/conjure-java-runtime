@@ -21,6 +21,8 @@ import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
+import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import java.io.IOException;
@@ -59,6 +61,7 @@ public final class ClientConfigurations {
             ClientConfiguration.RetryOnTimeout.DISABLED;
     private static final ClientConfiguration.RetryOnSocketException RETRY_ON_SOCKET_EXCEPTION_DEFAULT =
             ClientConfiguration.RetryOnSocketException.ENABLED;
+    private static final String ENV_HTTPS_PROXY = "https_proxy";
 
     private ClientConfigurations() {}
 
@@ -127,6 +130,15 @@ public final class ClientConfigurations {
         switch (proxyConfig.type()) {
             case DIRECT:
                 return fixedProxySelectorFor(Proxy.NO_PROXY);
+            case FROM_ENVIRONMENT:
+                String defaultEnvProxy = Preconditions.checkNotNull(
+                        System.getenv(ENV_HTTPS_PROXY),
+                        "Missing environment variable",
+                        SafeArg.of("name", ENV_HTTPS_PROXY));
+                HostAndPort defaultHostAndPort = HostAndPort.fromString(defaultEnvProxy);
+                InetSocketAddress address =
+                        new InetSocketAddress(defaultHostAndPort.getHost(), defaultHostAndPort.getPort());
+                return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
             case HTTP:
                 HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig
                         .hostAndPort()
