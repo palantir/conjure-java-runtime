@@ -90,7 +90,7 @@ public final class JaxRsClientDialogueEndpointTest {
         when(response.headers()).thenReturn(ImmutableListMultimap.of());
         when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
         StubService service = JaxRsClient.create(StubService.class, channel, runtime);
-        service.collectionOfQueryParams(ImmutableList.of("a", "/", ""));
+        service.collectionOfQueryParams(ImmutableList.of("a", "/", "", "a b", "a+b"));
 
         ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
@@ -100,6 +100,8 @@ public final class JaxRsClientDialogueEndpointTest {
         verify(urlBuilder).queryParam("query", "a");
         verify(urlBuilder).queryParam("query", "/");
         verify(urlBuilder).queryParam("query", "");
+        verify(urlBuilder).queryParam("query", "a b");
+        verify(urlBuilder).queryParam("query", "a+b");
     }
 
     @Test

@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Implement a host metrics registry callback
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1568
