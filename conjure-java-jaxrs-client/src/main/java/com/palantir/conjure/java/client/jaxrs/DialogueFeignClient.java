@@ -16,20 +16,17 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multimaps;
-import com.google.common.io.CharStreams;
 import com.google.common.net.HttpHeaders;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.palantir.conjure.java.api.errors.RemoteException;
-import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.UnknownRemoteException;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.EndpointNameHeaderEnrichmentContract;
-import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -44,6 +41,7 @@ import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import feign.Request;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -53,6 +51,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -256,63 +255,77 @@ final class DialogueFeignClient implements feign.Client {
         }
     }
 
-    /** Implements exception handling equivalent dialogue decoders. */
-    enum RemoteExceptionDecoder implements feign.codec.ErrorDecoder {
-        INSTANCE;
+    /** Converts back from a feign response into a dialogue response for exception mapping. */
+    private static final class FeignDialogueResponse implements Response {
 
-        private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
+        private final feign.Response delegate;
 
-        private static final feign.codec.ErrorDecoder defaultDecoder = new feign.codec.ErrorDecoder.Default();
-
-        private boolean isError(feign.Response response) {
-            return 300 <= response.status() && response.status() <= 599;
-        }
-
-        private Exception parse(feign.Response response) {
-            String body;
-            try {
-                body = toString(response.body().asInputStream());
-            } catch (NullPointerException | IOException e) {
-                UnknownRemoteException exception =
-                        new UnknownRemoteException(response.status(), "Failed to read response body");
-                exception.initCause(e);
-                return exception;
-            } finally {
-                response.close();
-            }
-
-            Optional<String> contentType = Optional.ofNullable(
-                            response.headers().get(HttpHeaders.CONTENT_TYPE))
-                    .map(values -> Iterables.getFirst(values, null));
-            if (contentType.isPresent()
-                    && contentType.get().toLowerCase(Locale.ENGLISH).startsWith("application/json")) {
-                try {
-                    SerializableError serializableError = MAPPER.readValue(body, SerializableError.class);
-                    return new RemoteException(serializableError, response.status());
-                } catch (Exception e) {
-                    return new UnknownRemoteException(response.status(), body);
-                }
-            }
-
-            return new UnknownRemoteException(response.status(), body);
-        }
-
-        private static String toString(InputStream body) throws IOException {
-            try (Reader reader = new InputStreamReader(body, StandardCharsets.UTF_8)) {
-                String value = CharStreams.toString(reader);
-                if (value.isEmpty()) {
-                    return "<empty>";
-                }
-                return value;
-            }
+        FeignDialogueResponse(feign.Response delegate) {
+            this.delegate = delegate;
         }
 
         @Override
-        public Exception decode(String methodKey, feign.Response response) {
-            if (isError(response)) {
-                return parse(response);
+        public InputStream body() {
+            feign.Response.Body body = delegate.body();
+            if (body != null) {
+                try {
+                    return body.asInputStream();
+                } catch (IOException e) {
+                    throw new SafeRuntimeException("Failed to access the delegate response body", e);
+                }
             }
-            return defaultDecoder.decode(methodKey, response);
+            return new ByteArrayInputStream(new byte[0]);
+        }
+
+        @Override
+        public int code() {
+            return delegate.status();
+        }
+
+        @Override
+        public ListMultimap<String, String> headers() {
+            ListMultimap<String, String> result = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER)
+                    .arrayListValues()
+                    .build();
+            delegate.headers().forEach(result::putAll);
+            return result;
+        }
+
+        @Override
+        public Optional<String> getFirstHeader(String header) {
+            return Optional.ofNullable(
+                    Iterables.getFirst(delegate.headers().getOrDefault(header, Collections.emptyList()), null));
+        }
+
+        @Override
+        public void close() {
+            delegate.close();
+        }
+
+        @Override
+        public String toString() {
+            return "FeignDialogueResponse{delegate=" + delegate + '}';
+        }
+    }
+
+    /** Implements exception handling equivalent dialogue decoders. */
+    static final class RemoteExceptionDecoder implements feign.codec.ErrorDecoder {
+
+        private final ConjureRuntime runtime;
+
+        RemoteExceptionDecoder(ConjureRuntime runtime) {
+            this.runtime = runtime;
+        }
+
+        @Override
+        public Exception decode(String _methodKey, feign.Response response) {
+            try {
+                // The dialogue empty body deserializer properly handles exception mapping
+                runtime.bodySerDe().emptyBodyDeserializer().deserialize(new FeignDialogueResponse(response));
+            } catch (Exception e) {
+                return e;
+            }
+            return new UnknownRemoteException(response.status(), "<unknown>");
         }
     }
 
