@@ -21,7 +21,6 @@ import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.EndpointNameHeaderEnrichmentContract;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.QosErrorDecoder;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
 import com.palantir.conjure.java.okhttp.HostEventsSink;
@@ -81,7 +80,7 @@ public final class JaxRsClient {
                 .contract(new EndpointNameHeaderEnrichmentContract(AbstractFeignJaxRsClientBuilder.createContract()))
                 .encoder(AbstractFeignJaxRsClientBuilder.createEncoder(JSON_OBJECT_MAPPER, CBOR_OBJECT_MAPPER))
                 .decoder(AbstractFeignJaxRsClientBuilder.createDecoder(JSON_OBJECT_MAPPER, CBOR_OBJECT_MAPPER))
-                .errorDecoder(new QosErrorDecoder(DialogueFeignClient.RemoteExceptionDecoder.INSTANCE))
+                .errorDecoder(new DialogueFeignClient.RemoteExceptionDecoder(runtime))
                 .client(new DialogueFeignClient(serviceClass, channel, runtime, baseUrl))
                 .logLevel(Logger.Level.NONE) // we use Dialogue for logging. (note that NONE is the default)
                 .retryer(new Retryer.Default(0, 0, 1)) // use dialogue retry mechanism only
