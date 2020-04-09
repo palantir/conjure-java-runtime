@@ -318,7 +318,7 @@ final class DialogueFeignClient implements feign.Client {
         }
 
         @Override
-        public Exception decode(String methodKey, feign.Response response) {
+        public Exception decode(String _methodKey, feign.Response response) {
             try {
                 // The dialogue empty body deserializer properly handles exception mapping
                 runtime.bodySerDe().emptyBodyDeserializer().deserialize(new FeignDialogueResponse(response));
