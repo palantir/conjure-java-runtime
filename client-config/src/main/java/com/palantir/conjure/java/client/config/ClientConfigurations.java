@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
+import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -103,6 +104,23 @@ public final class ClientConfigurations {
      */
     public static ClientConfiguration of(
             List<String> uris, SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
+        return of(uris, sslSocketFactory, trustManager, Optional.empty());
+    }
+
+    /**
+     * Creates a new {@link ClientConfiguration} instance from the given SSL configuration, URIs, and user agent,
+     * filling in all other configuration with the defaults specified as constants in this class.
+     */
+    public static ClientConfiguration of(
+            List<String> uris, SSLSocketFactory sslSocketFactory, X509TrustManager trustManager, UserAgent userAgent) {
+        return of(uris, sslSocketFactory, trustManager, Optional.of(userAgent));
+    }
+
+    private static ClientConfiguration of(
+            List<String> uris,
+            SSLSocketFactory sslSocketFactory,
+            X509TrustManager trustManager,
+            Optional<UserAgent> userAgent) {
         return ClientConfiguration.builder()
                 .sslSocketFactory(sslSocketFactory)
                 .trustManager(trustManager)
@@ -123,6 +141,7 @@ public final class ClientConfigurations {
                 .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
                 .retryOnSocketException(RETRY_ON_SOCKET_EXCEPTION_DEFAULT)
                 .taggedMetricRegistry(SharedTaggedMetricRegistries.getSingleton())
+                .userAgent(userAgent)
                 .build();
     }
 
