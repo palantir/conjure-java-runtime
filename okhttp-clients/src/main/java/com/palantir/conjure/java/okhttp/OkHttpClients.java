@@ -35,6 +35,7 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.Tracers;
 import com.palantir.tritium.metrics.MetricRegistries;
+import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import java.time.Clock;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -65,17 +66,22 @@ public final class OkHttpClients {
 
     private static final boolean DEFAULT_ENABLE_HTTP2 = false;
 
-    private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
-            .setUncaughtExceptionHandler((thread, uncaughtException) -> log.error(
-                    "An exception was uncaught in an execution thread. "
-                            + "This likely left a thread blocked, and is as such a serious bug "
-                            + "which requires debugging.",
-                    uncaughtException))
-            .setNameFormat("remoting-okhttp-dispatcher-%d")
-            // This diverges from the OkHttp default value, allowing the JVM to cleanly exit
-            // while idle dispatcher threads are still alive.
-            .setDaemon(true)
-            .build();
+    @SuppressWarnings("deprecation") // Singleton registry for a singleton executor
+    private static final ThreadFactory executionThreads = MetricRegistries.instrument(
+            SharedTaggedMetricRegistries.getSingleton(),
+            new ThreadFactoryBuilder()
+                    .setUncaughtExceptionHandler((thread, uncaughtException) -> log.error(
+                            "An exception was uncaught in an execution thread. "
+                                    + "This likely left a thread blocked, and is as such a serious bug "
+                                    + "which requires debugging.",
+                            uncaughtException))
+                    .setNameFormat("remoting-okhttp-dispatcher-%d")
+                    // This diverges from the OkHttp default value, allowing the JVM to cleanly exit
+                    // while idle dispatcher threads are still alive.
+                    .setDaemon(true)
+                    .build(),
+            "remoting-okhttp-dispatcher");
+
     /**
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
      * Similar to OkHttp's default, but with two modifications:
