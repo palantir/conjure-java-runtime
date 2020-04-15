@@ -66,9 +66,7 @@ public final class OkHttpClients {
 
     private static final boolean DEFAULT_ENABLE_HTTP2 = false;
 
-    @SuppressWarnings("deprecation") // Singleton registry for a singleton executor
-    private static final ThreadFactory executionThreads = MetricRegistries.instrument(
-            SharedTaggedMetricRegistries.getSingleton(),
+    private static final ThreadFactory executionThreads = instrument(
             new ThreadFactoryBuilder()
                     .setUncaughtExceptionHandler((thread, uncaughtException) -> log.error(
                             "An exception was uncaught in an execution thread. "
@@ -134,7 +132,10 @@ public final class OkHttpClients {
      */
     private static final Supplier<ScheduledExecutorService> schedulingExecutor =
             Suppliers.memoize(() -> Tracers.wrap(Executors.newScheduledThreadPool(
-                    NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true))));
+                    NUM_SCHEDULING_THREADS,
+                    instrument(
+                            Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true),
+                            "conjure-java-runtime/OkHttp Scheduler"))));
 
     private OkHttpClients() {}
 
@@ -350,5 +351,10 @@ public final class OkHttpClients {
                                         : CipherSuites.fastCipherSuites())
                         .build(),
                 ConnectionSpec.CLEARTEXT);
+    }
+
+    @SuppressWarnings("deprecation") // Singleton registry for a singleton executor
+    private static ThreadFactory instrument(ThreadFactory threadFactory, String name) {
+        return MetricRegistries.instrument(SharedTaggedMetricRegistries.getSingleton(), threadFactory, name);
     }
 }
