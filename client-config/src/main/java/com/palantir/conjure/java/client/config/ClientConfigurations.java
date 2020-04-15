@@ -183,15 +183,45 @@ public final class ClientConfigurations {
     }
 
     private static ProxySelector fixedProxySelectorFor(Proxy proxy) {
-        return new ProxySelector() {
-            @Override
-            public List<Proxy> select(URI _uri) {
-                return ImmutableList.of(proxy);
-            }
+        return new FixedProxySelector(proxy);
+    }
 
-            @Override
-            public void connectFailed(URI _uri, SocketAddress _sa, IOException _ioe) {}
-        };
+    private static final class FixedProxySelector extends ProxySelector {
+        private final Proxy proxy;
+
+        FixedProxySelector(Proxy proxy) {
+            this.proxy = proxy;
+        }
+
+        @Override
+        public List<Proxy> select(URI _uri) {
+            return ImmutableList.of(proxy);
+        }
+
+        @Override
+        public void connectFailed(URI _uri, SocketAddress _sa, IOException _ioe) {}
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other == null || FixedProxySelector.class != other.getClass()) {
+                return false;
+            }
+            FixedProxySelector that = (FixedProxySelector) other;
+            return proxy.equals(that.proxy);
+        }
+
+        @Override
+        public int hashCode() {
+            return proxy.hashCode();
+        }
+
+        @Override
+        public String toString() {
+            return "FixedProxySelector{proxy=" + proxy + '}';
+        }
     }
 
     private static boolean isJava8() {
