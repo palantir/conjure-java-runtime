@@ -119,8 +119,9 @@ public final class OkHttpClients {
 
     /** The {@link ScheduledExecutorService} used for recovering leaked limits. */
     private static final Supplier<ScheduledExecutorService> limitReviver =
-            Suppliers.memoize(() -> Tracers.wrap(Executors.newSingleThreadScheduledExecutor(
-                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", true))));
+            Suppliers.memoize(() -> Tracers.wrap(Executors.newSingleThreadScheduledExecutor(instrument(
+                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", true),
+                    "conjure-java-runtime/leaked limit reviver"))));
 
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
