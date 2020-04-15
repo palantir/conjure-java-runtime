@@ -35,6 +35,7 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tracing.Tracers;
 import com.palantir.tritium.metrics.MetricRegistries;
+import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import java.time.Clock;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -65,17 +66,20 @@ public final class OkHttpClients {
 
     private static final boolean DEFAULT_ENABLE_HTTP2 = false;
 
-    private static final ThreadFactory executionThreads = new ThreadFactoryBuilder()
-            .setUncaughtExceptionHandler((thread, uncaughtException) -> log.error(
-                    "An exception was uncaught in an execution thread. "
-                            + "This likely left a thread blocked, and is as such a serious bug "
-                            + "which requires debugging.",
-                    uncaughtException))
-            .setNameFormat("remoting-okhttp-dispatcher-%d")
-            // This diverges from the OkHttp default value, allowing the JVM to cleanly exit
-            // while idle dispatcher threads are still alive.
-            .setDaemon(true)
-            .build();
+    private static final ThreadFactory executionThreads = instrument(
+            new ThreadFactoryBuilder()
+                    .setUncaughtExceptionHandler((thread, uncaughtException) -> log.error(
+                            "An exception was uncaught in an execution thread. "
+                                    + "This likely left a thread blocked, and is as such a serious bug "
+                                    + "which requires debugging.",
+                            uncaughtException))
+                    .setNameFormat("remoting-okhttp-dispatcher-%d")
+                    // This diverges from the OkHttp default value, allowing the JVM to cleanly exit
+                    // while idle dispatcher threads are still alive.
+                    .setDaemon(true)
+                    .build(),
+            "remoting-okhttp-dispatcher");
+
     /**
      * The {@link ExecutorService} used for the {@link Dispatcher}s of all OkHttp clients created through this class.
      * Similar to OkHttp's default, but with two modifications:
@@ -115,8 +119,9 @@ public final class OkHttpClients {
 
     /** The {@link ScheduledExecutorService} used for recovering leaked limits. */
     private static final Supplier<ScheduledExecutorService> limitReviver =
-            Suppliers.memoize(() -> Tracers.wrap(Executors.newSingleThreadScheduledExecutor(
-                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", true))));
+            Suppliers.memoize(() -> Tracers.wrap(Executors.newSingleThreadScheduledExecutor(instrument(
+                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", true),
+                    "conjure-java-runtime/leaked limit reviver"))));
 
     /**
      * The {@link ScheduledExecutorService} used for scheduling call retries. This thread pool is distinct from OkHttp's
@@ -128,7 +133,10 @@ public final class OkHttpClients {
      */
     private static final Supplier<ScheduledExecutorService> schedulingExecutor =
             Suppliers.memoize(() -> Tracers.wrap(Executors.newScheduledThreadPool(
-                    NUM_SCHEDULING_THREADS, Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true))));
+                    NUM_SCHEDULING_THREADS,
+                    instrument(
+                            Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true),
+                            "conjure-java-runtime/OkHttp Scheduler"))));
 
     private OkHttpClients() {}
 
@@ -344,5 +352,10 @@ public final class OkHttpClients {
                                         : CipherSuites.fastCipherSuites())
                         .build(),
                 ConnectionSpec.CLEARTEXT);
+    }
+
+    @SuppressWarnings("deprecation") // Singleton registry for a singleton executor
+    private static ThreadFactory instrument(ThreadFactory threadFactory, String name) {
+        return MetricRegistries.instrument(SharedTaggedMetricRegistries.getSingleton(), threadFactory, name);
     }
 }
