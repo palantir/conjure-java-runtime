@@ -154,9 +154,8 @@ public final class ClientConfigurations {
                         System.getenv(ENV_HTTPS_PROXY),
                         "Missing environment variable",
                         SafeArg.of("name", ENV_HTTPS_PROXY));
-                HostAndPort defaultHostAndPort = HostAndPort.fromString(defaultEnvProxy);
-                InetSocketAddress address =
-                        new InetSocketAddress(defaultHostAndPort.getHost(), defaultHostAndPort.getPort());
+                URI uri = URI.create(defaultEnvProxy);
+                InetSocketAddress address = new InetSocketAddress(uri.getHost(), uri.getPort());
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
             case HTTP:
                 HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig
