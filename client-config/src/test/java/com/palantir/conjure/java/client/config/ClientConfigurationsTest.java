@@ -145,8 +145,7 @@ public final class ClientConfigurationsTest {
 
     @Test
     public void systemEnvUri() {
-        // How environment variables for https proxy look like in deployments.
-        // http://github.palantir.build/pcloud/pcloud-docs/blob/master/docs/usage/egress.rst#using-the-http-egress-proxy
+        // How environment variables for https proxy look like.
         InetSocketAddress inetSocketAddress =
                 ClientConfigurations.createInetSocketAddress("http://zomp-ovc-gw-1:8888/");
         assertThat(inetSocketAddress.getHostString()).isEqualTo("zomp-ovc-gw-1");
