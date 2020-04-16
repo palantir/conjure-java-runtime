@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.client.config;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
@@ -154,9 +155,7 @@ public final class ClientConfigurations {
                         System.getenv(ENV_HTTPS_PROXY),
                         "Missing environment variable",
                         SafeArg.of("name", ENV_HTTPS_PROXY));
-                HostAndPort defaultHostAndPort = HostAndPort.fromString(defaultEnvProxy);
-                InetSocketAddress address =
-                        new InetSocketAddress(defaultHostAndPort.getHost(), defaultHostAndPort.getPort());
+                InetSocketAddress address = createInetSocketAddress(defaultEnvProxy);
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
             case HTTP:
                 HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig
@@ -172,6 +171,12 @@ public final class ClientConfigurations {
         }
 
         throw new IllegalStateException("Failed to create ProxySelector for proxy configuration: " + proxyConfig);
+    }
+
+    @VisibleForTesting
+    static InetSocketAddress createInetSocketAddress(String uriString) {
+        URI uri = URI.create(uriString);
+        return new InetSocketAddress(uri.getHost(), uri.getPort());
     }
 
     private static Optional<HostAndPort> meshProxy(Optional<ProxyConfiguration> proxy) {

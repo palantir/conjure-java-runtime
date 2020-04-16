@@ -28,6 +28,7 @@ import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.logsafe.testing.Assertions;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
 import java.nio.file.Paths;
@@ -140,6 +141,15 @@ public final class ClientConfigurationsTest {
 
         assertThat(instance1).isEqualTo(instance2);
         assertThat(instance1).hasSameHashCodeAs(instance2);
+    }
+
+    @Test
+    public void systemEnvUri() {
+        // How environment variables for https proxy look like.
+        InetSocketAddress inetSocketAddress =
+                ClientConfigurations.createInetSocketAddress("http://zomp-ovc-gw-1:8888/");
+        assertThat(inetSocketAddress.getHostString()).isEqualTo("zomp-ovc-gw-1");
+        assertThat(inetSocketAddress.getPort()).isEqualTo(8888);
     }
 
     private ServiceConfiguration meshProxyServiceConfig(List<String> theUris, int maxNumRetries) {
