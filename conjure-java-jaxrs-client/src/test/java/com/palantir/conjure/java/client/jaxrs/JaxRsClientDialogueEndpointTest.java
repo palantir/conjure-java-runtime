@@ -228,6 +228,29 @@ public final class JaxRsClientDialogueEndpointTest {
         verify(urlBuilder).pathSegment("");
     }
 
+    @Test
+    public void testEmptyStringPathParameter() {
+        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
+        Channel channel = mock(Channel.class);
+        Response response = mock(Response.class);
+        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(response.code()).thenReturn(204);
+        when(response.headers()).thenReturn(ImmutableListMultimap.of());
+        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.innerPath("");
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
+        UrlBuilder urlBuilder = mock(UrlBuilder.class);
+        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        verify(urlBuilder).pathSegment("foo"); // context path
+        verify(urlBuilder).pathSegment("begin");
+        verify(urlBuilder).pathSegment("");
+        verify(urlBuilder).pathSegment("end");
+    }
+
     @Path("foo")
     @Produces("application/json")
     @Consumes("application/json")
@@ -249,6 +272,10 @@ public final class JaxRsClientDialogueEndpointTest {
         @GET
         @Path("static0/{id}/static1/{path:.*}")
         void complexPath(@PathParam("id") String id, @PathParam("path") String path);
+
+        @GET
+        @Path("begin/{path}/end")
+        void innerPath(@PathParam("path") String path);
     }
 
     @Path("bar")

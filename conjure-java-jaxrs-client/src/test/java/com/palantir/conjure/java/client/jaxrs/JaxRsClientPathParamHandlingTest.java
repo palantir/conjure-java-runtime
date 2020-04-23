@@ -85,6 +85,10 @@ public final class JaxRsClientPathParamHandlingTest extends TestBase {
         @GET
         @Path("complex/{path:.*}")
         void complexPath(@PathParam("path") String path);
+
+        @GET
+        @Path("begin/{path}/end")
+        void innerPath(@PathParam("path") String path);
     }
 
     @Test
@@ -99,5 +103,12 @@ public final class JaxRsClientPathParamHandlingTest extends TestBase {
         client.complexPath("");
         RecordedRequest takeRequest = server.takeRequest();
         assertThat(takeRequest.getRequestLine()).isEqualTo("GET /complex/ HTTP/1.1");
+    }
+
+    @Test
+    public void innerPathParameterAllowsEmptyString() throws Exception {
+        client.innerPath("");
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /begin//end HTTP/1.1");
     }
 }
