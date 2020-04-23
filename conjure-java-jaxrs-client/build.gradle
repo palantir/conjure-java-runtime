@@ -41,3 +41,5 @@ dependencies {
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
 }
+
+configurations.testImplementation.exclude group: 'com.palantir.conjure.java.runtime'
