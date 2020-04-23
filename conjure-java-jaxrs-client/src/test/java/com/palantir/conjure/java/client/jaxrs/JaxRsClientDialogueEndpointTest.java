@@ -55,15 +55,12 @@ import org.mockito.ArgumentCaptor;
 
 public final class JaxRsClientDialogueEndpointTest {
 
+    private static final ConjureRuntime runtime =
+            DefaultConjureRuntime.builder().build();
+
     @Test
     public void testEndpoint() {
-        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
-        Channel channel = mock(Channel.class);
-        Response response = mock(Response.class);
-        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
-        when(response.code()).thenReturn(204);
-        when(response.headers()).thenReturn(ImmutableListMultimap.of());
-        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        Channel channel = stubNoContentResponseChannel();
         StubService service = JaxRsClient.create(StubService.class, channel, runtime);
         service.ping();
 
@@ -83,13 +80,7 @@ public final class JaxRsClientDialogueEndpointTest {
 
     @Test
     public void testQueryParameterCollection() {
-        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
-        Channel channel = mock(Channel.class);
-        Response response = mock(Response.class);
-        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
-        when(response.code()).thenReturn(204);
-        when(response.headers()).thenReturn(ImmutableListMultimap.of());
-        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        Channel channel = stubNoContentResponseChannel();
         StubService service = JaxRsClient.create(StubService.class, channel, runtime);
         service.collectionOfQueryParams(ImmutableList.of("a", "/", "", "a b", "a+b"));
 
@@ -107,13 +98,7 @@ public final class JaxRsClientDialogueEndpointTest {
 
     @Test
     public void testPostWithBody() {
-        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
-        Channel channel = mock(Channel.class);
-        Response response = mock(Response.class);
-        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
-        when(response.code()).thenReturn(204);
-        when(response.headers()).thenReturn(ImmutableListMultimap.of());
-        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        Channel channel = stubNoContentResponseChannel();
         StubService service = JaxRsClient.create(StubService.class, channel, runtime);
         service.post("Hello, World!");
 
@@ -134,13 +119,7 @@ public final class JaxRsClientDialogueEndpointTest {
 
     @Test
     public void testPostWithBody_defaultContentType() {
-        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
-        Channel channel = mock(Channel.class);
-        Response response = mock(Response.class);
-        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
-        when(response.code()).thenReturn(204);
-        when(response.headers()).thenReturn(ImmutableListMultimap.of());
-        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        Channel channel = stubNoContentResponseChannel();
         StubServiceWithoutContentType service =
                 JaxRsClient.create(StubServiceWithoutContentType.class, channel, runtime);
         service.post("Hello, World!");
@@ -160,7 +139,6 @@ public final class JaxRsClientDialogueEndpointTest {
 
     @Test
     public void testUnsupportedHttpMethod_options() {
-        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
         Channel channel = mock(Channel.class);
         assertThatThrownBy(() -> JaxRsClient.create(OptionsService.class, channel, runtime))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -170,7 +148,6 @@ public final class JaxRsClientDialogueEndpointTest {
 
     @Test
     public void testUnsupportedHttpMethod_arbitrary() {
-        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
         Channel channel = mock(Channel.class);
         assertThatThrownBy(() -> JaxRsClient.create(ArbitraryMethodService.class, channel, runtime))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -180,13 +157,7 @@ public final class JaxRsClientDialogueEndpointTest {
 
     @Test
     public void testTrailingWildcardParameter_slashes() {
-        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
-        Channel channel = mock(Channel.class);
-        Response response = mock(Response.class);
-        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
-        when(response.code()).thenReturn(204);
-        when(response.headers()).thenReturn(ImmutableListMultimap.of());
-        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        Channel channel = stubNoContentResponseChannel();
         StubService service = JaxRsClient.create(StubService.class, channel, runtime);
         service.complexPath("dynamic0", "dynamic1/dynamic2");
 
@@ -205,13 +176,7 @@ public final class JaxRsClientDialogueEndpointTest {
 
     @Test
     public void testTrailingWildcardParameter_emptyString() {
-        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
-        Channel channel = mock(Channel.class);
-        Response response = mock(Response.class);
-        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
-        when(response.code()).thenReturn(204);
-        when(response.headers()).thenReturn(ImmutableListMultimap.of());
-        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        Channel channel = stubNoContentResponseChannel();
         StubService service = JaxRsClient.create(StubService.class, channel, runtime);
         service.complexPath("dynamic0", "");
 
@@ -230,13 +195,7 @@ public final class JaxRsClientDialogueEndpointTest {
 
     @Test
     public void testEmptyStringPathParameter() {
-        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
-        Channel channel = mock(Channel.class);
-        Response response = mock(Response.class);
-        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
-        when(response.code()).thenReturn(204);
-        when(response.headers()).thenReturn(ImmutableListMultimap.of());
-        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        Channel channel = stubNoContentResponseChannel();
         StubService service = JaxRsClient.create(StubService.class, channel, runtime);
         service.innerPath("");
 
@@ -249,6 +208,31 @@ public final class JaxRsClientDialogueEndpointTest {
         verify(urlBuilder).pathSegment("begin");
         verify(urlBuilder).pathSegment("");
         verify(urlBuilder).pathSegment("end");
+    }
+
+    @Test
+    public void testSlashPathParameter() {
+        Channel channel = stubNoContentResponseChannel();
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.innerPath("/");
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
+        UrlBuilder urlBuilder = mock(UrlBuilder.class);
+        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        verify(urlBuilder).pathSegment("foo"); // context path
+        verify(urlBuilder).pathSegment("/"); // encoded into %2F by DefaultUrlBuilder
+    }
+
+    static Channel stubNoContentResponseChannel() {
+        Channel channel = mock(Channel.class);
+        Response response = mock(Response.class);
+        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(response.code()).thenReturn(204);
+        when(response.headers()).thenReturn(ImmutableListMultimap.of());
+        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        return channel;
     }
 
     @Path("foo")
