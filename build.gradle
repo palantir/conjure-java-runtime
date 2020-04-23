@@ -33,6 +33,12 @@ allprojects {
         maven { url 'https://palantir.bintray.com/releases'}
     }
 
+    configurations.all {
+        resolutionStrategy {
+            preferProjectModules()
+        }
+    }
+
     dependencies {
         constraints {
             rootConfiguration 'io.dropwizard.metrics:metrics-core', {

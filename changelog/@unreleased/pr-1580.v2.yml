@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: Fix Dialogue feign client empty path parameter handling, no longer
+    excluding empty paths
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1580
