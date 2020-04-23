@@ -29,8 +29,12 @@ dependencies {
     testImplementation project(":conjure-java-retrofit2-client")
     testImplementation project(":conjure-java-jersey-server")
     testImplementation project(':keystores')
-    testImplementation "com.palantir.dialogue:dialogue-serde"
-    testImplementation "com.palantir.dialogue:dialogue-apache-hc4-client"
+    testImplementation "com.palantir.dialogue:dialogue-serde", {
+        exclude group: 'com.palantir.conjure.java.runtime'
+    }
+    testImplementation "com.palantir.dialogue:dialogue-apache-hc4-client", {
+        exclude group: 'com.palantir.conjure.java.runtime'
+    }
     testImplementation "com.netflix.feign:feign-jackson"
     testImplementation "com.squareup.okhttp3:mockwebserver"
     testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
@@ -41,5 +45,3 @@ dependencies {
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
 }
-
-configurations.testImplementation.exclude group: 'com.palantir.conjure.java.runtime'
