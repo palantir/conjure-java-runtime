@@ -64,7 +64,7 @@ import java.util.Optional;
 final class DialogueFeignClient implements feign.Client {
 
     private static final String PATH_TEMPLATE = "hr-path-template";
-    private static final Splitter pathSplitter = Splitter.on('/').omitEmptyStrings();
+    private static final Splitter pathSplitter = Splitter.on('/');
     private static final Splitter querySplitter = Splitter.on('&').omitEmptyStrings();
     private static final Splitter queryValueSplitter = Splitter.on('=');
 
@@ -349,7 +349,12 @@ final class DialogueFeignClient implements feign.Client {
                     "Request URL must start with base url",
                     UnsafeArg.of("requestUrl", target),
                     UnsafeArg.of("baseUrl", baseUrl));
-            String trailing = target.substring(baseUrl.length());
+            int trailingOffset = 0;
+            // If the trailing section starts with a slash, ignore it to prevent duplicate leading slashes.
+            if (target.length() > baseUrl.length() && target.charAt(baseUrl.length()) == '/') {
+                trailingOffset = 1;
+            }
+            String trailing = target.substring(baseUrl.length() + trailingOffset);
             int queryParamsStart = trailing.indexOf('?');
             String queryPortion = queryParamsStart == -1 ? trailing : trailing.substring(0, queryParamsStart);
             for (String pathSegment : pathSplitter.split(queryPortion)) {

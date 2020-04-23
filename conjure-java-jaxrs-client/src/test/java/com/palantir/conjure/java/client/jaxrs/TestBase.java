@@ -34,6 +34,7 @@ public abstract class TestBase {
         return ClientConfigurations.of(
                 ImmutableList.copyOf(uri),
                 SslSocketFactories.createSslSocketFactory(sslConfig),
-                SslSocketFactories.createX509TrustManager(sslConfig));
+                SslSocketFactories.createX509TrustManager(sslConfig),
+                AGENT);
     }
 }

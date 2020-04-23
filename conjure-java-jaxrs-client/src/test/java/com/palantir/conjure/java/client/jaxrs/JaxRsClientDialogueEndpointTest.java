@@ -47,6 +47,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import org.junit.Test;
@@ -177,6 +178,56 @@ public final class JaxRsClientDialogueEndpointTest {
                 .hasMessageContaining("ARBITRARY");
     }
 
+    @Test
+    public void testTrailingWildcardParameter_slashes() {
+        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
+        Channel channel = mock(Channel.class);
+        Response response = mock(Response.class);
+        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(response.code()).thenReturn(204);
+        when(response.headers()).thenReturn(ImmutableListMultimap.of());
+        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.complexPath("dynamic0", "dynamic1/dynamic2");
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
+        UrlBuilder urlBuilder = mock(UrlBuilder.class);
+        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        verify(urlBuilder).pathSegment("foo"); // context path
+        verify(urlBuilder).pathSegment("static0");
+        verify(urlBuilder).pathSegment("dynamic0");
+        verify(urlBuilder).pathSegment("static1");
+        // Value should not be split into multiple segments
+        verify(urlBuilder).pathSegment("dynamic1/dynamic2");
+    }
+
+    @Test
+    public void testTrailingWildcardParameter_emptyString() {
+        ConjureRuntime runtime = DefaultConjureRuntime.builder().build();
+        Channel channel = mock(Channel.class);
+        Response response = mock(Response.class);
+        when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
+        when(response.code()).thenReturn(204);
+        when(response.headers()).thenReturn(ImmutableListMultimap.of());
+        when(channel.execute(any(Endpoint.class), any(Request.class))).thenReturn(Futures.immediateFuture(response));
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.complexPath("dynamic0", "");
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
+        UrlBuilder urlBuilder = mock(UrlBuilder.class);
+        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        verify(urlBuilder).pathSegment("foo"); // context path
+        verify(urlBuilder).pathSegment("static0");
+        verify(urlBuilder).pathSegment("dynamic0");
+        verify(urlBuilder).pathSegment("static1");
+        // Empty string must be included
+        verify(urlBuilder).pathSegment("");
+    }
+
     @Path("foo")
     @Produces("application/json")
     @Consumes("application/json")
@@ -194,6 +245,10 @@ public final class JaxRsClientDialogueEndpointTest {
         @Path("post")
         @Consumes("text/plain")
         void post(String body);
+
+        @GET
+        @Path("static0/{id}/static1/{path:.*}")
+        void complexPath(@PathParam("id") String id, @PathParam("path") String path);
     }
 
     @Path("bar")
