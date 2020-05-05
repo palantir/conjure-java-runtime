@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Wrap InpuStream in BufferedInputStream before handing it off to X509Factory to avoid expensive single byte disk reads
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1588

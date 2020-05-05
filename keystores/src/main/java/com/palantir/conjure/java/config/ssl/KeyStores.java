@@ -22,6 +22,7 @@ import com.google.common.base.Throwables;
 import com.google.common.io.BaseEncoding;
 import com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1PrivateKeyReader;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -97,7 +98,7 @@ final class KeyStores {
         keyStore = createKeyStore();
 
         for (File currFile : getFilesForPath(path)) {
-            try (InputStream in = Files.newInputStream(currFile.toPath())) {
+            try (InputStream in = new BufferedInputStream(Files.newInputStream(currFile.toPath()))) {
                 addCertificatesToKeystore(keyStore, currFile.getName(), readX509Certificates(in));
             } catch (IOException e) {
                 throw new RuntimeException(
