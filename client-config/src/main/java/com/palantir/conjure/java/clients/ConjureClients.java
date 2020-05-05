@@ -61,13 +61,4 @@ public final class ConjureClients {
         @CheckReturnValue
         U reloading(Refreshable<ServicesConfigBlock> scb);
     }
-
-    public interface Factory
-            extends NonReloadingClientFactory, WithClientBehaviour<Factory>, ToReloadingFactory<ReloadingFactory> {}
-
-    public interface ReloadingFactory
-            extends ReloadingClientFactory,
-                    NonReloadingClientFactory,
-                    WithClientBehaviour<ReloadingFactory>,
-                    ToReloadingFactory<ReloadingFactory> {}
 }
