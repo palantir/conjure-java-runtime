@@ -22,6 +22,7 @@ import com.google.common.base.Throwables;
 import com.google.common.io.BaseEncoding;
 import com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1PrivateKeyReader;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
@@ -330,7 +331,9 @@ final class KeyStores {
     }
 
     static List<Certificate> readX509Certificates(InputStream certificateIn) throws CertificateException {
-        return CertificateFactory.getInstance("X.509").generateCertificates(certificateIn).stream()
+        return CertificateFactory.getInstance("X.509")
+                .generateCertificates(new BufferedInputStream(certificateIn))
+                .stream()
                 .map(cert -> getCertFromCache((X509Certificate) cert))
                 .collect(Collectors.toList());
     }
