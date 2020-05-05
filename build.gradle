@@ -23,9 +23,11 @@ apply plugin: 'com.palantir.baseline'
 apply plugin: 'com.palantir.git-version'
 apply plugin: 'com.palantir.consistent-versions'
 
+version gitVersion()
+
 allprojects {
     apply plugin: 'com.palantir.java-format'
-    version gitVersion()
+    version rootProject.version
     group 'com.palantir.conjure.java.runtime'
 
     repositories {
