@@ -97,8 +97,10 @@ final class KeyStores {
         keyStore = createKeyStore();
 
         for (File currFile : getFilesForPath(path)) {
-            try (InputStream in = Files.newInputStream(currFile.toPath())) {
-                addCertificatesToKeystore(keyStore, currFile.getName(), readX509Certificates(in));
+            try {
+                byte[] fileBytes = Files.readAllBytes(currFile.toPath());
+                addCertificatesToKeystore(
+                        keyStore, currFile.getName(), readX509Certificates(new ByteArrayInputStream(fileBytes)));
             } catch (IOException e) {
                 throw new RuntimeException(
                         String.format("IOException encountered when opening '%s'", currFile.toPath()), e);

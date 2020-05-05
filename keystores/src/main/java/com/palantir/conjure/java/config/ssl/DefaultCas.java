@@ -19,8 +19,13 @@ package com.palantir.conjure.java.config.ssl;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
+import com.google.common.io.ByteStreams;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -51,8 +56,12 @@ final class DefaultCas {
     private static Map<String, X509Certificate> getTrustedCertificates() {
         ImmutableMap.Builder<String, X509Certificate> certificateMap = ImmutableMap.builder();
         try {
+            InputStream certificateResource = DefaultCas.class.getResourceAsStream(CA_CERTIFICATES_CRT);
+            ByteArrayOutputStream inMemoryCertificates = new ByteArrayOutputStream();
+            ByteStreams.copy(certificateResource, inMemoryCertificates);
             List<X509Certificate> caCertificates =
-                    KeyStores.readX509Certificates(DefaultCas.class.getResourceAsStream(CA_CERTIFICATES_CRT)).stream()
+                    KeyStores.readX509Certificates(new ByteArrayInputStream(inMemoryCertificates.toByteArray()))
+                            .stream()
                             .map(cert -> (X509Certificate) cert)
                             .collect(Collectors.toList());
             int index = 0;
@@ -71,7 +80,7 @@ final class DefaultCas {
                                 Hashing.sha256().hashBytes(cert.getEncoded()).toString()));
                 index++;
             }
-        } catch (CertificateException e) {
+        } catch (CertificateException | IOException e) {
             throw new SafeRuntimeException("Could not read file as an X.509 certificate", e);
         }
 
