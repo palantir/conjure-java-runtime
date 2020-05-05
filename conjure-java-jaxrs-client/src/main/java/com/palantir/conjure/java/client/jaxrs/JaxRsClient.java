@@ -54,7 +54,11 @@ public final class JaxRsClient {
      * Similar to {@link #create(Class, UserAgent, HostEventsSink, ClientConfiguration)}, but creates a mutable client
      * that updates its configuration transparently whenever the given {@link Refreshable refreshable}
      * {@link ClientConfiguration} changes.
+     *
+     * @deprecated Prefer com.palantir.refreshable:refreshable from https://github.com/palantir/refreshable as it has
+     * much better protection against memory leaks.
      */
+    @Deprecated
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
