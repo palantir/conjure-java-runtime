@@ -30,20 +30,38 @@ public final class ConjureClients {
     private ConjureClients() {}
 
     public interface ReloadingClientFactory {
-        <T> T get(Class<T> serviceClass, String serviceName);
+        /**
+         * Construct an instance of the {@code clientInterface} parameter which can be used to make network calls to
+         * the service identified by {@code serviceName} in the given {@link ServicesConfigBlock}.
+         *
+         * This client is expected to live-reload when the given {@link Refreshable} changes, so changes to URIs or
+         * other config should happen transparently.
+         *
+         * Implementations of this interface may or may not cache client instances internally.
+         */
+        <T> T get(Class<T> clientInterface, String serviceName);
     }
 
     public interface NonReloadingClientFactory {
-        <T> T getNonReloading(Class<T> clazz, ServiceConfiguration serviceConf);
+        /**
+         * Construct an instance of the given {@code clientInterface} which can be used to make network calls to the
+         * single conceptual upstream identified by {@code serviceConf}.
+         *
+         * Behaviour is undefined if {@code serviceConf} contains no URIs.
+         */
+        <T> T getNonReloading(Class<T> clientInterface, ServiceConfiguration serviceConf);
     }
 
+    /**
+     * Options which users may want to tune when building a client.
+     *
+     * Implementors of this interface are expected to return their own type as the type parameter {@link T}, so that
+     * calls to these methods can be chained. Intended to be immutable.
+     */
     @CheckReturnValue
-    public interface WithClientBehaviour<T> {
+    public interface WithClientOptions<T> {
 
-        T withTaggedMetrics(TaggedMetricRegistry metrics);
-
-        T withUserAgent(UserAgent agent);
-
+        /** How should a client choose which URI to send requests to. */
         T withNodeSelectionStrategy(NodeSelectionStrategy strategy);
 
         T withClientQoS(ClientConfiguration.ClientQoS value);
@@ -55,6 +73,10 @@ public final class ConjureClients {
         T withSecurityProvider(java.security.Provider securityProvider);
 
         T withMaxNumRetries(int maxNumRetries);
+
+        T withTaggedMetrics(TaggedMetricRegistry metrics);
+
+        T withUserAgent(UserAgent agent);
     }
 
     public interface ToReloadingFactory<U> {
