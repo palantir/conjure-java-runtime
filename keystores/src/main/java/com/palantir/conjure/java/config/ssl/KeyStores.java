@@ -98,10 +98,8 @@ final class KeyStores {
         keyStore = createKeyStore();
 
         for (File currFile : getFilesForPath(path)) {
-            try {
-                byte[] fileBytes = Files.readAllBytes(currFile.toPath());
-                addCertificatesToKeystore(
-                        keyStore, currFile.getName(), readX509Certificates(new ByteArrayInputStream(fileBytes)));
+            try (InputStream in = new BufferedInputStream(Files.newInputStream(currFile.toPath()))) {
+                addCertificatesToKeystore(keyStore, currFile.getName(), readX509Certificates(in));
             } catch (IOException e) {
                 throw new RuntimeException(
                         String.format("IOException encountered when opening '%s'", currFile.toPath()), e);
@@ -331,9 +329,7 @@ final class KeyStores {
     }
 
     static List<Certificate> readX509Certificates(InputStream certificateIn) throws CertificateException {
-        return CertificateFactory.getInstance("X.509")
-                .generateCertificates(new BufferedInputStream(certificateIn))
-                .stream()
+        return CertificateFactory.getInstance("X.509").generateCertificates(certificateIn).stream()
                 .map(cert -> getCertFromCache((X509Certificate) cert))
                 .collect(Collectors.toList());
     }

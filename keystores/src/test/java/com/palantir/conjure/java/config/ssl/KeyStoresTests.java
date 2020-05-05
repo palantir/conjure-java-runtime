@@ -34,6 +34,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateParsingException;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.InvalidKeySpecException;
@@ -147,9 +148,9 @@ public final class KeyStoresTests {
 
         assertThatThrownBy(() -> KeyStores.createTrustStoreFromCertificates(certFolder.toPath()))
                 .isInstanceOf(RuntimeException.class)
-                .hasCauseInstanceOf(IOException.class)
-                .hasMessageContaining(
-                        String.format("IOException encountered when opening '%s'", tempDirFile.getAbsolutePath()));
+                .hasCauseInstanceOf(CertificateException.class)
+                .hasMessageContaining(String.format(
+                        "Could not read file at \"%s\" as an X.509 certificate", tempDirFile.getAbsolutePath()));
     }
 
     @Test
