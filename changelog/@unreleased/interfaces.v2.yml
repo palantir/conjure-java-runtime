@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: |
+    The client-config jar now publishes some standard interfaces for implementing client factories. This should allow libraries to rely on these interfaces (and thereby take wc-provided clients) rather than embedding their own client creation.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1587
