@@ -42,7 +42,7 @@ final class DefaultCas {
      * This should be updated by running `./gradlew regenerateCAs` whenever the Java version we use to compile changes,
      * to ensure we pick up new CAs or revoke insecure ones.
      */
-    private static final String CA_CERTIFICATES_CRT = "/ca-certificates.crt";
+    private static final String CA_CERTIFICATES_CRT = "ca-certificates.crt";
 
     private static final Supplier<Map<String, X509Certificate>> TRUSTED_CERTIFICATES =
             Suppliers.memoize(DefaultCas::getTrustedCertificates);
