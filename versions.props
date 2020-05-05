@@ -29,6 +29,7 @@ org.mockito:mockito-core = 3.3.3
 org.slf4j:slf4j-api = 1.7.30
 io.leangen.geantyref:geantyref = 1.3.4
 io.undertow:undertow-core = 2.1.0.Final
+com.palantir.refreshable:refreshable = 1.0.0
 
 # dependency-upgrader:OFF
 

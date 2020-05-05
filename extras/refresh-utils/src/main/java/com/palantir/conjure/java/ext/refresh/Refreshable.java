@@ -21,7 +21,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 
-/** A layman's Observable: Stores a reference to a value until it is {@link #getAndClear retrieved} once. */
+/**
+ * A layman's Observable: Stores a reference to a value until it is {@link #getAndClear retrieved} once.
+ *
+ * @deprecated Prefer com.palantir.refreshable:refreshable from https://github.com/palantir/refreshable as it has
+ * much better protection against memory leaks.
+ */
+@Deprecated
 @ThreadSafe
 public final class Refreshable<T> {
 

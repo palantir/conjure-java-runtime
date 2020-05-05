@@ -28,7 +28,11 @@ import javax.annotation.Nonnull;
 /**
  * A delegating {@link InvocationHandler} that requests a new delegate whenever a given {@link Refreshable} changes.
  * Useful for constructing dynamic proxies based on live-reloadable configuration.
+ *
+ * @deprecated Prefer com.palantir.refreshable:refreshable from https://github.com/palantir/refreshable as it has
+ * much better protection against memory leaks.
  */
+@Deprecated
 public final class RefreshableProxyInvocationHandler<R, T> extends AbstractInvocationHandler {
 
     private final Refreshable<R> refreshable;
