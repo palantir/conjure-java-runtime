@@ -1,42 +1,9 @@
-versionOverrides: {}
 acceptedBreaks:
-  "4.49.0":
-    com.palantir.conjure.java.runtime:okhttp-clients: []
-    com.palantir.conjure.java.runtime:refresh-utils: []
-    com.palantir.conjure.java.runtime:jetty-http2-agent: []
-    com.palantir.conjure.java.runtime:keystores:
-    - code: "java.class.removed"
-      old: "class com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1Readers"
-      new: null
-      justification: "Replaced by internal implementation that doesn't require service\
-        \ loading"
-    - code: "java.class.removed"
-      old: "interface com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1Reader"
-      new: null
-      justification: "Replaced by internal implementation that doesn't require service\
-        \ loading"
-    com.palantir.conjure.java.runtime:conjure-java-jackson-serialization: []
-    com.palantir.conjure.java.runtime:conjure-scala-jaxrs-client: []
-    com.palantir.conjure.java.runtime:conjure-java-jaxrs-client: []
-    com.palantir.conjure.java.runtime:conjure-java-jersey-server: []
-    com.palantir.conjure.java.runtime:conjure-java-retrofit2-client: []
-    com.palantir.conjure.java.runtime:client-config: []
   "4.37.0":
     com.palantir.conjure.java.runtime:okhttp-clients:
     - code: "java.method.addedToInterface"
-      old: null
       new: "method com.codahale.metrics.Timer com.palantir.conjure.java.okhttp.HostMetrics::getQos()"
       justification: "ABI-safe change to rarely used class, low impact"
-  "4.58.0":
-    com.palantir.conjure.java.runtime:conjure-java-jersey-server:
-    - code: "java.class.visibilityReduced"
-      old: "class com.palantir.conjure.java.server.jersey.JerseyServerMetrics"
-      new: "class com.palantir.conjure.java.server.jersey.JerseyServerMetrics"
-      justification: "Reverting after discussion. Not used by any consumer."
-    - code: "java.method.visibilityReduced"
-      old: "method com.codahale.metrics.Meter com.palantir.conjure.java.server.jersey.JerseyServerMetrics::internalerrorAll(java.lang.String)"
-      new: "method com.codahale.metrics.Meter com.palantir.conjure.java.server.jersey.JerseyServerMetrics::internalerrorAll(java.lang.String)"
-      justification: "Reverting after discussion. Not used by any consumer."
   "4.45.0":
     com.palantir.conjure.java.runtime:conjure-java-jersey-server:
     - code: "java.method.parameterTypeChanged"
@@ -49,40 +16,50 @@ acceptedBreaks:
       new: "parameter void com.palantir.conjure.java.server.jersey.Java8OptionalParamConverterProvider::<init>(===org.glassfish.jersey.internal.inject.InjectionManager===)"
       justification: "Classes are implementation details - only public for injection\
         \ purposes"
+  "4.49.0":
+    com.palantir.conjure.java.runtime:keystores:
+    - code: "java.class.removed"
+      old: "class com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1Readers"
+      justification: "Replaced by internal implementation that doesn't require service\
+        \ loading"
+    - code: "java.class.removed"
+      old: "interface com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1Reader"
+      justification: "Replaced by internal implementation that doesn't require service\
+        \ loading"
+  "4.58.0":
+    com.palantir.conjure.java.runtime:conjure-java-jersey-server:
+    - code: "java.class.visibilityReduced"
+      old: "class com.palantir.conjure.java.server.jersey.JerseyServerMetrics"
+      new: "class com.palantir.conjure.java.server.jersey.JerseyServerMetrics"
+      justification: "Reverting after discussion. Not used by any consumer."
+    - code: "java.method.visibilityReduced"
+      old: "method com.codahale.metrics.Meter com.palantir.conjure.java.server.jersey.JerseyServerMetrics::internalerrorAll(java.lang.String)"
+      new: "method com.codahale.metrics.Meter com.palantir.conjure.java.server.jersey.JerseyServerMetrics::internalerrorAll(java.lang.String)"
+      justification: "Reverting after discussion. Not used by any consumer."
   "4.64.0":
-    com.palantir.conjure.java.runtime:okhttp-clients: []
-    com.palantir.conjure.java.runtime:refresh-utils: []
-    com.palantir.conjure.java.runtime:jetty-http2-agent: []
-    com.palantir.conjure.java.runtime:keystores: []
-    com.palantir.conjure.java.runtime:conjure-java-jackson-serialization: []
-    com.palantir.conjure.java.runtime:conjure-scala-jaxrs-client: []
-    com.palantir.conjure.java.runtime:conjure-java-jaxrs-client: []
-    com.palantir.conjure.java.runtime:conjure-java-jersey-server: []
-    com.palantir.conjure.java.runtime:conjure-java-retrofit2-client: []
     com.palantir.conjure.java.runtime:client-config:
     - code: "java.method.addedToInterface"
-      old: null
       new: "method java.util.Optional<java.lang.Boolean> com.palantir.conjure.java.client.config.ClientConfiguration::enableHttp2()"
       justification: "immutables interfaces are not for extension"
   "4.66.0":
     com.palantir.conjure.java.runtime:client-config:
     - code: "java.method.addedToInterface"
-      old: null
       new: "method java.util.Optional<com.palantir.conjure.java.api.config.service.UserAgent>\
         \ com.palantir.conjure.java.client.config.ClientConfiguration::userAgent()"
       justification: "Added optional field to an immutables interface"
-    com.palantir.conjure.java.runtime:conjure-java-jackson-serialization: []
-    com.palantir.conjure.java.runtime:conjure-java-jaxrs-client: []
-    com.palantir.conjure.java.runtime:conjure-java-jersey-server: []
-    com.palantir.conjure.java.runtime:conjure-java-retrofit2-client: []
-    com.palantir.conjure.java.runtime:conjure-scala-jaxrs-client: []
-    com.palantir.conjure.java.runtime:jetty-http2-agent: []
-    com.palantir.conjure.java.runtime:keystores: []
-    com.palantir.conjure.java.runtime:okhttp-clients: []
-    com.palantir.conjure.java.runtime:refresh-utils: []
   "5.8.0":
     com.palantir.conjure.java.runtime:client-config:
     - code: "java.method.addedToInterface"
       new: "method java.util.Optional<com.palantir.conjure.java.client.config.HostEventsSink>\
         \ com.palantir.conjure.java.client.config.ClientConfiguration::hostEventsSink()"
       justification: "Adding optional field to immutable object won't break people"
+  "5.9.0":
+    com.palantir.conjure.java.runtime:client-config:
+    - code: "java.method.addedToInterface"
+      new: "method T com.palantir.conjure.java.clients.ConjureClients.WithClientOptions<T>::withFailedUrlCooldown(java.time.Duration)"
+      justification: "Compilation break will force implementers to address these methods.\
+        \ Revapi confirms this is NOT an ABI break"
+    - code: "java.method.addedToInterface"
+      new: "method T com.palantir.conjure.java.clients.ConjureClients.WithClientOptions<T>::withHostEventsSink(com.palantir.conjure.java.client.config.HostEventsSink)"
+      justification: "Compilation break will force implementers to address these methods.\
+        \ Revapi confirms this is NOT an ABI break"
