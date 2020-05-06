@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.Response;
+import com.palantir.conjure.java.client.config.HostEventsSink;
 
 /** Records metrics about the response codes of http requests. */
 final class InstrumentedInterceptor implements Interceptor {

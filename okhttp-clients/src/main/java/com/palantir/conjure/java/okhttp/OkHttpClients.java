@@ -37,6 +37,7 @@ import com.palantir.tracing.Tracers;
 import com.palantir.tritium.metrics.MetricRegistries;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import java.time.Clock;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -167,7 +168,7 @@ public final class OkHttpClients {
         ClientConfiguration config1 = ClientConfiguration.builder()
                 .from(config)
                 .userAgent(userAgent)
-                .hostEventsSink(hostEventsSink)
+                .hostEventsSink(Optional.ofNullable(hostEventsSink))
                 .build();
 
         return createInternal(
@@ -196,9 +197,7 @@ public final class OkHttpClients {
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUrisAndBackoff(
-            ClientConfiguration config,
-            Class<?> serviceClass,
-            Supplier<BackoffStrategy> backoffStrategy) {
+            ClientConfiguration config, Class<?> serviceClass, Supplier<BackoffStrategy> backoffStrategy) {
         return createInternal(
                 new OkHttpClient.Builder(), config, serviceClass, !RANDOMIZE, !RESHUFFLE, backoffStrategy);
     }

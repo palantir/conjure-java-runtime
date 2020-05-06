@@ -50,7 +50,10 @@ public final class Retrofit2ClientBuilder {
 
     public <T> T build(Class<T> serviceClass, UserAgent userAgent) {
         okhttp3.OkHttpClient client = OkHttpClients.create(
-                config, userAgent, config.hostEventsSink().orElse(NoOpHostEventsSink.INSTANCE), serviceClass);
+                config,
+                userAgent,
+                config.hostEventsSink().map(HostEventsSink::from).orElse(NoOpHostEventsSink.INSTANCE),
+                serviceClass);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
