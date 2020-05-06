@@ -23,6 +23,7 @@ import com.palantir.conjure.java.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.api.config.service.PartialServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.UserAgent;
+import com.palantir.conjure.java.okhttp.HostEventsSink;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -121,6 +122,9 @@ public interface ClientConfiguration {
 
     /** An identifier to distinguish this caller in the request logs of upstream services. */
     Optional<UserAgent> userAgent();
+
+    /** Per-host failures are recorded using this interface. */
+    Optional<HostEventsSink> hostEventsSink();
 
     @Value.Check
     default void check() {

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.okhttp.HostEventsSink;
+import com.palantir.conjure.java.okhttp.NoOpHostEventsSink;
 import com.palantir.conjure.java.okhttp.OkHttpClients;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;
@@ -30,9 +31,7 @@ public final class Retrofit2ClientBuilder {
     private static final ObjectMapper CBOR_OBJECT_MAPPER = ObjectMappers.newCborClientObjectMapper();
     private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
 
-    private final ClientConfiguration config;
-
-    private HostEventsSink hostEventsSink;
+    private ClientConfiguration config;
 
     public Retrofit2ClientBuilder(ClientConfiguration config) {
         Preconditions.checkArgument(!config.uris().isEmpty(), "Cannot construct retrofit client with empty URI list");
@@ -42,13 +41,16 @@ public final class Retrofit2ClientBuilder {
     /** Set the host metrics registry to use when constructing the OkHttp client. */
     public Retrofit2ClientBuilder hostEventsSink(HostEventsSink newHostEventsSink) {
         Preconditions.checkNotNull(newHostEventsSink, "hostEventsSink can't be null");
-        hostEventsSink = newHostEventsSink;
+        config = ClientConfiguration.builder()
+                .from(config)
+                .hostEventsSink(newHostEventsSink)
+                .build();
         return this;
     }
 
     public <T> T build(Class<T> serviceClass, UserAgent userAgent) {
-        Preconditions.checkNotNull(hostEventsSink, "hostEventsSink must be set");
-        okhttp3.OkHttpClient client = OkHttpClients.create(config, userAgent, hostEventsSink, serviceClass);
+        okhttp3.OkHttpClient client = OkHttpClients.create(
+                config, userAgent, config.hostEventsSink().orElse(NoOpHostEventsSink.INSTANCE), serviceClass);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
