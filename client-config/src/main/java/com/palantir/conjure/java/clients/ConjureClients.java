@@ -25,6 +25,7 @@ import com.palantir.conjure.java.client.config.HostEventsSink;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.refreshable.Refreshable;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.time.Duration;
 
 /** These interfaces are for implementing clientfactories. They are designed to be immutable. */
 public final class ConjureClients {
@@ -64,6 +65,12 @@ public final class ConjureClients {
 
         /** How should a client choose which URI to send requests to. */
         T withNodeSelectionStrategy(NodeSelectionStrategy strategy);
+
+        /**
+         * The amount of time a URL marked as failed should be avoided for subsequent calls. Implementations may
+         * ignore this value.
+         */
+        T withFailedUrlCooldown(Duration duration);
 
         T withClientQoS(ClientConfiguration.ClientQoS value);
 
