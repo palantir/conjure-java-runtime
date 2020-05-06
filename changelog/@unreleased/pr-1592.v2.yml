@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: ConjureClients has a withHostEventsSink method to allow modifying the
+    ClientConfiguration HostEventsSink
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1592

@@ -21,9 +21,11 @@ import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.ServicesConfigBlock;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.config.HostEventsSink;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.refreshable.Refreshable;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.time.Duration;
 
 /** These interfaces are for implementing clientfactories. They are designed to be immutable. */
 public final class ConjureClients {
@@ -64,6 +66,12 @@ public final class ConjureClients {
         /** How should a client choose which URI to send requests to. */
         T withNodeSelectionStrategy(NodeSelectionStrategy strategy);
 
+        /**
+         * The amount of time a URL marked as failed should be avoided for subsequent calls. Implementations may
+         * ignore this value.
+         */
+        T withFailedUrlCooldown(Duration duration);
+
         T withClientQoS(ClientConfiguration.ClientQoS value);
 
         T withServerQoS(ClientConfiguration.ServerQoS value);
@@ -77,6 +85,9 @@ public final class ConjureClients {
         T withTaggedMetrics(TaggedMetricRegistry metrics);
 
         T withUserAgent(UserAgent agent);
+
+        /** Per-host success/failure information will be recorded to this sink. */
+        T withHostEventsSink(HostEventsSink hostEventsSink);
     }
 
     public interface ToReloadingFactory<U> {
