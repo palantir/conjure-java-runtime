@@ -197,7 +197,6 @@ public final class OkHttpClients {
     @VisibleForTesting
     static RemotingOkHttpClient withStableUrisAndBackoff(
             ClientConfiguration config,
-            HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             Supplier<BackoffStrategy> backoffStrategy) {
         return createInternal(

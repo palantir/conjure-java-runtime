@@ -70,7 +70,6 @@ public class OkHttpClientsRealServerTest extends TestBase {
                             .maxNumRetries(10)
                             .backoffSlotSize(Duration.ofSeconds(3))
                             .build(),
-                    hostEventsSink,
                     OkHttpClientsTest.class,
                     () -> new ReproducibleExponentialBackoff(10, Duration.ofSeconds(3)));
             Future<?> future = executorService.submit((Callable<Void>) () -> {
@@ -122,7 +121,6 @@ public class OkHttpClientsRealServerTest extends TestBase {
                             .maxNumRetries(10)
                             .backoffSlotSize(Duration.ofSeconds(2))
                             .build(),
-                    hostEventsSink,
                     OkHttpClientsTest.class,
                     () -> new ReproducibleExponentialBackoff(10, Duration.ofSeconds(2)));
             Future<?> future = executorService.submit((Callable<Void>) () -> {
