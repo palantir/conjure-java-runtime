@@ -21,12 +21,17 @@ package com.palantir.conjure.java.okhttp;
  *
  * <p>We provide a {@link HostMetricsRegistry} implementation of this that turns these events into {@link HostMetrics}
  * for each remote host.
+ * @deprecated prefer super interface
  */
-public interface HostEventsSink {
+@Deprecated
+public interface HostEventsSink extends com.palantir.conjure.java.client.config.HostEventsSink {
+    @Override
     void record(String serviceName, String hostname, int port, int statusCode, long micros);
 
+    @Override
     void recordIoException(String serviceName, String hostname, int port);
 
+    @Override
     default HostEventCallback callback(String serviceName, String hostname, int port) {
         return new HostEventCallback() {
             @Override
@@ -41,10 +46,56 @@ public interface HostEventsSink {
         };
     }
 
-    interface HostEventCallback {
+    /**
+     * .
+     * @deprecated prefer super interface
+     */
+    @Deprecated
+    interface HostEventCallback extends com.palantir.conjure.java.client.config.HostEventsSink.HostEventCallback {
 
+        @Override
         void record(int statusCode, long micros);
 
+        @Override
         void recordIoException();
+
+        static HostEventCallback from(com.palantir.conjure.java.client.config.HostEventsSink.HostEventCallback other) {
+            if (other instanceof HostEventCallback) {
+                return (HostEventCallback) other;
+            }
+            return new HostEventCallback() {
+                @Override
+                public void record(int statusCode, long micros) {
+                    other.record(statusCode, micros);
+                }
+
+                @Override
+                public void recordIoException() {
+                    other.recordIoException();
+                }
+            };
+        }
+    }
+
+    static HostEventsSink from(com.palantir.conjure.java.client.config.HostEventsSink other) {
+        if (other instanceof HostEventsSink) {
+            return (HostEventsSink) other;
+        }
+        return new HostEventsSink() {
+            @Override
+            public void record(String serviceName, String hostname, int port, int statusCode, long micros) {
+                other.record(serviceName, hostname, port, statusCode, micros);
+            }
+
+            @Override
+            public void recordIoException(String serviceName, String hostname, int port) {
+                other.recordIoException(serviceName, hostname, port);
+            }
+
+            @Override
+            public HostEventCallback callback(String serviceName, String hostname, int port) {
+                return HostEventCallback.from(other.callback(serviceName, hostname, port));
+            }
+        };
     }
 }

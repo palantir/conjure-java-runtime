@@ -122,6 +122,9 @@ public interface ClientConfiguration {
     /** An identifier to distinguish this caller in the request logs of upstream services. */
     Optional<UserAgent> userAgent();
 
+    /** Per-host failures are recorded using this interface. */
+    Optional<HostEventsSink> hostEventsSink();
+
     @Value.Check
     default void check() {
         if (meshProxy().isPresent()) {

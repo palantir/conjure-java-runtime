@@ -37,6 +37,7 @@ import com.palantir.tracing.Tracers;
 import com.palantir.tritium.metrics.MetricRegistries;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import java.time.Clock;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -163,13 +164,16 @@ public final class OkHttpClients {
             Class<?> serviceClass) {
         boolean reshuffle =
                 !config.nodeSelectionStrategy().equals(NodeSelectionStrategy.PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE);
-        ClientConfiguration config1 =
-                ClientConfiguration.builder().from(config).userAgent(userAgent).build();
+
+        ClientConfiguration config1 = ClientConfiguration.builder()
+                .from(config)
+                .userAgent(userAgent)
+                .hostEventsSink(Optional.ofNullable(hostEventsSink))
+                .build();
 
         return createInternal(
                 client,
                 config1,
-                hostEventsSink,
                 serviceClass,
                 RANDOMIZE,
                 reshuffle,
@@ -181,8 +185,10 @@ public final class OkHttpClients {
             ClientConfiguration config, HostEventsSink hostEventsSink, Class<?> serviceClass) {
         return createInternal(
                 new OkHttpClient.Builder(),
-                config,
-                hostEventsSink,
+                ClientConfiguration.builder()
+                        .from(config)
+                        .hostEventsSink(hostEventsSink)
+                        .build(),
                 serviceClass,
                 !RANDOMIZE,
                 !RESHUFFLE,
@@ -191,24 +197,14 @@ public final class OkHttpClients {
 
     @VisibleForTesting
     static RemotingOkHttpClient withStableUrisAndBackoff(
-            ClientConfiguration config,
-            HostEventsSink hostEventsSink,
-            Class<?> serviceClass,
-            Supplier<BackoffStrategy> backoffStrategy) {
+            ClientConfiguration config, Class<?> serviceClass, Supplier<BackoffStrategy> backoffStrategy) {
         return createInternal(
-                new OkHttpClient.Builder(),
-                config,
-                hostEventsSink,
-                serviceClass,
-                !RANDOMIZE,
-                !RESHUFFLE,
-                backoffStrategy);
+                new OkHttpClient.Builder(), config, serviceClass, !RANDOMIZE, !RESHUFFLE, backoffStrategy);
     }
 
     private static RemotingOkHttpClient createInternal(
             OkHttpClient.Builder client,
             ClientConfiguration config,
-            HostEventsSink hostEventsSink,
             Class<?> serviceClass,
             boolean randomizeUrlOrder,
             boolean reshuffle,
@@ -256,7 +252,8 @@ public final class OkHttpClients {
         }
         ClientMetrics clientMetrics = ClientMetrics.of(config.taggedMetricRegistry());
         client.addInterceptor(DeprecationWarningInterceptor.create(clientMetrics, serviceClass));
-        client.addInterceptor(InstrumentedInterceptor.create(clientMetrics, hostEventsSink, serviceClass));
+        client.addInterceptor(InstrumentedInterceptor.create(
+                clientMetrics, config.hostEventsSink().orElse(NoOpHostEventsSink.INSTANCE), serviceClass));
         client.addInterceptor(OkhttpTraceInterceptor.INSTANCE);
         UserAgent agent =
                 config.userAgent().orElseThrow(() -> new SafeIllegalArgumentException("UserAgent is required"));

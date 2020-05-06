@@ -19,6 +19,7 @@ package com.palantir.conjure.java.okhttp;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 import com.google.common.base.Stopwatch;
+import com.palantir.conjure.java.client.config.HostEventsSink;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import okhttp3.HttpUrl;
