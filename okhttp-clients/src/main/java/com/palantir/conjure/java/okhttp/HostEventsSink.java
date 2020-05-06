@@ -47,6 +47,7 @@ public interface HostEventsSink extends com.palantir.conjure.java.client.config.
     }
 
     /**
+     * .
      * @deprecated prefer super interface
      */
     @Deprecated
