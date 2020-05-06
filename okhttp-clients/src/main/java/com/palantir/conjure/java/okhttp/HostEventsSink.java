@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2020 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package com.palantir.conjure.java.okhttp;
 
 /**
- * A listener for responses / exceptions coming from remote hosts.
+ * A listener for responses / exceptions coming from remote hosts when using clients created from {@link OkHttpClients}.
  *
- * <p>We provide a {@code HostMetricsRegistry} implementation of this that turns these events into {@code HostMetrics}
+ * <p>We provide a {@link HostMetricsRegistry} implementation of this that turns these events into {@link HostMetrics}
  * for each remote host.
  * @deprecated prefer super interface
  */
