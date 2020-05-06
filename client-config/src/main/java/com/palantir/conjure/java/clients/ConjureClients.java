@@ -21,6 +21,7 @@ import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.ServicesConfigBlock;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.config.HostEventsSink;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.refreshable.Refreshable;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -77,6 +78,9 @@ public final class ConjureClients {
         T withTaggedMetrics(TaggedMetricRegistry metrics);
 
         T withUserAgent(UserAgent agent);
+
+        /** Per-host success/failure information will be recorded to this sink. */
+        T withHostEventsSink(HostEventsSink hostEventsSink);
     }
 
     public interface ToReloadingFactory<U> {
