@@ -39,8 +39,6 @@ public class ConjureClientsTest {
             .put("taggedMetricRegistry", "Already handled by the withTaggedMetrics() method")
             .put("meshProxy", "ClientConfigurations.of sets this up automatically")
             .put("proxyCredentials", "ClientConfigurations.of sets this up automatically")
-            .put("sslSocketFactory", "Not expecting users to override these")
-            .put("trustManager", "Not expecting users to override these")
             .build();
 
     @Test

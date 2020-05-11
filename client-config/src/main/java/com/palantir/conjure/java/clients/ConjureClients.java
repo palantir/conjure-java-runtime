@@ -26,6 +26,8 @@ import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.refreshable.Refreshable;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.time.Duration;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 
 /** These interfaces are for implementing clientfactories. They are designed to be immutable. */
 public final class ConjureClients {
@@ -78,8 +80,6 @@ public final class ConjureClients {
 
         T withRetryOnTimeout(ClientConfiguration.RetryOnTimeout value);
 
-        T withSecurityProvider(java.security.Provider securityProvider);
-
         T withMaxNumRetries(int maxNumRetries);
 
         T withTaggedMetrics(TaggedMetricRegistry metrics);
@@ -88,6 +88,14 @@ public final class ConjureClients {
 
         /** Per-host success/failure information will be recorded to this sink. */
         T withHostEventsSink(HostEventsSink hostEventsSink);
+
+        /** The SSL configuration needed to interact with the service. */
+        T withSslSocketFactory(SSLSocketFactory sslSocketFactory);
+
+        /** The SSL configuration needed to interact with the service. */
+        T withTrustManager(X509TrustManager trustManager);
+
+        T withSecurityProvider(java.security.Provider securityProvider);
     }
 
     public interface ToReloadingFactory<U> {
