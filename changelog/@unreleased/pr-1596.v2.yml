@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: All jaxrs clients use dialogue transport
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1596
