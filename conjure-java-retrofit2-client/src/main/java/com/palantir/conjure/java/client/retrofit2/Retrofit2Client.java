@@ -22,6 +22,8 @@ import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
 import com.palantir.conjure.java.okhttp.HostEventsSink;
+import java.util.Optional;
+import retrofit2.Retrofit;
 
 /** Static factory methods for producing creating Retrofit2 HTTP proxies. */
 public final class Retrofit2Client {
@@ -34,7 +36,9 @@ public final class Retrofit2Client {
      */
     public static <T> T create(
             Class<T> serviceClass, UserAgent userAgent, HostEventsSink hostEventsSink, ClientConfiguration config) {
-        return new Retrofit2ClientBuilder(config).hostEventsSink(hostEventsSink).build(serviceClass, userAgent);
+        return new Retrofit2ClientBuilder(config)
+                .hostEventsSink(hostEventsSink)
+                .build(serviceClass, augmentUserAgent(userAgent));
     }
 
     /**
@@ -56,5 +60,11 @@ public final class Retrofit2Client {
                 RefreshableProxyInvocationHandler.create(
                         config,
                         serviceConfiguration -> create(serviceClass, userAgent, hostEventsSink, serviceConfiguration)));
+    }
+
+    private static UserAgent augmentUserAgent(UserAgent userAgent) {
+        String retrofitVersion = Retrofit.class.getPackage().getImplementationVersion();
+        return userAgent.addAgent(UserAgent.Agent.of(
+                "retrofit", Optional.ofNullable(retrofitVersion).orElse("0.0.0")));
     }
 }
