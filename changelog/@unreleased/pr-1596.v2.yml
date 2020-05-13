@@ -1,5 +1,9 @@
-type: improvement
-improvement:
-  description: All jaxrs clients use dialogue transport
+type: break
+break:
+  description: All jaxrs clients use dialogue transport. This can result in subtly
+    different behavior, but is not expected to be noticeable in the vast majority
+    of cases. Transport failures will manifest as DialogueException instead of FeignException
+    in most cases, some tests may need to be updated. Concurrency limiters and node
+    selection are handled entirely by the dialogue implementation.
   links:
   - https://github.com/palantir/conjure-java-runtime/pull/1596
