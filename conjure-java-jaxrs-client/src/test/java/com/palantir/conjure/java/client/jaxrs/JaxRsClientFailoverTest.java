@@ -17,14 +17,13 @@
 package com.palantir.conjure.java.client.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import feign.RetryableException;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,12 +108,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
         failoverTestCase.server1.shutdown();
         failoverTestCase.server2.shutdown();
 
-        try {
-            proxy.string();
-            fail("fail");
-        } catch (RetryableException e) {
-            assertThat(e.getMessage()).startsWith("Failed to complete the request due to an IOException");
-        }
+        assertThatThrownBy(proxy::string).hasRootCauseInstanceOf(ConnectException.class);
 
         // Subsequent call (with the same proxy instance) succeeds.
         MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
@@ -211,7 +205,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
         server1.shutdown();
 
         // Fail the request, ensuring that the URL is added to the cache
-        assertThatExceptionOfType(RetryableException.class).isThrownBy(() -> anotherProxy.string());
+        assertThatThrownBy(anotherProxy::string).hasRootCauseInstanceOf(ConnectException.class);
 
         // Allow the cache to clear
         Thread.sleep(2 * CACHE_DURATION);
@@ -223,22 +217,6 @@ public final class JaxRsClientFailoverTest extends TestBase {
         anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
         assertThat(anotherProxy.string()).isEqualTo("foo");
         anotherServer1.shutdown();
-    }
-
-    @Test
-    public void testPerformsRoundRobin() throws Exception {
-        FailoverTestCase failoverTestCase = new FailoverTestCase(
-                new MockWebServer(), new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.ROUND_ROBIN);
-
-        TestService proxy = failoverTestCase.getProxy();
-        failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
-        failoverTestCase.server2.enqueue(new MockResponse().setBody("\"bar\""));
-
-        proxy.string();
-        proxy.string();
-
-        assertThat(failoverTestCase.server1.getRequestCount()).isEqualTo(1);
-        assertThat(failoverTestCase.server2.getRequestCount()).isEqualTo(1);
     }
 
     private static class FailoverTestCase {

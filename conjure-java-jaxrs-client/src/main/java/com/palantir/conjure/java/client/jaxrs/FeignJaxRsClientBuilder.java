@@ -22,8 +22,8 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 
 public final class FeignJaxRsClientBuilder extends AbstractFeignJaxRsClientBuilder {
 
-    private static final ObjectMapper JSON_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
-    private static final ObjectMapper CBOR_OBJECT_MAPPER = ObjectMappers.newCborClientObjectMapper();
+    static final ObjectMapper JSON_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
+    static final ObjectMapper CBOR_OBJECT_MAPPER = ObjectMappers.newCborClientObjectMapper();
 
     FeignJaxRsClientBuilder(ClientConfiguration config) {
         super(config);

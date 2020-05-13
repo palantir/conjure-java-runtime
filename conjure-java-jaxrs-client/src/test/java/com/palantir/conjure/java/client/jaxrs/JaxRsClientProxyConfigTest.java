@@ -68,7 +68,9 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
 
     @Test
     public void testAuthenticatedProxy() throws Exception {
-        proxyServer.enqueue(new MockResponse().setResponseCode(407)); // indicates authenticated proxy
+        proxyServer.enqueue(new MockResponse()
+                .addHeader("Proxy-Authenticate", "Basic realm=test")
+                .setResponseCode(407)); // indicates authenticated proxy
         proxyServer.enqueue(new MockResponse().setBody("\"proxyServer\""));
 
         ClientConfiguration proxiedConfig = ClientConfiguration.builder()

@@ -83,7 +83,9 @@ public final class SlashEncodingContractTest extends TestBase {
     public void testPathAndQueryParamsAreEncoded() throws InterruptedException {
         inMemoryProxy.encoded(PATH_PARAM, QUERY_PARAM);
         RecordedRequest request = server.takeRequest();
-        assertThat(request.getPath()).isEqualTo("/path/slash%2Fpath?query=slash%2Fquery");
+        // See https://www.ietf.org/rfc/rfc3986.txt section 3.4: Query
+        // The characters slash ("/") and question mark ("?") may represent data within the query component.
+        assertThat(request.getPath()).isEqualTo("/path/slash%2Fpath?query=slash/query");
     }
 
     @Path("/")

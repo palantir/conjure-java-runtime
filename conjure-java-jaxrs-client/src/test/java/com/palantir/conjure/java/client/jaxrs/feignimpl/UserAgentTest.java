@@ -18,13 +18,14 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.base.MoreObjects;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.client.jaxrs.TestService;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import com.palantir.conjure.java.okhttp.OkHttpClients;
+import com.palantir.dialogue.Channel;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
@@ -79,10 +80,10 @@ public final class UserAgentTest extends TestBase {
         service.string();
 
         RecordedRequest request = server.takeRequest();
-        String conjureVersion = OkHttpClients.class.getPackage().getImplementationVersion();
+
+        String dialogueVersion = Channel.class.getPackage().getImplementationVersion();
         UserAgent expected = AGENT.addAgent(UserAgent.Agent.of("TestService", "0.0.0"))
-                .addAgent(UserAgent.Agent.of(
-                        UserAgents.CONJURE_AGENT_NAME, conjureVersion != null ? conjureVersion : "0.0.0"));
+                .addAgent(UserAgent.Agent.of("dialogue", MoreObjects.firstNonNull(dialogueVersion, "0.0.0")));
         assertThat(request.getHeader("User-Agent")).isEqualTo(UserAgents.format(expected));
     }
 }
