@@ -1,7 +1,7 @@
 ch.qos.logback:logback-classic = 1.2.3
 # catch-all jackson version
 com.fasterxml.jackson.*:jackson-* = 2.11.0
-com.github.ben-manes.caffeine:caffeine = 2.8.3
+com.github.ben-manes.caffeine:caffeine = 2.8.4
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 23.6.1-jre
 com.jcraft:jzlib = 1.1.3
@@ -11,7 +11,7 @@ com.palantir.conjure.java:conjure-java = 5.17.0
 com.palantir.conjure.java:conjure-lib = 5.17.0
 com.palantir.conjure.java.api:* = 2.13.0
 com.palantir.conjure.verification:* = 0.18.5
-com.palantir.dialogue:* = 1.50.0
+com.palantir.dialogue:* = 1.50.1
 com.palantir.safe-logging:* = 1.13.0
 com.palantir.tracing:* = 4.4.0
 com.palantir.tritium:* = 0.16.10
