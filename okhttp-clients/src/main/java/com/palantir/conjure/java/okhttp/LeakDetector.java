@@ -37,7 +37,7 @@ final class LeakDetector<T> {
     private final List<LeakDetectingReference<T>> references = new ArrayList<>();
 
     LeakDetector(Class<T> resourceType) {
-        this(resourceType, unused -> {});
+        this(resourceType, _unused -> {});
     }
 
     @VisibleForTesting

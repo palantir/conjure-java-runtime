@@ -441,7 +441,7 @@ final class KeyStores {
 
     private static X509Certificate getCertFromCache(X509Certificate certificate) {
         try {
-            return certCache.get(new EqualByteArray(certificate.getEncoded()), input -> certificate);
+            return certCache.get(new EqualByteArray(certificate.getEncoded()), _input -> certificate);
         } catch (CertificateEncodingException e) {
             throw new SafeRuntimeException("Unable to get certificate bytes", e);
         }

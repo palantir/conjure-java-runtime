@@ -106,7 +106,7 @@ public final class FlowControlTest {
             Meter rate, Histogram avgRetries, int numThreads, int rateLimit, Duration delay) {
         RateLimiter rateLimiter = RateLimiter.create(rateLimit);
         return IntStream.range(0, numThreads)
-                .mapToObj(unused -> new Worker(
+                .mapToObj(_unused -> new Worker(
                         () -> new ExponentialBackoff(4, Duration.ofMillis(250)),
                         limiters,
                         delay,
