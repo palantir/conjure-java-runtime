@@ -86,8 +86,12 @@ final class DialogueFeignClient implements feign.Client {
 
     @Override
     public feign.Response execute(Request request, Request.Options _options) throws IOException {
-        com.palantir.dialogue.Request.Builder builder =
-                com.palantir.dialogue.Request.builder().body(requestBody(request));
+        com.palantir.dialogue.Request.Builder builder = com.palantir.dialogue.Request.builder();
+        Optional<RequestBody> body = requestBody(request);
+        if (body.isPresent()) {
+            builder.body(body);
+            builder.putHeaderParams(HttpHeaders.CONTENT_LENGTH, Integer.toString(request.body().length));
+        }
         request.headers().forEach((headerName, values) -> {
             if (includeRequestHeader(headerName)) {
                 builder.putAllHeaderParams(headerName, values);
