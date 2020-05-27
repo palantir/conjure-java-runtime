@@ -114,7 +114,8 @@ public final class JaxRsClientDialogueEndpointTest {
         assertThat(request.body().get().contentType()).isEqualTo("text/plain");
         assertThat(request.headerParams().asMap())
                 .containsExactly(
-                        new AbstractMap.SimpleImmutableEntry<>("Accept", ImmutableList.of("application/json")));
+                        new AbstractMap.SimpleImmutableEntry<>("Accept", ImmutableList.of("application/json")),
+                        new AbstractMap.SimpleImmutableEntry<>("Content-Length", ImmutableList.of("13")));
     }
 
     @Test
@@ -134,7 +135,9 @@ public final class JaxRsClientDialogueEndpointTest {
         Request request = requestCaptor.getValue();
         assertThat(request.body()).isPresent();
         assertThat(request.body().get().contentType()).isEqualTo("application/json");
-        assertThat(request.headerParams().asMap()).isEmpty();
+
+        assertThat(request.headerParams().asMap())
+                .containsExactly(new AbstractMap.SimpleImmutableEntry<>("Content-Length", ImmutableList.of("15")));
     }
 
     @Test

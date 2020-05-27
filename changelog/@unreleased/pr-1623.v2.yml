@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: The dialogue feign shim uses content-length requests, not chunked
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1623
