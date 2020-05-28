@@ -69,7 +69,7 @@ public final class Java8OptionalParamConverterProvider implements ParamConverter
                     return new ParamConverter<T>() {
                         @Override
                         public T fromString(final String value) {
-                            return rawType.cast(Optional.ofNullable(value).map(_s -> converter.fromString(value)));
+                            return rawType.cast(Optional.ofNullable(value).map(converter::fromString));
                         }
 
                         @Override

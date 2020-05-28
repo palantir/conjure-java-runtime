@@ -69,7 +69,7 @@ public final class GuavaOptionalParamConverterProvider implements ParamConverter
                         @Override
                         public T fromString(final String value) {
                             return rawType.cast(com.google.common.base.Optional.fromNullable(value)
-                                    .transform(_s -> converter.fromString(value)));
+                                    .transform(converter::fromString));
                         }
 
                         @Override
