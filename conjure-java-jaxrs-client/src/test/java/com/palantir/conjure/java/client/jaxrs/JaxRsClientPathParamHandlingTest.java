@@ -18,15 +18,7 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.palantir.conjure.java.client.config.ClientConfiguration;
-import com.palantir.conjure.java.dialogue.serde.DefaultConjureRuntime;
 import com.palantir.conjure.java.okhttp.NoOpHostEventsSink;
-import com.palantir.dialogue.Channel;
-import com.palantir.dialogue.hc4.ApacheHttpClientChannels;
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
-import java.util.Arrays;
-import java.util.Collection;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -36,36 +28,8 @@ import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
-@RunWith(Parameterized.class)
 public final class JaxRsClientPathParamHandlingTest extends TestBase {
-
-    @Parameterized.Parameters(name = "Client: {0}")
-    public static Collection<Object[]> clients() {
-        return Arrays.asList(new Object[][] {{Client.CJR}, {Client.DIALOGUE}});
-    }
-
-    public enum Client {
-        CJR,
-        DIALOGUE;
-
-        <T> T create(Class<T> service, ClientConfiguration clientConfiguration) {
-            switch (this) {
-                case CJR:
-                    return JaxRsClient.create(service, AGENT, NoOpHostEventsSink.INSTANCE, clientConfiguration);
-                case DIALOGUE:
-                    Channel channel = ApacheHttpClientChannels.create(clientConfiguration);
-                    return JaxRsClient.create(
-                            service, channel, DefaultConjureRuntime.builder().build());
-            }
-            throw new SafeIllegalStateException("Unknown client", SafeArg.of("client", this));
-        }
-    }
-
-    @Parameterized.Parameter
-    public Client clientFactory;
 
     @Rule
     public final MockWebServer server = new MockWebServer();
@@ -74,7 +38,11 @@ public final class JaxRsClientPathParamHandlingTest extends TestBase {
 
     @Before
     public void before() {
-        client = clientFactory.create(Service.class, createTestConfig("http://localhost:" + server.getPort()));
+        client = JaxRsClient.create(
+                Service.class,
+                AGENT,
+                NoOpHostEventsSink.INSTANCE,
+                createTestConfig("http://localhost:" + server.getPort()));
         MockResponse mockResponse = new MockResponse().setResponseCode(200);
         server.enqueue(mockResponse);
     }

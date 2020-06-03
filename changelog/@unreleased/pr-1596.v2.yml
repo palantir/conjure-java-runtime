@@ -1,0 +1,8 @@
+type: break
+break:
+  description: |-
+    All clients created with `JaxRsClients.create()` now use dialogue under the hood. This can result in subtly different behavior, but is not expected to be noticeable in the vast majority of cases. Transport failures will manifest as DialogueException instead of FeignException in most cases, some tests may need to be updated. Concurrency limiters and node selection are handled entirely by the dialogue implementation.
+
+    Retrofit clients are unaffected.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1596

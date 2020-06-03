@@ -16,26 +16,18 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.EndpointNameHeaderEnrichmentContract;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.ext.refresh.RefreshableProxyInvocationHandler;
 import com.palantir.conjure.java.okhttp.HostEventsSink;
-import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.logsafe.Preconditions;
-import feign.Feign;
-import feign.Logger;
-import feign.Retryer;
 
 /** Static factory methods for producing creating JAX-RS HTTP proxies. */
 public final class JaxRsClient {
-    private static final ObjectMapper JSON_OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
-    private static final ObjectMapper CBOR_OBJECT_MAPPER = ObjectMappers.newCborClientObjectMapper();
 
     private JaxRsClient() {}
 
@@ -78,16 +70,11 @@ public final class JaxRsClient {
         Preconditions.checkNotNull(channel, "Channel is required");
         Preconditions.checkNotNull(serviceClass, "JAX-RS interface is required");
         Preconditions.checkNotNull(runtime, "ConjureRuntime is required");
-        // not used, simply for replacement
-        String baseUrl = "dialogue://feign";
-        return Feign.builder()
-                .contract(new EndpointNameHeaderEnrichmentContract(AbstractFeignJaxRsClientBuilder.createContract()))
-                .encoder(AbstractFeignJaxRsClientBuilder.createEncoder(JSON_OBJECT_MAPPER, CBOR_OBJECT_MAPPER))
-                .decoder(AbstractFeignJaxRsClientBuilder.createDecoder(JSON_OBJECT_MAPPER, CBOR_OBJECT_MAPPER))
-                .errorDecoder(new DialogueFeignClient.RemoteExceptionDecoder(runtime))
-                .client(new DialogueFeignClient(serviceClass, channel, runtime, baseUrl))
-                .logLevel(Logger.Level.NONE) // we use Dialogue for logging. (note that NONE is the default)
-                .retryer(new Retryer.Default(0, 0, 1)) // use dialogue retry mechanism only
-                .target(serviceClass, baseUrl);
+        return FeignJaxRsClientBuilder.create(
+                serviceClass,
+                channel,
+                runtime,
+                FeignJaxRsClientBuilder.JSON_OBJECT_MAPPER,
+                FeignJaxRsClientBuilder.CBOR_OBJECT_MAPPER);
     }
 }
