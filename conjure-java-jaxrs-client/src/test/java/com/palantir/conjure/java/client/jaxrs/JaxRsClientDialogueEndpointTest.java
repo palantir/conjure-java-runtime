@@ -44,7 +44,6 @@ import java.util.AbstractMap;
 import java.util.List;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -141,12 +140,12 @@ public final class JaxRsClientDialogueEndpointTest {
     }
 
     @Test
-    public void testUnsupportedHttpMethod_options() {
+    public void testUnsupportedHttpMethod_trace() {
         Channel channel = mock(Channel.class);
-        assertThatThrownBy(() -> JaxRsClient.create(OptionsService.class, channel, runtime))
+        assertThatThrownBy(() -> JaxRsClient.create(TraceService.class, channel, runtime))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Unsupported HTTP method")
-                .hasMessageContaining("OPTIONS");
+                .hasMessageContaining("TRACE");
     }
 
     @Test
@@ -273,14 +272,19 @@ public final class JaxRsClientDialogueEndpointTest {
         void post(String body);
     }
 
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.RUNTIME)
+    @javax.ws.rs.HttpMethod("TRACE")
+    public @interface Trace {}
+
     @Path("foo")
     @Produces("application/json")
     @Consumes("application/json")
-    public interface OptionsService {
+    public interface TraceService {
 
-        @Path("options")
-        @OPTIONS
-        void options();
+        @Path("trace")
+        @Trace
+        void trace();
     }
 
     @Target(ElementType.METHOD)
