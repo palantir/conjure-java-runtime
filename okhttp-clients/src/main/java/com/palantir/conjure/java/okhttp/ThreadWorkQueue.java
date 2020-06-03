@@ -69,6 +69,6 @@ final class ThreadWorkQueue<T> {
     }
 
     private Queue<T> queue(long id) {
-        return queuedRequests.computeIfAbsent(id, key -> new ArrayDeque<>(2));
+        return queuedRequests.computeIfAbsent(id, _key -> new ArrayDeque<>(2));
     }
 }

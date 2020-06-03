@@ -157,7 +157,7 @@ public final class OptionalObjectToStringConverterFactoryTest {
                 // Set bogus string values for any annotation methods that don't have a default
                 Map<String, Object> map = Arrays.stream(clazz[i].getDeclaredMethods())
                         .filter(method -> method.getDefaultValue() == null)
-                        .collect(Collectors.toMap(Method::getName, method -> ""));
+                        .collect(Collectors.toMap(Method::getName, _method -> ""));
                 annotations[i] = TypeFactory.annotation(clazz[i], map);
             } catch (AnnotationFormatException e) {
                 throw new RuntimeException(e);

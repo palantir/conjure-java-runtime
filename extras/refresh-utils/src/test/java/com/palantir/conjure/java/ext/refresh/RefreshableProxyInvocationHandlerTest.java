@@ -108,7 +108,7 @@ public final class RefreshableProxyInvocationHandlerTest {
         Refreshable<Callable> refreshable = Refreshable.of(throwingCallable);
 
         RefreshableProxyInvocationHandler<Callable, Callable> handler =
-                RefreshableProxyInvocationHandler.create(refreshable, tec -> throwingCallable);
+                RefreshableProxyInvocationHandler.create(refreshable, _tec -> throwingCallable);
         Callable proxy = Reflection.newProxy(Callable.class, handler);
 
         assertThatThrownBy(proxy::call)

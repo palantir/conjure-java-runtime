@@ -69,7 +69,7 @@ public final class OkHttpClients {
 
     private static final ThreadFactory executionThreads = instrument(
             new ThreadFactoryBuilder()
-                    .setUncaughtExceptionHandler((thread, uncaughtException) -> log.error(
+                    .setUncaughtExceptionHandler((_thread, uncaughtException) -> log.error(
                             "An exception was uncaught in an execution thread. "
                                     + "This likely left a thread blocked, and is as such a serious bug "
                                     + "which requires debugging.",
@@ -271,7 +271,7 @@ public final class OkHttpClients {
         if (config.proxyCredentials().isPresent()) {
             BasicCredentials basicCreds = config.proxyCredentials().get();
             final String credentials = Credentials.basic(basicCreds.username(), basicCreds.password());
-            client.proxyAuthenticator((route, response) -> response.request()
+            client.proxyAuthenticator((_route, response) -> response.request()
                     .newBuilder()
                     .header(HttpHeaders.PROXY_AUTHORIZATION, credentials)
                     .build());
