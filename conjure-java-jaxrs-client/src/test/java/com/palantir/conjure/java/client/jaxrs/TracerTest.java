@@ -177,7 +177,7 @@ public final class TracerTest extends TestBase {
     private void reduceConcurrencyLimitTo1() {
         int experimentallyThisNeedsToHappen3Times = 3;
         for (int i = 0; i < experimentallyThisNeedsToHappen3Times; i++) {
-            IntStream.range(0, 3).forEach(x -> {
+            IntStream.range(0, 3).forEach(_x -> {
                 server.enqueue(new MockResponse().setResponseCode(429));
             });
             server.enqueue(new MockResponse().setBody("\"server\""));

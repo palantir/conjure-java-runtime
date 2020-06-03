@@ -81,7 +81,7 @@ public final class QosExceptionThrowingCallAdapterFactoryTest {
                 .addCallAdapterFactory(factory)
                 .build();
         when(delegateFactory.get(type, NO_ANNOTATIONS, retrofit))
-                .thenAnswer((Answer<CallAdapter<Void, Void>>) invocation -> delegateAdapter);
+                .thenAnswer((Answer<CallAdapter<Void, Void>>) _invocation -> delegateAdapter);
         when(delegateAdapter.adapt(argument.capture())).thenReturn(null);
     }
 
