@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix unnecessary trailing slash in pathless endpoints
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1634

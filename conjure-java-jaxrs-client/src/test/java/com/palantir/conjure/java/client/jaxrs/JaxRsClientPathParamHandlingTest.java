@@ -42,7 +42,7 @@ public final class JaxRsClientPathParamHandlingTest extends TestBase {
                 Service.class,
                 AGENT,
                 NoOpHostEventsSink.INSTANCE,
-                createTestConfig("http://localhost:" + server.getPort()));
+                createTestConfig("http://localhost:" + server.getPort() + "/api"));
         MockResponse mockResponse = new MockResponse().setResponseCode(200);
         server.enqueue(mockResponse);
     }
@@ -57,26 +57,36 @@ public final class JaxRsClientPathParamHandlingTest extends TestBase {
         @GET
         @Path("begin/{path}/end")
         void innerPath(@PathParam("path") String path);
+
+        @GET
+        void simple();
     }
 
     @Test
     public void wildcardPathParameterSlashesAreEncoded() throws Exception {
         client.complexPath("foo/bar");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /complex/foo%2Fbar HTTP/1.1");
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /api/complex/foo%2Fbar HTTP/1.1");
     }
 
     @Test
     public void wildcardPathParameterAllowsEmptyString() throws Exception {
         client.complexPath("");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /complex/ HTTP/1.1");
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /api/complex/ HTTP/1.1");
     }
 
     @Test
     public void innerPathParameterAllowsEmptyString() throws Exception {
         client.innerPath("");
         RecordedRequest takeRequest = server.takeRequest();
-        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /begin//end HTTP/1.1");
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /api/begin//end HTTP/1.1");
+    }
+
+    @Test
+    public void simplestPath() throws Exception {
+        client.simple();
+        RecordedRequest takeRequest = server.takeRequest();
+        assertThat(takeRequest.getRequestLine()).isEqualTo("GET /api HTTP/1.1");
     }
 }
