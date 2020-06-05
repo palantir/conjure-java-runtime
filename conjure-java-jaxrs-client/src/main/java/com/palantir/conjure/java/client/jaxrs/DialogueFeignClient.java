@@ -361,8 +361,10 @@ final class DialogueFeignClient implements feign.Client {
             String trailing = target.substring(baseUrl.length() + trailingOffset);
             int queryParamsStart = trailing.indexOf('?');
             String queryPortion = queryParamsStart == -1 ? trailing : trailing.substring(0, queryParamsStart);
-            for (String pathSegment : pathSplitter.split(queryPortion)) {
-                url.pathSegment(urlDecode(pathSegment));
+            if (!queryPortion.isEmpty()) {
+                for (String pathSegment : pathSplitter.split(queryPortion)) {
+                    url.pathSegment(urlDecode(pathSegment));
+                }
             }
             if (queryParamsStart != -1) {
                 String querySegments = trailing.substring(queryParamsStart + 1);
