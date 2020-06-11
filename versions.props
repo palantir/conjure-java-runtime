@@ -37,7 +37,7 @@ com.palantir.refreshable:refreshable = 1.0.0
 com.squareup.okhttp3:* = 3.13.1
 
 # We cannot upgrade retrofit2 to 2.5.0 because of https://github.com/palantir/conjure-java-runtime/issues/930
-com.squareup.retrofit2:* = 2.4.0
+com.squareup.retrofit2:* = 2.9.0
 
 # Pin to same version as spark
 io.dropwizard.metrics:metrics-core = 3.2.6
