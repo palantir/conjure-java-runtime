@@ -39,7 +39,7 @@ import com.palantir.conjure.java.okhttp.HostEventsSink;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.core.DialogueChannel;
-import com.palantir.dialogue.hc4.ApacheHttpClientChannels;
+import com.palantir.dialogue.hc5.ApacheHttpClientChannels;
 import com.palantir.logsafe.Preconditions;
 import feign.Contract;
 import feign.Feign;
