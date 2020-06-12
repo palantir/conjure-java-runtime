@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -146,7 +145,7 @@ public final class FlowControlTest {
             for (int i = 0; i < REQUESTS_PER_THREAD; ) {
                 Limiter.Listener listener = Futures.getUnchecked(
                         limiters.acquireLimiterInternal(KEY).acquire());
-                boolean gotRateLimited = !rateLimiter.tryAcquire(100, TimeUnit.MILLISECONDS);
+                boolean gotRateLimited = !rateLimiter.tryAcquire(Duration.ofMillis(100));
                 if (!gotRateLimited) {
                     meter.mark();
                     sleep(successDuration.toMillis());

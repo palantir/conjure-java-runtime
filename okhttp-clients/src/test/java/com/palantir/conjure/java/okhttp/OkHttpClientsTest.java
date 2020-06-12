@@ -671,7 +671,7 @@ public final class OkHttpClientsTest extends TestBase {
                 hostEventsSink,
                 OkHttpClientsTest.class);
         Call call = client.newCall(new Request.Builder().url(url + "/foo?bar").build());
-        assertThatThrownBy(() -> call.execute())
+        assertThatThrownBy(call::execute)
                 .isInstanceOf(SafeIoException.class)
                 .hasMessageContaining("Failed to complete the request due to an IOException")
                 .hasCauseInstanceOf(SocketTimeoutException.class);
@@ -751,7 +751,7 @@ public final class OkHttpClientsTest extends TestBase {
         });
 
         thread.start();
-        Uninterruptibles.sleepUninterruptibly(100, TimeUnit.MILLISECONDS);
+        Uninterruptibles.sleepUninterruptibly(Duration.ofMillis(100));
         thread.interrupt();
         thread.join();
     }

@@ -102,7 +102,7 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
         }
     }
 
-    private static final Function<Annotation, Class<?>> EXTRACT_CLASS = input -> input.annotationType();
+    private static final Function<Annotation, Class<?>> EXTRACT_CLASS = Annotation::annotationType;
 
     private static final class ExpanderDef {
         private final Class<?> match;

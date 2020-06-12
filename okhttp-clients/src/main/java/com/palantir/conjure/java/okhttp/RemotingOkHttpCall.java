@@ -450,7 +450,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 }
 
                 retryIfAllowed(callback, call, exception, () -> {
-                    Duration backoff = exception.getRetryAfter().orElseGet(() -> nonAdvertizedBackoff.get());
+                    Duration backoff = exception.getRetryAfter().orElseGet(nonAdvertizedBackoff::get);
                     log.debug(
                             "Rescheduling call after receiving QosException.Throttle",
                             SafeArg.of("backoffMillis", backoff.toMillis()),

@@ -23,14 +23,13 @@ import java.lang.reflect.Type;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
-import retrofit2.Converter.Factory;
 import retrofit2.Retrofit;
 
-final class NeverReturnNullConverterFactory extends Factory {
+final class NeverReturnNullConverterFactory extends Converter.Factory {
 
-    private final Factory delegate;
+    private final Converter.Factory delegate;
 
-    NeverReturnNullConverterFactory(Factory delegate) {
+    NeverReturnNullConverterFactory(Converter.Factory delegate) {
         this.delegate = delegate;
     }
 
