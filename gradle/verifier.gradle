@@ -37,7 +37,7 @@ dependencies {
 }
 
 tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureEach {
-    options.errorprone.errorproneArgs += '-Xep:Slf4jLogsafeArgs:OFF'
+    options.errorprone.disable 'Slf4jLogsafeArgs'
 }
 
 idea {
