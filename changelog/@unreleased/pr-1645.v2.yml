@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: JaxrsClient uses the the latest release of the Apache httpclient
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1645
