@@ -91,7 +91,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
 
         List<Future<String>> things = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
-            things.add(executorService.submit(() -> proxy.string()));
+            things.add(executorService.submit(proxy::string));
         }
         for (int i = 0; i < 10; i++) {
             assertThat(things.get(i).get()).isEqualTo("foo");

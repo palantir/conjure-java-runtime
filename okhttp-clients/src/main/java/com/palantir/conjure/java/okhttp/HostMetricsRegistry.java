@@ -23,6 +23,7 @@ import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
@@ -41,7 +42,7 @@ public final class HostMetricsRegistry implements HostEventsSink {
         this.hostMetrics = Caffeine.newBuilder()
                 .maximumSize(1_000)
                 .initialCapacity(64)
-                .expireAfterAccess(1, TimeUnit.DAYS)
+                .expireAfterAccess(Duration.ofDays(1))
                 .build(key -> new DefaultHostMetrics(key.serviceName(), key.hostname(), key.port(), Clock.systemUTC()));
     }
 

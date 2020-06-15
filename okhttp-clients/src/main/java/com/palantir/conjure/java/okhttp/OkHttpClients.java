@@ -262,9 +262,9 @@ public final class OkHttpClients {
         // timeouts
         // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
         // with its own default otherwise.
-        client.connectTimeout(config.connectTimeout().toMillis(), TimeUnit.MILLISECONDS);
-        client.readTimeout(config.readTimeout().toMillis(), TimeUnit.MILLISECONDS);
-        client.writeTimeout(config.writeTimeout().toMillis(), TimeUnit.MILLISECONDS);
+        client.connectTimeout(config.connectTimeout());
+        client.readTimeout(config.readTimeout());
+        client.writeTimeout(config.writeTimeout());
 
         // proxy
         client.proxySelector(config.proxy());

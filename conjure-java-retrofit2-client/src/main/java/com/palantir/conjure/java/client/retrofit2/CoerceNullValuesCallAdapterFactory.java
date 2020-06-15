@@ -35,7 +35,6 @@ import javax.annotation.Nullable;
 import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
-import retrofit2.CallAdapter.Factory;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
@@ -54,7 +53,7 @@ final class CoerceNullValuesCallAdapterFactory extends CallAdapter.Factory {
 
     private final CallAdapter.Factory delegate;
 
-    CoerceNullValuesCallAdapterFactory(Factory delegate) {
+    CoerceNullValuesCallAdapterFactory(CallAdapter.Factory delegate) {
         this.delegate = delegate;
     }
 

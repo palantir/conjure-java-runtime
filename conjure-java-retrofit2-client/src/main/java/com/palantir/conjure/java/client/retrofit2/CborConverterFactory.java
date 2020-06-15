@@ -29,7 +29,6 @@ import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
-import retrofit2.Converter.Factory;
 import retrofit2.Retrofit;
 import retrofit2.http.Headers;
 
@@ -37,7 +36,7 @@ public final class CborConverterFactory extends Converter.Factory {
 
     private static final MediaType CBOR_MIME_TYPE = MediaType.parse("application/cbor");
 
-    private final Factory delegate;
+    private final Converter.Factory delegate;
     private final ObjectMapper cborObjectMapper;
 
     CborConverterFactory(Converter.Factory delegate, ObjectMapper cborObjectMapper) {

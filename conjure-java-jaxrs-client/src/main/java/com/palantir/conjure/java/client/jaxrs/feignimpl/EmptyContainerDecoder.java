@@ -30,13 +30,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import org.slf4j.Logger;
@@ -57,7 +57,7 @@ public final class EmptyContainerDecoder implements Decoder {
         this.delegate = delegate;
         this.blankInstanceCache = Caffeine.newBuilder()
                 .maximumSize(1000)
-                .expireAfterAccess(10, TimeUnit.MINUTES)
+                .expireAfterAccess(Duration.ofMinutes(10))
                 .build(new BlankInstanceLoader(mapper));
     }
 
