@@ -37,7 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public final class InstrumentedInterceptorTest {
@@ -85,6 +85,8 @@ public final class InstrumentedInterceptorTest {
         MetricName name = MetricName.builder()
                 .safeName("client.response")
                 .putSafeTags("service-name", "client")
+                .putSafeTags("libraryName", "conjure-java-runtime")
+                .putSafeTags("libraryVersion", "unknown")
                 .build();
         Timer timer = registry.timer(name);
 
