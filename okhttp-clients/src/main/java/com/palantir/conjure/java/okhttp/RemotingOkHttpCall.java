@@ -396,8 +396,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 if (exception instanceof SocketTimeoutException) {
                     // non-connect timeouts should not be retried
                     SocketTimeoutException socketTimeout = (SocketTimeoutException) exception;
+                    // in java 14 "connect timed out" renamed to "Connect timed out"
                     if (socketTimeout.getMessage() == null
-                            || !socketTimeout.getMessage().contains("connect timed out")) {
+                            || !socketTimeout.getMessage().contains("connect timed out")
+                                    && !socketTimeout.getMessage().contains("Connect timed out")) {
                         return false;
                     }
                 }
