@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -397,11 +396,10 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 if (exception instanceof SocketTimeoutException) {
                     // non-connect timeouts should not be retried
                     SocketTimeoutException socketTimeout = (SocketTimeoutException) exception;
+                    // in java 14 "connect timed out" renamed to "Connect timed out"
                     if (socketTimeout.getMessage() == null
-                            || !socketTimeout
-                                    .getMessage()
-                                    .toLowerCase(Locale.ENGLISH)
-                                    .contains("connect timed out")) {
+                            || !socketTimeout.getMessage().contains("connect timed out")
+                                    && !socketTimeout.getMessage().contains("Connect timed out")) {
                         return false;
                     }
                 }
