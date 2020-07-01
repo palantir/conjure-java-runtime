@@ -48,8 +48,6 @@ public class AutoDeserializeTest {
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
     private static final AutoDeserializeService testServiceJersey =
             VerificationClients.autoDeserializeServiceJersey(server);
-    private static final AutoDeserializeService testServiceJerseyDialogue =
-            VerificationClients.autoDeserializeServiceJerseyDialogue(server);
     private static final AutoDeserializeServiceRetrofit testServiceRetrofit =
             VerificationClients.autoDeserializeServiceRetrofit(server);
     private static final AutoDeserializeConfirmService confirmService = VerificationClients.confirmService(server);
@@ -128,36 +126,6 @@ public class AutoDeserializeTest {
     public void runTestCaseJersey() throws Error, NoSuchMethodException {
         boolean shouldIgnore = Cases.shouldIgnoreJersey(endpointName, jsonString);
         Method method = testServiceJersey.getClass().getMethod(endpointName.get(), int.class);
-        System.out.println(String.format(
-                "[%s%s test case %s]: %s(%s), expected client to %s",
-                shouldIgnore ? "ignored " : "",
-                shouldSucceed ? "positive" : "negative",
-                index,
-                endpointName,
-                jsonString,
-                shouldSucceed ? "succeed" : "fail"));
-
-        Optional<Error> expectationFailure = shouldSucceed ? expectSuccessJersey(method) : expectFailureJersey(method);
-
-        if (shouldIgnore) {
-            assertThat(expectationFailure)
-                    .describedAs(
-                            "The test passed but the test case was ignored - remove this from ignored-test-cases.yml")
-                    .isNotEmpty();
-        }
-
-        Assume.assumeFalse(shouldIgnore);
-
-        if (expectationFailure.isPresent()) {
-            throw expectationFailure.get();
-        }
-    }
-
-    @Test
-    @SuppressWarnings("IllegalThrows")
-    public void runTestCaseJerseyDialogue() throws Error, NoSuchMethodException {
-        boolean shouldIgnore = Cases.shouldIgnoreJersey(endpointName, jsonString);
-        Method method = testServiceJerseyDialogue.getClass().getMethod(endpointName.get(), int.class);
         System.out.println(String.format(
                 "[%s%s test case %s]: %s(%s), expected client to %s",
                 shouldIgnore ? "ignored " : "",
