@@ -52,14 +52,6 @@ public class SingleParamServicesTest {
             "singleQueryParamService",
             VerificationClients.singleQueryParamService(server));
 
-    private static ImmutableMap<String, Object> servicesMapsJaxrsDialogue = ImmutableMap.of(
-            "singlePathParamService",
-            VerificationClients.singlePathParamServiceDialogue(server),
-            "singleHeaderService",
-            VerificationClients.singleHeaderServiceDialogue(server),
-            "singleQueryParamService",
-            VerificationClients.singleQueryParamServiceDialogue(server));
-
     @Parameterized.Parameter(0)
     public String serviceName;
 
@@ -102,11 +94,6 @@ public class SingleParamServicesTest {
     @Test
     public void runTestCaseJaxrs() throws Exception {
         runTestCase(servicesMapsJaxrs);
-    }
-
-    @Test
-    public void runTestCaseJaxrsDialogue() throws Exception {
-        runTestCase(servicesMapsJaxrsDialogue);
     }
 
     private void runTestCase(ImmutableMap<String, Object> servicesMaps) throws Exception {
