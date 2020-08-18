@@ -162,7 +162,10 @@ public final class ClientConfigurations {
                         .hostAndPort()
                         .orElseThrow(() -> new SafeIllegalArgumentException(
                                 "Expected to find proxy hostAndPort configuration for HTTP proxy")));
-                InetSocketAddress addr = new InetSocketAddress(hostAndPort.getHost(), hostAndPort.getPort());
+                InetSocketAddress addr =
+                        // Proxy address must not be resolved, otherwise DNS changes while the application
+                        // is running are ignored by the application.
+                        InetSocketAddress.createUnresolved(hostAndPort.getHost(), hostAndPort.getPort());
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, addr));
             case MESH:
                 return ProxySelector.getDefault(); // MESH proxy is not a Java proxy
