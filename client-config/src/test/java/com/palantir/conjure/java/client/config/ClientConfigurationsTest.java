@@ -30,6 +30,7 @@ import com.palantir.logsafe.testing.Assertions;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.ProxySelector;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -150,6 +151,16 @@ public final class ClientConfigurationsTest {
                 ClientConfigurations.createInetSocketAddress("http://zomp-ovc-gw-1:8888/");
         assertThat(inetSocketAddress.getHostString()).isEqualTo("zomp-ovc-gw-1");
         assertThat(inetSocketAddress.getPort()).isEqualTo(8888);
+    }
+
+    @Test
+    public void testProxyAddressIsNotResolved() {
+        ProxySelector selector = ClientConfigurations.createProxySelector(ProxyConfiguration.of("localhost:80"));
+        List<Proxy> selected = selector.select(URI.create("https://foo"));
+        assertThat(selected).hasOnlyOneElementSatisfying(proxy -> assertThat(proxy.address())
+                .isInstanceOfSatisfying(InetSocketAddress.class, address -> assertThat(address.getAddress())
+                        .as("The address must not be resolved")
+                        .isNull()));
     }
 
     private ServiceConfiguration meshProxyServiceConfig(List<String> theUris, int maxNumRetries) {
