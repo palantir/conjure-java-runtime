@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Proxy selectors are resilient to DNS changes while the service is running
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1736
