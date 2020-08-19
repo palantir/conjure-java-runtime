@@ -179,7 +179,7 @@ public final class ClientConfigurations {
     @VisibleForTesting
     static InetSocketAddress createInetSocketAddress(String uriString) {
         URI uri = URI.create(uriString);
-        return new InetSocketAddress(uri.getHost(), uri.getPort());
+        return InetSocketAddress.createUnresolved(uri.getHost(), uri.getPort());
     }
 
     private static Optional<HostAndPort> meshProxy(Optional<ProxyConfiguration> proxy) {

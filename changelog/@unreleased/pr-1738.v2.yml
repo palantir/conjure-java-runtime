@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: FROM_ENVIRONMENT proxy configuration follows DNS changes
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1738
