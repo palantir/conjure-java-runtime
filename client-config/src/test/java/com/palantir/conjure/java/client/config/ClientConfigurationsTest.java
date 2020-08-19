@@ -146,10 +146,12 @@ public final class ClientConfigurationsTest {
     @Test
     public void systemEnvUri() {
         // How environment variables for https proxy look like.
-        InetSocketAddress inetSocketAddress =
-                ClientConfigurations.createInetSocketAddress("http://zomp-ovc-gw-1:8888/");
-        assertThat(inetSocketAddress.getHostString()).isEqualTo("zomp-ovc-gw-1");
+        InetSocketAddress inetSocketAddress = ClientConfigurations.createInetSocketAddress("http://localhost:8888/");
+        assertThat(inetSocketAddress.getHostString()).isEqualTo("localhost");
         assertThat(inetSocketAddress.getPort()).isEqualTo(8888);
+        assertThat(inetSocketAddress.getAddress())
+                .as("Address should not be resolved")
+                .isNull();
     }
 
     private ServiceConfiguration meshProxyServiceConfig(List<String> theUris, int maxNumRetries) {
