@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Update conjure-scala-jaxrs-client to use Scala 2.12
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1765
