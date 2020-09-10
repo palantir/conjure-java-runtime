@@ -4,5 +4,5 @@ apply plugin: 'com.palantir.revapi'
 dependencies {
     api project(':conjure-java-jaxrs-client')
     implementation project(':conjure-java-jackson-serialization')
-    implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.11'
+    implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.12'
 }
