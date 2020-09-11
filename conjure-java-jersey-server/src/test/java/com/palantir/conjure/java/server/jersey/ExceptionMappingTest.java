@@ -54,6 +54,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -238,6 +239,7 @@ public final class ExceptionMappingTest {
     public static class ExceptionMappersTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration _config, final Environment env) {
+            env.jersey().register(JacksonFeature.class);
             env.jersey().register(ConjureJerseyFeature.INSTANCE);
             env.jersey().register(new ExceptionTestResource());
         }
