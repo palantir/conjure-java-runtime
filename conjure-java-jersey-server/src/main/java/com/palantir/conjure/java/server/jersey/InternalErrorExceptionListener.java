@@ -19,10 +19,13 @@ package com.palantir.conjure.java.server.jersey;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.api.errors.UnknownRemoteException;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import feign.RetryableException;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 final class InternalErrorExceptionListener implements Consumer<Throwable> {
@@ -32,30 +35,57 @@ final class InternalErrorExceptionListener implements Consumer<Throwable> {
         this.metrics = JerseyServerMetrics.of(registry);
     }
 
+    /** Records information to the singleton TaggedMetricRegistry. */
     static Consumer<Throwable> createDefault() {
         return new InternalErrorExceptionListener(SharedTaggedMetricRegistries.getSingleton());
     }
 
     @Override
     public void accept(Throwable exception) {
-        ErrorCause errorCause = classifyExceptionForObservability(exception);
-        if (errorCause != ErrorCause.UNKNOWN) {
-            metrics.internalerrorAll(errorCause.toString()).mark();
+        Optional<ErrorCause> errorCause = classifyTypeOfInternalError(exception);
+        if (errorCause.isPresent()) {
+            ErrorCause cause = errorCause.get();
+            metrics.internalerrorAll(cause.toString()).mark();
         }
     }
 
-    private static ErrorCause classifyExceptionForObservability(Throwable throwable) {
+    /**
+     * Note, this is quite a naive approach as it doesn't consider Throwable causes. See WC's implementation for a
+     * more comprehensive approach.
+     */
+    @SuppressWarnings("CyclomaticComplexity") // switch statements are easy to read but upset checkstyle
+    private static Optional<ErrorCause> classifyTypeOfInternalError(Throwable throwable) {
         if (throwable instanceof ServiceException) {
-            return ErrorCause.SERVICE_INTERNAL;
+            ServiceException serviceException = (ServiceException) throwable;
+            switch (serviceException.getErrorType().code()) {
+                case INTERNAL:
+                case FAILED_PRECONDITION:
+                case TIMEOUT:
+                case CUSTOM_SERVER:
+                    return Optional.of(ErrorCause.SERVICE_INTERNAL);
+
+                    /** All the below are non-5xx, so we don't consider them to be 'internal' errors. */
+                case CUSTOM_CLIENT:
+                case UNAUTHORIZED:
+                case PERMISSION_DENIED:
+                case INVALID_ARGUMENT:
+                case NOT_FOUND:
+                case CONFLICT:
+                case REQUEST_ENTITY_TOO_LARGE:
+                    return Optional.empty();
+            }
+            throw new SafeIllegalStateException(
+                    "Unreachable",
+                    SafeArg.of("code", serviceException.getErrorType().code()));
         } else if (throwable instanceof RemoteException
                 || throwable instanceof RetryableException
                 || throwable instanceof IOException
                 || throwable instanceof UnknownRemoteException) {
-            return ErrorCause.RPC;
+            return Optional.of(ErrorCause.RPC);
         } else if (throwable instanceof RuntimeException || throwable instanceof Error) {
-            return ErrorCause.INTERNAL;
+            return Optional.of(ErrorCause.INTERNAL);
         } else {
-            return ErrorCause.UNKNOWN;
+            return Optional.empty();
         }
     }
 }
