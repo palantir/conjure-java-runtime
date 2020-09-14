@@ -17,23 +17,21 @@
 package com.palantir.conjure.java.server.jersey;
 
 import com.fasterxml.jackson.jaxrs.cbor.JacksonCBORProvider;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.logsafe.Preconditions;
 import com.palantir.tracing.jersey.TraceEnrichingFilter;
-import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
+import java.util.function.Consumer;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
 
 public enum ConjureJerseyFeature implements Feature {
     INSTANCE;
 
-    private final JerseyServerMetrics metrics;
+    private final Consumer<Throwable> listener;
 
     ConjureJerseyFeature() {
-        this.metrics = JerseyServerMetrics.of(SharedTaggedMetricRegistries.getSingleton());
-    }
-
-    public JerseyServerMetrics getMetrics() {
-        return metrics;
+        this.listener = InternalErrorExceptionListener.createDefault();
     }
 
     /**
@@ -42,16 +40,19 @@ public enum ConjureJerseyFeature implements Feature {
      */
     @Override
     public boolean configure(FeatureContext context) {
-        // Exception mappers
-        context.register(new IllegalArgumentExceptionMapper(metrics));
-        context.register(new NoContentExceptionMapper());
-        context.register(new RetryableExceptionMapper(metrics));
-        context.register(new RuntimeExceptionMapper(metrics));
-        context.register(new WebApplicationExceptionMapper());
-        context.register(new RemoteExceptionMapper());
-        context.register(new ServiceExceptionMapper(metrics));
-        context.register(new QosExceptionMapper());
-        context.register(new ThrowableExceptionMapper(metrics));
+        return configure(context, listener);
+    }
+
+    private static boolean configure(FeatureContext context, Consumer<Throwable> exceptionListener) {
+        context.register(new IllegalArgumentExceptionMapper(exceptionListener));
+        context.register(new NoContentExceptionMapper(exceptionListener));
+        context.register(new RetryableExceptionMapper(exceptionListener));
+        context.register(new RuntimeExceptionMapper(exceptionListener));
+        context.register(new WebApplicationExceptionMapper(exceptionListener));
+        context.register(new RemoteExceptionMapper(exceptionListener));
+        context.register(new ServiceExceptionMapper(exceptionListener));
+        context.register(new QosExceptionMapper(exceptionListener));
+        context.register(new ThrowableExceptionMapper(exceptionListener));
 
         // Cbor handling
         context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));
@@ -84,5 +85,39 @@ public enum ConjureJerseyFeature implements Feature {
         context.register(DeprecationReportingResponseFeature.INSTANCE);
 
         return true;
+    }
+
+    @CheckReturnValue
+    static Builder builder() {
+        return new Builder();
+    }
+
+    @CheckReturnValue
+    public static final class Builder {
+        private Consumer<Throwable> exceptionListener = InternalErrorExceptionListener.createDefault();
+
+        /**
+         * Every throwable handled by the {@code ConjureJerseyFeature} is first passed to this {@code
+         * exceptionListener}. This is a good opportunity to record metrics about the different types of exceptions.
+         */
+        Builder setExceptionListener(Consumer<Throwable> value) {
+            this.exceptionListener = value;
+            return this;
+        }
+
+        Feature build() {
+            Consumer<Throwable> listener = Preconditions.checkNotNull(exceptionListener, "exceptionListener");
+            return new Feature() {
+                @Override
+                public boolean configure(FeatureContext context) {
+                    return ConjureJerseyFeature.configure(context, listener);
+                }
+
+                @Override
+                public String toString() {
+                    return "ConjureJerseyFeature{}";
+                }
+            };
+        }
     }
 }
