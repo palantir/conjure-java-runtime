@@ -122,7 +122,10 @@ public enum ConjureJerseyFeature implements Feature {
         }
     }
 
-    /** Implementors of this interface can. */
+    /**
+     * Implementors of this interface can record metrics based on the exceptions being thrown, and set/unset MDCs in
+     * order to affect any log lines.
+     */
     public interface ExceptionListener {
 
         void onException(Throwable throwable);
