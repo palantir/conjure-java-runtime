@@ -37,11 +37,6 @@ public final class JsonExceptionMapperTest {
                 ErrorType getErrorType(RuntimeException _exception) {
                     return ErrorType.INVALID_ARGUMENT;
                 }
-
-                @Override
-                ErrorCause getCause() {
-                    return ErrorCause.INTERNAL;
-                }
             };
 
     private final ObjectMapper objectMapper =

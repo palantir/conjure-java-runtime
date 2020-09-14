@@ -53,14 +53,12 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
     /** Returns the {@link ErrorType} that this exception corresponds to. */
     abstract ErrorType getErrorType(T exception);
 
-    abstract ErrorCause getCause();
-
     @Override
     public final Response toResponse(T exception) {
+        exceptionListener.accept(exception);
+
         String errorInstanceId = UUID.randomUUID().toString();
         ErrorType errorType = getErrorType(exception);
-
-        exceptionListener.accept(exception);
 
         if (errorType.httpErrorCode() / 100 == 4 /* client error */) {
             log.info(

@@ -31,9 +31,4 @@ final class RuntimeExceptionMapper extends JsonExceptionMapper<RuntimeException>
     ErrorType getErrorType(RuntimeException _exception) {
         return ErrorType.INTERNAL;
     }
-
-    @Override
-    ErrorCause getCause() {
-        return ErrorCause.INTERNAL;
-    }
 }

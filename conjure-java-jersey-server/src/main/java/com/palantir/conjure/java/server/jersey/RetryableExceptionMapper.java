@@ -32,9 +32,4 @@ final class RetryableExceptionMapper extends JsonExceptionMapper<RetryableExcept
     ErrorType getErrorType(RetryableException _exception) {
         return ErrorType.INTERNAL;
     }
-
-    @Override
-    ErrorCause getCause() {
-        return ErrorCause.RPC;
-    }
 }
