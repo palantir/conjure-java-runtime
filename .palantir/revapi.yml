@@ -68,3 +68,8 @@ acceptedBreaks:
     - code: "java.method.removed"
       old: "method com.palantir.conjure.java.server.jersey.JerseyServerMetrics com.palantir.conjure.java.server.jersey.ConjureJerseyFeature::getMetrics()"
       justification: "Method is never used internally"
+  "6.5.0":
+    com.palantir.conjure.java.runtime:conjure-java-jersey-server:
+    - code: "java.class.removed"
+      old: "enum com.palantir.conjure.java.server.jersey.ErrorCause"
+      justification: "ErrorCause is never used by consumers"
