@@ -20,6 +20,7 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.SafeArg;
 import java.util.UUID;
+import java.util.function.Consumer;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -43,11 +44,10 @@ import org.slf4j.LoggerFactory;
 abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapper<T> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
+    private final Consumer<Throwable> exceptionListener;
 
-    private final JerseyServerMetrics metrics;
-
-    JsonExceptionMapper(JerseyServerMetrics metrics) {
-        this.metrics = metrics;
+    JsonExceptionMapper(Consumer<Throwable> exceptionListener) {
+        this.exceptionListener = exceptionListener;
     }
 
     /** Returns the {@link ErrorType} that this exception corresponds to. */
@@ -59,9 +59,8 @@ abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapp
     public final Response toResponse(T exception) {
         String errorInstanceId = UUID.randomUUID().toString();
         ErrorType errorType = getErrorType(exception);
-        if (errorType.equals(ErrorType.INTERNAL)) {
-            this.metrics.internalerrorAll(getCause().toString()).mark();
-        }
+
+        exceptionListener.accept(exception);
 
         if (errorType.httpErrorCode() / 100 == 4 /* client error */) {
             log.info(
