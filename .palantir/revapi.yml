@@ -63,3 +63,8 @@ acceptedBreaks:
       new: "method T com.palantir.conjure.java.clients.ConjureClients.WithClientOptions<T>::withHostEventsSink(com.palantir.conjure.java.client.config.HostEventsSink)"
       justification: "Compilation break will force implementers to address these methods.\
         \ Revapi confirms this is NOT an ABI break"
+  "6.4.0":
+    com.palantir.conjure.java.runtime:conjure-java-jersey-server:
+    - code: "java.method.removed"
+      old: "method com.palantir.conjure.java.server.jersey.JerseyServerMetrics com.palantir.conjure.java.server.jersey.ConjureJerseyFeature::getMetrics()"
+      justification: "Method is never used internally"
