@@ -20,6 +20,7 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
 import java.util.UUID;
+import java.util.function.Consumer;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
@@ -44,9 +45,16 @@ import org.slf4j.LoggerFactory;
 final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
 
     private static final Logger log = LoggerFactory.getLogger(WebApplicationExceptionMapper.class);
+    private final Consumer<Throwable> exceptionListener;
+
+    WebApplicationExceptionMapper(Consumer<Throwable> exceptionListener) {
+        this.exceptionListener = exceptionListener;
+    }
 
     @Override
     public Response toResponse(WebApplicationException exception) {
+        exceptionListener.accept(exception);
+
         String errorInstanceId = UUID.randomUUID().toString();
         if (exception.getResponse().getStatus() / 100 == 4 /* client error */) {
             log.info("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);

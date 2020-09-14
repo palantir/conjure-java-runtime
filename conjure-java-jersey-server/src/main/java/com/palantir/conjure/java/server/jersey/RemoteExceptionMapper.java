@@ -20,6 +20,7 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.SafeArg;
+import java.util.function.Consumer;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -47,9 +48,16 @@ import org.slf4j.LoggerFactory;
 final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
 
     private static final Logger log = LoggerFactory.getLogger(RemoteExceptionMapper.class);
+    private final Consumer<Throwable> exceptionListener;
+
+    RemoteExceptionMapper(Consumer<Throwable> exceptionListener) {
+        this.exceptionListener = exceptionListener;
+    }
 
     @Override
     public Response toResponse(RemoteException exception) {
+        exceptionListener.accept(exception);
+
         ErrorType errorType = mapErrorType(exception);
         Response.ResponseBuilder builder = Response.status(errorType.httpErrorCode());
 

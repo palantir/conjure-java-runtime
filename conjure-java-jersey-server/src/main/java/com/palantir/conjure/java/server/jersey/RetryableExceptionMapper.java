@@ -18,13 +18,14 @@ package com.palantir.conjure.java.server.jersey;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
 import feign.RetryableException;
+import java.util.function.Consumer;
 import javax.ws.rs.ext.Provider;
 
 @Provider
 final class RetryableExceptionMapper extends JsonExceptionMapper<RetryableException> {
 
-    RetryableExceptionMapper(JerseyServerMetrics metrics) {
-        super(metrics);
+    RetryableExceptionMapper(Consumer<Throwable> exceptionListener) {
+        super(exceptionListener);
     }
 
     @Override
