@@ -44,6 +44,7 @@ public enum ConjureJerseyFeature implements Feature {
     }
 
     private static boolean configure(FeatureContext context, Consumer<Throwable> exceptionListener) {
+        // Exception mappers
         context.register(new IllegalArgumentExceptionMapper(exceptionListener));
         context.register(new NoContentExceptionMapper(exceptionListener));
         context.register(new RetryableExceptionMapper(exceptionListener));
@@ -53,6 +54,7 @@ public enum ConjureJerseyFeature implements Feature {
         context.register(new ServiceExceptionMapper(exceptionListener));
         context.register(new QosExceptionMapper(exceptionListener));
         context.register(new ThrowableExceptionMapper(exceptionListener));
+        JacksonExceptionMappers.configure(context, exceptionListener);
 
         // Cbor handling
         context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));

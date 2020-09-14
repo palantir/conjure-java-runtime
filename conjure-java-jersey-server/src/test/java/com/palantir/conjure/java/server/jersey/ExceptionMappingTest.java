@@ -18,17 +18,27 @@ package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteStreams;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
+import io.dropwizard.jersey.jackson.JacksonFeature;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.ws.rs.Consumes;
@@ -60,6 +70,7 @@ public final class ExceptionMappingTest {
     private static final int REMOTE_EXCEPTION_STATUS_CODE = 400;
     private static final int UNAUTHORIZED_STATUS_CODE = 401;
     private static final int PERMISSION_DENIED_STATUS_CODE = 403;
+    private static final ObjectMapper MAPPER = ObjectMappers.newServerObjectMapper();
 
     private WebTarget target;
 
@@ -168,9 +179,67 @@ public final class ExceptionMappingTest {
         assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
     }
 
+    @Test
+    public void testInvalidDefinitionExceptionIsJsonException() {
+        Response response =
+                target.path("throw-invalid-definition-exception").request().get();
+        assertThat(response.getStatus()).isEqualTo(500);
+
+        SerializableError error = response.readEntity(SerializableError.class);
+        assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
+        assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
+    }
+
+    @Test
+    public void testJsonGenerationExceptionIsJsonException() {
+        Response response =
+                target.path("throw-json-generation-exception").request().get();
+        assertThat(response.getStatus()).isEqualTo(500);
+
+        SerializableError error = response.readEntity(SerializableError.class);
+        assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
+        assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
+    }
+
+    @Test
+    public void testJsonMappingExceptionIsJsonException() {
+        Response response =
+                target.path("throw-json-mapping-exception").request().get();
+        assertThat(response.getStatus()).isEqualTo(400);
+
+        SerializableError error = response.readEntity(SerializableError.class);
+        assertThat(error.errorCode())
+                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+        assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
+    }
+
+    @Test
+    public void testJsonProcessingExceptionIsJsonException() {
+        Response response =
+                target.path("throw-json-processing-exception").request().get();
+        assertThat(response.getStatus()).isEqualTo(400);
+
+        SerializableError error = response.readEntity(SerializableError.class);
+        assertThat(error.errorCode())
+                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+        assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
+    }
+
+    @Test
+    public void testJsonParseExceptionIsJsonException() {
+        Response response = target.path("throw-json-parse-exception").request().get();
+        assertThat(response.getStatus()).isEqualTo(400);
+
+        SerializableError error = response.readEntity(SerializableError.class);
+        assertThat(error.errorCode())
+                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+        assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
+    }
+
     public static class ExceptionMappersTestServer extends Application<Configuration> {
         @Override
         public final void run(Configuration _config, final Environment env) {
+            env.jersey().register(JacksonFeature.class);
             env.jersey().register(ConjureJerseyFeature.builder().build());
             env.jersey().register(new ExceptionTestResource());
         }
@@ -248,6 +317,38 @@ public final class ExceptionMappingTest {
         public String throwAssertionError() {
             throw new AssertionError();
         }
+
+        @Override
+        public String throwInvalidDefinitionException() throws IOException {
+            throw InvalidDefinitionException.from(
+                    MAPPER.createParser(new byte[0]), "message", MAPPER.constructType(String.class));
+        }
+
+        @Override
+        public String throwJsonGenerationException() throws IOException {
+            throw new JsonGenerationException("message", MAPPER.createGenerator(ByteStreams.nullOutputStream()));
+        }
+
+        @Override
+        public String throwJsonMappingException() throws IOException {
+            throw JsonMappingException.from(MAPPER.createParser(new byte[0]), "message");
+        }
+
+        @Override
+        public String throwJsonProcessingException() throws IOException {
+            throw new TestJsonProcessingException("message");
+        }
+
+        @Override
+        public String throwJsonParseException() throws IOException {
+            throw new JsonParseException(MAPPER.createParser(new byte[0]), "message");
+        }
+    }
+
+    private static final class TestJsonProcessingException extends JsonProcessingException {
+        TestJsonProcessingException(String msg) {
+            super(msg);
+        }
     }
 
     @Path("/")
@@ -293,5 +394,25 @@ public final class ExceptionMappingTest {
         @GET
         @Path("/throw-assertion-error")
         String throwAssertionError();
+
+        @GET
+        @Path("/throw-invalid-definition-exception")
+        String throwInvalidDefinitionException() throws IOException;
+
+        @GET
+        @Path("/throw-json-generation-exception")
+        String throwJsonGenerationException() throws IOException;
+
+        @GET
+        @Path("/throw-json-mapping-exception")
+        String throwJsonMappingException() throws IOException;
+
+        @GET
+        @Path("/throw-json-processing-exception")
+        String throwJsonProcessingException() throws IOException;
+
+        @GET
+        @Path("/throw-json-parse-exception")
+        String throwJsonParseException() throws IOException;
     }
 }
