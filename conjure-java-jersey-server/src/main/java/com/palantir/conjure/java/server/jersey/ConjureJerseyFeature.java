@@ -97,6 +97,8 @@ public enum ConjureJerseyFeature implements Feature {
     public static final class Builder {
         private ExceptionListener exceptionListener = NoOpListener.INSTANCE;
 
+        private Builder() {}
+
         /**
          * Every throwable handled by the {@code ConjureJerseyFeature} is first passed to this {@code
          * exceptionListener}. This is a good opportunity to record metrics about the different types of exceptions.
