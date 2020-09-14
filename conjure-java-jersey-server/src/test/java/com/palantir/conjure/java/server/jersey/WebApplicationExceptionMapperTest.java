@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
@@ -33,7 +34,8 @@ import org.junit.Test;
 
 public final class WebApplicationExceptionMapperTest {
 
-    private final WebApplicationExceptionMapper mapper = new WebApplicationExceptionMapper();
+    private final WebApplicationExceptionMapper mapper =
+            new WebApplicationExceptionMapper(new InternalErrorExceptionListener(new DefaultTaggedMetricRegistry()));
     private final ObjectMapper objectMapper =
             ObjectMappers.newServerObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
