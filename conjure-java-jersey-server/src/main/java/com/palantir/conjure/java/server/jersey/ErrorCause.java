@@ -17,15 +17,8 @@
 package com.palantir.conjure.java.server.jersey;
 
 public enum ErrorCause {
-    RPC("rpc"),
-    SERVICE_INTERNAL("serviceInternal"),
-    INTERNAL("internal"),
-    UNKNOWN("unknown");
-
-    @SuppressWarnings("unused")
-    private final String cause;
-
-    ErrorCause(String cause) {
-        this.cause = cause;
-    }
+    RPC,
+    SERVICE_INTERNAL,
+    INTERNAL,
+    UNKNOWN
 }
