@@ -52,6 +52,7 @@ public enum ConjureJerseyFeature implements Feature {
         context.register(new ServiceExceptionMapper(metrics));
         context.register(new QosExceptionMapper());
         context.register(new ThrowableExceptionMapper(metrics));
+        JacksonExceptionMappers.configure(metrics, context);
 
         // Cbor handling
         context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));
