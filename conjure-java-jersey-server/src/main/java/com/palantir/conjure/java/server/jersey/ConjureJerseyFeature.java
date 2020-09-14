@@ -27,6 +27,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
 public enum ConjureJerseyFeature implements Feature {
+
+    /**
+     * Prefer {@link #builder()} which allows passing in a real {@link ExceptionListener} which records internal errors.
+     */
     INSTANCE;
 
     /**
@@ -97,7 +101,7 @@ public enum ConjureJerseyFeature implements Feature {
          * Every throwable handled by the {@code ConjureJerseyFeature} is first passed to this {@code
          * exceptionListener}. This is a good opportunity to record metrics about the different types of exceptions.
          */
-        Builder setExceptionListener(ExceptionListener value) {
+        Builder exceptionListener(ExceptionListener value) {
             this.exceptionListener = value;
             return this;
         }
