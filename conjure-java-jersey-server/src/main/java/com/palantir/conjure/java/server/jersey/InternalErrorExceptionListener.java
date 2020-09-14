@@ -59,9 +59,9 @@ final class InternalErrorExceptionListener implements Consumer<Throwable> {
             ServiceException serviceException = (ServiceException) throwable;
             switch (serviceException.getErrorType().code()) {
                 case INTERNAL:
-                case FAILED_PRECONDITION:
                 case TIMEOUT:
                 case CUSTOM_SERVER:
+                case FAILED_PRECONDITION:
                     return Optional.of(ErrorCause.SERVICE_INTERNAL);
 
                     /** All the below are non-5xx, so we don't consider them to be 'internal' errors. */

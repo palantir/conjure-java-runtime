@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -44,7 +45,7 @@ public final class JsonExceptionMapperTest {
 
     @Test
     public void testExpectedSerializedError() throws Exception {
-        Response response = mapper.toResponse(new NullPointerException("foo"));
+        Response response = mapper.toResponse(new ServiceException(ErrorType.NOT_FOUND));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
@@ -52,6 +53,7 @@ public final class JsonExceptionMapperTest {
         assertThat(JerseyServerMetrics.of(registry)
                         .internalerrorAll(ErrorCause.INTERNAL.toString())
                         .getCount())
+                .describedAs("NOT_FOUND shouldn't be counted as the server-author's fault")
                 .isZero();
     }
 
@@ -64,6 +66,8 @@ public final class JsonExceptionMapperTest {
         assertThat(JerseyServerMetrics.of(registry)
                         .internalerrorAll(ErrorCause.INTERNAL.toString())
                         .getCount())
+                .describedAs("A NullPointerException is pretty much always a mistake on the part of the "
+                        + "server-author, so we count it as an internal error")
                 .isEqualTo(1);
     }
 }
