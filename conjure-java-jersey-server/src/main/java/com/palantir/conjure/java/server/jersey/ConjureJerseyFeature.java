@@ -89,7 +89,7 @@ public enum ConjureJerseyFeature implements Feature {
     }
 
     @CheckReturnValue
-    static Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
