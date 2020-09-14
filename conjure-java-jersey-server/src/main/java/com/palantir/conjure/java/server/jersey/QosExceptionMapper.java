@@ -19,7 +19,6 @@ package com.palantir.conjure.java.server.jersey;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.QosException;
 import java.time.temporal.ChronoUnit;
-import java.util.function.Consumer;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -41,17 +40,9 @@ final class QosExceptionMapper implements ExceptionMapper<QosException> {
 
     private static final Logger log = LoggerFactory.getLogger(QosExceptionMapper.class);
 
-    private final Consumer<Throwable> exceptionListener;
-
-    QosExceptionMapper(Consumer<Throwable> exceptionListener) {
-        this.exceptionListener = exceptionListener;
-    }
-
     @Override
     public Response toResponse(QosException qosException) {
         log.debug("Possible quality-of-service intervention", qosException);
-
-        exceptionListener.accept(qosException);
 
         return qosException.accept(new QosException.Visitor<Response>() {
             @Override

@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.errors.QosException;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.net.URL;
 import java.time.Duration;
 import javax.ws.rs.core.Response;
@@ -29,8 +28,7 @@ import org.junit.Test;
 
 public final class QosExceptionMapperTest {
 
-    private static final ExceptionMapper<QosException> mapper =
-            new QosExceptionMapper(new InternalErrorExceptionListener(new DefaultTaggedMetricRegistry()));
+    private static final ExceptionMapper<QosException> mapper = new QosExceptionMapper();
 
     @Test
     public void testThrottle_withoutDuration() throws Exception {

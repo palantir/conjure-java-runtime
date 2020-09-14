@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import java.util.function.Consumer;
 import javax.ws.rs.core.NoContentException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -24,15 +23,9 @@ import javax.ws.rs.ext.Provider;
 
 @Provider
 final class NoContentExceptionMapper implements ExceptionMapper<NoContentException> {
-    private final Consumer<Throwable> exceptionListener;
-
-    NoContentExceptionMapper(Consumer<Throwable> exceptionListener) {
-        this.exceptionListener = exceptionListener;
-    }
 
     @Override
     public Response toResponse(NoContentException exception) {
-        exceptionListener.accept(exception);
         return Response.noContent().build();
     }
 }

@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.palantir.conjure.java.api.errors.ErrorType;
-import java.util.function.Consumer;
 import javax.annotation.Priority;
 import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.ext.Provider;
@@ -31,21 +30,17 @@ final class JacksonExceptionMappers {
 
     private static final int HIGH_PRIORITY = 500;
 
-    static void configure(FeatureContext context, Consumer<Throwable> exceptionListeners) {
-        context.register(new InvalidDefinitionExceptionMapper(exceptionListeners));
-        context.register(new JsonGenerationExceptionMapper(exceptionListeners));
-        context.register(new JsonMappingExceptionMapper(exceptionListeners));
-        context.register(new JsonProcessingExceptionMapper(exceptionListeners));
-        context.register(new JsonParseExceptionMapper(exceptionListeners));
+    static void configure(FeatureContext context, ConjureJerseyFeature.ExceptionListener exceptionListener) {
+        context.register(exceptionListener.augment(new InvalidDefinitionExceptionMapper()));
+        context.register(exceptionListener.augment(new JsonGenerationExceptionMapper()));
+        context.register(exceptionListener.augment(new JsonMappingExceptionMapper()));
+        context.register(exceptionListener.augment(new JsonProcessingExceptionMapper()));
+        context.register(exceptionListener.augment(new JsonParseExceptionMapper()));
     }
 
     @Provider
     @Priority(HIGH_PRIORITY) // Must be prioritized over com.fasterxml.jackson.jaxrs.base.JsonMappingExceptionMapper
     static final class JsonMappingExceptionMapper extends JsonExceptionMapper<JsonMappingException> {
-
-        JsonMappingExceptionMapper(Consumer<Throwable> exceptionListeners) {
-            super(exceptionListeners);
-        }
 
         @Override
         ErrorType getErrorType(JsonMappingException _exception) {
@@ -57,10 +52,6 @@ final class JacksonExceptionMappers {
     @Priority(HIGH_PRIORITY) // Higher priority to avoid interaction with potential future builtin mappers
     static final class InvalidDefinitionExceptionMapper extends JsonExceptionMapper<InvalidDefinitionException> {
 
-        InvalidDefinitionExceptionMapper(Consumer<Throwable> exceptionListeners) {
-            super(exceptionListeners);
-        }
-
         @Override
         ErrorType getErrorType(InvalidDefinitionException _exception) {
             return ErrorType.INTERNAL;
@@ -71,10 +62,6 @@ final class JacksonExceptionMappers {
     @Priority(HIGH_PRIORITY) // Higher priority to avoid interaction with potential future builtin mappers
     static final class JsonGenerationExceptionMapper extends JsonExceptionMapper<JsonGenerationException> {
 
-        JsonGenerationExceptionMapper(Consumer<Throwable> exceptionListeners) {
-            super(exceptionListeners);
-        }
-
         @Override
         ErrorType getErrorType(JsonGenerationException _exception) {
             return ErrorType.INTERNAL;
@@ -84,11 +71,6 @@ final class JacksonExceptionMappers {
     @Provider
     @Priority(HIGH_PRIORITY) // Higher priority to avoid interaction with potential future builtin mappers
     static final class JsonProcessingExceptionMapper extends JsonExceptionMapper<JsonProcessingException> {
-
-        JsonProcessingExceptionMapper(Consumer<Throwable> exceptionListeners) {
-            super(exceptionListeners);
-        }
-
         @Override
         ErrorType getErrorType(JsonProcessingException _exception) {
             return ErrorType.INVALID_ARGUMENT;
@@ -98,10 +80,6 @@ final class JacksonExceptionMappers {
     @Provider
     @Priority(HIGH_PRIORITY) // Must be prioritized over com.fasterxml.jackson.jaxrs.base.JsonParseExceptionMapper
     static final class JsonParseExceptionMapper extends JsonExceptionMapper<JsonParseException> {
-
-        JsonParseExceptionMapper(Consumer<Throwable> exceptionListeners) {
-            super(exceptionListeners);
-        }
 
         @Override
         ErrorType getErrorType(JsonParseException _exception) {

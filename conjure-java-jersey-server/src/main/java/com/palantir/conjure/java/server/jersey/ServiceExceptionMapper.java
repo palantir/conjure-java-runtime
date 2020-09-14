@@ -19,7 +19,6 @@ package com.palantir.conjure.java.server.jersey;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
-import java.util.function.Consumer;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -35,16 +34,9 @@ import org.slf4j.LoggerFactory;
 final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceExceptionMapper.class);
-    private final Consumer<Throwable> exceptionListener;
-
-    ServiceExceptionMapper(Consumer<Throwable> exceptionListener) {
-        this.exceptionListener = exceptionListener;
-    }
 
     @Override
     public Response toResponse(ServiceException exception) {
-        exceptionListener.accept(exception);
-
         int httpStatus = exception.getErrorType().httpErrorCode();
         if (httpStatus / 100 == 4 /* client error */) {
             log.info(

@@ -20,7 +20,6 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.SafeArg;
 import java.util.UUID;
-import java.util.function.Consumer;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -44,19 +43,12 @@ import org.slf4j.LoggerFactory;
 abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapper<T> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
-    private final Consumer<Throwable> exceptionListener;
-
-    JsonExceptionMapper(Consumer<Throwable> exceptionListener) {
-        this.exceptionListener = exceptionListener;
-    }
 
     /** Returns the {@link ErrorType} that this exception corresponds to. */
     abstract ErrorType getErrorType(T exception);
 
     @Override
     public final Response toResponse(T exception) {
-        exceptionListener.accept(exception);
-
         String errorInstanceId = UUID.randomUUID().toString();
         ErrorType errorType = getErrorType(exception);
 

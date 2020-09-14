@@ -23,22 +23,17 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
-import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import javax.ws.rs.core.Response;
 import org.junit.Test;
 
 public final class JsonExceptionMapperTest {
 
-    private final TaggedMetricRegistry registry = new DefaultTaggedMetricRegistry();
-    private final InternalErrorExceptionListener exceptionListener = new InternalErrorExceptionListener(registry);
-    private final JsonExceptionMapper<RuntimeException> mapper =
-            new JsonExceptionMapper<RuntimeException>(exceptionListener) {
-                @Override
-                ErrorType getErrorType(RuntimeException _exception) {
-                    return ErrorType.INVALID_ARGUMENT;
-                }
-            };
+    private final JsonExceptionMapper<RuntimeException> mapper = new JsonExceptionMapper<RuntimeException>() {
+        @Override
+        ErrorType getErrorType(RuntimeException _exception) {
+            return ErrorType.INVALID_ARGUMENT;
+        }
+    };
 
     private final ObjectMapper objectMapper =
             ObjectMappers.newServerObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
@@ -50,24 +45,12 @@ public final class JsonExceptionMapperTest {
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
-        assertThat(JerseyServerMetrics.of(registry)
-                        .internalerrorAll(ErrorCause.INTERNAL.toString())
-                        .getCount())
-                .describedAs("NOT_FOUND shouldn't be counted as the server-author's fault")
-                .isZero();
     }
 
     @Test
     public void testDoesNotPropagateExceptionMessage() throws Exception {
-        Response response =
-                new RuntimeExceptionMapper(exceptionListener).toResponse(new NullPointerException("secret"));
+        Response response = new RuntimeExceptionMapper().toResponse(new NullPointerException("secret"));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).doesNotContain("secret");
-        assertThat(JerseyServerMetrics.of(registry)
-                        .internalerrorAll(ErrorCause.INTERNAL.toString())
-                        .getCount())
-                .describedAs("A NullPointerException is pretty much always a mistake on the part of the "
-                        + "server-author, so we count it as an internal error")
-                .isEqualTo(1);
     }
 }

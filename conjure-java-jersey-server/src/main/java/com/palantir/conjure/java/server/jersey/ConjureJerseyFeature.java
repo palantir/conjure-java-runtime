@@ -21,18 +21,13 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tracing.jersey.TraceEnrichingFilter;
-import java.util.function.Consumer;
 import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
 
 public enum ConjureJerseyFeature implements Feature {
     INSTANCE;
-
-    private final Consumer<Throwable> listener;
-
-    ConjureJerseyFeature() {
-        this.listener = InternalErrorExceptionListener.createDefault();
-    }
 
     /**
      * Configures a Jersey server w.r.t. conjure-java-runtime conventions: registers tracer filters and exception
@@ -40,20 +35,20 @@ public enum ConjureJerseyFeature implements Feature {
      */
     @Override
     public boolean configure(FeatureContext context) {
-        return configure(context, listener);
+        return configure(context, NoOpListener.INSTANCE);
     }
 
-    private static boolean configure(FeatureContext context, Consumer<Throwable> exceptionListener) {
+    private static boolean configure(FeatureContext context, ExceptionListener exceptionListener) {
         // Exception mappers
-        context.register(new IllegalArgumentExceptionMapper(exceptionListener));
-        context.register(new NoContentExceptionMapper(exceptionListener));
-        context.register(new RetryableExceptionMapper(exceptionListener));
-        context.register(new RuntimeExceptionMapper(exceptionListener));
-        context.register(new WebApplicationExceptionMapper(exceptionListener));
-        context.register(new RemoteExceptionMapper(exceptionListener));
-        context.register(new ServiceExceptionMapper(exceptionListener));
-        context.register(new QosExceptionMapper(exceptionListener));
-        context.register(new ThrowableExceptionMapper(exceptionListener));
+        context.register(exceptionListener.augment(new IllegalArgumentExceptionMapper()));
+        context.register(exceptionListener.augment(new NoContentExceptionMapper()));
+        context.register(exceptionListener.augment(new RetryableExceptionMapper()));
+        context.register(exceptionListener.augment(new RuntimeExceptionMapper()));
+        context.register(exceptionListener.augment(new WebApplicationExceptionMapper()));
+        context.register(exceptionListener.augment(new RemoteExceptionMapper()));
+        context.register(exceptionListener.augment(new ServiceExceptionMapper()));
+        context.register(exceptionListener.augment(new QosExceptionMapper()));
+        context.register(exceptionListener.augment(new ThrowableExceptionMapper()));
         JacksonExceptionMappers.configure(context, exceptionListener);
 
         // Cbor handling
@@ -96,19 +91,19 @@ public enum ConjureJerseyFeature implements Feature {
 
     @CheckReturnValue
     public static final class Builder {
-        private Consumer<Throwable> exceptionListener = InternalErrorExceptionListener.createDefault();
+        private ExceptionListener exceptionListener = NoOpListener.INSTANCE;
 
         /**
          * Every throwable handled by the {@code ConjureJerseyFeature} is first passed to this {@code
          * exceptionListener}. This is a good opportunity to record metrics about the different types of exceptions.
          */
-        Builder setExceptionListener(Consumer<Throwable> value) {
+        Builder setExceptionListener(ExceptionListener value) {
             this.exceptionListener = value;
             return this;
         }
 
         Feature build() {
-            Consumer<Throwable> listener = Preconditions.checkNotNull(exceptionListener, "exceptionListener");
+            ExceptionListener listener = Preconditions.checkNotNull(exceptionListener, "exceptionListener");
             return new Feature() {
                 @Override
                 public boolean configure(FeatureContext context) {
@@ -120,6 +115,49 @@ public enum ConjureJerseyFeature implements Feature {
                     return "ConjureJerseyFeature{}";
                 }
             };
+        }
+    }
+
+    /** Implementors of this interface can. */
+    public interface ExceptionListener {
+
+        void onException(Throwable throwable);
+
+        /** Invoked in a finally block, so use this to unset any MDC values. */
+        void afterResponseBuilt();
+
+        default <T extends Throwable> ExceptionMapper<T> augment(ExceptionMapper<T> delegate) {
+            return new ExceptionMapper<T>() {
+                @Override
+                public Response toResponse(T exception) {
+                    try {
+                        onException(exception);
+                        return delegate.toResponse(exception);
+                    } finally {
+                        afterResponseBuilt();
+                    }
+                }
+
+                @Override
+                public String toString() {
+                    return "ExceptionListener{delegate=" + delegate + '}';
+                }
+            };
+        }
+    }
+
+    enum NoOpListener implements ExceptionListener {
+        INSTANCE;
+
+        @Override
+        public void onException(Throwable _throwable) {}
+
+        @Override
+        public void afterResponseBuilt() {}
+
+        @Override
+        public <T extends Throwable> ExceptionMapper<T> augment(ExceptionMapper<T> delegate) {
+            return delegate;
         }
     }
 }

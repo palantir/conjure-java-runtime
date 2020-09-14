@@ -17,15 +17,10 @@
 package com.palantir.conjure.java.server.jersey;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
-import java.util.function.Consumer;
 import javax.ws.rs.ext.Provider;
 
 @Provider
 final class ThrowableExceptionMapper extends JsonExceptionMapper<Throwable> {
-
-    ThrowableExceptionMapper(Consumer<Throwable> exceptionListener) {
-        super(exceptionListener);
-    }
 
     @Override
     ErrorType getErrorType(Throwable _exception) {
