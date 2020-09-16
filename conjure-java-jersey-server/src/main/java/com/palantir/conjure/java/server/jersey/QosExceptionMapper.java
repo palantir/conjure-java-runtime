@@ -36,13 +36,18 @@ import org.slf4j.LoggerFactory;
  * </ol>
  */
 @Provider
-final class QosExceptionMapper implements ExceptionMapper<QosException> {
+final class QosExceptionMapper extends ListenableExceptionMapper<QosException> {
 
     private static final Logger log = LoggerFactory.getLogger(QosExceptionMapper.class);
 
+    QosExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+        super(listener);
+    }
+
     @Override
-    public Response toResponse(QosException qosException) {
+    public Response toResponseInner(QosException qosException) {
         log.debug("Possible quality-of-service intervention", qosException);
+
         return qosException.accept(new QosException.Visitor<Response>() {
             @Override
             public Response visit(QosException.Throttle exception) {

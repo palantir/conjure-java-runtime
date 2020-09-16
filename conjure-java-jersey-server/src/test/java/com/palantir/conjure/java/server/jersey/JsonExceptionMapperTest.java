@@ -21,50 +21,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.palantir.conjure.java.api.errors.ErrorType;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
-import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import javax.ws.rs.core.Response;
 import org.junit.Test;
 
 public final class JsonExceptionMapperTest {
 
-    private final JerseyServerMetrics metrics = JerseyServerMetrics.of(new DefaultTaggedMetricRegistry());
-    private final JsonExceptionMapper<RuntimeException> mapper = new JsonExceptionMapper<RuntimeException>(metrics) {
-        @Override
-        ErrorType getErrorType(RuntimeException _exception) {
-            return ErrorType.INVALID_ARGUMENT;
-        }
-
-        @Override
-        ErrorCause getCause() {
-            return ErrorCause.INTERNAL;
-        }
-    };
+    private final JsonExceptionMapper<RuntimeException> mapper =
+            new JsonExceptionMapper<RuntimeException>(ConjureJerseyFeature.NoOpListener.INSTANCE) {
+                @Override
+                ErrorType getErrorType(RuntimeException _exception) {
+                    return ErrorType.INVALID_ARGUMENT;
+                }
+            };
 
     private final ObjectMapper objectMapper =
             ObjectMappers.newServerObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 
     @Test
     public void testExpectedSerializedError() throws Exception {
-        Response response = mapper.toResponse(new NullPointerException("foo"));
+        Response response = mapper.toResponse(new ServiceException(ErrorType.NOT_FOUND));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).contains("\"errorCode\" : \"INVALID_ARGUMENT\"");
         assertThat(entity).contains("\"errorName\" : \"Default:InvalidArgument\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
-        assertThat(metrics.internalerrorAll(ErrorCause.INTERNAL.toString()).getCount())
-                .isZero();
     }
 
     @Test
     public void testDoesNotPropagateExceptionMessage() throws Exception {
-        JerseyServerMetrics runtimeExceptionMetrics = JerseyServerMetrics.of(new DefaultTaggedMetricRegistry());
-        Response response =
-                new RuntimeExceptionMapper(runtimeExceptionMetrics).toResponse(new NullPointerException("secret"));
+        Response response = new RuntimeExceptionMapper(ConjureJerseyFeature.NoOpListener.INSTANCE)
+                .toResponse(new NullPointerException("secret"));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).doesNotContain("secret");
-        assertThat(runtimeExceptionMetrics
-                        .internalerrorAll(ErrorCause.INTERNAL.toString())
-                        .getCount())
-                .isEqualTo(1);
     }
 }

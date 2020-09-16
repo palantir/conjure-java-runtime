@@ -28,7 +28,8 @@ import org.junit.Test;
 
 public final class QosExceptionMapperTest {
 
-    private static final ExceptionMapper<QosException> mapper = new QosExceptionMapper();
+    private static final ExceptionMapper<QosException> mapper =
+            new QosExceptionMapper(ConjureJerseyFeature.NoOpListener.INSTANCE);
 
     @Test
     public void testThrottle_withoutDuration() throws Exception {

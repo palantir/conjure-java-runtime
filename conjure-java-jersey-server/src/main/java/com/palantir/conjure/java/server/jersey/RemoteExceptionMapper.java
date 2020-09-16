@@ -44,12 +44,16 @@ import org.slf4j.LoggerFactory;
  * propagated to caller to avoid an unintentional dependency on the remote exception.
  */
 @Provider
-final class RemoteExceptionMapper implements ExceptionMapper<RemoteException> {
+final class RemoteExceptionMapper extends ListenableExceptionMapper<RemoteException> {
 
     private static final Logger log = LoggerFactory.getLogger(RemoteExceptionMapper.class);
 
+    RemoteExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+        super(listener);
+    }
+
     @Override
-    public Response toResponse(RemoteException exception) {
+    public Response toResponseInner(RemoteException exception) {
         ErrorType errorType = mapErrorType(exception);
         Response.ResponseBuilder builder = Response.status(errorType.httpErrorCode());
 

@@ -22,17 +22,12 @@ import javax.ws.rs.ext.Provider;
 @Provider
 final class IllegalArgumentExceptionMapper extends JsonExceptionMapper<IllegalArgumentException> {
 
-    IllegalArgumentExceptionMapper(JerseyServerMetrics metrics) {
-        super(metrics);
+    IllegalArgumentExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+        super(listener);
     }
 
     @Override
     ErrorType getErrorType(IllegalArgumentException _exception) {
         return ErrorType.INVALID_ARGUMENT;
-    }
-
-    @Override
-    ErrorCause getCause() {
-        return ErrorCause.UNKNOWN;
     }
 }

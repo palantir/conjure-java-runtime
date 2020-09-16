@@ -40,28 +40,21 @@ import org.slf4j.LoggerFactory;
  * <p>When code in the server throws an {@link Exception} that reaches Jersey, this {@link ExceptionMapper} converts
  * that exception into an HTTP {@link Response} for return to the caller/browser.
  */
-abstract class JsonExceptionMapper<T extends Throwable> implements ExceptionMapper<T> {
+abstract class JsonExceptionMapper<T extends Throwable> extends ListenableExceptionMapper<T> {
 
     private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
 
-    private final JerseyServerMetrics metrics;
-
-    JsonExceptionMapper(JerseyServerMetrics metrics) {
-        this.metrics = metrics;
+    JsonExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+        super(listener);
     }
 
     /** Returns the {@link ErrorType} that this exception corresponds to. */
     abstract ErrorType getErrorType(T exception);
 
-    abstract ErrorCause getCause();
-
     @Override
-    public final Response toResponse(T exception) {
+    public final Response toResponseInner(T exception) {
         String errorInstanceId = UUID.randomUUID().toString();
         ErrorType errorType = getErrorType(exception);
-        if (errorType.equals(ErrorType.INTERNAL)) {
-            this.metrics.internalerrorAll(getCause().toString()).mark();
-        }
 
         if (errorType.httpErrorCode() / 100 == 4 /* client error */) {
             log.info(

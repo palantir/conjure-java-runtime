@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: |
+    Rather than using ConjureJerseyFeature.INSTANCE, it is now recommended to use ConjureJerseyFeature.builder().exceptionListener(...).build() to allow WC's smarter 'internal error' detection logic to hook up the necessary request and service log params.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1772

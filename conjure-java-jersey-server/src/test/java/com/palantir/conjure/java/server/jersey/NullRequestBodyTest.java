@@ -56,7 +56,7 @@ public class NullRequestBodyTest {
 
     @Test
     public void testEmptyRequestBody() {
-        Entity empty = Entity.entity(null, MediaType.APPLICATION_JSON);
+        Entity<String> empty = Entity.entity(null, MediaType.APPLICATION_JSON);
 
         // this endpoint does not have any annotation
         Response postResponse = target.path("post").request().post(empty);
@@ -69,7 +69,7 @@ public class NullRequestBodyTest {
 
     @Test
     public void testExplicitlyNullRequestBody() {
-        Entity explicitlyNull = Entity.entity("null", MediaType.APPLICATION_JSON);
+        Entity<String> explicitlyNull = Entity.entity("null", MediaType.APPLICATION_JSON);
 
         // this endpoint does not have any annotation
         Response postResponse = target.path("post").request().post(explicitlyNull);
@@ -82,7 +82,7 @@ public class NullRequestBodyTest {
 
     @Test
     public void testNonNullRequestBody() {
-        Entity emptyMap = Entity.entity(ImmutableMap.of(), MediaType.APPLICATION_JSON);
+        Entity<Map<String, String>> emptyMap = Entity.entity(ImmutableMap.of(), MediaType.APPLICATION_JSON);
 
         // this endpoint's handler method does not throw
         Response postResponse = target.path("post").request().post(emptyMap);

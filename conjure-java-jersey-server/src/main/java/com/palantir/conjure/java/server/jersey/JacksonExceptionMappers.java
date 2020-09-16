@@ -30,30 +30,25 @@ final class JacksonExceptionMappers {
 
     private static final int HIGH_PRIORITY = 500;
 
-    static void configure(JerseyServerMetrics metrics, FeatureContext context) {
-        context.register(new InvalidDefinitionExceptionMapper(metrics));
-        context.register(new JsonGenerationExceptionMapper(metrics));
-        context.register(new JsonMappingExceptionMapper(metrics));
-        context.register(new JsonProcessingExceptionMapper(metrics));
-        context.register(new JsonParseExceptionMapper(metrics));
+    static void configure(FeatureContext context, ConjureJerseyFeature.ExceptionListener exceptionListener) {
+        context.register(new InvalidDefinitionExceptionMapper(exceptionListener));
+        context.register(new JsonGenerationExceptionMapper(exceptionListener));
+        context.register(new JsonMappingExceptionMapper(exceptionListener));
+        context.register(new JsonProcessingExceptionMapper(exceptionListener));
+        context.register(new JsonParseExceptionMapper(exceptionListener));
     }
 
     @Provider
     @Priority(HIGH_PRIORITY) // Must be prioritized over com.fasterxml.jackson.jaxrs.base.JsonMappingExceptionMapper
     static final class JsonMappingExceptionMapper extends JsonExceptionMapper<JsonMappingException> {
 
-        JsonMappingExceptionMapper(JerseyServerMetrics metrics) {
-            super(metrics);
+        JsonMappingExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+            super(listener);
         }
 
         @Override
         ErrorType getErrorType(JsonMappingException _exception) {
             return ErrorType.INVALID_ARGUMENT;
-        }
-
-        @Override
-        ErrorCause getCause() {
-            return ErrorCause.RPC;
         }
     }
 
@@ -61,18 +56,13 @@ final class JacksonExceptionMappers {
     @Priority(HIGH_PRIORITY) // Higher priority to avoid interaction with potential future builtin mappers
     static final class InvalidDefinitionExceptionMapper extends JsonExceptionMapper<InvalidDefinitionException> {
 
-        InvalidDefinitionExceptionMapper(JerseyServerMetrics metrics) {
-            super(metrics);
+        InvalidDefinitionExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+            super(listener);
         }
 
         @Override
         ErrorType getErrorType(InvalidDefinitionException _exception) {
             return ErrorType.INTERNAL;
-        }
-
-        @Override
-        ErrorCause getCause() {
-            return ErrorCause.RPC;
         }
     }
 
@@ -80,37 +70,26 @@ final class JacksonExceptionMappers {
     @Priority(HIGH_PRIORITY) // Higher priority to avoid interaction with potential future builtin mappers
     static final class JsonGenerationExceptionMapper extends JsonExceptionMapper<JsonGenerationException> {
 
-        JsonGenerationExceptionMapper(JerseyServerMetrics metrics) {
-            super(metrics);
+        JsonGenerationExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+            super(listener);
         }
 
         @Override
         ErrorType getErrorType(JsonGenerationException _exception) {
             return ErrorType.INTERNAL;
         }
-
-        @Override
-        ErrorCause getCause() {
-            return ErrorCause.RPC;
-        }
     }
 
     @Provider
     @Priority(HIGH_PRIORITY) // Higher priority to avoid interaction with potential future builtin mappers
     static final class JsonProcessingExceptionMapper extends JsonExceptionMapper<JsonProcessingException> {
-
-        JsonProcessingExceptionMapper(JerseyServerMetrics metrics) {
-            super(metrics);
+        JsonProcessingExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+            super(listener);
         }
 
         @Override
         ErrorType getErrorType(JsonProcessingException _exception) {
             return ErrorType.INVALID_ARGUMENT;
-        }
-
-        @Override
-        ErrorCause getCause() {
-            return ErrorCause.RPC;
         }
     }
 
@@ -118,18 +97,13 @@ final class JacksonExceptionMappers {
     @Priority(HIGH_PRIORITY) // Must be prioritized over com.fasterxml.jackson.jaxrs.base.JsonParseExceptionMapper
     static final class JsonParseExceptionMapper extends JsonExceptionMapper<JsonParseException> {
 
-        JsonParseExceptionMapper(JerseyServerMetrics metrics) {
-            super(metrics);
+        JsonParseExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+            super(listener);
         }
 
         @Override
         ErrorType getErrorType(JsonParseException _exception) {
             return ErrorType.INVALID_ARGUMENT;
-        }
-
-        @Override
-        ErrorCause getCause() {
-            return ErrorCause.RPC;
         }
     }
 

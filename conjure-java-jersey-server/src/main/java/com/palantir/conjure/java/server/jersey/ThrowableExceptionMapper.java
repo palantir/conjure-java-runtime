@@ -22,17 +22,12 @@ import javax.ws.rs.ext.Provider;
 @Provider
 final class ThrowableExceptionMapper extends JsonExceptionMapper<Throwable> {
 
-    ThrowableExceptionMapper(JerseyServerMetrics metrics) {
-        super(metrics);
+    ThrowableExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+        super(listener);
     }
 
     @Override
     ErrorType getErrorType(Throwable _exception) {
         return ErrorType.INTERNAL;
-    }
-
-    @Override
-    ErrorCause getCause() {
-        return ErrorCause.INTERNAL;
     }
 }

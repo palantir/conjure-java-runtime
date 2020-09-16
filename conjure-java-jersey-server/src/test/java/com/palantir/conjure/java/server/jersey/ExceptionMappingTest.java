@@ -240,7 +240,7 @@ public final class ExceptionMappingTest {
         @Override
         public final void run(Configuration _config, final Environment env) {
             env.jersey().register(JacksonFeature.class);
-            env.jersey().register(ConjureJerseyFeature.INSTANCE);
+            env.jersey().register(ConjureJerseyFeature.builder().build());
             env.jersey().register(new ExceptionTestResource());
         }
     }
