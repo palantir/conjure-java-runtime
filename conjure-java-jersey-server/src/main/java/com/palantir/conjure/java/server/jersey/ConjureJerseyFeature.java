@@ -103,12 +103,12 @@ public enum ConjureJerseyFeature implements Feature {
          * Every throwable handled by the {@code ConjureJerseyFeature} is first passed to this {@code
          * exceptionListener}. This is a good opportunity to record metrics about the different types of exceptions.
          */
-        Builder exceptionListener(ExceptionListener value) {
+        public Builder exceptionListener(ExceptionListener value) {
             this.exceptionListener = value;
             return this;
         }
 
-        Feature build() {
+        public Feature build() {
             ExceptionListener listener = Preconditions.checkNotNull(exceptionListener, "exceptionListener");
             return new Feature() {
                 @Override
