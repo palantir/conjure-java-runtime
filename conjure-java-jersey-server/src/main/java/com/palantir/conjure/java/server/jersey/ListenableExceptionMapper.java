@@ -27,6 +27,7 @@ abstract class ListenableExceptionMapper<T extends Throwable> implements Excepti
         this.listener = listener;
     }
 
+    /** Just like the jaxrs {@link javax.ws.rs.ext.ExceptionMapper#toResponse} method. */
     abstract Response toResponseInner(T exception);
 
     @Override
