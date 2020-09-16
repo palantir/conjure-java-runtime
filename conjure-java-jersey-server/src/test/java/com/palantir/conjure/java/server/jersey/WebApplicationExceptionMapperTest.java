@@ -33,7 +33,8 @@ import org.junit.Test;
 
 public final class WebApplicationExceptionMapperTest {
 
-    private final WebApplicationExceptionMapper mapper = new WebApplicationExceptionMapper();
+    private final WebApplicationExceptionMapper mapper =
+            new WebApplicationExceptionMapper(ConjureJerseyFeature.NoOpListener.INSTANCE);
     private final ObjectMapper objectMapper =
             ObjectMappers.newServerObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 

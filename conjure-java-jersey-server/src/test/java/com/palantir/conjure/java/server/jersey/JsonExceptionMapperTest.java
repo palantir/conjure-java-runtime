@@ -28,12 +28,13 @@ import org.junit.Test;
 
 public final class JsonExceptionMapperTest {
 
-    private final JsonExceptionMapper<RuntimeException> mapper = new JsonExceptionMapper<RuntimeException>() {
-        @Override
-        ErrorType getErrorType(RuntimeException _exception) {
-            return ErrorType.INVALID_ARGUMENT;
-        }
-    };
+    private final JsonExceptionMapper<RuntimeException> mapper =
+            new JsonExceptionMapper<RuntimeException>(ConjureJerseyFeature.NoOpListener.INSTANCE) {
+                @Override
+                ErrorType getErrorType(RuntimeException _exception) {
+                    return ErrorType.INVALID_ARGUMENT;
+                }
+            };
 
     private final ObjectMapper objectMapper =
             ObjectMappers.newServerObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
@@ -49,7 +50,8 @@ public final class JsonExceptionMapperTest {
 
     @Test
     public void testDoesNotPropagateExceptionMessage() throws Exception {
-        Response response = new RuntimeExceptionMapper().toResponse(new NullPointerException("secret"));
+        Response response = new RuntimeExceptionMapper(ConjureJerseyFeature.NoOpListener.INSTANCE)
+                .toResponse(new NullPointerException("secret"));
         String entity = objectMapper.writeValueAsString(response.getEntity());
         assertThat(entity).doesNotContain("secret");
     }

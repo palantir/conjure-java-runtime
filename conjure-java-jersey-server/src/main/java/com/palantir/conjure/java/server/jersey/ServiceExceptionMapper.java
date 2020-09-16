@@ -22,7 +22,6 @@ import com.palantir.logsafe.SafeArg;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +30,16 @@ import org.slf4j.LoggerFactory;
  * {@link SerializableError#forException}). Also see {@link JsonExceptionMapper} for more information on the interplay
  * of Jersey and exception mappers.
  */
-final class ServiceExceptionMapper implements ExceptionMapper<ServiceException> {
+final class ServiceExceptionMapper extends ListenableExceptionMapper<ServiceException> {
 
     private static final Logger log = LoggerFactory.getLogger(ServiceExceptionMapper.class);
 
+    ServiceExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+        super(listener);
+    }
+
     @Override
-    public Response toResponse(ServiceException exception) {
+    public Response toResponseInner(ServiceException exception) {
         int httpStatus = exception.getErrorType().httpErrorCode();
         if (httpStatus / 100 == 4 /* client error */) {
             log.info(

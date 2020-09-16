@@ -23,6 +23,10 @@ import javax.ws.rs.ext.Provider;
 @Provider
 final class RetryableExceptionMapper extends JsonExceptionMapper<RetryableException> {
 
+    RetryableExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+        super(listener);
+    }
+
     @Override
     ErrorType getErrorType(RetryableException _exception) {
         return ErrorType.INTERNAL;

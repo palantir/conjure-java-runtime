@@ -22,6 +22,10 @@ import javax.ws.rs.ext.Provider;
 @Provider
 final class ThrowableExceptionMapper extends JsonExceptionMapper<Throwable> {
 
+    ThrowableExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+        super(listener);
+    }
+
     @Override
     ErrorType getErrorType(Throwable _exception) {
         return ErrorType.INTERNAL;

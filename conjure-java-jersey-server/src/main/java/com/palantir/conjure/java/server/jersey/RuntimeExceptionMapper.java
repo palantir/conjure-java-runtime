@@ -22,6 +22,10 @@ import javax.ws.rs.ext.Provider;
 @Provider
 final class RuntimeExceptionMapper extends JsonExceptionMapper<RuntimeException> {
 
+    RuntimeExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+        super(listener);
+    }
+
     @Override
     ErrorType getErrorType(RuntimeException _exception) {
         return ErrorType.INTERNAL;

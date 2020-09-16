@@ -26,7 +26,6 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.ParamException;
 import org.glassfish.jersey.server.ServerRuntime;
@@ -41,12 +40,16 @@ import org.slf4j.LoggerFactory;
  * {@link RuntimeExceptionMapper} and transformed into a 500 internal exception, which is not what we want.
  */
 @Provider
-final class WebApplicationExceptionMapper implements ExceptionMapper<WebApplicationException> {
+final class WebApplicationExceptionMapper extends ListenableExceptionMapper<WebApplicationException> {
 
     private static final Logger log = LoggerFactory.getLogger(WebApplicationExceptionMapper.class);
 
+    WebApplicationExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
+        super(listener);
+    }
+
     @Override
-    public Response toResponse(WebApplicationException exception) {
+    public Response toResponseInner(WebApplicationException exception) {
         String errorInstanceId = UUID.randomUUID().toString();
 
         if (exception.getResponse().getStatus() / 100 == 4 /* client error */) {
