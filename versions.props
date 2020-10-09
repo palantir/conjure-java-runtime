@@ -1,6 +1,4 @@
 ch.qos.logback:logback-classic = 1.2.3
-# catch-all jackson version
-com.fasterxml.jackson.*:jackson-* = 2.11.3
 com.github.ben-manes.caffeine:caffeine = 2.8.5
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 29.0-jre
@@ -32,6 +30,8 @@ io.undertow:undertow-core = 2.2.2.Final
 com.palantir.refreshable:refreshable = 1.0.0
 
 # dependency-upgrader:OFF
+
+com.fasterxml.jackson.*:jackson-* = 2.11.1
 
 # Temporarily pausing until internal libraries stop relying on UnrepeatableRequestBody
 com.squareup.okhttp3:* = 3.13.1

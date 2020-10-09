@@ -57,7 +57,13 @@ allprojects {
                 version { strictly '[3, 3.14.0[' }
                 because 'okhttp 3.14.0 removed UnrepeatableRequestBody which is relied on by an internal library'
             }
+
+            rootConfiguration 'com.fasterxml.jackson.core:jackson-databind', {
+                version { strictly '2.11.1' }
+                because 'Staying on jackson 2.11.1 due to problems with 2.11.2 and 2.11.3 deserializing polymorphic types'
+            }
         }
+
         modules {
             module('javax.ws.rs:javax.ws.rs-api') {
                 replacedBy('jakarta.ws.rs:jakarta.ws.rs-api', 'Oracle have trademarks, Eclipse forced to rename https://waynebeaton.wordpress.com/2019/04/04/renaming-java-ee-specifications-for-jakarta-ee/')
