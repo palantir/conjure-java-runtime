@@ -411,7 +411,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
                 .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(ERROR)));
 
         CountDownLatch assertionsPassed = new CountDownLatch(1);
-        retrofit2.Call<String> call = service.getRelative();
+        Call<String> call = service.getRelative();
         call.enqueue(new retrofit2.Callback<String>() {
             @Override
             public void onResponse(Call<String> _call, Response<String> _response) {
@@ -491,11 +491,11 @@ public final class Retrofit2ClientApiTest extends TestBase {
         return com.google.common.base.Optional.absent();
     }
 
-    private static <T> java.util.Optional<T> java8Optional(T value) {
-        return java.util.Optional.of(value);
+    private static <T> Optional<T> java8Optional(T value) {
+        return Optional.of(value);
     }
 
-    private static <T> java.util.Optional<T> java8EmptyOptional() {
-        return java.util.Optional.empty();
+    private static <T> Optional<T> java8EmptyOptional() {
+        return Optional.empty();
     }
 }

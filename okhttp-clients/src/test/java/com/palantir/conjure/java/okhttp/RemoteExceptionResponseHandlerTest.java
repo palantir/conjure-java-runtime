@@ -82,9 +82,8 @@ public final class RemoteExceptionResponseHandlerTest {
     @Test
     public void handlesWebApplicationExceptions() {
         testEncodingAndDecodingWebException(ClientErrorException.class, Response.Status.NOT_ACCEPTABLE);
-        testEncodingAndDecodingWebException(ServerErrorException.class, javax.ws.rs.core.Response.Status.BAD_GATEWAY);
-        testEncodingAndDecodingWebException(
-                WebApplicationException.class, javax.ws.rs.core.Response.Status.NOT_MODIFIED);
+        testEncodingAndDecodingWebException(ServerErrorException.class, Response.Status.BAD_GATEWAY);
+        testEncodingAndDecodingWebException(WebApplicationException.class, Response.Status.NOT_MODIFIED);
     }
 
     private static void testEncodingAndDecodingWebException(
@@ -133,12 +132,11 @@ public final class RemoteExceptionResponseHandlerTest {
 
     @Test
     public void handlesNotAuthorizedException() throws Exception {
-        NotAuthorizedException originalException =
-                new NotAuthorizedException(message, javax.ws.rs.core.Response.Status.UNAUTHORIZED);
+        NotAuthorizedException originalException = new NotAuthorizedException(message, Response.Status.UNAUTHORIZED);
 
         RemoteException exception = encodeAndDecode(originalException).get();
         assertThat(exception.getCause()).isNull();
-        assertThat(exception.getStatus()).isEqualTo(javax.ws.rs.core.Response.Status.UNAUTHORIZED.getStatusCode());
+        assertThat(exception.getStatus()).isEqualTo(Response.Status.UNAUTHORIZED.getStatusCode());
         assertThat(exception.getError().errorCode()).isEqualTo(NotAuthorizedException.class.getName());
         assertThat(exception.getError().errorName()).isEqualTo(message);
         assertThat(exception.getMessage())

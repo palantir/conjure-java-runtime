@@ -69,7 +69,7 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
 
     /** Optionally returns a converter which returns null when the value is not present. */
     private static Optional<Converter<?, String>> getNullableConverterForRawType(Class<?> rawType) {
-        if (rawType == java.util.Optional.class) {
+        if (rawType == Optional.class) {
             return Optional.of(Java8OptionalStringConverter.INSTANCE);
         } else if (rawType == java.util.OptionalInt.class) {
             return Optional.of(Java8OptionalIntStringConverter.INSTANCE);
@@ -84,11 +84,11 @@ public final class OptionalObjectToStringConverterFactory extends Converter.Fact
         }
     }
 
-    enum Java8OptionalStringConverter implements Converter<java.util.Optional<?>, String> {
+    enum Java8OptionalStringConverter implements Converter<Optional<?>, String> {
         INSTANCE;
 
         @Override
-        public String convert(java.util.Optional<?> value) throws IOException {
+        public String convert(Optional<?> value) throws IOException {
             return value.map(Object::toString).orElse(null);
         }
     }

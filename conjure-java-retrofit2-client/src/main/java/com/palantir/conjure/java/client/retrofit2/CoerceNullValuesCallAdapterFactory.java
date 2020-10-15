@@ -78,13 +78,13 @@ final class CoerceNullValuesCallAdapterFactory extends CallAdapter.Factory {
             return new DefaultingOnNullAdapter<>(callAdapter, Collections::emptySet);
         } else if (Map.class.isAssignableFrom(rawType)) {
             return new DefaultingOnNullAdapter<>(callAdapter, Collections::emptyMap);
-        } else if (rawType == java.util.Optional.class) {
+        } else if (rawType == Optional.class) {
             return new DefaultingOnNullAdapter<>(callAdapter, Optional::empty);
-        } else if (rawType == java.util.OptionalInt.class) {
+        } else if (rawType == OptionalInt.class) {
             return new DefaultingOnNullAdapter<>(callAdapter, OptionalInt::empty);
-        } else if (rawType == java.util.OptionalLong.class) {
+        } else if (rawType == OptionalLong.class) {
             return new DefaultingOnNullAdapter<>(callAdapter, OptionalLong::empty);
-        } else if (rawType == java.util.OptionalDouble.class) {
+        } else if (rawType == OptionalDouble.class) {
             return new DefaultingOnNullAdapter<>(callAdapter, OptionalDouble::empty);
         } else if (rawType == com.google.common.base.Optional.class) {
             return new DefaultingOnNullAdapter<>(callAdapter, com.google.common.base.Optional::absent);

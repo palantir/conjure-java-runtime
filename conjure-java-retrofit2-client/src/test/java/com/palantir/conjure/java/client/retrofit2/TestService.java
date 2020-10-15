@@ -40,9 +40,8 @@ public interface TestService {
             @Query("queryString") com.google.common.base.Optional<String> queryString);
 
     @GET("getJava8OptionalString/{pathString}/")
-    Call<java.util.Optional<String>> getJava8OptionalString(
-            @Path("pathString") java.util.Optional<String> pathString,
-            @Query("queryString") java.util.Optional<String> queryString);
+    Call<Optional<String>> getJava8OptionalString(
+            @Path("pathString") Optional<String> pathString, @Query("queryString") Optional<String> queryString);
 
     @GET("getJava8OptionalInt")
     Call<java.util.OptionalInt> getJava8OptionalInt();
@@ -58,14 +57,14 @@ public interface TestService {
             @Body com.google.common.base.Optional<LocalDate> date);
 
     @POST("getComplexJavaType")
-    Call<java.util.Optional<LocalDate>> getComplexJava8Type(@Body java.util.Optional<LocalDate> date);
+    Call<Optional<LocalDate>> getComplexJava8Type(@Body Optional<LocalDate> date);
 
     @GET("relative")
     Call<String> getRelative();
 
     @GET("getComplexCborType")
     @Headers("Accepts: application/cbor")
-    Call<java.util.Optional<LocalDate>> getComplexCborType();
+    Call<Optional<LocalDate>> getComplexCborType();
 
     @POST("makeCborRequest")
     @Headers("Content-Type: application/cbor")
