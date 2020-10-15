@@ -334,11 +334,11 @@ final class DialogueFeignClient implements feign.Client {
     }
 
     private final class FeignRequestEndpoint implements Endpoint {
-        private final feign.Request request;
+        private final Request request;
         private final String endpoint;
         private final HttpMethod method;
 
-        FeignRequestEndpoint(feign.Request request) {
+        FeignRequestEndpoint(Request request) {
             this.request = request;
             this.method = HttpMethod.valueOf(request.method().toUpperCase(Locale.ENGLISH));
             endpoint = getFirstHeader(request, EndpointNameHeaderEnrichmentContract.ENDPOINT_NAME_HEADER)

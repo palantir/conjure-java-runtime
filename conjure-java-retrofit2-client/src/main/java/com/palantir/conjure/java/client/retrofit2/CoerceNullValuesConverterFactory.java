@@ -88,13 +88,13 @@ final class CoerceNullValuesConverterFactory extends Converter.Factory {
                 return Collections.emptySet();
             } else if (Map.class.isAssignableFrom(rawType)) {
                 return Collections.emptyMap();
-            } else if (rawType == java.util.Optional.class) {
+            } else if (rawType == Optional.class) {
                 return Optional.empty();
-            } else if (rawType == java.util.OptionalInt.class) {
+            } else if (rawType == OptionalInt.class) {
                 return OptionalInt.empty();
-            } else if (rawType == java.util.OptionalLong.class) {
+            } else if (rawType == OptionalLong.class) {
                 return OptionalLong.empty();
-            } else if (rawType == java.util.OptionalDouble.class) {
+            } else if (rawType == OptionalDouble.class) {
                 return OptionalDouble.empty();
             } else if (rawType == com.google.common.base.Optional.class) {
                 return com.google.common.base.Optional.absent();

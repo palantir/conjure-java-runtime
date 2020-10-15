@@ -59,31 +59,31 @@ public final class OptionalObjectToStringConverterFactoryTest {
         assertThat(factory.stringConverter(java.util.Optional.class, createAnnotations(Nonnull.class), null))
                 .isNull();
 
-        assertThat(factory.stringConverter(java.util.OptionalInt.class, createAnnotations(Header.class), null))
+        assertThat(factory.stringConverter(OptionalInt.class, createAnnotations(Header.class), null))
                 .isNotNull();
-        assertThat(factory.stringConverter(java.util.OptionalInt.class, createAnnotations(Path.class), null))
+        assertThat(factory.stringConverter(OptionalInt.class, createAnnotations(Path.class), null))
                 .isNotNull();
-        assertThat(factory.stringConverter(java.util.OptionalInt.class, createAnnotations(Query.class), null))
+        assertThat(factory.stringConverter(OptionalInt.class, createAnnotations(Query.class), null))
                 .isNotNull();
-        assertThat(factory.stringConverter(java.util.OptionalInt.class, createAnnotations(Nonnull.class), null))
+        assertThat(factory.stringConverter(OptionalInt.class, createAnnotations(Nonnull.class), null))
                 .isNull();
 
-        assertThat(factory.stringConverter(java.util.OptionalDouble.class, createAnnotations(Header.class), null))
+        assertThat(factory.stringConverter(OptionalDouble.class, createAnnotations(Header.class), null))
                 .isNotNull();
-        assertThat(factory.stringConverter(java.util.OptionalDouble.class, createAnnotations(Path.class), null))
+        assertThat(factory.stringConverter(OptionalDouble.class, createAnnotations(Path.class), null))
                 .isNotNull();
-        assertThat(factory.stringConverter(java.util.OptionalDouble.class, createAnnotations(Query.class), null))
+        assertThat(factory.stringConverter(OptionalDouble.class, createAnnotations(Query.class), null))
                 .isNotNull();
-        assertThat(factory.stringConverter(java.util.OptionalDouble.class, createAnnotations(Nonnull.class), null))
+        assertThat(factory.stringConverter(OptionalDouble.class, createAnnotations(Nonnull.class), null))
                 .isNull();
 
-        assertThat(factory.stringConverter(java.util.OptionalLong.class, createAnnotations(Header.class), null))
+        assertThat(factory.stringConverter(OptionalLong.class, createAnnotations(Header.class), null))
                 .isNotNull();
-        assertThat(factory.stringConverter(java.util.OptionalLong.class, createAnnotations(Path.class), null))
+        assertThat(factory.stringConverter(OptionalLong.class, createAnnotations(Path.class), null))
                 .isNotNull();
-        assertThat(factory.stringConverter(java.util.OptionalLong.class, createAnnotations(Query.class), null))
+        assertThat(factory.stringConverter(OptionalLong.class, createAnnotations(Query.class), null))
                 .isNotNull();
-        assertThat(factory.stringConverter(java.util.OptionalLong.class, createAnnotations(Nonnull.class), null))
+        assertThat(factory.stringConverter(OptionalLong.class, createAnnotations(Nonnull.class), null))
                 .isNull();
 
         // Guava
