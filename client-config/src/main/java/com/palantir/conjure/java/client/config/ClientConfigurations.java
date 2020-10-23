@@ -33,8 +33,6 @@ import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +50,9 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_FAILED_URL_COOLDOWN = Duration.ZERO;
     // GCM ciphers perform poorly using a java 1.8 runtime, but improve significantly in 9 and beyond.
     // See http://openjdk.java.net/jeps/246
-    private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = !isJava8();
+    // Given the low volume of services still using java8, it's safer to avoid failing handshakes
+    // at a performance cost.
+    private static final boolean DEFAULT_ENABLE_GCM_CIPHERS = true;
     private static final boolean DEFAULT_FALLBACK_TO_COMMON_NAME_VERIFICATION = false;
     private static final NodeSelectionStrategy DEFAULT_NODE_SELECTION_STRATEGY = NodeSelectionStrategy.PIN_UNTIL_ERROR;
     private static final int DEFAULT_MAX_NUM_RETRIES = 4;
@@ -230,10 +230,5 @@ public final class ClientConfigurations {
         public String toString() {
             return "FixedProxySelector{proxy=" + proxy + '}';
         }
-    }
-
-    private static boolean isJava8() {
-        return AccessController.doPrivileged(
-                (PrivilegedAction<Boolean>) () -> "1.8".equals(System.getProperty("java.specification.version")));
     }
 }

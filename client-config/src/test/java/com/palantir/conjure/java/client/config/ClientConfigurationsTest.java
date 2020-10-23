@@ -58,9 +58,7 @@ public final class ClientConfigurationsTest {
         assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(10));
         assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(5));
-        assertThat(actual.enableGcmCipherSuites())
-                .as("GCM ciphers should be used by default with JRE9+")
-                .isNotEqualTo("1.8".equals(System.getProperty("java.specification.version")));
+        assertThat(actual.enableGcmCipherSuites()).isTrue();
         assertThat(actual.enableHttp2()).isEmpty();
         assertThat(actual.fallbackToCommonNameVerification()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
@@ -79,9 +77,7 @@ public final class ClientConfigurationsTest {
         assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(10));
         assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(5));
-        assertThat(actual.enableGcmCipherSuites())
-                .as("GCM ciphers should be used by default with JRE9+")
-                .isNotEqualTo("1.8".equals(System.getProperty("java.specification.version")));
+        assertThat(actual.enableGcmCipherSuites()).isTrue();
         assertThat(actual.enableHttp2()).isEmpty();
         assertThat(actual.fallbackToCommonNameVerification()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
