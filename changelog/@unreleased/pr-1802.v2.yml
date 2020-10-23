@@ -1,0 +1,8 @@
+type: fix
+fix:
+  description: |-
+    Make dialogue-target an api dependency
+
+    `ConjureRuntime` and `Channel` classes are exposed in `JaxRsClient` public API. Unless a consumer pulls in dialogue-target from some other dependency, this results in a `NoClassDefFoundError`.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1802
