@@ -9,11 +9,11 @@ dependencies {
     api "javax.ws.rs:javax.ws.rs-api"
     // TODO(dsanduleac): Should be implementation, but can't because we expose feign.TextDelegateEncoder
     api "com.netflix.feign:feign-core"
+    api "com.palantir.dialogue:dialogue-target"
 
     implementation "com.palantir.dialogue:dialogue-apache-hc5-client"
     implementation "com.palantir.dialogue:dialogue-core"
     implementation "com.palantir.dialogue:dialogue-serde"
-    implementation "com.palantir.dialogue:dialogue-target"
 
     implementation project(":conjure-java-jackson-serialization")
     implementation project(":keystores")
