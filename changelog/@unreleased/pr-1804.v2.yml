@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Always enable secure GCM ciphers by default, previously java 8 clients
+    avoided GCM ciphers by default.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1804
