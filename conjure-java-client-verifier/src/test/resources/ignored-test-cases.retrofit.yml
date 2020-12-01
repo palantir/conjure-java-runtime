@@ -15,7 +15,6 @@ client:
 
    receiveOptionalIntegerExample:
    - 'null'
-   - '{"value":"1234"}' # jackson coerces things to other types
    receiveListBearerTokenAliasExample:
    - 'null'
    receiveListBinaryAliasExample:
@@ -137,6 +136,8 @@ client:
    - 'null'
    receiveMapEnumExampleAlias:
    - 'null'
+   receiveSafeLongExample: #allowed long coercion applies to safelong
+   - '{"value":"12"}'
 
   singleHeaderService: {}
 
