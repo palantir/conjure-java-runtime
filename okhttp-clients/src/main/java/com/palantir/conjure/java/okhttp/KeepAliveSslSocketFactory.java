@@ -53,7 +53,7 @@ final class KeepAliveSslSocketFactory extends ForwardingSslSocketFactory {
 
     @Override
     public int hashCode() {
-        return Objects.hash(delegate);
+        return Objects.hashCode(delegate);
     }
 
     @Override
