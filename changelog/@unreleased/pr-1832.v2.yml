@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix string-to-long coercion when afterburner is enabled
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1832

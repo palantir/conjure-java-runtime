@@ -19,12 +19,14 @@ package com.palantir.conjure.java.serialization;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.InputCoercionException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.palantir.logsafe.Preconditions;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -38,6 +40,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
@@ -129,8 +132,112 @@ public final class ObjectMappersTest {
     }
 
     @Test
+    public void testLongBeanTypeDeserializationFromString() throws IOException {
+        assertThat(MAPPER.readValue("{\"value\":\"1\"}", LongBean.class)).isEqualTo(new LongBean(1L));
+    }
+
+    @Test
+    public void testLongBeanTypeDeserializationFromNumber() throws IOException {
+        assertThat(MAPPER.readValue("{\"value\":\"1\"}", LongBean.class)).isEqualTo(new LongBean(1L));
+    }
+
+    static final class LongBean {
+        @JsonProperty
+        private long value;
+
+        LongBean() {}
+
+        LongBean(long value) {
+            setValue(value);
+        }
+
+        public long getValue() {
+            return value;
+        }
+
+        public void setValue(long value) {
+            this.value = value;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other == null || getClass() != other.getClass()) {
+                return false;
+            }
+            LongBean that = (LongBean) other;
+            return value == that.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(value);
+        }
+
+        @Override
+        public String toString() {
+            return "LongBean{value=" + value + '}';
+        }
+    }
+
+    @Test
     public void testOptionalLongTypeDeserializationFromString() throws IOException {
         assertThat(MAPPER.readValue("\"1\"", OptionalLong.class)).hasValue(1L);
+    }
+
+    @Test
+    public void testOptionalLongBeanTypeDeserializationFromString() throws IOException {
+        assertThat(MAPPER.readValue("{\"value\":\"1\"}", OptionalLongBean.class))
+                .isEqualTo(new OptionalLongBean(OptionalLong.of(1L)));
+    }
+
+    @Test
+    public void testOptionalLongBeanTypeDeserializationFromNumber() throws IOException {
+        assertThat(MAPPER.readValue("{\"value\":1}", OptionalLongBean.class))
+                .isEqualTo(new OptionalLongBean(OptionalLong.of(1L)));
+    }
+
+    static final class OptionalLongBean {
+        @JsonProperty
+        private OptionalLong value = OptionalLong.empty();
+
+        OptionalLongBean() {}
+
+        OptionalLongBean(OptionalLong value) {
+            setValue(value);
+        }
+
+        public OptionalLong getValue() {
+            return value;
+        }
+
+        public void setValue(OptionalLong value) {
+            this.value = Preconditions.checkNotNull(value, "value");
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other == null || getClass() != other.getClass()) {
+                return false;
+            }
+            OptionalLongBean that = (OptionalLongBean) other;
+            return value.equals(that.value);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(value);
+        }
+
+        @Override
+        public String toString() {
+            return "OptionalLongBean{value=" + value + '}';
+        }
     }
 
     @Test

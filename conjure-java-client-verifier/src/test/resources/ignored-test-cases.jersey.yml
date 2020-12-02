@@ -99,8 +99,6 @@ client:
    - 'null'
    receiveMapEnumExampleAlias:
    - 'null'
-   receiveSafeLongExample: #allowed long coercion applies to safelong
-   - '{"value":"12"}'
 
   singleHeaderService: {}
 
