@@ -20,15 +20,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.cfg.CoercionAction;
-import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
-import java.util.OptionalLong;
 
 public final class ObjectMappers {
 
@@ -131,14 +128,12 @@ public final class ObjectMappers {
      * </ul>
      */
     public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
-        allowStringCoercion(mapper, long.class);
-        allowStringCoercion(mapper, Long.class);
-        allowStringCoercion(mapper, OptionalLong.class);
         return mapper.registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
                 .registerModule(new AfterburnerModule())
                 .registerModule(new JavaTimeModule())
+                .registerModule(new LenientLongModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
                 .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
@@ -147,11 +142,5 @@ public final class ObjectMappers {
                 .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
                 .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
                 .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
-    }
-
-    private static void allowStringCoercion(ObjectMapper mapper, Class<?> clazz) {
-        mapper.coercionConfigFor(clazz)
-                .setAcceptBlankAsEmpty(false)
-                .setCoercion(CoercionInputShape.String, CoercionAction.TryConvert);
     }
 }
