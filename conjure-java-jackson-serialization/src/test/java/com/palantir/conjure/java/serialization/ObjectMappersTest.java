@@ -173,7 +173,7 @@ public final class ObjectMappersTest {
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(value);
+            return Long.hashCode(value);
         }
 
         @Override
