@@ -19,8 +19,10 @@ package com.palantir.conjure.java.config.ssl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -314,6 +316,35 @@ public final class KeyStoresTests {
                         "-----BEGIN PRIVATE KEY-----\n-----END RSA PRIVATE KEY-----\n"))
                 .isInstanceOf(GeneralSecurityException.class)
                 .hasMessageStartingWith("unable to find valid RSA key in the provided string");
+    }
+
+    @Test
+    public void testPemX509CertificateDeserializationFromString() throws IOException {
+        ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
+        String cert = Files.asCharSource(TestConstants.SERVER_CERT_PEM_PATH.toFile(), StandardCharsets.UTF_8)
+                .read();
+        byte[] json = mapper.writeValueAsBytes(cert);
+        assertThat(mapper.readValue(json, PemX509Certificate.class)).isEqualTo(PemX509Certificate.of(cert));
+    }
+
+    @Test
+    public void testPemX509CertificateDeserializationFromJsonObject() throws IOException {
+        ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
+        String cert = Files.asCharSource(TestConstants.SERVER_CERT_PEM_PATH.toFile(), StandardCharsets.UTF_8)
+                .read();
+        byte[] json = mapper.writeValueAsBytes(ImmutableMap.of("pemCertificate", cert));
+        assertThat(mapper.readValue(json, PemX509Certificate.class)).isEqualTo(PemX509Certificate.of(cert));
+    }
+
+    @Test
+    public void testPemX509CertificateRoundTripSerde() throws IOException {
+        ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
+        PemX509Certificate expected = PemX509Certificate.of(
+                Files.asCharSource(TestConstants.SERVER_CERT_PEM_PATH.toFile(), StandardCharsets.UTF_8)
+                        .read());
+        byte[] json = mapper.writeValueAsBytes(expected);
+        PemX509Certificate actual = mapper.readValue(json, PemX509Certificate.class);
+        assertThat(actual).isEqualTo(expected);
     }
 
     private void assertKey(RSAPrivateCrtKey privateKey) {

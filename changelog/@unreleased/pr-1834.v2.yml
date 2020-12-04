@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix PemX509Certificate deserialization from a JSON string
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1834

@@ -16,14 +16,15 @@
 
 package com.palantir.conjure.java.config.ssl;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonCreator.Mode;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.palantir.logsafe.Preconditions;
 import org.immutables.value.Value;
 
 @Value.Immutable
 @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE, jdkOnly = true)
 @JsonSerialize(as = ImmutablePemX509Certificate.class)
-@JsonDeserialize(as = ImmutablePemX509Certificate.class)
 public abstract class PemX509Certificate {
 
     /**
@@ -33,9 +34,16 @@ public abstract class PemX509Certificate {
      */
     public abstract String pemCertificate();
 
+    @JsonCreator(mode = Mode.DELEGATING)
     public static PemX509Certificate of(String pemCertificate) {
         return ImmutablePemX509Certificate.builder()
                 .pemCertificate(pemCertificate)
                 .build();
+    }
+
+    // Exists for backcompat, PemX509Certificate may be deserialized from either a String or JSON object.
+    @JsonCreator(mode = Mode.DELEGATING)
+    private static PemX509Certificate of(ImmutablePemX509Certificate immutablePemX509Certificate) {
+        return Preconditions.checkNotNull(immutablePemX509Certificate, "PemX509Certificate is required");
     }
 }
