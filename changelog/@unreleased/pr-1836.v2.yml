@@ -1,0 +1,7 @@
+type: fix
+fix:
+  description: 'conjure-java-jackson-serialization: joda types can once again be deserialized
+    (as this was a behaviour change of the jackson 2.12 upgrade which landed in conjure-java-runtime
+    6.9.0)'
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1836
