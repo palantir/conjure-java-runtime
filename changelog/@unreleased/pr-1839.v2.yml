@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description:  Downgrade Jackson to 2.11.1
+  links:
+    - https://github.com/palantir/conjure-java-runtime/pull/1839
