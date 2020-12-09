@@ -24,7 +24,6 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 
@@ -135,9 +134,6 @@ public final class ObjectMappers {
                 .registerModule(new AfterburnerModule())
                 .registerModule(new JavaTimeModule())
                 .registerModule(new LenientLongModule())
-                // we strongly recommend using built-in java.time classes instead of joda ones. Joda deserialization
-                // was implicit up until jackson 2.12
-                .registerModule(new JodaModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
                 .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)

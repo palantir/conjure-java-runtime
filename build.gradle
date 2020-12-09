@@ -58,6 +58,10 @@ allprojects {
                 because 'okhttp 3.14.0 removed UnrepeatableRequestBody which is relied on by an internal library'
             }
 
+            rootConfiguration 'com.fasterxml.jackson.core:jackson-databind', {
+                version { strictly '2.11.1' }
+                because 'Staying on jackson 2.11.1 due to problems with 2.11.2 and 2.11.3 deserializing polymorphic types'
+            }
         }
 
         modules {
