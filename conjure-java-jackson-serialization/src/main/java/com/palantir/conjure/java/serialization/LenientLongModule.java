@@ -37,7 +37,7 @@ final class LenientLongModule extends SimpleModule {
         super("lenient long");
         // Register to both Long.TYPE and Long.class
         this.addDeserializer(long.class, new LongAsStringDeserializer())
-                .addDeserializer(Long.class, new LongAsStringDeserializer()):
+                .addDeserializer(Long.class, new LongAsStringDeserializer());
     }
 
     private static final class LongAsStringDeserializer extends StdDeserializer<Long> {
