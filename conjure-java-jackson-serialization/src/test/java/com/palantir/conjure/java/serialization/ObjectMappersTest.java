@@ -277,7 +277,7 @@ public final class ObjectMappersTest {
     public void testLongAsStringOverflowDeserialization() {
         BigInteger large = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE);
         assertThatThrownBy(() -> MAPPER.readValue("\"" + large + "\"", Long.TYPE))
-                .isInstanceOf(JsonParseException.class)
+                .isInstanceOf(InvalidFormatException.class)
                 .hasMessageContaining("not a valid long value");
     }
 
