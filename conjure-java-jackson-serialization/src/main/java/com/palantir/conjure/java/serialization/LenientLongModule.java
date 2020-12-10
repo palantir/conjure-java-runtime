@@ -18,14 +18,11 @@ package com.palantir.conjure.java.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.cfg.CoercionAction;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jdk8.OptionalLongDeserializer;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
-import java.util.OptionalLong;
 
 /**
  * Provides support for the {@link Long} deserialization from JSON string and numeric values regardless of
@@ -40,8 +37,7 @@ final class LenientLongModule extends SimpleModule {
         super("lenient long");
         // Register to both Long.TYPE and Long.class
         this.addDeserializer(long.class, new LongAsStringDeserializer())
-                .addDeserializer(Long.class, new LongAsStringDeserializer())
-                .addDeserializer(OptionalLong.class, new OptionalLongAsStringDeserializer());
+                .addDeserializer(Long.class, new LongAsStringDeserializer());
     }
 
     private static final class LongAsStringDeserializer extends StdDeserializer<Long> {
@@ -59,9 +55,8 @@ final class LenientLongModule extends SimpleModule {
                     return parseLong(jsonParser);
                 case VALUE_NULL:
                     return null;
-                default:
-                    throw new SafeIoException("Expected a long value");
             }
+            throw new SafeIoException("Expected a long value");
         }
 
         @Override
@@ -79,16 +74,6 @@ final class LenientLongModule extends SimpleModule {
                 failure.initCause(e);
                 throw failure;
             }
-        }
-    }
-
-    private static final class OptionalLongAsStringDeserializer extends OptionalLongDeserializer {
-
-        private OptionalLongAsStringDeserializer() {}
-
-        @Override
-        protected CoercionAction _checkFromStringCoercion(DeserializationContext _ctxt, String _value) {
-            return CoercionAction.TryConvert;
         }
     }
 }

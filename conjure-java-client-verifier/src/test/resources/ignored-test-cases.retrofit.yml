@@ -15,6 +15,7 @@ client:
 
    receiveOptionalIntegerExample:
    - 'null'
+   - '{"value":"1234"}' # jackson coerces things to other types
    receiveListBearerTokenAliasExample:
    - 'null'
    receiveListBinaryAliasExample:
