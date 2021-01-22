@@ -77,7 +77,7 @@ final class DialogueFeignClient implements feign.Client {
     DialogueFeignClient(Class<?> jaxrsInterface, Channel channel, ConjureRuntime runtime, String baseUrl) {
         this.channel = Preconditions.checkNotNull(channel, "Channel is required");
         this.baseUrl = Preconditions.checkNotNull(baseUrl, "Base URL is required");
-        this.runtime = Preconditions.checkNotNull(runtime, "ConjureRuntime is required");
+        this.runtime = Preconditions.checkNotNull(runtime.toBlocking(), "ConjureRuntime is required");
         this.serviceName = Preconditions.checkNotNull(jaxrsInterface, "Service is required")
                 .getSimpleName();
         this.version = Optional.ofNullable(jaxrsInterface.getPackage().getImplementationVersion())
