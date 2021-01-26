@@ -31,7 +31,7 @@ com.palantir.refreshable:refreshable = 1.0.0
 
 # dependency-upgrader:OFF
 
-com.fasterxml.jackson.*:jackson-* = 2.11.1
+com.fasterxml.jackson.*:jackson-* = 2.12.1
 
 # Temporarily pausing until internal libraries stop relying on UnrepeatableRequestBody
 com.squareup.okhttp3:* = 3.13.1
