@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: '`ClientConfigurations` built with a `FROM_ENVIRONMENT` proxy will now behave as if there is no proxy if the `https_proxy` environment variable is not set, instead of throwing.'
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1874
