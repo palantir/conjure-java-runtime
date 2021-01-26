@@ -23,8 +23,6 @@ import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
-import com.palantir.logsafe.Preconditions;
-import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import java.io.IOException;
@@ -151,10 +149,10 @@ public final class ClientConfigurations {
             case DIRECT:
                 return fixedProxySelectorFor(Proxy.NO_PROXY);
             case FROM_ENVIRONMENT:
-                String defaultEnvProxy = Preconditions.checkNotNull(
-                        System.getenv(ENV_HTTPS_PROXY),
-                        "Missing environment variable",
-                        SafeArg.of("name", ENV_HTTPS_PROXY));
+                String defaultEnvProxy = System.getenv(ENV_HTTPS_PROXY);
+                if (defaultEnvProxy == null) {
+                    return fixedProxySelectorFor(Proxy.NO_PROXY);
+                }
                 InetSocketAddress address = createInetSocketAddress(defaultEnvProxy);
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
             case HTTP:
