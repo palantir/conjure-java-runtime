@@ -23,6 +23,7 @@ import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
+import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import java.io.IOException;
@@ -36,9 +37,13 @@ import java.util.List;
 import java.util.Optional;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Utilities for creating {@link ClientConfiguration} instances. */
 public final class ClientConfigurations {
+
+    private static final Logger log = LoggerFactory.getLogger(ClientConfigurations.class);
 
     // Defaults for parameters that are optional in ServiceConfiguration.
     private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(10);
@@ -151,8 +156,10 @@ public final class ClientConfigurations {
             case FROM_ENVIRONMENT:
                 String defaultEnvProxy = System.getenv(ENV_HTTPS_PROXY);
                 if (defaultEnvProxy == null) {
+                    log.info("Proxy environment variable not set, using no proxy");
                     return fixedProxySelectorFor(Proxy.NO_PROXY);
                 }
+                log.info("Using proxy from environment variable", UnsafeArg.of("proxy", defaultEnvProxy));
                 InetSocketAddress address = createInetSocketAddress(defaultEnvProxy);
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
             case HTTP:
