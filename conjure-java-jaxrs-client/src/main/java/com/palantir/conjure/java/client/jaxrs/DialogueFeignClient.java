@@ -31,6 +31,7 @@ import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
 import com.palantir.dialogue.Endpoint;
+import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.RequestBody;
 import com.palantir.dialogue.Response;
@@ -100,12 +101,7 @@ final class DialogueFeignClient implements feign.Client {
 
         try {
             return runtime.clients()
-                    .block(runtime.clients()
-                            .call(
-                                    channel,
-                                    new FeignRequestEndpoint(request),
-                                    builder.build(),
-                                    FeignResponseDeserializer.INSTANCE));
+                    .callBlocking(toEndpointChannel(request), builder.build(), FeignResponseDeserializer.INSTANCE);
         } catch (UncheckedExecutionException e) {
             // Rethrow IOException to match standard feign behavior
             Throwable cause = e.getCause();
@@ -114,6 +110,11 @@ final class DialogueFeignClient implements feign.Client {
             }
             throw e;
         }
+    }
+
+    private EndpointChannel toEndpointChannel(feign.Request feignRequest) {
+        Endpoint endpoint = new FeignRequestEndpoint(feignRequest);
+        return dialogueRequest -> channel.execute(endpoint, dialogueRequest);
     }
 
     private static boolean includeRequestHeader(String headerName) {
