@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Use Clients#callBlocking in DialogueFeignClient.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1876
