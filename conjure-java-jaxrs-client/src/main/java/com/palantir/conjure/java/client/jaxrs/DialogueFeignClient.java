@@ -112,7 +112,7 @@ final class DialogueFeignClient implements feign.Client {
         }
     }
 
-    private EndpointChannel toEndpointChannel(feign.Request feignRequest) {
+    private EndpointChannel toEndpointChannel(Request feignRequest) {
         Endpoint endpoint = new FeignRequestEndpoint(feignRequest);
         return dialogueRequest -> channel.execute(endpoint, dialogueRequest);
     }
