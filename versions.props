@@ -1,5 +1,4 @@
 ch.qos.logback:logback-classic = 1.2.3
-com.github.ben-manes.caffeine:caffeine = 3.0.0
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 30.1-jre
 com.jcraft:jzlib = 1.1.3
@@ -9,7 +8,7 @@ com.palantir.conjure.java:conjure-java = 5.35.0
 com.palantir.conjure.java:conjure-lib = 5.35.0
 com.palantir.conjure.java.api:* = 2.16.2
 com.palantir.conjure.verification:* = 0.18.5
-com.palantir.dialogue:* = 1.101.0
+com.palantir.dialogue:* = 1.101.1
 com.palantir.safe-logging:* = 1.14.0
 com.palantir.tracing:* = 4.11.0
 com.palantir.tritium:* = 0.18.5
@@ -47,3 +46,6 @@ com.palantir.tracing:tracing-test-utils = 3.2.0-rc1
 
 # Allow tests to run on Centos6
 org.conscrypt:conscrypt-openjdk-uber = 1.4.1
+
+# Avoid forcing a java 11 requirement
+com.github.ben-manes.caffeine:caffeine = 2.9.0
