@@ -23,7 +23,7 @@ import com.palantir.logsafe.Preconditions;
 import org.immutables.value.Value;
 
 @Value.Immutable
-@Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE, jdkOnly = true)
+@ImmutablesStyle
 @JsonSerialize(as = ImmutablePemX509Certificate.class)
 public abstract class PemX509Certificate {
 

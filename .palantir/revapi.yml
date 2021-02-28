@@ -63,6 +63,12 @@ acceptedBreaks:
       new: "method T com.palantir.conjure.java.clients.ConjureClients.WithClientOptions<T>::withHostEventsSink(com.palantir.conjure.java.client.config.HostEventsSink)"
       justification: "Compilation break will force implementers to address these methods.\
         \ Revapi confirms this is NOT an ABI break"
+  "6.13.0":
+    com.palantir.conjure.java.runtime:client-config:
+    - code: "java.class.visibilityReduced"
+      old: "@interface com.palantir.conjure.java.client.config.ImmutablesStyle"
+      new: "@interface com.palantir.conjure.java.client.config.ImmutablesStyle"
+      justification: "Hide internal annotation"
   "6.4.0":
     com.palantir.conjure.java.runtime:conjure-java-jersey-server:
     - code: "java.method.removed"
