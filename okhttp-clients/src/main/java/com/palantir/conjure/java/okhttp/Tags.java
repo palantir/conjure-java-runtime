@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import com.palantir.tracing.DetachedSpan;
 import java.util.function.Supplier;
 import org.immutables.value.Value;

@@ -19,7 +19,6 @@ package com.palantir.conjure.java.okhttp;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Suppliers;
-import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import java.time.Clock;

@@ -18,7 +18,6 @@ package com.palantir.conjure.java.okhttp;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.netflix.concurrency.limits.Limiter;
-import com.palantir.conjure.java.client.config.ImmutablesStyle;
 import org.immutables.value.Value;
 
 @Value.Modifiable
