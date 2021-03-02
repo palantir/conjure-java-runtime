@@ -320,7 +320,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
                 AGENT,
                 new HostMetricsRegistry(),
                 ClientConfiguration.builder()
-                        .from(createTestConfig("https://invalid.service.dev"))
+                        .from(createTestConfig("https://service.invalid"))
                         .connectTimeout(Duration.ofMillis(10))
                         .build());
 
@@ -375,7 +375,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
                 AGENT,
                 new HostMetricsRegistry(),
                 ClientConfiguration.builder()
-                        .from(createTestConfig("https://invalid.service.dev"))
+                        .from(createTestConfig("https://service.invalid"))
                         .connectTimeout(Duration.ofMillis(10))
                         .build());
 
