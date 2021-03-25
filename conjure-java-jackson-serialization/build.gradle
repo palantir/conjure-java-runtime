@@ -1,4 +1,4 @@
-apply from: "${rootDir}/gradle/publish-jar.gradle"
+apply plugin: 'com.palantir.external-publish-jar'
 apply plugin: 'com.palantir.revapi'
 
 dependencies {
