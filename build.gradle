@@ -1,7 +1,9 @@
 buildscript {
     repositories {
         gradlePluginPortal()
-        maven { url 'https://palantir.bintray.com/releases'}
+        mavenCentral()
+        maven { url 'https://palantir.bintray.com/releases' }
+        jcenter()
     }
 
     dependencies {
@@ -30,8 +32,9 @@ allprojects {
     group 'com.palantir.conjure.java.runtime'
 
     repositories {
+        mavenCentral()
+        maven { url 'https://palantir.bintray.com/releases' }
         jcenter()
-        maven { url 'https://palantir.bintray.com/releases'}
     }
 
     configurations.all {
