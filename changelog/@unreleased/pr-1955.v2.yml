@@ -1,5 +1,5 @@
-type: improvement
-improvement:
+type: break
+break:
   description: conjure-java-jaxrs-client no longer provides okhttp-clients
   links:
   - https://github.com/palantir/conjure-java-runtime/pull/1955
