@@ -60,7 +60,7 @@ task checkCAsNeedUpdating(type: Exec, dependsOn: regenerateCAs) {
     commandLine 'git', 'diff', '--quiet', 'HEAD', 'src/main/resources/ca-certificates.crt'
 }
 
-if (!JavaVersion.current().isJava8() && System.getenv().containsKey("CI")) {
+if (System.getenv().containsKey("CI")) {
     tasks.test.dependsOn checkCAsNeedUpdating
 }
 
