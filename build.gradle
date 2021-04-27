@@ -72,7 +72,7 @@ subprojects {
     apply plugin: 'java-library'
     apply plugin: 'com.palantir.baseline-class-uniqueness'
 
-    sourceCompatibility = 1.8
+    sourceCompatibility = 11
     tasks.check.dependsOn(javadoc)
 
     test {
