@@ -1,0 +1,5 @@
+type: break
+break:
+  description: CJR requires java 11, java 8 is no longer supported
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1956
