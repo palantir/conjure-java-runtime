@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Move NoOpHostEventsSink into conjure-java-legacy-clients
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/1958
