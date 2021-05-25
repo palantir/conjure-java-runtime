@@ -25,6 +25,7 @@ import java.util.Objects;
  * {@link Object#toString()} of the value otherwise.
  */
 public final class GuavaEmptyOptionalExpander implements Expander {
+    public static final Expander INSTANCE = new GuavaEmptyOptionalExpander();
 
     @Override
     public String expand(Object value) {

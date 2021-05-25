@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -44,14 +43,17 @@ import javax.ws.rs.QueryParam;
 public final class Java8OptionalAwareContract extends AbstractDelegatingContract {
 
     private static final List<ExpanderDef> expanders = ImmutableList.of(
-            new ExpanderDef(Optional.class, Java8EmptyOptionalExpander.class, Java8NullOptionalExpander.class),
-            new ExpanderDef(OptionalInt.class, Java8EmptyOptionalIntExpander.class, Java8NullOptionalIntExpander.class),
+            new ExpanderDef(Optional.class, Java8EmptyOptionalExpander.INSTANCE, Java8NullOptionalExpander.INSTANCE),
+            new ExpanderDef(
+                    OptionalInt.class, Java8EmptyOptionalIntExpander.INSTANCE, Java8NullOptionalIntExpander.INSTANCE),
             new ExpanderDef(
                     OptionalDouble.class,
-                    Java8EmptyOptionalDoubleExpander.class,
-                    Java8NullOptionalDoubleExpander.class),
+                    Java8EmptyOptionalDoubleExpander.INSTANCE,
+                    Java8NullOptionalDoubleExpander.INSTANCE),
             new ExpanderDef(
-                    OptionalLong.class, Java8EmptyOptionalLongExpander.class, Java8NullOptionalLongExpander.class));
+                    OptionalLong.class,
+                    Java8EmptyOptionalLongExpander.INSTANCE,
+                    Java8NullOptionalLongExpander.INSTANCE));
 
     public Java8OptionalAwareContract(Contract delegate) {
         super(delegate);
@@ -67,20 +69,14 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
                 if (cls.equals(def.match)) {
                     FluentIterable<Class<?>> paramAnnotations = getAnnotations(annotations, i);
                     configureOptionalExpanders(
-                            targetType,
-                            method,
-                            metadata,
-                            i,
-                            paramAnnotations,
-                            def.emptyExpanderClass,
-                            def.nullExpanderClass);
+                            targetType, method, metadata, i, paramAnnotations, def.emptyExpander, def.nullExpander);
                 }
             }
         }
     }
 
     private FluentIterable<Class<?>> getAnnotations(Annotation[][] annotations, int index) {
-        return FluentIterable.from(Lists.newArrayList(annotations[index])).transform(EXTRACT_CLASS);
+        return FluentIterable.from(Lists.newArrayList(annotations[index])).transform(Annotation::annotationType);
     }
 
     private void configureOptionalExpanders(
@@ -89,12 +85,12 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
             MethodMetadata metadata,
             int index,
             FluentIterable<Class<?>> paramAnnotations,
-            Class<? extends Expander> emptyExpanderClass,
-            Class<? extends Expander> nullExpanderClass) {
+            Expander emptyExpander,
+            Expander nullExpander) {
         if (paramAnnotations.contains(HeaderParam.class)) {
-            metadata.indexToExpanderClass().put(index, emptyExpanderClass);
+            Expanders.add(metadata, index, emptyExpander);
         } else if (paramAnnotations.contains(QueryParam.class)) {
-            metadata.indexToExpanderClass().put(index, nullExpanderClass);
+            Expanders.add(metadata, index, nullExpander);
         } else if (paramAnnotations.contains(PathParam.class)) {
             throw new RuntimeException(String.format(
                     "Cannot use Java8 Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
@@ -102,20 +98,15 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
         }
     }
 
-    private static final Function<Annotation, Class<?>> EXTRACT_CLASS = Annotation::annotationType;
-
     private static final class ExpanderDef {
         private final Class<?> match;
-        private final Class<? extends Expander> emptyExpanderClass;
-        private final Class<? extends Expander> nullExpanderClass;
+        private final Expander emptyExpander;
+        private final Expander nullExpander;
 
-        ExpanderDef(
-                Class<?> match,
-                Class<? extends Expander> emptyExpanderClass,
-                Class<? extends Expander> nullExpanderClass) {
+        ExpanderDef(Class<?> match, Expander emptyExpander, Expander nullExpander) {
             this.match = match;
-            this.emptyExpanderClass = emptyExpanderClass;
-            this.nullExpanderClass = nullExpanderClass;
+            this.emptyExpander = emptyExpander;
+            this.nullExpander = nullExpander;
         }
     }
 }

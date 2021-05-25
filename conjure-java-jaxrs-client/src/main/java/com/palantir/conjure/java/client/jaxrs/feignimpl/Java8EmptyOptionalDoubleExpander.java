@@ -26,6 +26,7 @@ import java.util.OptionalDouble;
  * of the value otherwise.
  */
 public final class Java8EmptyOptionalDoubleExpander implements Expander {
+    public static final Expander INSTANCE = new Java8EmptyOptionalDoubleExpander();
 
     @Override
     public String expand(Object value) {

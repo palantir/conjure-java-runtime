@@ -51,9 +51,9 @@ public final class GuavaOptionalAwareContract extends AbstractDelegatingContract
                 FluentIterable<Class<?>> paramAnnotations =
                         FluentIterable.from(Lists.newArrayList(annotations[i])).transform(EXTRACT_CLASS);
                 if (paramAnnotations.contains(HeaderParam.class)) {
-                    metadata.indexToExpanderClass().put(i, GuavaEmptyOptionalExpander.class);
+                    Expanders.add(metadata, i, GuavaEmptyOptionalExpander.INSTANCE);
                 } else if (paramAnnotations.contains(QueryParam.class)) {
-                    metadata.indexToExpanderClass().put(i, GuavaNullOptionalExpander.class);
+                    Expanders.add(metadata, i, GuavaNullOptionalExpander.INSTANCE);
                 } else if (paramAnnotations.contains(PathParam.class)) {
                     throw new RuntimeException(String.format(
                             "Cannot use Guava Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",

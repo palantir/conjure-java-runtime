@@ -25,6 +25,7 @@ import java.util.Optional;
  * Expands Optional by using null for {@link Optional#empty()} and the {@link Object#toString()} of the value otherwise.
  */
 public final class Java8NullOptionalExpander implements Expander {
+    public static final Expander INSTANCE = new Java8NullOptionalExpander();
 
     @Override
     public String expand(Object value) {

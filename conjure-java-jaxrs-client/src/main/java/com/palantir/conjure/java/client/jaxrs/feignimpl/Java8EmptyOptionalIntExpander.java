@@ -26,6 +26,7 @@ import java.util.OptionalInt;
  * the value otherwise.
  */
 public final class Java8EmptyOptionalIntExpander implements Expander {
+    public static final Expander INSTANCE = new Java8EmptyOptionalIntExpander();
 
     @Override
     public String expand(Object value) {

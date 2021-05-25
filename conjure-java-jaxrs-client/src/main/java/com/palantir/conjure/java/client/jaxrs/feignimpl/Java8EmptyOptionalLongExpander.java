@@ -26,6 +26,7 @@ import java.util.OptionalLong;
  * the value otherwise.
  */
 public final class Java8EmptyOptionalLongExpander implements Expander {
+    public static final Expander INSTANCE = new Java8EmptyOptionalLongExpander();
 
     @Override
     public String expand(Object value) {
