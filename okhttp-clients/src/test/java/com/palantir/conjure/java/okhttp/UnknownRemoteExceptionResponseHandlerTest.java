@@ -56,8 +56,7 @@ public final class UnknownRemoteExceptionResponseHandlerTest {
                     decode(MediaType.APPLICATION_JSON, code, "body").get();
             assertThat(exception.getStatus()).isEqualTo(code);
             assertThat(exception.getBody()).isEqualTo("body");
-            assertThat(exception.getMessage())
-                    .isEqualTo(String.format("Error %s. (Failed to parse response body as SerializableError.)", code));
+            assertThat(exception.getMessage()).isEqualTo(String.format("Response status: %s", code));
         }
     }
 
