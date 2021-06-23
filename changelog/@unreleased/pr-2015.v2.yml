@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Upgrade Jersey to 2.34
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2015
