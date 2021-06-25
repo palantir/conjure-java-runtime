@@ -21,7 +21,6 @@ import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,23 +54,13 @@ final class ServiceExceptionMapper extends ListenableExceptionMapper<ServiceExce
                     exception);
         }
 
-        ResponseBuilder builder = Response.status(httpStatus);
-        try {
-            SerializableError error = SerializableError.builder()
-                    .from(SerializableError.forException(exception))
-                    .build();
-            builder.type(MediaType.APPLICATION_JSON);
-            builder.entity(error);
-        } catch (RuntimeException e) {
-            log.warn(
-                    "Unable to translate exception to json",
-                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
-                    e);
-            // simply write out the exception message
-            builder.type(MediaType.TEXT_PLAIN);
-            builder.entity("Unable to translate exception to json. Refer to the server logs with this errorInstanceId: "
-                    + exception.getErrorInstanceId());
-        }
-        return builder.build();
+        SerializableError error = SerializableError.builder()
+                .from(SerializableError.forException(exception))
+                .build();
+
+        return Response.status(httpStatus)
+                .type(MediaType.APPLICATION_JSON)
+                .entity(error)
+                .build();
     }
 }
