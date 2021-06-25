@@ -54,13 +54,9 @@ final class ServiceExceptionMapper extends ListenableExceptionMapper<ServiceExce
                     exception);
         }
 
-        SerializableError error = SerializableError.builder()
-                .from(SerializableError.forException(exception))
-                .build();
-
         return Response.status(httpStatus)
                 .type(MediaType.APPLICATION_JSON)
-                .entity(error)
+                .entity(SerializableError.forException(exception))
                 .build();
     }
 }

@@ -59,7 +59,7 @@ final class RemoteExceptionMapper extends ListenableExceptionMapper<RemoteExcept
                     "Encountered a remote exception",
                     SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
                     SafeArg.of("errorName", exception.getError().errorName()),
-                    SafeArg.of("status", exception.getStatus()),
+                    SafeArg.of("statusCode", exception.getStatus()),
                     exception);
 
             return Response.status(exception.getStatus())
@@ -75,7 +75,7 @@ final class RemoteExceptionMapper extends ListenableExceptionMapper<RemoteExcept
                     "Encountered a remote exception. Mapping to an internal error before propagating",
                     SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
                     SafeArg.of("errorName", exception.getError().errorName()),
-                    SafeArg.of("status", exception.getStatus()),
+                    SafeArg.of("statusCode", exception.getStatus()),
                     exception);
 
             ServiceException propagatedException = new ServiceException(ErrorType.INTERNAL, exception);
