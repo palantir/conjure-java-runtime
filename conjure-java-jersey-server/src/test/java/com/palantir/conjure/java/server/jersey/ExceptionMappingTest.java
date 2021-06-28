@@ -275,6 +275,7 @@ public final class ExceptionMappingTest {
                             .errorInstanceId("errorInstanceId")
                             .errorCode("errorCode")
                             .errorName("errorName")
+                            .putParameters("arg", "value")
                             .build(),
                     REMOTE_EXCEPTION_STATUS_CODE);
         }
@@ -286,6 +287,7 @@ public final class ExceptionMappingTest {
                             .errorInstanceId("errorInstanceId")
                             .errorCode("errorCode")
                             .errorName("errorName")
+                            .putParameters("arg", "value")
                             .build(),
                     UNAUTHORIZED_STATUS_CODE);
         }
@@ -297,6 +299,7 @@ public final class ExceptionMappingTest {
                             .errorInstanceId("errorInstanceId")
                             .errorCode("errorCode")
                             .errorName("errorName")
+                            .putParameters("arg", "value")
                             .build(),
                     PERMISSION_DENIED_STATUS_CODE);
         }

@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
  * response is then thrown as a {@link RemoteException} at the call point in server A. If server A does not catch this
  * exception and it raises up the call stack back into Jersey, execution enters this {@link RemoteExceptionMapper}.
  *
- * <p>To preserve debuggability, the exception and HTTP status code from B's exception are logged at WARN level, but not
- * propagated to caller to avoid an unintentional dependency on the remote exception.
+ * <p>Exception with HTTP status codes other than 401 and 403 are not propagated to caller to avoid an unintentional
+ * dependency on the remote exception.
  */
 @Provider
 final class RemoteExceptionMapper extends ListenableExceptionMapper<RemoteException> {
