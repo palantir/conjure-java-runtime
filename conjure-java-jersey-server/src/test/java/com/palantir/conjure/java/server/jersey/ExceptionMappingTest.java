@@ -121,6 +121,7 @@ public final class ExceptionMappingTest {
         assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
         assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
         assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
+        assertThat(error.parameters()).isEmpty();
     }
 
     @Test
@@ -131,8 +132,9 @@ public final class ExceptionMappingTest {
 
         SerializableError error = response.readEntity(SerializableError.class);
         assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
-        assertThat(error.errorCode()).isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
-        assertThat(error.errorName()).isEqualTo(ErrorType.UNAUTHORIZED.name());
+        assertThat(error.errorCode()).isEqualTo("errorCode");
+        assertThat(error.errorName()).isEqualTo("errorName");
+        assertThat(error.parameters()).isEmpty();
     }
 
     @Test
@@ -143,9 +145,9 @@ public final class ExceptionMappingTest {
 
         SerializableError error = response.readEntity(SerializableError.class);
         assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
-        assertThat(error.errorCode())
-                .isEqualTo(ErrorType.PERMISSION_DENIED.code().toString());
-        assertThat(error.errorName()).isEqualTo(ErrorType.PERMISSION_DENIED.name());
+        assertThat(error.errorCode()).isEqualTo("errorCode");
+        assertThat(error.errorName()).isEqualTo("errorName");
+        assertThat(error.parameters()).isEmpty();
     }
 
     @Test
@@ -273,6 +275,7 @@ public final class ExceptionMappingTest {
                             .errorInstanceId("errorInstanceId")
                             .errorCode("errorCode")
                             .errorName("errorName")
+                            .putParameters("arg", "value")
                             .build(),
                     REMOTE_EXCEPTION_STATUS_CODE);
         }
@@ -284,6 +287,7 @@ public final class ExceptionMappingTest {
                             .errorInstanceId("errorInstanceId")
                             .errorCode("errorCode")
                             .errorName("errorName")
+                            .putParameters("arg", "value")
                             .build(),
                     UNAUTHORIZED_STATUS_CODE);
         }
@@ -295,6 +299,7 @@ public final class ExceptionMappingTest {
                             .errorInstanceId("errorInstanceId")
                             .errorCode("errorCode")
                             .errorName("errorName")
+                            .putParameters("arg", "value")
                             .build(),
                     PERMISSION_DENIED_STATUS_CODE);
         }

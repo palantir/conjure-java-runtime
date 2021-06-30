@@ -22,7 +22,6 @@ import com.palantir.logsafe.SafeArg;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,25 +77,13 @@ abstract class JsonExceptionMapper<T extends Throwable> extends ListenableExcept
     }
 
     static Response createResponse(int httpErrorCode, String errorCode, String errorName, String errorInstanceId) {
-        ResponseBuilder builder = Response.status(httpErrorCode);
-        try {
-            builder.entity(SerializableError.builder()
-                            .errorCode(errorCode)
-                            .errorName(errorName)
-                            .errorInstanceId(errorInstanceId)
-                            .build())
-                    .type(MediaType.APPLICATION_JSON);
-        } catch (RuntimeException e) {
-            log.warn(
-                    "Unable to translate exception to json",
-                    SafeArg.of("errorInstanceId", errorInstanceId),
-                    SafeArg.of("errorName", errorName),
-                    e);
-            builder = Response.status(httpErrorCode);
-            builder.type(MediaType.TEXT_PLAIN);
-            builder.entity("Unable to translate exception to json. Refer to the server logs with this errorInstanceId: "
-                    + errorInstanceId);
-        }
-        return builder.build();
+        return Response.status(httpErrorCode)
+                .type(MediaType.APPLICATION_JSON)
+                .entity(SerializableError.builder()
+                        .errorCode(errorCode)
+                        .errorName(errorName)
+                        .errorInstanceId(errorInstanceId)
+                        .build())
+                .build();
     }
 }

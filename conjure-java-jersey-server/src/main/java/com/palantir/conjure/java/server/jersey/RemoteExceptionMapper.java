@@ -19,10 +19,10 @@ package com.palantir.conjure.java.server.jersey;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
  * response is then thrown as a {@link RemoteException} at the call point in server A. If server A does not catch this
  * exception and it raises up the call stack back into Jersey, execution enters this {@link RemoteExceptionMapper}.
  *
- * <p>To preserve debuggability, the exception and HTTP status code from B's exception are logged at WARN level, but not
- * propagated to caller to avoid an unintentional dependency on the remote exception.
+ * <p>Exception with HTTP status codes other than 401 and 403 are not propagated to caller to avoid an unintentional
+ * dependency on the remote exception.
  */
 @Provider
 final class RemoteExceptionMapper extends ListenableExceptionMapper<RemoteException> {
@@ -54,64 +54,35 @@ final class RemoteExceptionMapper extends ListenableExceptionMapper<RemoteExcept
 
     @Override
     public Response toResponseInner(RemoteException exception) {
-        ErrorType errorType = mapErrorType(exception);
-        Response.ResponseBuilder builder = Response.status(errorType.httpErrorCode());
+        if (exception.getStatus() == 401 || exception.getStatus() == 403) {
+            log.info(
+                    "Encountered a remote exception",
+                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
+                    SafeArg.of("errorName", exception.getError().errorName()),
+                    SafeArg.of("statusCode", exception.getStatus()),
+                    exception);
 
-        try {
-            SerializableError error = SerializableError.builder()
-                    .errorName(errorType.name())
-                    .errorCode(errorType.code().toString())
-                    .errorInstanceId(exception.getError().errorInstanceId())
+            return Response.status(exception.getStatus())
+                    .type(MediaType.APPLICATION_JSON)
+                    .entity(SerializableError.builder()
+                            .errorCode(exception.getError().errorCode())
+                            .errorName(exception.getError().errorName())
+                            .errorInstanceId(exception.getError().errorInstanceId())
+                            .build())
                     .build();
-            builder.type(MediaType.APPLICATION_JSON);
-            builder.entity(error);
-        } catch (RuntimeException e) {
-            log.warn(
-                    "Unable to translate exception to json",
-                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
-                    SafeArg.of("errorName", exception.getError().errorName()),
-                    e);
-            // simply write out the exception message
-            builder.type(MediaType.TEXT_PLAIN);
-            builder.entity("Unable to translate exception to json. Refer to the server logs with this errorInstanceId: "
-                    + exception.getError().errorInstanceId());
-        }
-        return builder.build();
-    }
-
-    private ErrorType mapErrorType(RemoteException exception) {
-        Status status = Status.fromStatusCode(exception.getStatus());
-
-        if (status.getStatusCode() == 401) {
-            log.info(
-                    "Encountered a remote unauthorized exception."
-                            + " Mapping to a default unauthorized exception before propagating",
-                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
-                    SafeArg.of("errorName", exception.getError().errorName()),
-                    SafeArg.of("statusCode", status.getStatusCode()),
-                    exception);
-
-            return ErrorType.UNAUTHORIZED;
-        } else if (status.getStatusCode() == 403) {
-            log.info(
-                    "Encountered a remote permission denied exception."
-                            + " Mapping to a default permission denied exception before propagating",
-                    SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
-                    SafeArg.of("errorName", exception.getError().errorName()),
-                    SafeArg.of("statusCode", status.getStatusCode()),
-                    exception);
-
-            return ErrorType.PERMISSION_DENIED;
         } else {
-            // log at WARN instead of ERROR because this indicates an issue in a remote server
             log.warn(
                     "Encountered a remote exception. Mapping to an internal error before propagating",
                     SafeArg.of("errorInstanceId", exception.getError().errorInstanceId()),
                     SafeArg.of("errorName", exception.getError().errorName()),
-                    SafeArg.of("statusCode", status.getStatusCode()),
+                    SafeArg.of("statusCode", exception.getStatus()),
                     exception);
 
-            return ErrorType.INTERNAL;
+            ServiceException propagatedException = new ServiceException(ErrorType.INTERNAL, exception);
+            return Response.status(propagatedException.getErrorType().httpErrorCode())
+                    .type(MediaType.APPLICATION_JSON)
+                    .entity(SerializableError.forException(propagatedException))
+                    .build();
         }
     }
 }
