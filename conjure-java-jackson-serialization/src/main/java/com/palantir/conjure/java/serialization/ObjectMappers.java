@@ -129,10 +129,18 @@ public final class ObjectMappers {
      * </ul>
      */
     public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
+        AfterburnerModule afterburnerModule = new AfterburnerModule();
+
+        // Disabling this avoids 'Illegal reflective access' warnings on Java 9+
+        // (https://github.com/FasterXML/jackson-modules-base/issues/37).
+        // Downside is that only 'public' properties can be accessed, whereas before 'protected' and 'package access'
+        // properties can be accessed.
+        afterburnerModule.setUseValueClassLoader(false);
+
         return mapper.registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
-                .registerModule(new AfterburnerModule())
+                .registerModule(afterburnerModule)
                 .registerModule(new JavaTimeModule())
                 .registerModule(new LenientLongModule())
                 // we strongly recommend using built-in java.time classes instead of joda ones. Joda deserialization
