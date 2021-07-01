@@ -129,11 +129,15 @@ public final class ObjectMappers {
      * </ul>
      */
     public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
-        return mapper.registerModule(new GuavaModule())
+        mapper.registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
-                .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
-                .registerModule(new AfterburnerModule())
-                .registerModule(new JavaTimeModule())
+                .registerModule(new Jdk8Module().configureAbsentsAsNulls(true));
+        if (Runtime.version().compareTo(Runtime.Version.parse("17")) < 0) {
+            // JEP 403 (java 17) breaks afterburner's ability to deserialize package private classes
+            // https://github.com/FasterXML/jackson-modules-base/issues/37
+            mapper.registerModule(new AfterburnerModule());
+        }
+        return mapper.registerModule(new JavaTimeModule())
                 .registerModule(new LenientLongModule())
                 // we strongly recommend using built-in java.time classes instead of joda ones. Joda deserialization
                 // was implicit up until jackson 2.12
