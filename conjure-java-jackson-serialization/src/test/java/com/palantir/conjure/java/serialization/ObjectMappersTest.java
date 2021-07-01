@@ -141,11 +141,11 @@ public final class ObjectMappersTest {
         assertThat(MAPPER.readValue("{\"value\":\"1\"}", LongBean.class)).isEqualTo(new LongBean(1L));
     }
 
-    static final class LongBean {
+    public static final class LongBean {
         @JsonProperty
         private long value;
 
-        LongBean() {}
+        public LongBean() {}
 
         LongBean(long value) {
             setValue(value);
@@ -199,11 +199,11 @@ public final class ObjectMappersTest {
                 .isEqualTo(new OptionalLongBean(OptionalLong.of(1L)));
     }
 
-    static final class OptionalLongBean {
+    public static final class OptionalLongBean {
         @JsonProperty
         private OptionalLong value = OptionalLong.empty();
 
-        OptionalLongBean() {}
+        public OptionalLongBean() {}
 
         OptionalLongBean(OptionalLong value) {
             setValue(value);
