@@ -12,7 +12,7 @@ com.fasterxml.jackson.datatype:jackson-datatype-joda:2.12.3 (3 constraints: 9e22
 com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3 (3 constraints: 9e226f26)
 com.fasterxml.jackson.jaxrs:jackson-jaxrs-base:2.12.3 (3 constraints: 903d4249)
 com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider:2.12.3 (2 constraints: f1137d82)
-com.fasterxml.jackson.module:jackson-module-afterburner:2.12.3 (4 constraints: 6c2f294c)
+com.fasterxml.jackson.module:jackson-module-afterburner:2.12.3 (3 constraints: 332a618e)
 com.fasterxml.jackson.module:jackson-module-blackbird:2.12.3 (2 constraints: f1137d82)
 com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.12.3 (4 constraints: 7c53e41b)
 com.fasterxml.jackson.module:jackson-module-scala_2.12:2.12.3 (2 constraints: f1137d82)
