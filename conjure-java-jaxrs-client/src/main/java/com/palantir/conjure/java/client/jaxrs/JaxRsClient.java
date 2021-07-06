@@ -51,6 +51,7 @@ public final class JaxRsClient {
      * much better protection against memory leaks.
      */
     @Deprecated
+    @SuppressWarnings("ProxyNonConstantType")
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,

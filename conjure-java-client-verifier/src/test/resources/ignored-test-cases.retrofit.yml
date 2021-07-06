@@ -17,54 +17,78 @@ client:
    - 'null'
    receiveListBearerTokenAliasExample:
    - 'null'
+   - '{}'
    receiveListBinaryAliasExample:
    - 'null'
+   - '{}'
    receiveListBooleanAliasExample:
    - 'null'
+   - '{}'
    receiveListDateTimeAliasExample:
    - 'null'
+   - '{}'
    receiveListDoubleAliasExample:
    - 'null'
+   - '{}'
    receiveListIntegerAliasExample:
    - 'null'
+   - '{}'
    receiveListRidAliasExample:
    - 'null'
+   - '{}'
    receiveListSafeLongAliasExample:
    - 'null'
+   - '{}'
    receiveListStringAliasExample:
    - 'null'
+   - '{}'
    receiveListUuidAliasExample:
    - 'null'
+   - '{}'
    receiveListAnyAliasExample:
    - 'null'
    - '[null]'
+   - '{}'
    receiveSetBearerTokenAliasExample:
    - 'null'
+   - '{}'
    receiveSetBinaryAliasExample:
    - 'null'
+   - '{}'
    receiveSetBooleanAliasExample:
    - 'null'
+   - '{}'
    receiveSetDateTimeAliasExample:
    - 'null'
+   - '{}'
    receiveSetDoubleAliasExample:
    - 'null'
+   - '{}'
    receiveSetIntegerAliasExample:
    - 'null'
+   - '{}'
    receiveSetRidAliasExample:
    - 'null'
+   - '{}'
    receiveSetSafeLongAliasExample:
    - 'null'
+   - '{}'
    receiveSetStringAliasExample:
    - 'null'
+   - '{}'
    receiveSetUuidAliasExample:
    - 'null'
+   - '{}'
    receiveSetAnyAliasExample:
    - 'null'
    - '[null]'
+   - '{}'
    receiveSetOptionalAnyAliasExample:
    - 'null'
+   - '{}'
    receiveListOptionalAnyAliasExample:
    - 'null' # jackson coerces this to [], which is kinda OK, but other conjure languages might not do this
+   - '{}'
    receiveRawOptionalExample:
    - 'null'
    receiveStringAliasExample:
