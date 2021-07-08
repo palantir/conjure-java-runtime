@@ -26,7 +26,7 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
+import com.palantir.conjure.java.optimizations.ObjectMapperOptimizations;
 
 public final class ObjectMappers {
 
@@ -132,7 +132,7 @@ public final class ObjectMappers {
         return mapper.registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
-                .registerModule(new BlackbirdModule())
+                .registerModules(ObjectMapperOptimizations.createModules())
                 .registerModule(new JavaTimeModule())
                 .registerModule(new LenientLongModule())
                 // we strongly recommend using built-in java.time classes instead of joda ones. Joda deserialization
