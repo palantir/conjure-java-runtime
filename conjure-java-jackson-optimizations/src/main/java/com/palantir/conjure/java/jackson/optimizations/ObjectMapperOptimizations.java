@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.optimizations;
+package com.palantir.conjure.java.jackson.optimizations;
 
 import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
 import java.util.List;
@@ -30,7 +30,9 @@ public final class ObjectMapperOptimizations {
             // These optimizations are not used within graalvm because they leverage dynamic class creation
             System.getProperty("org.graalvm.nativeimage.imagecode") != null
                     // This may be globally disabled with a system property
-                    || "true".equalsIgnoreCase(System.getProperty("com.palantir.conjure.java.optimizations.disabled"));
+                    || "true"
+                            .equalsIgnoreCase(
+                                    System.getProperty("com.palantir.conjure.java.jackson.optimizations.disabled"));
 
     public static List<? extends com.fasterxml.jackson.databind.Module> createModules() {
         return NO_OPTIMIZATIONS ? List.of() : List.<com.fasterxml.jackson.databind.Module>of(new BlackbirdModule());
