@@ -20,11 +20,11 @@ Core libraries:
 
 # Usage
 
-Maven artifacts are published to JCenter. Example Gradle dependency configuration:
+Maven artifacts are published to Maven Central. Example Gradle dependency configuration:
 
 ```groovy
 repositories {
-  jcenter()
+  mavenCentral()
 }
 
 dependencies {
