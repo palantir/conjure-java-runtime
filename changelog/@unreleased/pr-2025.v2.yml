@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Wrap jackson optimization modules with a factory API
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2025
