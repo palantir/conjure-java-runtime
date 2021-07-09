@@ -504,7 +504,7 @@ create_jks_key_store_from_p12() {
   log -n "Creating JKS key store from PKCS12 store..."
   set +e
   output=$(
-    keytool \
+    "${JAVA_HOME}/bin/keytool" \
       -importkeystore \
       -noprompt \
       -srckeystore "$input_store_path" \
@@ -540,7 +540,7 @@ create_jks_trust_store_from_pem() {
   log -n "Creating JKS trust store from PEM certificate..."
   set +e
   output=$(
-    keytool \
+    "${JAVA_HOME}/bin/keytool" \
       -import \
       -noprompt \
       -file "$cert_path" \
@@ -591,7 +591,7 @@ combine_jks_key_stores() {
     log -n "Importing JKS key store $curr_input_store/$num_input_stores..."
     set +e
     output=$(
-      keytool \
+      "${JAVA_HOME}/bin/keytool" \
         -noprompt \
         -importkeystore \
         -srckeystore "${input_args[$counter]}" \
