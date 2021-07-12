@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.jackson.optimizations;
 
-import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import java.util.List;
 
 /**
@@ -35,7 +35,7 @@ public final class ObjectMapperOptimizations {
                                     System.getProperty("com.palantir.conjure.java.jackson.optimizations.disabled"));
 
     public static List<? extends com.fasterxml.jackson.databind.Module> createModules() {
-        return NO_OPTIMIZATIONS ? List.of() : List.<com.fasterxml.jackson.databind.Module>of(new BlackbirdModule());
+        return NO_OPTIMIZATIONS ? List.of() : List.<com.fasterxml.jackson.databind.Module>of(new AfterburnerModule());
     }
 
     private ObjectMapperOptimizations() {}
