@@ -31,7 +31,7 @@ org.hibernate.validator:* = 6.2.0.Final
 
 # dependency-upgrader:OFF
 
-com.fasterxml.jackson.*:jackson-* = 2.12.3
+com.fasterxml.jackson.*:* = 2.12.3
 
 # Temporarily pausing until internal libraries stop relying on UnrepeatableRequestBody
 com.squareup.okhttp3:* = 3.13.1
