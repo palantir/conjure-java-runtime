@@ -35,6 +35,7 @@ import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.RequestBody;
 import com.palantir.dialogue.Response;
+import com.palantir.dialogue.ResponseAttachments;
 import com.palantir.dialogue.UrlBuilder;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
@@ -264,9 +265,11 @@ final class DialogueFeignClient implements feign.Client {
     private static final class FeignDialogueResponse implements Response {
 
         private final feign.Response delegate;
+        private final ResponseAttachments attachments;
 
         FeignDialogueResponse(feign.Response delegate) {
             this.delegate = delegate;
+            this.attachments = ResponseAttachments.create();
         }
 
         @Override
@@ -300,6 +303,11 @@ final class DialogueFeignClient implements feign.Client {
         public Optional<String> getFirstHeader(String header) {
             return Optional.ofNullable(
                     Iterables.getFirst(delegate.headers().getOrDefault(header, Collections.emptyList()), null));
+        }
+
+        @Override
+        public ResponseAttachments attachments() {
+            return attachments;
         }
 
         @Override
