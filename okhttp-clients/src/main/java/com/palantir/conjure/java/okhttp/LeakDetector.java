@@ -93,10 +93,9 @@ final class LeakDetector<T> {
             log.warn(
                     "Leak detected in Conjure call - did you forget to close a resource properly? "
                             + "This will likely hurt performance. To get a "
-                            + "stack trace for the call where the acquire happened, set log "
-                            + "level to TRACE.",
-                    SafeArg.of("resourceType", resourceType.getName()),
-                    SafeArg.of("loggerToSetToTrace", log.getName()));
+                            + "stack trace for the call where the acquire happened, set the log "
+                            + "level for this origin to TRACE.",
+                    SafeArg.of("resourceType", resourceType.getName()));
         }
     }
 
