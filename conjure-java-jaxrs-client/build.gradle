@@ -14,6 +14,7 @@ dependencies {
     implementation "com.palantir.dialogue:dialogue-apache-hc5-client"
     implementation "com.palantir.dialogue:dialogue-core"
     implementation "com.palantir.dialogue:dialogue-serde"
+    implementation 'com.palantir.safe-logging:logger'
 
     implementation project(":conjure-java-jackson-serialization")
     implementation "com.google.guava:guava"
@@ -23,8 +24,6 @@ dependencies {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
     }
-    implementation "org.slf4j:slf4j-api"
-
     testImplementation project(":conjure-java-jersey-server")
     testImplementation project(':keystores')
     testImplementation "com.netflix.feign:feign-jackson"
@@ -33,5 +32,4 @@ dependencies {
     testImplementation "junit:junit"
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
-    implementation 'com.palantir.safe-logging:logger'
 }
