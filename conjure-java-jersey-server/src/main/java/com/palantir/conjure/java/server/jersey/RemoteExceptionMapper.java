@@ -21,12 +21,12 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This {@link ExceptionMapper} is used when forwarding an exception from a remote server back to a calling client.
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 @Provider
 final class RemoteExceptionMapper extends ListenableExceptionMapper<RemoteException> {
 
-    private static final Logger log = LoggerFactory.getLogger(RemoteExceptionMapper.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(RemoteExceptionMapper.class);
 
     RemoteExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
         super(listener);

@@ -33,6 +33,8 @@ import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.tracing.Tracers;
 import com.palantir.tritium.metrics.MetricRegistries;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
@@ -54,11 +56,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.TlsVersion;
 import okhttp3.internal.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class OkHttpClients {
-    private static final Logger log = LoggerFactory.getLogger(OkHttpClients.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(OkHttpClients.class);
     private static final boolean RANDOMIZE = true;
     private static final boolean RESHUFFLE = true;
 

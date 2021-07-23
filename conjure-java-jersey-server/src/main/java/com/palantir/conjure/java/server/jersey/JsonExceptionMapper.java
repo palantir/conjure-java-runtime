@@ -19,12 +19,12 @@ package com.palantir.conjure.java.server.jersey;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Writes out generic exceptions as serialized {@link SerializableError}s with {@link MediaType#APPLICATION_JSON JSON
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 abstract class JsonExceptionMapper<T extends Throwable> extends ListenableExceptionMapper<T> {
 
-    private static final Logger log = LoggerFactory.getLogger(JsonExceptionMapper.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(JsonExceptionMapper.class);
 
     JsonExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
         super(listener);

@@ -21,6 +21,8 @@ import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.tracing.DetachedSpan;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -30,15 +32,13 @@ import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An {@link OkHttpClient} that executes {@link okhttp3.Call}s as {@link RemotingOkHttpCall}s in order to retry a class
  * of retryable error states.
  */
 final class RemotingOkHttpClient extends ForwardingOkHttpClient {
-    private static final Logger log = LoggerFactory.getLogger(RemotingOkHttpClient.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(RemotingOkHttpClient.class);
 
     private static final int MAX_NUM_RELOCATIONS = 20;
 

@@ -25,6 +25,8 @@ import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -37,13 +39,11 @@ import java.util.List;
 import java.util.Optional;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Utilities for creating {@link ClientConfiguration} instances. */
 public final class ClientConfigurations {
 
-    private static final Logger log = LoggerFactory.getLogger(ClientConfigurations.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(ClientConfigurations.class);
 
     // Defaults for parameters that are optional in ServiceConfiguration.
     private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(10);

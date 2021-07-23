@@ -19,6 +19,8 @@ package com.palantir.conjure.java.server.jersey;
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.util.UUID;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -29,8 +31,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.ParamException;
 import org.glassfish.jersey.server.ServerRuntime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * While we strongly recommend that users throw {@link ServiceException}s and not {@link WebApplicationException}s,
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @Provider
 final class WebApplicationExceptionMapper extends ListenableExceptionMapper<WebApplicationException> {
 
-    private static final Logger log = LoggerFactory.getLogger(WebApplicationExceptionMapper.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(WebApplicationExceptionMapper.class);
 
     WebApplicationExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
         super(listener);

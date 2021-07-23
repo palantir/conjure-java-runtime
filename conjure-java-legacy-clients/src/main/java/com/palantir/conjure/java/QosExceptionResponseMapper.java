@@ -19,18 +19,18 @@ package com.palantir.conjure.java;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class QosExceptionResponseMapper {
 
-    private static final Logger log = LoggerFactory.getLogger(QosExceptionResponseMapper.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(QosExceptionResponseMapper.class);
 
     private QosExceptionResponseMapper() {}
 

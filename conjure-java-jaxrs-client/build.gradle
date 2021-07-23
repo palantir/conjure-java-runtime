@@ -33,4 +33,5 @@ dependencies {
     testImplementation "junit:junit"
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
+    implementation 'com.palantir.safe-logging:logger'
 }
