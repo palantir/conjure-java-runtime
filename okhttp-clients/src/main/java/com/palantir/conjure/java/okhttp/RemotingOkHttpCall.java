@@ -31,6 +31,8 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeIoException;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.tracing.DetachedSpan;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -50,8 +52,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.internal.http.UnrepeatableRequestBody;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An OkHttp {@link Call} implementation that handles standard retryable error status such as 308, 429, 503, and
@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  */
 final class RemotingOkHttpCall extends ForwardingCall {
 
-    private static final Logger log = LoggerFactory.getLogger(RemotingOkHttpCall.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(RemotingOkHttpCall.class);
 
     private static final ResponseHandler<RemoteException> remoteExceptionHandler =
             RemoteExceptionResponseHandler.INSTANCE;

@@ -21,4 +21,5 @@ dependencies {
     testImplementation 'com.palantir.dialogue:dialogue-serde', {
         exclude group: 'com.palantir.conjure.java.runtime'
     }
+    testImplementation 'com.palantir.safe-logging:logger'
 }

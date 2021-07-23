@@ -18,11 +18,11 @@ package com.palantir.conjure.java.okhttp;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An interceptor that logs warnings when the response from a server contains the "deprecation" header. Logs include the
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * <p>Note: endpoint information is not included because endpoint-level details are not available at this level.
  */
 final class DeprecationWarningInterceptor implements Interceptor {
-    private static final Logger log = LoggerFactory.getLogger(DeprecationWarningInterceptor.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(DeprecationWarningInterceptor.class);
     // log at most once per minute
     private final RateLimiter loggingRateLimiter = RateLimiter.create(1.0 / 60.0);
     private final ClientMetrics clientMetrics;

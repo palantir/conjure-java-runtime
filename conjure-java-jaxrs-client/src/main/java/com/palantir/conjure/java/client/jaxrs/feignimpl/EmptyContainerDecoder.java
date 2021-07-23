@@ -23,6 +23,8 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import feign.Response;
 import feign.codec.Decoder;
 import java.io.IOException;
@@ -39,8 +41,6 @@ import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Interprets HTTP 204 as an 'empty' type using Jackson initially, then using reflection to manually invoke a static
@@ -77,7 +77,7 @@ public final class EmptyContainerDecoder implements Decoder {
     }
 
     private static class BlankInstanceLoader implements CacheLoader<Type, Object> {
-        private static final Logger log = LoggerFactory.getLogger(BlankInstanceLoader.class);
+        private static final SafeLogger log = SafeLoggerFactory.get(BlankInstanceLoader.class);
         private final ObjectMapper mapper;
 
         BlankInstanceLoader(ObjectMapper mapper) {

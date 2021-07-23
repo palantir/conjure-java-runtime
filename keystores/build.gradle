@@ -30,6 +30,7 @@ dependencies {
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'
+    implementation 'com.palantir.safe-logging:logger'
 }
 
 task generateCerts(type:Exec) {

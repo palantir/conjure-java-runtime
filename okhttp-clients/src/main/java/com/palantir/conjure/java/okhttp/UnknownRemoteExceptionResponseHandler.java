@@ -18,6 +18,8 @@ package com.palantir.conjure.java.okhttp;
 
 import com.google.common.io.CharStreams;
 import com.palantir.conjure.java.api.errors.UnknownRemoteException;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -25,13 +27,11 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import okhttp3.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 enum UnknownRemoteExceptionResponseHandler implements ResponseHandler<UnknownRemoteException> {
     INSTANCE;
 
-    private static final Logger log = LoggerFactory.getLogger(UnknownRemoteExceptionResponseHandler.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(UnknownRemoteExceptionResponseHandler.class);
 
     @Override
     public Optional<UnknownRemoteException> handle(Response response) {
