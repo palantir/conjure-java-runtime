@@ -45,6 +45,7 @@ public final class Retrofit2Client {
      * @deprecated Prefer com.palantir.refreshable:refreshable from https://github.com/palantir/refreshable as it has
      * much better protection against memory leaks.
      */
+    @SuppressWarnings("ProxyNonConstantType")
     @Deprecated
     public static <T> T create(
             Class<T> serviceClass,

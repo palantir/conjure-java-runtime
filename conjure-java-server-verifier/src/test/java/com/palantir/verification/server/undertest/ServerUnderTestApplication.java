@@ -46,6 +46,7 @@ public final class ServerUnderTestApplication extends Application<Configuration>
         bootstrap.setObjectMapper(remotingObjectMapper);
     }
 
+    @SuppressWarnings("ProxyNonConstantType")
     @Override
     public void run(Configuration _configuration, Environment environment) {
         environment
