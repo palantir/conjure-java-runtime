@@ -21,6 +21,8 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.base.Suppliers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Collection;
@@ -28,12 +30,10 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import org.immutables.value.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class HostMetricsRegistry implements HostEventsSink {
 
-    private static final Logger log = LoggerFactory.getLogger(HostMetricsRegistry.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(HostMetricsRegistry.class);
 
     private final LoadingCache<ServiceHostAndPort, DefaultHostMetrics> hostMetrics;
 

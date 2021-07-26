@@ -29,6 +29,7 @@ dependencies {
     testImplementation "junit:junit"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
+    implementation 'com.palantir.safe-logging:logger'
 }
 
 configurations.all {
