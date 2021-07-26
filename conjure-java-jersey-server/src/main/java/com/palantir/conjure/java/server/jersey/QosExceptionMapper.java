@@ -18,12 +18,12 @@ package com.palantir.conjure.java.server.jersey;
 
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.time.temporal.ChronoUnit;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An {@link ExceptionMapper} that turns {@link QosException}s into appropriate HTTP error codes and headers. Three
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 @Provider
 final class QosExceptionMapper extends ListenableExceptionMapper<QosException> {
 
-    private static final Logger log = LoggerFactory.getLogger(QosExceptionMapper.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(QosExceptionMapper.class);
 
     QosExceptionMapper(ConjureJerseyFeature.ExceptionListener listener) {
         super(listener);

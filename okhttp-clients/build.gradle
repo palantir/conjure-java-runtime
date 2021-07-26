@@ -12,6 +12,7 @@ dependencies {
     implementation project(':conjure-java-jackson-serialization')
     implementation 'com.google.guava:guava'
     implementation 'com.netflix.concurrency-limits:concurrency-limits-core'
+    implementation 'com.palantir.safe-logging:logger'
     implementation 'com.palantir.safe-logging:preconditions'
     implementation 'com.palantir.tracing:tracing-okhttp3'
     implementation 'com.palantir.tritium:tritium-registry'
@@ -19,7 +20,6 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor'
     implementation 'io.dropwizard.metrics:metrics-core'
     implementation 'javax.ws.rs:javax.ws.rs-api'
-    implementation 'org.slf4j:slf4j-api'
 
     testImplementation project(":conjure-java-jersey-server")
     testImplementation project(":keystores")
@@ -31,6 +31,7 @@ dependencies {
     testImplementation "org.jmock:jmock"
     testImplementation "org.mockito:mockito-core"
     testImplementation "io.undertow:undertow-core"
+    testImplementation "org.slf4j:slf4j-api"
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'

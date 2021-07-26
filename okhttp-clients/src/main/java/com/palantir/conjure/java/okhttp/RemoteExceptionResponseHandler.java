@@ -23,6 +23,8 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -32,13 +34,11 @@ import java.util.Collection;
 import java.util.Optional;
 import javax.ws.rs.core.MediaType;
 import okhttp3.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 enum RemoteExceptionResponseHandler implements ResponseHandler<RemoteException> {
     INSTANCE;
 
-    private static final Logger log = LoggerFactory.getLogger(RemoteExceptionResponseHandler.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(RemoteExceptionResponseHandler.class);
     private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
 
     @Override

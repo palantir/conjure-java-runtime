@@ -19,6 +19,8 @@ package com.palantir.conjure.java.okhttp;
 import com.google.common.annotations.VisibleForTesting;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,11 +28,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 final class LeakDetector<T> {
-    private static final Logger log = LoggerFactory.getLogger(LeakDetector.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(LeakDetector.class);
 
     private final Class<T> resourceType;
     private final Consumer<Optional<RuntimeException>> subscriber;
@@ -93,10 +93,9 @@ final class LeakDetector<T> {
             log.warn(
                     "Leak detected in Conjure call - did you forget to close a resource properly? "
                             + "This will likely hurt performance. To get a "
-                            + "stack trace for the call where the acquire happened, set log "
-                            + "level to TRACE.",
-                    SafeArg.of("resourceType", resourceType.getName()),
-                    SafeArg.of("loggerToSetToTrace", log.getName()));
+                            + "stack trace for the call where the acquire happened, set the log "
+                            + "level for this origin to TRACE.",
+                    SafeArg.of("resourceType", resourceType.getName()));
         }
     }
 

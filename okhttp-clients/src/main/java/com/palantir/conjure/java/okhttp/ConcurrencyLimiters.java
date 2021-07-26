@@ -30,6 +30,8 @@ import com.netflix.concurrency.limits.limit.AIMDLimit;
 import com.netflix.concurrency.limits.limiter.SimpleLimiter;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.logger.SafeLogger;
+import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.time.Duration;
 import java.util.Optional;
@@ -42,11 +44,9 @@ import java.util.function.Supplier;
 import javax.annotation.concurrent.GuardedBy;
 import okhttp3.Request;
 import org.immutables.value.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 final class ConcurrencyLimiters {
-    private static final Logger log = LoggerFactory.getLogger(ConcurrencyLimiters.class);
+    private static final SafeLogger log = SafeLoggerFactory.get(ConcurrencyLimiters.class);
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(1);
     private static final Void NO_CONTEXT = null;
 
