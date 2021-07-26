@@ -74,6 +74,7 @@ public final class RefreshableProxyInvocationHandlerTest {
         RefreshableProxyInvocationHandler<Object, Callable> handler =
                 RefreshableProxyInvocationHandler.create(refreshable, supplier);
         verify(supplier).apply(object1);
+        @SuppressWarnings("ProxyNonConstantType")
         Callable proxy = Reflection.newProxy(Callable.class, handler);
 
         // First call: check that delegate 1 received call and that supplier is not invoked.
@@ -109,6 +110,7 @@ public final class RefreshableProxyInvocationHandlerTest {
 
         RefreshableProxyInvocationHandler<Callable, Callable> handler =
                 RefreshableProxyInvocationHandler.create(refreshable, _tec -> throwingCallable);
+        @SuppressWarnings("ProxyNonConstantType")
         Callable proxy = Reflection.newProxy(Callable.class, handler);
 
         assertThatThrownBy(proxy::call)

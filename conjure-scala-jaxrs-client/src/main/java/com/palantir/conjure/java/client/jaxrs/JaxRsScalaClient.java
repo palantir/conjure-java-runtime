@@ -37,6 +37,7 @@ public final class JaxRsScalaClient {
     }
 
     /** See {@link JaxRsClient}. */
+    @SuppressWarnings("ProxyNonConstantType")
     public static <T> T create(
             Class<T> serviceClass,
             UserAgent userAgent,
