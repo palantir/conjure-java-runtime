@@ -97,8 +97,8 @@ org.slf4j:slf4j-api:1.7.32 (29 constraints: 2fb90405)
 
 [Test dependencies]
 ch.qos.logback:logback-access:1.2.3 (1 constraints: b41148e2)
-ch.qos.logback:logback-classic:1.2.4 (4 constraints: d3325bc4)
-ch.qos.logback:logback-core:1.2.4 (3 constraints: 1b28817f)
+ch.qos.logback:logback-classic:1.2.5 (4 constraints: d432ddc4)
+ch.qos.logback:logback-core:1.2.5 (3 constraints: 1c28ab7f)
 com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.12.3 (3 constraints: 2d25190e)
 com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.12.3 (2 constraints: 0e1d8210)
 com.fasterxml.jackson.module:jackson-module-parameter-names:2.12.3 (2 constraints: 651d2c2f)
