@@ -56,7 +56,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -355,7 +354,7 @@ final class DialogueFeignClient implements feign.Client {
         }
 
         @Override
-        public void renderPath(Map<String, String> _params, UrlBuilder url) {
+        public void renderPath(ListMultimap<String, String> _params, UrlBuilder url) {
             String target = request.url();
             Preconditions.checkState(
                     target.startsWith(baseUrl),
