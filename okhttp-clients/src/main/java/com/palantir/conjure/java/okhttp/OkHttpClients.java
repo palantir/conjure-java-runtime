@@ -277,13 +277,8 @@ public final class OkHttpClients {
                     .build());
         }
 
-        // cipher setup
-        client.connectionSpecs(createConnectionSpecs(config.enableGcmCipherSuites()));
-        // gcm ciphers are required for http/2 per https://tools.ietf.org/html/rfc7540#section-9.2.2
-        // some servers fail to implement this piece of the specification, which can violate our
-        // assumptions.
-        // This check can be removed once we've migrated to TLSv1.3+
-        if (!config.enableGcmCipherSuites() || !config.enableHttp2().orElse(DEFAULT_ENABLE_HTTP2)) {
+        client.connectionSpecs(createConnectionSpecs());
+        if (!config.enableHttp2().orElse(DEFAULT_ENABLE_HTTP2)) {
             client.protocols(ImmutableList.of(Protocol.HTTP_1_1));
         }
 
@@ -339,14 +334,11 @@ public final class OkHttpClients {
         return augmentedAgent;
     }
 
-    private static ImmutableList<ConnectionSpec> createConnectionSpecs(boolean enableGcmCipherSuites) {
+    private static ImmutableList<ConnectionSpec> createConnectionSpecs() {
         return ImmutableList.of(
                 new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
                         .tlsVersions(TlsVersion.TLS_1_2)
-                        .cipherSuites(
-                                enableGcmCipherSuites
-                                        ? CipherSuites.allCipherSuites()
-                                        : CipherSuites.fastCipherSuites())
+                        .cipherSuites(CipherSuites.allCipherSuites())
                         .build(),
                 ConnectionSpec.CLEARTEXT);
     }

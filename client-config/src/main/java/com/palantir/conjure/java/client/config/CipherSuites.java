@@ -20,19 +20,13 @@ import com.google.common.collect.ImmutableList;
 
 public final class CipherSuites {
 
-    private static final ImmutableList<String> FAST_CIPHER_SUITES = ImmutableList.of(
+    private static final ImmutableList<String> OTHER_CIPHER_SUITES = ImmutableList.of(
             "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384",
             "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256",
             "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384",
             "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA256",
             "TLS_RSA_WITH_AES_128_CBC_SHA256",
             "TLS_RSA_WITH_AES_256_CBC_SHA256",
-            "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
-            "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA",
-            "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA",
-            "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA",
-            "TLS_RSA_WITH_AES_256_CBC_SHA",
-            "TLS_RSA_WITH_AES_128_CBC_SHA",
             "TLS_CHACHA20_POLY1305_SHA256",
             "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
             "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256");
@@ -49,24 +43,20 @@ public final class CipherSuites {
 
     private static final ImmutableList<String> ALL_CIPHER_SUITES = ImmutableList.<String>builder()
             .addAll(GCM_CIPHER_SUITES)
-            .addAll(FAST_CIPHER_SUITES)
+            .addAll(OTHER_CIPHER_SUITES)
             .build();
 
     /**
-     * Known fast and safe cipher suites on the JVM.
+     * This should not be used.
      *
-     * <p>In an ideal world, we'd use GCM suites, but they're an order of magnitude slower than the CBC suites, which
-     * have JVM optimizations already. We should revisit with JDK9.
+     * The Java 8 implementation of GCM ciphers was much slower than CBC suites, however in all newer releases
+     * the GCM ciphers out-perform CBC (and all other suites).
      *
-     * <p>See also:
-     *
-     * <ul>
-     *   <li>http://openjdk.java.net/jeps/246
-     *   <li>https://bugs.openjdk.java.net/secure/attachment/25422/GCM%20Analysis.pdf
-     * </ul>
+     * @deprecated No longer necessary, GCM ciphers provide the most throughput on modern JVMs.
      */
+    @Deprecated
     public static String[] fastCipherSuites() {
-        return FAST_CIPHER_SUITES.toArray(new String[0]);
+        return allCipherSuites();
     }
 
     /** Known safe GCM cipher suites. */

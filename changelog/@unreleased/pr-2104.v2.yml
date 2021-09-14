@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: CJR CipherSuites list is more restrictive, avoiding less secure ciphers
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2104
