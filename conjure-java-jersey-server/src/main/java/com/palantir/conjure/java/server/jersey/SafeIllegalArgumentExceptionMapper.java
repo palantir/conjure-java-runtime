@@ -48,6 +48,7 @@ final class SafeIllegalArgumentExceptionMapper extends ListenableExceptionMapper
                 SafeArg.of("errorName", errorType.name()),
                 exception);
         Builder builder = new Builder()
+                .message(exception.getLogMessage())
                 .errorCode(errorType.code().name())
                 .errorName(errorType.name())
                 .errorInstanceId(errorInstanceId);
