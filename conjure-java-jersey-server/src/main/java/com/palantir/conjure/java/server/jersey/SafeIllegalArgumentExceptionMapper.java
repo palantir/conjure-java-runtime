@@ -56,7 +56,7 @@ final class SafeIllegalArgumentExceptionMapper extends ListenableExceptionMapper
             builder.putParameters(arg.getName(), Objects.toString(arg.getValue()));
         }
 
-        return Response.status(400)
+        return Response.status(errorType.httpErrorCode())
                 .type(MediaType.APPLICATION_JSON)
                 .entity(builder.build())
                 .build();
