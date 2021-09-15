@@ -2,12 +2,12 @@ apply plugin: 'com.palantir.external-publish-jar'
 apply plugin: 'com.palantir.revapi'
 
 dependencies {
-    compile "com.google.code.findbugs:jsr305"
-    compile "com.google.guava:guava"
+    api "com.google.code.findbugs:jsr305"
+    api "com.google.guava:guava"
 
-    testCompile "junit:junit"
-    testCompile "org.assertj:assertj-core"
-    testCompile "org.jmock:jmock"
-    testCompile "org.mockito:mockito-core"
-    testCompile 'io.reactivex.rxjava2:rxjava'
+    testImplementation "junit:junit"
+    testImplementation "org.assertj:assertj-core"
+    testImplementation "org.jmock:jmock"
+    testImplementation "org.mockito:mockito-core"
+    testImplementation 'io.reactivex.rxjava2:rxjava'
 }
