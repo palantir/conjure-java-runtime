@@ -43,6 +43,7 @@ public enum ConjureJerseyFeature implements Feature {
     private static boolean configure(FeatureContext context, ExceptionListener exceptionListener) {
         // Exception mappers
         context.register(new NoContentExceptionMapper());
+        context.register(new SafeIllegalArgumentExceptionMapper(exceptionListener));
         context.register(new IllegalArgumentExceptionMapper(exceptionListener));
         context.register(new RetryableExceptionMapper(exceptionListener));
         context.register(new RuntimeExceptionMapper(exceptionListener));
