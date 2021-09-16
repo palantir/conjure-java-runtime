@@ -43,7 +43,8 @@ final class SafeIllegalArgumentExceptionMapper extends ListenableExceptionMapper
         String errorInstanceId = UUID.randomUUID().toString();
         ErrorType errorType = ErrorType.INVALID_ARGUMENT;
         log.info(
-                exception.getLogMessage(),
+                "Constant",
+                SafeArg.of("safeMessage", exception.getLogMessage()),
                 SafeArg.of("errorInstanceId", errorInstanceId),
                 SafeArg.of("errorName", errorType.name()),
                 exception);
