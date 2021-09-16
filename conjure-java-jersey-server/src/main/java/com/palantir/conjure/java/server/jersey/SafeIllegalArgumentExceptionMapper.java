@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.server.jersey;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
-import com.palantir.conjure.java.api.errors.SerializableError.Builder;
+import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.Arg;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -47,7 +47,7 @@ final class SafeIllegalArgumentExceptionMapper extends ListenableExceptionMapper
                 SafeArg.of("errorInstanceId", errorInstanceId),
                 SafeArg.of("errorName", errorType.name()),
                 exception);
-        Builder builder = new Builder()
+        SerializableError.Builder builder = new SerializableError.Builder()
                 .errorCode(errorType.code().name())
                 .errorName(errorType.name())
                 .errorInstanceId(errorInstanceId);
@@ -55,6 +55,7 @@ final class SafeIllegalArgumentExceptionMapper extends ListenableExceptionMapper
         for (Arg<?> arg : exception.getArgs()) {
             builder.putParameters(arg.getName(), Objects.toString(arg.getValue()));
         }
+        builder.putParameters("safeMessage", exception.getLogMessage());
 
         return Response.status(errorType.httpErrorCode())
                 .type(MediaType.APPLICATION_JSON)
