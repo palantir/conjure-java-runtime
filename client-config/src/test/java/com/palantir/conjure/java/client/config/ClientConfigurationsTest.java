@@ -35,7 +35,6 @@ import java.net.URI;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import org.junit.Test;
@@ -101,7 +100,7 @@ public final class ClientConfigurationsTest {
                 .hasMessage("If meshProxy is configured then maxNumRetries must be 0");
 
         ClientConfiguration validConfig = ClientConfigurations.of(meshProxyServiceConfig(uris, 0));
-        assertThat(validConfig.meshProxy()).isEqualTo(Optional.of(HostAndPort.fromParts("localhost", 1234)));
+        assertThat(validConfig.meshProxy()).contains(HostAndPort.fromParts("localhost", 1234));
         assertThat(validConfig.maxNumRetries()).isZero();
     }
 
