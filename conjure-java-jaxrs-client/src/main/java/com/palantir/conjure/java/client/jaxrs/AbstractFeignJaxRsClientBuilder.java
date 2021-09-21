@@ -44,11 +44,15 @@ import com.palantir.logsafe.Preconditions;
 import feign.Contract;
 import feign.Feign;
 import feign.Logger;
+import feign.Request;
+import feign.RequestTemplate;
 import feign.Retryer;
+import feign.Target;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.jackson.JacksonDecoder;
 import feign.jaxrs.JAXRSContract;
+import java.util.Objects;
 
 /** Not meant to be implemented outside of this library. */
 abstract class AbstractFeignJaxRsClientBuilder {
@@ -99,17 +103,74 @@ abstract class AbstractFeignJaxRsClientBuilder {
             ConjureRuntime runtime,
             ObjectMapper jsonObjectMapper,
             ObjectMapper cborObjectMapper) {
-        // not used, simply for replacement
-        String baseUrl = "dialogue://feign";
         return Feign.builder()
                 .contract(createContract())
                 .encoder(createEncoder(jsonObjectMapper, cborObjectMapper))
                 .decoder(createDecoder(jsonObjectMapper, cborObjectMapper))
                 .errorDecoder(new DialogueFeignClient.RemoteExceptionDecoder(runtime))
-                .client(new DialogueFeignClient(serviceClass, channel, runtime, baseUrl))
+                .client(new DialogueFeignClient(serviceClass, channel, runtime, FeignDialogueTarget.BASE_URL))
                 .logLevel(Logger.Level.NONE) // we use Dialogue for logging. (note that NONE is the default)
                 .retryer(new Retryer.Default(0, 0, 1)) // use dialogue retry mechanism only
-                .target(serviceClass, baseUrl);
+                .target(new FeignDialogueTarget<>(serviceClass, channel));
+    }
+
+    /**
+     * Exists to fix equality computation between Feign client instances, which only compare the serviceClass and
+     * target. However, there's a great deal of other configuration, and we handle failover/retries in Dialogue
+     * which makes every client appear to use the same URL.
+     */
+    private static final class FeignDialogueTarget<T> implements Target<T> {
+        private static final String BASE_URL = "dialogue://feign";
+
+        private final Class<T> serviceClass;
+        private final Target<T> delegate;
+        // For equality checks
+        private final Channel channel;
+
+        FeignDialogueTarget(Class<T> serviceClass, Channel channel) {
+            this.serviceClass = serviceClass;
+            this.channel = channel;
+            this.delegate = new HardCodedTarget<>(serviceClass, BASE_URL);
+        }
+
+        @Override
+        public Class<T> type() {
+            return serviceClass;
+        }
+
+        @Override
+        public String name() {
+            return delegate.name();
+        }
+
+        @Override
+        public String url() {
+            return delegate.url();
+        }
+
+        @Override
+        public Request apply(RequestTemplate input) {
+            return delegate.apply(input);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other == null || getClass() != other.getClass()) {
+                return false;
+            }
+            FeignDialogueTarget<?> that = (FeignDialogueTarget<?>) other;
+            return serviceClass.equals(that.serviceClass)
+                    && delegate.equals(that.delegate)
+                    && channel.equals(that.channel);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(serviceClass, delegate, channel);
+        }
     }
 
     private static Contract createContract() {
