@@ -174,6 +174,16 @@ public final class ClientConfigurations {
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, addr));
             case MESH:
                 return ProxySelector.getDefault(); // MESH proxy is not a Java proxy
+            case SOCKS:
+                HostAndPort socksHostAndPort = HostAndPort.fromString(proxyConfig
+                        .hostAndPort()
+                        .orElseThrow(() -> new SafeIllegalArgumentException(
+                                "Expected to find proxy hostAndPort configuration for SOCKS proxy")));
+                InetSocketAddress socksAddress =
+                        // Proxy address must not be resolved, otherwise DNS changes while the application
+                        // is running are ignored by the application.
+                        InetSocketAddress.createUnresolved(socksHostAndPort.getHost(), socksHostAndPort.getPort());
+                return fixedProxySelectorFor(new Proxy(Proxy.Type.SOCKS, socksAddress));
             default:
                 // fall through
         }
