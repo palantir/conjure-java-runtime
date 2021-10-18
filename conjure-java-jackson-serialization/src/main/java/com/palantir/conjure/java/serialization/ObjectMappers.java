@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
+import com.fasterxml.jackson.dataformat.smile.SmileGenerator;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
@@ -65,11 +66,13 @@ public final class ObjectMappers {
      * <p>Settings:
      *
      * <ul>
+     *   <li>Disable 7-bit binary encoding.
      *   <li>Ignore unknown properties found during deserialization.
      * </ul>
      */
     public static ObjectMapper newSmileClientObjectMapper() {
-        return withDefaultModules(new ObjectMapper(new SmileFactory()))
+        return withDefaultModules(
+                        new ObjectMapper(new SmileFactory().disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
@@ -106,11 +109,13 @@ public final class ObjectMappers {
      * <p>Settings:
      *
      * <ul>
+     *   <li>Disable 7-bit binary encoding.
      *   <li>Throw on unknown properties found during deserialization.
      * </ul>
      */
     public static ObjectMapper newSmileServerObjectMapper() {
-        return withDefaultModules(new ObjectMapper(new SmileFactory()))
+        return withDefaultModules(
+                        new ObjectMapper(new SmileFactory().disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)))
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 

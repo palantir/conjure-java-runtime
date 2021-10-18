@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Smile encoding now uses the raw binary format.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2134
