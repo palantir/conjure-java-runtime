@@ -28,11 +28,15 @@ public final class ObjectMapperOptimizations {
 
     private static final boolean NO_OPTIMIZATIONS =
             // These optimizations are not used within graalvm because they leverage dynamic class creation
+            // The nativeimage check should not be refactored into a utility method which may reduce our ability to
+            // tree-shake.
             System.getProperty("org.graalvm.nativeimage.imagecode") != null
-                    // This may be globally disabled with a system property
-                    || "true"
-                            .equalsIgnoreCase(
-                                    System.getProperty("com.palantir.conjure.java.jackson.optimizations.disabled"));
+                    // This may be globally configured with a system property
+                    // We disable afterburner optimizations by default on java 16+ where internal access is
+                    // restricted by https://openjdk.java.net/jeps/396 and https://openjdk.java.net/jeps/403
+                    || Boolean.parseBoolean(System.getProperty(
+                            "com.palantir.conjure.java.jackson.optimizations.disabled",
+                            Runtime.version().feature() >= 16 ? "true" : "false"));
 
     public static List<? extends com.fasterxml.jackson.databind.Module> createModules() {
         return NO_OPTIMIZATIONS ? List.of() : List.<com.fasterxml.jackson.databind.Module>of(new AfterburnerModule());
