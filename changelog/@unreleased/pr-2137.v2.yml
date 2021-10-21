@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Opt out of invasive object-mapper optimizations by default in jdk16+
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2137
