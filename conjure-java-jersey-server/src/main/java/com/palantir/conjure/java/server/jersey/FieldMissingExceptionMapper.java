@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.server.jersey;
 
 import com.palantir.conjure.java.api.errors.FieldMissingException;
-import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
@@ -44,7 +43,7 @@ final class FieldMissingExceptionMapper extends ListenableExceptionMapper<FieldM
 
         return Response.status(FieldMissingException.ERROR_TYPE.httpErrorCode())
                 .type(MediaType.APPLICATION_JSON)
-                .entity(SerializableError.forException(exception))
+                .entity(exception.asSerializableError())
                 .build();
     }
 }
