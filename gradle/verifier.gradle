@@ -30,10 +30,10 @@ dependencies {
     generatedRetrofitCompile 'com.squareup.retrofit2:retrofit'
     generatedRetrofitCompile sourceSets.generatedObjects.output
 
-    testCompile 'com.palantir.conjure.java:conjure-lib'
-    testCompile sourceSets.generatedObjects.output
-    testCompile sourceSets.generatedJersey.output
-    testCompile sourceSets.generatedRetrofit.output
+    testImplementation 'com.palantir.conjure.java:conjure-lib'
+    testImplementation sourceSets.generatedObjects.output
+    testImplementation sourceSets.generatedJersey.output
+    testImplementation sourceSets.generatedRetrofit.output
 }
 
 tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureEach {
