@@ -38,6 +38,6 @@ dependencies {
 // InaccessibleObjectException: Unable to make field static final java.lang.invoke.MethodHandles$Lookup
 // java.lang.invoke.MethodHandles$Lookup.IMPL_LOOKUP accessible: module java.base does not
 // "opens java.lang.invoke" to unnamed module
-moduleJvmArgs {
-    opens 'java.base/java.lang.invoke'
-}
+//moduleJvmArgs {
+//    opens 'java.base/java.lang.invoke'
+//}
