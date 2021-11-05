@@ -1,4 +1,5 @@
-import static org.apache.tools.ant.taskdefs.condition.Os.*
+import static org.apache.tools.ant.taskdefs.condition.Os.FAMILY_MAC
+import static org.apache.tools.ant.taskdefs.condition.Os.isFamily
 
 ext {
     osClassifier = isFamily(FAMILY_MAC) ? "osx" : "linux"
@@ -18,22 +19,23 @@ configurations {
     generator
 }
 
+
 dependencies {
     generator 'com.palantir.conjure.java:conjure-java'
 
-    generatedObjectsCompile 'com.palantir.conjure.java:conjure-lib'
-    generatedJerseyCompile 'com.palantir.conjure.java:conjure-lib'
-    generatedJerseyCompile 'javax.ws.rs:javax.ws.rs-api'
-    generatedJerseyCompile sourceSets.generatedObjects.output
-    generatedRetrofitCompile 'com.google.guava:guava'
-    generatedRetrofitCompile 'com.palantir.conjure.java:conjure-lib'
-    generatedRetrofitCompile 'com.squareup.retrofit2:retrofit'
-    generatedRetrofitCompile sourceSets.generatedObjects.output
+    generatedObjectsImplementation 'com.palantir.conjure.java:conjure-lib'
+    generatedJerseyImplementation 'com.palantir.conjure.java:conjure-lib'
+    generatedJerseyImplementation 'javax.ws.rs:javax.ws.rs-api'
+    generatedJerseyImplementation sourceSets.generatedObjects.output
+    generatedRetrofitImplementation 'com.google.guava:guava'
+    generatedRetrofitImplementation 'com.palantir.conjure.java:conjure-lib'
+    generatedRetrofitImplementation 'com.squareup.retrofit2:retrofit'
+    generatedRetrofitImplementation sourceSets.generatedObjects.output
 
-    testCompile 'com.palantir.conjure.java:conjure-lib'
-    testCompile sourceSets.generatedObjects.output
-    testCompile sourceSets.generatedJersey.output
-    testCompile sourceSets.generatedRetrofit.output
+    testImplementation 'com.palantir.conjure.java:conjure-lib'
+    testImplementation sourceSets.generatedObjects.output
+    testImplementation sourceSets.generatedJersey.output
+    testImplementation sourceSets.generatedRetrofit.output
 }
 
 tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureEach {
