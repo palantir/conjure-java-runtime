@@ -9,7 +9,7 @@ buildscript {
         classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.5.0'
         classpath 'com.palantir.gradle.revapi:gradle-revapi:1.5.0'
         classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:7.0.1'
-        classpath 'com.palantir.baseline:gradle-baseline-java:4.31.0'
+        classpath 'com.palantir.baseline:gradle-baseline-java:4.38.0'
         classpath 'com.palantir.gradle.gitversion:gradle-git-version:0.12.3'
         classpath 'com.palantir.metricschema:gradle-metric-schema:0.8.0'
         classpath 'gradle.plugin.org.inferred:gradle-processors:3.6.0'
@@ -21,6 +21,12 @@ apply plugin: 'com.palantir.external-publish'
 apply plugin: 'com.palantir.baseline'
 apply plugin: 'com.palantir.git-version'
 apply plugin: 'com.palantir.consistent-versions'
+apply plugin: 'com.palantir.baseline-java-versions'
+
+javaVersions {
+    libraryTarget = 11
+    runtime = 17
+}
 
 version gitVersion()
 
@@ -70,7 +76,6 @@ subprojects {
     apply plugin: 'java-library'
     apply plugin: 'com.palantir.baseline-class-uniqueness'
 
-    sourceCompatibility = 11
     tasks.check.dependsOn(javadoc)
 
     test {
