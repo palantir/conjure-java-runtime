@@ -3,7 +3,6 @@
 </p>
 
 [![CircleCI Build Status](https://circleci.com/gh/palantir/conjure-java-runtime/tree/develop.svg?style=shield)](https://circleci.com/gh/palantir/conjure-java-runtime)
-[![Download](https://api.bintray.com/packages/palantir/releases/conjure-java-runtime/images/download.svg) ](https://bintray.com/palantir/releases/conjure-java-runtime/_latestVersion)
 
 # Conjure Java Runtime (formerly http-remoting)
 This repository provides an opinionated set of libraries for defining and creating RESTish/RPC servers and clients based
@@ -43,7 +42,7 @@ all clients, plain-text HTTP is not supported. Example:
 SslConfiguration sslConfig = SslConfiguration.of(Paths.get("path/to/trustStore"));
 UserAgent userAgent = UserAgent.of(UserAgent.Agent.of("my-user-agent", "1.0.0"));
 ClientConfiguration config = ClientConfigurations.of(
-        ImmutableList.copyOf("https://url-to-server:6789"),
+        ImmutableList.of(SERVER_URI),
         SslSocketFactories.createSslSocketFactory(sslConfig),
         SslSocketFactories.createX509TrustManager(sslConfig));
 HostMetricsRegistry hostMetricsRegistry = new HostMetricsRegistry();  // can call .getMetrics() and then collect them to a central metrics repository
@@ -97,7 +96,7 @@ services:
     trustStorePath: path/to/trustStore.jks
   myService:  # the key used in `factory.get("myService")` below
     uris:
-      - https://my-server/
+      - URI
     # optionally set a myService-specific truststore
     # security:
     #   trustStorePath: path/to/trustStore.jks
@@ -161,7 +160,7 @@ The following values are supported as store types:
 * `PKCS12`: a trust store or key store in PKCS12 format. Behavior is the same as for the `JKS` type,
   but operates on stores in PKCS12 format.
 * `Puppet`: a directory whose content conforms to the
-  [Puppet SSLdir](https://docs.puppet.com/puppet/latest/reference/dirs_ssldir.html) format. For trust stores, the
+  [Puppet SSLdir](https://puppet.com/docs/puppet/7/dirs_ssldir.html) format. For trust stores, the
   certificates in the `certs` directory are added to the trust store.  For key stores, the PEM files in the
   `private_keys` directory are added as the private keys and the corresponding files in `certs` are used as the trust
   chain for the key.
