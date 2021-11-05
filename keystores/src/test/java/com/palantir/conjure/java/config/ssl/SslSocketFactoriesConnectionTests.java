@@ -241,21 +241,14 @@ public final class SslSocketFactoriesConnectionTests {
                 TestConstants.CLIENT_KEY_STORE_JKS_PATH,
                 TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
 
-        assertThatThrownBy(() -> {
-                    runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
-                })
+        assertThatThrownBy(() -> runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH))
                 .isInstanceOfSatisfying(RuntimeException.class, ex -> {
-                    if (System.getProperty("java.version").startsWith("1.8")) {
-                        assertThat(ex)
-                                .hasCauseInstanceOf(SSLHandshakeException.class)
-                                .hasMessageContaining("bad_certificate");
-                    } else {
-                        assertThat(ex.getCause()).isInstanceOfAny(SSLException.class, SSLHandshakeException.class);
-                        assertThat(ex.getMessage())
-                                .satisfiesAnyOf(
-                                        message -> assertThat(message).contains("readHandshakeRecord"),
-                                        message -> assertThat(message).contains("certificate_unknown"));
-                    }
+                    assertThat(ex.getCause()).isInstanceOfAny(SSLException.class, SSLHandshakeException.class);
+                    assertThat(ex.getMessage())
+                            .satisfiesAnyOf(
+                                    message -> assertThat(message).contains("readHandshakeRecord"),
+                                    message -> assertThat(message).contains("certificate_unknown"),
+                                    message -> assertThat(message).contains("bad_certificate"));
                 });
     }
 
