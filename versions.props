@@ -1,4 +1,5 @@
 ch.qos.logback:logback-classic = 1.2.6
+com.github.ben-manes.caffeine:caffeine = 3.0.4
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 31.0.1-jre
 com.jcraft:jzlib = 1.1.3
@@ -9,9 +10,9 @@ com.palantir.conjure.java:conjure-lib = 6.8.0
 com.palantir.conjure.java.api:* = 2.21.0
 com.palantir.conjure.verification:* = 0.19.0
 com.palantir.dialogue:* = 3.28.0
-com.palantir.safe-logging:* = 1.19.0
+com.palantir.safe-logging:* = 1.20.0
 com.palantir.tracing:* = 6.5.0
-com.palantir.tritium:* = 0.30.0
+com.palantir.tritium:* = 0.31.0
 io.dropwizard:dropwizard-* = 2.0.0
 io.reactivex.rxjava2:rxjava = 2.2.21
 javax.ws.rs:javax.ws.rs-api = 2.1
@@ -22,7 +23,6 @@ org.glassfish.jersey.*:* = 2.34
 org.hamcrest:hamcrest-* = 1.3
 org.immutables:value = 2.8.8
 org.jmock:jmock = 2.12.0
-org.mockito:mockito-core = 3.12.4
 org.slf4j:slf4j-api = 1.7.32
 io.leangen.geantyref:geantyref = 1.3.4
 io.undertow:undertow-core = 2.2.12.Final
@@ -42,11 +42,8 @@ com.squareup.retrofit2:* = 2.4.0
 # Pin to same version as spark
 io.dropwizard.metrics:metrics-core = 3.2.6
 
-# We never actually properly released these yet
-com.palantir.tracing:tracing-test-utils = 3.2.0-rc1
-
 # Allow tests to run on Centos6
 org.conscrypt:conscrypt-openjdk-uber = 1.4.1
 
-# Avoid forcing a java 11 requirement
-com.github.ben-manes.caffeine:caffeine = 2.9.0
+# Hold off on the mockito 4.x upgrade
+org.mockito:mockito-core = 3.12.4
