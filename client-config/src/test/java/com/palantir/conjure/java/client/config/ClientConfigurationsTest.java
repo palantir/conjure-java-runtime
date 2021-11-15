@@ -160,6 +160,27 @@ public final class ClientConfigurationsTest {
                         .isNull()));
     }
 
+    @Test
+    public void socksProxy() {
+        String uri = "https://localhost:8080";
+        ProxySelector selector = ClientConfigurations.of(ServiceConfiguration.builder()
+                        .addUris(uri)
+                        .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                        .proxy(ProxyConfiguration.socks("localhost:1234"))
+                        .maxNumRetries(1)
+                        .build())
+                .proxy();
+
+        List<Proxy> proxies = selector.select(URI.create(uri));
+        assertThat(proxies).hasSize(1).allSatisfy(proxy -> {
+            assertThat(proxy.type()).isEqualTo(Proxy.Type.SOCKS);
+            assertThat(proxy.address()).isInstanceOfSatisfying(InetSocketAddress.class, address -> {
+                assertThat(address.getHostString()).isEqualTo("localhost");
+                assertThat(address.getPort()).isEqualTo(1234);
+            });
+        });
+    }
+
     private ServiceConfiguration meshProxyServiceConfig(List<String> theUris, int maxNumRetries) {
         return ServiceConfiguration.builder()
                 .uris(theUris)
