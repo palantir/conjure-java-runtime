@@ -81,7 +81,7 @@ public final class JaxRsClientStackTraceTest extends TestBase {
     }
 
     private static MockResponse serializableError() throws JsonProcessingException {
-        String json = ObjectMappers.newServerObjectMapper()
+        String json = ObjectMappers.newServerJsonMapper()
                 .writeValueAsString(SerializableError.forException(new ServiceException(ErrorType.INTERNAL)));
         return new MockResponse()
                 .setResponseCode(500)

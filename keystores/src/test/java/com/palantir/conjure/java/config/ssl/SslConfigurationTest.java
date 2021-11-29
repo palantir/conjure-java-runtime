@@ -42,11 +42,11 @@ public final class SslConfigurationTest {
                 + "\"key-store-path\":\"keystore.jks\",\"key-store-password\":\"password\","
                 + "\"key-store-type\":\"JKS\",\"key-store-key-alias\":\"alias\"}";
 
-        assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
+        assertThat(ObjectMappers.newClientJsonMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
-        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedCamelCase, SslConfiguration.class))
+        assertThat(ObjectMappers.newClientJsonMapper().readValue(deserializedCamelCase, SslConfiguration.class))
                 .isEqualTo(serialized);
-        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedKebabCase, SslConfiguration.class))
+        assertThat(ObjectMappers.newClientJsonMapper().readValue(deserializedKebabCase, SslConfiguration.class))
                 .isEqualTo(serialized);
     }
 
@@ -59,11 +59,11 @@ public final class SslConfigurationTest {
                 + "\"key-store-path\":null,\"key-store-password\":null,\"key-store-type\":\"JKS\","
                 + "\"key-store-key-alias\":null}";
 
-        assertThat(ObjectMappers.newClientObjectMapper().writeValueAsString(serialized))
+        assertThat(ObjectMappers.newClientJsonMapper().writeValueAsString(serialized))
                 .isEqualTo(deserializedCamelCase);
-        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedCamelCase, SslConfiguration.class))
+        assertThat(ObjectMappers.newClientJsonMapper().readValue(deserializedCamelCase, SslConfiguration.class))
                 .isEqualTo(serialized);
-        assertThat(ObjectMappers.newClientObjectMapper().readValue(deserializedKebabCase, SslConfiguration.class))
+        assertThat(ObjectMappers.newClientJsonMapper().readValue(deserializedKebabCase, SslConfiguration.class))
                 .isEqualTo(serialized);
     }
 }

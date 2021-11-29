@@ -18,8 +18,8 @@ package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
@@ -35,8 +35,10 @@ public final class WebApplicationExceptionMapperTest {
 
     private final WebApplicationExceptionMapper mapper =
             new WebApplicationExceptionMapper(ConjureJerseyFeature.NoOpListener.INSTANCE);
-    private final ObjectMapper objectMapper =
-            ObjectMappers.newServerObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+    private final JsonMapper objectMapper = ObjectMappers.newServerJsonMapper()
+            .rebuild()
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .build();
 
     @Test
     public void testExplicitlyHandledExceptions() throws Exception {

@@ -17,13 +17,15 @@
 package com.palantir.conjure.java.client.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.serialization.ScalaObjectMappers;
 
 public final class FeignJaxRsScalaClientBuilder extends AbstractFeignJaxRsClientBuilder {
 
-    private static final ObjectMapper JSON_OBJECT_MAPPER = ScalaObjectMappers.newClientObjectMapper();
-    private static final ObjectMapper CBOR_OBJECT_MAPPER = ScalaObjectMappers.newCborClientObjectMapper();
+    private static final JsonMapper JSON_MAPPER = ScalaObjectMappers.newClientJsonMapper();
+    private static final CBORMapper CBOR_MAPPER = ScalaObjectMappers.newClientCborMapper();
 
     FeignJaxRsScalaClientBuilder(ClientConfiguration config) {
         super(config);
@@ -31,11 +33,11 @@ public final class FeignJaxRsScalaClientBuilder extends AbstractFeignJaxRsClient
 
     @Override
     protected ObjectMapper getObjectMapper() {
-        return JSON_OBJECT_MAPPER;
+        return JSON_MAPPER;
     }
 
     @Override
     protected ObjectMapper getCborObjectMapper() {
-        return CBOR_OBJECT_MAPPER;
+        return CBOR_MAPPER;
     }
 }

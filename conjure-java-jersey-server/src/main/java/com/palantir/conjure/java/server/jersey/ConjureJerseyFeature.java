@@ -54,7 +54,7 @@ public enum ConjureJerseyFeature implements Feature {
         JacksonExceptionMappers.configure(context, exceptionListener);
 
         // Cbor handling
-        context.register(new JacksonCBORProvider(ObjectMappers.newCborServerObjectMapper()));
+        context.register(new JacksonCBORProvider(ObjectMappers.newServerCborMapper()));
 
         // Auth handling
         context.register(AuthHeaderParamConverterProvider.class);

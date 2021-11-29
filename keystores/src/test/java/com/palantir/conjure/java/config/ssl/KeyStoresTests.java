@@ -19,7 +19,7 @@ package com.palantir.conjure.java.config.ssl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 import com.palantir.conjure.java.serialization.ObjectMappers;
@@ -320,7 +320,7 @@ public final class KeyStoresTests {
 
     @Test
     public void testPemX509CertificateDeserializationFromString() throws IOException {
-        ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
+        JsonMapper mapper = ObjectMappers.newServerJsonMapper();
         String cert = Files.asCharSource(TestConstants.SERVER_CERT_PEM_PATH.toFile(), StandardCharsets.UTF_8)
                 .read();
         byte[] json = mapper.writeValueAsBytes(cert);
@@ -329,7 +329,7 @@ public final class KeyStoresTests {
 
     @Test
     public void testPemX509CertificateDeserializationFromJsonObject() throws IOException {
-        ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
+        JsonMapper mapper = ObjectMappers.newServerJsonMapper();
         String cert = Files.asCharSource(TestConstants.SERVER_CERT_PEM_PATH.toFile(), StandardCharsets.UTF_8)
                 .read();
         byte[] json = mapper.writeValueAsBytes(ImmutableMap.of("pemCertificate", cert));
@@ -338,7 +338,7 @@ public final class KeyStoresTests {
 
     @Test
     public void testPemX509CertificateRoundTripSerde() throws IOException {
-        ObjectMapper mapper = ObjectMappers.newServerObjectMapper();
+        JsonMapper mapper = ObjectMappers.newServerJsonMapper();
         PemX509Certificate expected = PemX509Certificate.of(
                 Files.asCharSource(TestConstants.SERVER_CERT_PEM_PATH.toFile(), StandardCharsets.UTF_8)
                         .read());

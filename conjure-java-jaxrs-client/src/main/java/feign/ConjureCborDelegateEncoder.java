@@ -35,8 +35,8 @@ public final class ConjureCborDelegateEncoder implements Encoder {
 
     private final Encoder delegate;
 
-    public ConjureCborDelegateEncoder(ObjectMapper cborObjectMapper, Encoder delegate) {
-        this.delegate = new CborDelegateEncoder(cborObjectMapper, delegate);
+    public ConjureCborDelegateEncoder(ObjectMapper cborMapper, Encoder delegate) {
+        this.delegate = new CborDelegateEncoder(cborMapper, delegate);
     }
 
     @Override

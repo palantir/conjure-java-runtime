@@ -39,11 +39,11 @@ import java.util.Collection;
  */
 public final class CborDelegateDecoder implements Decoder {
 
-    private final ObjectMapper cborObjectMapper;
+    private final ObjectMapper cborMapper;
     private final Decoder delegate;
 
-    public CborDelegateDecoder(ObjectMapper cborObjectMapper, Decoder delegate) {
-        this.cborObjectMapper = cborObjectMapper;
+    public CborDelegateDecoder(ObjectMapper cborMapper, Decoder delegate) {
+        this.cborMapper = cborMapper;
         this.delegate = delegate;
     }
 
@@ -69,7 +69,7 @@ public final class CborDelegateDecoder implements Decoder {
             // put the byte back
             pushbackInputStream.unread(firstByte);
 
-            return cborObjectMapper.readValue(pushbackInputStream, cborObjectMapper.constructType(type));
+            return cborMapper.readValue(pushbackInputStream, cborMapper.constructType(type));
 
         } else {
             return delegate.decode(response, type);

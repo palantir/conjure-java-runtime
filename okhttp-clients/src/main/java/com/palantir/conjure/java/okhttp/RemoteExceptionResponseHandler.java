@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.okhttp;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.io.CharStreams;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.api.errors.SerializableError;
@@ -39,7 +39,7 @@ enum RemoteExceptionResponseHandler implements ResponseHandler<RemoteException> 
     INSTANCE;
 
     private static final SafeLogger log = SafeLoggerFactory.get(RemoteExceptionResponseHandler.class);
-    private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
+    private static final JsonMapper MAPPER = ObjectMappers.newClientJsonMapper();
 
     @Override
     public Optional<RemoteException> handle(Response response) {

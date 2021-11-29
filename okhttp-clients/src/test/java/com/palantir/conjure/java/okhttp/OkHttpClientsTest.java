@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HostAndPort;
@@ -348,7 +348,7 @@ public final class OkHttpClientsTest extends TestBase {
                 .errorName("error name")
                 .build();
         MockResponse mockResponse = new MockResponse()
-                .setBody(new ObjectMapper().writeValueAsString(error))
+                .setBody(new JsonMapper().writeValueAsString(error))
                 .addHeader("Content-Type", "application/json")
                 .setResponseCode(400);
         server.enqueue(mockResponse);

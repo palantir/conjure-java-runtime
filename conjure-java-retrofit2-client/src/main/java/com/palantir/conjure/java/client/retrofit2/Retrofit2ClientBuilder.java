@@ -16,7 +16,8 @@
 
 package com.palantir.conjure.java.client.retrofit2;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.okhttp.HostEventsSink;
@@ -28,8 +29,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
 public final class Retrofit2ClientBuilder {
-    private static final ObjectMapper CBOR_OBJECT_MAPPER = ObjectMappers.newCborClientObjectMapper();
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.newClientObjectMapper();
+    private static final JsonMapper JSON_MAPPER = ObjectMappers.newClientJsonMapper();
+    private static final CBORMapper CBOR_MAPPER = ObjectMappers.newClientCborMapper();
 
     private ClientConfiguration config;
 
@@ -62,8 +63,8 @@ public final class Retrofit2ClientBuilder {
                 .addConverterFactory(OptionalResponseBodyConverterFactory.INSTANCE)
                 .addConverterFactory(new CborConverterFactory(
                         new NeverReturnNullConverterFactory(
-                                new CoerceNullValuesConverterFactory(JacksonConverterFactory.create(OBJECT_MAPPER))),
-                        CBOR_OBJECT_MAPPER))
+                                new CoerceNullValuesConverterFactory(JacksonConverterFactory.create(JSON_MAPPER))),
+                        CBOR_MAPPER))
                 .addConverterFactory(OptionalObjectToStringConverterFactory.INSTANCE)
                 // These get evaluated last, to convert the original Call into the response type expected by the client
                 .addCallAdapterFactory(new QosExceptionThrowingCallAdapterFactory(

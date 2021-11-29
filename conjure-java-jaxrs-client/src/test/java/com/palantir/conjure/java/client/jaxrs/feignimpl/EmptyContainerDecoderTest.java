@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
@@ -50,7 +50,7 @@ import org.junit.Test;
 
 public class EmptyContainerDecoderTest {
 
-    private static final ObjectMapper mapper = ObjectMappers.newClientObjectMapper();
+    private static final JsonMapper mapper = ObjectMappers.newClientJsonMapper();
     private static final Response HTTP_204 = Response.create(204, "No Content", Collections.emptyMap(), new byte[] {});
     private final Decoder delegate = mock(Decoder.class);
     private final EmptyContainerDecoder emptyContainerDecoder = new EmptyContainerDecoder(mapper, delegate);

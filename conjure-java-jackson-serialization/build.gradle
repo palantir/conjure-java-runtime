@@ -4,14 +4,13 @@ apply plugin: 'com.palantir.revapi'
 dependencies {
     implementation project(":conjure-java-jackson-optimizations")
     api "com.fasterxml.jackson.core:jackson-databind"
+    api "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor"
+    api "com.fasterxml.jackson.dataformat:jackson-dataformat-smile"
     api "com.fasterxml.jackson.datatype:jackson-datatype-guava"
     api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-joda"
     api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
-    api "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor"
     api "com.palantir.safe-logging:preconditions"
-
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-joda"
-    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-smile"
 
     testImplementation "junit:junit"
     testImplementation "org.assertj:assertj-core"

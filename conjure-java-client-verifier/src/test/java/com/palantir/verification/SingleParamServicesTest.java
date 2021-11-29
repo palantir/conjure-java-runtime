@@ -16,7 +16,7 @@
 
 package com.palantir.verification;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
@@ -43,7 +43,7 @@ public class SingleParamServicesTest {
     public static final VerificationServerRule server = new VerificationServerRule();
 
     private static final Logger log = LoggerFactory.getLogger(SingleParamServicesTest.class);
-    private static final ObjectMapper objectMapper = ObjectMappers.newClientObjectMapper();
+    private static final JsonMapper jsonMapper = ObjectMappers.newClientJsonMapper();
     private static ImmutableMap<String, Object> servicesMapsJaxrs = ImmutableMap.of(
             "singlePathParamService",
             VerificationClients.singlePathParamService(server),
@@ -116,11 +116,11 @@ public class SingleParamServicesTest {
                     if ("singleHeaderService".equals(serviceName)) {
                         Type type = method.getGenericParameterTypes()[0];
                         Class<?> cls = ClassUtils.getClass(type.getTypeName());
-                        method.invoke(service, objectMapper.readValue(jsonString, cls), index);
+                        method.invoke(service, jsonMapper.readValue(jsonString, cls), index);
                     } else {
                         Type type = method.getGenericParameterTypes()[1];
                         Class<?> cls = ClassUtils.getClass(type.getTypeName());
-                        method.invoke(service, index, objectMapper.readValue(jsonString, cls));
+                        method.invoke(service, index, jsonMapper.readValue(jsonString, cls));
                     }
 
                     log.info("Successfully post param to endpoint {} and index {}", endpointName, index);

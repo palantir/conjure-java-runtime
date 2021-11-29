@@ -18,7 +18,7 @@ package com.palantir.conjure.java.serialization;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -28,7 +28,7 @@ public final class ShimJdk7ModuleTest {
 
     @Test
     public void testPathSerDe() throws IOException {
-        ObjectMapper mapper = new ObjectMapper().registerModule(new ShimJdk7Module());
+        JsonMapper mapper = JsonMapper.builder().addModule(new ShimJdk7Module()).build();
         String val = mapper.writeValueAsString(Paths.get("a", "b", "c"));
         assertThat(mapper.readValue(val, Path.class)).isEqualTo(Paths.get("a", "b", "c"));
     }

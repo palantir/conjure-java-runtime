@@ -22,8 +22,8 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 import com.palantir.conjure.java.api.errors.ErrorType;
@@ -70,7 +70,7 @@ public final class ExceptionMappingTest {
     private static final int REMOTE_EXCEPTION_STATUS_CODE = 400;
     private static final int UNAUTHORIZED_STATUS_CODE = 401;
     private static final int PERMISSION_DENIED_STATUS_CODE = 403;
-    private static final ObjectMapper MAPPER = ObjectMappers.newServerObjectMapper();
+    private static final JsonMapper MAPPER = ObjectMappers.newServerJsonMapper();
 
     private WebTarget target;
 

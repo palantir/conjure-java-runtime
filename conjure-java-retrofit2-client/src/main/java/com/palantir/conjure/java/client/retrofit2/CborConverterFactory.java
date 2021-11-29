@@ -17,9 +17,9 @@
 package com.palantir.conjure.java.client.retrofit2;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.google.common.net.HttpHeaders;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -37,11 +37,11 @@ public final class CborConverterFactory extends Converter.Factory {
     private static final MediaType CBOR_MIME_TYPE = MediaType.parse("application/cbor");
 
     private final Converter.Factory delegate;
-    private final ObjectMapper cborObjectMapper;
+    private final CBORMapper cborMapper;
 
-    CborConverterFactory(Converter.Factory delegate, ObjectMapper cborObjectMapper) {
+    CborConverterFactory(Converter.Factory delegate, CBORMapper cborMapper) {
         this.delegate = delegate;
-        this.cborObjectMapper = cborObjectMapper;
+        this.cborMapper = cborMapper;
     }
 
     @Override
@@ -49,8 +49,8 @@ public final class CborConverterFactory extends Converter.Factory {
         // given we don't know how to convert the response until we check the Content-Type, we construct a delegate
         // converter for when the response is not application/cbor.
         Converter<ResponseBody, ?> delegateConverter = delegate.responseBodyConverter(type, annotations, retrofit);
-        JavaType javaType = cborObjectMapper.getTypeFactory().constructType(type);
-        ObjectReader objectReader = cborObjectMapper.readerFor(javaType);
+        JavaType javaType = cborMapper.getTypeFactory().constructType(type);
+        ObjectReader objectReader = cborMapper.readerFor(javaType);
         return new CborResponseBodyConverter<>(objectReader, delegateConverter);
     }
 
@@ -58,7 +58,7 @@ public final class CborConverterFactory extends Converter.Factory {
     public Converter<?, RequestBody> requestBodyConverter(
             Type type, Annotation[] parameterAnnotations, Annotation[] methodAnnotations, Retrofit retrofit) {
         if (contentTypeIsCbor(methodAnnotations)) {
-            return new CborRequestBodyConverter<>(cborObjectMapper.writer());
+            return new CborRequestBodyConverter<>(cborMapper.writer());
         } else {
             return delegate.requestBodyConverter(type, parameterAnnotations, methodAnnotations, retrofit);
         }

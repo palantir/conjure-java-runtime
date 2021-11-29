@@ -16,8 +16,8 @@
 
 package com.palantir.verification;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.palantir.conjure.verification.server.ClientTestCases;
 import com.palantir.conjure.verification.server.EndpointName;
@@ -41,8 +41,9 @@ public final class Cases {
 
     private static ClientTestCases deserializeTestCases(File file) {
         try {
-            return new ObjectMapper()
-                    .registerModule(new Jdk8Module())
+            return JsonMapper.builder()
+                    .addModule(new Jdk8Module())
+                    .build()
                     .readValue(file, TestCases.class)
                     .getClient();
         } catch (IOException e) {
@@ -53,8 +54,9 @@ public final class Cases {
 
     private static IgnoredClientTestCases deserializeIgnoredClientTestCases(File file) {
         try {
-            return new ObjectMapper(new YAMLFactory())
-                    .registerModule(new Jdk8Module())
+            return YAMLMapper.builder()
+                    .addModule(new Jdk8Module())
+                    .build()
                     .readValue(file, IgnoredTestCases.class)
                     .getClient();
         } catch (IOException e) {

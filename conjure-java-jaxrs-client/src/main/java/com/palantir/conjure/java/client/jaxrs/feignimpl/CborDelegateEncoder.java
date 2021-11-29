@@ -41,11 +41,11 @@ public final class CborDelegateEncoder implements Encoder {
 
     public static final String MIME_TYPE = "application/cbor";
 
-    private final ObjectMapper cborObjectMapper;
+    private final ObjectMapper cborMapper;
     private final Encoder delegate;
 
-    public CborDelegateEncoder(ObjectMapper cborObjectMapper, Encoder delegate) {
-        this.cborObjectMapper = cborObjectMapper;
+    public CborDelegateEncoder(ObjectMapper cborMapper, Encoder delegate) {
+        this.cborMapper = cborMapper;
         this.delegate = delegate;
     }
 
@@ -63,8 +63,8 @@ public final class CborDelegateEncoder implements Encoder {
         }
 
         try {
-            JavaType javaType = cborObjectMapper.getTypeFactory().constructType(bodyType);
-            template.body(cborObjectMapper.writerFor(javaType).writeValueAsBytes(object), StandardCharsets.UTF_8);
+            JavaType javaType = cborMapper.getTypeFactory().constructType(bodyType);
+            template.body(cborMapper.writerFor(javaType).writeValueAsBytes(object), StandardCharsets.UTF_8);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
