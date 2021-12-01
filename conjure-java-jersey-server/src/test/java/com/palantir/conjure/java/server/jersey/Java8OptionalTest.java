@@ -18,11 +18,22 @@ package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
+import com.google.common.io.ByteStreams;
+import com.google.common.net.HttpHeaders;
+import com.palantir.logsafe.Preconditions;
 import io.dropwizard.Application;
 import io.dropwizard.Configuration;
 import io.dropwizard.setup.Environment;
 import io.dropwizard.testing.junit.DropwizardAppRule;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -60,11 +71,39 @@ public final class Java8OptionalTest {
     }
 
     @Test
-    public void testOptionalPresent() throws NoSuchMethodException, SecurityException {
+    public void testOptionalPresent() throws SecurityException {
         Response response =
                 target.path("optional").queryParam("value", "val").request().get();
         assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
         assertThat(response.readEntity(String.class)).isEqualTo("valval");
+    }
+
+    @Test
+    public void testOptionalPresentWithAdditionalAccepts() throws IOException, SecurityException {
+        HttpURLConnection conn = (HttpURLConnection)
+                new URL("http://localhost:" + APP.getLocalPort() + "/optional?value=val").openConnection();
+        conn.addRequestProperty(HttpHeaders.ACCEPT, "application/x-jackson-smile, application/json, application/cbor");
+        int statusCode = conn.getResponseCode();
+        assertThat(statusCode).isEqualTo(Status.OK.getStatusCode());
+        assertThat(conn.getHeaderField("Content-Type")).startsWith("application/json");
+        try (InputStream responseBody = conn.getInputStream()) {
+            String stringValue = new String(ByteStreams.toByteArray(responseBody), StandardCharsets.UTF_8);
+            assertThat(stringValue).isEqualTo("valval");
+        }
+    }
+
+    @Test
+    public void testOptionalComnplexPresentWithAdditionalAccepts() throws IOException, SecurityException {
+        HttpURLConnection conn = (HttpURLConnection)
+                new URL("http://localhost:" + APP.getLocalPort() + "/optional/complex?value=val").openConnection();
+        conn.addRequestProperty(HttpHeaders.ACCEPT, "application/x-jackson-smile, application/json, application/cbor");
+        int statusCode = conn.getResponseCode();
+        assertThat(statusCode).isEqualTo(Status.OK.getStatusCode());
+        assertThat(conn.getHeaderField("Content-Type")).startsWith("application/json");
+        try (InputStream responseBody = conn.getInputStream()) {
+            String stringValue = new String(ByteStreams.toByteArray(responseBody), StandardCharsets.UTF_8);
+            assertThat(stringValue).isEqualTo("{\"value\":\"val\"}");
+        }
     }
 
     @Test
@@ -184,6 +223,15 @@ public final class Java8OptionalTest {
         }
 
         @Override
+        public Optional<Complex> getOptionalComplex(@Nullable String value) {
+            if (Strings.isNullOrEmpty(value)) {
+                return Optional.empty();
+            } else {
+                return Optional.of(new Complex(value));
+            }
+        }
+
+        @Override
         public String getWithOptionalQueryParam(Optional<String> string) {
             return string.orElse("default");
         }
@@ -213,6 +261,10 @@ public final class Java8OptionalTest {
         Optional<String> getOptional(@QueryParam("value") @Nullable String value);
 
         @GET
+        @Path("/optional/complex")
+        Optional<Complex> getOptionalComplex(@QueryParam("value") @Nullable String value);
+
+        @GET
         @Path("/optional/string")
         String getWithOptionalQueryParam(@QueryParam("value") Optional<String> string);
 
@@ -227,5 +279,20 @@ public final class Java8OptionalTest {
         @GET
         @Path("/optional/long")
         long getWithOptionalLongQueryParam(@QueryParam("value") OptionalLong value);
+    }
+
+    public static final class Complex {
+
+        private final String value;
+
+        @JsonCreator
+        Complex(@JsonProperty("value") String value) {
+            this.value = Preconditions.checkNotNull(value, "Value is required");
+        }
+
+        @JsonGetter("value")
+        public String getValue() {
+            return value;
+        }
     }
 }
