@@ -93,7 +93,7 @@ public final class Java8OptionalTest {
     }
 
     @Test
-    public void testOptionalComnplexPresentWithAdditionalAccepts() throws IOException, SecurityException {
+    public void testOptionalComplexPresentWithAdditionalAccepts() throws IOException, SecurityException {
         HttpURLConnection conn = (HttpURLConnection)
                 new URL("http://localhost:" + APP.getLocalPort() + "/optional/complex?value=val").openConnection();
         conn.addRequestProperty(HttpHeaders.ACCEPT, "application/x-jackson-smile, application/json, application/cbor");
