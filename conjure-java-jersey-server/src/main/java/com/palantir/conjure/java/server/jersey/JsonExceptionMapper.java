@@ -57,15 +57,15 @@ abstract class JsonExceptionMapper<T extends Throwable> extends ListenableExcept
 
         if (errorType.httpErrorCode() / 100 == 4 /* client error */) {
             log.info(
-                    "Error handling request",
-                    SafeArg.of("errorInstanceId", errorInstanceId),
+                    "Error handling request. {}: {}",
                     SafeArg.of("errorName", errorType.name()),
+                    SafeArg.of("errorInstanceId", errorInstanceId),
                     exception);
         } else {
             log.error(
-                    "Error handling request",
-                    SafeArg.of("errorInstanceId", errorInstanceId),
+                    "Error handling request. {}: {}",
                     SafeArg.of("errorName", errorType.name()),
+                    SafeArg.of("errorInstanceId", errorInstanceId),
                     exception);
         }
 
