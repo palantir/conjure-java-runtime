@@ -6,9 +6,12 @@ dependencies {
     api project(":client-config")
     api project(":conjure-java-legacy-clients")
     api "com.google.code.findbugs:jsr305"
-    api "javax.ws.rs:javax.ws.rs-api"
+    api "jakarta.ws.rs:jakarta.ws.rs-api"
     // TODO(dsanduleac): Should be implementation, but can't because we expose feign.TextDelegateEncoder
-    api "com.netflix.feign:feign-core"
+    api "com.netflix.feign:feign-core", {
+        // prefer jakarta.ws.rs:jakarta.ws.rs-api
+        exclude group: 'javax.ws.rs', module: 'javax.ws.rs-api'
+    }
     api "com.palantir.dialogue:dialogue-target"
 
     implementation "com.palantir.dialogue:dialogue-apache-hc5-client"

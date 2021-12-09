@@ -25,7 +25,7 @@ dependencies {
 
     generatedObjectsImplementation 'com.palantir.conjure.java:conjure-lib'
     generatedJerseyImplementation 'com.palantir.conjure.java:conjure-lib'
-    generatedJerseyImplementation 'javax.ws.rs:javax.ws.rs-api'
+    generatedJerseyImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     generatedJerseyImplementation sourceSets.generatedObjects.output
     generatedRetrofitImplementation 'com.google.guava:guava'
     generatedRetrofitImplementation 'com.palantir.conjure.java:conjure-lib'
