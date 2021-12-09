@@ -19,13 +19,13 @@ dependencies {
     implementation 'com.palantir.tritium:tritium-metrics'
     implementation 'com.squareup.okhttp3:logging-interceptor'
     implementation 'io.dropwizard.metrics:metrics-core'
-    implementation 'javax.ws.rs:javax.ws.rs-api'
+    implementation 'jakarta.ws.rs:jakarta.ws.rs-api'
 
     testImplementation project(":conjure-java-jersey-server")
     testImplementation project(":keystores")
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation "com.squareup.okhttp3:mockwebserver"
-    testImplementation "javax.ws.rs:javax.ws.rs-api"
+    testImplementation "jakarta.ws.rs:jakarta.ws.rs-api"
     testImplementation "junit:junit"
     testImplementation "org.assertj:assertj-core"
     testImplementation "org.jmock:jmock"
