@@ -93,7 +93,7 @@ org.jboss.logging:jboss-logging:3.4.1.Final (10 constraints: a7acd33a)
 org.jvnet:animal-sniffer-annotation:1.0 (1 constraints: f20b95eb)
 org.mpierce.metrics.reservoir:hdrhistogram-metrics-reservoir:1.1.3 (11 constraints: 30b5eab8)
 org.scala-lang:scala-library:2.12.13 (1 constraints: 3816742c)
-org.slf4j:slf4j-api:1.7.32 (40 constraints: 8a6f304e)
+org.slf4j:slf4j-api:1.7.33 (40 constraints: 8b6f2455)
 
 [Test dependencies]
 ch.qos.logback:logback-access:1.2.3 (1 constraints: b41148e2)
