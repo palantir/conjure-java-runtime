@@ -37,7 +37,7 @@ import java.time.Duration;
 import java.util.List;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public final class ClientConfigurationsTest {
 
