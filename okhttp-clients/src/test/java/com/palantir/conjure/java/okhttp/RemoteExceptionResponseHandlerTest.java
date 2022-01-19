@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.errors.ErrorType;
@@ -52,7 +52,7 @@ public final class RemoteExceptionResponseHandlerTest {
     private static final String message = "hello";
     private static final int STATUS_500 = 500;
 
-    private static final ObjectMapper SERVER_MAPPER = ObjectMappers.newServerObjectMapper();
+    private static final JsonMapper SERVER_MAPPER = ObjectMappers.newServerJsonMapper();
 
     private static final Request request =
             new Request.Builder().url("http://url").build();

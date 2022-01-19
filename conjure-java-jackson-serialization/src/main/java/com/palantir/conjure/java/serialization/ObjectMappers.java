@@ -20,9 +20,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
+import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileGenerator;
+import com.fasterxml.jackson.dataformat.smile.databind.SmileMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
@@ -33,6 +36,10 @@ public final class ObjectMappers {
 
     private ObjectMappers() {}
 
+    private static final SmileFactory SMILE_FACTORY = SmileFactory.builder()
+            .disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)
+            .build();
+
     /**
      * Returns a default ObjectMapper with settings adjusted for use in clients.
      *
@@ -42,8 +49,10 @@ public final class ObjectMappers {
      *   <li>Ignore unknown properties found during deserialization.
      * </ul>
      */
-    public static ObjectMapper newClientObjectMapper() {
-        return withDefaultModules(new ObjectMapper()).disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    public static JsonMapper newClientJsonMapper() {
+        return withDefaultModules(JsonMapper.builder())
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
     /**
@@ -55,9 +64,10 @@ public final class ObjectMappers {
      *   <li>Ignore unknown properties found during deserialization.
      * </ul>
      */
-    public static ObjectMapper newCborClientObjectMapper() {
-        return withDefaultModules(new ObjectMapper(new CBORFactory()))
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    public static CBORMapper newClientCborMapper() {
+        return withDefaultModules(CBORMapper.builder())
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
     /**
@@ -70,10 +80,10 @@ public final class ObjectMappers {
      *   <li>Ignore unknown properties found during deserialization.
      * </ul>
      */
-    public static ObjectMapper newSmileClientObjectMapper() {
-        return withDefaultModules(
-                        new ObjectMapper(new SmileFactory().disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)))
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    public static SmileMapper newClientSmileMapper() {
+        return withDefaultModules(SmileMapper.builder(SMILE_FACTORY))
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
     /**
@@ -85,8 +95,10 @@ public final class ObjectMappers {
      *   <li>Throw on unknown properties found during deserialization.
      * </ul>
      */
-    public static ObjectMapper newServerObjectMapper() {
-        return withDefaultModules(new ObjectMapper()).enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    public static JsonMapper newServerJsonMapper() {
+        return withDefaultModules(JsonMapper.builder())
+                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
     /**
@@ -98,9 +110,10 @@ public final class ObjectMappers {
      *   <li>Throw on unknown properties found during deserialization.
      * </ul>
      */
-    public static ObjectMapper newCborServerObjectMapper() {
-        return withDefaultModules(new ObjectMapper(new CBORFactory()))
-                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    public static CBORMapper newServerCborMapper() {
+        return withDefaultModules(CBORMapper.builder())
+                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
     /**
@@ -113,10 +126,68 @@ public final class ObjectMappers {
      *   <li>Throw on unknown properties found during deserialization.
      * </ul>
      */
+    public static SmileMapper newServerSmileMapper() {
+        return withDefaultModules(SmileMapper.builder(SMILE_FACTORY))
+                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
+    }
+
+    public static ObjectMapper newClientObjectMapper() {
+        return newClientJsonMapper();
+    }
+
+    public static ObjectMapper newCborClientObjectMapper() {
+        return newClientCborMapper();
+    }
+
+    public static ObjectMapper newSmileClientObjectMapper() {
+        return newClientSmileMapper();
+    }
+
+    public static ObjectMapper newServerObjectMapper() {
+        return newServerJsonMapper();
+    }
+
+    public static ObjectMapper newCborServerObjectMapper() {
+        return newServerCborMapper();
+    }
+
     public static ObjectMapper newSmileServerObjectMapper() {
-        return withDefaultModules(
-                        new ObjectMapper(new SmileFactory().disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)))
-                .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        return newServerSmileMapper();
+    }
+
+    /**
+     * Configures provided MapperBuilder with default modules and settings.
+     *
+     * <p>Modules: Guava, JDK7, JDK8, Afterburner, JavaTime, Joda
+     *
+     * <p>Settings:
+     *
+     * <ul>
+     *   <li>Dates written as ISO-8601 strings.
+     *   <li>Dates remain in received timezone.
+     *   <li>Exceptions will not be wrapped with Jackson exceptions.
+     *   <li>Deserializing a null for a primitive field will throw an exception.
+     * </ul>
+     */
+    public static <M extends ObjectMapper, B extends MapperBuilder<M, B>> B withDefaultModules(B builder) {
+        return builder.addModule(new GuavaModule())
+                .addModule(new ShimJdk7Module())
+                .addModule(new Jdk8Module().configureAbsentsAsNulls(true))
+                .addModules(ObjectMapperOptimizations.createModules())
+                .addModule(new JavaTimeModule())
+                .addModule(new LenientLongModule())
+                // we strongly recommend using built-in java.time classes instead of joda ones. Joda deserialization
+                // was implicit up until jackson 2.12
+                .addModule(new JodaModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(SerializationFeature.WRITE_DURATIONS_AS_TIMESTAMPS)
+                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+                .disable(DeserializationFeature.WRAP_EXCEPTIONS)
+                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+                .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+                .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
+                .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
     }
 
     /**

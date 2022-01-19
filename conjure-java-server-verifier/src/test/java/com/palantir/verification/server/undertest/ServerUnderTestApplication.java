@@ -16,7 +16,7 @@
 
 package com.palantir.verification.server.undertest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
 import com.google.common.reflect.AbstractInvocationHandler;
@@ -39,10 +39,12 @@ public final class ServerUnderTestApplication extends Application<Configuration>
 
     @Override
     public void initialize(Bootstrap<Configuration> bootstrap) {
-        ObjectMapper remotingObjectMapper = ObjectMappers.newServerObjectMapper()
+        JsonMapper remotingObjectMapper = ObjectMappers.newServerJsonMapper()
+                .rebuild()
                 // needs discoverable subtype resolver for DW polymorphic configuration mechanism
-                .setSubtypeResolver(new DiscoverableSubtypeResolver())
-                .registerModule(new FuzzyEnumModule());
+                .subtypeResolver(new DiscoverableSubtypeResolver())
+                .addModule(new FuzzyEnumModule())
+                .build();
         bootstrap.setObjectMapper(remotingObjectMapper);
     }
 

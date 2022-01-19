@@ -101,12 +101,12 @@ abstract class AbstractFeignJaxRsClientBuilder {
             Class<T> serviceClass,
             Channel channel,
             ConjureRuntime runtime,
-            ObjectMapper jsonObjectMapper,
-            ObjectMapper cborObjectMapper) {
+            ObjectMapper jsonMapper,
+            ObjectMapper cborMapper) {
         return Feign.builder()
                 .contract(createContract())
-                .encoder(createEncoder(jsonObjectMapper, cborObjectMapper))
-                .decoder(createDecoder(jsonObjectMapper, cborObjectMapper))
+                .encoder(createEncoder(jsonMapper, cborMapper))
+                .decoder(createDecoder(jsonMapper, cborMapper))
                 .errorDecoder(new DialogueFeignClient.RemoteExceptionDecoder(runtime))
                 .client(new DialogueFeignClient(serviceClass, channel, runtime, FeignDialogueTarget.BASE_URL))
                 .logLevel(Logger.Level.NONE) // we use Dialogue for logging. (note that NONE is the default)
@@ -179,16 +179,16 @@ abstract class AbstractFeignJaxRsClientBuilder {
                         new Java8OptionalAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())))));
     }
 
-    private static Decoder createDecoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
+    private static Decoder createDecoder(ObjectMapper jsonMapper, ObjectMapper cborMapper) {
         return new NeverReturnNullDecoder(
                 new Java8OptionalAwareDecoder(new GuavaOptionalAwareDecoder(new EmptyContainerDecoder(
-                        objectMapper,
+                        jsonMapper,
                         new InputStreamDelegateDecoder(new TextDelegateDecoder(
-                                new CborDelegateDecoder(cborObjectMapper, new JacksonDecoder(objectMapper))))))));
+                                new CborDelegateDecoder(cborMapper, new JacksonDecoder(jsonMapper))))))));
     }
 
-    private static Encoder createEncoder(ObjectMapper objectMapper, ObjectMapper cborObjectMapper) {
+    private static Encoder createEncoder(ObjectMapper jsonMapper, ObjectMapper cborMapper) {
         return new InputStreamDelegateEncoder(new TextDelegateEncoder(
-                new CborDelegateEncoder(cborObjectMapper, new ConjureFeignJacksonEncoder(objectMapper))));
+                new CborDelegateEncoder(cborMapper, new ConjureFeignJacksonEncoder(jsonMapper))));
     }
 }

@@ -240,7 +240,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
     @Test
     public void testCborReturnValues() throws IOException {
         LocalDate date = LocalDate.of(2001, 2, 3);
-        byte[] bytes = ObjectMappers.newCborServerObjectMapper().writeValueAsBytes(Optional.of(date));
+        byte[] bytes = ObjectMappers.newServerCborMapper().writeValueAsBytes(Optional.of(date));
         try (Buffer buffer = new Buffer()) {
             buffer.write(bytes);
             server.enqueue(new MockResponse().setBody(buffer).addHeader("Content-Type", "application/cbor"));
@@ -256,7 +256,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
         service.makeCborRequest(date).execute();
         RecordedRequest request = server.takeRequest();
         assertThat(request.getBody().readByteArray())
-                .isEqualTo(ObjectMappers.newCborClientObjectMapper().writeValueAsBytes(date));
+                .isEqualTo(ObjectMappers.newClientCborMapper().writeValueAsBytes(date));
     }
 
     @Test
@@ -295,7 +295,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
-                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(error)));
+                .setBody(ObjectMappers.newClientJsonMapper().writeValueAsString(error)));
 
         assertThatThrownBy(() -> Futures.getUnchecked(futureSupplier.get()))
                 .isInstanceOf(UncheckedExecutionException.class)
@@ -344,7 +344,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
-                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(ERROR)));
+                .setBody(ObjectMappers.newClientJsonMapper().writeValueAsString(ERROR)));
 
         Future<String> future = futureSupplier.get();
 
@@ -390,7 +390,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
-                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(ERROR)));
+                .setBody(ObjectMappers.newClientJsonMapper().writeValueAsString(ERROR)));
 
         Call<String> call = service.getRelative();
 
@@ -408,7 +408,7 @@ public final class Retrofit2ClientApiTest extends TestBase {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, "application/json")
-                .setBody(ObjectMappers.newClientObjectMapper().writeValueAsString(ERROR)));
+                .setBody(ObjectMappers.newClientJsonMapper().writeValueAsString(ERROR)));
 
         CountDownLatch assertionsPassed = new CountDownLatch(1);
         Call<String> call = service.getRelative();

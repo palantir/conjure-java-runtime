@@ -75,7 +75,7 @@ public final class JaxRsClient {
                 serviceClass,
                 channel,
                 runtime,
-                FeignJaxRsClientBuilder.JSON_OBJECT_MAPPER,
-                FeignJaxRsClientBuilder.CBOR_OBJECT_MAPPER);
+                FeignJaxRsClientBuilder.JSON_MAPPER,
+                FeignJaxRsClientBuilder.CBOR_MAPPER);
     }
 }

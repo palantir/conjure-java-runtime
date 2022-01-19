@@ -19,6 +19,9 @@ package com.palantir.conjure.java.serialization;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
+import com.fasterxml.jackson.dataformat.smile.databind.SmileMapper;
 import com.fasterxml.jackson.module.scala.DefaultScalaModule;
 import com.fasterxml.jackson.module.scala.introspect.ScalaAnnotationIntrospector$;
 
@@ -26,31 +29,55 @@ public final class ScalaObjectMappers {
 
     private ScalaObjectMappers() {}
 
+    public static JsonMapper newClientJsonMapper() {
+        return withScalaSupport(ObjectMappers.newClientJsonMapper());
+    }
+
+    public static CBORMapper newClientCborMapper() {
+        return withScalaSupport(ObjectMappers.newClientCborMapper());
+    }
+
+    public static SmileMapper newClientSmileMapper() {
+        return withScalaSupport(ObjectMappers.newClientSmileMapper());
+    }
+
+    public static JsonMapper newServerJsonMapper() {
+        return withScalaSupport(ObjectMappers.newServerJsonMapper());
+    }
+
+    public static CBORMapper newServerCborMapper() {
+        return withScalaSupport(ObjectMappers.newServerCborMapper());
+    }
+
+    public static SmileMapper newServerSmileMapper() {
+        return withScalaSupport(ObjectMappers.newServerSmileMapper());
+    }
+
     public static ObjectMapper newClientObjectMapper() {
-        return withScalaSupport(ObjectMappers.newClientObjectMapper());
+        return newClientJsonMapper();
     }
 
     public static ObjectMapper newCborClientObjectMapper() {
-        return withScalaSupport(ObjectMappers.newCborClientObjectMapper());
+        return newClientCborMapper();
     }
 
     public static ObjectMapper newSmileClientObjectMapper() {
-        return withScalaSupport(ObjectMappers.newSmileClientObjectMapper());
+        return newClientSmileMapper();
     }
 
     public static ObjectMapper newServerObjectMapper() {
-        return withScalaSupport(ObjectMappers.newServerObjectMapper());
+        return newServerJsonMapper();
     }
 
     public static ObjectMapper newCborServerObjectMapper() {
-        return withScalaSupport(ObjectMappers.newCborServerObjectMapper());
+        return newServerCborMapper();
     }
 
     public static ObjectMapper newSmileServerObjectMapper() {
-        return withScalaSupport(ObjectMappers.newSmileServerObjectMapper());
+        return newServerSmileMapper();
     }
 
-    private static ObjectMapper withScalaSupport(ObjectMapper objectMapper) {
+    private static <T extends ObjectMapper> T withScalaSupport(T objectMapper) {
         objectMapper
                 .registerModule(new DefaultScalaModule())
                 .setAnnotationIntrospector(new AnnotationIntrospectorPair(

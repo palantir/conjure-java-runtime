@@ -24,8 +24,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.InputCoercionException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.palantir.logsafe.Preconditions;
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +47,7 @@ import java.util.OptionalLong;
 import org.junit.Test;
 
 public final class ObjectMappersTest {
-    private static final ObjectMapper MAPPER = ObjectMappers.newClientObjectMapper();
+    private static final JsonMapper MAPPER = ObjectMappers.newClientJsonMapper();
 
     @Test
     public void deserializeJdk7ModuleObject() throws IOException {
@@ -85,7 +85,7 @@ public final class ObjectMappersTest {
 
     @Test
     public void testMappersReturnNewInstance() {
-        assertThat(ObjectMappers.newClientObjectMapper()).isNotSameAs(ObjectMappers.newClientObjectMapper());
+        assertThat(ObjectMappers.newClientJsonMapper()).isNotSameAs(ObjectMappers.newClientJsonMapper());
     }
 
     @Test

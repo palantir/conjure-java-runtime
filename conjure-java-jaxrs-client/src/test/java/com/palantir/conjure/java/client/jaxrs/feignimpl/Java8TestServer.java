@@ -53,7 +53,7 @@ public class Java8TestServer extends Application<Configuration> {
     @Override
     public final void run(Configuration _config, final Environment env) throws Exception {
         env.jersey().register(ConjureJerseyFeature.INSTANCE);
-        env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerObjectMapper()));
+        env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerJsonMapper()));
         env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
         env.jersey().register(new TestResource());
     }

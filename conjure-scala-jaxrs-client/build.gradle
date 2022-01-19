@@ -3,6 +3,10 @@ apply plugin: 'com.palantir.revapi'
 
 dependencies {
     api project(':conjure-java-jaxrs-client')
+    api "com.fasterxml.jackson.core:jackson-databind"
+    api "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor"
+    api "com.fasterxml.jackson.dataformat:jackson-dataformat-smile"
+
     implementation project(':conjure-java-jackson-serialization')
     implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.12'
 }
