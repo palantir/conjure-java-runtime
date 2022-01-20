@@ -53,7 +53,7 @@ public final class ClientConfigurationsTest {
 
         assertThat(actual.sslSocketFactory()).isNotNull();
         assertThat(actual.trustManager()).isNotNull();
-        assertThat(actual.uris()).isEqualTo(uris);
+        assertThat(actual.uris()).containsExactlyElementsOf(uris);
         assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(10));
         assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(5));
@@ -72,7 +72,7 @@ public final class ClientConfigurationsTest {
 
         assertThat(actual.sslSocketFactory()).isEqualTo(sslFactory);
         assertThat(actual.trustManager()).isEqualTo(trustManager);
-        assertThat(actual.uris()).isEqualTo(uris);
+        assertThat(actual.uris()).containsExactlyElementsOf(uris);
         assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(10));
         assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(5));
