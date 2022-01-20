@@ -159,7 +159,7 @@ public final class ExceptionMappingTest {
         assertThat(error.errorCode())
                 .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
         assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
-        assertThat(error.parameters()).isEqualTo(ImmutableMap.of("arg", "value"));
+        assertThat(error.parameters()).containsExactlyInAnyOrderEntriesOf(ImmutableMap.of("arg", "value"));
     }
 
     @Test
