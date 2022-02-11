@@ -35,6 +35,7 @@ public final class ObjectMapperOptimizations {
                     || readProperty(
                             "com.palantir.conjure.java.jackson.optimizations.disabled", shouldDisableByDefault());
 
+    @SuppressWarnings("AfterburnerJavaIncompatibility")
     public static List<? extends com.fasterxml.jackson.databind.Module> createModules() {
         return NO_OPTIMIZATIONS ? List.of() : List.<com.fasterxml.jackson.databind.Module>of(new AfterburnerModule());
     }
