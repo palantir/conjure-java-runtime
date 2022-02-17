@@ -1,0 +1,7 @@
+type: improvement
+improvement:
+  description: Expand the supported cipher suite list to include `TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384`,
+    `TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256`, `TLS_DHE_RSA_WITH_AES_256_GCM_SHA384`,
+    `TLS_DHE_RSA_WITH_AES_128_GCM_SHA256`
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2258
