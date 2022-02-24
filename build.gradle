@@ -43,6 +43,7 @@ allprojects {
         resolutionStrategy {
             preferProjectModules()
         }
+
         resolutionStrategy.eachDependency { details ->
             if (details.requested.group == 'com.google.errorprone' && details.requested.name == 'error_prone_annotations') {
                 details.useTarget group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.7.1'
