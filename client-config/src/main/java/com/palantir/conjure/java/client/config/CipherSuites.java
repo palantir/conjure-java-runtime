@@ -18,7 +18,6 @@ package com.palantir.conjure.java.client.config;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.InlineMe;
 import java.util.Set;
 
 public final class CipherSuites {
@@ -63,9 +62,6 @@ public final class CipherSuites {
      * @deprecated No longer necessary, GCM ciphers provide the most throughput on modern JVMs.
      */
     @Deprecated
-    @InlineMe(
-            replacement = "CipherSuites.allCipherSuites()",
-            imports = "com.palantir.conjure.java.client.config.CipherSuites")
     public static String[] fastCipherSuites() {
         return allCipherSuites();
     }
@@ -76,9 +72,6 @@ public final class CipherSuites {
      * @deprecated should not be used, this is an artifact from java-8 when gcm ciphers performed poorly.
      */
     @Deprecated
-    @InlineMe(
-            replacement = "CipherSuites.allCipherSuites()",
-            imports = "com.palantir.conjure.java.client.config.CipherSuites")
     public static String[] gcmCipherSuites() {
         return ALL_CIPHER_SUITES.stream()
                 .filter(cipherString -> cipherString.contains("_GCM_"))
