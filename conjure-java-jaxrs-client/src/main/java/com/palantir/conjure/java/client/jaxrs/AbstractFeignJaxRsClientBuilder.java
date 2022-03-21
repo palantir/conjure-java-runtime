@@ -41,6 +41,7 @@ import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.core.DialogueChannel;
 import com.palantir.dialogue.hc5.ApacheHttpClientChannels;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.logsafe.Safe;
 import feign.Contract;
 import feign.Feign;
 import feign.Logger;
@@ -94,10 +95,11 @@ abstract class AbstractFeignJaxRsClientBuilder {
                 .clientConfiguration(hydratedConfiguration)
                 .buildNonLiveReloading();
 
-        return create(serviceClass, channel, RUNTIME, getObjectMapper(), getCborObjectMapper());
+        return create(name, serviceClass, channel, RUNTIME, getObjectMapper(), getCborObjectMapper());
     }
 
     static <T> T create(
+            @Safe String clientNameForLogging,
             Class<T> serviceClass,
             Channel channel,
             ConjureRuntime runtime,
@@ -105,8 +107,8 @@ abstract class AbstractFeignJaxRsClientBuilder {
             ObjectMapper cborMapper) {
         return Feign.builder()
                 .contract(createContract())
-                .encoder(createEncoder(jsonMapper, cborMapper))
-                .decoder(createDecoder(jsonMapper, cborMapper))
+                .encoder(createEncoder(clientNameForLogging, jsonMapper, cborMapper))
+                .decoder(createDecoder(clientNameForLogging, jsonMapper, cborMapper))
                 .errorDecoder(new DialogueFeignClient.RemoteExceptionDecoder(runtime))
                 .client(new DialogueFeignClient(serviceClass, channel, runtime, FeignDialogueTarget.BASE_URL))
                 .logLevel(Logger.Level.NONE) // we use Dialogue for logging. (note that NONE is the default)
@@ -179,16 +181,22 @@ abstract class AbstractFeignJaxRsClientBuilder {
                         new Java8OptionalAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())))));
     }
 
-    private static Decoder createDecoder(ObjectMapper jsonMapper, ObjectMapper cborMapper) {
+    private static Decoder createDecoder(
+            @Safe String clientNameForLogging, ObjectMapper jsonMapper, ObjectMapper cborMapper) {
         return new NeverReturnNullDecoder(
                 new Java8OptionalAwareDecoder(new GuavaOptionalAwareDecoder(new EmptyContainerDecoder(
                         jsonMapper,
-                        new InputStreamDelegateDecoder(new TextDelegateDecoder(
-                                new CborDelegateDecoder(cborMapper, new JacksonDecoder(jsonMapper))))))));
+                        new InputStreamDelegateDecoder(
+                                clientNameForLogging,
+                                new TextDelegateDecoder(
+                                        new CborDelegateDecoder(cborMapper, new JacksonDecoder(jsonMapper))))))));
     }
 
-    private static Encoder createEncoder(ObjectMapper jsonMapper, ObjectMapper cborMapper) {
-        return new InputStreamDelegateEncoder(new TextDelegateEncoder(
-                new CborDelegateEncoder(cborMapper, new ConjureFeignJacksonEncoder(jsonMapper))));
+    private static Encoder createEncoder(
+            @Safe String clientNameForLogging, ObjectMapper jsonMapper, ObjectMapper cborMapper) {
+        return new InputStreamDelegateEncoder(
+                clientNameForLogging,
+                new TextDelegateEncoder(
+                        new CborDelegateEncoder(cborMapper, new ConjureFeignJacksonEncoder(jsonMapper))));
     }
 }
