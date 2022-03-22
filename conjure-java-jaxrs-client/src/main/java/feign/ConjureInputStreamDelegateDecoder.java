@@ -31,7 +31,7 @@ public final class ConjureInputStreamDelegateDecoder implements Decoder {
     private final Decoder delegate;
 
     public ConjureInputStreamDelegateDecoder(Decoder delegate) {
-        this.delegate = new InputStreamDelegateDecoder(delegate);
+        this.delegate = new InputStreamDelegateDecoder("unknown", delegate);
     }
 
     @Override

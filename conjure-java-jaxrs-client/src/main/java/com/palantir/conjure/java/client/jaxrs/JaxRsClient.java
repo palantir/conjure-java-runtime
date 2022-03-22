@@ -72,6 +72,7 @@ public final class JaxRsClient {
         Preconditions.checkNotNull(serviceClass, "JAX-RS interface is required");
         Preconditions.checkNotNull(runtime, "ConjureRuntime is required");
         return FeignJaxRsClientBuilder.create(
+                "JaxRsClient-" + serviceClass.getSimpleName(),
                 serviceClass,
                 channel,
                 runtime,

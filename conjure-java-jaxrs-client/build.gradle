@@ -1,5 +1,6 @@
 apply plugin: 'com.palantir.external-publish-jar'
 apply plugin: 'com.palantir.revapi'
+apply plugin: 'com.palantir.metric-schema'
 
 dependencies {
     api project(":extras:refresh-utils")
@@ -18,6 +19,8 @@ dependencies {
     implementation "com.palantir.dialogue:dialogue-core"
     implementation "com.palantir.dialogue:dialogue-serde"
     implementation 'com.palantir.safe-logging:logger'
+
+    implementation 'com.palantir.tritium:tritium-registry'
 
     implementation project(":conjure-java-jackson-serialization")
     implementation "com.google.guava:guava"

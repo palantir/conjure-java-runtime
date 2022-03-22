@@ -16,6 +16,10 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
+import com.codahale.metrics.Meter;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.FeignClientMetrics.DangerousBuffering_Direction;
+import com.palantir.logsafe.Safe;
+import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import feign.RequestTemplate;
 import feign.Util;
 import feign.codec.EncodeException;
@@ -28,16 +32,29 @@ import java.nio.charset.StandardCharsets;
 /** If the body type is an InputStream, write it into the body, otherwise pass to delegate. */
 public final class InputStreamDelegateEncoder implements Encoder {
     private final Encoder delegate;
+    private final Meter dangerousBufferingMeter;
 
     public InputStreamDelegateEncoder(Encoder delegate) {
+        this("unknown", delegate);
+    }
+
+    @SuppressWarnings("deprecation") // No access to a TaggedMetricRegistry without breaking API
+    public InputStreamDelegateEncoder(@Safe String clientNameForLogging, Encoder delegate) {
         this.delegate = delegate;
+        this.dangerousBufferingMeter = FeignClientMetrics.of(SharedTaggedMetricRegistries.getSingleton())
+                .dangerousBuffering()
+                .client(clientNameForLogging)
+                .direction(DangerousBuffering_Direction.REQUEST)
+                .build();
     }
 
     @Override
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
         if (bodyType.equals(InputStream.class)) {
             try {
-                template.body(Util.toByteArray((InputStream) object), StandardCharsets.UTF_8);
+                byte[] bytes = Util.toByteArray((InputStream) object);
+                dangerousBufferingMeter.mark(Math.max(1, bytes.length));
+                template.body(bytes, StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

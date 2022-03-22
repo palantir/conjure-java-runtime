@@ -31,7 +31,7 @@ public final class ConjureInputStreamDelegateEncoder implements Encoder {
     private final Encoder delegate;
 
     public ConjureInputStreamDelegateEncoder(Encoder delegate) {
-        this.delegate = new InputStreamDelegateEncoder(delegate);
+        this.delegate = new InputStreamDelegateEncoder("unknown", delegate);
     }
 
     @Override

@@ -1,0 +1,20 @@
+options:
+  javaPackage: com.palantir.conjure.java.client.jaxrs.feignimpl
+  javaVisibility: packagePrivate
+namespaces:
+  feign.client:
+    docs: Metrics produced by Feign clients
+    metrics:
+      dangerous.buffering:
+        type: meter
+        tags:
+          - name: client
+            docs: Name of the client which dangerously buffered data.
+          - name: direction
+            values: [request, response]
+        docs: |
+          Meter incremented each time a feign client is used to send or receive streamed binary data by the number of 
+          bytes sent or received (minimum one such that empty streams are recorded).
+          Feign should never be used in this way because it fully buffers the request and response internally,
+          resulting in heavy heap pressure. Dialogue clients are preferred as they do not cause such heap churn,
+          and allow streaming beyond two gigabytes of data.
