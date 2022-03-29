@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: WebApplicationExceptionMapper treats redirection as informational
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2316
