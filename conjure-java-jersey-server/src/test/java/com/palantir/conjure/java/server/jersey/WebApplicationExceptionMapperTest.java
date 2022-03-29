@@ -25,6 +25,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.RedirectionException;
 import javax.ws.rs.ServiceUnavailableException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -101,6 +102,19 @@ public final class WebApplicationExceptionMapperTest {
         assertThat(entity).contains("\"errorCode\" : \"javax.ws.rs.ServiceUnavailableException\"");
         assertThat(entity).contains("\"errorName\" : \"ServiceUnavailableException\"");
         assertThat(response.getStatus()).isEqualTo(503);
+        assertThat(entity).doesNotContain("secret");
+    }
+
+    @Test
+    public void handle304NotModified() throws Exception {
+        Response response = mapper.toResponse(
+                new RedirectionException(Response.notModified("test-etag").build()));
+        String entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity).contains("\"errorCode\" : \"javax.ws.rs.RedirectionException\"");
+        assertThat(entity).contains("\"errorName\" : \"RedirectionException\"");
+        assertThat(entity).contains("\"errorInstanceId\" : ");
+        assertThat(response.getStatus()).isEqualTo(304);
+        assertThat(response.getHeaderString("ETag")).isNull();
         assertThat(entity).doesNotContain("secret");
     }
 }

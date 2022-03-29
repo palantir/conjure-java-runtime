@@ -52,10 +52,10 @@ final class WebApplicationExceptionMapper extends ListenableExceptionMapper<WebA
     public Response toResponseInner(WebApplicationException exception) {
         String errorInstanceId = UUID.randomUUID().toString();
 
-        if (exception.getResponse().getStatus() / 100 == 4 /* client error */) {
-            log.info("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
-        } else {
+        if (exception.getResponse().getStatusInfo().getFamily() == Response.Status.Family.SERVER_ERROR) {
             log.error("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
+        } else {
+            log.info("Error handling request", SafeArg.of("errorInstanceId", errorInstanceId), exception);
         }
 
         if (exception instanceof NotAuthorizedException) {
