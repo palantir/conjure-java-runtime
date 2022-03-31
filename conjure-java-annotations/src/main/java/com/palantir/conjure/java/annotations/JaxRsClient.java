@@ -17,14 +17,16 @@
 package com.palantir.conjure.java.annotations;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicator annotation for marking that a JAX-RS interface is used to construct a Jersey client.
- * See also {@link JerseyService}.
+ * Indicator annotation for marking that a JAX-RS interface is used to construct a client. See also
+ * {@link JaxRsService}.
  */
-@Retention(RetentionPolicy.SOURCE)
+@Inherited
+@Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface JerseyClient {}
+public @interface JaxRsClient {}
