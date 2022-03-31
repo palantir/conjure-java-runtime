@@ -23,10 +23,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicator annotation for marking that a JAX-RS interface is used for registering a service resource. See also
+ * Indicator annotation for marking that a JAX-RS interface is used for registering a server resource. See also
  * {@link JaxRsClient}.
  */
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface JaxRsService {}
+public @interface JaxRsServer {}

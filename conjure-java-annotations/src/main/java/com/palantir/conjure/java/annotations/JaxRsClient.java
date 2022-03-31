@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 
 /**
  * Indicator annotation for marking that a JAX-RS interface is used to construct a client. See also
- * {@link JaxRsService}.
+ * {@link JaxRsServer}.
  */
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
