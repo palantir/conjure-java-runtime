@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add marker annotations for Jersey resource and client usage
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2320
