@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Fail if annotated server resource is used as a client
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2324

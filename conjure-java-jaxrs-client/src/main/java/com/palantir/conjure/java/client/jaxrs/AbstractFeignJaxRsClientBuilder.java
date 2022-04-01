@@ -17,6 +17,8 @@
 package com.palantir.conjure.java.client.jaxrs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.palantir.conjure.java.annotations.JaxRsClient;
+import com.palantir.conjure.java.annotations.JaxRsServer;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.CborDelegateDecoder;
@@ -42,6 +44,8 @@ import com.palantir.dialogue.core.DialogueChannel;
 import com.palantir.dialogue.hc5.ApacheHttpClientChannels;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import feign.Contract;
 import feign.Feign;
 import feign.Logger;
@@ -105,6 +109,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
             ConjureRuntime runtime,
             ObjectMapper jsonMapper,
             ObjectMapper cborMapper) {
+        verifyClientUsageAnnotations(serviceClass);
         return Feign.builder()
                 .contract(createContract())
                 .encoder(createEncoder(clientNameForLogging, jsonMapper, cborMapper))
@@ -198,5 +203,15 @@ abstract class AbstractFeignJaxRsClientBuilder {
                 clientNameForLogging,
                 new TextDelegateEncoder(
                         new CborDelegateEncoder(cborMapper, new ConjureFeignJacksonEncoder(jsonMapper))));
+    }
+
+    private static void verifyClientUsageAnnotations(Class<?> serviceClass) {
+        if (serviceClass.getAnnotation(JaxRsClient.class) == null
+                && serviceClass.getAnnotation(JaxRsServer.class) != null) {
+            throw new SafeIllegalArgumentException(
+                    "Service class should not be used as a client because it is annotated with \"@JaxRsServer\" and "
+                            + "should only used as a server resource",
+                    SafeArg.of("serviceClass", serviceClass));
+        }
     }
 }
