@@ -1,5 +1,4 @@
 ch.qos.logback:logback-classic = 1.2.11
-com.fasterxml.jackson.core:jackson-databind = 2.13.2.1
 com.github.ben-manes.caffeine:caffeine = 3.0.6
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 31.1-jre
@@ -33,7 +32,8 @@ org.checkerframework:checker-qual = 3.21.4
 
 # dependency-upgrader:OFF
 
-com.fasterxml.jackson.*:* = 2.13.1
+com.fasterxml.jackson.core:jackson-databind = 2.13.3
+com.fasterxml.jackson.*:* = 2.13.3
 
 # Temporarily pausing until internal libraries stop relying on UnrepeatableRequestBody
 com.squareup.okhttp3:* = 3.13.1
