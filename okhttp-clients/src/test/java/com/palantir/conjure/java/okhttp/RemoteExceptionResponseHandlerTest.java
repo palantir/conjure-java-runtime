@@ -126,7 +126,7 @@ public final class RemoteExceptionResponseHandlerTest {
                             + " ("
                             + ErrorType.FAILED_PRECONDITION.name()
                             + ") with instance ID "
-                            + SERVICE_EXCEPTION.getErrorInstanceId());
+                            + SERVICE_EXCEPTION.getErrorInstanceId() + ": {key=value}");
         }
     }
 
