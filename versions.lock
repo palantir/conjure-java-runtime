@@ -26,7 +26,7 @@ com.netflix.concurrency-limits:concurrency-limits-core:0.2.2 (1 constraints: 060
 com.netflix.feign:feign-core:8.18.0 (4 constraints: a02d2192)
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 com.netflix.feign:feign-jaxrs:8.18.0 (1 constraints: 43056b3b)
-com.palantir.conjure.java:conjure-lib:6.48.0 (3 constraints: 6e256151)
+com.palantir.conjure.java:conjure-lib:6.49.0 (3 constraints: 73254153)
 com.palantir.conjure.java.api:errors:2.25.0 (3 constraints: 2f257d49)
 com.palantir.conjure.java.api:service-config:2.25.0 (3 constraints: a128f5e1)
 com.palantir.conjure.java.api:ssl-config:2.25.0 (2 constraints: fd174686)
