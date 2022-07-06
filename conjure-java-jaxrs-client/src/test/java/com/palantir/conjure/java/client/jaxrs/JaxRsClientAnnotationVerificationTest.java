@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public final class JaxRsClientAnnotationVerificationTest extends TestBase {
 
