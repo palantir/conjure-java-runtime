@@ -29,7 +29,7 @@ io.leangen.geantyref:geantyref = 1.3.4
 io.undertow:undertow-core = 2.2.18.Final
 com.palantir.refreshable:refreshable = 2.2.0
 org.hibernate.validator:* = 6.2.0.Final
-org.checkerframework:checker-qual = 3.23.0
+org.checkerframework:checker-qual = 3.24.0
 
 # dependency-upgrader:OFF
 
