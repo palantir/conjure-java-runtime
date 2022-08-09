@@ -2,12 +2,16 @@ apply plugin: 'com.palantir.external-publish-jar'
 apply plugin: 'com.palantir.revapi'
 apply plugin: 'com.palantir.metric-schema'
 
+versionsLock {
+    disableJavaPluginDefaults()
+}
+
 dependencies {
     api project(":extras:refresh-utils")
     api project(":client-config")
     api project(":conjure-java-legacy-clients")
     api "com.google.code.findbugs:jsr305"
-    api "jakarta.ws.rs:jakarta.ws.rs-api"
+    api "javax.ws.rs:javax.ws.rs-api"
     // TODO(dsanduleac): Should be implementation, but can't because we expose feign.TextDelegateEncoder
     api "com.netflix.feign:feign-core", {
         // prefer jakarta.ws.rs:jakarta.ws.rs-api
@@ -39,6 +43,13 @@ dependencies {
     testImplementation "junit:junit"
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
+
+    constraints {
+        rootConfiguration 'io.dropwizard.metrics:metrics-core', {
+            version { strictly '[3, 4[' }
+            because "Spark still uses 3.X, which can't co-exist with 4.X"
+        }
+    }
 }
 
 // feign.DefaultMethodHandler sets Lookup.IMPL_LOOKUP accessible resulting in

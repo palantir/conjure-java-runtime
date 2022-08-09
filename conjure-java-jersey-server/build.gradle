@@ -2,13 +2,33 @@ apply plugin: 'com.palantir.external-publish-jar'
 apply plugin: 'com.palantir.revapi'
 apply plugin: 'com.palantir.metric-schema'
 
+versionsLock {
+    disableJavaPluginDefaults()
+}
+
 dependencies {
     api "com.palantir.conjure.java.api:errors"
-    api "org.glassfish.jersey.core:jersey-server"
+    api "org.glassfish.jersey.core:jersey-server", {
+        version {
+            strictly "2.26"
+            because "need to pin to the javax version of Jersey"
+        }
+    }
+    implementation "org.glassfish.jersey.core:jersey-common", {
+        version {
+            strictly "2.26"
+            because "need to pin to the javax version of Jersey"
+        }
+    }
 
     implementation 'com.palantir.tritium:tritium-registry'
     implementation 'io.dropwizard.metrics:metrics-core'
-    implementation 'org.glassfish.jersey.inject:jersey-hk2'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2', {
+        version {
+            strictly "2.26"
+            because "need to pin to the javax version of Jersey"
+        }
+    }
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
     implementation "com.jcraft:jzlib"
     implementation "com.netflix.feign:feign-core"
@@ -24,19 +44,34 @@ dependencies {
     testImplementation "com.fasterxml.jackson.core:jackson-databind"
     testImplementation "com.palantir.tracing:tracing"
     testImplementation "com.palantir.conjure.java.api:ssl-config"
-    testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
+    testImplementation("io.dropwizard:dropwizard-testing") {
+        exclude module: 'metrics-core'
+        version {
+            strictly '2.0.10'
+        }
+    }
     testImplementation "io.dropwizard.metrics:metrics-core"
     testImplementation "junit:junit"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
     implementation 'com.palantir.safe-logging:logger'
-}
 
-configurations.all {
-    resolutionStrategy {
-        // Conflicts with javax.inject:javax.inject:1
-        // This is safe to remove, the purpose of the repackaged version is to implement OSGI, which we don't use
-        // Source: https://stackoverflow.com/a/25218230/274699
-        exclude group: 'org.glassfish.hk2.external', module: 'javax.inject'
+    modules {
+        module("org.glassfish.hk2.external:javax.inject") {
+            // Conflicts with javax.inject:javax.inject:1
+            // This is safe to remove, the purpose of the repackaged version is to implement OSGI, which we don't use
+            // Source: https://stackoverflow.com/a/25218230/274699
+            replacedBy("javax.inject:javax.inject", "javax version is preferred")
+        }
+        module("com.sun.activation:jakarta.activation") {
+            replacedBy('jakarta.activation:jakarta.activation-api', "jakarta version is preferred in this case")
+        }
+    }
+
+    constraints {
+        rootConfiguration 'io.dropwizard.metrics:metrics-core', {
+            version { strictly '[3, 4[' }
+            because "Spark still uses 3.X, which can't co-exist with 4.X"
+        }
     }
 }
