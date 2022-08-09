@@ -8,27 +8,12 @@ versionsLock {
 
 dependencies {
     api "com.palantir.conjure.java.api:errors"
-    api "org.glassfish.jersey.core:jersey-server", {
-        version {
-            strictly "2.26"
-            because "need to pin to the javax version of Jersey"
-        }
-    }
-    implementation "org.glassfish.jersey.core:jersey-common", {
-        version {
-            strictly "2.26"
-            because "need to pin to the javax version of Jersey"
-        }
-    }
+    api "org.glassfish.jersey.core:jersey-server:2.26"
+    implementation "org.glassfish.jersey.core:jersey-common:2.26"
 
     implementation 'com.palantir.tritium:tritium-registry'
     implementation 'io.dropwizard.metrics:metrics-core'
-    implementation 'org.glassfish.jersey.inject:jersey-hk2', {
-        version {
-            strictly "2.26"
-            because "need to pin to the javax version of Jersey"
-        }
-    }
+    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.26'
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
     implementation "com.jcraft:jzlib"
     implementation "com.netflix.feign:feign-core"
@@ -44,13 +29,7 @@ dependencies {
     testImplementation "com.fasterxml.jackson.core:jackson-databind"
     testImplementation "com.palantir.tracing:tracing"
     testImplementation "com.palantir.conjure.java.api:ssl-config"
-    testImplementation("io.dropwizard:dropwizard-testing") {
-        exclude module: 'metrics-core'
-        version {
-            strictly '2.0.10'
-        }
-    }
-    testImplementation "io.dropwizard.metrics:metrics-core"
+    testImplementation("io.dropwizard:dropwizard-testing:2.0.10")
     testImplementation "junit:junit"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
@@ -69,9 +48,21 @@ dependencies {
     }
 
     constraints {
-        rootConfiguration 'io.dropwizard.metrics:metrics-core', {
-            version { strictly '[3, 4[' }
-            because "Spark still uses 3.X, which can't co-exist with 4.X"
+        rootConfiguration "io.dropwizard:dropwizard-testing", {
+            version { strictly "2.0.10" }
+            because "2.x is compatible with jaxrs"
+        }
+        rootConfiguration "org.glassfish.jersey.inject:jersey-hk2", {
+            version { strictly "2.26" }
+            because "2.x is compatible with jaxrs"
+        }
+        rootConfiguration "org.glassfish.jersey.core:jersey-common", {
+            version { strictly "2.26" }
+            because "2.x is compatible with jaxrs"
+        }
+        rootConfiguration "org.glassfish.jersey.core:jersey-server", {
+            version { strictly "2.26" }
+            because "2.x is compatible with jaxrs"
         }
     }
 }
