@@ -43,13 +43,6 @@ dependencies {
     testImplementation "junit:junit"
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
-
-    constraints {
-        rootConfiguration 'io.dropwizard.metrics:metrics-core', {
-            version { strictly '[3, 4[' }
-            because "Spark still uses 3.X, which can't co-exist with 4.X"
-        }
-    }
 }
 
 // feign.DefaultMethodHandler sets Lookup.IMPL_LOOKUP accessible resulting in

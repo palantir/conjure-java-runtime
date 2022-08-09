@@ -32,13 +32,13 @@ import com.palantir.logsafe.SafeArg;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import javax.annotation.CheckForNull;
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.NotAuthorizedException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.NotAuthorizedException;
+import jakarta.ws.rs.ServerErrorException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
@@ -140,7 +140,7 @@ public final class RemoteExceptionResponseHandlerTest {
         assertThat(exception.getError().errorCode()).isEqualTo(NotAuthorizedException.class.getName());
         assertThat(exception.getError().errorName()).isEqualTo(message);
         assertThat(exception.getMessage())
-                .isEqualTo("RemoteException: javax.ws.rs.NotAuthorizedException ("
+                .isEqualTo("RemoteException: jakarta.ws.rs.NotAuthorizedException ("
                         + message
                         + ") with instance ID "
                         + exception.getError().errorInstanceId());
