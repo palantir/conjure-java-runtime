@@ -20,9 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
+import com.palantir.conjure.java.client.jaxrs.CompatibleJaxRsContract;
 import feign.Feign;
 import feign.RetryableException;
-import feign.jaxrs.JAXRSContract;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.core.setup.Environment;
@@ -101,7 +101,7 @@ public final class DropwizardSslClientAuthTests {
                 .build();
         return Feign.builder()
                 .client(new feign.okhttp.OkHttpClient(okHttpClient))
-                .contract(new JAXRSContract())
+                .contract(new CompatibleJaxRsContract())
                 .target(TestEchoService.class, endpointUri);
     }
 

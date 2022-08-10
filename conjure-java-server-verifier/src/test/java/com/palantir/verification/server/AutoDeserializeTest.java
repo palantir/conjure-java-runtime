@@ -20,14 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.verification.client.EndpointName;
+import com.palantir.conjure.verification.client.PositiveAndNegativeTestCases;
 import com.palantir.conjure.verification.client.VerificationClientRequest;
 import com.palantir.conjure.verification.client.VerificationClientService;
 import com.palantir.verification.server.undertest.ServerUnderTestApplication;
 import io.dropwizard.core.Configuration;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -56,27 +55,32 @@ public class AutoDeserializeTest {
     public static final class Parameters implements ArgumentsProvider {
 
         @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
-            List<Arguments> objects = new ArrayList<>();
-            Cases.TEST_CASES.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
+        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+            return Cases.TEST_CASES.getAutoDeserialize().entrySet().stream().flatMap(testCase -> {
+                EndpointName endpointName = testCase.getKey();
+                PositiveAndNegativeTestCases positiveAndNegativeTestCases = testCase.getValue();
+
                 int positiveSize = positiveAndNegativeTestCases.getPositive().size();
                 int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
-                IntStream.range(0, positiveSize)
-                        .forEach(i -> objects.add(Arguments.of(
-                                endpointName,
-                                i,
-                                true,
-                                positiveAndNegativeTestCases.getPositive().get(i))));
-
-                IntStream.range(0, negativeSize)
-                        .forEach(i -> objects.add(Arguments.of(
-                                endpointName,
-                                positiveSize + i,
-                                false,
-                                positiveAndNegativeTestCases.getNegative().get(i))));
+                return Stream.concat(
+                        IntStream.range(0, positiveSize)
+                                .mapToObj(i -> Arguments.of(
+                                        endpointName,
+                                        i,
+                                        true,
+                                        positiveAndNegativeTestCases
+                                                .getPositive()
+                                                .get(i))),
+                        IntStream.range(0, negativeSize)
+                                .mapToObj(i -> Arguments.of(
+                                        endpointName,
+                                        positiveSize + i,
+                                        false,
+                                        positiveAndNegativeTestCases
+                                                .getNegative()
+                                                .get(i))));
             });
-            return objects.stream();
         }
     }
 
@@ -84,16 +88,17 @@ public class AutoDeserializeTest {
     @ArgumentsSource(Parameters.class)
     public void runTestCase(EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) {
         boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
-        System.out.println(String.format(
-                "[%s%s test case %s]: %s(%s), expected client to %s",
+        System.out.printf(
+                "[%s%s test case %s]: %s(%s), expected client to %s%n",
                 shouldIgnore ? "ignored " : "",
                 shouldSucceed ? "positive" : "negative",
                 index,
                 endpointName,
                 jsonString,
-                shouldSucceed ? "succeed" : "fail"));
+                shouldSucceed ? "succeed" : "fail");
 
-        Optional<Error> expectationFailure = shouldSucceed ? expectSuccess() : expectFailure();
+        Optional<Error> expectationFailure =
+                shouldSucceed ? expectSuccess(endpointName, index) : expectFailure(endpointName, index);
 
         if (shouldIgnore) {
             assertThat(expectationFailure)
@@ -109,7 +114,7 @@ public class AutoDeserializeTest {
         }
     }
 
-    private Optional<Error> expectSuccess() {
+    private Optional<Error> expectSuccess(EndpointName endpointName, int index) {
         try {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
@@ -122,7 +127,7 @@ public class AutoDeserializeTest {
         }
     }
 
-    private Optional<Error> expectFailure() {
+    private Optional<Error> expectFailure(EndpointName endpointName, int index) {
         try {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)

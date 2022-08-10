@@ -28,6 +28,7 @@ dependencies {
     testImplementation "io.dropwizard.metrics:metrics-core"
     testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation "org.assertj:assertj-core"
+    testImplementation project(":conjure-java-jaxrs-client")
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'
