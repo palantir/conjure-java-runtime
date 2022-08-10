@@ -55,7 +55,7 @@ public class AutoDeserializeTest {
     public static final class Parameters implements ArgumentsProvider {
 
         @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
+        public Stream<? extends Arguments> provideArguments(ExtensionContext _context) {
             return Cases.TEST_CASES.getAutoDeserialize().entrySet().stream().flatMap(testCase -> {
                 EndpointName endpointName = testCase.getKey();
                 PositiveAndNegativeTestCases positiveAndNegativeTestCases = testCase.getValue();
