@@ -56,7 +56,6 @@ import feign.Target;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.jackson.JacksonDecoder;
-import feign.jaxrs.JAXRSContract;
 import java.util.Objects;
 
 /** Not meant to be implemented outside of this library. */
@@ -182,8 +181,8 @@ abstract class AbstractFeignJaxRsClientBuilder {
 
     private static Contract createContract() {
         return new EndpointNameHeaderEnrichmentContract(
-                new PathTemplateHeaderEnrichmentContract(new SlashEncodingContract(
-                        new Java8OptionalAwareContract(new GuavaOptionalAwareContract(new JAXRSContract())))));
+                new PathTemplateHeaderEnrichmentContract(new SlashEncodingContract(new Java8OptionalAwareContract(
+                        new GuavaOptionalAwareContract(new CompatibleJaxRsContract())))));
     }
 
     private static Decoder createDecoder(

@@ -48,7 +48,7 @@ public final class JaxRsClientStackTraceTest extends TestBase {
                 new HostMetricsRegistry(),
                 ClientConfiguration.builder()
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
-                        .maxNumRetries(1)
+                        .maxNumRetries(0)
                         .build());
         server1.start();
     }
@@ -89,9 +89,9 @@ public final class JaxRsClientStackTraceTest extends TestBase {
 
     private static MockResponse serializableError() throws JsonProcessingException {
         String json = ObjectMappers.newServerJsonMapper()
-                .writeValueAsString(SerializableError.forException(new ServiceException(ErrorType.INTERNAL)));
+                .writeValueAsString(SerializableError.forException(new ServiceException(ErrorType.INVALID_ARGUMENT)));
         return new MockResponse()
-                .setResponseCode(500)
+                .setResponseCode(400)
                 .setHeader("Content-Type", "application/json")
                 .setBody(json);
     }
