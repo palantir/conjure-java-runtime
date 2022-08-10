@@ -65,6 +65,4 @@ dependencies {
             because "2.x is compatible with jaxrs"
         }
     }
-
-    components.all(LegacyJerseyAlignmentRule)
 }
