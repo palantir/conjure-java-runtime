@@ -23,11 +23,11 @@ import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.errors.QosException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
+import jakarta.ws.rs.core.HttpHeaders;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
-import jakarta.ws.rs.core.HttpHeaders;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public final class QosErrorDecoderTest {
@@ -36,8 +36,8 @@ public final class QosErrorDecoderTest {
 
     private QosErrorDecoder decoder;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void beforeEach() {
         decoder = new QosErrorDecoder(new ErrorDecoder.Default());
     }
 

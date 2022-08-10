@@ -30,7 +30,13 @@ dependencies {
     implementation "com.google.guava:guava"
     implementation "com.github.ben-manes.caffeine:caffeine"
     implementation "com.netflix.feign:feign-jackson"
-    testImplementation project(":conjure-java-jersey-server")
+    // this is unfortunately very deliberate. The client code _should_
+    // work against both javax. and jakarta. annotations, however,
+    // most of the server infrastructure needed to make this work cannot
+    // possibly work with both of those at the same time, so this
+    // very intentionally is bound to the jakarta version and we just
+    // don't test the legacy javax version in this way
+    testImplementation project(":conjure-java-jersey-jakarta-server")
     testImplementation project(':keystores')
     testImplementation "com.netflix.feign:feign-jackson"
     testImplementation "com.squareup.okhttp3:mockwebserver:4.10.0"
@@ -47,6 +53,13 @@ dependencies {
             because 'this is only used in tests in this module'
         }
     }
+}
+
+configurations.all {
+    // dropwizard dynamically searches for this if it's available, this breaks with
+    // modern versions of Java 17+, so just exclude it since we don't want it on any
+    // configuration
+    exclude group: 'com.fasterxml.jackson.module', module: 'jackson-module-afterburner'
 }
 
 // feign.DefaultMethodHandler sets Lookup.IMPL_LOOKUP accessible resulting in

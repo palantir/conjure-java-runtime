@@ -23,12 +23,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import com.google.common.net.HttpHeaders;
 import feign.RequestTemplate;
 import feign.codec.Encoder;
+import jakarta.ws.rs.core.MediaType;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import jakarta.ws.rs.core.MediaType;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public final class TextDelegateEncoderTest {
@@ -38,7 +38,7 @@ public final class TextDelegateEncoderTest {
     private Encoder delegate;
     private Encoder textDelegateEncoder;
 
-    @Before
+    @BeforeEach
     public void before() {
         delegate = mock(Encoder.class);
         headers = new HashMap<>();

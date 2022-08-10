@@ -50,7 +50,6 @@ public final class JaxRsClientStackTraceTest extends TestBase {
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(0)
                         .build());
-        server1.start();
     }
 
     @AfterEach

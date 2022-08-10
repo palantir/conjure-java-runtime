@@ -22,9 +22,9 @@ import com.google.common.net.HttpHeaders;
 import feign.RequestTemplate;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
+import jakarta.ws.rs.core.MediaType;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import javax.ws.rs.core.MediaType;
 
 /**
  * Delegates to a {@link feign.codec.Encoder.Default} if the response has a Content-Type of text/plain, or falls back to

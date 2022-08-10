@@ -23,10 +23,10 @@ import feign.FeignException;
 import feign.Response;
 import feign.codec.Decoder;
 import feign.codec.StringDecoder;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import javax.ws.rs.core.MediaType;
 
 /**
  * Delegates to a {@link StringDecoder} if the response has a Content-Type of text/plain, or falls back to the given

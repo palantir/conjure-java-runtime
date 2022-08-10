@@ -33,6 +33,7 @@ import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import feign.Response;
 import feign.codec.Decoder;
+import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -45,7 +46,6 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
 import javax.annotation.processing.Generated;
-import jakarta.ws.rs.core.MediaType;
 import org.junit.jupiter.api.Test;
 
 public class EmptyContainerDecoderTest {
