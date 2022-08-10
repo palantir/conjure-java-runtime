@@ -31,6 +31,7 @@ dependencies {
     testImplementation "com.palantir.conjure.java.api:ssl-config"
     testImplementation("io.dropwizard:dropwizard-testing:2.0.10")
     testImplementation "junit:junit"
+    testImplementation "org.assertj:assertj-core"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
     implementation 'com.palantir.safe-logging:logger'

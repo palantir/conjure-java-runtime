@@ -19,20 +19,21 @@ package com.palantir.conjure.java.config.ssl;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.core.setup.Environment;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public final class DropwizardConfigTests {
-    @ClassRule
-    public static final DropwizardAppRule<DropwizardConfigTestsConfiguration> APP =
-            new DropwizardAppRule<>(DropwizardConfigTestsServer.class, "src/test/resources/test-server-no-ssl.yml");
+    public static final DropwizardAppExtension<DropwizardConfigTestsConfiguration> APP = new DropwizardAppExtension<>(
+            DropwizardConfigTestsServer.class, "src/test/resources/test-server-no-ssl.yml");
 
     @Test
     public void testUriInConfig() {

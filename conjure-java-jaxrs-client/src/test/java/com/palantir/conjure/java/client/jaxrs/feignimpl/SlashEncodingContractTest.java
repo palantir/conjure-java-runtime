@@ -25,40 +25,43 @@ import static org.mockito.Mockito.when;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.core.setup.Environment;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import java.io.IOException;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public final class SlashEncodingContractTest extends TestBase {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(Server.class, "src/test/resources/test-server.yml");
+    public static final DropwizardAppExtension<Configuration> APP =
+            new DropwizardAppExtension<>(Server.class, "src/test/resources/test-server.yml");
 
     private static final Service resource = mock(Service.class);
     private static final String PATH_PARAM = "slash/path";
     private static final String QUERY_PARAM = "slash/query";
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    public MockWebServer server;
 
     private Service jerseyProxy;
     private Service inMemoryProxy;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void beforeEach() throws IOException {
+        server = new MockWebServer();
+        server.start();
         jerseyProxy = JaxRsClient.create(
                 Service.class,
                 AGENT,
@@ -70,6 +73,11 @@ public final class SlashEncodingContractTest extends TestBase {
                 new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("\"foo\""));
+    }
+
+    @AfterEach
+    void afterEach() throws IOException {
+        server.shutdown();
     }
 
     @Test

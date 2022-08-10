@@ -26,21 +26,22 @@ import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public final class JaxRsClientStackTraceTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server1 = new MockWebServer();
+    public MockWebServer server1;
 
     private TestService proxy;
 
-    @Before
-    public void before() throws Exception {
+    @BeforeEach
+    void beforeEach() throws Exception {
+        server1 = new MockWebServer();
         proxy = JaxRsClient.create(
                 TestService.class,
                 AGENT,
@@ -49,6 +50,12 @@ public final class JaxRsClientStackTraceTest extends TestBase {
                         .from(createTestConfig("http://localhost:" + server1.getPort()))
                         .maxNumRetries(1)
                         .build());
+        server1.start();
+    }
+
+    @AfterEach
+    void afterEach() throws IOException {
+        server1.shutdown();
     }
 
     @Test

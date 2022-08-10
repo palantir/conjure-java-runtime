@@ -33,36 +33,32 @@ import feign.FeignException;
 import feign.Response;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
-import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import javax.ws.rs.core.MediaType;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import jakarta.ws.rs.core.MediaType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public final class TextDelegateDecoderTest extends TestBase {
     private static final String DELEGATE_RESPONSE = "delegate response";
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    public static final DropwizardAppExtension<Configuration> APP =
+            new DropwizardAppExtension<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
 
     private GuavaTestServer.TestService service;
     private Map<String, Collection<String>> headers;
     private Decoder delegate;
     private Decoder textDelegateDecoder;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void beforeEach() {
         delegate = mock(Decoder.class);
         headers = new HashMap<>();
         textDelegateDecoder = new TextDelegateDecoder(delegate);

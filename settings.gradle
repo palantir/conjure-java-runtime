@@ -2,7 +2,6 @@ rootProject.name = 'conjure-java-runtime'
 
 include 'conjure-java-annotations'
 include 'conjure-java-jaxrs-client'
-include 'conjure-java-jaxrs-jakarta-client'
 include 'conjure-java-retrofit2-client'
 include 'conjure-scala-jaxrs-client'
 include 'conjure-java-jackson-serialization'

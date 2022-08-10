@@ -21,32 +21,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public final class TextEncoderTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    public MockWebServer server;
 
     private Service service;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void beforeEach() throws IOException {
+        server = new MockWebServer();
+        server.start();
         service = JaxRsClient.create(
                 Service.class,
                 AGENT,
                 new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
         server.enqueue(new MockResponse().setBody("{}"));
+    }
+
+    @AfterEach
+    void afterEach() throws IOException {
+        server.shutdown();
     }
 
     @Test

@@ -26,7 +26,8 @@ dependencies {
     testImplementation("io.dropwizard:dropwizard-core") { exclude module: 'metrics-core' }
     testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
     testImplementation "io.dropwizard.metrics:metrics-core"
-    testImplementation "junit:junit"
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "org.assertj:assertj-core"
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'

@@ -24,19 +24,20 @@ import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import feign.RequestTemplate;
 import feign.codec.Encoder;
-import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(DropwizardExtensionsSupport.class)
+@ExtendWith(MockitoExtension.class)
 public final class InputStreamDelegateEncoderTest extends TestBase {
     @Mock
     private Encoder delegate;
@@ -45,13 +46,12 @@ public final class InputStreamDelegateEncoderTest extends TestBase {
 
     private Encoder inputStreamDelegateEncoder;
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
+    public static final DropwizardAppExtension<Configuration> APP =
+            new DropwizardAppExtension<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
 
     private GuavaTestServer.TestService service;
 
-    @Before
+    @BeforeEach
     public void before() {
         inputStreamDelegateEncoder = new InputStreamDelegateEncoder(delegate);
 

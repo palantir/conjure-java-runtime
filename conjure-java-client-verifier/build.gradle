@@ -5,7 +5,7 @@ dependencies {
     verificationApi 'com.palantir.conjure.verification:verification-server-api'
     verifier "com.palantir.conjure.verification:verification-server::${osClassifier}@tgz"
 
-    testImplementation project(':conjure-java-jaxrs-jakarta-client')
+    testImplementation project(':conjure-java-jaxrs-client')
     testImplementation project(':conjure-java-retrofit2-client')
     testImplementation project(':conjure-java-jackson-serialization')
     testImplementation project(':keystores')

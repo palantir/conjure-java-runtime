@@ -24,19 +24,16 @@ import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public final class JaxRsClientConfigRefreshTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server1 = new MockWebServer();
-
-    @Rule
-    public final MockWebServer server2 = new MockWebServer();
-
     @Test
     public void testConfigRefresh() throws Exception {
+        MockWebServer server1 = new MockWebServer();
+        MockWebServer server2 = new MockWebServer();
+        server1.start();
+        server2.start();
 
         ClientConfiguration config1 = createTestConfig("http://localhost:" + server1.getPort());
         ClientConfiguration config2 = createTestConfig("http://localhost:" + server2.getPort());
@@ -71,5 +68,8 @@ public final class JaxRsClientConfigRefreshTest extends TestBase {
         assertThat(proxy.string()).isEqualTo("server2");
         assertThat(server1.getRequestCount()).isEqualTo(2);
         assertThat(server2.getRequestCount()).isEqualTo(2);
+
+        server1.shutdown();
+        server2.shutdown();
     }
 }

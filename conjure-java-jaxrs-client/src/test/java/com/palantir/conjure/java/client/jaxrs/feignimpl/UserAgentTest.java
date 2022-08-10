@@ -26,28 +26,36 @@ import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.client.jaxrs.TestService;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.dialogue.Channel;
+import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 public final class UserAgentTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    public MockWebServer server;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     private String endpointUri;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void beforeEach() throws IOException {
+        server = new MockWebServer();
+        server.start();
         endpointUri = "http://localhost:" + server.getPort();
         server.enqueue(new MockResponse().setBody("\"body\""));
+    }
+
+    @AfterEach
+    void afterEach() throws IOException {
+        server.shutdown();
     }
 
     @Test

@@ -27,18 +27,19 @@ import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.client.jaxrs.TestService;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
-import org.junit.Rule;
-import org.junit.Test;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public final class ServiceConfigTest extends TestBase {
 
-    @Rule
-    public final DropwizardAppRule<ServiceConfigTestAppConfig> rule = new DropwizardAppRule<>(
+    public final DropwizardAppExtension<ServiceConfigTestAppConfig> rule = new DropwizardAppExtension<>(
             ServiceConfigTestServer.ServiceConfigTestApp.class,
             ServiceConfigTest.class
                     .getClassLoader()

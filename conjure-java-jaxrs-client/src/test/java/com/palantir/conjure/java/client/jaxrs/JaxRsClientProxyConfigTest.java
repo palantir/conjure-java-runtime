@@ -32,16 +32,29 @@ import java.util.List;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public final class JaxRsClientProxyConfigTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    public MockWebServer server;
 
-    @Rule
-    public final MockWebServer proxyServer = new MockWebServer();
+    public MockWebServer proxyServer;
+
+    @BeforeEach
+    void beforeEach() throws IOException {
+        server = new MockWebServer();
+        proxyServer = new MockWebServer();
+        server.start();
+        proxyServer.start();
+    }
+
+    @AfterEach
+    void afterEach() throws IOException {
+        server.shutdown();
+        proxyServer.shutdown();
+    }
 
     @Test
     public void testDirectVersusProxyConnection() throws Exception {

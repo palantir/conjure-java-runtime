@@ -38,11 +38,20 @@ dependencies {
     testImplementation project(":conjure-java-jersey-server")
     testImplementation project(':keystores')
     testImplementation "com.netflix.feign:feign-jackson"
-    testImplementation "com.squareup.okhttp3:mockwebserver"
-    testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
-    testImplementation "junit:junit"
+    testImplementation "com.squareup.okhttp3:mockwebserver:4.10.0"
+    testImplementation("io.dropwizard:dropwizard-testing")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "org.assertj:assertj-core"
     testImplementation "org.mockito:mockito-core"
+    testImplementation "org.mockito:mockito-junit-jupiter"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
+
+    constraints {
+        testImplementation 'com.squareup.okhttp3:okhttp', {
+            version { strictly '[4, 5[' }
+            because 'this is only used in tests in this module'
+        }
+    }
 }
 
 // feign.DefaultMethodHandler sets Lookup.IMPL_LOOKUP accessible resulting in

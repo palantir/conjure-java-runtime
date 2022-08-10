@@ -26,9 +26,9 @@ import feign.codec.ErrorDecoder;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
-import javax.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.HttpHeaders;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public final class QosErrorDecoderTest {
 

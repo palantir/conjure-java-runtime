@@ -27,19 +27,24 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.security.Provider;
 import java.util.Map;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import org.conscrypt.Conscrypt;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
 
 public final class SslSocketFactoriesTests {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    public Path tempFolder;
+
+    @BeforeEach
+    void beforeEach(@TempDir Path tempDir) {
+        this.tempFolder = tempDir;
+    }
 
     @Test
     public void testCreateSslSocketFactory_withPemCertificatesByAlias() throws IOException {
@@ -96,7 +101,8 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateTrustStorePemFromDirectory() throws IOException {
-        File certFolder = tempFolder.newFolder();
+        File certFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
 
         Files.copy(
                 TestConstants.CA_DER_CERT_PATH.toFile(),
@@ -119,7 +125,8 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateTrustStorePuppetFromDirectory() throws IOException {
-        File puppetFolder = tempFolder.newFolder();
+        File puppetFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
 
         File certsFolder = puppetFolder.toPath().resolve("certs").toFile();
         assertThat(certsFolder.mkdir()).isTrue();
@@ -145,7 +152,8 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateKeyStorePuppetFromDirectory() throws IOException {
-        File puppetFolder = tempFolder.newFolder();
+        File puppetFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
 
         File keysFolder = puppetFolder.toPath().resolve("private_keys").toFile();
         assertThat(keysFolder.mkdir()).isTrue();

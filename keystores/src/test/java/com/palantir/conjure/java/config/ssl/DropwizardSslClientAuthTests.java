@@ -23,27 +23,28 @@ import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import feign.Feign;
 import feign.RetryableException;
 import feign.jaxrs.JAXRSContract;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.testing.ConfigOverride;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import io.dropwizard.testing.junit5.DropwizardAppExtension;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 import okhttp3.OkHttpClient;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public final class DropwizardSslClientAuthTests {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP = new DropwizardAppRule<>(
+    public static final DropwizardAppExtension<Configuration> APP = new DropwizardAppExtension<>(
             TestEchoServer.class,
             "src/test/resources/test-server.yml",
             ConfigOverride.config(

@@ -19,32 +19,38 @@ package com.palantir.conjure.java.client.jaxrs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.okhttp.NoOpHostEventsSink;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import java.io.IOException;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public final class JaxRsClientPathParamHandlingTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
-
+    private MockWebServer server;
     private Service client;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    public void beforeEach() throws IOException {
+        server = new MockWebServer();
+        MockResponse mockResponse = new MockResponse().setResponseCode(200);
+        server.enqueue(mockResponse);
+        server.start();
         client = JaxRsClient.create(
                 Service.class,
                 AGENT,
                 NoOpHostEventsSink.INSTANCE,
                 createTestConfig("http://localhost:" + server.getPort() + "/api"));
-        MockResponse mockResponse = new MockResponse().setResponseCode(200);
-        server.enqueue(mockResponse);
+    }
+
+    @AfterEach
+    void afterEach() throws IOException {
+        server.shutdown();
     }
 
     @Path("/")

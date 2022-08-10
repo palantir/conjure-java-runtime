@@ -5,14 +5,14 @@ dependencies {
     verificationApi 'com.palantir.conjure.verification:verification-client-api'
     verifier "com.palantir.conjure.verification:verification-client::${osClassifier}@tgz"
 
-    testImplementation project(':conjure-java-jaxrs-jakarta-client')
+    testImplementation project(':conjure-java-jaxrs-client')
     testImplementation project(':conjure-java-jersey-jakarta-server')
     testImplementation project(':keystores')
     testImplementation project(':conjure-java-jackson-serialization')
     testImplementation project(':okhttp-clients')
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     testImplementation("io.dropwizard:dropwizard-testing")
-    testImplementation 'junit:junit'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.assertj:assertj-core'
     testImplementation 'com.palantir.dialogue:dialogue-apache-hc5-client', {
         exclude group: 'com.palantir.conjure.java.runtime'
