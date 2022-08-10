@@ -25,15 +25,15 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
 import com.palantir.conjure.verification.client.AutoDeserializeService;
 import com.palantir.conjure.verification.types.BinaryAliasExample;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.jackson.DiscoverableSubtypeResolver;
 import io.dropwizard.jackson.FuzzyEnumModule;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
+import jakarta.ws.rs.core.StreamingOutput;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import javax.ws.rs.core.StreamingOutput;
 
 public final class ServerUnderTestApplication extends Application<Configuration> {
 

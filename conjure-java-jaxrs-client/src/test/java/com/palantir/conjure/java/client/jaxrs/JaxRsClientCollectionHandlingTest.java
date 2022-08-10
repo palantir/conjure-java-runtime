@@ -103,7 +103,7 @@ public final class JaxRsClientCollectionHandlingTest extends TestBase {
     private static final class Args implements ArgumentsProvider {
 
         @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+        public Stream<? extends Arguments> provideArguments(ExtensionContext _context) {
             return Stream.of(Arguments.of(200, "null"), Arguments.of(200, ""), Arguments.of(204, ""));
         }
     }

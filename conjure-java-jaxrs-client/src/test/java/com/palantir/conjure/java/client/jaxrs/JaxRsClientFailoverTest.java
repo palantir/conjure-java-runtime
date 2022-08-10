@@ -47,7 +47,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
     private static final class PinStrategies implements ArgumentsProvider {
 
         @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+        public Stream<? extends Arguments> provideArguments(ExtensionContext _context) {
             FailoverTestCase pinNoCache = new FailoverTestCase(
                     new MockWebServer(), new MockWebServer(), 0, NodeSelectionStrategy.PIN_UNTIL_ERROR);
             FailoverTestCase pinWithCache = new FailoverTestCase(
@@ -59,7 +59,7 @@ public final class JaxRsClientFailoverTest extends TestBase {
     private static final class AllStrategies implements ArgumentsProvider {
 
         @Override
-        public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
+        public Stream<? extends Arguments> provideArguments(ExtensionContext _context) {
             FailoverTestCase pinNoCache = new FailoverTestCase(
                     new MockWebServer(), new MockWebServer(), 0, NodeSelectionStrategy.PIN_UNTIL_ERROR);
             FailoverTestCase pinWithCache = new FailoverTestCase(

@@ -30,18 +30,13 @@ import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 public final class UserAgentTest extends TestBase {
 
     public MockWebServer server;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     private String endpointUri;
 

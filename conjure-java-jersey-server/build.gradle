@@ -1,5 +1,4 @@
 apply plugin: 'com.palantir.external-publish-jar'
-apply plugin: 'com.palantir.revapi'
 apply plugin: 'com.palantir.metric-schema'
 
 versionsLock {
@@ -66,4 +65,6 @@ dependencies {
             because "2.x is compatible with jaxrs"
         }
     }
+
+    components.all(LegacyJerseyAlignmentRule)
 }
