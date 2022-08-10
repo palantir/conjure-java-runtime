@@ -1,0 +1,17 @@
+type: improvement
+improvement:
+  description: |-
+    Create jakarta equivalents of conjure-java-runtime
+
+    This change creates -jakarta equivalents of conjure-java-jaxrs-client
+    and conjure-java-jaxrs-server. This enables a gradual migration to the
+    jakarta EE versions of upstream libraries.
+
+    In addition to these changes, a few other minor changes had to occur:
+
+    * Migrated to Junit5 for tests which needed to depend on a newer version
+      of Jakarta
+    * Upgraded tracing-java and conjure-java since we needed to take
+      on those upstream changes.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2435
