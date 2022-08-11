@@ -32,7 +32,7 @@ public final class ServerUnderTestApplication {
     private ServerUnderTestApplication() {}
 
     public static UndertowServerExtension createUndertow() {
-        return UndertowServerExtension.create()
+        return UndertowServerExtension.create("/test/api")
                 .jersey(Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()))
                 .jersey(ConjureJerseyFeature.INSTANCE);
     }

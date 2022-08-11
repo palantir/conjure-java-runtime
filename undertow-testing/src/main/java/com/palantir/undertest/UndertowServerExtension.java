@@ -56,6 +56,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 @SuppressWarnings("NullAway")
 public final class UndertowServerExtension implements BeforeAllCallback, AfterAllCallback {
 
+    private final String contextPath;
+
     private Undertow server;
 
     private CloseableHttpClient httpClient;
@@ -69,7 +71,15 @@ public final class UndertowServerExtension implements BeforeAllCallback, AfterAl
     private List<Object> jerseyObjects = new ArrayList<>();
 
     public static UndertowServerExtension create() {
-        return new UndertowServerExtension();
+        return new UndertowServerExtension("/");
+    }
+
+    public static UndertowServerExtension create(String contextPath) {
+        return new UndertowServerExtension(contextPath);
+    }
+
+    private UndertowServerExtension(String contextPath) {
+        this.contextPath = contextPath;
     }
 
     public UndertowServerExtension servlet(ServletInfo servlet) {
@@ -97,7 +107,7 @@ public final class UndertowServerExtension implements BeforeAllCallback, AfterAl
     public void beforeAll(ExtensionContext _context) throws ServletException {
         DeploymentInfo servletBuilder = Servlets.deployment()
                 .setDeploymentName("test")
-                .setContextPath("/")
+                .setContextPath(contextPath)
                 .setClassLoader(UndertowServerExtension.class.getClassLoader());
 
         servletBuilder.addServlets(servlets);
@@ -127,7 +137,7 @@ public final class UndertowServerExtension implements BeforeAllCallback, AfterAl
 
         server = Undertow.builder()
                 .addHttpListener(0, "0.0.0.0")
-                .setHandler(Handlers.path().addPrefixPath("/", manager.start()))
+                .setHandler(Handlers.path().addPrefixPath(contextPath, manager.start()))
                 .build();
         server.start();
 
