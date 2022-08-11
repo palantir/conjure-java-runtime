@@ -23,6 +23,8 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.UndertowOptions;
+import io.undertow.server.handlers.URLDecodingHandler;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -32,6 +34,7 @@ import io.undertow.servlet.util.ImmediateInstanceFactory;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -136,8 +139,13 @@ public final class UndertowServerExtension implements BeforeAllCallback, AfterAl
         manager.deploy();
 
         server = Undertow.builder()
+                .setIoThreads(1)
+                .setWorkerThreads(1)
                 .addHttpListener(0, "0.0.0.0")
-                .setHandler(Handlers.path().addPrefixPath(contextPath, manager.start()))
+                .setServerOption(UndertowOptions.DECODE_URL, false)
+                .setHandler(Handlers.path()
+                        .addPrefixPath(
+                                contextPath, new URLDecodingHandler(manager.start(), StandardCharsets.UTF_8.name())))
                 .build();
         server.start();
 
