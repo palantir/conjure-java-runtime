@@ -240,7 +240,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
             return annotation.annotationType().getMethod("value").invoke(annotation);
         } catch (ReflectiveOperationException e) {
             throw new SafeIllegalStateException(
-                    "Failed to read annotation value", SafeArg.of("annotationType", annotation.annotationType()));
+                    "Failed to read annotation value", e, SafeArg.of("annotationType", annotation.annotationType()));
         }
     }
 
