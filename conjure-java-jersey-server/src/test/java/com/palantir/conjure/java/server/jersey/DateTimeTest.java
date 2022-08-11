@@ -18,10 +18,7 @@ package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import com.palantir.undertest.UndertowServerExtension;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
@@ -30,68 +27,54 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class DateTimeTest {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(DateTimeTestServer.class, "src/test/resources/test-server.yml");
-
-    private WebTarget target;
-
-    @Before
-    public void before() {
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
-        JerseyClientBuilder builder = new JerseyClientBuilder();
-        Client client = builder.build();
-        target = client.target(endpointUri);
-    }
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = UndertowServerExtension.create()
+            .jersey(ConjureJerseyFeature.INSTANCE)
+            .jersey(new DateTimeTestResource());
 
     @Test
     public void testOffsetDateTimeParam() throws SecurityException {
-        Response response = target.path("offsetDateTime")
-                .queryParam("value", "2017-01-02T03:04:05.06Z")
-                .request()
-                .get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("2017-01-02T03:04:05.060Z");
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/offsetDateTime")
+                        .addParameter("value", "2017-01-02T03:04:05.06Z")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("2017-01-02T03:04:05.060Z");
+                });
     }
 
     @Test
     public void testZonedDateTimeParam() throws SecurityException {
-        Response response = target.path("zonedDateTime")
-                .queryParam("value", "2017-01-02T03:04:05.06Z")
-                .request()
-                .get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("2017-01-02T03:04:05.060Z");
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/zonedDateTime")
+                        .addParameter("value", "2017-01-02T03:04:05.06Z")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("2017-01-02T03:04:05.060Z");
+                });
     }
 
     @Test
     public void testInstantParam() {
-        Response response = target.path("instant")
-                .queryParam("value", "2017-01-02T03:04:05.06Z")
-                .request()
-                .get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("2017-01-02T03:04:05.060Z");
-    }
-
-    public static class DateTimeTestServer extends Application<Configuration> {
-        @Override
-        public final void run(Configuration _config, final Environment env) {
-            env.jersey().register(ConjureJerseyFeature.INSTANCE);
-            env.jersey().register(new DateTimeTestResource());
-        }
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/instant")
+                        .addParameter("value", "2017-01-02T03:04:05.06Z")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("2017-01-02T03:04:05.060Z");
+                });
     }
 
     public static final class DateTimeTestResource implements DateTimeTestService {

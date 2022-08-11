@@ -20,23 +20,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper.BeforeAndAfter;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class JaxRsClientConfigRefreshTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server1 = new MockWebServer();
+    @RegisterExtension
+    public final BeforeAndAfter<MockWebServer> server1Resource = ExtensionsWrapper.toExtension(new MockWebServer());
 
-    @Rule
-    public final MockWebServer server2 = new MockWebServer();
+    @RegisterExtension
+    public final BeforeAndAfter<MockWebServer> server2Resource = ExtensionsWrapper.toExtension(new MockWebServer());
 
     @Test
     public void testConfigRefresh() throws Exception {
+        MockWebServer server1 = server1Resource.getResource();
+        MockWebServer server2 = server2Resource.getResource();
 
         ClientConfiguration config1 = createTestConfig("http://localhost:" + server1.getPort());
         ClientConfiguration config2 = createTestConfig("http://localhost:" + server2.getPort());

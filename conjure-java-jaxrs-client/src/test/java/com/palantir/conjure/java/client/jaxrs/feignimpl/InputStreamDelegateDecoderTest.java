@@ -24,34 +24,33 @@ import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import com.palantir.undertest.UndertowServerExtension;
 import feign.Response;
 import feign.Util;
 import feign.codec.Decoder;
-import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mockito;
 
 public final class InputStreamDelegateDecoderTest extends TestBase {
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
+
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = GuavaTestServer.createUndertow();
 
     private GuavaTestServer.TestService service;
     private Decoder delegate;
     private Decoder inputStreamDelegateDecoder;
 
-    @Before
+    @BeforeEach
     public void before() {
         delegate = Mockito.mock(Decoder.class);
         inputStreamDelegateDecoder = new InputStreamDelegateDecoder(delegate);
 
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
+        String endpointUri = "http://localhost:" + undertow.getLocalPort();
         service = JaxRsClient.create(
                 GuavaTestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }

@@ -20,12 +20,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.tokens.auth.AuthHeader;
 import com.palantir.tokens.auth.BearerToken;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import com.palantir.undertest.UndertowServerExtension;
+import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.CookieParam;
@@ -34,198 +33,202 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class AuthTest {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(AuthTestServer.class, "src/test/resources/test-server.yml");
-
-    private WebTarget target;
-
-    @Before
-    public void before() {
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
-        JerseyClientBuilder builder = new JerseyClientBuilder();
-        Client client = builder.build();
-        target = client.target(endpointUri);
-    }
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = UndertowServerExtension.create()
+            .jersey(ConjureJerseyFeature.INSTANCE)
+            .jersey(new AuthTestResource());
 
     @Test
-    public void testAuthHeader() throws SecurityException {
-        Response response = target.path("authHeader")
-                .request()
-                .header("Authorization", "Bearer bearerToken")
-                .get();
-
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("Bearer bearerToken");
+    public void testAuthHeader() {
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/authHeader")
+                        .addHeader("Authorization", "Bearer bearerToken")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("Bearer bearerToken");
+                });
     }
 
     @Test
     public void testAuthHeaderNullable_present() throws SecurityException {
-        Response response = target.path("authHeaderNullable")
-                .request()
-                .header("Authorization", "Bearer bearerToken")
-                .get();
-
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("Bearer bearerToken");
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/authHeaderNullable")
+                        .addHeader("Authorization", "Bearer bearerToken")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8))
+                            .isEqualTo("Bearer bearerToken");
+                });
     }
 
     @Test
     public void testAuthHeaderNullable_absent() throws SecurityException {
-        Response response = target.path("authHeaderNullable").request().get();
-
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("[no value]");
+        undertow.runRequest(ClassicRequestBuilder.get("/authHeaderNullable").build(), response -> {
+            assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+            assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("[no value]");
+        });
     }
 
     @Test
     public void testAuthHeader_missingCredentials() throws SecurityException {
-        Response response = target.path("authHeader").request().get();
+        undertow.runRequest(new HttpGet("/authHeader"), response -> {
+            assertThat(response.getCode()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
 
-        assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
-
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode()).isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
-        assertThat(error.errorName()).isEqualTo("Conjure:MissingCredentials");
-        assertThat(error.parameters()).isEmpty();
+            SerializableError error = ObjectMappers.newClientObjectMapper()
+                    .readValue(response.getEntity().getContent(), SerializableError.class);
+            assertThat(error.errorCode())
+                    .isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
+            assertThat(error.errorName()).isEqualTo("Conjure:MissingCredentials");
+            assertThat(error.parameters()).isEmpty();
+        });
     }
 
     @Test
     public void testAuthHeader_malformedCredentials() throws SecurityException {
-        Response response =
-                target.path("authHeader").request().header("Authorization", "!").get();
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/authHeader")
+                        .addHeader("Authorization", "!")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
 
-        assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
-
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode()).isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
-        assertThat(error.errorName()).isEqualTo("Conjure:MalformedCredentials");
-        assertThat(error.parameters()).isEmpty();
+                    SerializableError error = ObjectMappers.newClientObjectMapper()
+                            .readValue(response.getEntity().getContent(), SerializableError.class);
+                    assertThat(error.errorCode())
+                            .isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
+                    assertThat(error.errorName()).isEqualTo("Conjure:MalformedCredentials");
+                    assertThat(error.parameters()).isEmpty();
+                });
     }
 
     @Test
     public void testAuthHeaderOtherHeader_illegalArgument() throws SecurityException {
-        Response response = target.path("authHeaderOtherHeader")
-                .request()
-                .header("Other", "!")
-                .get();
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/authHeaderOtherHeader")
+                        .setHeader("Other", "!")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
 
-        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
-
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode())
-                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
-        assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
-        assertThat(error.parameters()).isEmpty();
+                    SerializableError error = ObjectMappers.newClientObjectMapper()
+                            .readValue(response.getEntity().getContent(), SerializableError.class);
+                    assertThat(error.errorCode())
+                            .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+                    assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
+                    assertThat(error.parameters()).isEmpty();
+                });
     }
 
     @Test
     public void testAuthHeaderOtherParam_illegalArgument() throws SecurityException {
-        Response response = target.path("authHeaderOtherParam")
-                .queryParam("Authorization", "!")
-                .request()
-                .get();
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/authHeaderOtherParam")
+                        .addParameter("Authorization", "!")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
 
-        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
-
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode())
-                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
-        assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
-        assertThat(error.parameters()).isEmpty();
+                    SerializableError error = ObjectMappers.newClientObjectMapper()
+                            .readValue(response.getEntity().getContent(), SerializableError.class);
+                    assertThat(error.errorCode())
+                            .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+                    assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
+                    assertThat(error.parameters()).isEmpty();
+                });
     }
 
     @Test
     public void testBearerToken() throws SecurityException {
-        Response response = target.path("bearerToken")
-                .request()
-                .cookie("PALANTIR_TOKEN", "bearerToken")
-                .get();
-
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("bearerToken");
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/bearerToken")
+                        .addHeader("Cookie", "PALANTIR_TOKEN=bearerToken")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("bearerToken");
+                });
     }
 
     @Test
     public void testBearerTokenNullable_present() {
-        Response response = target.path("bearerTokenNullable")
-                .request()
-                .cookie("PALANTIR_TOKEN", "bearerToken")
-                .get();
-
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("bearerToken");
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/bearerTokenNullable")
+                        .addHeader("Cookie", "PALANTIR_TOKEN=bearerToken")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("bearerToken");
+                });
     }
 
     @Test
     public void testBearerTokenNullable_absent() {
-        Response response = target.path("bearerTokenNullable").request().get();
-
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("[no value]");
+        undertow.runRequest(ClassicRequestBuilder.get("/bearerTokenNullable").build(), response -> {
+            assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+            assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("[no value]");
+        });
     }
 
     @Test
     public void testBearerToken_missingCredentials() throws SecurityException {
-        Response response = target.path("bearerToken").request().get();
+        undertow.runRequest(new HttpGet("/bearerToken"), response -> {
+            assertThat(response.getCode()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
 
-        assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
-
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode()).isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
-        assertThat(error.errorName()).isEqualTo("Conjure:MissingCredentials");
-        assertThat(error.parameters()).isEmpty();
+            SerializableError error = ObjectMappers.newClientObjectMapper()
+                    .readValue(response.getEntity().getContent(), SerializableError.class);
+            assertThat(error.errorCode())
+                    .isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
+            assertThat(error.errorName()).isEqualTo("Conjure:MissingCredentials");
+            assertThat(error.parameters()).isEmpty();
+        });
     }
 
     @Test
     public void testBearerToken_malformedCredentials() throws SecurityException {
-        Response response = target.path("bearerToken")
-                .request()
-                .cookie("PALANTIR_TOKEN", "!")
-                .get();
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/bearerToken")
+                        .addHeader("Cookie", "PALANTIR_TOKEN=!")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
 
-        assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
-
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode()).isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
-        assertThat(error.errorName()).isEqualTo("Conjure:MalformedCredentials");
-        assertThat(error.parameters()).isEmpty();
+                    SerializableError error = ObjectMappers.newClientObjectMapper()
+                            .readValue(response.getEntity().getContent(), SerializableError.class);
+                    assertThat(error.errorCode())
+                            .isEqualTo(ErrorType.UNAUTHORIZED.code().toString());
+                    assertThat(error.errorName()).isEqualTo("Conjure:MalformedCredentials");
+                    assertThat(error.parameters()).isEmpty();
+                });
     }
 
     @Test
     public void testBearerTokenOtherParam_illegalArgument() throws SecurityException {
-        Response response = target.path("bearerTokenOtherParam")
-                .queryParam("PALANTIR_TOKEN", "!")
-                .request()
-                .get();
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/bearerTokenOtherParam")
+                        .addParameter("PALANTIR_TOKEN", "!")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
 
-        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
-
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode())
-                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
-        assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
-        assertThat(error.parameters()).isEmpty();
-    }
-
-    public static class AuthTestServer extends Application<Configuration> {
-        @Override
-        public final void run(Configuration _config, final Environment env) {
-            env.jersey().register(ConjureJerseyFeature.INSTANCE);
-            env.jersey().register(new AuthTestResource());
-        }
+                    SerializableError error = ObjectMappers.newClientObjectMapper()
+                            .readValue(response.getEntity().getContent(), SerializableError.class);
+                    assertThat(error.errorCode())
+                            .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+                    assertThat(error.errorName()).isEqualTo("Default:InvalidArgument");
+                    assertThat(error.parameters()).isEmpty();
+                });
     }
 
     public static final class AuthTestResource implements AuthTestService {

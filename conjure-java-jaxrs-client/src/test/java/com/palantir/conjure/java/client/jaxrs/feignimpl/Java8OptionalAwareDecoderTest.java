@@ -25,30 +25,23 @@ import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8TestServer.TestService;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import com.palantir.undertest.UndertowServerExtension;
 import java.nio.file.Paths;
 import java.util.Optional;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class Java8OptionalAwareDecoderTest extends TestBase {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(Java8TestServer.class, "src/test/resources/test-server.yml");
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = Java8TestServer.createUndertow();
 
     private Java8TestServer.TestService service;
 
-    @Before
+    @BeforeEach
     public void before() {
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
+        String endpointUri = "http://localhost:" + undertow.getLocalPort();
         service =
                 JaxRsClient.create(TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }

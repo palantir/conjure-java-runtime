@@ -20,87 +20,81 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.verification.client.EndpointName;
+import com.palantir.conjure.verification.client.PositiveAndNegativeTestCases;
 import com.palantir.conjure.verification.client.VerificationClientRequest;
 import com.palantir.conjure.verification.client.VerificationClientService;
+import com.palantir.undertest.UndertowServerExtension;
 import com.palantir.verification.server.undertest.ServerUnderTestApplication;
-import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.assertj.core.api.Assertions;
-import org.junit.Assume;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
-@RunWith(Parameterized.class)
 public class AutoDeserializeTest {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> serverUnderTestRule =
-            new DropwizardAppRule<>(ServerUnderTestApplication.class, "src/test/resources/config.yml");
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = ServerUnderTestApplication.createUndertow();
 
-    @ClassRule
+    @RegisterExtension
     public static final VerificationClientRule verificationClientRule = new VerificationClientRule();
 
     private static final VerificationClientService verificationService =
             VerificationClients.verificationClientService(verificationClientRule);
 
-    @Parameterized.Parameter(0)
-    public EndpointName endpointName;
+    public static final class Parameters implements ArgumentsProvider {
 
-    @Parameterized.Parameter(1)
-    public int index;
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext _context) {
+            return Cases.TEST_CASES.getAutoDeserialize().entrySet().stream().flatMap(testCase -> {
+                EndpointName endpointName = testCase.getKey();
+                PositiveAndNegativeTestCases positiveAndNegativeTestCases = testCase.getValue();
 
-    @Parameterized.Parameter(2)
-    public boolean shouldSucceed;
+                int positiveSize = positiveAndNegativeTestCases.getPositive().size();
+                int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
-    @Parameterized.Parameter(3)
-    public String jsonString;
-
-    @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2} with client {4}")
-    public static Collection<Object[]> data() {
-        List<Object[]> objects = new ArrayList<>();
-        Cases.TEST_CASES.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
-            int positiveSize = positiveAndNegativeTestCases.getPositive().size();
-            int negativeSize = positiveAndNegativeTestCases.getNegative().size();
-
-            IntStream.range(0, positiveSize)
-                    .forEach(i -> objects.add(new Object[] {
-                        endpointName,
-                        i,
-                        true,
-                        positiveAndNegativeTestCases.getPositive().get(i),
-                    }));
-
-            IntStream.range(0, negativeSize)
-                    .forEach(i -> objects.add(new Object[] {
-                        endpointName,
-                        positiveSize + i,
-                        false,
-                        positiveAndNegativeTestCases.getNegative().get(i)
-                    }));
-        });
-        return objects;
+                return Stream.concat(
+                        IntStream.range(0, positiveSize)
+                                .mapToObj(i -> Arguments.of(
+                                        endpointName,
+                                        i,
+                                        true,
+                                        positiveAndNegativeTestCases
+                                                .getPositive()
+                                                .get(i))),
+                        IntStream.range(0, negativeSize)
+                                .mapToObj(i -> Arguments.of(
+                                        endpointName,
+                                        positiveSize + i,
+                                        false,
+                                        positiveAndNegativeTestCases
+                                                .getNegative()
+                                                .get(i))));
+            });
+        }
     }
 
-    @Test
-    public void runTestCase() {
+    @ParameterizedTest(name = "{0}({3}) -> should succeed {2} with client {4}")
+    @ArgumentsSource(Parameters.class)
+    public void runTestCase(EndpointName endpointName, int index, boolean shouldSucceed, String jsonString) {
         boolean shouldIgnore = Cases.shouldIgnore(endpointName, jsonString);
-        System.out.println(String.format(
-                "[%s%s test case %s]: %s(%s), expected client to %s",
+        System.out.printf(
+                "[%s%s test case %s]: %s(%s), expected client to %s%n",
                 shouldIgnore ? "ignored " : "",
                 shouldSucceed ? "positive" : "negative",
                 index,
                 endpointName,
                 jsonString,
-                shouldSucceed ? "succeed" : "fail"));
+                shouldSucceed ? "succeed" : "fail");
 
-        Optional<Error> expectationFailure = shouldSucceed ? expectSuccess() : expectFailure();
+        Optional<Error> expectationFailure =
+                shouldSucceed ? expectSuccess(endpointName, index) : expectFailure(endpointName, index);
 
         if (shouldIgnore) {
             assertThat(expectationFailure)
@@ -109,19 +103,19 @@ public class AutoDeserializeTest {
                     .isNotEmpty();
         }
 
-        Assume.assumeFalse(shouldIgnore);
+        Assumptions.assumeFalse(shouldIgnore);
 
         if (expectationFailure.isPresent()) {
             throw expectationFailure.get();
         }
     }
 
-    private Optional<Error> expectSuccess() {
+    private Optional<Error> expectSuccess(EndpointName endpointName, int index) {
         try {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
                     .testCase(index)
-                    .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
+                    .baseUrl(String.format("http://localhost:%d/test/api", undertow.getLocalPort()))
                     .build());
             return Optional.empty();
         } catch (RemoteException e) {
@@ -129,12 +123,12 @@ public class AutoDeserializeTest {
         }
     }
 
-    private Optional<Error> expectFailure() {
+    private Optional<Error> expectFailure(EndpointName endpointName, int index) {
         try {
             verificationService.runTestCase(VerificationClientRequest.builder()
                     .endpointName(endpointName)
                     .testCase(index)
-                    .baseUrl(String.format("http://localhost:%d/test/api", serverUnderTestRule.getLocalPort()))
+                    .baseUrl(String.format("http://localhost:%d/test/api", undertow.getLocalPort()))
                     .build());
             return Optional.of(new AssertionError("Result should have caused an exception"));
         } catch (RemoteException e) {

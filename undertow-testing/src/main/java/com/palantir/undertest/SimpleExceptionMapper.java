@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2022 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.server.jersey;
+package com.palantir.undertest;
 
-import io.dropwizard.jersey.optional.EmptyOptionalException;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public final class EmptyOptionalTo204ExceptionMapper implements ExceptionMapper<EmptyOptionalException> {
+public final class SimpleExceptionMapper implements ExceptionMapper<Throwable> {
     @Override
-    public Response toResponse(EmptyOptionalException _exception) {
-        return Response.noContent().build();
+    public Response toResponse(Throwable exception) {
+        return Response.serverError()
+                .entity(Objects.requireNonNullElse(exception.getMessage(), "").getBytes(StandardCharsets.UTF_8))
+                .build();
     }
 }

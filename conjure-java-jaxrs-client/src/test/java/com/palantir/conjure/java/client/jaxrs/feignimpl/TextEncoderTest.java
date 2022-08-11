@@ -18,6 +18,8 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper;
+import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper.BeforeAndAfter;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
@@ -28,19 +30,22 @@ import javax.ws.rs.core.MediaType;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class TextEncoderTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @RegisterExtension
+    public final BeforeAndAfter<MockWebServer> serverResource = ExtensionsWrapper.toExtension(new MockWebServer());
+
+    MockWebServer server;
 
     private Service service;
 
-    @Before
+    @BeforeEach
     public void before() {
+        this.server = serverResource.getResource();
         service = JaxRsClient.create(
                 Service.class,
                 AGENT,

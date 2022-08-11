@@ -19,6 +19,7 @@ package com.palantir.conjure.java.client.jaxrs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper.BeforeAndAfter;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -32,20 +33,23 @@ import javax.ws.rs.QueryParam;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @RegisterExtension
+    public final BeforeAndAfter<MockWebServer> serverResource = ExtensionsWrapper.toExtension(new MockWebServer());
+
+    MockWebServer server;
 
     private Service proxy;
 
-    @Before
+    @BeforeEach
     public void before() {
+        this.server = serverResource.getResource();
         proxy = JaxRsClient.create(
                 Service.class,
                 AGENT,
@@ -169,7 +173,7 @@ public final class JaxRsClientJava8OptionalHandlingTest extends TestBase {
         assertThat(takeRequest.getHeader("req")).isEqualTo("str2");
     }
 
-    @Ignore("TODO(rfink): Add support for header encoding")
+    @Disabled("TODO(rfink): Add support for header encoding")
     @Test
     public void testStringHeader_withNonAsciiCharacters() throws Exception {
         proxy.header(Optional.of("ü"), "ø");

@@ -17,18 +17,13 @@
 package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import javax.annotation.Nullable;
 import javax.ws.rs.BadRequestException;
-import org.hamcrest.Matchers;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 public final class WebPreconditionsTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Nullable
     private static Object nullReference = null; // circumvent findbugs
 
@@ -36,20 +31,22 @@ public final class WebPreconditionsTest {
     public void testCheckNotNullWithMessage() {
         String message = "here's a message";
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(Matchers.is(message));
-
-        WebPreconditions.checkNotNull(nullReference, message);
+        assertThatThrownBy(() -> {
+                    WebPreconditions.checkNotNull(nullReference, message);
+                })
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(message);
     }
 
     @Test
     public void testCheckNotNullWithNullMessage() {
         String message = null;
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(Matchers.is("null"));
-
-        WebPreconditions.checkNotNull(nullReference, message);
+        assertThatThrownBy(() -> {
+                    WebPreconditions.checkNotNull(nullReference, message);
+                })
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("null");
     }
 
     @Test
@@ -57,10 +54,11 @@ public final class WebPreconditionsTest {
         String message = "message with %s %s";
         String replacedMessage = "message with two percents";
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(Matchers.is(replacedMessage));
-
-        WebPreconditions.checkNotNull(nullReference, message, "two", "percents");
+        assertThatThrownBy(() -> {
+                    WebPreconditions.checkNotNull(nullReference, message, "two", "percents");
+                })
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(replacedMessage);
     }
 
     @Test
@@ -75,20 +73,22 @@ public final class WebPreconditionsTest {
     public void testCheckNotEmptyWithMessage() {
         String message = "here's a message";
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(Matchers.is(message));
-
-        WebPreconditions.checkNotEmpty("", message);
+        assertThatThrownBy(() -> {
+                    WebPreconditions.checkNotEmpty("", message);
+                })
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(message);
     }
 
     @Test
     public void testCheckNotEmptyWithNullMessage() {
         String message = null;
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(Matchers.is("null"));
-
-        WebPreconditions.checkNotEmpty("", message);
+        assertThatThrownBy(() -> {
+                    WebPreconditions.checkNotEmpty("", message);
+                })
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("null");
     }
 
     @Test
@@ -96,10 +96,11 @@ public final class WebPreconditionsTest {
         String message = "message with %s %s";
         String replacedMessage = "message with two percents";
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(Matchers.is(replacedMessage));
-
-        WebPreconditions.checkNotEmpty("", message, "two", "percents");
+        assertThatThrownBy(() -> {
+                    WebPreconditions.checkNotEmpty("", message, "two", "percents");
+                })
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(replacedMessage);
     }
 
     @Test
@@ -114,20 +115,22 @@ public final class WebPreconditionsTest {
     public void testCheckArgumentWithMessage() {
         String message = "here's a message";
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(Matchers.is(message));
-
-        WebPreconditions.checkArgument(false, message);
+        assertThatThrownBy(() -> {
+                    WebPreconditions.checkArgument(false, message);
+                })
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(message);
     }
 
     @Test
     public void testCheckArgumentWithNullMessage() {
         String message = null;
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(Matchers.is("null"));
-
-        WebPreconditions.checkArgument(false, message);
+        assertThatThrownBy(() -> {
+                    WebPreconditions.checkArgument(false, message);
+                })
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("null");
     }
 
     @Test
@@ -135,10 +138,11 @@ public final class WebPreconditionsTest {
         String message = "message with %s %s";
         String replacedMessage = "message with two percents";
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(Matchers.is(replacedMessage));
-
-        WebPreconditions.checkArgument(false, message, "two", "percents");
+        assertThatThrownBy(() -> {
+                    WebPreconditions.checkArgument(false, message, "two", "percents");
+                })
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(replacedMessage);
     }
 
     @Test

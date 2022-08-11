@@ -29,45 +29,38 @@ import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import com.palantir.undertest.UndertowServerExtension;
 import feign.FeignException;
 import feign.Response;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
-import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.core.MediaType;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class TextDelegateDecoderTest extends TestBase {
     private static final String DELEGATE_RESPONSE = "delegate response";
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = GuavaTestServer.createUndertow();
 
     private GuavaTestServer.TestService service;
     private Map<String, Collection<String>> headers;
     private Decoder delegate;
     private Decoder textDelegateDecoder;
 
-    @Before
+    @BeforeEach
     public void before() {
         delegate = mock(Decoder.class);
         headers = new HashMap<>();
         textDelegateDecoder = new TextDelegateDecoder(delegate);
 
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
+        String endpointUri = "http://localhost:" + undertow.getLocalPort();
         service = JaxRsClient.create(
                 GuavaTestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }

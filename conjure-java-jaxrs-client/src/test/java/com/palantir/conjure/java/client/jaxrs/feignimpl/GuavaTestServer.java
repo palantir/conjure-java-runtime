@@ -17,13 +17,9 @@
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.google.common.collect.ImmutableMap;
-import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
+import com.palantir.undertest.UndertowServerExtension;
 import feign.Util;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.jersey.jackson.JacksonMessageBodyProvider;
-import io.dropwizard.setup.Environment;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,12 +37,13 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import org.assertj.core.util.Strings;
 
-public class GuavaTestServer extends Application<Configuration> {
-    @Override
-    public final void run(Configuration _config, final Environment env) throws Exception {
-        env.jersey().register(ConjureJerseyFeature.INSTANCE);
-        env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerJsonMapper()));
-        env.jersey().register(new TestResource());
+public final class GuavaTestServer {
+    private GuavaTestServer() {}
+
+    public static UndertowServerExtension createUndertow() {
+        return UndertowServerExtension.create()
+                .jersey(ConjureJerseyFeature.INSTANCE)
+                .jersey(new GuavaTestServer.TestResource());
     }
 
     static class TestResource implements TestService {

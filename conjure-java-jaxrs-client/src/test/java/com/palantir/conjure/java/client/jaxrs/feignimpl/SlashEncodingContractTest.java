@@ -22,13 +22,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper;
+import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper.BeforeAndAfter;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import com.palantir.undertest.UndertowServerExtension;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -36,34 +35,36 @@ import javax.ws.rs.QueryParam;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class SlashEncodingContractTest extends TestBase {
-
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(Server.class, "src/test/resources/test-server.yml");
-
     private static final Service resource = mock(Service.class);
+
+    @RegisterExtension
+    public static final UndertowServerExtension undertow =
+            UndertowServerExtension.create().jersey(resource);
+
     private static final String PATH_PARAM = "slash/path";
     private static final String QUERY_PARAM = "slash/query";
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @RegisterExtension
+    public final BeforeAndAfter<MockWebServer> serverResource = ExtensionsWrapper.toExtension(new MockWebServer());
+
+    MockWebServer server;
 
     private Service jerseyProxy;
     private Service inMemoryProxy;
 
-    @Before
+    @BeforeEach
     public void before() {
+        this.server = serverResource.getResource();
         jerseyProxy = JaxRsClient.create(
                 Service.class,
                 AGENT,
                 new HostMetricsRegistry(),
-                createTestConfig("http://localhost:" + APP.getLocalPort()));
+                createTestConfig("http://localhost:" + undertow.getLocalPort()));
         inMemoryProxy = JaxRsClient.create(
                 Service.class,
                 AGENT,
@@ -93,12 +94,5 @@ public final class SlashEncodingContractTest extends TestBase {
         @GET
         @Path("path/{path}")
         String encoded(@PathParam("path") String path, @QueryParam("query") String query);
-    }
-
-    public static class Server extends Application<Configuration> {
-        @Override
-        public final void run(Configuration _config, final Environment env) throws Exception {
-            env.jersey().register(resource);
-        }
     }
 }

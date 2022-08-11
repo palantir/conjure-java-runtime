@@ -74,7 +74,7 @@ public final class GuavaOptionalComplexType {
         if (string != null ? !string.equals(that.string) : that.string != null) {
             return false;
         }
-        return path != null ? path.equals(that.path) : that.path == null;
+        return path != null ? path.getFileName().equals(that.path.getFileName()) : that.path == null;
     }
 
     @Override

@@ -15,3 +15,5 @@ include 'jetty-http2-agent'
 include 'conjure-java-jersey-server'
 include 'keystores'
 include 'okhttp-clients'
+
+include 'undertow-testing'

@@ -19,62 +19,44 @@ package com.palantir.conjure.java.server.jersey;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.base.Strings;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import com.palantir.undertest.UndertowServerExtension;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class GuavaOptionalTest {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(OptionalTestServer.class, "src/test/resources/test-server.yml");
-
-    private WebTarget target;
-
-    @Before
-    public void before() {
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
-        JerseyClientBuilder builder = new JerseyClientBuilder();
-        Client client = builder.build();
-        target = client.target(endpointUri);
-    }
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = UndertowServerExtension.create()
+            .jersey(ConjureJerseyFeature.INSTANCE)
+            .jersey(new OptionalTestResource());
 
     @Test
     public void testOptionalPresent() throws SecurityException {
-        Response response =
-                target.path("optional").queryParam("value", "val").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("valval");
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/optional")
+                        .addParameter("value", "val")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("valval");
+                });
     }
 
     @Test
     public void testOptionalAbsent() {
-        Response response = target.path("optional").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.NO_CONTENT.getStatusCode());
-    }
-
-    public static class OptionalTestServer extends Application<Configuration> {
-        @Override
-        public final void run(Configuration _config, final Environment env) {
-            env.jersey().register(ConjureJerseyFeature.INSTANCE);
-            env.jersey().register(new OptionalTestResource());
-        }
+        undertow.get("/optional", response -> {
+            assertThat(response.getCode()).isEqualTo(Status.NO_CONTENT.getStatusCode());
+        });
     }
 
     public static final class OptionalTestResource implements OptionalTestService {

@@ -36,19 +36,16 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocketFactory;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
+@Timeout(value = 5)
 public final class SslSocketFactoriesConnectionTests {
 
     private enum ClientAuth {
         WITH_CLIENT_AUTH,
         NO_CLIENT_AUTH,
     }
-
-    @Rule
-    public Timeout testTimeout = Timeout.seconds(5);
 
     @Test
     public void testSslNoClientAuthenticationJks() {

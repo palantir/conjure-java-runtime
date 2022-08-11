@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper.BeforeAndAfter;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -32,16 +33,26 @@ import java.util.List;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class JaxRsClientProxyConfigTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @RegisterExtension
+    public final BeforeAndAfter<MockWebServer> serverResource = ExtensionsWrapper.toExtension(new MockWebServer());
 
-    @Rule
-    public final MockWebServer proxyServer = new MockWebServer();
+    @RegisterExtension
+    public final BeforeAndAfter<MockWebServer> proxyServerResource = ExtensionsWrapper.toExtension(new MockWebServer());
+
+    MockWebServer server;
+    MockWebServer proxyServer;
+
+    @BeforeEach
+    void beforeEach() {
+        server = serverResource.getResource();
+        proxyServer = proxyServerResource.getResource();
+    }
 
     @Test
     public void testDirectVersusProxyConnection() throws Exception {

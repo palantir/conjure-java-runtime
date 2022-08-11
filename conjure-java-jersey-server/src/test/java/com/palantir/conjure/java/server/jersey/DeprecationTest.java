@@ -18,62 +18,40 @@ package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import com.palantir.undertest.UndertowServerExtension;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class DeprecationTest {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(DeprecationTestServer.class, "src/test/resources/test-server.yml");
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = UndertowServerExtension.create()
+            .jersey(ConjureJerseyFeature.INSTANCE)
+            .jersey(new DeprecationResource());
 
-    private WebTarget target;
-
-    @Before
-    public void before() {
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
-        JerseyClientBuilder builder = new JerseyClientBuilder();
-        Client client = builder.build();
-        target = client.target(endpointUri);
-    }
+    ;
 
     @Test
     public void testDeprecated() throws SecurityException {
-        try (Response response = target.path("deprecated").request().get()) {
-            assertThat(response.getStatus()).isEqualTo(Status.NO_CONTENT.getStatusCode());
-            assertThat(response.getHeaderString("deprecation")).isEqualTo("true");
-        }
+        undertow.runRequest(new HttpGet("/deprecated"), response -> {
+            assertThat(response.getCode()).isEqualTo(Status.NO_CONTENT.getStatusCode());
+            assertThat(response.getFirstHeader("deprecation").getValue()).isEqualTo("true");
+        });
     }
 
     @Test
     public void testUnmarked() throws SecurityException {
-        try (Response response = target.path("unmarked").request().get()) {
-            assertThat(response.getStatus()).isEqualTo(Status.NO_CONTENT.getStatusCode());
-            assertThat(response.getHeaderString("deprecation")).isNull();
-        }
-    }
-
-    public static class DeprecationTestServer extends Application<Configuration> {
-        @Override
-        public final void run(Configuration _config, final Environment env) {
-            env.jersey().register(ConjureJerseyFeature.INSTANCE);
-            env.jersey().register(new DeprecationResource());
-        }
+        undertow.runRequest(new HttpGet("/unmarked"), response -> {
+            assertThat(response.getCode()).isEqualTo(Status.NO_CONTENT.getStatusCode());
+            assertThat(response.getFirstHeader("deprecation")).isNull();
+        });
     }
 
     public static final class DeprecationResource implements DeprecationTestService {

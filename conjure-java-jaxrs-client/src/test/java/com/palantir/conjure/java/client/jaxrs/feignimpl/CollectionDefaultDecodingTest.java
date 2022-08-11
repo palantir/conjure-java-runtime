@@ -21,24 +21,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import com.palantir.undertest.UndertowServerExtension;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 /** Tests that nulls are correctly deserialized into empty collections. */
 public final class CollectionDefaultDecodingTest extends TestBase {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(Java8TestServer.class, "src/test/resources/test-server.yml");
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = Java8TestServer.createUndertow();
 
     private Java8TestServer.TestService service;
 
-    @Before
+    @BeforeEach
     public void before() {
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
+        String endpointUri = "http://localhost:" + undertow.getLocalPort();
         service = JaxRsClient.create(
                 Java8TestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }
