@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.google.common.base.MoreObjects;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.service.UserAgents;
+import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper;
+import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper.BeforeAndAfter;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.client.jaxrs.TestService;
@@ -29,23 +31,22 @@ import com.palantir.dialogue.Channel;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class UserAgentTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @RegisterExtension
+    public final BeforeAndAfter<MockWebServer> serverResource = ExtensionsWrapper.toExtension(new MockWebServer());
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    MockWebServer server;
 
     private String endpointUri;
 
-    @Before
+    @BeforeEach
     public void before() {
+        this.server = serverResource.getResource();
         endpointUri = "http://localhost:" + server.getPort();
         server.enqueue(new MockResponse().setBody("\"body\""));
     }

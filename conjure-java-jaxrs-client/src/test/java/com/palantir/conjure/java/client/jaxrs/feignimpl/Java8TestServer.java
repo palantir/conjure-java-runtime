@@ -18,14 +18,9 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
+import com.palantir.undertest.UndertowServerExtension;
 import feign.Util;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.jersey.jackson.JacksonMessageBodyProvider;
-import io.dropwizard.jersey.optional.EmptyOptionalException;
-import io.dropwizard.setup.Environment;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,25 +40,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 
-public class Java8TestServer extends Application<Configuration> {
-    @Override
-    public final void run(Configuration _config, final Environment env) throws Exception {
-        env.jersey().register(ConjureJerseyFeature.INSTANCE);
-        env.jersey().register(new JacksonMessageBodyProvider(ObjectMappers.newServerJsonMapper()));
-        env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
-        env.jersey().register(new TestResource());
-    }
+public final class Java8TestServer {
+    private Java8TestServer() {}
 
-    @Provider
-    private static final class EmptyOptionalTo204ExceptionMapper implements ExceptionMapper<EmptyOptionalException> {
-        @Override
-        public Response toResponse(EmptyOptionalException _exception) {
-            return Response.noContent().build();
-        }
+    public static UndertowServerExtension createUndertow() {
+        return UndertowServerExtension.create()
+                .jersey(ConjureJerseyFeature.INSTANCE)
+                .jersey(new TestResource());
     }
 
     static class TestResource implements TestService {

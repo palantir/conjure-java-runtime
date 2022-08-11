@@ -27,19 +27,24 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.security.Provider;
 import java.util.Map;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import org.conscrypt.Conscrypt;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public final class SslSocketFactoriesTests {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    public Path tempFolder;
+
+    @BeforeEach
+    void beforeEach(@TempDir Path tempDir) {
+        this.tempFolder = tempDir;
+    }
 
     @Test
     public void testCreateSslSocketFactory_withPemCertificatesByAlias() throws IOException {
@@ -96,7 +101,8 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateTrustStorePemFromDirectory() throws IOException {
-        File certFolder = tempFolder.newFolder();
+        File certFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
 
         Files.copy(
                 TestConstants.CA_DER_CERT_PATH.toFile(),
@@ -119,9 +125,9 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateTrustStorePuppetFromDirectory() throws IOException {
-        File puppetFolder = tempFolder.newFolder();
+        Path puppetFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"));
 
-        File certsFolder = puppetFolder.toPath().resolve("certs").toFile();
+        File certsFolder = puppetFolder.resolve("certs").toFile();
         assertThat(certsFolder.mkdir()).isTrue();
 
         Files.copy(
@@ -135,7 +141,7 @@ public final class SslSocketFactoriesTests {
                 certsFolder.toPath().resolve("client.pem").toFile());
 
         SslConfiguration sslConfig = SslConfiguration.builder()
-                .trustStorePath(puppetFolder.toPath())
+                .trustStorePath(puppetFolder)
                 .trustStoreType(SslConfiguration.StoreType.PUPPET)
                 .build();
 
@@ -145,12 +151,12 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateKeyStorePuppetFromDirectory() throws IOException {
-        File puppetFolder = tempFolder.newFolder();
+        Path puppetFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"));
 
-        File keysFolder = puppetFolder.toPath().resolve("private_keys").toFile();
+        File keysFolder = puppetFolder.resolve("private_keys").toFile();
         assertThat(keysFolder.mkdir()).isTrue();
 
-        File certsFolder = puppetFolder.toPath().resolve("certs").toFile();
+        File certsFolder = puppetFolder.resolve("certs").toFile();
         assertThat(certsFolder.mkdir()).isTrue();
 
         Files.copy(
@@ -162,7 +168,7 @@ public final class SslSocketFactoriesTests {
 
         SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
-                .keyStorePath(puppetFolder.toPath())
+                .keyStorePath(puppetFolder)
                 .keyStorePassword("")
                 .keyStoreType(SslConfiguration.StoreType.PUPPET)
                 .build();

@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public final class JaxRsClientEqualityTest extends TestBase {
 

@@ -18,10 +18,7 @@ package com.palantir.conjure.java.server.jersey;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import com.palantir.undertest.UndertowServerExtension;
 import javax.annotation.Nullable;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -29,67 +26,66 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class StringFormatTest {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(TestServer.class, "src/test/resources/test-server.yml");
-
-    private WebTarget target;
-
-    @Before
-    public void before() {
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
-        JerseyClientBuilder builder = new JerseyClientBuilder();
-        Client client = builder.build();
-        target = client.target(endpointUri);
-    }
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = UndertowServerExtension.create()
+            .jersey(ConjureJerseyFeature.INSTANCE)
+            .jersey(new StringFormatTest.TestResource());
 
     @Test
     public void testTextPlainMediaTypeReturnsPlainStrings() {
-        Response response = target.path("textString").request().get();
-        assertThat(response.readEntity(String.class)).isEmpty();
-        response =
-                target.path("textString").queryParam("value", "val").request().get();
-        assertThat(response.readEntity(String.class)).isEqualTo("val");
+        undertow.get("/textString", response -> {
+            assertThat(response.getCode()).isEqualTo(204);
+        });
+
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/textString")
+                        .addParameter("value", "val")
+                        .build(),
+                response -> {
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("val");
+                });
     }
 
     @Test
     public void testJsonMediaTypeReturnsPlainStrings() {
         // This behaviour is somewhat unexpected since a valid JSON response object would be "\"val\"" rather than "val"
-        Response response = target.path("jsonString").request().get();
-        assertThat(response.readEntity(String.class)).isEmpty();
-        response =
-                target.path("jsonString").queryParam("value", "val").request().get();
-        assertThat(response.readEntity(String.class)).isEqualTo("val");
+        undertow.get("/jsonString", response -> {
+            assertThat(response.getCode()).isEqualTo(204);
+        });
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/jsonString")
+                        .addParameter("value", "val")
+                        .build(),
+                response -> {
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("val");
+                });
     }
 
     @Test
     public void testJsonStringBodyDeserializedAsPlainString() {
         // This behaviour is somewhat unexpected since a valid JSON string is deserialized as a raw string, even
         // though the endpoint consumes application/json
-        Response response = target.path("bodyString").request().post(null);
-        assertThat(response.readEntity(String.class)).isEmpty();
-        response = target.path("bodyString").request().post(Entity.json("\"val\""));
-        assertThat(response.readEntity(String.class)).isEqualTo("\"val\"");
-    }
+        undertow.runRequest(ClassicRequestBuilder.post("/bodyString").build(), response -> {
+            assertThat(EntityUtils.toString(response.getEntity())).isEmpty();
+        });
 
-    public static class TestServer extends Application<Configuration> {
-        @Override
-        public final void run(Configuration _config, final Environment env) throws Exception {
-            env.jersey().register(ConjureJerseyFeature.INSTANCE);
-            env.jersey().register(new TestResource());
-        }
+        undertow.runRequest(
+                ClassicRequestBuilder.post("/bodyString")
+                        .setEntity(new StringEntity("\"val\"", ContentType.APPLICATION_JSON))
+                        .build(),
+                response -> {
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("\"val\"");
+                });
     }
 
     public static final class TestResource implements TestService {

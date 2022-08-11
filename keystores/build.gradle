@@ -14,6 +14,7 @@ dependencies {
     implementation "com.github.ben-manes.caffeine:caffeine"
 
     testImplementation project(":conjure-java-jackson-serialization")
+    testImplementation project(":undertow-testing")
     testImplementation("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"
@@ -23,10 +24,8 @@ dependencies {
     testImplementation "com.squareup.okhttp3:okhttp"
     testImplementation "org.conscrypt:conscrypt-openjdk-uber"
     testImplementation "org.hamcrest:hamcrest-all"
-    testImplementation("io.dropwizard:dropwizard-core") { exclude module: 'metrics-core' }
-    testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
-    testImplementation "io.dropwizard.metrics:metrics-core"
-    testImplementation "junit:junit"
+    testImplementation "org.assertj:assertj-core"
+    testImplementation "org.junit.jupiter:junit-jupiter"
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'

@@ -20,15 +20,15 @@ dependencies {
     runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation"
 
     testImplementation project(':conjure-java-jackson-serialization')
+    testImplementation project(':undertow-testing')
     testImplementation 'org.glassfish.jersey.media:jersey-media-json-jackson'
     testImplementation "com.fasterxml.jackson.core:jackson-databind"
     testImplementation "com.palantir.tracing:tracing"
     testImplementation "com.palantir.conjure.java.api:ssl-config"
-    testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
-    testImplementation "io.dropwizard.metrics:metrics-core"
-    testImplementation "junit:junit"
+    testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.mockito:mockito-core"
+    testImplementation "org.assertj:assertj-core"
     implementation 'com.palantir.safe-logging:logger'
 }
 

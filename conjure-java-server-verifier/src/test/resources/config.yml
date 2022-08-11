@@ -1,7 +1,0 @@
-server:
-  applicationContextPath: /test
-  applicationConnectors:
-  - type: http
-    port: 12345
-  adminConnectors: []
-  rootPath: /api/*

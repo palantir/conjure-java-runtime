@@ -22,18 +22,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
-import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
 import com.palantir.logsafe.Preconditions;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import com.palantir.undertest.UndertowServerExtension;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -44,172 +36,182 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.glassfish.jersey.client.JerseyClientBuilder;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.support.ClassicRequestBuilder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class Java8OptionalTest {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(OptionalTestServer.class, "src/test/resources/test-server.yml");
-
-    private WebTarget target;
-
-    @Before
-    public void before() {
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
-        JerseyClientBuilder builder = new JerseyClientBuilder();
-        Client client = builder.build();
-        target = client.target(endpointUri);
-    }
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = UndertowServerExtension.create()
+            .jersey(ConjureJerseyFeature.INSTANCE)
+            .jersey(new OptionalTestResource());
 
     @Test
     public void testOptionalPresent() throws SecurityException {
-        Response response =
-                target.path("optional").queryParam("value", "val").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("valval");
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/optional")
+                        .addParameter("value", "val")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("valval");
+                });
     }
 
     @Test
     public void testOptionalPresentWithAdditionalAccepts() throws IOException, SecurityException {
-        HttpURLConnection conn = (HttpURLConnection)
-                new URL("http://localhost:" + APP.getLocalPort() + "/optional?value=val").openConnection();
-        conn.addRequestProperty(HttpHeaders.ACCEPT, "application/x-jackson-smile, application/json, application/cbor");
-        int statusCode = conn.getResponseCode();
-        assertThat(statusCode).isEqualTo(Status.OK.getStatusCode());
-        assertThat(conn.getHeaderField("Content-Type")).startsWith("application/json");
-        try (InputStream responseBody = conn.getInputStream()) {
-            String stringValue = new String(ByteStreams.toByteArray(responseBody), StandardCharsets.UTF_8);
-            assertThat(stringValue).isEqualTo("valval");
-        }
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/optional")
+                        .addParameter("value", "val")
+                        .addHeader(
+                                HttpHeaders.ACCEPT, "application/x-jackson-smile, application/json, application/cbor")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(response.getFirstHeader("Content-Type").getValue())
+                            .startsWith("application/json");
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("valval");
+                });
     }
 
     @Test
     public void testOptionalComplexPresentWithAdditionalAccepts() throws IOException, SecurityException {
-        HttpURLConnection conn = (HttpURLConnection)
-                new URL("http://localhost:" + APP.getLocalPort() + "/optional/complex?value=val").openConnection();
-        conn.addRequestProperty(HttpHeaders.ACCEPT, "application/x-jackson-smile, application/json, application/cbor");
-        int statusCode = conn.getResponseCode();
-        assertThat(statusCode).isEqualTo(Status.OK.getStatusCode());
-        assertThat(conn.getHeaderField("Content-Type")).startsWith("application/json");
-        try (InputStream responseBody = conn.getInputStream()) {
-            String stringValue = new String(ByteStreams.toByteArray(responseBody), StandardCharsets.UTF_8);
-            assertThat(stringValue).isEqualTo("{\"value\":\"val\"}");
-        }
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/optional/complex")
+                        .addParameter("value", "val")
+                        .addHeader(
+                                HttpHeaders.ACCEPT, "application/x-jackson-smile, application/json, application/cbor")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(response.getFirstHeader("Content-Type").getValue())
+                            .startsWith("application/json");
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("{\"value\":\"val\"}");
+                });
     }
 
     @Test
     public void testOptionalAbsent() {
-        Response response = target.path("optional").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.NO_CONTENT.getStatusCode());
+        undertow.get("/optional", response -> {
+            assertThat(response.getCode()).isEqualTo(Status.NO_CONTENT.getStatusCode());
+        });
     }
 
     @Test
     public void testQueryParam_optionalPresent() throws NoSuchMethodException, SecurityException {
-        Response response = target.path("optional/string")
-                .queryParam("value", "val")
-                .request()
-                .get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("val");
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/optional/string")
+                        .addParameter("value", "val")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("val");
+                });
     }
 
     @Test
     public void testQueryParam_optionalEmpty() {
-        Response response = target.path("optional/string").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("default");
+        undertow.get("/optional/string", response -> {
+            assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+            assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("default");
+        });
     }
 
     @Test
     public void testQueryParam_optionalIntPresent() throws NoSuchMethodException, SecurityException {
-        Response response =
-                target.path("optional/int").queryParam("value", "10").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("10");
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/optional/int")
+                        .addParameter("value", "10")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("10");
+                });
     }
 
     @Test
     public void testQueryParam_optionalIntEmpty() {
-        Response response = target.path("optional/int").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("0");
+        undertow.get("/optional/int", response -> {
+            assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+            assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("0");
+        });
     }
 
     @Test
     public void testQueryParam_optionalIntInvalid() {
-        Response response =
-                target.path("optional/int").queryParam("value", "foo").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/optional/int")
+                        .addParameter("value", "foo")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
+                });
     }
 
     @Test
     public void testQueryParam_optionalDoublePresent() throws NoSuchMethodException, SecurityException {
-        Response response = target.path("optional/double")
-                .queryParam("value", "1.5")
-                .request()
-                .get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("1.5");
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/optional/double")
+                        .addParameter("value", "1.5")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("1.5");
+                });
     }
 
     @Test
     public void testQueryParam_optionalDoubleEmpty() {
-        Response response = target.path("optional/double").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("0.0");
+        undertow.get("/optional/double", response -> {
+            assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+            assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("0.0");
+        });
     }
 
     @Test
     public void testQueryParam_optionalDoubleInvalid() {
-        Response response = target.path("optional/double")
-                .queryParam("value", "foo")
-                .request()
-                .get();
-        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/optional/double")
+                        .addParameter("value", "foo")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
+                });
     }
 
     @Test
     public void testQueryParam_optionalLongPresent() throws NoSuchMethodException, SecurityException {
-        Response response = target.path("optional/long")
-                .queryParam("value", "100")
-                .request()
-                .get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("100");
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/optional/long")
+                        .addParameter("value", "100")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+                    assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("100");
+                });
     }
 
     @Test
     public void testQueryParam_optionalLongEmpty() {
-        Response response = target.path("optional/long").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.OK.getStatusCode());
-        assertThat(response.readEntity(String.class)).isEqualTo("0");
+        undertow.get("/optional/long", response -> {
+            assertThat(response.getCode()).isEqualTo(Status.OK.getStatusCode());
+            assertThat(EntityUtils.toString(response.getEntity())).isEqualTo("0");
+        });
     }
 
     @Test
     public void testQueryParam_optionalLongInvalid() {
-        Response response = target.path("optional/long")
-                .queryParam("value", "foo")
-                .request()
-                .get();
-        assertThat(response.getStatus()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
-    }
-
-    public static class OptionalTestServer extends Application<Configuration> {
-        @Override
-        public final void run(Configuration _config, final Environment env) throws Exception {
-            env.jersey().register(ConjureJerseyFeature.INSTANCE);
-            env.jersey().register(new EmptyOptionalTo204ExceptionMapper());
-            env.jersey().register(new OptionalTestResource());
-        }
+        undertow.runRequest(
+                ClassicRequestBuilder.get("/optional/long")
+                        .addParameter("value", "foo")
+                        .build(),
+                response -> {
+                    assertThat(response.getCode()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
+                });
     }
 
     public static final class OptionalTestResource implements OptionalTestService {

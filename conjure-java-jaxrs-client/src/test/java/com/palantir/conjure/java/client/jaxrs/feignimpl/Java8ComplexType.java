@@ -65,7 +65,7 @@ public final class Java8ComplexType {
         if (string != null ? !string.equals(that.string) : that.string != null) {
             return false;
         }
-        return path != null ? path.equals(that.path) : that.path == null;
+        return path != null ? path.getFileName().equals(that.path.getFileName()) : that.path == null;
     }
 
     @Override
@@ -74,5 +74,10 @@ public final class Java8ComplexType {
         result = 31 * result + (string != null ? string.hashCode() : 0);
         result = 31 * result + (path != null ? path.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Java8ComplexType{" + "nested=" + nested + ", string=" + string + ", path=" + path + '}';
     }
 }

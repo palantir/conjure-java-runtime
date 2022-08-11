@@ -24,23 +24,27 @@ import com.palantir.conjure.java.api.errors.ErrorType;
 import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
+import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper.BeforeAndAfter;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class JaxRsClientStackTraceTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server1 = new MockWebServer();
+    @RegisterExtension
+    public final BeforeAndAfter<MockWebServer> server1Resource = ExtensionsWrapper.toExtension(new MockWebServer());
 
     private TestService proxy;
 
-    @Before
+    MockWebServer server1;
+
+    @BeforeEach
     public void before() throws Exception {
+        this.server1 = server1Resource.getResource();
         proxy = JaxRsClient.create(
                 TestService.class,
                 AGENT,

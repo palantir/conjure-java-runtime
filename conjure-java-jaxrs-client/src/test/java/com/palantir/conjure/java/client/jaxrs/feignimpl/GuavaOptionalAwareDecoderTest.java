@@ -24,29 +24,22 @@ import com.palantir.conjure.java.api.errors.RemoteException;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import com.palantir.undertest.UndertowServerExtension;
 import java.nio.file.Paths;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class GuavaOptionalAwareDecoderTest extends TestBase {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = GuavaTestServer.createUndertow();
 
     private GuavaTestServer.TestService service;
 
-    @Before
+    @BeforeEach
     public void before() {
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
+        String endpointUri = "http://localhost:" + undertow.getLocalPort();
         service = JaxRsClient.create(
                 GuavaTestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }
@@ -122,9 +115,9 @@ public final class GuavaOptionalAwareDecoderTest extends TestBase {
                 com.google.common.base.Optional.of(new GuavaOptionalComplexType(
                         com.google.common.base.Optional.absent(),
                         com.google.common.base.Optional.absent(),
-                        Paths.get("bar"))),
+                        Paths.get("bar").getFileName())),
                 com.google.common.base.Optional.of("baz"),
-                Paths.get("foo"));
+                Paths.get("foo").getFileName());
         // Hint: set breakpoint in Feign's SynchronousMethodHandler#executeAndDecode to inspect serialized parameter.
         assertThat(service.getGuavaComplexType(value)).isEqualTo(value);
     }

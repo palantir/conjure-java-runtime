@@ -33,10 +33,7 @@ import com.palantir.conjure.java.api.errors.SerializableError;
 import com.palantir.conjure.java.api.errors.ServiceException;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
-import io.dropwizard.setup.Environment;
-import io.dropwizard.testing.junit.DropwizardAppRule;
+import com.palantir.undertest.UndertowServerExtension;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -48,22 +45,22 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.glassfish.jersey.client.JerseyClientBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.glassfish.jersey.jackson.JacksonFeature;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public final class ExceptionMappingTest {
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(ExceptionMappersTestServer.class, "src/test/resources/test-server.yml");
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = UndertowServerExtension.create()
+            .jersey(ConjureJerseyFeature.INSTANCE)
+            .jersey(JacksonFeature.withExceptionMappers())
+            .jersey(new ExceptionMappingTest.ExceptionTestResource());
 
     private static final Response.Status SERVER_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
     private static final Response.Status WEB_EXCEPTION_STATUS = Status.INTERNAL_SERVER_ERROR;
@@ -72,179 +69,171 @@ public final class ExceptionMappingTest {
     private static final int PERMISSION_DENIED_STATUS_CODE = 403;
     private static final JsonMapper MAPPER = ObjectMappers.newServerJsonMapper();
 
-    private WebTarget target;
-
-    @Before
-    public void before() {
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
-        JerseyClientBuilder builder = new JerseyClientBuilder();
-        Client client = builder.build();
-        target = client.target(endpointUri);
-    }
-
     /**
      * These tests confirm that {@link WebApplicationException}s are handled by the
      * {@link WebApplicationExceptionMapper} rather than the {@link RuntimeExceptionMapper}
      */
     @Test
     public void testForbiddenException() {
-        Response response = target.path("throw-forbidden-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.FORBIDDEN.getStatusCode());
+        undertow.get("/throw-forbidden-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(Status.FORBIDDEN.getStatusCode());
+        });
     }
 
     @Test
     public void testNotFoundException() {
-        Response response = target.path("throw-not-found-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(Status.NOT_FOUND.getStatusCode());
+        undertow.get("/throw-not-found-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(Status.NOT_FOUND.getStatusCode());
+        });
     }
 
     @Test
     public void testServerErrorException() {
-        Response response =
-                target.path("throw-server-error-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(SERVER_EXCEPTION_STATUS.getStatusCode());
+        undertow.get("/throw-server-error-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(SERVER_EXCEPTION_STATUS.getStatusCode());
+        });
     }
 
     @Test
     public void testWebApplicationException() {
-        Response response =
-                target.path("throw-web-application-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(WEB_EXCEPTION_STATUS.getStatusCode());
+        undertow.get("/throw-web-application-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(WEB_EXCEPTION_STATUS.getStatusCode());
+        });
     }
 
     @Test
     public void testRemoteException() {
-        Response response = target.path("throw-remote-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
+        undertow.get("/throw-remote-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(ErrorType.INTERNAL.httpErrorCode());
 
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
-        assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
-        assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
-        assertThat(error.parameters()).isEmpty();
+            SerializableError error = readError(response);
+            assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
+            assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
+            assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
+            assertThat(error.parameters()).isEmpty();
+        });
     }
 
     @Test
     public void testUnauthorizedException() {
-        Response response =
-                target.path("throw-unauthorized-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(ErrorType.UNAUTHORIZED.httpErrorCode());
+        undertow.get("/throw-unauthorized-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(ErrorType.UNAUTHORIZED.httpErrorCode());
 
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
-        assertThat(error.errorCode()).isEqualTo("errorCode");
-        assertThat(error.errorName()).isEqualTo("errorName");
-        assertThat(error.parameters()).isEmpty();
+            SerializableError error = readError(response);
+            assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
+            assertThat(error.errorCode()).isEqualTo("errorCode");
+            assertThat(error.errorName()).isEqualTo("errorName");
+            assertThat(error.parameters()).isEmpty();
+        });
     }
 
     @Test
     public void testPermissionDeniedException() {
-        Response response =
-                target.path("throw-permission-denied-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(ErrorType.PERMISSION_DENIED.httpErrorCode());
+        undertow.get("/throw-permission-denied-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(ErrorType.PERMISSION_DENIED.httpErrorCode());
 
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
-        assertThat(error.errorCode()).isEqualTo("errorCode");
-        assertThat(error.errorName()).isEqualTo("errorName");
-        assertThat(error.parameters()).isEmpty();
+            SerializableError error = readError(response);
+            assertThat(error.errorInstanceId()).isEqualTo("errorInstanceId");
+            assertThat(error.errorCode()).isEqualTo("errorCode");
+            assertThat(error.errorName()).isEqualTo("errorName");
+            assertThat(error.parameters()).isEmpty();
+        });
     }
 
     @Test
     public void testServiceException() {
-        Response response = target.path("throw-service-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(ErrorType.INVALID_ARGUMENT.httpErrorCode());
+        undertow.get("/throw-service-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(ErrorType.INVALID_ARGUMENT.httpErrorCode());
 
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode())
-                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
-        assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
-        assertThat(error.parameters()).containsExactlyInAnyOrderEntriesOf(ImmutableMap.of("arg", "value"));
+            SerializableError error = readError(response);
+            assertThat(error.errorCode())
+                    .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+            assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
+            assertThat(error.parameters()).containsExactlyInAnyOrderEntriesOf(ImmutableMap.of("arg", "value"));
+        });
     }
 
     @Test
     public void testQosException() {
-        Response response =
-                target.path("throw-qos-retry-foo-exception").request().get();
-
-        assertThat(response.getStatus()).isEqualTo(308);
-        assertThat(response.getHeaderString("Location")).isEqualTo("http://foo");
+        undertow.get("/throw-qos-retry-foo-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(308);
+            assertThat(response.getFirstHeader("Location").getValue()).isEqualTo("http://foo");
+        });
     }
 
     @Test
+    @Disabled("These were historically mapped by Dropwizard, but aren't from normal web services")
     public void testAssertionErrorIsJsonException() {
-        Response response = target.path("throw-assertion-error").request().get();
-        assertThat(response.getStatus()).isEqualTo(SERVER_EXCEPTION_STATUS.getStatusCode());
+        undertow.get("/throw-assertion-error", response -> {
+            assertThat(response.getCode()).isEqualTo(SERVER_EXCEPTION_STATUS.getStatusCode());
 
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
-        assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
+            SerializableError error = readError(response);
+            assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
+            assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
+        });
     }
 
     @Test
     public void testInvalidDefinitionExceptionIsJsonException() {
-        Response response =
-                target.path("throw-invalid-definition-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(500);
+        undertow.get("/throw-invalid-definition-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(500);
 
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
-        assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
+            SerializableError error = readError(response);
+            assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
+            assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
+        });
     }
 
     @Test
     public void testJsonGenerationExceptionIsJsonException() {
-        Response response =
-                target.path("throw-json-generation-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(500);
+        undertow.get("/throw-json-generation-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(500);
 
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
-        assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
+            SerializableError error = readError(response);
+            assertThat(error.errorCode()).isEqualTo(ErrorType.INTERNAL.code().toString());
+            assertThat(error.errorName()).isEqualTo(ErrorType.INTERNAL.name());
+        });
     }
 
     @Test
     public void testJsonMappingExceptionIsJsonException() {
-        Response response =
-                target.path("throw-json-mapping-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(400);
+        undertow.get("/throw-json-mapping-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(400);
 
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode())
-                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
-        assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
+            SerializableError error = readError(response);
+            assertThat(error.errorCode())
+                    .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+            assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
+        });
     }
 
     @Test
     public void testJsonProcessingExceptionIsJsonException() {
-        Response response =
-                target.path("throw-json-processing-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(400);
+        undertow.get("/throw-json-processing-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(400);
 
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode())
-                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
-        assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
+            SerializableError error = readError(response);
+            assertThat(error.errorCode())
+                    .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+            assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
+        });
     }
 
     @Test
     public void testJsonParseExceptionIsJsonException() {
-        Response response = target.path("throw-json-parse-exception").request().get();
-        assertThat(response.getStatus()).isEqualTo(400);
+        undertow.get("/throw-json-parse-exception", response -> {
+            assertThat(response.getCode()).isEqualTo(400);
 
-        SerializableError error = response.readEntity(SerializableError.class);
-        assertThat(error.errorCode())
-                .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
-        assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
+            SerializableError error = readError(response);
+            assertThat(error.errorCode())
+                    .isEqualTo(ErrorType.INVALID_ARGUMENT.code().toString());
+            assertThat(error.errorName()).isEqualTo(ErrorType.INVALID_ARGUMENT.name());
+        });
     }
 
-    public static class ExceptionMappersTestServer extends Application<Configuration> {
-        @Override
-        public final void run(Configuration _config, final Environment env) {
-            env.jersey().register(JacksonFeature.class);
-            env.jersey().register(ConjureJerseyFeature.builder().build());
-            env.jersey().register(new ExceptionTestResource());
-        }
+    private static SerializableError readError(CloseableHttpResponse response) throws IOException {
+        return ObjectMappers.newClientObjectMapper()
+                .readValue(response.getEntity().getContent(), SerializableError.class);
     }
 
     public static final class ExceptionTestResource implements ExceptionTestService {

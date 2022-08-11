@@ -18,56 +18,49 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper.BeforeAndAfter;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.ArgumentsProvider;
+import org.junit.jupiter.params.provider.ArgumentsSource;
 
-@RunWith(Parameterized.class)
 public final class JaxRsClientCollectionHandlingTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    @RegisterExtension
+    public final BeforeAndAfter<MockWebServer> serverResource = ExtensionsWrapper.toExtension(new MockWebServer());
+
+    MockWebServer server;
 
     private Service proxy;
 
-    @Parameters(name = "{index}: code {0} body: \"{1}\"")
-    public static Collection<Object[]> responses() {
-        return Arrays.asList(new Object[][] {
-            {200, "null"},
-            {200, ""},
-            {204, ""}
-        });
+    static class Args implements ArgumentsProvider {
+
+        @Override
+        public Stream<? extends Arguments> provideArguments(ExtensionContext _context) {
+            return Stream.of(Arguments.of(200, "null"), Arguments.of(200, ""), Arguments.of(204, ""));
+        }
     }
 
-    @Parameter
-    public int code;
-
-    @Parameter(1)
-    public String body;
-
-    @Before
+    @BeforeEach
     public void before() {
+        this.server = serverResource.getResource();
         proxy = JaxRsClient.create(
                 Service.class,
                 AGENT,
                 new HostMetricsRegistry(),
                 createTestConfig("http://localhost:" + server.getPort()));
-        MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
-        server.enqueue(mockResponse);
     }
 
     @Path("/")
@@ -85,18 +78,27 @@ public final class JaxRsClientCollectionHandlingTest extends TestBase {
         Map<String, String> getMap();
     }
 
-    @Test
-    public void testList() {
+    @ParameterizedTest
+    @ArgumentsSource(Args.class)
+    public void testList(int code, String body) {
+        MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
+        server.enqueue(mockResponse);
         assertThat(proxy.getList()).isEmpty();
     }
 
-    @Test
-    public void testSet() {
+    @ParameterizedTest
+    @ArgumentsSource(Args.class)
+    public void testSet(int code, String body) {
+        MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
+        server.enqueue(mockResponse);
         assertThat(proxy.getSet()).isEmpty();
     }
 
-    @Test
-    public void testMap() {
+    @ParameterizedTest
+    @ArgumentsSource(Args.class)
+    public void testMap(int code, String body) {
+        MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
+        server.enqueue(mockResponse);
         assertThat(proxy.getMap()).isEmpty();
     }
 }

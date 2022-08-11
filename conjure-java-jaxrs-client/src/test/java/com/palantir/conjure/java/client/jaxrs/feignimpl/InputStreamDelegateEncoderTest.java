@@ -22,21 +22,20 @@ import static org.mockito.Mockito.verify;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import com.palantir.undertest.UndertowServerExtension;
 import feign.RequestTemplate;
 import feign.codec.Encoder;
-import io.dropwizard.Configuration;
-import io.dropwizard.testing.junit.DropwizardAppRule;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public final class InputStreamDelegateEncoderTest extends TestBase {
     @Mock
     private Encoder delegate;
@@ -45,17 +44,16 @@ public final class InputStreamDelegateEncoderTest extends TestBase {
 
     private Encoder inputStreamDelegateEncoder;
 
-    @ClassRule
-    public static final DropwizardAppRule<Configuration> APP =
-            new DropwizardAppRule<>(GuavaTestServer.class, "src/test/resources/test-server.yml");
+    @RegisterExtension
+    public static final UndertowServerExtension undertow = GuavaTestServer.createUndertow();
 
     private GuavaTestServer.TestService service;
 
-    @Before
+    @BeforeEach
     public void before() {
         inputStreamDelegateEncoder = new InputStreamDelegateEncoder(delegate);
 
-        String endpointUri = "http://localhost:" + APP.getLocalPort();
+        String endpointUri = "http://localhost:" + undertow.getLocalPort();
         service = JaxRsClient.create(
                 GuavaTestServer.TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(endpointUri));
     }

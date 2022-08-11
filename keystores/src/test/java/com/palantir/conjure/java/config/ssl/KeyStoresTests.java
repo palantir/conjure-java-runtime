@@ -42,14 +42,18 @@ import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public final class KeyStoresTests {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    public Path tempFolder;
+
+    @BeforeEach
+    void beforeEach(@TempDir Path tempDir) {
+        this.tempFolder = tempDir;
+    }
 
     @Test
     public void testCreateTrustStoreFromCertificateFile() throws GeneralSecurityException {
@@ -79,7 +83,8 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateTrustStoreFromCertificateDirectory() throws GeneralSecurityException, IOException {
-        File certFolder = tempFolder.newFolder();
+        File certFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
         Files.copy(
                 TestConstants.CA_DER_CERT_PATH.toFile(),
                 certFolder.toPath().resolve("ca.der").toFile());
@@ -99,7 +104,8 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateTrustStoreFromEmptyDirectory() throws GeneralSecurityException, IOException {
-        File certFolder = tempFolder.newFolder();
+        File certFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
         KeyStore trustStore = KeyStores.createTrustStoreFromCertificates(certFolder.toPath());
 
         assertThat(trustStore.size()).isZero();
@@ -107,7 +113,8 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateTrustStoreFromMultiCertificateFile() throws IOException, KeyStoreException {
-        File certFolder = tempFolder.newFolder();
+        File certFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
         Path caCer = certFolder.toPath().resolve("ca.cer");
         java.nio.file.Files.copy(TestConstants.SERVER_CERT_PEM_PATH, caCer);
         java.nio.file.Files.write(
@@ -119,7 +126,8 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateTrustStoreFromDirectoryIgnoresHiddenFiles() throws IOException, GeneralSecurityException {
-        File certFolder = tempFolder.newFolder();
+        File certFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
         Files.copy(
                 TestConstants.CA_DER_CERT_PATH.toFile(),
                 certFolder.toPath().resolve(".hidden_file").toFile());
@@ -130,7 +138,8 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateTrustStoreFromDirectoryFailsWithNonCertFiles() throws IOException {
-        File certFolder = tempFolder.newFolder();
+        File certFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
         File tempCertFile = certFolder.toPath().resolve("crl.pkcs1").toFile();
         Files.copy(TestConstants.COMBINED_CRL_PATH.toFile(), tempCertFile);
 
@@ -143,7 +152,8 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateTrustStoreFromDirectoryFailsWithDirectories() throws IOException {
-        File certFolder = tempFolder.newFolder();
+        File certFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
         File tempDirFile = certFolder.toPath().resolve("childDir").toFile();
         boolean childDir = tempDirFile.mkdir();
         assertThat(childDir).isTrue();
@@ -196,7 +206,8 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateKeyStoreFromKeyDirectory() throws GeneralSecurityException, IOException {
-        File keyFolder = tempFolder.newFolder();
+        File keyFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
         Files.copy(
                 TestConstants.SERVER_KEY_CERT_COMBINED_PEM_PATH.toFile(),
                 keyFolder.toPath().resolve("server.pkcs1").toFile());
@@ -214,7 +225,8 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateKeyStoreFromEmptyDirectory() throws GeneralSecurityException, IOException {
-        File keyFolder = tempFolder.newFolder();
+        File keyFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
         KeyStore trustStore = KeyStores.createKeyStoreFromCombinedPems(keyFolder.toPath());
 
         assertThat(trustStore.size()).isZero();
@@ -222,7 +234,8 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateKeyStoreFromDirectoryFailsWithNonKeyFiles() throws IOException, GeneralSecurityException {
-        File keyFolder = tempFolder.newFolder();
+        File keyFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
         File tempCertFile = keyFolder.toPath().resolve("server.cer").toFile();
         Files.copy(TestConstants.SERVER_CERT_PEM_PATH.toFile(), tempCertFile);
 
@@ -235,8 +248,10 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateKeyStoreFromPemDirectories() throws GeneralSecurityException, IOException {
-        File keyFolder = tempFolder.newFolder();
-        File certFolder = tempFolder.newFolder();
+        File keyFolder =
+                java.nio.file.Files.createDirectory(tempFolder.resolve("key")).toFile();
+        File certFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
         Files.copy(
                 TestConstants.SERVER_KEY_PEM_PATH.toFile(),
                 keyFolder.toPath().resolve("server.key").toFile());
@@ -254,8 +269,10 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateKeyStoreFromPemDirectoriesFailsIfCertMissing() throws IOException {
-        File keyFolder = tempFolder.newFolder();
-        File certFolder = tempFolder.newFolder();
+        File keyFolder =
+                java.nio.file.Files.createDirectory(tempFolder.resolve("key")).toFile();
+        File certFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
+                .toFile();
         Files.copy(
                 TestConstants.SERVER_KEY_PEM_PATH.toFile(),
                 keyFolder.toPath().resolve("server.key").toFile());
@@ -270,8 +287,9 @@ public final class KeyStoresTests {
 
     @Test
     public void testCreateKeyStoreFromPemDirectoriesFailsIfArgIsNotDirectory() throws IOException {
-        File folder = tempFolder.newFolder();
-        File file = tempFolder.newFile();
+        File folder = java.nio.file.Files.createDirectory(tempFolder.resolve("folder"))
+                .toFile();
+        File file = java.nio.file.Files.createFile(tempFolder.resolve("file")).toFile();
 
         assertThatThrownBy(() ->
                         KeyStores.createKeyStoreFromPemDirectories(file.toPath(), ".key", folder.toPath(), ".cer"))

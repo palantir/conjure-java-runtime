@@ -28,11 +28,12 @@ dependencies {
     implementation "com.netflix.feign:feign-jackson"
     testImplementation project(":conjure-java-jersey-server")
     testImplementation project(':keystores')
+    testImplementation project(':undertow-testing')
     testImplementation "com.netflix.feign:feign-jackson"
     testImplementation "com.squareup.okhttp3:mockwebserver"
-    testImplementation("io.dropwizard:dropwizard-testing") { exclude module: 'metrics-core' }
-    testImplementation "junit:junit"
+    testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation "org.mockito:mockito-core"
+    testImplementation "org.mockito:mockito-junit-jupiter"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
 }
 
