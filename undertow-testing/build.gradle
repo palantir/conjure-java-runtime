@@ -20,4 +20,10 @@ dependencies {
     implementation 'org.glassfish.jersey.core:jersey-server'
     implementation 'org.glassfish.jersey.containers:jersey-container-servlet-core'
     implementation 'org.glassfish.jersey.media:jersey-media-json-jackson'
+
+    modules {
+        module('jakarta.annotation:jakarta.annotation-api') {
+            replacedBy('javax.annotation:javax.annotation-api', 'We prefer the javax version')
+        }
+    }
 }
