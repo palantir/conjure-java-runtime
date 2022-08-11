@@ -9,9 +9,9 @@ dependencies {
     api 'io.undertow:undertow-core'
     api 'io.undertow:undertow-servlet'
     api 'org.apache.httpcomponents.client5:httpclient5'
+    implementation project(':conjure-java-jackson-serialization')
     implementation 'com.palantir.safe-logging:preconditions'
     implementation 'org.glassfish.jersey.core:jersey-server'
     implementation 'org.glassfish.jersey.containers:jersey-container-servlet-core'
     implementation 'org.glassfish.jersey.media:jersey-media-json-jackson'
-
 }
