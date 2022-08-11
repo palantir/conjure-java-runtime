@@ -16,8 +16,10 @@
 
 package com.palantir.undertest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.MustBeClosed;
+import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
@@ -41,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
+import javax.ws.rs.ext.ContextResolver;
+import javax.ws.rs.ext.Provider;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -125,7 +129,8 @@ public final class UndertowServerExtension implements BeforeAllCallback, AfterAl
                     .property(CommonProperties.FEATURE_AUTO_DISCOVERY_DISABLE, true)
                     .property(ServerProperties.WADL_FEATURE_DISABLE, true)
                     .register(new SimpleExceptionMapper())
-                    .register(new JacksonFeature());
+                    .register(JacksonFeature.withoutExceptionMappers())
+                    .register(new ObjectMapperProvider(ObjectMappers.newServerObjectMapper()));
             jerseyObjects.forEach(jerseyConfig::register);
 
             servletBuilder.addServlet(Servlets.servlet(
@@ -150,6 +155,21 @@ public final class UndertowServerExtension implements BeforeAllCallback, AfterAl
         server.start();
 
         httpClient = HttpClients.custom().disableRedirectHandling().build();
+    }
+
+    @Provider
+    public static final class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
+
+        private final ObjectMapper mapper;
+
+        public ObjectMapperProvider(ObjectMapper mapper) {
+            this.mapper = mapper;
+        }
+
+        @Override
+        public ObjectMapper getContext(Class<?> _type) {
+            return mapper;
+        }
     }
 
     @Override
