@@ -19,7 +19,6 @@ dependencies {
     implementation 'com.palantir.tritium:tritium-metrics'
     implementation 'com.squareup.okhttp3:logging-interceptor'
     implementation 'io.dropwizard.metrics:metrics-core'
-    implementation 'jakarta.ws.rs:jakarta.ws.rs-api'
 
     testImplementation project(":conjure-java-jersey-server")
     testImplementation project(":keystores")

@@ -14,7 +14,7 @@ dependencies {
     implementation "com.github.ben-manes.caffeine:caffeine"
 
     testImplementation project(":conjure-java-jackson-serialization")
-    testImplementation project(":undertow-testing")
+    testImplementation project(":undertow-jakarta-testing")
     testImplementation("com.netflix.feign:feign-jaxrs") {
         // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
         exclude group: "javax.ws.rs", module: "jsr311-api"

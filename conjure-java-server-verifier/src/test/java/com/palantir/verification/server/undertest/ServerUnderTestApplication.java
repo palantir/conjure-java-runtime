@@ -24,9 +24,9 @@ import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
 import com.palantir.conjure.verification.client.AutoDeserializeService;
 import com.palantir.conjure.verification.types.BinaryAliasExample;
 import com.palantir.undertest.UndertowServerExtension;
+import jakarta.ws.rs.core.StreamingOutput;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import javax.ws.rs.core.StreamingOutput;
 
 public final class ServerUnderTestApplication {
     private ServerUnderTestApplication() {}

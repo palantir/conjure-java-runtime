@@ -32,7 +32,6 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Optional;
-import javax.ws.rs.core.MediaType;
 import okhttp3.Response;
 
 enum RemoteExceptionResponseHandler implements ResponseHandler<RemoteException> {
@@ -51,7 +50,7 @@ enum RemoteExceptionResponseHandler implements ResponseHandler<RemoteException> 
         }
 
         Collection<String> contentTypes = response.headers("Content-Type");
-        if (contentTypes.contains(MediaType.APPLICATION_JSON)
+        if (contentTypes.contains("application/json")
                 && !response.request().method().equals("HEAD")) {
             final String body;
             try {

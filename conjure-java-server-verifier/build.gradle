@@ -6,11 +6,11 @@ dependencies {
     verifier "com.palantir.conjure.verification:verification-client::${osClassifier}@tgz"
 
     testImplementation project(':conjure-java-jaxrs-client')
-    testImplementation project(':conjure-java-jersey-server')
+    testImplementation project(':conjure-java-jersey-jakarta-server')
     testImplementation project(':keystores')
     testImplementation project(':conjure-java-jackson-serialization')
     testImplementation project(':okhttp-clients')
-    testImplementation project(':undertow-testing')
+    testImplementation project(':undertow-jakarta-testing')
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.assertj:assertj-core'

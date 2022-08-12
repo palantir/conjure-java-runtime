@@ -22,13 +22,17 @@ dependencies {
 
     implementation 'com.palantir.tritium:tritium-registry'
 
+    // include both the old and the new
+    implementation 'javax.ws.rs:javax.ws.rs-api'
+    implementation 'jakarta.ws.rs:jakarta.ws.rs-api'
+
     implementation project(":conjure-java-jackson-serialization")
     implementation "com.google.guava:guava"
     implementation "com.github.ben-manes.caffeine:caffeine"
     implementation "com.netflix.feign:feign-jackson"
-    testImplementation project(":conjure-java-jersey-server")
+    testImplementation project(":conjure-java-jersey-jakarta-server")
     testImplementation project(':keystores')
-    testImplementation project(':undertow-testing')
+    testImplementation project(':undertow-jakarta-testing')
     testImplementation "com.netflix.feign:feign-jackson"
     testImplementation "com.squareup.okhttp3:mockwebserver"
     testImplementation "org.junit.jupiter:junit-jupiter"
