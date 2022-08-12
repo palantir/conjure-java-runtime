@@ -45,7 +45,7 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
-import javax.annotation.Generated;
+import javax.annotation.processing.Generated;
 import org.junit.jupiter.api.Test;
 
 public class EmptyContainerDecoderTest {

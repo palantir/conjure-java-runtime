@@ -14,7 +14,7 @@ dependencies {
     implementation "com.netflix.feign:feign-core"
     implementation "com.palantir.safe-logging:safe-logging"
     implementation 'com.palantir.tokens:auth-tokens'
-    implementation "com.palantir.tracing:tracing-jersey"
+    implementation "com.palantir.tracing:tracing-jersey-jakarta"
     implementation project(':conjure-java-jackson-serialization')
 
     runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation"

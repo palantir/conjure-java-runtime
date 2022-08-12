@@ -20,7 +20,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:logging-interceptor'
     implementation 'io.dropwizard.metrics:metrics-core'
 
-    testImplementation project(":conjure-java-jersey-server")
+    testImplementation project(":conjure-java-jersey-jakarta-server")
     testImplementation project(":keystores")
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation "com.squareup.okhttp3:mockwebserver"
