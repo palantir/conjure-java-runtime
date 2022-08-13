@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import com.google.common.base.Function;
 import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotations;
 import feign.Contract;
 import feign.MethodMetadata;
@@ -65,6 +64,4 @@ public final class GuavaOptionalAwareContract extends AbstractDelegatingContract
             }
         }
     }
-
-    private static final Function<Annotation, Class<?>> EXTRACT_CLASS = Annotation::annotationType;
 }
