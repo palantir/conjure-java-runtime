@@ -17,6 +17,7 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
+import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotations;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
@@ -36,57 +37,9 @@ import javax.annotation.Nullable;
  */
 public final class CompatibleJaxRsContract extends Contract.BaseContract {
 
-    @Nullable
-    private static final Class<? extends Annotation> JAVAX_CONSUMES = resolve("javax.ws.rs.Consumes");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAKARTA_CONSUMES = resolve("jakarta.ws.rs.Consumes");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAVAX_FORM_PARAM = resolve("javax.ws.rs.FormParam");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAKARTA_FORM_PARAM = resolve("jakarta.ws.rs.FormParam");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAVAX_HEADER_PARAM = resolve("javax.ws.rs.HeaderParam");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAKARTA_HEADER_PARAM = resolve("jakarta.ws.rs.HeaderParam");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAVAX_HTTP_METHOD = resolve("javax.ws.rs.HttpMethod");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAKARTA_HTTP_METHOD = resolve("jakarta.ws.rs.HttpMethod");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAVAX_PATH = resolve("javax.ws.rs.Path");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAKARTA_PATH = resolve("jakarta.ws.rs.Path");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAVAX_PATH_PARAM = resolve("javax.ws.rs.PathParam");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAKARTA_PATH_PARAM = resolve("jakarta.ws.rs.PathParam");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAVAX_PRODUCES = resolve("javax.ws.rs.Produces");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAKARTA_PRODUCES = resolve("jakarta.ws.rs.Produces");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAVAX_QUERY_PARAM = resolve("javax.ws.rs.QueryParam");
-
-    @Nullable
-    private static final Class<? extends Annotation> JAKARTA_QUERY_PARAM = resolve("jakarta.ws.rs.QueryParam");
-
     @Override
     protected void processAnnotationOnClass(MethodMetadata data, Class<?> clz) {
-        Annotation path = getAnnotation(clz, JAKARTA_PATH, JAVAX_PATH);
+        Annotation path = Annotations.PATH.getAnnotation(clz);
         if (path != null) {
             String pathValue = Strings.emptyToNull(getAnnotationValue(path));
             Preconditions.checkState(
@@ -100,11 +53,11 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
             }
             data.template().insert(0, pathValue);
         }
-        Annotation consumes = getAnnotation(clz, JAKARTA_CONSUMES, JAVAX_CONSUMES);
+        Annotation consumes = Annotations.CONSUMES.getAnnotation(clz);
         if (consumes != null) {
             handleConsumesAnnotation(data, consumes, clz.getName());
         }
-        Annotation produces = getAnnotation(clz, JAKARTA_PRODUCES, JAVAX_PRODUCES);
+        Annotation produces = Annotations.PRODUCES.getAnnotation(clz);
         if (produces != null) {
             handleProducesAnnotation(data, produces, clz.getName());
         }
@@ -113,7 +66,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
     @Override
     protected void processAnnotationOnMethod(MethodMetadata data, Annotation methodAnnotation, Method method) {
         Class<? extends Annotation> annotationType = methodAnnotation.annotationType();
-        Annotation http = getAnnotation(annotationType, JAKARTA_HTTP_METHOD, JAVAX_HTTP_METHOD);
+        Annotation http = Annotations.HTTP_METHOD.getAnnotation(annotationType);
         if (http != null) {
             String httpValue = getAnnotationValue(http);
             Preconditions.checkState(
@@ -123,7 +76,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
                     SafeArg.of("existingMethod", data.template().method()),
                     SafeArg.of("newMethod", httpValue));
             data.template().method(Preconditions.checkNotNull(httpValue, "Unexpected null HttpMethod value"));
-        } else if (annotationType == JAKARTA_PATH || annotationType == JAVAX_PATH) {
+        } else if (Annotations.PATH.matches(annotationType)) {
             String pathValue = Strings.emptyToNull(getAnnotationValue(methodAnnotation));
             Preconditions.checkState(
                     pathValue != null, "Path.value() was empty on method", SafeArg.of("method", method.getName()));
@@ -134,9 +87,9 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
             // strip these out appropriately.
             pathValue = pathValue.replaceAll("\\{\\s*(.+?)\\s*(:.+?)?\\}", "\\{$1\\}");
             data.template().append(pathValue);
-        } else if (annotationType == JAKARTA_PRODUCES || annotationType == JAVAX_PRODUCES) {
+        } else if (Annotations.PRODUCES.matches(annotationType)) {
             handleProducesAnnotation(data, methodAnnotation, "method " + method.getName());
-        } else if (annotationType == JAKARTA_CONSUMES || annotationType == JAVAX_CONSUMES) {
+        } else if (Annotations.CONSUMES.matches(annotationType)) {
             handleConsumesAnnotation(data, methodAnnotation, "method " + method.getName());
         }
     }
@@ -165,7 +118,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
         for (Annotation parameterAnnotation : annotations) {
             Class<? extends Annotation> annotationType =
                     Preconditions.checkNotNull(parameterAnnotation.annotationType(), "Unexpected null annotation type");
-            if (annotationType == JAKARTA_PATH_PARAM || annotationType == JAVAX_PATH_PARAM) {
+            if (Annotations.PATH_PARAM.matches(annotationType)) {
                 String name = getAnnotationValue(parameterAnnotation);
                 Preconditions.checkState(
                         Strings.emptyToNull(name) != null,
@@ -173,7 +126,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
                         SafeArg.of("paramIndex", paramIndex));
                 nameParam(data, name, paramIndex);
                 isHttpParam = true;
-            } else if (annotationType == JAKARTA_QUERY_PARAM || annotationType == JAVAX_QUERY_PARAM) {
+            } else if (Annotations.QUERY_PARAM.matches(annotationType)) {
                 String name = getAnnotationValue(parameterAnnotation);
                 Preconditions.checkState(
                         Strings.emptyToNull(name) != null,
@@ -184,7 +137,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
                 data.template().query(name, query);
                 nameParam(data, name, paramIndex);
                 isHttpParam = true;
-            } else if (annotationType == JAKARTA_HEADER_PARAM || annotationType == JAVAX_HEADER_PARAM) {
+            } else if (Annotations.HEADER_PARAM.matches(annotationType)) {
                 String name = getAnnotationValue(parameterAnnotation);
                 Preconditions.checkState(
                         Strings.emptyToNull(name) != null,
@@ -195,7 +148,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
                 data.template().header(name, header);
                 nameParam(data, name, paramIndex);
                 isHttpParam = true;
-            } else if (annotationType == JAKARTA_FORM_PARAM || annotationType == JAVAX_FORM_PARAM) {
+            } else if (Annotations.FORM_PARAM.matches(annotationType)) {
                 String name = getAnnotationValue(parameterAnnotation);
                 Preconditions.checkState(
                         Strings.emptyToNull(name) != null,
@@ -241,16 +194,6 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
         } catch (ReflectiveOperationException e) {
             throw new SafeIllegalStateException(
                     "Failed to read annotation value", e, SafeArg.of("annotationType", annotation.annotationType()));
-        }
-    }
-
-    @Nullable
-    @SuppressWarnings("unchecked")
-    private static Class<? extends Annotation> resolve(String fqcn) {
-        try {
-            return (Class<? extends Annotation>) Class.forName(fqcn);
-        } catch (ClassNotFoundException ignored) {
-            return null;
         }
     }
 }

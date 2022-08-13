@@ -17,12 +17,14 @@
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
+import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotations;
 import feign.Contract;
 import feign.MethodMetadata;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
@@ -48,13 +50,14 @@ public final class GuavaOptionalAwareContract extends AbstractDelegatingContract
         for (int i = 0; i < parameterTypes.length; i++) {
             Class<?> cls = parameterTypes[i];
             if (cls.equals(com.google.common.base.Optional.class)) {
-                FluentIterable<Class<?>> paramAnnotations =
-                        FluentIterable.from(Lists.newArrayList(annotations[i])).transform(EXTRACT_CLASS);
-                if (paramAnnotations.contains(HeaderParam.class)) {
+                Set<Class<?>> paramAnnotations = Arrays.stream(annotations[i])
+                        .map(Annotation::annotationType)
+                        .collect(Collectors.toSet());
+                if (Annotations.HEADER_PARAM.matches(paramAnnotations)) {
                     metadata.indexToExpanderClass().put(i, GuavaEmptyOptionalExpander.class);
-                } else if (paramAnnotations.contains(QueryParam.class)) {
+                } else if (Annotations.QUERY_PARAM.matches(paramAnnotations)) {
                     metadata.indexToExpanderClass().put(i, GuavaNullOptionalExpander.class);
-                } else if (paramAnnotations.contains(PathParam.class)) {
+                } else if (Annotations.PATH_PARAM.matches(PathParam.class)) {
                     throw new RuntimeException(String.format(
                             "Cannot use Guava Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
                             targetType.getName(), method.getName(), i));
