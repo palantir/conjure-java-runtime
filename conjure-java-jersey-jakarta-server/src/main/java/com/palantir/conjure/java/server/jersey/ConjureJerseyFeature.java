@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.server.jersey;
 
-import com.fasterxml.jackson.jaxrs.cbor.JacksonCBORProvider;
+import com.fasterxml.jackson.jakarta.rs.cbor.JacksonCBORProvider;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;

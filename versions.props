@@ -38,7 +38,6 @@ org.glassfish.jersey.*:* = 3.0.6
 
 # for version locks on legacy javax versions
 javax.annotation:javax.annotation-api = 1.3.2
-javax.servlet:javax.servlet-api = 4.0.1
 javax.ws.rs:javax.ws.rs-api = 2.1.1
 javax.inject:javax.inject = 1
 
