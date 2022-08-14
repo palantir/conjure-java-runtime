@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-import com.google.common.base.MoreObjects;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Set;
@@ -99,6 +98,10 @@ public final class JaxRsJakartaCompatibility {
             return annotation == jakarta || annotation == javax;
         }
 
+        public boolean matches(Set<Class<?>> annotations) {
+            return annotations.contains(jakarta) || annotations.contains(javax);
+        }
+
         @Nullable
         public Annotation getAnnotation(AnnotatedElement element) {
             if (jakarta != null) {
@@ -109,57 +112,11 @@ public final class JaxRsJakartaCompatibility {
             }
             if (javax != null) {
                 Annotation annotation = element.getAnnotation(javax);
-                if (annotation != null) {
-                    return annotation;
-                }
+                return annotation;
             }
 
             return null;
         }
-
-        public boolean matches(Set<Class<?>> annotations) {
-            return annotations.contains(jakarta) || annotations.contains(javax);
-        }
-    }
-
-    @Nullable
-    public static Class<? extends Annotation> consumes() {
-        return MoreObjects.firstNonNull(JAKARTA_CONSUMES, JAVAX_CONSUMES);
-    }
-
-    @Nullable
-    public static Class<? extends Annotation> produces() {
-        return MoreObjects.firstNonNull(JAKARTA_PRODUCES, JAVAX_PRODUCES);
-    }
-
-    @Nullable
-    public static Class<? extends Annotation> queryParam() {
-        return MoreObjects.firstNonNull(JAKARTA_QUERY_PARAM, JAVAX_QUERY_PARAM);
-    }
-
-    @Nullable
-    public static Class<? extends Annotation> path() {
-        return MoreObjects.firstNonNull(JAKARTA_PATH, JAVAX_PATH);
-    }
-
-    @Nullable
-    public static Class<? extends Annotation> pathParam() {
-        return MoreObjects.firstNonNull(JAKARTA_PATH_PARAM, JAVAX_PATH_PARAM);
-    }
-
-    @Nullable
-    public static Class<? extends Annotation> httpMethod() {
-        return MoreObjects.firstNonNull(JAKARTA_HTTP_METHOD, JAVAX_HTTP_METHOD);
-    }
-
-    @Nullable
-    public static Class<? extends Annotation> headerParam() {
-        return MoreObjects.firstNonNull(JAKARTA_HEADER_PARAM, JAVAX_HEADER_PARAM);
-    }
-
-    @Nullable
-    public static Class<? extends Annotation> formParam() {
-        return MoreObjects.firstNonNull(JAKARTA_FORM_PARAM, JAVAX_FORM_PARAM);
     }
 
     @Nullable
