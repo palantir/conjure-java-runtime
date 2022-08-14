@@ -22,7 +22,9 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-public class JaxRsJakartaCompatibility {
+public final class JaxRsJakartaCompatibility {
+    private JaxRsJakartaCompatibility() {}
+
     @Nullable
     private static final Class<? extends Annotation> JAVAX_CONSUMES = resolve("javax.ws.rs.Consumes");
 
