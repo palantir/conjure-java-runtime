@@ -31,16 +31,13 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 
 /**
- * Decorates a {@link Contract} and uses {@link Java8NullOptionalExpander} for any {@link QueryParam} parameters,
- * {@link Java8EmptyOptionalExpander} for any {@link HeaderParam} parameters, and throws a {@link RuntimeException} at
- * first encounter of an {@link Optional} typed {@link PathParam}.
+ * Decorates a {@link Contract} and uses {@link Java8NullOptionalExpander} for any {@link javax.ws.rs.QueryParam} parameters,
+ * {@link Java8EmptyOptionalExpander} for any {@link javax.ws.rs.HeaderParam} parameters, and throws a {@link RuntimeException} at
+ * first encounter of an {@link Optional} typed {@link javax.ws.rs.PathParam}.
  *
- * <p>{@link PathParam}s require a value, and so we explicitly disallow use with {@link Optional}.
+ * <p>{@link javax.ws.rs.PathParam}s require a value, and so we explicitly disallow use with {@link Optional}.
  */
 public final class Java8OptionalAwareContract extends AbstractDelegatingContract {
 

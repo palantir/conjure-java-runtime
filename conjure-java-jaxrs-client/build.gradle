@@ -22,10 +22,6 @@ dependencies {
 
     implementation 'com.palantir.tritium:tritium-registry'
 
-    // include both the old and the new
-    implementation 'javax.ws.rs:javax.ws.rs-api'
-    implementation 'jakarta.ws.rs:jakarta.ws.rs-api'
-
     implementation project(":conjure-java-jackson-serialization")
     implementation "com.google.guava:guava"
     implementation "com.github.ben-manes.caffeine:caffeine"
