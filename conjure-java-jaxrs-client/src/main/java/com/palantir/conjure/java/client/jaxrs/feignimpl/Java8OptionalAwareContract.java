@@ -33,7 +33,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Decorates a {@link Contract} and uses {@link Java8NullOptionalExpander} for any {@link jakarta.ws.rs.QueryParam} parameters,
+ * Decorates a {@link Contract} and uses {@link Java8NullOptionalExpander}
+ * for any {@link jakarta.ws.rs.QueryParam} parameters,
  * {@link Java8EmptyOptionalExpander} for any {@link jakarta.ws.rs.HeaderParam} parameters,
  * and throws a {@link RuntimeException} at
  * first encounter of an {@link Optional} typed {@link jakarta.ws.rs.PathParam}.
