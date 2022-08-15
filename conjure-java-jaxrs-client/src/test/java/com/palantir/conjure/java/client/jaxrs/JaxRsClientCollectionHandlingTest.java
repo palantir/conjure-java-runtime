@@ -20,12 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper.BeforeAndAfter;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.BeforeEach;

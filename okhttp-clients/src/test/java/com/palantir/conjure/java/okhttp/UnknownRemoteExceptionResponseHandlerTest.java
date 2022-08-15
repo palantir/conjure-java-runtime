@@ -20,10 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.errors.UnknownRemoteException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
 import java.util.Optional;
 import javax.annotation.CheckForNull;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;

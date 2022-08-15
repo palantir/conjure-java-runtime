@@ -1,0 +1,24 @@
+// Avoid including test dependencies from this module in
+// gradle module metadata.
+versionsLock {
+    testProject()
+}
+
+dependencies {
+    api 'org.junit.jupiter:junit-jupiter'
+    api 'io.undertow:undertow-core'
+    api 'io.undertow:undertow-servlet-jakarta', {
+        // Use  standard servlet-api instead
+        exclude group: 'org.jboss.spec.javax.servlet', module: 'jboss-servlet-api_4.0_spec'
+        exclude group: 'org.jboss.spec.javax.annotation', module: 'jboss-annotations-api_1.3_spec'
+    }
+    api 'jakarta.annotation:jakarta.annotation-api'
+    api 'jakarta.servlet:jakarta.servlet-api'
+    api 'org.apache.httpcomponents.client5:httpclient5'
+    implementation project(':conjure-java-jackson-serialization')
+    implementation 'com.palantir.safe-logging:preconditions'
+    implementation 'org.glassfish.jersey.core:jersey-server'
+    implementation 'org.glassfish.jersey.containers:jersey-container-servlet-core'
+    implementation 'org.glassfish.jersey.media:jersey-media-json-jackson'
+
+}

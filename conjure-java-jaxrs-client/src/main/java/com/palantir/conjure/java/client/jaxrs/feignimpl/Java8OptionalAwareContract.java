@@ -16,30 +16,30 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotations;
 import feign.Contract;
 import feign.MethodMetadata;
 import feign.Param.Expander;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * Decorates a {@link Contract} and uses {@link Java8NullOptionalExpander} for any {@link QueryParam} parameters,
- * {@link Java8EmptyOptionalExpander} for any {@link HeaderParam} parameters, and throws a {@link RuntimeException} at
- * first encounter of an {@link Optional} typed {@link PathParam}.
+ * Decorates a {@link Contract} and uses {@link Java8NullOptionalExpander}
+ * for any {@link jakarta.ws.rs.QueryParam} parameters,
+ * {@link Java8EmptyOptionalExpander} for any {@link jakarta.ws.rs.HeaderParam} parameters,
+ * and throws a {@link RuntimeException} at
+ * first encounter of an {@link Optional} typed {@link jakarta.ws.rs.PathParam}.
  *
- * <p>{@link PathParam}s require a value, and so we explicitly disallow use with {@link Optional}.
+ * <p>{@link jakarta.ws.rs.PathParam}s require a value, and so we explicitly disallow use with {@link Optional}.
  */
 public final class Java8OptionalAwareContract extends AbstractDelegatingContract {
 
@@ -65,7 +65,7 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
             Class<?> cls = parameterTypes[i];
             for (ExpanderDef def : expanders) {
                 if (cls.equals(def.match)) {
-                    FluentIterable<Class<?>> paramAnnotations = getAnnotations(annotations, i);
+                    Set<Class<?>> paramAnnotations = getAnnotations(annotations, i);
                     configureOptionalExpanders(
                             targetType,
                             method,
@@ -79,8 +79,8 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
         }
     }
 
-    private FluentIterable<Class<?>> getAnnotations(Annotation[][] annotations, int index) {
-        return FluentIterable.from(Lists.newArrayList(annotations[index])).transform(EXTRACT_CLASS);
+    private Set<Class<?>> getAnnotations(Annotation[][] annotations, int index) {
+        return Arrays.stream(annotations[index]).map(Annotation::annotationType).collect(Collectors.toSet());
     }
 
     private void configureOptionalExpanders(
@@ -88,21 +88,19 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
             Method method,
             MethodMetadata metadata,
             int index,
-            FluentIterable<Class<?>> paramAnnotations,
+            Set<Class<?>> paramAnnotations,
             Class<? extends Expander> emptyExpanderClass,
             Class<? extends Expander> nullExpanderClass) {
-        if (paramAnnotations.contains(HeaderParam.class)) {
+        if (Annotations.HEADER_PARAM.matches(paramAnnotations)) {
             metadata.indexToExpanderClass().put(index, emptyExpanderClass);
-        } else if (paramAnnotations.contains(QueryParam.class)) {
+        } else if (Annotations.QUERY_PARAM.matches(paramAnnotations)) {
             metadata.indexToExpanderClass().put(index, nullExpanderClass);
-        } else if (paramAnnotations.contains(PathParam.class)) {
+        } else if (Annotations.PATH_PARAM.matches(paramAnnotations)) {
             throw new RuntimeException(String.format(
                     "Cannot use Java8 Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
                     targetType.getName(), method.getName(), index));
         }
     }
-
-    private static final Function<Annotation, Class<?>> EXTRACT_CLASS = Annotation::annotationType;
 
     private static final class ExpanderDef {
         private final Class<?> match;

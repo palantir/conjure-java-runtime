@@ -16,23 +16,23 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
+import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotations;
 import feign.Contract;
 import feign.MethodMetadata;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * Decorates a {@link Contract} and uses {@link GuavaNullOptionalExpander} for any {@link QueryParam} parameters,
- * {@link GuavaEmptyOptionalExpander} for any {@link HeaderParam} parameters, and throws a {@link RuntimeException} at
- * first encounter of an {@link com.google.common.base.Optional} typed {@link PathParam}.
+ * Decorates a {@link Contract} and uses {@link GuavaNullOptionalExpander} for
+ * any {@link jakarta.ws.rs.QueryParam} parameters,
+ * {@link GuavaEmptyOptionalExpander} for any {@link jakarta.ws.rs.HeaderParam} parameters,
+ * and throws a {@link RuntimeException} at
+ * first encounter of an {@link com.google.common.base.Optional} typed {@link jakarta.ws.rs.PathParam}.
  *
- * <p>{@link PathParam}s require a value, and so we explicitly disallow use with
+ * <p>{@link jakarta.ws.rs.PathParam}s require a value, and so we explicitly disallow use with
  * {@link com.google.common.base.Optional}.
  */
 public final class GuavaOptionalAwareContract extends AbstractDelegatingContract {
@@ -48,13 +48,14 @@ public final class GuavaOptionalAwareContract extends AbstractDelegatingContract
         for (int i = 0; i < parameterTypes.length; i++) {
             Class<?> cls = parameterTypes[i];
             if (cls.equals(com.google.common.base.Optional.class)) {
-                FluentIterable<Class<?>> paramAnnotations =
-                        FluentIterable.from(Lists.newArrayList(annotations[i])).transform(EXTRACT_CLASS);
-                if (paramAnnotations.contains(HeaderParam.class)) {
+                Set<Class<?>> paramAnnotations = Arrays.stream(annotations[i])
+                        .map(Annotation::annotationType)
+                        .collect(Collectors.toSet());
+                if (Annotations.HEADER_PARAM.matches(paramAnnotations)) {
                     metadata.indexToExpanderClass().put(i, GuavaEmptyOptionalExpander.class);
-                } else if (paramAnnotations.contains(QueryParam.class)) {
+                } else if (Annotations.QUERY_PARAM.matches(paramAnnotations)) {
                     metadata.indexToExpanderClass().put(i, GuavaNullOptionalExpander.class);
-                } else if (paramAnnotations.contains(PathParam.class)) {
+                } else if (Annotations.PATH_PARAM.matches(paramAnnotations)) {
                     throw new RuntimeException(String.format(
                             "Cannot use Guava Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
                             targetType.getName(), method.getName(), i));
@@ -62,6 +63,4 @@ public final class GuavaOptionalAwareContract extends AbstractDelegatingContract
             }
         }
     }
-
-    private static final Function<Annotation, Class<?>> EXTRACT_CLASS = Annotation::annotationType;
 }

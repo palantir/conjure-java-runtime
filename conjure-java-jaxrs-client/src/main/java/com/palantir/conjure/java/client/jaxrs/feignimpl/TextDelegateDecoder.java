@@ -26,7 +26,6 @@ import feign.codec.StringDecoder;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import javax.ws.rs.core.MediaType;
 
 /**
  * Delegates to a {@link StringDecoder} if the response has a Content-Type of text/plain, or falls back to the given
@@ -50,7 +49,7 @@ public final class TextDelegateDecoder implements Decoder {
         }
         // In the case of multiple content types, or an unknown content type, we'll use the delegate instead.
         if (contentTypes.size() == 1
-                && Iterables.getOnlyElement(contentTypes, "").startsWith(MediaType.TEXT_PLAIN)) {
+                && Iterables.getOnlyElement(contentTypes, "").startsWith("text/plain")) {
             Object decoded = stringDecoder.decode(response, type);
             if (decoded == null) {
                 return "";

@@ -20,9 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.client.jaxrs.ExtensionsWrapper.BeforeAndAfter;
 import com.palantir.conjure.java.okhttp.NoOpHostEventsSink;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;

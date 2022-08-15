@@ -23,11 +23,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import com.google.common.net.HttpHeaders;
 import feign.RequestTemplate;
 import feign.codec.Encoder;
+import jakarta.ws.rs.core.MediaType;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import javax.ws.rs.core.MediaType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

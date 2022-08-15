@@ -7,6 +7,7 @@ Further note that:
 - org.jvnet:animal-sniffer-annotation (http://www.mojohaus.org/animal-sniffer/animal-sniffer-annotations/) is distributed only under CDDL 1.0.
 - Palantir Technologies Inc. elects to include javax.ws.rs:javax.ws.rs-api in this distribution under the CDDL license.
 - javax.ws.rs:javax.ws.rs-api (https://jax-rs-spec.java.net/) is distributed only under CDDL 1.1.
+- jakarta.ws.rs:jakarta.ws.rs-api (https://jakarta.ee/specifications/restful-ws/2.1/) is distributed under the Eclipse Foundation Specification License
 - org.slf4j:jcl-over-slf4j and org.slf4j:slf4j-api are distributed under the MIT License.
 - The rest of the contents of this file are subject to the terms of Apache License, Version 2.0.
 A copy of the licenses can be found in this directory.

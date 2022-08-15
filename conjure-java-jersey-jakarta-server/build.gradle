@@ -1,0 +1,42 @@
+apply plugin: 'com.palantir.external-publish-jar'
+apply plugin: 'com.palantir.revapi'
+apply plugin: 'com.palantir.metric-schema'
+
+dependencies {
+    api "com.palantir.conjure.java.api:errors"
+    api "org.glassfish.jersey.core:jersey-server"
+
+    implementation 'com.palantir.tritium:tritium-registry'
+    implementation 'io.dropwizard.metrics:metrics-core'
+    implementation 'org.glassfish.jersey.inject:jersey-hk2'
+    implementation "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider"
+    implementation "com.jcraft:jzlib"
+    implementation "com.netflix.feign:feign-core"
+    implementation "com.palantir.safe-logging:safe-logging"
+    implementation 'com.palantir.tokens:auth-tokens'
+    implementation "com.palantir.tracing:tracing-jersey-jakarta"
+    implementation project(':conjure-java-jackson-serialization')
+
+    runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation"
+
+    testImplementation project(':conjure-java-jackson-serialization')
+    testImplementation project(':undertow-jakarta-testing')
+    testImplementation 'org.glassfish.jersey.media:jersey-media-json-jackson'
+    testImplementation "com.fasterxml.jackson.core:jackson-databind"
+    testImplementation "com.palantir.tracing:tracing"
+    testImplementation "com.palantir.conjure.java.api:ssl-config"
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "org.hamcrest:hamcrest-all"
+    testImplementation "org.mockito:mockito-core"
+    testImplementation "org.assertj:assertj-core"
+    implementation 'com.palantir.safe-logging:logger'
+}
+
+configurations.all {
+    resolutionStrategy {
+        // Conflicts with javax.inject:javax.inject:1
+        // This is safe to remove, the purpose of the repackaged version is to implement OSGI, which we don't use
+        // Source: https://stackoverflow.com/a/25218230/274699
+        exclude group: 'org.glassfish.hk2.external', module: 'javax.inject'
+    }
+}
