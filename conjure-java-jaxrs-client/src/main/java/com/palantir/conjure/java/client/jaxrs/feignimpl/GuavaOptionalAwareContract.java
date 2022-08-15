@@ -26,8 +26,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Decorates a {@link Contract} and uses {@link GuavaNullOptionalExpander} for any {@link jakarta.ws.rs.QueryParam} parameters,
- * {@link GuavaEmptyOptionalExpander} for any {@link jakarta.ws.rs.HeaderParam} parameters, and throws a {@link RuntimeException} at
+ * Decorates a {@link Contract} and uses {@link GuavaNullOptionalExpander} for
+ * any {@link jakarta.ws.rs.QueryParam} parameters,
+ * {@link GuavaEmptyOptionalExpander} for any {@link jakarta.ws.rs.HeaderParam} parameters,
+ * and throws a {@link RuntimeException} at
  * first encounter of an {@link com.google.common.base.Optional} typed {@link jakarta.ws.rs.PathParam}.
  *
  * <p>{@link jakarta.ws.rs.PathParam}s require a value, and so we explicitly disallow use with
