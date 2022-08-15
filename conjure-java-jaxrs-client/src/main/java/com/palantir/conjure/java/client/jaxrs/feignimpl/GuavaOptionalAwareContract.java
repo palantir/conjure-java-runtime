@@ -24,16 +24,13 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 
 /**
- * Decorates a {@link Contract} and uses {@link GuavaNullOptionalExpander} for any {@link QueryParam} parameters,
- * {@link GuavaEmptyOptionalExpander} for any {@link HeaderParam} parameters, and throws a {@link RuntimeException} at
- * first encounter of an {@link com.google.common.base.Optional} typed {@link PathParam}.
+ * Decorates a {@link Contract} and uses {@link GuavaNullOptionalExpander} for any {@link jakarta.ws.rs.QueryParam} parameters,
+ * {@link GuavaEmptyOptionalExpander} for any {@link jakarta.ws.rs.HeaderParam} parameters, and throws a {@link RuntimeException} at
+ * first encounter of an {@link com.google.common.base.Optional} typed {@link jakarta.ws.rs.PathParam}.
  *
- * <p>{@link PathParam}s require a value, and so we explicitly disallow use with
+ * <p>{@link jakarta.ws.rs.PathParam}s require a value, and so we explicitly disallow use with
  * {@link com.google.common.base.Optional}.
  */
 public final class GuavaOptionalAwareContract extends AbstractDelegatingContract {
@@ -56,7 +53,7 @@ public final class GuavaOptionalAwareContract extends AbstractDelegatingContract
                     metadata.indexToExpanderClass().put(i, GuavaEmptyOptionalExpander.class);
                 } else if (Annotations.QUERY_PARAM.matches(paramAnnotations)) {
                     metadata.indexToExpanderClass().put(i, GuavaNullOptionalExpander.class);
-                } else if (Annotations.PATH_PARAM.matches(PathParam.class)) {
+                } else if (Annotations.PATH_PARAM.matches(paramAnnotations)) {
                     throw new RuntimeException(String.format(
                             "Cannot use Guava Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
                             targetType.getName(), method.getName(), i));
