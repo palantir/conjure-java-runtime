@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add conjure-java-jersey-jakarta-server
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2440
