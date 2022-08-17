@@ -1,6 +1,8 @@
 apply plugin: 'com.palantir.external-publish-jar'
 apply plugin: 'com.palantir.metric-schema'
 
+def jerseyVersion = '2.34'
+
 versionsLock {
     disableJavaPluginDefaults()
 }
@@ -10,7 +12,7 @@ dependencies {
     api "javax.ws.rs:javax.ws.rs-api"
     api "org.glassfish.jersey.core:jersey-server", {
         version {
-            strictly '2.34'
+            strictly jerseyVersion
         }
     }
 
@@ -20,7 +22,7 @@ dependencies {
     implementation 'io.dropwizard.metrics:metrics-core'
     implementation 'org.glassfish.jersey.inject:jersey-hk2', {
         version {
-            strictly '2.34'
+            strictly jerseyVersion
         }
     }
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
@@ -34,7 +36,7 @@ dependencies {
 
     runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation", {
         version {
-            strictly '2.34'
+            strictly jerseyVersion
         }
     }
 }
