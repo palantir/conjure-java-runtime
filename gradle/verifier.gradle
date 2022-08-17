@@ -121,3 +121,5 @@ test.dependsOn unpackVerifier, copyTestCases
 checkstyleGeneratedObjects.enabled = false
 checkstyleGeneratedJersey.enabled = false
 checkstyleGeneratedRetrofit.enabled = false
+
+checkUnusedDependenciesTest.enabled = false

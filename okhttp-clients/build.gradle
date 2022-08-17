@@ -8,7 +8,6 @@ dependencies {
     api project(':client-config')
     api project(':conjure-java-legacy-clients')
     api "com.palantir.conjure.java.api:errors"
-    api 'com.squareup.okhttp3:okhttp'
     implementation project(':conjure-java-jackson-serialization')
     implementation 'com.google.guava:guava'
     implementation 'com.netflix.concurrency-limits:concurrency-limits-core'
@@ -17,20 +16,19 @@ dependencies {
     implementation 'com.palantir.tracing:tracing-okhttp3'
     implementation 'com.palantir.tritium:tritium-registry'
     implementation 'com.palantir.tritium:tritium-metrics'
-    implementation 'com.squareup.okhttp3:logging-interceptor'
     implementation 'io.dropwizard.metrics:metrics-core'
 
-    testImplementation project(":conjure-java-jersey-jakarta-server")
     testImplementation project(":keystores")
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation "com.squareup.okhttp3:mockwebserver"
     testImplementation "jakarta.ws.rs:jakarta.ws.rs-api"
     testImplementation "junit:junit"
     testImplementation "org.assertj:assertj-core"
-    testImplementation "org.jmock:jmock"
     testImplementation "org.mockito:mockito-core"
     testImplementation "io.undertow:undertow-core"
     testImplementation "org.slf4j:slf4j-api"
+
+    testRuntimeOnly project(":conjure-java-jersey-jakarta-server")
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'

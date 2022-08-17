@@ -14,16 +14,7 @@ dependencies {
     implementation "com.github.ben-manes.caffeine:caffeine"
 
     testImplementation project(":conjure-java-jackson-serialization")
-    testImplementation project(":undertow-jakarta-testing")
-    testImplementation("com.netflix.feign:feign-jaxrs") {
-        // the shipped version clashes with the newer javax.ws.rs:javax.ws.rs-api used by (e.g.) dropwizard
-        exclude group: "javax.ws.rs", module: "jsr311-api"
-    }
-    testImplementation("com.netflix.feign:feign-core")
-    testImplementation "com.netflix.feign:feign-okhttp"
-    testImplementation "com.squareup.okhttp3:okhttp"
     testImplementation "org.conscrypt:conscrypt-openjdk-uber"
-    testImplementation "org.hamcrest:hamcrest-all"
     testImplementation "org.assertj:assertj-core"
     testImplementation "org.junit.jupiter:junit-jupiter"
 

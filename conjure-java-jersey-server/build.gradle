@@ -1,15 +1,18 @@
 apply plugin: 'com.palantir.external-publish-jar'
 apply plugin: 'com.palantir.metric-schema'
 
+def jerseyVersion = '2.34'
+
 versionsLock {
     disableJavaPluginDefaults()
 }
 
 dependencies {
     api "com.palantir.conjure.java.api:errors"
+    api "javax.ws.rs:javax.ws.rs-api"
     api "org.glassfish.jersey.core:jersey-server", {
         version {
-            strictly '2.26'
+            strictly jerseyVersion
         }
     }
 
@@ -17,13 +20,7 @@ dependencies {
     implementation 'javax.inject:javax.inject'
     implementation 'com.palantir.tritium:tritium-registry'
     implementation 'io.dropwizard.metrics:metrics-core'
-    implementation 'org.glassfish.jersey.inject:jersey-hk2', {
-        version {
-            strictly '2.26'
-        }
-    }
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
-    implementation "com.jcraft:jzlib"
     implementation "com.netflix.feign:feign-core"
     implementation "com.palantir.safe-logging:safe-logging"
     implementation "com.palantir.safe-logging:logger"
@@ -31,8 +28,16 @@ dependencies {
     implementation "com.palantir.tracing:tracing-jersey"
     implementation project(':conjure-java-jackson-serialization')
 
-    runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation"
-
+    runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation", {
+        version {
+            strictly jerseyVersion
+        }
+    }
+    runtimeOnly 'org.glassfish.jersey.inject:jersey-hk2', {
+        version {
+            strictly jerseyVersion
+        }
+    }
 }
 
 configurations.all {
@@ -40,6 +45,6 @@ configurations.all {
         // Conflicts with javax.inject:javax.inject:1
         // This is safe to remove, the purpose of the repackaged version is to implement OSGI, which we don't use
         // Source: https://stackoverflow.com/a/25218230/274699
-        exclude group: 'org.glassfish.hk2.external', module: 'javax.inject'
+        exclude group: 'org.glassfish.hk2.external', module: 'jakarta.inject'
     }
 }

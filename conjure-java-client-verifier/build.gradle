@@ -9,7 +9,6 @@ dependencies {
     testImplementation project(':conjure-java-retrofit2-client')
     testImplementation project(':conjure-java-jackson-serialization')
     testImplementation project(':keystores')
-    testImplementation project(':okhttp-clients')
     testImplementation 'junit:junit'
     testImplementation "org.slf4j:slf4j-api"
     testImplementation 'org.assertj:assertj-core'
