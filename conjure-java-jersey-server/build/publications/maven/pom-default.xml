@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.palantir.conjure.java.runtime</groupId>
   <artifactId>conjure-java-jersey-server</artifactId>
-  <version>7.36.0-1-g60185d5</version>
+  <version>7.36.0-2-g730e8b8.dirty</version>
   <name>conjure-java-jersey-server</name>
   <description>Palantir open source project</description>
   <url>https://github.com/palantir/conjure-java-runtime</url>
@@ -424,17 +424,17 @@
       <dependency>
         <groupId>org.glassfish.jersey.core</groupId>
         <artifactId>jersey-client</artifactId>
-        <version>2.26</version>
+        <version>2.34</version>
       </dependency>
       <dependency>
         <groupId>org.glassfish.jersey.core</groupId>
         <artifactId>jersey-common</artifactId>
-        <version>2.26</version>
+        <version>2.34</version>
       </dependency>
       <dependency>
         <groupId>org.glassfish.jersey.core</groupId>
         <artifactId>jersey-server</artifactId>
-        <version>2.26</version>
+        <version>2.34</version>
       </dependency>
       <dependency>
         <groupId>org.glassfish.jersey.ext</groupId>
@@ -444,7 +444,7 @@
       <dependency>
         <groupId>org.glassfish.jersey.inject</groupId>
         <artifactId>jersey-hk2</artifactId>
-        <version>2.26</version>
+        <version>2.34</version>
       </dependency>
       <dependency>
         <groupId>org.hdrhistogram</groupId>
@@ -560,7 +560,7 @@
     <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-server</artifactId>
-      <version>2.26</version>
+      <version>2.34</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -608,7 +608,7 @@
     <dependency>
       <groupId>org.glassfish.jersey.inject</groupId>
       <artifactId>jersey-hk2</artifactId>
-      <version>2.26</version>
+      <version>2.34</version>
       <scope>runtime</scope>
       <exclusions>
         <exclusion>
@@ -704,7 +704,7 @@
     <dependency>
       <groupId>com.palantir.conjure.java.runtime</groupId>
       <artifactId>conjure-java-jackson-serialization</artifactId>
-      <version>7.36.0-1-g60185d5</version>
+      <version>7.36.0-2-g730e8b8.dirty</version>
       <scope>runtime</scope>
       <exclusions>
         <exclusion>
@@ -716,7 +716,7 @@
     <dependency>
       <groupId>org.glassfish.jersey.ext</groupId>
       <artifactId>jersey-bean-validation</artifactId>
-      <version>2.26</version>
+      <version>2.34</version>
       <scope>runtime</scope>
       <exclusions>
         <exclusion>
@@ -728,7 +728,7 @@
     <dependency>
       <groupId>com.palantir.conjure.java.runtime</groupId>
       <artifactId>conjure-java-runtime</artifactId>
-      <version>7.36.0-1-g60185d5</version>
+      <version>7.36.0-2-g730e8b8.dirty</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>

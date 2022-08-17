@@ -9,7 +9,7 @@ dependencies {
     api "com.palantir.conjure.java.api:errors"
     api "org.glassfish.jersey.core:jersey-server", {
         version {
-            strictly '2.26'
+            strictly '2.34'
         }
     }
 
@@ -19,7 +19,7 @@ dependencies {
     implementation 'io.dropwizard.metrics:metrics-core'
     implementation 'org.glassfish.jersey.inject:jersey-hk2', {
         version {
-            strictly '2.26'
+            strictly '2.34'
         }
     }
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-cbor-provider"
@@ -31,8 +31,11 @@ dependencies {
     implementation "com.palantir.tracing:tracing-jersey"
     implementation project(':conjure-java-jackson-serialization')
 
-    runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation"
-
+    runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation", {
+        version {
+            strictly '2.34'
+        }
+    }
 }
 
 configurations.all {
