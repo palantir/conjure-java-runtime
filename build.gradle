@@ -80,7 +80,7 @@ subprojects {
     apply plugin: 'java-library'
     apply plugin: 'com.palantir.baseline-class-uniqueness'
 
-    tasks.check.dependsOn(javadoc)
+    tasks.check.dependsOn javadoc, checkUnusedDependencies
 
     test {
         minHeapSize = "512m"

@@ -8,17 +8,10 @@ dependencies {
     testImplementation project(':conjure-java-jaxrs-client')
     testImplementation project(':conjure-java-jersey-jakarta-server')
     testImplementation project(':keystores')
-    testImplementation project(':conjure-java-jackson-serialization')
-    testImplementation project(':okhttp-clients')
     testImplementation project(':undertow-jakarta-testing')
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.assertj:assertj-core'
-    testImplementation 'com.palantir.dialogue:dialogue-apache-hc5-client', {
-        exclude group: 'com.palantir.conjure.java.runtime'
-    }
-    testImplementation 'com.palantir.dialogue:dialogue-serde', {
-        exclude group: 'com.palantir.conjure.java.runtime'
-    }
     testImplementation 'com.palantir.safe-logging:logger'
 }
