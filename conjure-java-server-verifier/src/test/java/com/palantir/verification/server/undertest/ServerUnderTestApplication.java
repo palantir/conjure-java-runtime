@@ -31,6 +31,7 @@ import java.lang.reflect.Method;
 public final class ServerUnderTestApplication {
     private ServerUnderTestApplication() {}
 
+    @SuppressWarnings("ProxyNonConstantType")
     public static UndertowServerExtension createUndertow() {
         return UndertowServerExtension.create("/test/api")
                 .jersey(Reflection.newProxy(AutoDeserializeService.class, new EchoResourceInvocationHandler()))
