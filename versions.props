@@ -27,7 +27,7 @@ com.palantir.refreshable:refreshable = 2.2.0
 org.hibernate.validator:* = 6.2.0.Final
 org.checkerframework:checker-qual = 3.25.0
 
-org.junit.jupiter:* = 5.9.0
+org.junit.jupiter:* = 5.9.1
 org.apache.httpcomponents.client5:* = 5.1.3
 
 # Jakarta EE9 Versions
