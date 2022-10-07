@@ -79,7 +79,7 @@ final class DefaultCas {
             throw new SafeRuntimeException("Could not read file as an X.509 certificate", e);
         }
 
-        return certificateMap.build();
+        return certificateMap.buildOrThrow();
     }
 
     private DefaultCas() {}
