@@ -41,7 +41,7 @@ public class ConjureClientsTest {
             .put("proxyCredentials", "ClientConfigurations.of sets this up automatically")
             .put("sslSocketFactory", "Not expecting users to override these")
             .put("trustManager", "Not expecting users to override these")
-            .build();
+            .buildOrThrow();
 
     @Test
     public void check_WithClientOptions_is_in_sync_with_ClientConfiguration() {
