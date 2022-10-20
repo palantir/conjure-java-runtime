@@ -222,15 +222,15 @@ public final class ClientConfigurations {
     }
 
     private static final class FixedProxySelector extends ProxySelector {
-        private final Proxy proxy;
+        private final ImmutableList<Proxy> proxy;
 
         FixedProxySelector(Proxy proxy) {
-            this.proxy = proxy;
+            this.proxy = ImmutableList.of(proxy);
         }
 
         @Override
         public List<Proxy> select(URI _uri) {
-            return ImmutableList.of(proxy);
+            return proxy;
         }
 
         @Override
