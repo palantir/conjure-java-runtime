@@ -8,7 +8,10 @@ dependencies {
 
     implementation 'com.palantir.tritium:tritium-registry'
     implementation 'io.dropwizard.metrics:metrics-core'
-    implementation "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider"
+    implementation "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider", {
+        // activation-api should be a 'compileOnly' dependency where 'jakarta.activation' should be used at runtime
+        exclude module: 'jakarta.activation-api'
+    }
     implementation "com.netflix.feign:feign-core"
     implementation "com.palantir.safe-logging:safe-logging"
     implementation 'com.palantir.tokens:auth-tokens'
