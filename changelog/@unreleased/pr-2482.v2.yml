@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Deprecate less secure ciphers using classic Diffie-Hellman key exchange
+    (DHE)
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2482
