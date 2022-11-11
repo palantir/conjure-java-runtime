@@ -19,33 +19,39 @@ package com.palantir.conjure.java.client.retrofit2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public final class Retrofit2ClientQueryParamHandlingTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    private final MockWebServer server = new MockWebServer();
 
     private Service proxy;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    public void before() throws IOException {
+        server.start();
         HttpUrl url = server.url("/");
         proxy = Retrofit2Client.create(
                 Service.class, AGENT, new HostMetricsRegistry(), createTestConfig(url.toString()));
         MockResponse mockResponse = new MockResponse().setResponseCode(204);
         server.enqueue(mockResponse);
+    }
+
+    @AfterEach
+    void after() throws IOException {
+        server.close();
     }
 
     public interface Service {

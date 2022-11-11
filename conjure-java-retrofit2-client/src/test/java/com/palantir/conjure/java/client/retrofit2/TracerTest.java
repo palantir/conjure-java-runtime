@@ -19,7 +19,6 @@ package com.palantir.conjure.java.client.retrofit2;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
-import com.palantir.tracing.RenderTracingRule;
 import com.palantir.tracing.Tracer;
 import com.palantir.tracing.api.OpenSpan;
 import com.palantir.tracing.api.TraceHttpHeaders;
@@ -28,24 +27,26 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public final class TracerTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
-
-    @Rule
-    public final RenderTracingRule renderTracingRule = new RenderTracingRule();
+    private final MockWebServer server = new MockWebServer();
 
     private TestService service;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    public void before() throws IOException {
+        server.start();
         String uri = "http://localhost:" + server.getPort();
         service = Retrofit2Client.create(TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(uri));
+    }
+
+    @AfterEach
+    void after() throws IOException {
+        server.close();
     }
 
     @Test

@@ -20,7 +20,5 @@ dependencies {
     compileOnly 'org.immutables:value::annotations'
     implementation 'com.palantir.safe-logging:logger'
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine', {
-        because 'allows JUnit 3 and JUnit 4 tests to run'
-    }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
 }

@@ -32,16 +32,29 @@ import java.util.List;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public final class Retrofit2ClientProxyTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    private final MockWebServer server = new MockWebServer();
+    private final MockWebServer proxyServer = new MockWebServer();
 
-    @Rule
-    public final MockWebServer proxyServer = new MockWebServer();
+    @BeforeEach
+    void before() throws IOException {
+        server.start();
+        proxyServer.start();
+    }
+
+    @AfterEach
+    void after() throws IOException {
+        try (MockWebServer s1 = server;
+                MockWebServer s2 = proxyServer) {
+            s1.close();
+            s2.close();
+        }
+    }
 
     @Test
     public void testDirectVersusProxyConnection() throws Exception {

@@ -54,16 +54,15 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okio.Buffer;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import retrofit2.Call;
 import retrofit2.Response;
 
 public final class Retrofit2ClientApiTest extends TestBase {
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    private final MockWebServer server = new MockWebServer();
 
     private static final SerializableError ERROR = SerializableError.builder()
             .errorCode("errorCode")
@@ -73,11 +72,17 @@ public final class Retrofit2ClientApiTest extends TestBase {
     private HttpUrl url;
     private TestService service;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    public void before() throws IOException {
+        server.start();
         url = server.url("/");
         service = Retrofit2Client.create(
                 TestService.class, AGENT, new HostMetricsRegistry(), createTestConfig(url.toString()));
+    }
+
+    @AfterEach
+    void after() throws IOException {
+        server.close();
     }
 
     @Test
@@ -402,8 +407,8 @@ public final class Retrofit2ClientApiTest extends TestBase {
         }
     }
 
-    @Ignore("TODO(rfink): Async Retrofit calls should produce RemoteException, Issue #625")
     @Test
+    @Disabled("TODO(rfink): Async Retrofit calls should produce RemoteException, Issue #625")
     public void async_retrofit_call_should_throw_RemoteException_for_server_serializable_errors() throws Exception {
         server.enqueue(new MockResponse()
                 .setResponseCode(500)

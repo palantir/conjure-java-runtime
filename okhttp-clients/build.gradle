@@ -22,7 +22,6 @@ dependencies {
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
     testImplementation "com.squareup.okhttp3:mockwebserver"
     testImplementation "jakarta.ws.rs:jakarta.ws.rs-api"
-    testImplementation "junit:junit"
     testImplementation "org.assertj:assertj-core"
     testImplementation "org.mockito:mockito-core"
     testImplementation "io.undertow:undertow-core"
@@ -33,8 +32,6 @@ dependencies {
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine', {
-        because 'allows JUnit 3 and JUnit 4 tests to run'
-    }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testImplementation 'org.mockito:mockito-junit-jupiter'
 }

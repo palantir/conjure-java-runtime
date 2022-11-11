@@ -27,6 +27,7 @@ dependencies {
     testImplementation "com.fasterxml.jackson.core:jackson-databind"
     testImplementation "com.palantir.tracing:tracing"
     testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation "org.junit.jupiter:junit-jupiter-api"
     testImplementation "org.assertj:assertj-core"
     implementation 'com.palantir.safe-logging:logger'
 

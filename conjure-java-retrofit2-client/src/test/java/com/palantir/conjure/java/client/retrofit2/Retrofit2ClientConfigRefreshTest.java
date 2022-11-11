@@ -21,18 +21,32 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.ext.refresh.Refreshable;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
+import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public final class Retrofit2ClientConfigRefreshTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server1 = new MockWebServer();
+    private final MockWebServer server1 = new MockWebServer();
+    private final MockWebServer server2 = new MockWebServer();
 
-    @Rule
-    public final MockWebServer server2 = new MockWebServer();
+    @BeforeEach
+    void before() throws IOException {
+        server1.start();
+        server2.start();
+    }
+
+    @AfterEach
+    void after() throws IOException {
+        try (MockWebServer s1 = server1;
+                MockWebServer s2 = server2) {
+            s1.close();
+            s2.close();
+        }
+    }
 
     @Test
     public void testConfigRefresh() throws Exception {

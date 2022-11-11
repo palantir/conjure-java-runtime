@@ -17,6 +17,7 @@ dependencies {
     testImplementation "org.conscrypt:conscrypt-openjdk-uber"
     testImplementation "org.assertj:assertj-core"
     testImplementation "org.junit.jupiter:junit-jupiter"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'
