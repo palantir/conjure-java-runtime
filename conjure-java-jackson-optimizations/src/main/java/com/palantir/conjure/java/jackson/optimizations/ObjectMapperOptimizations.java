@@ -35,11 +35,11 @@ public final class ObjectMapperOptimizations {
                     // This may be globally configured with a system property
                     || readProperty("com.palantir.conjure.java.jackson.optimizations.disabled", false);
 
-    @SuppressWarnings("AfterburnerJavaIncompatibility")
     public static List<? extends com.fasterxml.jackson.databind.Module> createModules() {
         return NO_OPTIMIZATIONS ? List.of() : List.of(optimizationModule());
     }
 
+    @SuppressWarnings("AfterburnerJavaIncompatibility")
     private static com.fasterxml.jackson.databind.Module optimizationModule() {
         return isJava16OrLater() ? new BlackbirdModule() : new AfterburnerModule();
     }
