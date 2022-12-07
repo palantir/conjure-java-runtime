@@ -1,8 +1,8 @@
 # Run ./gradlew --write-locks to regenerate this file
 com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
 com.fasterxml.jackson.core:jackson-annotations:2.14.1 (9 constraints: 35b6e255)
-com.fasterxml.jackson.core:jackson-core:2.14.1 (13 constraints: ea25e272)
-com.fasterxml.jackson.core:jackson-databind:2.14.1 (20 constraints: b68c742e)
+com.fasterxml.jackson.core:jackson-core:2.14.1 (14 constraints: 683c1ff8)
+com.fasterxml.jackson.core:jackson-databind:2.14.1 (21 constraints: 34a3e7dd)
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.14.1 (2 constraints: 2c20b705)
 com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.14.1 (1 constraints: 3905393b)
 com.fasterxml.jackson.datatype:jackson-datatype-guava:2.14.1 (1 constraints: 3905393b)
@@ -12,6 +12,7 @@ com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.14.1 (1 constraints: 39
 com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.14.1 (1 constraints: f41af842)
 com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider:2.14.1 (1 constraints: 3905393b)
 com.fasterxml.jackson.module:jackson-module-afterburner:2.14.1 (1 constraints: 3905393b)
+com.fasterxml.jackson.module:jackson-module-blackbird:2.14.1 (1 constraints: 3905393b)
 com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.14.1 (2 constraints: e2304fb3)
 com.fasterxml.jackson.module:jackson-module-scala_2.12:2.14.1 (1 constraints: 3905393b)
 com.github.ben-manes.caffeine:caffeine:3.1.2 (3 constraints: de237fa1)
