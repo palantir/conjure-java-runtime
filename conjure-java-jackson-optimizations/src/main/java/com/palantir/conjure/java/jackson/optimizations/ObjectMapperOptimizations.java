@@ -33,7 +33,7 @@ public final class ObjectMapperOptimizations {
             // tree-shake.
             System.getProperty("org.graalvm.nativeimage.imagecode") != null
                     // This may be globally configured with a system property
-                    || readProperty("com.palantir.conjure.java.jackson.optimizations.disabled", isJava16OrLater());
+                    || readProperty("com.palantir.conjure.java.jackson.optimizations.disabled", false);
 
     @SuppressWarnings("AfterburnerJavaIncompatibility")
     public static List<? extends com.fasterxml.jackson.databind.Module> createModules() {
