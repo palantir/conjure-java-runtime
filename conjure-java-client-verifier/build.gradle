@@ -15,5 +15,4 @@ dependencies {
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     testImplementation 'org.apache.commons:commons-lang3'
     testImplementation 'com.palantir.safe-logging:logger'
-    testRuntimeOnly 'jakarta.ws.rs:jakarta.ws.rs-api'
 }
