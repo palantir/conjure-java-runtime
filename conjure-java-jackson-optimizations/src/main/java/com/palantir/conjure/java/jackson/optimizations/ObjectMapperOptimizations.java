@@ -16,8 +16,9 @@
 
 package com.palantir.conjure.java.jackson.optimizations;
 
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
-import java.util.List;
+import com.fasterxml.jackson.module.blackbird.*;
+
+import java.util.*;
 
 /**
  * Applies jackson optimization modules based on supported JVMs and best practices.
@@ -33,21 +34,22 @@ public final class ObjectMapperOptimizations {
             System.getProperty("org.graalvm.nativeimage.imagecode") != null
                     // This may be globally configured with a system property
                     || readProperty(
-                            "com.palantir.conjure.java.jackson.optimizations.disabled", shouldDisableByDefault());
+                    "com.palantir.conjure.java.jackson.optimizations.disabled", shouldDisableByDefault());
 
     @SuppressWarnings("AfterburnerJavaIncompatibility")
     public static List<? extends com.fasterxml.jackson.databind.Module> createModules() {
-        return NO_OPTIMIZATIONS ? List.of() : List.<com.fasterxml.jackson.databind.Module>of(new AfterburnerModule());
+        return NO_OPTIMIZATIONS ? List.of() : List.<com.fasterxml.jackson.databind.Module>of(new BlackbirdModule());
     }
 
-    private ObjectMapperOptimizations() {}
+    private ObjectMapperOptimizations() {
+    }
 
     /**
      * We disable afterburner optimizations by default on java 16+ where internal access is
      * restricted by https://openjdk.java.net/jeps/396 and https://openjdk.java.net/jeps/403.
      */
     private static boolean shouldDisableByDefault() {
-        return Runtime.version().feature() >= 16;
+        return false;
     }
 
     private static boolean readProperty(String property, boolean defaultValue) {
