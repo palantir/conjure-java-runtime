@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.jackson.optimizations;
 
-import com.fasterxml.jackson.module.blackbird.*;
-import java.util.*;
+import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
+import java.util.List;
 
 /**
  * Applies jackson optimization modules based on supported JVMs and best practices.
