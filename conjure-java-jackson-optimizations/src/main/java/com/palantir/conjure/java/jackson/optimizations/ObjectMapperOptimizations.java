@@ -16,7 +16,7 @@
 
 package com.palantir.conjure.java.jackson.optimizations;
 
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
 import java.util.List;
 
 /**
@@ -37,7 +37,7 @@ public final class ObjectMapperOptimizations {
 
     @SuppressWarnings("AfterburnerJavaIncompatibility")
     public static List<? extends com.fasterxml.jackson.databind.Module> createModules() {
-        return NO_OPTIMIZATIONS ? List.of() : List.<com.fasterxml.jackson.databind.Module>of(new AfterburnerModule());
+        return NO_OPTIMIZATIONS ? List.of() : List.<com.fasterxml.jackson.databind.Module>of(new BlackbirdModule());
     }
 
     private ObjectMapperOptimizations() {}
@@ -47,7 +47,7 @@ public final class ObjectMapperOptimizations {
      * restricted by https://openjdk.java.net/jeps/396 and https://openjdk.java.net/jeps/403.
      */
     private static boolean shouldDisableByDefault() {
-        return Runtime.version().feature() >= 16;
+        return false;
     }
 
     private static boolean readProperty(String property, boolean defaultValue) {
