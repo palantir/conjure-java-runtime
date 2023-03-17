@@ -56,7 +56,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.UUID;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public final class ObjectMappersTest {
     private static final JsonMapper MAPPER = ObjectMappers.newClientJsonMapper();
