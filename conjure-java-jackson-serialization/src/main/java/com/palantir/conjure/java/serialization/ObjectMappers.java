@@ -50,7 +50,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static JsonMapper newClientJsonMapper() {
-        return withDefaultModules(JsonMapper.builder())
+        return withDefaultModules(JsonMapper.builder(new InstrumentedJsonFactory()))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -96,7 +96,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static JsonMapper newServerJsonMapper() {
-        return withDefaultModules(JsonMapper.builder())
+        return withDefaultModules(JsonMapper.builder(new InstrumentedJsonFactory()))
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
