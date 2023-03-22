@@ -83,6 +83,11 @@ final class InstrumentedJsonFactory extends JsonFactory {
     }
 
     @Override
+    public String getFormatName() {
+        return FORMAT_NAME_JSON;
+    }
+
+    @Override
     protected JsonParser _createParser(InputStream in, IOContext ctxt) throws IOException {
         return wrap(super._createParser(in, ctxt));
     }
