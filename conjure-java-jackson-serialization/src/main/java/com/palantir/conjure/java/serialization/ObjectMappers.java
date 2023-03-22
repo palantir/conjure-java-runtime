@@ -36,10 +36,6 @@ public final class ObjectMappers {
 
     private ObjectMappers() {}
 
-    private static final SmileFactory SMILE_FACTORY = SmileFactory.builder()
-            .disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)
-            .build();
-
     /**
      * Returns a default ObjectMapper with settings adjusted for use in clients.
      *
@@ -81,7 +77,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static SmileMapper newClientSmileMapper() {
-        return withDefaultModules(SmileMapper.builder(SMILE_FACTORY))
+        return withDefaultModules(SmileMapper.builder(smileFactory()))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -127,7 +123,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static SmileMapper newServerSmileMapper() {
-        return withDefaultModules(SmileMapper.builder(SMILE_FACTORY))
+        return withDefaultModules(SmileMapper.builder(smileFactory()))
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -222,5 +218,11 @@ public final class ObjectMappers {
                 .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
                 .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
                 .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
+    }
+
+    private static SmileFactory smileFactory() {
+        return InstrumentedSmileFactory.builder()
+                .disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)
+                .build();
     }
 }

@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.serialization;
 
-import com.codahale.metrics.Histogram;
 import com.fasterxml.jackson.core.Base64Variant;
 import com.fasterxml.jackson.core.FormatSchema;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -37,14 +36,7 @@ import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.core.util.RequestPayload;
-import com.google.common.util.concurrent.RateLimiter;
-import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
-import com.palantir.logsafe.logger.SafeLogger;
-import com.palantir.logsafe.logger.SafeLoggerFactory;
-import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
-import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,35 +50,21 @@ import javax.annotation.Nullable;
 
 final class InstrumentedJsonFactory extends JsonFactory {
 
-    // Log at most once per second
-    private static final RateLimiter LOGGING_RATE_LIMITER = RateLimiter.create(1);
-    private static final SafeLogger log = SafeLoggerFactory.get(InstrumentedJsonFactory.class);
-    private final Histogram parsedStringLength;
-    private final Throwable creationStackTrace;
+    private final ParserInstrumentation instrumentation;
 
-    // Using the shared metric registry singleton to avoid API churn in methods that use this instrumentation.
-    @SuppressWarnings("deprecation")
     InstrumentedJsonFactory() {
-        this(SharedTaggedMetricRegistries.getSingleton());
+        this.instrumentation = new ParserInstrumentation();
     }
 
-    InstrumentedJsonFactory(TaggedMetricRegistry registry) {
-        this.parsedStringLength = JsonParserMetrics.of(registry).stringLength();
-        this.creationStackTrace = new SafeRuntimeException("InstrumentedJsonFactory created here");
-    }
-
-    private InstrumentedJsonFactory(
-            JsonFactoryBuilder builder, Histogram parsedStringLength, Throwable creationStackTrace) {
+    private InstrumentedJsonFactory(JsonFactoryBuilder builder, ParserInstrumentation instrumentation) {
         super(builder);
-        this.parsedStringLength = parsedStringLength;
-        this.creationStackTrace = creationStackTrace;
+        this.instrumentation = instrumentation;
     }
 
     private InstrumentedJsonFactory(
-            JsonFactory src, @Nullable ObjectCodec codec, Histogram parsedStringLength, Throwable creationStackTrace) {
+            JsonFactory src, @Nullable ObjectCodec codec, ParserInstrumentation instrumentation) {
         super(src, codec);
-        this.parsedStringLength = parsedStringLength;
-        this.creationStackTrace = creationStackTrace;
+        this.instrumentation = instrumentation;
     }
 
     @Override
@@ -94,14 +72,14 @@ final class InstrumentedJsonFactory extends JsonFactory {
         return new JsonFactoryBuilder(this) {
             @Override
             public JsonFactory build() {
-                return new InstrumentedJsonFactory(this, parsedStringLength, creationStackTrace);
+                return new InstrumentedJsonFactory(this, instrumentation);
             }
         };
     }
 
     @Override
     public JsonFactory copy() {
-        return new InstrumentedJsonFactory(this, null, parsedStringLength, creationStackTrace);
+        return new InstrumentedJsonFactory(this, null, instrumentation);
     }
 
     @Override
@@ -134,32 +112,16 @@ final class InstrumentedJsonFactory extends JsonFactory {
         if (input == null || input instanceof InstrumentedJsonParser) {
             return input;
         }
-        return new InstrumentedJsonParser(input, parsedStringLength, creationStackTrace);
+        return new InstrumentedJsonParser(input, instrumentation);
     }
 
     private static final class InstrumentedJsonParser extends JsonParser {
         private final JsonParser delegate;
-        private final Histogram parsedStringLength;
-        private final Throwable factoryCreationStackTrace;
+        private final ParserInstrumentation instrumentation;
 
-        InstrumentedJsonParser(JsonParser delegate, Histogram parsedStringLength, Throwable factoryCreationStackTrace) {
+        InstrumentedJsonParser(JsonParser delegate, ParserInstrumentation instrumentation) {
             this.delegate = delegate;
-            this.parsedStringLength = parsedStringLength;
-            this.factoryCreationStackTrace = factoryCreationStackTrace;
-        }
-
-        private String recordStringLength(String value) {
-            if (value != null) {
-                int length = value.length();
-                parsedStringLength.update(length);
-                if (length > 1_000_000 && LOGGING_RATE_LIMITER.tryAcquire()) {
-                    log.info(
-                            "Detected an unusually large JSON string value",
-                            SafeArg.of("length", length),
-                            new SafeRuntimeException("Pared here", factoryCreationStackTrace));
-                }
-            }
-            return value;
+            this.instrumentation = instrumentation;
         }
 
         @Override
@@ -376,7 +338,7 @@ final class InstrumentedJsonFactory extends JsonFactory {
 
         @Override
         public String nextTextValue() throws IOException {
-            return recordStringLength(delegate.nextTextValue());
+            return instrumentation.recordStringLength(delegate.nextTextValue());
         }
 
         @Override
@@ -488,7 +450,7 @@ final class InstrumentedJsonFactory extends JsonFactory {
 
         @Override
         public String getText() throws IOException {
-            return recordStringLength(delegate.getText());
+            return instrumentation.recordStringLength(delegate.getText());
         }
 
         @Override
@@ -643,12 +605,12 @@ final class InstrumentedJsonFactory extends JsonFactory {
 
         @Override
         public String getValueAsString() throws IOException {
-            return recordStringLength(delegate.getValueAsString());
+            return instrumentation.recordStringLength(delegate.getValueAsString());
         }
 
         @Override
         public String getValueAsString(String def) throws IOException {
-            return recordStringLength(delegate.getValueAsString(def));
+            return instrumentation.recordStringLength(delegate.getValueAsString(def));
         }
 
         @Override
