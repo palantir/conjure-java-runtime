@@ -57,7 +57,7 @@ final class ParserInstrumentation {
     private void recordNontrivialStringLength(int length) {
         parsedStringLength.update(length);
         if (length > 1_000_000 && LOGGING_RATE_LIMITER.tryAcquire()) {
-            log.info(
+            log.warn(
                     "Detected an unusually large JSON string value",
                     SafeArg.of("length", length),
                     new SafeRuntimeException("Parsed here", creationStackTrace));
