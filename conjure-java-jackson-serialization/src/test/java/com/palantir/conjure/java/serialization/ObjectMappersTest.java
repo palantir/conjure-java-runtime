@@ -19,6 +19,7 @@ package com.palantir.conjure.java.serialization;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.codahale.metrics.Histogram;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -27,6 +28,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -309,6 +312,64 @@ public final class ObjectMappersTest {
         assertThatThrownBy(() -> MAPPER.readValue("" + Long.MAX_VALUE, OptionalInt.class))
                 .isInstanceOf(InputCoercionException.class)
                 .hasMessageContaining("out of range of int");
+    }
+
+    @Test
+    public void testStringMetrics_json() throws IOException {
+        TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
+        // Unregister all metrics
+        registry.forEachMetric((name, _value) -> registry.remove(name));
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength();
+        assertThat(stringLength.getSnapshot().size()).isZero();
+        // Length must exceed the minimum threshold for metrics (64 characters)
+        String expected = "Hello, World!".repeat(10);
+        String value = ObjectMappers.newServerJsonMapper().readValue("\"" + expected + "\"", String.class);
+        assertThat(value).isEqualTo(expected);
+        assertThat(stringLength.getSnapshot().size()).isOne();
+        assertThat(stringLength.getSnapshot().getMax()).isEqualTo(expected.length());
+    }
+
+    @Test
+    public void testStringMetricsNotRecordedWhenValuesAreSmall_json() throws IOException {
+        TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
+        // Unregister all metrics
+        registry.forEachMetric((name, _value) -> registry.remove(name));
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength();
+        assertThat(stringLength.getSnapshot().size()).isZero();
+        String expected = "Hello, World!";
+        String value = ObjectMappers.newServerJsonMapper().readValue("\"" + expected + "\"", String.class);
+        assertThat(value).isEqualTo(expected);
+        assertThat(stringLength.getSnapshot().size()).isZero();
+    }
+
+    @Test
+    public void testStringMetrics_smile() throws IOException {
+        TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
+        // Unregister all metrics
+        registry.forEachMetric((name, _value) -> registry.remove(name));
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength();
+        assertThat(stringLength.getSnapshot().size()).isZero();
+        // Length must exceed the minimum threshold for metrics (64 characters)
+        String expected = "Hello, World!".repeat(10);
+        String value = ObjectMappers.newServerSmileMapper()
+                .readValue(ObjectMappers.newClientSmileMapper().writeValueAsBytes(expected), String.class);
+        assertThat(value).isEqualTo(expected);
+        assertThat(stringLength.getSnapshot().size()).isOne();
+        assertThat(stringLength.getSnapshot().getMax()).isEqualTo(expected.length());
+    }
+
+    @Test
+    public void testStringMetricsNotRecordedWhenValuesAreSmall_smile() throws IOException {
+        TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
+        // Unregister all metrics
+        registry.forEachMetric((name, _value) -> registry.remove(name));
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength();
+        assertThat(stringLength.getSnapshot().size()).isZero();
+        String expected = "Hello, World!";
+        String value = ObjectMappers.newServerSmileMapper()
+                .readValue(ObjectMappers.newClientSmileMapper().writeValueAsBytes(expected), String.class);
+        assertThat(value).isEqualTo(expected);
+        assertThat(stringLength.getSnapshot().size()).isZero();
     }
 
     private static String ser(Object object) throws IOException {
