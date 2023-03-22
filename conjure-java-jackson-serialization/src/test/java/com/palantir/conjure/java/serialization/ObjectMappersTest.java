@@ -372,6 +372,30 @@ public final class ObjectMappersTest {
         assertThat(stringLength.getSnapshot().size()).isZero();
     }
 
+    @Test
+    public void testJsonFormatName() {
+        assertThat(ObjectMappers.newServerJsonMapper().getFactory().getFormatName())
+                .isEqualTo("JSON");
+        assertThat(ObjectMappers.newClientJsonMapper().getFactory().getFormatName())
+                .isEqualTo("JSON");
+    }
+
+    @Test
+    public void testCborFormatName() {
+        assertThat(ObjectMappers.newServerCborMapper().getFactory().getFormatName())
+                .isEqualTo("CBOR");
+        assertThat(ObjectMappers.newClientCborMapper().getFactory().getFormatName())
+                .isEqualTo("CBOR");
+    }
+
+    @Test
+    public void testSmileFormatName() {
+        assertThat(ObjectMappers.newServerSmileMapper().getFactory().getFormatName())
+                .isEqualTo("Smile");
+        assertThat(ObjectMappers.newClientSmileMapper().getFactory().getFormatName())
+                .isEqualTo("Smile");
+    }
+
     private static String ser(Object object) throws IOException {
         return MAPPER.writeValueAsString(object);
     }
