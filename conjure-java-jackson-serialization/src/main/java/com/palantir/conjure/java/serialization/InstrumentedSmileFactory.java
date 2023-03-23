@@ -34,11 +34,11 @@ final class InstrumentedSmileFactory extends SmileFactory {
     private final ParserInstrumentation instrumentation;
 
     InstrumentedSmileFactory() {
-        instrumentation = new ParserInstrumentation();
+        instrumentation = new ParserInstrumentation(getFormatName());
     }
 
     private InstrumentedSmileFactory(SmileFactoryBuilder builder) {
-        this(builder, new ParserInstrumentation());
+        this(builder, new ParserInstrumentation(FORMAT_NAME_SMILE));
     }
 
     private InstrumentedSmileFactory(SmileFactoryBuilder builder, ParserInstrumentation instrumentation) {

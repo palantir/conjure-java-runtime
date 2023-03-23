@@ -53,7 +53,7 @@ final class InstrumentedJsonFactory extends JsonFactory {
     private final ParserInstrumentation instrumentation;
 
     InstrumentedJsonFactory() {
-        this.instrumentation = new ParserInstrumentation();
+        this.instrumentation = new ParserInstrumentation(getFormatName());
     }
 
     private InstrumentedJsonFactory(JsonFactoryBuilder builder, ParserInstrumentation instrumentation) {

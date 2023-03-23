@@ -21,12 +21,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.codahale.metrics.Histogram;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.InputCoercionException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -319,7 +321,7 @@ public final class ObjectMappersTest {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
         // Unregister all metrics
         registry.forEachMetric((name, _value) -> registry.remove(name));
-        Histogram stringLength = JsonParserMetrics.of(registry).stringLength();
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength(JsonFactory.FORMAT_NAME_JSON);
         assertThat(stringLength.getSnapshot().size()).isZero();
         // Length must exceed the minimum threshold for metrics (64 characters)
         String expected = "Hello, World!".repeat(10);
@@ -334,7 +336,7 @@ public final class ObjectMappersTest {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
         // Unregister all metrics
         registry.forEachMetric((name, _value) -> registry.remove(name));
-        Histogram stringLength = JsonParserMetrics.of(registry).stringLength();
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength(JsonFactory.FORMAT_NAME_JSON);
         assertThat(stringLength.getSnapshot().size()).isZero();
         String expected = "Hello, World!";
         String value = ObjectMappers.newServerJsonMapper().readValue("\"" + expected + "\"", String.class);
@@ -347,7 +349,7 @@ public final class ObjectMappersTest {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
         // Unregister all metrics
         registry.forEachMetric((name, _value) -> registry.remove(name));
-        Histogram stringLength = JsonParserMetrics.of(registry).stringLength();
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength(SmileFactory.FORMAT_NAME_SMILE);
         assertThat(stringLength.getSnapshot().size()).isZero();
         // Length must exceed the minimum threshold for metrics (64 characters)
         String expected = "Hello, World!".repeat(10);
@@ -363,7 +365,7 @@ public final class ObjectMappersTest {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
         // Unregister all metrics
         registry.forEachMetric((name, _value) -> registry.remove(name));
-        Histogram stringLength = JsonParserMetrics.of(registry).stringLength();
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength(SmileFactory.FORMAT_NAME_SMILE);
         assertThat(stringLength.getSnapshot().size()).isZero();
         String expected = "Hello, World!";
         String value = ObjectMappers.newServerSmileMapper()
