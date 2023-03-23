@@ -35,10 +35,10 @@ final class ParserInstrumentation {
 
     // Using the shared metric registry singleton to avoid API churn in methods that use this instrumentation.
     @SuppressWarnings("deprecation")
-    ParserInstrumentation() {
+    ParserInstrumentation(String format) {
         creationStackTrace = new SafeRuntimeException("Stream factory created here");
         parsedStringLength = JsonParserMetrics.of(SharedTaggedMetricRegistries.getSingleton())
-                .stringLength();
+                .stringLength(format);
     }
 
     /** Returns the input, recording length of the value. */

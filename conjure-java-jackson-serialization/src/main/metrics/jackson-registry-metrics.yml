@@ -7,4 +7,6 @@ namespaces:
     metrics:
       string.length:
         type: histogram
+        tags:
+          - format
         docs: Histogram describing the length of strings parsed from input.
