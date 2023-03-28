@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Increase string-length observability thresholds
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2574
