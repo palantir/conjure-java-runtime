@@ -351,7 +351,7 @@ public final class ObjectMappersTest {
         registry.forEachMetric((name, _value) -> registry.remove(name));
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(SmileFactory.FORMAT_NAME_SMILE);
         assertThat(stringLength.getSnapshot().size()).isZero();
-        // Length must exceed the minimum threshold for metrics (64 characters)
+        // Length must exceed the minimum threshold for metrics
         String expected = "Hello, World!".repeat(100000);
         String value = ObjectMappers.newServerSmileMapper()
                 .readValue(ObjectMappers.newClientSmileMapper().writeValueAsBytes(expected), String.class);
