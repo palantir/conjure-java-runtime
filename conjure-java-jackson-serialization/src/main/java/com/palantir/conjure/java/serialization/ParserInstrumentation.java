@@ -46,8 +46,9 @@ final class ParserInstrumentation {
         if (value != null) {
             int length = value.length();
             // Avoid updating a histogram in the common case (small values) because this path will be exceedingly
-            // hot.
-            if (length > 64) {
+            // hot. Furthermore, we use sampling reservoirs, so the higher the rate at which we report values, the
+            // more likely it becomes that our largest inputs will not be sampled.
+            if (length > 1024 * 512) {
                 recordNontrivialStringLength(length);
             }
         }
@@ -56,7 +57,7 @@ final class ParserInstrumentation {
 
     private void recordNontrivialStringLength(int length) {
         parsedStringLength.update(length);
-        if (length > 1_000_000 && LOGGING_RATE_LIMITER.tryAcquire()) {
+        if (length > 4_000_000 && LOGGING_RATE_LIMITER.tryAcquire()) {
             log.warn(
                     "Detected an unusually large JSON string value",
                     SafeArg.of("length", length),
