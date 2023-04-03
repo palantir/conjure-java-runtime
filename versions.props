@@ -25,7 +25,8 @@ io.leangen.geantyref:geantyref = 1.3.4
 io.undertow:* = 2.2.24.Final
 # dependency-upgrader:OFF
 # Last version of undertow with both Jakarta+Javax support before 'undertow-servlet' was
-# updated to jakarta only.
+# updated to jakarta only. This should NEVER be done in production code, it is only used
+# here to enable existing test coverage.
 io.undertow:undertow-servlet-jakarta = 2.2.20.Final
 # dependency-upgrader:ON
 com.palantir.refreshable:refreshable = 2.2.0
