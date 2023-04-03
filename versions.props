@@ -50,8 +50,6 @@ javax.inject:javax.inject = 1
 # dependency-upgrader:OFF
 
 com.fasterxml.jackson.*:* = 2.13.1
-
-# Temporarily pausing until internal libraries stop relying on UnrepeatableRequestBody
 com.squareup.okhttp3:* = 4.10.0
 
 # We cannot upgrade retrofit2 to 2.5.0 because of https://github.com/palantir/conjure-java-runtime/issues/930

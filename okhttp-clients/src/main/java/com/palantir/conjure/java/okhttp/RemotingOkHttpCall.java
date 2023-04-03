@@ -49,9 +49,9 @@ import okhttp3.Callback;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import okhttp3.internal.http.UnrepeatableRequestBody;
 
 /**
  * An OkHttp {@link Call} implementation that handles standard retryable error status such as 308, 429, 503, and
@@ -586,7 +586,8 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     private static boolean isStreamingBody(Call call) {
-        return call.request().body() instanceof UnrepeatableRequestBody;
+        RequestBody body = call.request().body();
+        return body != null && body.isOneShot();
     }
 
     private static boolean shouldPropagateQos(ClientConfiguration.ServerQoS serverQoS) {
