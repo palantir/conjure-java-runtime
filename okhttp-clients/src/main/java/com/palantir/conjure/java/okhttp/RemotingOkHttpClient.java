@@ -52,7 +52,7 @@ final class RemotingOkHttpClient extends OkHttpClient {
     private final ClientConfiguration.RetryOnSocketException retryOnSocketException;
 
     RemotingOkHttpClient(
-            OkHttpClient delegate,
+            OkHttpClient.Builder delegateBuilder,
             Supplier<BackoffStrategy> backoffStrategy,
             NodeSelectionStrategy nodeSelectionStrategy,
             UrlSelector urls,
@@ -62,7 +62,7 @@ final class RemotingOkHttpClient extends OkHttpClient {
             ClientConfiguration.ServerQoS serverQoS,
             ClientConfiguration.RetryOnTimeout retryOnTimeout,
             ClientConfiguration.RetryOnSocketException retryOnSocketException) {
-        super(delegate.newBuilder());
+        super(delegateBuilder);
         this.backoffStrategyFactory = backoffStrategy;
         this.nodeSelectionStrategy = nodeSelectionStrategy;
         this.urls = urls;
