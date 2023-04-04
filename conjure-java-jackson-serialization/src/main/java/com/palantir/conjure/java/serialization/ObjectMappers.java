@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.serialization;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +47,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static JsonMapper newClientJsonMapper() {
-        return withDefaultModules(JsonMapper.builder(new InstrumentedJsonFactory()))
+        return withDefaultModules(JsonMapper.builder(jsonFactory()))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -92,7 +93,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static JsonMapper newServerJsonMapper() {
-        return withDefaultModules(JsonMapper.builder(new InstrumentedJsonFactory()))
+        return withDefaultModules(JsonMapper.builder(jsonFactory()))
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -220,9 +221,18 @@ public final class ObjectMappers {
                 .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
     }
 
+    private static JsonFactory jsonFactory() {
+        JsonFactory jsonFactory = new InstrumentedJsonFactory();
+        // Interning introduces excessive contention https://github.com/FasterXML/jackson-core/issues/946
+        jsonFactory.disable(JsonFactory.Feature.INTERN_FIELD_NAMES);
+        return jsonFactory;
+    }
+
     private static SmileFactory smileFactory() {
         return InstrumentedSmileFactory.builder()
                 .disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)
+                // Interning introduces excessive contention https://github.com/FasterXML/jackson-core/issues/946
+                .disable(JsonFactory.Feature.INTERN_FIELD_NAMES)
                 .build();
     }
 }
