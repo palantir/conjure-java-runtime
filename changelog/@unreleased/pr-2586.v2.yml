@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Add public JsonFactory factories to ObjectMappers
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2586
