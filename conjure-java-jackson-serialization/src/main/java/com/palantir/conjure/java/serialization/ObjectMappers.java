@@ -17,12 +17,14 @@
 package com.palantir.conjure.java.serialization;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.TSFBuilder;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileGenerator;
@@ -62,7 +64,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static CBORMapper newClientCborMapper() {
-        return withDefaultModules(CBORMapper.builder())
+        return withDefaultModules(CBORMapper.builder(cborFactory()))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -108,7 +110,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static CBORMapper newServerCborMapper() {
-        return withDefaultModules(CBORMapper.builder())
+        return withDefaultModules(CBORMapper.builder(cborFactory()))
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -221,18 +223,26 @@ public final class ObjectMappers {
                 .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
     }
 
-    private static JsonFactory jsonFactory() {
-        JsonFactory jsonFactory = new InstrumentedJsonFactory();
-        // Interning introduces excessive contention https://github.com/FasterXML/jackson-core/issues/946
-        jsonFactory.disable(JsonFactory.Feature.INTERN_FIELD_NAMES);
-        return jsonFactory;
+    /** Creates a new {@link JsonFactory} configured with Conjure defaults. */
+    public static JsonFactory jsonFactory() {
+        return withDefaults(InstrumentedJsonFactory.builder()).build();
     }
 
-    private static SmileFactory smileFactory() {
-        return InstrumentedSmileFactory.builder()
-                .disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)
-                // Interning introduces excessive contention https://github.com/FasterXML/jackson-core/issues/946
-                .disable(JsonFactory.Feature.INTERN_FIELD_NAMES)
+    /** Creates a new {@link SmileFactory} configured with Conjure defaults. */
+    public static SmileFactory smileFactory() {
+        return withDefaults(InstrumentedSmileFactory.builder().disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT))
                 .build();
+    }
+
+    /** Creates a new {@link CBORFactory} configured with Conjure defaults. */
+    public static CBORFactory cborFactory() {
+        return withDefaults(CBORFactory.builder()).build();
+    }
+
+    /** Configures provided JsonFactory with Conjure default settings. */
+    private static <F extends JsonFactory, B extends TSFBuilder<F, B>> B withDefaults(B builder) {
+        return builder
+                // Interning introduces excessive contention https://github.com/FasterXML/jackson-core/issues/946
+                .disable(JsonFactory.Feature.INTERN_FIELD_NAMES);
     }
 }
