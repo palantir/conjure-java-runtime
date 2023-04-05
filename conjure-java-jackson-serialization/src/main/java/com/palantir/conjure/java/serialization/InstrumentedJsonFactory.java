@@ -28,7 +28,6 @@ import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.SerializableString;
 import com.fasterxml.jackson.core.StreamReadCapability;
 import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.core.TSFBuilder;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.async.NonBlockingInputFeeder;
@@ -56,6 +55,10 @@ final class InstrumentedJsonFactory extends JsonFactory {
         this.instrumentation = new ParserInstrumentation(getFormatName());
     }
 
+    private InstrumentedJsonFactory(JsonFactoryBuilder builder) {
+        this(builder, new ParserInstrumentation(FORMAT_NAME_JSON));
+    }
+
     private InstrumentedJsonFactory(JsonFactoryBuilder builder, ParserInstrumentation instrumentation) {
         super(builder);
         this.instrumentation = instrumentation;
@@ -67,8 +70,17 @@ final class InstrumentedJsonFactory extends JsonFactory {
         this.instrumentation = instrumentation;
     }
 
+    public static JsonFactoryBuilder builder() {
+        return new JsonFactoryBuilder() {
+            @Override
+            public JsonFactory build() {
+                return new InstrumentedJsonFactory(this);
+            }
+        };
+    }
+
     @Override
-    public TSFBuilder<?, ?> rebuild() {
+    public JsonFactoryBuilder rebuild() {
         return new JsonFactoryBuilder(this) {
             @Override
             public JsonFactory build() {

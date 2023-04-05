@@ -26,6 +26,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.InputCoercionException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.util.InternCache;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
@@ -49,6 +51,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
+import java.util.UUID;
 import org.junit.Test;
 
 public final class ObjectMappersTest {
@@ -396,6 +399,28 @@ public final class ObjectMappersTest {
                 .isEqualTo("Smile");
         assertThat(ObjectMappers.newClientSmileMapper().getFactory().getFormatName())
                 .isEqualTo("Smile");
+    }
+
+    @Test
+    public void testMapKeysAreNotInterned() throws IOException {
+        testMapKeysAreNotInterned(ObjectMappers.newServerJsonMapper());
+        testMapKeysAreNotInterned(ObjectMappers.newServerCborMapper());
+        testMapKeysAreNotInterned(ObjectMappers.newServerSmileMapper());
+    }
+
+    public void testMapKeysAreNotInterned(ObjectMapper mapper) throws IOException {
+        Map<String, String> expected = Collections.singletonMap(
+                UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        byte[] serialized = mapper.writeValueAsBytes(expected);
+        // Reset static state cache. Note that this may flake if we run tests in parallel within
+        // the same process.
+        InternCache.instance.clear();
+        Map<String, String> actual = mapper.readValue(serialized, new TypeReference<>() {});
+        assertThat(actual).isEqualTo(expected);
+        assertThat(InternCache.instance)
+                .as("The Jackson InternCache should have no interactions "
+                        + "due to pitfalls described in https://shipilev.net/jvm/anatomy-quarks/10-string-intern/")
+                .isEmpty();
     }
 
     private static String ser(Object object) throws IOException {
