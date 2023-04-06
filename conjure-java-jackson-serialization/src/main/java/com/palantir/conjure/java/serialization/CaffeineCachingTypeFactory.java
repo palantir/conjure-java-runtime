@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.serialization;
 
+import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.type.TypeModifier;
@@ -25,11 +26,19 @@ import com.fasterxml.jackson.databind.util.LRUMap;
 import com.fasterxml.jackson.databind.util.LookupCache;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalCause;
+import com.github.benmanes.caffeine.cache.stats.CacheStats;
+import com.github.benmanes.caffeine.cache.stats.StatsCounter;
 import com.google.common.primitives.Ints;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
+import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import java.util.Locale;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
+import org.checkerframework.checker.index.qual.NonNegative;
 
 final class CaffeineCachingTypeFactory extends TypeFactory {
     private static final SafeLogger log = SafeLoggerFactory.get(CaffeineCachingTypeFactory.class);
@@ -108,6 +117,7 @@ final class CaffeineCachingTypeFactory extends TypeFactory {
                     .maximumSize(1000)
                     // initial-size 128 up from 16 default as of 2.14.2
                     .initialCapacity(128)
+                    .recordStats(InstrumentedStatsCounter.SUPPLIER)
                     .build();
         }
 
@@ -140,6 +150,67 @@ final class CaffeineCachingTypeFactory extends TypeFactory {
         @Override
         public String toString() {
             return "CaffeineLookupCache{" + cache + '}';
+        }
+    }
+
+    private static final class InstrumentedStatsCounter implements StatsCounter {
+        // Collecting metrics without broadening APIs to require a TaggedMetricRegistry
+        @SuppressWarnings("deprecation")
+        private static final StatsCounter INSTANCE =
+                new InstrumentedStatsCounter(SharedTaggedMetricRegistries.getSingleton());
+
+        private static final Supplier<StatsCounter> SUPPLIER = () -> INSTANCE;
+
+        private final Meter hits;
+        private final Meter misses;
+        // Eviction meters are based on RemovalCause ordinal
+        private final Meter[] evictions;
+
+        private InstrumentedStatsCounter(TaggedMetricRegistry registry) {
+            JsonDatabindTypefactoryCacheMetrics metrics = JsonDatabindTypefactoryCacheMetrics.of(registry);
+            this.hits = metrics.hit();
+            this.misses = metrics.miss();
+            RemovalCause[] causes = RemovalCause.values();
+            this.evictions = new Meter[causes.length];
+            for (int i = 0; i < causes.length; i++) {
+                evictions[i] = metrics.eviction(causes[i].name().toLowerCase(Locale.ROOT));
+            }
+        }
+
+        @Override
+        public void recordHits(@NonNegative int count) {
+            hits.mark(count);
+        }
+
+        @Override
+        public void recordMisses(@NonNegative int count) {
+            misses.mark(count);
+        }
+
+        @Override
+        public void recordLoadSuccess(@NonNegative long _loadTime) {
+            // nop
+        }
+
+        @Override
+        public void recordLoadFailure(@NonNegative long _loadTime) {
+            // nop
+        }
+
+        @Override
+        public void recordEviction(@NonNegative int _weight, RemovalCause cause) {
+            evictions[cause.ordinal()].mark();
+        }
+
+        @Override
+        public CacheStats snapshot() {
+            // Item weight is always 1, evictions count and weight are always identical.
+            // We don't measure load success/failure/timing information.
+            long evictionsCount = 0;
+            for (Meter meter : evictions) {
+                evictionsCount += meter.getCount();
+            }
+            return CacheStats.of(hits.getCount(), misses.getCount(), 0, 0, 0, evictionsCount, evictionsCount);
         }
     }
 }

@@ -1,0 +1,25 @@
+options:
+  javaPackage: com.palantir.conjure.java.serialization
+  javaVisibility: packagePrivate
+namespaces:
+  json.parser:
+    docs: Metrics produced instrumented Jackson components.
+    metrics:
+      string.length:
+        type: histogram
+        tags:
+          - format
+        docs: Histogram describing the length of strings parsed from input.
+  json.databind.typefactory.cache:
+    docs: Metrics produced by the Jackson Databind TypeFactory cache.
+    metrics:
+      hit:
+        type: meter
+        docs: Rate at which cache lookups are successful.
+      miss:
+        type: meter
+        docs: Rate at which cache lookups miss and require computation.
+      eviction:
+        type: meter
+        docs: Rate at which cache entries are removed, tagged by the cause for removal.
+        tags: [reason]
