@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.core.util.InternCache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
@@ -322,8 +324,7 @@ public final class ObjectMappersTest {
     @Test
     public void testStringMetrics_json() throws IOException {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
-        // Unregister all metrics
-        registry.forEachMetric((name, _value) -> registry.remove(name));
+        removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(JsonFactory.FORMAT_NAME_JSON);
         assertThat(stringLength.getSnapshot().size()).isZero();
         // Length must exceed the minimum threshold for metrics
@@ -337,8 +338,7 @@ public final class ObjectMappersTest {
     @Test
     public void testStringMetricsNotRecordedWhenValuesAreSmall_json() throws IOException {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
-        // Unregister all metrics
-        registry.forEachMetric((name, _value) -> registry.remove(name));
+        removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(JsonFactory.FORMAT_NAME_JSON);
         assertThat(stringLength.getSnapshot().size()).isZero();
         String expected = "Hello, World!";
@@ -350,8 +350,7 @@ public final class ObjectMappersTest {
     @Test
     public void testStringMetrics_smile() throws IOException {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
-        // Unregister all metrics
-        registry.forEachMetric((name, _value) -> registry.remove(name));
+        removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(SmileFactory.FORMAT_NAME_SMILE);
         assertThat(stringLength.getSnapshot().size()).isZero();
         // Length must exceed the minimum threshold for metrics
@@ -366,8 +365,7 @@ public final class ObjectMappersTest {
     @Test
     public void testStringMetricsNotRecordedWhenValuesAreSmall_smile() throws IOException {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
-        // Unregister all metrics
-        registry.forEachMetric((name, _value) -> registry.remove(name));
+        removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(SmileFactory.FORMAT_NAME_SMILE);
         assertThat(stringLength.getSnapshot().size()).isZero();
         String expected = "Hello, World!";
@@ -375,6 +373,15 @@ public final class ObjectMappersTest {
                 .readValue(ObjectMappers.newClientSmileMapper().writeValueAsBytes(expected), String.class);
         assertThat(value).isEqualTo(expected);
         assertThat(stringLength.getSnapshot().size()).isZero();
+    }
+
+    private static void removeJsonParserMetrics(TaggedMetricRegistry registry) {
+        // Unregister relevant metrics
+        registry.forEachMetric((name, _value) -> {
+            if (name.safeName().startsWith("json.parser")) {
+                registry.remove(name);
+            }
+        });
     }
 
     @Test
@@ -419,6 +426,34 @@ public final class ObjectMappersTest {
 
     private void testTypeFactory(ObjectMapper mapper) {
         assertThat(mapper.getTypeFactory()).isInstanceOf(CaffeineCachingTypeFactory.class);
+    }
+
+    @Test
+    public void testTypeFactoryCacheMetrics() {
+        TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
+        JsonDatabindTypefactoryCacheMetrics metrics = JsonDatabindTypefactoryCacheMetrics.of(registry);
+        Meter hit = metrics.hit();
+        Meter miss = metrics.miss();
+        TypeFactory typeFactory = ObjectMappers.newServerJsonMapper().getTypeFactory();
+
+        long hitBeforeFirst = hit.getCount();
+        long missBeforeFirst = miss.getCount();
+        typeFactory.constructType(SimpleSerializable.class);
+        assertThat(miss.getCount() - missBeforeFirst).isOne();
+        assertThat(hit.getCount() - hitBeforeFirst).isZero();
+        // After writing the same type again, we should observe hits and no additional misses.
+        long hitBeforeSecond = hit.getCount();
+        long missBeforeSecond = miss.getCount();
+        typeFactory.constructType(SimpleSerializable.class);
+        assertThat(miss.getCount() - missBeforeSecond).isZero();
+        assertThat(hit.getCount() - hitBeforeSecond).isOne();
+    }
+
+    static final class SimpleSerializable {
+        @JsonProperty("str")
+        public String toString() {
+            return "stringValue";
+        }
     }
 
     @Test
