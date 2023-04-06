@@ -402,13 +402,33 @@ public final class ObjectMappersTest {
     }
 
     @Test
+    public void testTypeFactoryCache() {
+        testTypeFactory(ObjectMappers.newServerObjectMapper());
+        testTypeFactory(ObjectMappers.newClientObjectMapper());
+        testTypeFactory(ObjectMappers.newServerJsonMapper());
+        testTypeFactory(ObjectMappers.newClientJsonMapper());
+        testTypeFactory(ObjectMappers.newSmileServerObjectMapper());
+        testTypeFactory(ObjectMappers.newSmileClientObjectMapper());
+        testTypeFactory(ObjectMappers.newServerSmileMapper());
+        testTypeFactory(ObjectMappers.newClientSmileMapper());
+        testTypeFactory(ObjectMappers.newCborServerObjectMapper());
+        testTypeFactory(ObjectMappers.newCborClientObjectMapper());
+        testTypeFactory(ObjectMappers.newServerCborMapper());
+        testTypeFactory(ObjectMappers.newClientCborMapper());
+    }
+
+    private void testTypeFactory(ObjectMapper mapper) {
+        assertThat(mapper.getTypeFactory()).isInstanceOf(CaffeineCachingTypeFactory.class);
+    }
+
+    @Test
     public void testMapKeysAreNotInterned() throws IOException {
         testMapKeysAreNotInterned(ObjectMappers.newServerJsonMapper());
         testMapKeysAreNotInterned(ObjectMappers.newServerCborMapper());
         testMapKeysAreNotInterned(ObjectMappers.newServerSmileMapper());
     }
 
-    public void testMapKeysAreNotInterned(ObjectMapper mapper) throws IOException {
+    private void testMapKeysAreNotInterned(ObjectMapper mapper) throws IOException {
         Map<String, String> expected = Collections.singletonMap(
                 UUID.randomUUID().toString(), UUID.randomUUID().toString());
         byte[] serialized = mapper.writeValueAsBytes(expected);
