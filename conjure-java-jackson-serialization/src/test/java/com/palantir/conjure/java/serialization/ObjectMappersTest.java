@@ -31,8 +31,8 @@ import com.fasterxml.jackson.core.util.InternCache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
-import com.google.common.io.ByteStreams;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -429,29 +429,24 @@ public final class ObjectMappersTest {
     }
 
     @Test
-    public void testTypeFactoryCacheMetrics() throws IOException {
+    public void testTypeFactoryCacheMetrics() {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
         JsonDatabindTypefactoryCacheMetrics metrics = JsonDatabindTypefactoryCacheMetrics.of(registry);
         Meter hit = metrics.hit();
         Meter miss = metrics.miss();
+        TypeFactory typeFactory = ObjectMappers.newServerJsonMapper().getTypeFactory();
 
-        ObjectMapper mapper = ObjectMappers.newServerJsonMapper();
-        long hitBefore = hit.getCount();
-        long missBefore = miss.getCount();
-
-        mapper.writeValue(ByteStreams.nullOutputStream(), new SimpleSerializable());
-
-        long hits = hit.getCount() - hitBefore;
-        long misses = miss.getCount() - missBefore;
-
-        assertThat(hits).isGreaterThan(0);
-        assertThat(misses).isOne();
-
-        // After writing the same type again, we should observe no additional misses.
-        missBefore = miss.getCount();
-        mapper.writeValue(ByteStreams.nullOutputStream(), new SimpleSerializable());
-        misses = miss.getCount() - missBefore;
-        assertThat(misses).isZero();
+        long hitBeforeFirst = hit.getCount();
+        long missBeforeFirst = miss.getCount();
+        typeFactory.constructType(SimpleSerializable.class);
+        assertThat(miss.getCount() - missBeforeFirst).isOne();
+        assertThat(hit.getCount() - hitBeforeFirst).isZero();
+        // After writing the same type again, we should observe hits and no additional misses.
+        long hitBeforeSecond = hit.getCount();
+        long missBeforeSecond = miss.getCount();
+        typeFactory.constructType(SimpleSerializable.class);
+        assertThat(miss.getCount() - missBeforeSecond).isZero();
+        assertThat(hit.getCount() - hitBeforeSecond).isOne();
     }
 
     static final class SimpleSerializable {
