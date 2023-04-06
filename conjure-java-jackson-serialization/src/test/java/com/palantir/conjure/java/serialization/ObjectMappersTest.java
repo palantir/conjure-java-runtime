@@ -324,8 +324,7 @@ public final class ObjectMappersTest {
     @Test
     public void testStringMetrics_json() throws IOException {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
-        // Unregister all metrics
-        registry.forEachMetric((name, _value) -> registry.remove(name));
+        removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(JsonFactory.FORMAT_NAME_JSON);
         assertThat(stringLength.getSnapshot().size()).isZero();
         // Length must exceed the minimum threshold for metrics
@@ -339,8 +338,7 @@ public final class ObjectMappersTest {
     @Test
     public void testStringMetricsNotRecordedWhenValuesAreSmall_json() throws IOException {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
-        // Unregister all metrics
-        registry.forEachMetric((name, _value) -> registry.remove(name));
+        removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(JsonFactory.FORMAT_NAME_JSON);
         assertThat(stringLength.getSnapshot().size()).isZero();
         String expected = "Hello, World!";
@@ -352,8 +350,7 @@ public final class ObjectMappersTest {
     @Test
     public void testStringMetrics_smile() throws IOException {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
-        // Unregister all metrics
-        registry.forEachMetric((name, _value) -> registry.remove(name));
+        removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(SmileFactory.FORMAT_NAME_SMILE);
         assertThat(stringLength.getSnapshot().size()).isZero();
         // Length must exceed the minimum threshold for metrics
@@ -368,8 +365,7 @@ public final class ObjectMappersTest {
     @Test
     public void testStringMetricsNotRecordedWhenValuesAreSmall_smile() throws IOException {
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
-        // Unregister all metrics
-        registry.forEachMetric((name, _value) -> registry.remove(name));
+        removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(SmileFactory.FORMAT_NAME_SMILE);
         assertThat(stringLength.getSnapshot().size()).isZero();
         String expected = "Hello, World!";
@@ -377,6 +373,15 @@ public final class ObjectMappersTest {
                 .readValue(ObjectMappers.newClientSmileMapper().writeValueAsBytes(expected), String.class);
         assertThat(value).isEqualTo(expected);
         assertThat(stringLength.getSnapshot().size()).isZero();
+    }
+
+    private static void removeJsonParserMetrics(TaggedMetricRegistry registry) {
+        // Unregister relevant metrics
+        registry.forEachMetric((name, _value) -> {
+            if (name.safeName().startsWith("json.parser")) {
+                registry.remove(name);
+            }
+        });
     }
 
     @Test
