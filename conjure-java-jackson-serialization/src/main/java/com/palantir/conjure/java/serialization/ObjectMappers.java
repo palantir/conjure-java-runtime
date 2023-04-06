@@ -205,8 +205,8 @@ public final class ObjectMappers {
      * </ul>
      */
     public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
-        mapper.setTypeFactory(new CaffeineCachingTypeFactory());
-        return mapper.registerModule(new GuavaModule())
+        return mapper.setTypeFactory(new CaffeineCachingTypeFactory())
+                .registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
                 .registerModules(ObjectMapperOptimizations.createModules())
