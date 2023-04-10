@@ -1,6 +1,7 @@
 apply plugin: 'com.palantir.external-publish-jar'
 apply plugin: 'com.palantir.revapi'
 apply plugin: 'com.palantir.metric-schema'
+apply plugin: 'me.champeau.jmh'
 
 dependencies {
     implementation project(":conjure-java-jackson-optimizations")
@@ -18,4 +19,7 @@ dependencies {
 
     testImplementation "junit:junit"
     testImplementation "org.assertj:assertj-core"
+
+    jmhImplementation 'org.openjdk.jmh:jmh-core'
+    jmhAnnotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess'
 }

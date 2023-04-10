@@ -18,6 +18,7 @@ junit:junit = 4.13.2
 org.apache.commons:commons-lang3 = 3.12.0
 org.assertj:assertj-core = 3.24.2
 org.immutables:value = 2.9.3
+org.openjdk.jmh:* = 1.36
 org.jmock:jmock = 2.12.0
 org.mockito:* = 5.2.0
 org.slf4j:* = 1.7.36
