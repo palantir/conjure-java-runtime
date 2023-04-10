@@ -43,6 +43,7 @@ allprojects {
 
     repositories {
         mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
+        mavenLocal() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
 
     configurations.all {
@@ -54,6 +55,12 @@ allprojects {
             if (details.requested.group == 'com.google.errorprone' && details.requested.name == 'error_prone_annotations') {
                 details.useTarget group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.7.1'
                 details.because "The error_prone_annotations dependency must be low to avoid forcing consumers to use newer releases"
+            }
+            if (details.requested.group.startsWith('com.fasterxml.jackson') && details.requested.name != 'jackson-databind') {
+                details.useTarget group: details.requested.group, name: details.requested.name, version: '2.14.2'
+            }
+            if (details.requested.group.startsWith('com.fasterxml.jackson') && details.requested.name == 'jackson-databind') {
+                details.useTarget group: details.requested.group, name: details.requested.name, version: '2.14.3-SNAPSHOT'
             }
         }
     }
