@@ -159,6 +159,7 @@ final class CaffeineCachingTypeFactory extends TypeFactory {
         private static final StatsCounter INSTANCE =
                 new InstrumentedStatsCounter(SharedTaggedMetricRegistries.getSingleton());
 
+        @SuppressWarnings("UnnecessaryLambda")
         private static final Supplier<StatsCounter> SUPPLIER = () -> INSTANCE;
 
         private final Meter hits;

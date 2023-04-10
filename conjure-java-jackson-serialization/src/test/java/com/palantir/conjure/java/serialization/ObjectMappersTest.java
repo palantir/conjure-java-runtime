@@ -450,6 +450,7 @@ public final class ObjectMappersTest {
     }
 
     static final class SimpleSerializable {
+        @Override
         @JsonProperty("str")
         public String toString() {
             return "stringValue";
