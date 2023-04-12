@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
@@ -31,7 +30,6 @@ import com.fasterxml.jackson.core.util.InternCache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
@@ -425,36 +423,7 @@ public final class ObjectMappersTest {
     }
 
     private void testTypeFactory(ObjectMapper mapper) {
-        assertThat(mapper.getTypeFactory()).isInstanceOf(CaffeineCachingTypeFactory.class);
-    }
-
-    @Test
-    public void testTypeFactoryCacheMetrics() {
-        TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
-        JsonDatabindTypefactoryCacheMetrics metrics = JsonDatabindTypefactoryCacheMetrics.of(registry);
-        Meter hit = metrics.hit();
-        Meter miss = metrics.miss();
-        TypeFactory typeFactory = ObjectMappers.newServerJsonMapper().getTypeFactory();
-
-        long hitBeforeFirst = hit.getCount();
-        long missBeforeFirst = miss.getCount();
-        typeFactory.constructType(SimpleSerializable.class);
-        assertThat(miss.getCount() - missBeforeFirst).isOne();
-        assertThat(hit.getCount() - hitBeforeFirst).isZero();
-        // After writing the same type again, we should observe hits and no additional misses.
-        long hitBeforeSecond = hit.getCount();
-        long missBeforeSecond = miss.getCount();
-        typeFactory.constructType(SimpleSerializable.class);
-        assertThat(miss.getCount() - missBeforeSecond).isZero();
-        assertThat(hit.getCount() - hitBeforeSecond).isOne();
-    }
-
-    static final class SimpleSerializable {
-        @Override
-        @JsonProperty("str")
-        public String toString() {
-            return "stringValue";
-        }
+        assertThat(mapper.getTypeFactory()).isInstanceOf(NonCachingTypeFactory.class);
     }
 
     @Test
