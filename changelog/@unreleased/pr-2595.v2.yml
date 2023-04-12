@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Opt out of the TypeFactory cache until we can resolve cache contention
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2595
