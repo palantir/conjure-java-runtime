@@ -14,7 +14,6 @@ dependencies {
     api "com.palantir.safe-logging:preconditions"
     implementation "com.palantir.safe-logging:logger"
     implementation 'com.palantir.tritium:tritium-registry'
-    implementation 'com.github.ben-manes.caffeine:caffeine'
 
     testImplementation "junit:junit"
     testImplementation "org.assertj:assertj-core"
