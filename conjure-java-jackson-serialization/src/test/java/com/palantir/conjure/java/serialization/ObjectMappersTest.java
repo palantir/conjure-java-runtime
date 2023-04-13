@@ -472,7 +472,7 @@ public final class ObjectMappersTest {
         // the same process.
         InternCache.instance.clear();
         Map<String, String> actual = mapper.readValue(serialized, new TypeReference<>() {});
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(expected);
         assertThat(InternCache.instance)
                 .as("The Jackson InternCache should have no interactions "
                         + "due to pitfalls described in https://shipilev.net/jvm/anatomy-quarks/10-string-intern/")
