@@ -30,13 +30,17 @@ import com.fasterxml.jackson.core.util.InternCache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -424,6 +428,51 @@ public final class ObjectMappersTest {
 
     private void testTypeFactory(ObjectMapper mapper) {
         assertThat(mapper.getTypeFactory()).isInstanceOf(NonCachingTypeFactory.class);
+    }
+
+    @Test
+    public void testObjectMapperWithDefaultModules() throws IOException {
+        ObjectMapper mapper = ObjectMappers.withDefaultModules(new ObjectMapper().registerModule(new Jdk8Module()));
+        Optional<String> value = mapper.readValue("\"hello\"", new TypeReference<>() {});
+        assertThat(value).hasValue("hello");
+    }
+
+    @Test
+    public void testJsonMapperBuilderWithDefaultModules() throws IOException {
+        ObjectMapper mapper = ObjectMappers.withDefaultModules(
+                        JsonMapper.builder().addModule(new Jdk8Module().configureAbsentsAsNulls(true)))
+                .build();
+        Optional<String> value = mapper.readValue("\"hello\"", new TypeReference<>() {});
+        assertThat(value).hasValue("hello");
+    }
+
+    @Test
+    public void testObjectMapperWithDefaultModulesRetainsTypeFactoryClassLoader() throws IOException {
+        try (URLClassLoader classLoader = new URLClassLoader(new URL[0])) {
+            ObjectMapper mapper = new ObjectMapper()
+                    .setTypeFactory(TypeFactory.defaultInstance().withClassLoader(classLoader));
+            ObjectMapper updated = ObjectMappers.withDefaultModules(mapper);
+            assertThat(updated.getTypeFactory().getClassLoader()).isSameAs(classLoader);
+        }
+
+        ObjectMapper mapper = ObjectMappers.withDefaultModules(ObjectMappers.newClientJsonMapper());
+        Optional<String> value = mapper.readValue("\"hello\"", new TypeReference<>() {});
+        assertThat(value).hasValue("hello");
+    }
+
+    @Test
+    public void testJsonMapperBuilderWithDefaultModulesRetainsTypeFactoryClassLoader() throws IOException {
+        try (URLClassLoader classLoader = new URLClassLoader(new URL[0])) {
+            JsonMapper mapper = ObjectMappers.withDefaultModules(JsonMapper.builder()
+                            .typeFactory(TypeFactory.defaultInstance().withClassLoader(classLoader)))
+                    .build();
+            ObjectMapper updated = ObjectMappers.withDefaultModules(mapper);
+            assertThat(updated.getTypeFactory().getClassLoader()).isSameAs(classLoader);
+        }
+
+        ObjectMapper mapper = ObjectMappers.withDefaultModules(ObjectMappers.newClientJsonMapper());
+        Optional<String> value = mapper.readValue("\"hello\"", new TypeReference<>() {});
+        assertThat(value).hasValue("hello");
     }
 
     @Test
