@@ -32,11 +32,29 @@ import javax.annotation.Nullable;
  */
 final class NonCachingTypeFactory extends TypeFactory {
 
-    NonCachingTypeFactory() {
+    /**
+     * Attempt to produce a {@link NonCachingTypeFactory} based on the given {@link TypeFactory}.
+     * If the provided TypeFactory is non-default, this may not be possible to do safely
+     * and the original will be returned.
+     */
+    static TypeFactory from(TypeFactory original) {
+        if (original instanceof NonCachingTypeFactory) {
+            return original;
+        }
+        if (original == TypeFactory.defaultInstance()) {
+            return new NonCachingTypeFactory();
+        }
+        // As a fallback we update the existing factory with a non-caching cache implementation. Unfortunately this
+        // is not likely to survive any module registration which adds a TypeModifier, but it's the best we can do.
+        // If we return a new instance which doesn't preserve existing TypeModifiers, deserialization may fail.
+        return original.withCache(NoCacheLookupCache.INSTANCE);
+    }
+
+    private NonCachingTypeFactory() {
         super(NoCacheLookupCache.INSTANCE);
     }
 
-    NonCachingTypeFactory(TypeParser parser, @Nullable TypeModifier[] modifiers, ClassLoader classLoader) {
+    private NonCachingTypeFactory(TypeParser parser, @Nullable TypeModifier[] modifiers, ClassLoader classLoader) {
         super(NoCacheLookupCache.INSTANCE, parser, modifiers, classLoader);
     }
 

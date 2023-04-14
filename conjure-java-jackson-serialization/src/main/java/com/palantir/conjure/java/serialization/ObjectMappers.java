@@ -170,7 +170,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static <M extends ObjectMapper, B extends MapperBuilder<M, B>> B withDefaultModules(B builder) {
-        return builder.typeFactory(new NonCachingTypeFactory())
+        return builder.typeFactory(NonCachingTypeFactory.from(builder.build().getTypeFactory()))
                 .addModule(new GuavaModule())
                 .addModule(new ShimJdk7Module())
                 .addModule(new Jdk8Module().configureAbsentsAsNulls(true))
@@ -205,7 +205,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
-        return mapper.setTypeFactory(new NonCachingTypeFactory())
+        return mapper.setTypeFactory(NonCachingTypeFactory.from(mapper.getTypeFactory()))
                 .registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
