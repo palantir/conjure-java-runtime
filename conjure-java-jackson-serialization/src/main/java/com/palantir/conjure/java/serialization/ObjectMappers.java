@@ -243,8 +243,8 @@ public final class ObjectMappers {
 
     /** Configures provided JsonFactory with Conjure default settings. */
     private static <F extends JsonFactory, B extends TSFBuilder<F, B>> B withDefaults(B builder) {
-        return builder
+        return ReflectiveStreamReadConstraints.withDefaultConstraints(builder
                 // Interning introduces excessive contention https://github.com/FasterXML/jackson-core/issues/946
-                .disable(JsonFactory.Feature.INTERN_FIELD_NAMES);
+                .disable(JsonFactory.Feature.INTERN_FIELD_NAMES));
     }
 }

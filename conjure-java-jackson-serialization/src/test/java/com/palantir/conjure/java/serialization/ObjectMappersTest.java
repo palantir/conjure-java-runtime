@@ -497,6 +497,15 @@ public final class ObjectMappersTest {
                 .isEmpty();
     }
 
+    @Test
+    public void testExtraordinarilyLargeStrings() throws IOException {
+        // Value must sit between StreamReadConstraints.DEFAULT_MAX_STRING_LEN and
+        // ReflectiveStreamReadConstraints.MAX_STRING_LENGTH.
+        int size = 10_000_000;
+        String parsed = ObjectMappers.newServerJsonMapper().readValue('"' + "a".repeat(size) + '"', String.class);
+        assertThat(parsed).hasSize(size);
+    }
+
     private static String ser(Object object) throws IOException {
         return MAPPER.writeValueAsString(object);
     }
