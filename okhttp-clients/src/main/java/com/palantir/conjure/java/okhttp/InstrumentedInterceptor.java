@@ -21,6 +21,8 @@ import com.codahale.metrics.Timer;
 import com.google.common.base.Stopwatch;
 import com.palantir.conjure.java.client.config.HostEventsSink;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
@@ -66,7 +68,7 @@ final class InstrumentedInterceptor implements Interceptor {
         long micros = stopwatch.elapsed(TimeUnit.MICROSECONDS);
 
         hostEventsSink.record(serviceName, hostname, port, response.code(), micros);
-        responseTimer.update(micros, TimeUnit.MICROSECONDS);
+        responseTimer.update(Duration.of(micros, ChronoUnit.MICROS));
 
         return response;
     }
