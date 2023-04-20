@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Opt out of canonicalization in Conjure JsonFactories
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2603
