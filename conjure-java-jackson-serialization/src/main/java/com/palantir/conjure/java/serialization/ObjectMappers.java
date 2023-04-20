@@ -245,6 +245,10 @@ public final class ObjectMappers {
     private static <F extends JsonFactory, B extends TSFBuilder<F, B>> B withDefaults(B builder) {
         return ReflectiveStreamReadConstraints.withDefaultConstraints(builder
                 // Interning introduces excessive contention https://github.com/FasterXML/jackson-core/issues/946
-                .disable(JsonFactory.Feature.INTERN_FIELD_NAMES));
+                .disable(JsonFactory.Feature.INTERN_FIELD_NAMES)
+                // Canonicalization can be helpful to avoid string re-allocation, however we expect unbounded
+                // key space due to use of maps keyed by random identifiers, which cause heavy heap churn.
+                // See this discussion: https://github.com/FasterXML/jackson-benchmarks/pull/6
+                .disable(JsonFactory.Feature.CANONICALIZE_FIELD_NAMES));
     }
 }
