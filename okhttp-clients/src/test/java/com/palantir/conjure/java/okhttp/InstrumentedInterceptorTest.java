@@ -24,7 +24,6 @@ import com.codahale.metrics.Timer;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
-import com.palantir.tritium.metrics.registry.MetricName;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.IOException;
 import java.util.Collection;
@@ -82,13 +81,7 @@ public final class InstrumentedInterceptorTest {
 
     @Test
     public void testResponseMetricRegistered() throws IOException {
-        MetricName name = MetricName.builder()
-                .safeName("client.response")
-                .putSafeTags("service-name", "client")
-                .putSafeTags("libraryName", "conjure-java-runtime")
-                .putSafeTags("libraryVersion", "unknown")
-                .build();
-        Timer timer = registry.timer(name);
+        Timer timer = ClientMetrics.of(registry).response("client");
 
         assertThat(timer.getCount()).isZero();
 
