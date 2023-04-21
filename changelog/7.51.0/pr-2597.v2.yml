@@ -1,0 +1,6 @@
+type: fix
+fix:
+  description: ObjectMappers.withDefaultModules(ObjectMapper) does not replace existing
+    TypeFactories with state from registered modules
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2597

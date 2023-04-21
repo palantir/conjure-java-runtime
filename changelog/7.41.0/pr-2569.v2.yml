@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Report metrics when unusually large strings are parsed using JSON mappers
+    created using Conjure ObjectMappers factory methods.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2569

@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Use a TypeFactory backed by a Caffeine Cache
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2587

@@ -19,17 +19,28 @@ package com.palantir.conjure.java.serialization;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.codahale.metrics.Histogram;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.exc.InputCoercionException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.util.InternCache;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.palantir.logsafe.Preconditions;
+import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
+import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
@@ -44,6 +55,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 public final class ObjectMappersTest {
@@ -309,6 +321,189 @@ public final class ObjectMappersTest {
         assertThatThrownBy(() -> MAPPER.readValue("" + Long.MAX_VALUE, OptionalInt.class))
                 .isInstanceOf(InputCoercionException.class)
                 .hasMessageContaining("out of range of int");
+    }
+
+    @Test
+    public void testStringMetrics_json() throws IOException {
+        TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
+        removeJsonParserMetrics(registry);
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength(JsonFactory.FORMAT_NAME_JSON);
+        assertThat(stringLength.getSnapshot().size()).isZero();
+        // Length must exceed the minimum threshold for metrics
+        String expected = "Hello, World!".repeat(100000);
+        String value = ObjectMappers.newServerJsonMapper().readValue("\"" + expected + "\"", String.class);
+        assertThat(value).isEqualTo(expected);
+        assertThat(stringLength.getSnapshot().size()).isOne();
+        assertThat(stringLength.getSnapshot().getMax()).isEqualTo(expected.length());
+    }
+
+    @Test
+    public void testStringMetricsNotRecordedWhenValuesAreSmall_json() throws IOException {
+        TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
+        removeJsonParserMetrics(registry);
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength(JsonFactory.FORMAT_NAME_JSON);
+        assertThat(stringLength.getSnapshot().size()).isZero();
+        String expected = "Hello, World!";
+        String value = ObjectMappers.newServerJsonMapper().readValue("\"" + expected + "\"", String.class);
+        assertThat(value).isEqualTo(expected);
+        assertThat(stringLength.getSnapshot().size()).isZero();
+    }
+
+    @Test
+    public void testStringMetrics_smile() throws IOException {
+        TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
+        removeJsonParserMetrics(registry);
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength(SmileFactory.FORMAT_NAME_SMILE);
+        assertThat(stringLength.getSnapshot().size()).isZero();
+        // Length must exceed the minimum threshold for metrics
+        String expected = "Hello, World!".repeat(100000);
+        String value = ObjectMappers.newServerSmileMapper()
+                .readValue(ObjectMappers.newClientSmileMapper().writeValueAsBytes(expected), String.class);
+        assertThat(value).isEqualTo(expected);
+        assertThat(stringLength.getSnapshot().size()).isOne();
+        assertThat(stringLength.getSnapshot().getMax()).isEqualTo(expected.length());
+    }
+
+    @Test
+    public void testStringMetricsNotRecordedWhenValuesAreSmall_smile() throws IOException {
+        TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
+        removeJsonParserMetrics(registry);
+        Histogram stringLength = JsonParserMetrics.of(registry).stringLength(SmileFactory.FORMAT_NAME_SMILE);
+        assertThat(stringLength.getSnapshot().size()).isZero();
+        String expected = "Hello, World!";
+        String value = ObjectMappers.newServerSmileMapper()
+                .readValue(ObjectMappers.newClientSmileMapper().writeValueAsBytes(expected), String.class);
+        assertThat(value).isEqualTo(expected);
+        assertThat(stringLength.getSnapshot().size()).isZero();
+    }
+
+    private static void removeJsonParserMetrics(TaggedMetricRegistry registry) {
+        // Unregister relevant metrics
+        registry.forEachMetric((name, _value) -> {
+            if (name.safeName().startsWith("json.parser")) {
+                registry.remove(name);
+            }
+        });
+    }
+
+    @Test
+    public void testJsonFormatName() {
+        assertThat(ObjectMappers.newServerJsonMapper().getFactory().getFormatName())
+                .isEqualTo("JSON");
+        assertThat(ObjectMappers.newClientJsonMapper().getFactory().getFormatName())
+                .isEqualTo("JSON");
+    }
+
+    @Test
+    public void testCborFormatName() {
+        assertThat(ObjectMappers.newServerCborMapper().getFactory().getFormatName())
+                .isEqualTo("CBOR");
+        assertThat(ObjectMappers.newClientCborMapper().getFactory().getFormatName())
+                .isEqualTo("CBOR");
+    }
+
+    @Test
+    public void testSmileFormatName() {
+        assertThat(ObjectMappers.newServerSmileMapper().getFactory().getFormatName())
+                .isEqualTo("Smile");
+        assertThat(ObjectMappers.newClientSmileMapper().getFactory().getFormatName())
+                .isEqualTo("Smile");
+    }
+
+    @Test
+    public void testTypeFactoryCache() {
+        testTypeFactory(ObjectMappers.newServerObjectMapper());
+        testTypeFactory(ObjectMappers.newClientObjectMapper());
+        testTypeFactory(ObjectMappers.newServerJsonMapper());
+        testTypeFactory(ObjectMappers.newClientJsonMapper());
+        testTypeFactory(ObjectMappers.newSmileServerObjectMapper());
+        testTypeFactory(ObjectMappers.newSmileClientObjectMapper());
+        testTypeFactory(ObjectMappers.newServerSmileMapper());
+        testTypeFactory(ObjectMappers.newClientSmileMapper());
+        testTypeFactory(ObjectMappers.newCborServerObjectMapper());
+        testTypeFactory(ObjectMappers.newCborClientObjectMapper());
+        testTypeFactory(ObjectMappers.newServerCborMapper());
+        testTypeFactory(ObjectMappers.newClientCborMapper());
+    }
+
+    private void testTypeFactory(ObjectMapper mapper) {
+        assertThat(mapper.getTypeFactory()).isInstanceOf(NonCachingTypeFactory.class);
+    }
+
+    @Test
+    public void testObjectMapperWithDefaultModules() throws IOException {
+        ObjectMapper mapper = ObjectMappers.withDefaultModules(new ObjectMapper().registerModule(new Jdk8Module()));
+        Optional<String> value = mapper.readValue("\"hello\"", new TypeReference<>() {});
+        assertThat(value).hasValue("hello");
+    }
+
+    @Test
+    public void testJsonMapperBuilderWithDefaultModules() throws IOException {
+        ObjectMapper mapper = ObjectMappers.withDefaultModules(
+                        JsonMapper.builder().addModule(new Jdk8Module().configureAbsentsAsNulls(true)))
+                .build();
+        Optional<String> value = mapper.readValue("\"hello\"", new TypeReference<>() {});
+        assertThat(value).hasValue("hello");
+    }
+
+    @Test
+    public void testObjectMapperWithDefaultModulesRetainsTypeFactoryClassLoader() throws IOException {
+        try (URLClassLoader classLoader = new URLClassLoader(new URL[0])) {
+            ObjectMapper mapper = new ObjectMapper()
+                    .setTypeFactory(TypeFactory.defaultInstance().withClassLoader(classLoader));
+            ObjectMapper updated = ObjectMappers.withDefaultModules(mapper);
+            assertThat(updated.getTypeFactory().getClassLoader()).isSameAs(classLoader);
+        }
+
+        ObjectMapper mapper = ObjectMappers.withDefaultModules(ObjectMappers.newClientJsonMapper());
+        Optional<String> value = mapper.readValue("\"hello\"", new TypeReference<>() {});
+        assertThat(value).hasValue("hello");
+    }
+
+    @Test
+    public void testJsonMapperBuilderWithDefaultModulesRetainsTypeFactoryClassLoader() throws IOException {
+        try (URLClassLoader classLoader = new URLClassLoader(new URL[0])) {
+            JsonMapper mapper = ObjectMappers.withDefaultModules(JsonMapper.builder()
+                            .typeFactory(TypeFactory.defaultInstance().withClassLoader(classLoader)))
+                    .build();
+            ObjectMapper updated = ObjectMappers.withDefaultModules(mapper);
+            assertThat(updated.getTypeFactory().getClassLoader()).isSameAs(classLoader);
+        }
+
+        ObjectMapper mapper = ObjectMappers.withDefaultModules(ObjectMappers.newClientJsonMapper());
+        Optional<String> value = mapper.readValue("\"hello\"", new TypeReference<>() {});
+        assertThat(value).hasValue("hello");
+    }
+
+    @Test
+    public void testMapKeysAreNotInterned() throws IOException {
+        testMapKeysAreNotInterned(ObjectMappers.newServerJsonMapper());
+        testMapKeysAreNotInterned(ObjectMappers.newServerCborMapper());
+        testMapKeysAreNotInterned(ObjectMappers.newServerSmileMapper());
+    }
+
+    private void testMapKeysAreNotInterned(ObjectMapper mapper) throws IOException {
+        Map<String, String> expected = Collections.singletonMap(
+                UUID.randomUUID().toString(), UUID.randomUUID().toString());
+        byte[] serialized = mapper.writeValueAsBytes(expected);
+        // Reset static state cache. Note that this may flake if we run tests in parallel within
+        // the same process.
+        InternCache.instance.clear();
+        Map<String, String> actual = mapper.readValue(serialized, new TypeReference<>() {});
+        assertThat(actual).containsExactlyInAnyOrderEntriesOf(expected);
+        assertThat(InternCache.instance)
+                .as("The Jackson InternCache should have no interactions "
+                        + "due to pitfalls described in https://shipilev.net/jvm/anatomy-quarks/10-string-intern/")
+                .isEmpty();
+    }
+
+    @Test
+    public void testExtraordinarilyLargeStrings() throws IOException {
+        // Value must sit between StreamReadConstraints.DEFAULT_MAX_STRING_LEN and
+        // ReflectiveStreamReadConstraints.MAX_STRING_LENGTH.
+        int size = 10_000_000;
+        String parsed = ObjectMappers.newServerJsonMapper().readValue('"' + "a".repeat(size) + '"', String.class);
+        assertThat(parsed).hasSize(size);
     }
 
     private static String ser(Object object) throws IOException {

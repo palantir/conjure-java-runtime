@@ -6,17 +6,17 @@ buildscript {
 
     dependencies {
         classpath 'com.palantir.jakartapackagealignment:jakarta-package-alignment:0.5.0'
-        classpath 'com.palantir.gradle.jdks:gradle-jdks:0.31.0'
+        classpath 'com.palantir.gradle.jdks:gradle-jdks:0.32.0'
         classpath 'com.palantir.gradle.jdkslatest:gradle-jdks-latest:0.7.0'
         classpath 'com.palantir.gradle.externalpublish:gradle-external-publish-plugin:1.12.0'
-        classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.28.0'
+        classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.29.0'
         classpath 'com.palantir.gradle.revapi:gradle-revapi:1.7.0'
         classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:7.0.1'
-        classpath 'com.palantir.baseline:gradle-baseline-java:4.188.0'
-        classpath 'com.palantir.gradle.gitversion:gradle-git-version:0.15.0'
-        classpath 'com.palantir.metricschema:gradle-metric-schema:0.16.0'
+        classpath 'com.palantir.baseline:gradle-baseline-java:5.7.0'
+        classpath 'com.palantir.gradle.gitversion:gradle-git-version:3.0.0'
+        classpath 'com.palantir.metricschema:gradle-metric-schema:0.20.0'
         classpath 'gradle.plugin.org.inferred:gradle-processors:3.7.0'
-        classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.11.0'
+        classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.12.0'
     }
 }
 
@@ -59,11 +59,6 @@ allprojects {
 
     dependencies {
         constraints {
-            rootConfiguration 'io.dropwizard.metrics:metrics-core', {
-                version { strictly '[3, 4[' }
-                because "Spark still uses 3.X, which can't co-exist with 4.X"
-            }
-
             rootConfiguration 'com.squareup.retrofit2:retrofit', {
                 version { strictly '2.4.0' }
                 because 'Retrofit 2.5.0 breaks with our path parameter routing logic'

@@ -16,12 +16,15 @@
 
 package com.palantir.conjure.java.serialization;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.TSFBuilder;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileGenerator;
@@ -36,10 +39,6 @@ public final class ObjectMappers {
 
     private ObjectMappers() {}
 
-    private static final SmileFactory SMILE_FACTORY = SmileFactory.builder()
-            .disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT)
-            .build();
-
     /**
      * Returns a default ObjectMapper with settings adjusted for use in clients.
      *
@@ -50,7 +49,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static JsonMapper newClientJsonMapper() {
-        return withDefaultModules(JsonMapper.builder())
+        return withDefaultModules(JsonMapper.builder(jsonFactory()))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -65,7 +64,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static CBORMapper newClientCborMapper() {
-        return withDefaultModules(CBORMapper.builder())
+        return withDefaultModules(CBORMapper.builder(cborFactory()))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -81,7 +80,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static SmileMapper newClientSmileMapper() {
-        return withDefaultModules(SmileMapper.builder(SMILE_FACTORY))
+        return withDefaultModules(SmileMapper.builder(smileFactory()))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -96,7 +95,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static JsonMapper newServerJsonMapper() {
-        return withDefaultModules(JsonMapper.builder())
+        return withDefaultModules(JsonMapper.builder(jsonFactory()))
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -111,7 +110,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static CBORMapper newServerCborMapper() {
-        return withDefaultModules(CBORMapper.builder())
+        return withDefaultModules(CBORMapper.builder(cborFactory()))
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -127,7 +126,7 @@ public final class ObjectMappers {
      * </ul>
      */
     public static SmileMapper newServerSmileMapper() {
-        return withDefaultModules(SmileMapper.builder(SMILE_FACTORY))
+        return withDefaultModules(SmileMapper.builder(smileFactory()))
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -171,7 +170,8 @@ public final class ObjectMappers {
      * </ul>
      */
     public static <M extends ObjectMapper, B extends MapperBuilder<M, B>> B withDefaultModules(B builder) {
-        return builder.addModule(new GuavaModule())
+        return builder.typeFactory(NonCachingTypeFactory.from(builder.build().getTypeFactory()))
+                .addModule(new GuavaModule())
                 .addModule(new ShimJdk7Module())
                 .addModule(new Jdk8Module().configureAbsentsAsNulls(true))
                 .addModules(ObjectMapperOptimizations.createModules())
@@ -205,7 +205,8 @@ public final class ObjectMappers {
      * </ul>
      */
     public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
-        return mapper.registerModule(new GuavaModule())
+        return mapper.setTypeFactory(NonCachingTypeFactory.from(mapper.getTypeFactory()))
+                .registerModule(new GuavaModule())
                 .registerModule(new ShimJdk7Module())
                 .registerModule(new Jdk8Module().configureAbsentsAsNulls(true))
                 .registerModules(ObjectMapperOptimizations.createModules())
@@ -222,5 +223,32 @@ public final class ObjectMappers {
                 .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
                 .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
                 .disable(DeserializationFeature.ACCEPT_FLOAT_AS_INT);
+    }
+
+    /** Creates a new {@link JsonFactory} configured with Conjure defaults. */
+    public static JsonFactory jsonFactory() {
+        return withDefaults(InstrumentedJsonFactory.builder()).build();
+    }
+
+    /** Creates a new {@link SmileFactory} configured with Conjure defaults. */
+    public static SmileFactory smileFactory() {
+        return withDefaults(InstrumentedSmileFactory.builder().disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT))
+                .build();
+    }
+
+    /** Creates a new {@link CBORFactory} configured with Conjure defaults. */
+    public static CBORFactory cborFactory() {
+        return withDefaults(CBORFactory.builder()).build();
+    }
+
+    /** Configures provided JsonFactory with Conjure default settings. */
+    private static <F extends JsonFactory, B extends TSFBuilder<F, B>> B withDefaults(B builder) {
+        return ReflectiveStreamReadConstraints.withDefaultConstraints(builder
+                // Interning introduces excessive contention https://github.com/FasterXML/jackson-core/issues/946
+                .disable(JsonFactory.Feature.INTERN_FIELD_NAMES)
+                // Canonicalization can be helpful to avoid string re-allocation, however we expect unbounded
+                // key space due to use of maps keyed by random identifiers, which cause heavy heap churn.
+                // See this discussion: https://github.com/FasterXML/jackson-benchmarks/pull/6
+                .disable(JsonFactory.Feature.CANONICALIZE_FIELD_NAMES));
     }
 }

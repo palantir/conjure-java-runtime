@@ -1,0 +1,12 @@
+options:
+  javaPackage: com.palantir.conjure.java.serialization
+  javaVisibility: packagePrivate
+namespaces:
+  json.parser:
+    docs: Metrics produced instrumented Jackson components.
+    metrics:
+      string.length:
+        type: histogram
+        tags:
+          - format
+        docs: Histogram describing the length of strings parsed from input.

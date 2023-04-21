@@ -301,8 +301,8 @@ final class ConcurrencyLimiters {
                             // exclude
                             // them from the 'slow acquire' metric
                             if (TimeUnit.NANOSECONDS.toMillis(durationNanos) > 1) {
-                                slowAcquire.update(durationNanos, TimeUnit.NANOSECONDS);
-                                slowAcquireTagged.update(durationNanos, TimeUnit.NANOSECONDS);
+                                slowAcquire.update(Duration.ofNanos(durationNanos));
+                                slowAcquireTagged.update(Duration.ofNanos(durationNanos));
                             }
                         }
 
