@@ -24,7 +24,7 @@ import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.Rule;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public final class Retrofit2ClientConfigRefreshTest extends TestBase {
 
