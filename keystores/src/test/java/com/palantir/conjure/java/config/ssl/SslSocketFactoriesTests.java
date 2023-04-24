@@ -19,6 +19,7 @@ package com.palantir.conjure.java.config.ssl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
@@ -362,6 +363,9 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testConscryptProvider_context() {
+        assumeThat(Conscrypt.isAvailable())
+                .as("Conscrypt is not available on this platform")
+                .isTrue();
         SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(new File("src/test/resources/testCA/testCA.jks").toPath())
                 .build();
@@ -375,6 +379,9 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testConscryptProvider_socketFactory() {
+        assumeThat(Conscrypt.isAvailable())
+                .as("Conscrypt is not available on this platform")
+                .isTrue();
         SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(new File("src/test/resources/testCA/testCA.jks").toPath())
                 .build();
