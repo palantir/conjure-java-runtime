@@ -30,8 +30,10 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.Provider;
 import java.util.Map;
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import org.conscrypt.Conscrypt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -384,5 +386,19 @@ public final class SslSocketFactoriesTests {
         SSLSocketFactory defaultFactory = SslSocketFactories.createSslSocketFactory(sslConfig);
         assertThat(Conscrypt.isConscrypt(conscryptFactory)).isTrue();
         assertThat(Conscrypt.isConscrypt(defaultFactory)).isFalse();
+    }
+
+    @Test
+    public void testCreateSslContext_completesWithProvidedManagers() {
+        SslConfiguration sslConfig = SslConfiguration.builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .trustStoreType(TestConstants.CA_TRUST_STORE_TYPE)
+                .build();
+
+        TrustManager[] trustManagers = SslSocketFactories.createTrustManagers(sslConfig);
+        KeyManager[] keyManagers = SslSocketFactories.createKeyManagers(sslConfig);
+
+        assertThat(SslSocketFactories.createSslContext(trustManagers, keyManagers))
+                .isNotNull();
     }
 }

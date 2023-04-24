@@ -22,6 +22,7 @@ import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.UserAgent;
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
@@ -37,7 +38,9 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 /** Utilities for creating {@link ClientConfiguration} instances. */
@@ -75,9 +78,16 @@ public final class ClientConfigurations {
      * empty/absent configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(ServiceConfiguration config) {
+        TrustManager[] trustManagers = SslSocketFactories.createTrustManagers(config.security());
+        KeyManager[] keyManagers = SslSocketFactories.createKeyManagers(config.security());
+        SSLSocketFactory sslSocketFactory =
+                SslSocketFactories.createSslContext(trustManagers, keyManagers).getSocketFactory();
+
+        X509TrustManager trustManager = extractX509TrustManager(trustManagers, config.security());
+
         return ClientConfiguration.builder()
-                .sslSocketFactory(SslSocketFactories.createSslSocketFactory(config.security()))
-                .trustManager(SslSocketFactories.createX509TrustManager(config.security()))
+                .sslSocketFactory(sslSocketFactory)
+                .trustManager(trustManager)
                 .uris(config.uris())
                 .connectTimeout(config.connectTimeout().orElse(DEFAULT_CONNECT_TIMEOUT))
                 .readTimeout(config.readTimeout().orElse(DEFAULT_READ_TIMEOUT))
@@ -195,6 +205,19 @@ public final class ClientConfigurations {
     static InetSocketAddress createInetSocketAddress(String uriString) {
         URI uri = URI.create(uriString);
         return InetSocketAddress.createUnresolved(uri.getHost(), uri.getPort());
+    }
+
+    private static X509TrustManager extractX509TrustManager(TrustManager[] trustManagers, SslConfiguration config) {
+        TrustManager trustManager = trustManagers[0];
+        if (trustManager instanceof X509TrustManager) {
+            return (X509TrustManager) trustManager;
+        } else {
+            throw new RuntimeException(String.format(
+                    "First TrustManager associated with SslConfiguration was expected to be a %s, but was a %s: %s",
+                    X509TrustManager.class.getSimpleName(),
+                    trustManager.getClass().getSimpleName(),
+                    config.trustStorePath()));
+        }
     }
 
     private static Optional<HostAndPort> meshProxy(Optional<ProxyConfiguration> proxy) {

@@ -140,7 +140,7 @@ public final class SslSocketFactories {
         return createSslContext(trustManagers, new KeyManager[] {}, provider);
     }
 
-    private static SSLContext createSslContext(TrustManager[] trustManagers, KeyManager[] keyManagers) {
+    public static SSLContext createSslContext(TrustManager[] trustManagers, KeyManager[] keyManagers) {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(keyManagers, trustManagers, null);
