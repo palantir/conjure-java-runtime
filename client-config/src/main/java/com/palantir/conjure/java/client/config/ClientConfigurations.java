@@ -23,6 +23,7 @@ import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
+import com.palantir.conjure.java.config.ssl.TrustContext;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.logger.SafeLogger;
@@ -75,9 +76,10 @@ public final class ClientConfigurations {
      * empty/absent configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(ServiceConfiguration config) {
+        TrustContext trustContext = SslSocketFactories.createTrustContext(config.security());
         return ClientConfiguration.builder()
-                .sslSocketFactory(SslSocketFactories.createSslSocketFactory(config.security()))
-                .trustManager(SslSocketFactories.createX509TrustManager(config.security()))
+                .sslSocketFactory(trustContext.sslSocketFactory())
+                .trustManager(trustContext.x509TrustManager())
                 .uris(config.uris())
                 .connectTimeout(config.connectTimeout().orElse(DEFAULT_CONNECT_TIMEOUT))
                 .readTimeout(config.readTimeout().orElse(DEFAULT_READ_TIMEOUT))
