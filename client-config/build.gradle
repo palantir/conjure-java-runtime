@@ -14,7 +14,7 @@ dependencies {
     testImplementation "junit:junit"
     testImplementation 'com.google.guava:guava'
     testImplementation "org.assertj:assertj-core"
-    testImplementation "org.mockito:mockito-core"
+    testImplementation "org. mockito:mockito-core"
     testImplementation 'com.palantir.safe-logging:preconditions-assertj'
 
     annotationProcessor "org.immutables:value"

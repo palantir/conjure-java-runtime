@@ -24,6 +24,7 @@ import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
+import com.palantir.conjure.java.config.ssl.SslUtils;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.logger.SafeLogger;
@@ -83,7 +84,7 @@ public final class ClientConfigurations {
         SSLSocketFactory sslSocketFactory =
                 SslSocketFactories.createSslContext(trustManagers, keyManagers).getSocketFactory();
 
-        X509TrustManager trustManager = extractX509TrustManager(trustManagers, config.security());
+        X509TrustManager trustManager = SslUtils.extractX509TrustManager(trustManagers, config.security());
 
         return ClientConfiguration.builder()
                 .sslSocketFactory(sslSocketFactory)
@@ -205,19 +206,6 @@ public final class ClientConfigurations {
     static InetSocketAddress createInetSocketAddress(String uriString) {
         URI uri = URI.create(uriString);
         return InetSocketAddress.createUnresolved(uri.getHost(), uri.getPort());
-    }
-
-    private static X509TrustManager extractX509TrustManager(TrustManager[] trustManagers, SslConfiguration config) {
-        TrustManager trustManager = trustManagers[0];
-        if (trustManager instanceof X509TrustManager) {
-            return (X509TrustManager) trustManager;
-        } else {
-            throw new RuntimeException(String.format(
-                    "First TrustManager associated with SslConfiguration was expected to be a %s, but was a %s: %s",
-                    X509TrustManager.class.getSimpleName(),
-                    trustManager.getClass().getSimpleName(),
-                    config.trustStorePath()));
-        }
     }
 
     private static Optional<HostAndPort> meshProxy(Optional<ProxyConfiguration> proxy) {

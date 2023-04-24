@@ -211,28 +211,13 @@ public final class SslSocketFactories {
      * {@link javax.net.ssl.X509TrustManager}.
      */
     public static X509TrustManager createX509TrustManager(SslConfiguration config) {
-        TrustManager trustManager = createTrustManagers(config)[0];
-        if (trustManager instanceof X509TrustManager) {
-            return (X509TrustManager) trustManager;
-        } else {
-            throw new RuntimeException(String.format(
-                    "First TrustManager associated with SslConfiguration was expected to be a %s, but was a %s: %s",
-                    X509TrustManager.class.getSimpleName(),
-                    trustManager.getClass().getSimpleName(),
-                    config.trustStorePath()));
-        }
+        TrustManager[] trustManagers = createTrustManagers(config);
+        return SslUtils.extractX509TrustManager(trustManagers, config);
     }
 
     public static X509TrustManager createX509TrustManager(Map<String, PemX509Certificate> certificatesByAlias) {
-        TrustManager trustManager = createTrustManagers(certificatesByAlias)[0];
-        if (trustManager instanceof X509TrustManager) {
-            return (X509TrustManager) trustManager;
-        } else {
-            throw new RuntimeException(String.format(
-                    "First TrustManager associated with certificates was expected to be a %s, but was a %s",
-                    X509TrustManager.class.getSimpleName(),
-                    trustManager.getClass().getSimpleName()));
-        }
+        TrustManager[] trustManagers = createTrustManagers(certificatesByAlias);
+        return SslUtils.extractX509TrustManager(trustManagers);
     }
 
     /**
