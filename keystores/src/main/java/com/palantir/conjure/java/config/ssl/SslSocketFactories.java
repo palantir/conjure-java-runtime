@@ -26,8 +26,10 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
+import java.security.SecureRandom;
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -140,7 +142,11 @@ public final class SslSocketFactories {
         return createSslContext(trustManagers, new KeyManager[] {}, provider);
     }
 
-    private static SSLContext createSslContext(TrustManager[] trustManagers, KeyManager[] keyManagers) {
+    /**
+     * Create an {@link SSLContext} initialized from the provided certificates.
+     * @see SSLContext#init(KeyManager[], TrustManager[], SecureRandom)
+     */
+    public static SSLContext createSslContext(TrustManager[] trustManagers, @Nullable KeyManager[] keyManagers) {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS");
             sslContext.init(keyManagers, trustManagers, null);
@@ -150,8 +156,12 @@ public final class SslSocketFactories {
         }
     }
 
-    private static SSLContext createSslContext(
-            TrustManager[] trustManagers, KeyManager[] keyManagers, Provider provider) {
+    /**
+     * Create an {@link SSLContext} initialized from the provided certificates using the supplied {@link Provider}.
+     * @see SSLContext#init(KeyManager[], TrustManager[], SecureRandom)
+     */
+    public static SSLContext createSslContext(
+            TrustManager[] trustManagers, @Nullable KeyManager[] keyManagers, Provider provider) {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS", provider);
             sslContext.init(keyManagers, trustManagers, null);
@@ -194,7 +204,10 @@ public final class SslSocketFactories {
      * {@link #createSslSocketFactory}.
      */
     public static TrustContext createTrustContext(SslConfiguration config) {
-        return TrustContext.of(createSslSocketFactory(config), createX509TrustManager(config));
+        TrustManager[] trustManagers = createTrustManagers(config);
+        KeyManager[] keyManagers = createKeyManagers(config);
+        SSLContext context = createSslContext(trustManagers, keyManagers);
+        return TrustContext.of(context.getSocketFactory(), getX509TrustManager(trustManagers));
     }
 
     /**
@@ -202,8 +215,9 @@ public final class SslSocketFactories {
      * {@link #createSslSocketFactory}.
      */
     public static TrustContext createTrustContext(Map<String, PemX509Certificate> trustCertificatesByAlias) {
-        return TrustContext.of(
-                createSslSocketFactory(trustCertificatesByAlias), createX509TrustManager(trustCertificatesByAlias));
+        TrustManager[] trustManagers = createTrustManagers(trustCertificatesByAlias);
+        SSLContext context = createSslContext(trustManagers, new KeyManager[] {});
+        return TrustContext.of(context.getSocketFactory(), getX509TrustManager(trustManagers));
     }
 
     /**
@@ -211,27 +225,27 @@ public final class SslSocketFactories {
      * {@link javax.net.ssl.X509TrustManager}.
      */
     public static X509TrustManager createX509TrustManager(SslConfiguration config) {
-        TrustManager trustManager = createTrustManagers(config)[0];
-        if (trustManager instanceof X509TrustManager) {
-            return (X509TrustManager) trustManager;
-        } else {
-            throw new RuntimeException(String.format(
-                    "First TrustManager associated with SslConfiguration was expected to be a %s, but was a %s: %s",
-                    X509TrustManager.class.getSimpleName(),
-                    trustManager.getClass().getSimpleName(),
-                    config.trustStorePath()));
-        }
+        return getX509TrustManager(createTrustManagers(config));
     }
 
     public static X509TrustManager createX509TrustManager(Map<String, PemX509Certificate> certificatesByAlias) {
-        TrustManager trustManager = createTrustManagers(certificatesByAlias)[0];
+        return getX509TrustManager(createTrustManagers(certificatesByAlias));
+    }
+
+    /**
+     * Returns the first {@link TrustManager} from a loaded {@link TrustManagerFactory}. This is always an
+     * {@link javax.net.ssl.X509TrustManager}.
+     * @param trustManagers must be the result of {@link TrustManagerFactory#getTrustManagers()}
+     * @return The first {@link TrustManager} which must be a {@link X509TrustManager}
+     */
+    public static X509TrustManager getX509TrustManager(TrustManager[] trustManagers) {
+        TrustManager trustManager = trustManagers[0];
         if (trustManager instanceof X509TrustManager) {
             return (X509TrustManager) trustManager;
         } else {
-            throw new RuntimeException(String.format(
-                    "First TrustManager associated with certificates was expected to be a %s, but was a %s",
-                    X509TrustManager.class.getSimpleName(),
-                    trustManager.getClass().getSimpleName()));
+            throw new SafeRuntimeException(
+                    "First TrustManager associated with SslConfiguration was expected to be an X509TrustManager",
+                    SafeArg.of("actualType", trustManager.getClass().getSimpleName()));
         }
     }
 
