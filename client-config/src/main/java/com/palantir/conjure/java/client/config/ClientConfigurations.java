@@ -24,6 +24,7 @@ import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.conjure.java.config.ssl.TrustContext;
+import com.palantir.conjure.java.config.ssl.TrustContextFactory;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.logger.SafeLogger;
@@ -76,7 +77,16 @@ public final class ClientConfigurations {
      * empty/absent configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(ServiceConfiguration config) {
-        TrustContext trustContext = SslSocketFactories.createTrustContext(config.security());
+        return ClientConfigurations.of(config, SslSocketFactories::createTrustContext);
+    }
+
+    /**
+     * Creates a new {@link ClientConfiguration} instance from the given {@link ServiceConfiguration} and
+     * {@link TrustContextFactory}, filling in empty/absent configuration with the defaults specified as constants
+     * in this class.
+     */
+    public static ClientConfiguration of(ServiceConfiguration config, TrustContextFactory factory) {
+        TrustContext trustContext = factory.create(config.security());
         return ClientConfiguration.builder()
                 .sslSocketFactory(trustContext.sslSocketFactory())
                 .trustManager(trustContext.x509TrustManager())
