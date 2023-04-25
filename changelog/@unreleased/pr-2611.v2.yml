@@ -1,0 +1,6 @@
+type: improvement
+improvement:
+  description: Overload client config creation method to allow a TrustContextFactory
+    to be passed as well.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2611
