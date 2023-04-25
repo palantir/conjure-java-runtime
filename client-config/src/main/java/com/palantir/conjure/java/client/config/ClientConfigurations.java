@@ -22,6 +22,7 @@ import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.UserAgent;
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.conjure.java.config.ssl.TrustContext;
 import com.palantir.logsafe.UnsafeArg;
@@ -76,7 +77,16 @@ public final class ClientConfigurations {
      * empty/absent configuration with the defaults specified as constants in this class.
      */
     public static ClientConfiguration of(ServiceConfiguration config) {
-        TrustContext trustContext = SslSocketFactories.createTrustContext(config.security());
+        return ClientConfigurations.of(config, SslSocketFactories::createTrustContext);
+    }
+
+    /**
+     * Creates a new {@link ClientConfiguration} instance from the given {@link ServiceConfiguration} and
+     * {@link TrustContextFactory}, filling in empty/absent configuration with the defaults specified as constants
+     * in this class.
+     */
+    public static ClientConfiguration of(ServiceConfiguration config, TrustContextFactory factory) {
+        TrustContext trustContext = factory.create(config.security());
         return ClientConfiguration.builder()
                 .sslSocketFactory(trustContext.sslSocketFactory())
                 .trustManager(trustContext.x509TrustManager())
@@ -247,5 +257,13 @@ public final class ClientConfigurations {
         public String toString() {
             return "FixedProxySelector{proxy=" + proxy + '}';
         }
+    }
+
+    /**
+     * A factory for {@link TrustContext} which allows to define how one will be created,
+     * based on implementer defined security configurations. See {@link SslConfiguration}.
+     */
+    public interface TrustContextFactory {
+        TrustContext create(SslConfiguration configuration);
     }
 }
