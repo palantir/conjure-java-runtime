@@ -22,6 +22,7 @@ import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.UserAgent;
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.conjure.java.config.ssl.TrustContext;
 import com.palantir.conjure.java.config.ssl.TrustContextFactory;
@@ -257,5 +258,13 @@ public final class ClientConfigurations {
         public String toString() {
             return "FixedProxySelector{proxy=" + proxy + '}';
         }
+    }
+
+    /**
+     * A factory for {@link TrustContext} which allows to define how one will be created,
+     * based on implementer defined security configurations. See {@link SslConfiguration}.
+     */
+    public interface TrustContextFactory {
+        TrustContext create(SslConfiguration configuration);
     }
 }
