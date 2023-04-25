@@ -392,4 +392,37 @@ public final class SslSocketFactoriesTests {
         assertThat(Conscrypt.isConscrypt(conscryptFactory)).isTrue();
         assertThat(Conscrypt.isConscrypt(defaultFactory)).isFalse();
     }
+
+    @Test
+    public void testConscryptProvider_trustContextByConfig() {
+        assumeThat(Conscrypt.isAvailable())
+                .as("Conscrypt is not available on this platform")
+                .isTrue();
+        SslConfiguration sslConfig = SslConfiguration.builder()
+                .trustStorePath(new File("src/test/resources/testCA/testCA.jks").toPath())
+                .build();
+
+        Provider conscryptProvider = Conscrypt.newProvider();
+        TrustContext conscryptContext = SslSocketFactories.createTrustContext(sslConfig, conscryptProvider);
+        TrustContext defaultContext = SslSocketFactories.createTrustContext(sslConfig);
+        assertThat(Conscrypt.isConscrypt(conscryptContext.sslSocketFactory())).isTrue();
+        assertThat(Conscrypt.isConscrypt(defaultContext.sslSocketFactory())).isFalse();
+    }
+
+    @Test
+    public void testConscryptProvider_trustContext() throws IOException {
+        assumeThat(Conscrypt.isAvailable())
+                .as("Conscrypt is not available on this platform")
+                .isTrue();
+
+        String cert = Files.asCharSource(TestConstants.CA_PEM_CERT_PATH.toFile(), StandardCharsets.UTF_8)
+                .read();
+        Map<String, PemX509Certificate> certs = ImmutableMap.of("cert", PemX509Certificate.of(cert));
+
+        Provider conscryptProvider = Conscrypt.newProvider();
+        TrustContext conscryptContext = SslSocketFactories.createTrustContext(certs, conscryptProvider);
+        TrustContext defaultContext = SslSocketFactories.createTrustContext(certs);
+        assertThat(Conscrypt.isConscrypt(conscryptContext.sslSocketFactory())).isTrue();
+        assertThat(Conscrypt.isConscrypt(defaultContext.sslSocketFactory())).isFalse();
+    }
 }

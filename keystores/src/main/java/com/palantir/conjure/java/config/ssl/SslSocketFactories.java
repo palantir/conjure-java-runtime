@@ -211,12 +211,41 @@ public final class SslSocketFactories {
     }
 
     /**
+     * Create an {@link TrustContext} from the provided configuration and provider. See {@link #createX509TrustManager}
+     * and {@link #createSslSocketFactory}.
+     *
+     * @param config an {@link SslConfiguration} describing the trust store and key store configuration
+     * @param provider The preferred security {@link Provider}
+     */
+    public static TrustContext createTrustContext(SslConfiguration config, Provider provider) {
+        TrustManager[] trustManagers = createTrustManagers(config);
+        KeyManager[] keyManagers = createKeyManagers(config);
+        SSLContext context = createSslContext(trustManagers, keyManagers, provider);
+        return TrustContext.of(context.getSocketFactory(), getX509TrustManager(trustManagers));
+    }
+
+    /**
      * Create SSL socket factory and trust manager from the given certificates, see {@link #createX509TrustManager} and
      * {@link #createSslSocketFactory}.
      */
     public static TrustContext createTrustContext(Map<String, PemX509Certificate> trustCertificatesByAlias) {
         TrustManager[] trustManagers = createTrustManagers(trustCertificatesByAlias);
         SSLContext context = createSslContext(trustManagers, new KeyManager[] {});
+        return TrustContext.of(context.getSocketFactory(), getX509TrustManager(trustManagers));
+    }
+
+    /**
+     * Create SSL socket factory and trust manager from the given certificates, see {@link #createX509TrustManager} and
+     * {@link #createSslSocketFactory}.
+     *
+     * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
+     *     certificate as.
+     * @param provider The preferred security {@link Provider}
+     */
+    public static TrustContext createTrustContext(
+            Map<String, PemX509Certificate> trustCertificatesByAlias, Provider provider) {
+        TrustManager[] trustManagers = createTrustManagers(trustCertificatesByAlias);
+        SSLContext context = createSslContext(trustManagers, new KeyManager[] {}, provider);
         return TrustContext.of(context.getSocketFactory(), getX509TrustManager(trustManagers));
     }
 
