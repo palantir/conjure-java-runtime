@@ -27,17 +27,23 @@ import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public final class Retrofit2ClientBuilderTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    private final MockWebServer server = new MockWebServer();
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @BeforeEach
+    void before() throws IOException {
+        server.start();
+    }
+
+    @AfterEach
+    void after() throws IOException {
+        server.close();
+    }
 
     @Test
     public void testRelativeAndAbsoluteRetrofitEndPoints_workWithArbitraryBaseUrlFormats() throws Exception {

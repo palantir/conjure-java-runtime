@@ -25,47 +25,42 @@ import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
+import javax.annotation.Nonnull;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.Test;
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.FromDataPoints;
-import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.Theory;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-@RunWith(Theories.class)
 public final class Retrofit2ClientFailoverTest extends TestBase {
 
     private static final int CACHE_DURATION = 2000;
 
-    @DataPoints("PinStrategies")
-    public static FailoverTestCase[] pinStrategies() {
+    private static Stream<FailoverTestCase> pinStrategies() {
         FailoverTestCase pinNoCache = new FailoverTestCase(
                 new MockWebServer(), new MockWebServer(), 0, NodeSelectionStrategy.PIN_UNTIL_ERROR);
         FailoverTestCase pinWithCache = new FailoverTestCase(
                 new MockWebServer(), new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.PIN_UNTIL_ERROR);
-        return new FailoverTestCase[] {pinNoCache, pinWithCache};
+        return Stream.of(pinNoCache, pinWithCache);
     }
 
-    @DataPoints("AllStrategies")
-    public static FailoverTestCase[] allStrategies() {
+    private static Stream<FailoverTestCase> allStrategies() {
         FailoverTestCase pinNoCache = new FailoverTestCase(
                 new MockWebServer(), new MockWebServer(), 0, NodeSelectionStrategy.PIN_UNTIL_ERROR);
         FailoverTestCase pinWithCache = new FailoverTestCase(
                 new MockWebServer(), new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.PIN_UNTIL_ERROR);
         FailoverTestCase roundRobin = new FailoverTestCase(
                 new MockWebServer(), new MockWebServer(), CACHE_DURATION, NodeSelectionStrategy.ROUND_ROBIN);
-        return new FailoverTestCase[] {pinNoCache, pinWithCache, roundRobin};
+        return Stream.of(pinNoCache, pinWithCache, roundRobin);
     }
 
-    @Test
-    @Theory
-    public void testConnectionError_performsFailover(@FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase)
-            throws IOException {
+    @ParameterizedTest
+    @MethodSource("allStrategies")
+    public void testConnectionError_performsFailover(FailoverTestCase failoverTestCase) throws IOException {
         TestService proxy = failoverTestCase.getProxy();
 
         failoverTestCase.server1.shutdown();
@@ -73,10 +68,10 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         assertThat(proxy.get().execute().body()).isEqualTo("pong");
     }
 
-    @Test
-    @Theory
+    @ParameterizedTest
+    @MethodSource("allStrategies")
     public void testConnectionError_whenOneCallFailsThenSubsequentNewCallsCanStillSucceed(
-            @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws Exception {
+            FailoverTestCase failoverTestCase) throws Exception {
         TestService proxy = failoverTestCase.getProxy();
 
         failoverTestCase.server1.shutdown();
@@ -87,17 +82,19 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
                 .hasMessageStartingWith("Failed to complete the request due to an IOException");
 
         // Subsequent call (with the same proxy instance) succeeds.
-        MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
-        anotherServer1.start(failoverTestCase.server1.getPort());
-        anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
-        assertThat(proxy.get().execute().body()).isEqualTo("foo");
-        anotherServer1.shutdown();
+        try (MockWebServer anotherServer1 = new MockWebServer()) {
+            // Not a @Rule so we can control start/stop/port explicitly
+            anotherServer1.start(failoverTestCase.server1.getPort());
+            anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
+            assertThat(proxy.get().execute().body()).isEqualTo("foo");
+            anotherServer1.shutdown();
+        }
     }
 
-    @Test
-    @Theory
-    public void testQosError_performsFailover_forSynchronousOperation(
-            @FromDataPoints("PinStrategies") FailoverTestCase failoverTestCase) throws Exception {
+    @ParameterizedTest
+    @MethodSource("pinStrategies")
+    public void testQosError_performsFailover_forSynchronousOperation(FailoverTestCase failoverTestCase)
+            throws Exception {
         TestService proxy = failoverTestCase.getProxy();
 
         failoverTestCase.server1.enqueue(new MockResponse().setResponseCode(503));
@@ -107,10 +104,10 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         assertThat(proxy.get().execute().body()).isEqualTo("bar");
     }
 
-    @Test
-    @Theory
-    public void testQosError_performsFailover_forAsynchronousOperation(
-            @FromDataPoints("PinStrategies") FailoverTestCase failoverTestCase) throws Exception {
+    @ParameterizedTest
+    @MethodSource("pinStrategies")
+    public void testQosError_performsFailover_forAsynchronousOperation(FailoverTestCase failoverTestCase)
+            throws Exception {
         TestService proxy = failoverTestCase.getProxy();
 
         failoverTestCase.server1.enqueue(new MockResponse().setResponseCode(503));
@@ -118,24 +115,23 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
         failoverTestCase.server2.enqueue(new MockResponse().setBody("\"bar\""));
 
         CompletableFuture<String> future = new CompletableFuture<>();
-        proxy.get().enqueue(new Callback<String>() {
+        proxy.get().enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<String> _call, Response<String> response) {
+            public void onResponse(@Nonnull Call<String> _call, @Nonnull Response<String> response) {
                 future.complete(response.body());
             }
 
             @Override
-            public void onFailure(Call<String> _call, Throwable throwable) {
+            public void onFailure(@Nonnull Call<String> _call, @Nonnull Throwable throwable) {
                 future.completeExceptionally(throwable);
             }
         });
         assertThat(future.get()).isEqualTo("bar");
     }
 
-    @Test
-    @Theory
-    public void testConnectionError_performsFailoverOnDnsFailure(
-            @FromDataPoints("AllStrategies") FailoverTestCase failoverTestCase) throws Exception {
+    @ParameterizedTest
+    @MethodSource("allStrategies")
+    public void testConnectionError_performsFailoverOnDnsFailure(FailoverTestCase failoverTestCase) throws Exception {
         failoverTestCase.server1.enqueue(new MockResponse().setBody("\"foo\""));
 
         TestService bogusHostProxy = Retrofit2Client.create(
@@ -154,135 +150,141 @@ public final class Retrofit2ClientFailoverTest extends TestBase {
 
     @Test
     public void testQosError_performsRetryWithOneNode_forSynchronousOperation() throws Exception {
-        MockWebServer server1 = new MockWebServer();
-        server1.enqueue(new MockResponse().setResponseCode(503));
-        server1.enqueue(new MockResponse().setBody("\"foo\""));
+        try (MockWebServer server1 = new MockWebServer()) {
+            server1.enqueue(new MockResponse().setResponseCode(503));
+            server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(
-                TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfiguration.builder()
-                        .from(createTestConfig("http://localhost:" + server1.getPort()))
-                        .maxNumRetries(2)
-                        .build());
-
-        assertThat(anotherProxy.get().execute().body()).isEqualTo("foo");
+            TestService anotherProxy = Retrofit2Client.create(
+                    TestService.class,
+                    AGENT,
+                    new HostMetricsRegistry(),
+                    ClientConfiguration.builder()
+                            .from(createTestConfig("http://localhost:" + server1.getPort()))
+                            .maxNumRetries(2)
+                            .build());
+            assertThat(anotherProxy.get().execute().body()).isEqualTo("foo");
+        }
     }
 
     @Test
     public void testQosError_performsRetryWithOneNodeAndCache_forSynchronousOperation() throws Exception {
-        MockWebServer server1 = new MockWebServer();
-        server1.enqueue(new MockResponse().setResponseCode(503));
-        server1.enqueue(new MockResponse().setBody("\"foo\""));
+        try (MockWebServer server1 = new MockWebServer()) {
+            server1.enqueue(new MockResponse().setResponseCode(503));
+            server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(
-                TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfiguration.builder()
-                        .from(createTestConfig("http://localhost:" + server1.getPort()))
-                        .maxNumRetries(2)
-                        .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
-                        .build());
+            TestService anotherProxy = Retrofit2Client.create(
+                    TestService.class,
+                    AGENT,
+                    new HostMetricsRegistry(),
+                    ClientConfiguration.builder()
+                            .from(createTestConfig("http://localhost:" + server1.getPort()))
+                            .maxNumRetries(2)
+                            .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
+                            .build());
 
-        assertThat(anotherProxy.get().execute().body()).isEqualTo("foo");
+            assertThat(anotherProxy.get().execute().body()).isEqualTo("foo");
+        }
     }
 
     @Test
     public void testQosError_performsRetryWithOneNode_forAsynchronousOperation() throws Exception {
-        MockWebServer server1 = new MockWebServer();
-        server1.enqueue(new MockResponse().setResponseCode(503));
-        server1.enqueue(new MockResponse().setBody("\"foo\""));
+        try (MockWebServer server1 = new MockWebServer()) {
+            server1.enqueue(new MockResponse().setResponseCode(503));
+            server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(
-                TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfiguration.builder()
-                        .from(createTestConfig("http://localhost:" + server1.getPort()))
-                        .maxNumRetries(2)
-                        .build());
+            TestService anotherProxy = Retrofit2Client.create(
+                    TestService.class,
+                    AGENT,
+                    new HostMetricsRegistry(),
+                    ClientConfiguration.builder()
+                            .from(createTestConfig("http://localhost:" + server1.getPort()))
+                            .maxNumRetries(2)
+                            .build());
 
-        CompletableFuture<String> future = new CompletableFuture<>();
-        anotherProxy.get().enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(Call<String> _call, Response<String> response) {
-                future.complete(response.body());
-            }
+            CompletableFuture<String> future = new CompletableFuture<>();
+            anotherProxy.get().enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@Nonnull Call<String> _call, @Nonnull Response<String> response) {
+                    future.complete(response.body());
+                }
 
-            @Override
-            public void onFailure(Call<String> _call, Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-        });
+                @Override
+                public void onFailure(@Nonnull Call<String> _call, @Nonnull Throwable throwable) {
+                    future.completeExceptionally(throwable);
+                }
+            });
 
-        assertThat(future.get()).isEqualTo("foo");
+            assertThat(future.get()).isEqualTo("foo");
+        }
     }
 
     @Test
     public void testQosError_performsRetryWithOneNodeAndCache_forAsynchronousOperation() throws Exception {
-        MockWebServer server1 = new MockWebServer();
-        server1.enqueue(new MockResponse().setResponseCode(503));
-        server1.enqueue(new MockResponse().setBody("\"foo\""));
+        try (MockWebServer server1 = new MockWebServer()) {
+            server1.enqueue(new MockResponse().setResponseCode(503));
+            server1.enqueue(new MockResponse().setBody("\"foo\""));
 
-        TestService anotherProxy = Retrofit2Client.create(
-                TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfiguration.builder()
-                        .from(createTestConfig("http://localhost:" + server1.getPort()))
-                        .maxNumRetries(2)
-                        .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
-                        .build());
+            TestService anotherProxy = Retrofit2Client.create(
+                    TestService.class,
+                    AGENT,
+                    new HostMetricsRegistry(),
+                    ClientConfiguration.builder()
+                            .from(createTestConfig("http://localhost:" + server1.getPort()))
+                            .maxNumRetries(2)
+                            .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
+                            .build());
 
-        CompletableFuture<String> future = new CompletableFuture<>();
-        anotherProxy.get().enqueue(new Callback<String>() {
-            @Override
-            public void onResponse(Call<String> _call, Response<String> response) {
-                future.complete(response.body());
-            }
+            CompletableFuture<String> future = new CompletableFuture<>();
+            anotherProxy.get().enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@Nonnull Call<String> _call, @Nonnull Response<String> response) {
+                    future.complete(response.body());
+                }
 
-            @Override
-            public void onFailure(Call<String> _call, Throwable throwable) {
-                future.completeExceptionally(throwable);
-            }
-        });
+                @Override
+                public void onFailure(@Nonnull Call<String> _call, @Nonnull Throwable throwable) {
+                    future.completeExceptionally(throwable);
+                }
+            });
 
-        assertThat(future.get()).isEqualTo("foo");
+            assertThat(future.get()).isEqualTo("foo");
+        }
     }
 
     @Test
     public void testCache_recovery() throws Exception {
-        MockWebServer server1 = new MockWebServer();
+        try (MockWebServer server1 = new MockWebServer()) {
 
-        TestService anotherProxy = Retrofit2Client.create(
-                TestService.class,
-                AGENT,
-                new HostMetricsRegistry(),
-                ClientConfiguration.builder()
-                        .from(createTestConfig("http://localhost:" + server1.getPort()))
-                        .maxNumRetries(1)
-                        .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
-                        .build());
+            TestService anotherProxy = Retrofit2Client.create(
+                    TestService.class,
+                    AGENT,
+                    new HostMetricsRegistry(),
+                    ClientConfiguration.builder()
+                            .from(createTestConfig("http://localhost:" + server1.getPort()))
+                            .maxNumRetries(1)
+                            .failedUrlCooldown(Duration.ofMillis(CACHE_DURATION))
+                            .build());
 
-        server1.shutdown();
+            server1.shutdown();
 
-        // Fail the request, ensuring that the URL is added to the cache
-        assertThatThrownBy(() -> anotherProxy.get().execute())
-                .isInstanceOf(IOException.class)
-                .hasMessageStartingWith("Failed to complete the request due to an IOException");
+            // Fail the request, ensuring that the URL is added to the cache
+            assertThatThrownBy(() -> anotherProxy.get().execute())
+                    .isInstanceOf(IOException.class)
+                    .hasMessageStartingWith("Failed to complete the request due to an IOException");
 
-        // Allow the cache to clear
-        Thread.sleep(2 * CACHE_DURATION);
+            // Allow the cache to clear
+            Thread.sleep(2 * CACHE_DURATION);
 
-        MockWebServer anotherServer1 = new MockWebServer(); // Not a @Rule so we can control start/stop/port explicitly
-        anotherServer1.start(server1.getPort());
+            try (MockWebServer anotherServer1 = new MockWebServer()) {
+                // Not a @Rule so we can control start/stop/port explicitly
+                anotherServer1.start(server1.getPort());
 
-        anotherServer1.enqueue(new MockResponse().setResponseCode(503));
-        anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
-        assertThat(anotherProxy.get().execute().body()).isEqualTo("foo");
-        anotherServer1.shutdown();
+                anotherServer1.enqueue(new MockResponse().setResponseCode(503));
+                anotherServer1.enqueue(new MockResponse().setBody("\"foo\""));
+                assertThat(anotherProxy.get().execute().body()).isEqualTo("foo");
+                anotherServer1.shutdown();
+            }
+        }
     }
 
     private static class FailoverTestCase {

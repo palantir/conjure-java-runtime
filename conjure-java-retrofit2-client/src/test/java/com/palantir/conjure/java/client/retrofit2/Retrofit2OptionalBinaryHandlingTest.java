@@ -21,62 +21,51 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.palantir.conjure.java.okhttp.NoOpHostEventsSink;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import okhttp3.HttpUrl;
 import okhttp3.ResponseBody;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okio.Buffer;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.http.GET;
 
-@RunWith(Parameterized.class)
 public final class Retrofit2OptionalBinaryHandlingTest extends TestBase {
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    private final MockWebServer server = new MockWebServer();
 
-    private HttpUrl url;
     private Service proxy;
 
-    @Parameterized.Parameters(name = "{index}: code {0} body: \"{1}\"")
-    public static Collection<Object[]> responses() {
+    public static Stream<Arguments> responses() {
         Buffer nullValueBuffer = new Buffer();
         nullValueBuffer.write("null".getBytes(StandardCharsets.UTF_8));
         Buffer emptyBuffer = new Buffer();
-        return Arrays.asList(new Object[][] {
-            {200, nullValueBuffer, false},
-            {200, emptyBuffer, false},
-            {204, emptyBuffer, true}
-        });
+        return Stream.of(
+                Arguments.of(200, nullValueBuffer, false),
+                Arguments.of(200, emptyBuffer, false),
+                Arguments.of(204, emptyBuffer, true));
     }
 
-    @Parameterized.Parameter
-    public int code;
-
-    @Parameterized.Parameter(1)
-    public Buffer body;
-
-    @Parameterized.Parameter(2)
-    public boolean empty;
-
-    @Before
-    public void before() {
-        url = server.url("/");
+    @BeforeEach
+    public void before() throws IOException {
+        server.start();
+        HttpUrl url = server.url("/");
         proxy = Retrofit2Client.create(
                 Service.class, AGENT, NoOpHostEventsSink.INSTANCE, createTestConfig(url.toString()));
-        MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
-        server.enqueue(mockResponse);
+    }
+
+    @AfterEach
+    void after() throws IOException {
+        server.close();
     }
 
     public interface Service {
@@ -87,8 +76,10 @@ public final class Retrofit2OptionalBinaryHandlingTest extends TestBase {
         CompletableFuture<Optional<ResponseBody>> getOptionalFuture();
     }
 
-    @Test
-    public void testOptional() throws IOException {
+    @ParameterizedTest(name = "{index}: code {0} body: \"{1}\"")
+    @MethodSource("responses")
+    public void testOptional(int code, Buffer body, boolean empty) throws IOException {
+        server.enqueue(new MockResponse().setResponseCode(code).setBody(body));
         assertCallBody(proxy.getOptional(), optional -> {
             if (empty) {
                 assertThat(optional).isEmpty();
@@ -98,8 +89,10 @@ public final class Retrofit2OptionalBinaryHandlingTest extends TestBase {
         });
     }
 
-    @Test
-    public void testOptionalFuture() throws Exception {
+    @ParameterizedTest(name = "{index}: code {0} body: \"{1}\"")
+    @MethodSource("responses")
+    public void testOptionalFuture(int code, Buffer body, boolean empty) throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(code).setBody(body));
         assertFuture(proxy.getOptionalFuture(), optional -> {
             if (empty) {
                 assertThat(optional).isEmpty();

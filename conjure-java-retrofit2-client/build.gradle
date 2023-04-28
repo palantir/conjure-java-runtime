@@ -19,18 +19,15 @@ dependencies {
     testImplementation project(":keystores")
     testImplementation "com.palantir.tracing:tracing"
     testImplementation "com.squareup.okhttp3:mockwebserver"
-    testImplementation "junit:junit"
     testImplementation "org.assertj:assertj-core"
     testImplementation "org.mockito:mockito-core"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
     testImplementation "io.leangen.geantyref:geantyref"
-    testImplementation "com.palantir.tracing:tracing-test-utils"
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'
     testImplementation 'org.junit.jupiter:junit-jupiter'
-    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine', {
-        because 'allows JUnit 3 and JUnit 4 tests to run'
-    }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params'
     testImplementation 'org.mockito:mockito-junit-jupiter'
 }

@@ -31,18 +31,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import okhttp3.ResponseBody;
-import org.junit.Assume;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@RunWith(Parameterized.class)
 public class AutoDeserializeTest {
 
-    @ClassRule
+    @RegisterExtension
     public static final VerificationServerRule server = new VerificationServerRule();
 
     private static final Logger log = LoggerFactory.getLogger(AutoDeserializeTest.class);
@@ -52,60 +51,48 @@ public class AutoDeserializeTest {
             VerificationClients.autoDeserializeServiceRetrofit(server);
     private static final AutoDeserializeConfirmService confirmService = VerificationClients.confirmService(server);
 
-    @Parameterized.Parameter(0)
-    public EndpointName endpointName;
-
-    @Parameterized.Parameter(1)
-    public int index;
-
-    @Parameterized.Parameter(2)
-    public boolean shouldSucceed;
-
-    @Parameterized.Parameter(3)
-    public String jsonString;
-
-    @Parameterized.Parameters(name = "{0}({3}) -> should succeed {2}")
-    public static Collection<Object[]> data() {
-        List<Object[]> objects = new ArrayList<>();
+    private static Collection<Arguments> data() {
+        List<Arguments> objects = new ArrayList<>();
         Cases.TEST_CASES.getAutoDeserialize().forEach((endpointName, positiveAndNegativeTestCases) -> {
             int positiveSize = positiveAndNegativeTestCases.getPositive().size();
             int negativeSize = positiveAndNegativeTestCases.getNegative().size();
 
             IntStream.range(0, positiveSize)
-                    .forEach(i -> objects.add(new Object[] {
-                        endpointName,
-                        i,
-                        true,
-                        positiveAndNegativeTestCases.getPositive().get(i)
-                    }));
+                    .forEach(i -> objects.add(Arguments.of(
+                            endpointName,
+                            i,
+                            true,
+                            positiveAndNegativeTestCases.getPositive().get(i))));
 
             IntStream.range(0, negativeSize)
-                    .forEach(i -> objects.add(new Object[] {
-                        endpointName,
-                        positiveSize + i,
-                        false,
-                        positiveAndNegativeTestCases.getNegative().get(i)
-                    }));
+                    .forEach(i -> objects.add(Arguments.of(
+                            endpointName,
+                            positiveSize + i,
+                            false,
+                            positiveAndNegativeTestCases.getNegative().get(i))));
         });
         return objects;
     }
 
-    @Test
+    @ParameterizedTest(name = "{0}({3}) -> should succeed {2}")
+    @MethodSource("data")
     @SuppressWarnings("IllegalThrows")
-    public void runTestCaseRetrofit() throws Error, NoSuchMethodException {
+    public void runTestCaseRetrofit(EndpointName endpointName, int index, boolean shouldSucceed, String jsonString)
+            throws Error, NoSuchMethodException {
         boolean shouldIgnore = Cases.shouldIgnoreRetrofit(endpointName, jsonString);
         Method method = testServiceRetrofit.getClass().getMethod(endpointName.get(), int.class);
-        System.out.println(String.format(
-                "[%s%s test case %s]: %s(%s), expected client to %s",
+        System.out.printf(
+                "[%s%s test case %s]: %s(%s), expected client to %s%n",
                 shouldIgnore ? "ignored " : "",
                 shouldSucceed ? "positive" : "negative",
                 index,
                 endpointName,
                 jsonString,
-                shouldSucceed ? "succeed" : "fail"));
+                shouldSucceed ? "succeed" : "fail");
 
-        Optional<Error> expectationFailure =
-                shouldSucceed ? expectSuccessRetrofit(method) : expectFailureRetrofit(method);
+        Optional<Error> expectationFailure = shouldSucceed
+                ? expectSuccessRetrofit(method, endpointName, index)
+                : expectFailureRetrofit(method, index);
 
         if (shouldIgnore) {
             assertThat(expectationFailure)
@@ -114,28 +101,31 @@ public class AutoDeserializeTest {
                     .isNotEmpty();
         }
 
-        Assume.assumeFalse(shouldIgnore);
+        Assumptions.assumeFalse(shouldIgnore);
 
         if (expectationFailure.isPresent()) {
             throw expectationFailure.get();
         }
     }
 
-    @Test
+    @ParameterizedTest(name = "{0}({3}) -> should succeed {2}")
+    @MethodSource("data")
     @SuppressWarnings("IllegalThrows")
-    public void runTestCaseJersey() throws Error, NoSuchMethodException {
+    public void runTestCaseJersey(EndpointName endpointName, int index, boolean shouldSucceed, String jsonString)
+            throws Error, NoSuchMethodException {
         boolean shouldIgnore = Cases.shouldIgnoreJersey(endpointName, jsonString);
         Method method = testServiceJersey.getClass().getMethod(endpointName.get(), int.class);
-        System.out.println(String.format(
-                "[%s%s test case %s]: %s(%s), expected client to %s",
+        System.out.printf(
+                "[%s%s test case %s]: %s(%s), expected client to %s%n",
                 shouldIgnore ? "ignored " : "",
                 shouldSucceed ? "positive" : "negative",
                 index,
                 endpointName,
                 jsonString,
-                shouldSucceed ? "succeed" : "fail"));
+                shouldSucceed ? "succeed" : "fail");
 
-        Optional<Error> expectationFailure = shouldSucceed ? expectSuccessJersey(method) : expectFailureJersey(method);
+        Optional<Error> expectationFailure =
+                shouldSucceed ? expectSuccessJersey(method, endpointName, index) : expectFailureJersey(method, index);
 
         if (shouldIgnore) {
             assertThat(expectationFailure)
@@ -144,14 +134,14 @@ public class AutoDeserializeTest {
                     .isNotEmpty();
         }
 
-        Assume.assumeFalse(shouldIgnore);
+        Assumptions.assumeFalse(shouldIgnore);
 
         if (expectationFailure.isPresent()) {
             throw expectationFailure.get();
         }
     }
 
-    private Optional<Error> expectSuccessRetrofit(Method method) {
+    private Optional<Error> expectSuccessRetrofit(Method method, EndpointName endpointName, int index) {
         try {
             Object result = Futures.getUnchecked((ListenableFuture<?>) method.invoke(testServiceRetrofit, index));
             log.info("Received result for endpoint {} and index {}: {}", endpointName, index, result);
@@ -167,17 +157,17 @@ public class AutoDeserializeTest {
         }
     }
 
-    private Optional<Error> expectFailureRetrofit(Method method) {
+    private Optional<Error> expectFailureRetrofit(Method method, int index) {
         try {
             Object result = Futures.getUnchecked((ListenableFuture<?>) method.invoke(testServiceRetrofit, index));
             return Optional.of(new AssertionError(
                     String.format("Result should have caused an exception but deserialized to: %s", result)));
         } catch (Exception e) {
-            return Optional.empty(); // we expected the method to throw and it did, so this expectation was satisifed
+            return Optional.empty(); // we expected the method to throw, and it did, so this expectation was satisfied
         }
     }
 
-    private Optional<Error> expectSuccessJersey(Method method) {
+    private Optional<Error> expectSuccessJersey(Method method, EndpointName endpointName, int index) {
         try {
             Object resultFromServer = method.invoke(testServiceJersey, index);
             log.info("Received result for endpoint {} and index {}: {}", endpointName, index, resultFromServer);
@@ -188,13 +178,13 @@ public class AutoDeserializeTest {
         }
     }
 
-    private Optional<Error> expectFailureJersey(Method method) {
+    private Optional<Error> expectFailureJersey(Method method, int index) {
         try {
             Object result = method.invoke(testServiceJersey, index);
             return Optional.of(new AssertionError(
                     String.format("Result should have caused an exception but deserialized to: %s", result)));
         } catch (Exception e) {
-            return Optional.empty(); // we expected the method to throw and it did, so this expectation was satisifed
+            return Optional.empty(); // we expected the method to throw, and it did, so this expectation was satisfied
         }
     }
 }

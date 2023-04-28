@@ -20,59 +20,47 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import retrofit2.Call;
 import retrofit2.Response;
 import retrofit2.http.GET;
 
-@RunWith(Parameterized.class)
 public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
 
-    @Rule
-    public final MockWebServer server = new MockWebServer();
+    private final MockWebServer server = new MockWebServer();
 
     private HttpUrl url;
     private Service proxy;
 
-    @Parameters(name = "{index}: code {0} body: \"{1}\"")
-    public static Collection<Object[]> responses() {
-        return Arrays.asList(new Object[][] {
-            {200, "null"},
-            {200, ""},
-            {204, ""}
-        });
+    public static Stream<Arguments> responses() {
+        return Stream.of(Arguments.of(200, "null"), Arguments.of(200, ""), Arguments.of(204, ""));
     }
 
-    @Parameter
-    public int code;
-
-    @Parameter(1)
-    public String body;
-
-    @Before
-    public void before() {
+    @BeforeEach
+    public void before() throws IOException {
+        server.start();
         url = server.url("/");
         proxy = Retrofit2Client.create(
                 Service.class, AGENT, new HostMetricsRegistry(), createTestConfig(url.toString()));
-        MockResponse mockResponse = new MockResponse().setResponseCode(code).setBody(body);
-        server.enqueue(mockResponse);
+    }
+
+    @AfterEach
+    void after() throws IOException {
+        server.close();
     }
 
     public interface Service {
@@ -95,33 +83,49 @@ public final class Retrofit2ClientCollectionHandlingTest extends TestBase {
         CompletableFuture<Map<String, String>> getMapFuture();
     }
 
-    @Test
-    public void testList() throws IOException {
+    private void enqueueResponse(int code, String body) {
+        server.enqueue(new MockResponse().setResponseCode(code).setBody(body));
+    }
+
+    @ParameterizedTest(name = "{index}: code {0} body: \"{1}\"")
+    @MethodSource("responses")
+    public void testList(int code, String body) throws IOException {
+        enqueueResponse(code, body);
         assertCallBody(proxy.getList(), list -> assertThat(list).isEmpty());
     }
 
-    @Test
-    public void testSet() throws IOException {
+    @ParameterizedTest(name = "{index}: code {0} body: \"{1}\"")
+    @MethodSource("responses")
+    public void testSet(int code, String body) throws IOException {
+        enqueueResponse(code, body);
         assertCallBody(proxy.getSet(), set -> assertThat(set).isEmpty());
     }
 
-    @Test
-    public void testMap() throws IOException {
+    @ParameterizedTest(name = "{index}: code {0} body: \"{1}\"")
+    @MethodSource("responses")
+    public void testMap(int code, String body) throws IOException {
+        enqueueResponse(code, body);
         assertCallBody(proxy.getMap(), map -> assertThat(map).isEmpty());
     }
 
-    @Test
-    public void testListFuture() throws Exception {
+    @ParameterizedTest(name = "{index}: code {0} body: \"{1}\"")
+    @MethodSource("responses")
+    public void testListFuture(int code, String body) throws Exception {
+        enqueueResponse(code, body);
         assertFuture(proxy.getListFuture(), list -> assertThat(list).isEmpty());
     }
 
-    @Test
-    public void testSetFuture() throws Exception {
+    @ParameterizedTest(name = "{index}: code {0} body: \"{1}\"")
+    @MethodSource("responses")
+    public void testSetFuture(int code, String body) throws Exception {
+        enqueueResponse(code, body);
         assertFuture(proxy.getSetFuture(), set -> assertThat(set).isEmpty());
     }
 
-    @Test
-    public void testMapFuture() throws Exception {
+    @ParameterizedTest(name = "{index}: code {0} body: \"{1}\"")
+    @MethodSource("responses")
+    public void testMapFuture(int code, String body) throws Exception {
+        enqueueResponse(code, body);
         assertFuture(proxy.getMapFuture(), map -> assertThat(map).isEmpty());
     }
 
