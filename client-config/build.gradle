@@ -11,7 +11,6 @@ dependencies {
     implementation 'com.google.guava:guava'
     implementation project(":keystores")
 
-    testImplementation "junit:junit"
     testImplementation 'com.google.guava:guava'
     testImplementation "org.assertj:assertj-core"
     testImplementation "org.mockito:mockito-core"
@@ -20,4 +19,8 @@ dependencies {
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'
     implementation 'com.palantir.safe-logging:logger'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine', {
+        because 'allows JUnit 3 and JUnit 4 tests to run'
+    }
 }

@@ -5,9 +5,12 @@ dependencies {
     api "com.google.code.findbugs:jsr305"
     api "com.google.guava:guava"
 
-    testImplementation "junit:junit"
     testImplementation "org.assertj:assertj-core"
     testImplementation "org.jmock:jmock"
     testImplementation "org.mockito:mockito-core"
     testImplementation 'io.reactivex.rxjava2:rxjava'
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine', {
+        because 'allows JUnit 3 and JUnit 4 tests to run'
+    }
 }

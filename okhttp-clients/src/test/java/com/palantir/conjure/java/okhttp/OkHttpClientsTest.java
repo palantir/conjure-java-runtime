@@ -77,8 +77,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 @RunWith(MockitoJUnitRunner.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public final class OkHttpClientsTest extends TestBase {
 
     @Rule
@@ -736,7 +739,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(server2.takeRequest().getPath()).isEqualTo("/foo?bar");
     }
 
-    @Test(timeout = 10_000)
+    @Test(timeout = 10000L)
     public void handlesInterruptedThreads() throws Exception {
         server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.NO_RESPONSE));
 
@@ -852,7 +855,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(synchronousCall.body().string()).isEqualTo("Hello, world!");
     }
 
-    @Test(timeout = 10_000)
+    @Test(timeout = 10000L)
     public void randomizesUrls() throws IOException {
         boolean server2WasHit = false;
         server.shutdown();
@@ -903,7 +906,7 @@ public final class OkHttpClientsTest extends TestBase {
         assertThat(server.takeRequest().getHeader(HttpHeaders.HOST)).isEqualTo("foo.com");
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 1000L)
     public void non_ioexceptions_dont_break_the_world() throws IOException {
         server.enqueue(new MockResponse().setBody("foo"));
 

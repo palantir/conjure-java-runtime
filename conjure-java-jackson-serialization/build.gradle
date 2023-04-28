@@ -15,6 +15,9 @@ dependencies {
     implementation "com.palantir.safe-logging:logger"
     implementation 'com.palantir.tritium:tritium-registry'
 
-    testImplementation "junit:junit"
     testImplementation "org.assertj:assertj-core"
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine', {
+        because 'allows JUnit 3 and JUnit 4 tests to run'
+    }
 }
