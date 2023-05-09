@@ -39,8 +39,7 @@ final class DefaultCas {
     private static final SafeLogger log = SafeLoggerFactory.get(DefaultCas.class);
 
     /**
-     * This should be updated by running `./gradlew regenerateCAs` whenever the Java version we use to compile changes,
-     * to ensure we pick up new CAs or revoke insecure ones.
+     * This is managed by an excavator.
      */
     private static final String CA_CERTIFICATES_CRT = "ca-certificates.crt";
 
