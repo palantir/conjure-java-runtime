@@ -63,7 +63,7 @@ final class DefaultCas {
             for (X509Certificate cert : caCertificates) {
                 String certificateCommonName =
                         cert.getSubjectX500Principal().getName().toLowerCase(Locale.ENGLISH);
-                certificateMap.put(certificateCommonName, cert);
+                certificateMap.put(certificateCommonName + index, cert);
                 log.debug(
                         "Adding CA certificate",
                         SafeArg.of("certificateIndex", index),
