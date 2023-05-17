@@ -59,5 +59,4 @@ com.squareup.retrofit2:* = 2.4.0
 # Pin to same version as spark
 io.dropwizard.metrics:metrics-core = 3.2.6
 
-# Allow tests to run on Centos6
-org.conscrypt:conscrypt-openjdk-uber = 1.4.1
+org.conscrypt:conscrypt-openjdk-uber = 2.5.2
