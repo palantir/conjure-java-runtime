@@ -23,6 +23,14 @@ dependencies {
     compileOnly 'org.immutables:value::annotations'
 }
 
+moduleJvmArgs {
+    // This opens exists to unblock potential failures which occur when Conscrypt is used with a non-Conscrypt
+    // trust-manager. It's arguable whether this is the correct place for the setting to live, however this
+    // provides a wide net to prevent runtime failures.
+    opens 'java.base/java.net'
+}
+
+
 task generateCerts(type:Exec) {
   workingDir './src/test/resources'
   commandLine './certSetup.sh', '-f'
