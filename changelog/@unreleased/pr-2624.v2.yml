@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Improve TLSv1.3 interoperability with Conscrypt
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2624

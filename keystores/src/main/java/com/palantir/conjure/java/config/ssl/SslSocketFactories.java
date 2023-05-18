@@ -164,7 +164,7 @@ public final class SslSocketFactories {
             TrustManager[] trustManagers, @Nullable KeyManager[] keyManagers, Provider provider) {
         try {
             SSLContext sslContext = SSLContext.getInstance("TLS", provider);
-            sslContext.init(keyManagers, trustManagers, null);
+            sslContext.init(keyManagers, ConscryptCompatTrustManagers.wrap(trustManagers), null);
             return sslContext;
         } catch (GeneralSecurityException e) {
             throw Throwables.propagate(e);
@@ -178,8 +178,9 @@ public final class SslSocketFactories {
      * @return an {@link TrustManager} array according to the input configuration
      */
     public static TrustManager[] createTrustManagers(SslConfiguration config) {
-        return createTrustManagerFactory(config.trustStorePath(), config.trustStoreType())
-                .getTrustManagers();
+        return ConscryptCompatTrustManagers.wrap(
+                createTrustManagerFactory(config.trustStorePath(), config.trustStoreType())
+                        .getTrustManagers());
     }
 
     /**
@@ -193,7 +194,7 @@ public final class SslSocketFactories {
             TrustManagerFactory trustManagerFactory =
                     TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(KeyStores.createTrustStoreFromCertificates(trustCertificatesByAlias));
-            return trustManagerFactory.getTrustManagers();
+            return ConscryptCompatTrustManagers.wrap(trustManagerFactory.getTrustManagers());
         } catch (NoSuchAlgorithmException | KeyStoreException e) {
             throw Throwables.propagate(e);
         }
