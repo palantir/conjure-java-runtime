@@ -14,7 +14,7 @@ com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider:2.15.2 (1 cons
 com.fasterxml.jackson.module:jackson-module-afterburner:2.15.2 (1 constraints: 3905393b)
 com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.15.2 (2 constraints: e430cfb3)
 com.fasterxml.jackson.module:jackson-module-scala_2.12:2.15.2 (1 constraints: 3905393b)
-com.github.ben-manes.caffeine:caffeine:3.1.7 (3 constraints: ef235ba4)
+com.github.ben-manes.caffeine:caffeine:3.1.7 (3 constraints: ee2301a4)
 com.google.code.findbugs:jsr305:3.0.2 (15 constraints: 9de5277d)
 com.google.errorprone:error_prone_annotations:2.7.1 (16 constraints: e2f94d23)
 com.google.guava:failureaccess:1.0.1 (1 constraints: 140ae1b4)
