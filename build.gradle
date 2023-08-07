@@ -54,6 +54,10 @@ allprojects {
                 details.useTarget group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.7.1'
                 details.because "The error_prone_annotations dependency must be low to avoid forcing consumers to use newer releases"
             }
+            if (details.requested.group == 'com.github.ben-manes.caffeine' && details.requested.name == 'caffeine' && details.requested.version == '3.1.7') {
+                details.useTarget group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.6'
+                details.because "https://github.com/ben-manes/caffeine/issues/1111"
+            }
         }
     }
 
