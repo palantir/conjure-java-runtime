@@ -9,7 +9,7 @@ buildscript {
         classpath 'com.palantir.gradle.jdks:gradle-jdks:0.32.0'
         classpath 'com.palantir.gradle.jdkslatest:gradle-jdks-latest:0.9.0'
         classpath 'com.palantir.gradle.externalpublish:gradle-external-publish-plugin:1.12.0'
-        classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.34.0'
+        classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.35.0'
         classpath 'com.palantir.gradle.revapi:gradle-revapi:1.7.0'
         classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:7.0.1'
         classpath 'com.palantir.baseline:gradle-baseline-java:5.13.0'
