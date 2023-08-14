@@ -122,6 +122,12 @@ final class KeyStores {
         KeyStore keyStore;
         keyStore = createKeyStore();
 
+        addCertificatesToKeystore(certificatesByAlias, keyStore);
+
+        return keyStore;
+    }
+
+    static void addCertificatesToKeystore(Map<String, PemX509Certificate> certificatesByAlias, KeyStore keyStore) {
         for (Map.Entry<String, PemX509Certificate> entry : certificatesByAlias.entrySet()) {
             try (InputStream certIn =
                     new ByteArrayInputStream(entry.getValue().pemCertificate().getBytes(StandardCharsets.UTF_8))) {
@@ -135,8 +141,6 @@ final class KeyStores {
                         e);
             }
         }
-
-        return keyStore;
     }
 
     private static void addCertificatesToKeystore(
