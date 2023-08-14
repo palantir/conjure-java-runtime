@@ -57,7 +57,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-final class KeyStores {
+public final class KeyStores {
 
     private static final Cache<EqualByteArray, X509Certificate> certCache =
             Caffeine.newBuilder().maximumSize(1024).softValues().build();
@@ -331,7 +331,7 @@ final class KeyStores {
      * @return a newly constructed key store of the type trustStoreType that contains the contents of the trust store
      * and all default ca certificates.
      */
-    static KeyStore getCombinedTrustStoreAndDefaultCas(Path trustStorePath, StoreType trustStoreType) {
+    public static KeyStore getCombinedTrustStoreAndDefaultCas(Path trustStorePath, StoreType trustStoreType) {
         KeyStore keyStore;
         switch (trustStoreType) {
             case JKS:
