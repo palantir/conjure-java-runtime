@@ -20,7 +20,9 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.base.Throwables;
 import com.google.common.io.BaseEncoding;
+import com.palantir.conjure.java.api.config.ssl.SslConfiguration.StoreType;
 import com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1PrivateKeyReader;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -319,6 +321,48 @@ final class KeyStores {
         } catch (GeneralSecurityException | IOException e) {
             throw Throwables.propagate(e);
         }
+    }
+
+    /**
+     * Return a new {@link KeyStore} that contains the contents of the trust store and all default ca certificates.
+     *
+     * @param trustStorePath The path to the trust store.
+     * @param trustStoreType The type of trust store.
+     * @return a newly constructed key store of the type trustStoreType that contains the contents of the trust store
+     * and all default ca certificates.
+     */
+    static KeyStore getCombinedTrustStoreAndDefaultCas(Path trustStorePath, StoreType trustStoreType) {
+        KeyStore keyStore;
+        switch (trustStoreType) {
+            case JKS:
+            case PKCS12:
+                keyStore = loadKeyStore(trustStoreType.name(), trustStorePath, Optional.empty());
+                break;
+            case PEM:
+                keyStore = createTrustStoreFromCertificates(trustStorePath);
+                break;
+            case PUPPET:
+                Path puppetCertsDir = trustStorePath.resolve("certs");
+                if (!puppetCertsDir.toFile().isDirectory()) {
+                    throw new IllegalStateException(
+                            String.format("Puppet certs directory did not exist at path \"%s\"", puppetCertsDir));
+                }
+                keyStore = createTrustStoreFromCertificates(puppetCertsDir);
+                break;
+            default:
+                throw new IllegalStateException("Unrecognized trust store type: " + trustStoreType);
+        }
+
+        // Add globally trusted root CAs
+        DefaultCas.getCertificates().forEach((certAlias, cert) -> {
+            try {
+                keyStore.setCertificateEntry(certAlias, cert);
+            } catch (KeyStoreException e) {
+                throw new SafeRuntimeException(
+                        "Unable to add certificate to store", e, SafeArg.of("certificateAlias", certAlias));
+            }
+        });
+        return keyStore;
     }
 
     private static KeyStore createKeyStore() {

@@ -18,7 +18,6 @@ package com.palantir.conjure.java.config.ssl;
 
 import com.google.common.base.Throwables;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
-import com.palantir.conjure.java.api.config.ssl.SslConfiguration.StoreType;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.nio.file.Path;
@@ -93,20 +92,6 @@ public final class SslSocketFactories {
     }
 
     /**
-     * Create a {@link SSLSocketFactory} from the provided certificates and configuration.
-     *
-     * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
-     *     certificate as.
-     * @param config an {@link SslConfiguration} describing the trust store configuration
-     * @param provider The preferred security {@link Provider}
-     */
-    public static SSLSocketFactory createSslSocketFactory(
-            Map<String, PemX509Certificate> trustCertificatesByAlias, SslConfiguration config, Provider provider) {
-        SSLContext sslContext = createSslContext(config, trustCertificatesByAlias, provider);
-        return sslContext.getSocketFactory();
-    }
-
-    /**
      * Create an {@link SSLContext} initialized from the provided configuration.
      *
      * @param config an {@link SslConfiguration} describing the trust store and key store configuration
@@ -154,19 +139,6 @@ public final class SslSocketFactories {
     public static SSLContext createSslContext(
             Map<String, PemX509Certificate> trustCertificatesByAlias, Provider provider) {
         TrustManager[] trustManagers = createTrustManagers(trustCertificatesByAlias);
-        return createSslContext(trustManagers, new KeyManager[] {}, provider);
-    }
-
-    /**
-     * Create an {@link SSLContext} initialized from the provided configuration and certificates.
-     *
-     * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
-     *       certificate as.
-     * @param config an {@link SslConfiguration} describing the trust store configuration
-     */
-    public static SSLContext createSslContext(
-            SslConfiguration config, Map<String, PemX509Certificate> trustCertificatesByAlias, Provider provider) {
-        TrustManager[] trustManagers = createMergedTrustManagers(config, trustCertificatesByAlias);
         return createSslContext(trustManagers, new KeyManager[] {}, provider);
     }
 
@@ -226,20 +198,6 @@ public final class SslSocketFactories {
         } catch (NoSuchAlgorithmException | KeyStoreException e) {
             throw Throwables.propagate(e);
         }
-    }
-
-    /**
-     * Create SSL socket factory and trust manager from the given certificates, see {@link #createX509TrustManager} and
-     * {@link #createSslSocketFactory}.
-     */
-    public static TrustManager[] createMergedTrustManagers(
-            SslConfiguration config, Map<String, PemX509Certificate> trustCertificatesByAlias) {
-        KeyStore keystore = getCombinedTrustStoreAndDefaultCas(config.trustStorePath(), config.trustStoreType());
-
-        KeyStores.addCertificatesToKeystore(trustCertificatesByAlias, keystore);
-
-        return ConscryptCompatTrustManagers.wrap(
-                getTrustManagerFactory(keystore).getTrustManagers());
     }
 
     /**
@@ -311,12 +269,8 @@ public final class SslSocketFactories {
 
     private static TrustManagerFactory createTrustManagerFactory(
             Path trustStorePath, SslConfiguration.StoreType trustStoreType) {
-        KeyStore keyStore = getCombinedTrustStoreAndDefaultCas(trustStorePath, trustStoreType);
+        KeyStore keyStore = KeyStores.getCombinedTrustStoreAndDefaultCas(trustStorePath, trustStoreType);
 
-        return getTrustManagerFactory(keyStore);
-    }
-
-    private static TrustManagerFactory getTrustManagerFactory(KeyStore keyStore) {
         try {
             TrustManagerFactory trustManagerFactory =
                     TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -325,40 +279,6 @@ public final class SslSocketFactories {
         } catch (GeneralSecurityException e) {
             throw Throwables.propagate(e);
         }
-    }
-
-    private static KeyStore getCombinedTrustStoreAndDefaultCas(Path trustStorePath, StoreType trustStoreType) {
-        KeyStore keyStore;
-        switch (trustStoreType) {
-            case JKS:
-            case PKCS12:
-                keyStore = KeyStores.loadKeyStore(trustStoreType.name(), trustStorePath, Optional.empty());
-                break;
-            case PEM:
-                keyStore = KeyStores.createTrustStoreFromCertificates(trustStorePath);
-                break;
-            case PUPPET:
-                Path puppetCertsDir = trustStorePath.resolve("certs");
-                if (!puppetCertsDir.toFile().isDirectory()) {
-                    throw new IllegalStateException(
-                            String.format("Puppet certs directory did not exist at path \"%s\"", puppetCertsDir));
-                }
-                keyStore = KeyStores.createTrustStoreFromCertificates(puppetCertsDir);
-                break;
-            default:
-                throw new IllegalStateException("Unrecognized trust store type: " + trustStoreType);
-        }
-
-        // Add globally trusted root CAs
-        DefaultCas.getCertificates().forEach((certAlias, cert) -> {
-            try {
-                keyStore.setCertificateEntry(certAlias, cert);
-            } catch (KeyStoreException e) {
-                throw new SafeRuntimeException(
-                        "Unable to add certificate to store", e, SafeArg.of("certificateAlias", certAlias));
-            }
-        });
-        return keyStore;
     }
 
     private static KeyManagerFactory createKeyManagerFactory(
