@@ -162,7 +162,7 @@ public final class SslSocketFactories {
      *
      * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
      *       certificate as.
-     * @param config an {@link SslConfiguration} describing the trust store and key store configuration
+     * @param config an {@link SslConfiguration} describing the trust store configuration
      */
     public static SSLContext createSslContext(
             SslConfiguration config, Map<String, PemX509Certificate> trustCertificatesByAlias, Provider provider) {
