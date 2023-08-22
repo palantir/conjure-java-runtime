@@ -29,7 +29,7 @@ io.undertow:* = 2.2.24.Final
 # here to enable existing test coverage.
 io.undertow:undertow-servlet-jakarta = 2.2.20.Final
 # dependency-upgrader:ON
-com.palantir.refreshable:refreshable = 2.2.0
+com.palantir.refreshable:refreshable = 2.3.0
 org.hibernate.validator:* = 6.2.0.Final
 org.checkerframework:checker-qual = 3.37.0
 
