@@ -13,6 +13,7 @@ com.palantir.safe-logging:* = 3.6.0
 com.palantir.tokens:* = 3.18.0
 com.palantir.tracing:* = 6.18.0
 com.palantir.tritium:* = 0.77.0
+com.squareup.okhttp3:* = 4.11.0
 io.reactivex.rxjava2:rxjava = 2.2.21
 org.apache.commons:commons-lang3 = 3.13.0
 org.assertj:assertj-core = 3.24.2
@@ -49,9 +50,6 @@ javax.inject:javax.inject = 1
 # dependency-upgrader:OFF
 
 com.fasterxml.jackson.*:* = 2.13.1
-
-# Temporarily pausing until internal libraries stop relying on UnrepeatableRequestBody
-com.squareup.okhttp3:* = 3.13.1
 
 # We cannot upgrade retrofit2 to 2.5.0 because of https://github.com/palantir/conjure-java-runtime/issues/930
 com.squareup.retrofit2:* = 2.4.0

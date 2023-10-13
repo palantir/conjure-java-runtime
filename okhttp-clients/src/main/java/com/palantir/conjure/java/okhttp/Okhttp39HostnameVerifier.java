@@ -32,7 +32,7 @@
  */
 package com.palantir.conjure.java.okhttp;
 
-import static okhttp3.internal.Util.verifyAsIpAddress;
+import static okhttp3.internal.Util.canParseAsIpAddress;
 
 import java.security.cert.Certificate;
 import java.security.cert.CertificateParsingException;
@@ -79,7 +79,7 @@ final class Okhttp39HostnameVerifier implements HostnameVerifier {
     }
 
     public boolean verify(String host, X509Certificate certificate) {
-        return verifyAsIpAddress(host) ? verifyIpAddress(host, certificate) : verifyHostname(host, certificate);
+        return canParseAsIpAddress(host) ? verifyIpAddress(host, certificate) : verifyHostname(host, certificate);
     }
 
     /** Returns true if {@code certificate} matches {@code ipAddress}. */
