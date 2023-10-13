@@ -292,7 +292,7 @@ public final class OkHttpClients {
                 .addMetrics("from", DispatcherMetricSet.class.getSimpleName(), dispatcherMetricSet);
 
         return new RemotingOkHttpClient(
-                client.build(),
+                client,
                 backoffStrategyFunction,
                 config.nodeSelectionStrategy(),
                 urlSelector,
