@@ -23,6 +23,7 @@ import com.palantir.conjure.java.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.api.config.service.PartialServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.UserAgent;
+import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -38,6 +39,7 @@ import org.immutables.value.Value;
  * A context-independent (i.e., does not depend on configuration files or on-disk entities like JKS keystores)
  * instantiation of a {@link ServiceConfiguration}.
  */
+@DoNotLog
 @Value.Immutable
 @ImmutablesStyle
 public interface ClientConfiguration {

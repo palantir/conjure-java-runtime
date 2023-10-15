@@ -17,7 +17,6 @@
 package com.palantir.verification.server.undertest;
 
 import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
 import com.google.common.reflect.AbstractInvocationHandler;
 import com.google.common.reflect.Reflection;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
@@ -48,7 +47,7 @@ public final class ServerUnderTestApplication {
             Preconditions.checkArgument(args.length == 1, "Expected single argument. Method: %s", method);
             if (args[0] instanceof BinaryAliasExample) {
                 return (StreamingOutput) output ->
-                        ByteStreams.copy(((BinaryAliasExample) args[0]).get().getInputStream(), output);
+                        ((BinaryAliasExample) args[0]).get().getInputStream().transferTo(output);
             } else {
                 return args[0];
             }

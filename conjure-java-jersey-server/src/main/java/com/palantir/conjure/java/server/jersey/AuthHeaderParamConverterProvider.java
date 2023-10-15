@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.AuthHeader;
 import java.lang.annotation.Annotation;
@@ -81,6 +82,7 @@ public final class AuthHeaderParamConverterProvider implements ParamConverterPro
             }
         }
 
+        @DoNotLog
         @Override
         public String toString(final AuthHeader value) {
             Preconditions.checkArgument(value != null);

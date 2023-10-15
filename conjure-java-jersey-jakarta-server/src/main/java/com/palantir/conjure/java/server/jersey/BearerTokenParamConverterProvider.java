@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.server.jersey;
 
+import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tokens.auth.BearerToken;
 import jakarta.ws.rs.CookieParam;
@@ -80,6 +81,7 @@ public final class BearerTokenParamConverterProvider implements ParamConverterPr
             }
         }
 
+        @DoNotLog
         @Override
         public String toString(final BearerToken value) {
             Preconditions.checkArgument(value != null);
