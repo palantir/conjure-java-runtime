@@ -1,7 +1,7 @@
 apply plugin: 'com.palantir.external-publish-jar'
 apply plugin: 'com.palantir.metric-schema'
 
-def jerseyVersion = '2.34'
+def jerseyVersion = '2.40'
 
 versionsLock {
     disableJavaPluginDefaults()

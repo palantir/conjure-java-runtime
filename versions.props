@@ -39,7 +39,7 @@ org.apache.httpcomponents.client5:* = 5.2.1
 jakarta.servlet:jakarta.servlet-api = 5.0.0
 jakarta.ws.rs:jakarta.ws.rs-api = 3.1.0
 jakarta.annotation:jakarta.annotation-api = 2.0.0
-org.glassfish.jersey.*:* = 3.0.6
+org.glassfish.jersey.*:* = 3.1.3
 
 # for version locks on legacy javax versions
 javax.annotation:javax.annotation-api = 1.3.2
