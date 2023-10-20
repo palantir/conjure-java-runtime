@@ -577,11 +577,15 @@ final class RemotingOkHttpCall extends ForwardingCall {
     }
 
     private static void retryIfAllowed(Callback callback, Call call, Exception exception, Runnable retryScheduler) {
-        if (call.request().body().isOneShot()) {
+        if (isStreamingBody(call)) {
             callback.onFailure(call, new SafeIoException("Cannot retry a 'one shot' HTTP body", exception));
         } else {
             retryScheduler.run();
         }
+    }
+
+    private static boolean isStreamingBody(Call call) {
+        return call.request().body() != null && call.request().body().isOneShot();
     }
 
     private static boolean shouldPropagateQos(ClientConfiguration.ServerQoS serverQoS) {
