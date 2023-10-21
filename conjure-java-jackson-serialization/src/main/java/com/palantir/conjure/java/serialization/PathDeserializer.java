@@ -38,6 +38,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
+import com.palantir.logsafe.exceptions.SafeIoException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -58,6 +59,7 @@ public final class PathDeserializer extends StdScalarDeserializer<Path> {
             }
             // 16-Oct-2015: should we perhaps allow JSON Arrays (of Strings) as well?
         }
-        throw ctxt.mappingException(Path.class, token);
+        throw new SafeIoException(
+                "Could not deserialize path", ctxt.wrongTokenException(parser, Path.class, token, null));
     }
 }
