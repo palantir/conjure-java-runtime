@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Replace deprecated mappingException
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2714
