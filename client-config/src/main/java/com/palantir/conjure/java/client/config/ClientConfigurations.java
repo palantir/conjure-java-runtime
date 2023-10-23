@@ -25,8 +25,10 @@ import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.conjure.java.config.ssl.TrustContext;
+import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
@@ -200,7 +202,10 @@ public final class ClientConfigurations {
                 // fall through
         }
 
-        throw new IllegalStateException("Failed to create ProxySelector for proxy configuration: " + proxyConfig);
+        throw new SafeIllegalStateException(
+                "Failed to create ProxySelector for proxy configuration",
+                SafeArg.of("type", proxyConfig.type()),
+                UnsafeArg.of("hostAndPort", proxyConfig.hostAndPort()));
     }
 
     @VisibleForTesting
