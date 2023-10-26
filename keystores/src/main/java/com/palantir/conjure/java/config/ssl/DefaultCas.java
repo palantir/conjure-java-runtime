@@ -41,7 +41,7 @@ final class DefaultCas {
     /**
      * This is managed by an excavator.
      */
-    private static final String CA_CERTIFICATES_CRT = "ca-certificates.crt";
+    private static final String CA_CERTIFICATES_CRT = "/ca-certificates.crt";
 
     private static final Supplier<Map<String, X509Certificate>> TRUSTED_CERTIFICATES =
             Suppliers.memoize(DefaultCas::getTrustedCertificates);
@@ -53,8 +53,8 @@ final class DefaultCas {
     private static Map<String, X509Certificate> getTrustedCertificates() {
         ImmutableMap.Builder<String, X509Certificate> certificateMap = ImmutableMap.builder();
         try {
-            List<X509Certificate> caCertificates = KeyStores.readX509Certificates(
-                            new ByteArrayInputStream(Resources.toByteArray(Resources.getResource(CA_CERTIFICATES_CRT))))
+            List<X509Certificate> caCertificates = KeyStores.readX509Certificates(new ByteArrayInputStream(
+                            Resources.toByteArray(Resources.getResource(DefaultCas.class, CA_CERTIFICATES_CRT))))
                     .stream()
                     .map(cert -> (X509Certificate) cert)
                     .collect(Collectors.toList());
