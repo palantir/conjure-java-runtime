@@ -37,7 +37,7 @@ import okhttp3.Request;
  * An {@link OkHttpClient} that executes {@link okhttp3.Call}s as {@link RemotingOkHttpCall}s in order to retry a class
  * of retryable error states.
  */
-final class RemotingOkHttpClient extends ForwardingOkHttpClient {
+final class RemotingOkHttpClient extends OkHttpClient {
     private static final SafeLogger log = SafeLoggerFactory.get(RemotingOkHttpClient.class);
 
     private static final int MAX_NUM_RELOCATIONS = 20;
@@ -53,7 +53,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     private final ClientConfiguration.RetryOnSocketException retryOnSocketException;
 
     RemotingOkHttpClient(
-            OkHttpClient delegate,
+            OkHttpClient.Builder builder,
             Supplier<BackoffStrategy> backoffStrategy,
             NodeSelectionStrategy nodeSelectionStrategy,
             UrlSelector urls,
@@ -63,7 +63,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
             ClientConfiguration.ServerQoS serverQoS,
             ClientConfiguration.RetryOnTimeout retryOnTimeout,
             ClientConfiguration.RetryOnSocketException retryOnSocketException) {
-        super(delegate);
+        super(builder);
         this.backoffStrategyFactory = backoffStrategy;
         this.nodeSelectionStrategy = nodeSelectionStrategy;
         this.urls = urls;
@@ -93,7 +93,7 @@ final class RemotingOkHttpClient extends ForwardingOkHttpClient {
     RemotingOkHttpCall newCallWithMutableState(
             Request request, BackoffStrategy backoffStrategy, int maxNumRelocations, Optional<Call> previousCall) {
         return new RemotingOkHttpCall(
-                getDelegate().newCall(request),
+                super.newCall(request),
                 previousCall,
                 backoffStrategy,
                 urls,
