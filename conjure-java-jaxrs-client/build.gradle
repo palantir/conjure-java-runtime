@@ -15,12 +15,19 @@ dependencies {
     api "com.palantir.dialogue:dialogue-target"
 
     implementation project(":conjure-java-annotations")
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-cbor'
+    implementation 'com.palantir.conjure.java.api:errors'
+    implementation 'com.palantir.conjure.java.api:service-config'
     implementation "com.palantir.dialogue:dialogue-apache-hc5-client"
     implementation "com.palantir.dialogue:dialogue-core"
     implementation "com.palantir.dialogue:dialogue-serde"
     implementation 'com.palantir.safe-logging:logger'
-
+    implementation 'com.palantir.safe-logging:safe-logging'
     implementation 'com.palantir.tritium:tritium-registry'
+    implementation 'io.dropwizard.metrics:metrics-core'
 
     implementation project(":conjure-java-jackson-serialization")
     implementation "com.google.guava:guava"

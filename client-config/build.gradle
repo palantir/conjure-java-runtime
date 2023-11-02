@@ -7,7 +7,10 @@ dependencies {
     api 'com.palantir.tritium:tritium-registry'
     api 'com.google.errorprone:error_prone_annotations'
     api 'com.palantir.refreshable:refreshable'
+    implementation 'com.palantir.conjure.java.api:ssl-config'
+    implementation 'com.palantir.safe-logging:preconditions'
     implementation 'com.palantir.safe-logging:safe-logging'
+    implementation 'com.google.code.findbugs:jsr305'
     implementation 'com.google.guava:guava'
     implementation project(":keystores")
 
