@@ -8,6 +8,7 @@ dependencies {
     api project(':client-config')
     api project(':conjure-java-legacy-clients')
     api "com.palantir.conjure.java.api:errors"
+    api "com.squareup.okhttp3:okhttp"
     implementation project(':conjure-java-jackson-serialization')
     implementation 'com.google.guava:guava'
     implementation 'com.netflix.concurrency-limits:concurrency-limits-core'
