@@ -16,9 +16,17 @@ dependencies {
     api 'jakarta.servlet:jakarta.servlet-api'
     api 'org.apache.httpcomponents.client5:httpclient5'
     implementation project(':conjure-java-jackson-serialization')
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.google.errorprone:error_prone_annotations'
     implementation 'com.palantir.safe-logging:preconditions'
-    implementation 'org.glassfish.jersey.core:jersey-server'
+    implementation 'com.palantir.safe-logging:safe-logging'
+    implementation 'jakarta.ws.rs:jakarta.ws.rs-api'
+    implementation 'org.apache.httpcomponents.core5:httpcore5'
     implementation 'org.glassfish.jersey.containers:jersey-container-servlet-core'
+    implementation 'org.glassfish.jersey.core:jersey-common'
+    implementation 'org.glassfish.jersey.core:jersey-server'
     implementation 'org.glassfish.jersey.media:jersey-media-json-jackson'
+    implementation 'org.jboss.xnio:xnio-api'
+    implementation 'org.junit.jupiter:junit-jupiter-api'
 
 }

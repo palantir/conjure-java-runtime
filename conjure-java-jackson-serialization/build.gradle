@@ -12,8 +12,13 @@ dependencies {
     api "com.fasterxml.jackson.datatype:jackson-datatype-joda"
     api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     api "com.palantir.safe-logging:preconditions"
+    implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.guava:guava'
     implementation "com.palantir.safe-logging:logger"
+    implementation 'com.palantir.safe-logging:safe-logging'
     implementation 'com.palantir.tritium:tritium-registry'
+    implementation 'io.dropwizard.metrics:metrics-core'
 
     testImplementation "org.assertj:assertj-core"
     testImplementation 'org.junit.jupiter:junit-jupiter'
