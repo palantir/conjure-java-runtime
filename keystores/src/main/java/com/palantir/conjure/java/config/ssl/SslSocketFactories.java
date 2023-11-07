@@ -93,7 +93,7 @@ public final class SslSocketFactories {
     }
 
     /**
-     * Create a {@link SSLSocketFactory} from the provided certificates and configuration.
+     * Create a {@link SSLSocketFactory} by merging the provided certificates and configuration.
      *
      * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
      *     certificate as.
@@ -158,11 +158,12 @@ public final class SslSocketFactories {
     }
 
     /**
-     * Create an {@link SSLContext} initialized from the provided configuration and certificates.
+     * Create an {@link SSLContext} by merging the provided configuration and certificates.
      *
      * @param trustCertificatesByAlias a map of X.509 certificate in PEM or DER format by the alias to load the
      *       certificate as.
      * @param config an {@link SslConfiguration} describing the trust store configuration
+     * @param provider The preferred security {@link Provider}
      */
     public static SSLContext createSslContext(
             SslConfiguration config, Map<String, PemX509Certificate> trustCertificatesByAlias, Provider provider) {
@@ -229,8 +230,8 @@ public final class SslSocketFactories {
     }
 
     /**
-     * Create SSL socket factory and trust manager from the given certificates, see {@link #createX509TrustManager} and
-     * {@link #createSslSocketFactory}.
+     * Create SSL socket factory and trust manager by merging the given certificates and configuration,
+     * see {@link #createX509TrustManager} and {@link #createSslSocketFactory}.
      */
     public static TrustManager[] createMergedTrustManagers(
             SslConfiguration config, Map<String, PemX509Certificate> trustCertificatesByAlias) {
