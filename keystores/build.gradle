@@ -8,10 +8,15 @@ apply plugin: 'com.palantir.revapi'
 dependencies {
     api "com.fasterxml.jackson.core:jackson-databind"
     api "com.palantir.conjure.java.api:ssl-config"
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    implementation "com.github.ben-manes.caffeine:caffeine"
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.errorprone:error_prone_annotations'
     implementation "com.google.guava:guava"
     implementation 'com.palantir.safe-logging:logger'
     implementation "com.palantir.safe-logging:preconditions"
-    implementation "com.github.ben-manes.caffeine:caffeine"
+    implementation 'com.palantir.safe-logging:safe-logging'
+
 
     testImplementation project(":conjure-java-jackson-serialization")
     testImplementation "org.conscrypt:conscrypt-openjdk-uber"

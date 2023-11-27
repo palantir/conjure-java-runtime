@@ -8,5 +8,10 @@ dependencies {
     api "com.fasterxml.jackson.dataformat:jackson-dataformat-smile"
 
     implementation project(':conjure-java-jackson-serialization')
+    implementation project(':conjure-java-legacy-clients')
+    implementation project(':extras:refresh-utils')
     implementation 'com.fasterxml.jackson.module:jackson-module-scala_2.12'
+    implementation 'com.google.guava:guava'
+    implementation 'com.palantir.conjure.java.api:service-config'
+    implementation 'com.palantir.conjure.java.runtime:client-config'
 }

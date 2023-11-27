@@ -6,6 +6,10 @@ dependencies {
     api "com.palantir.conjure.java.api:errors"
     implementation "com.google.guava:guava"
     implementation 'com.github.ben-manes.caffeine:caffeine'
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.errorprone:error_prone_annotations'
+    implementation 'com.palantir.safe-logging:safe-logging'
+    implementation 'io.dropwizard.metrics:metrics-core'
 
     annotationProcessor "org.immutables:value"
     compileOnly 'org.immutables:value::annotations'

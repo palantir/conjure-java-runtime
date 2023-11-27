@@ -17,6 +17,7 @@
 package com.palantir.conjure.java.serialization;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.TSFBuilder;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -243,12 +244,18 @@ public final class ObjectMappers {
 
     /** Configures provided JsonFactory with Conjure default settings. */
     private static <F extends JsonFactory, B extends TSFBuilder<F, B>> B withDefaults(B builder) {
-        return ReflectiveStreamReadConstraints.withDefaultConstraints(builder
+        return builder
                 // Interning introduces excessive contention https://github.com/FasterXML/jackson-core/issues/946
                 .disable(JsonFactory.Feature.INTERN_FIELD_NAMES)
                 // Canonicalization can be helpful to avoid string re-allocation, however we expect unbounded
                 // key space due to use of maps keyed by random identifiers, which cause heavy heap churn.
                 // See this discussion: https://github.com/FasterXML/jackson-benchmarks/pull/6
-                .disable(JsonFactory.Feature.CANONICALIZE_FIELD_NAMES));
+                .disable(JsonFactory.Feature.CANONICALIZE_FIELD_NAMES)
+                .streamReadConstraints(StreamReadConstraints.builder()
+                        // 50mb up from the default 20mb as a more permissive value to begin with, which we can ratchet
+                        // down over time. This allows us to decouple the initial risk of adopting string length limits
+                        // from the risk introduced by taking a dependency upgrade.
+                        .maxStringLength(50_000_000)
+                        .build());
     }
 }

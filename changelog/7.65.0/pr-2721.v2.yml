@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Always load certificates from the same jar as the code
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2721

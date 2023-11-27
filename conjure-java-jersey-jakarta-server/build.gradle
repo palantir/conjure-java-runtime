@@ -8,14 +8,23 @@ dependencies {
 
     implementation 'com.palantir.tritium:tritium-registry'
     implementation 'io.dropwizard.metrics:metrics-core'
+    implementation 'com.fasterxml.jackson.core:jackson-core'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-cbor'
     implementation "com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider", {
         // activation-api should be a 'compileOnly' dependency where 'jakarta.activation' should be used at runtime
         exclude module: 'jakarta.activation-api'
     }
+    implementation 'com.google.code.findbugs:jsr305'
+    implementation 'com.google.guava:guava'
     implementation "com.netflix.feign:feign-core"
     implementation "com.palantir.safe-logging:safe-logging"
     implementation 'com.palantir.tokens:auth-tokens'
     implementation "com.palantir.tracing:tracing-jersey-jakarta"
+    implementation 'jakarta.annotation:jakarta.annotation-api'
+    implementation 'jakarta.inject:jakarta.inject-api'
+    implementation 'jakarta.ws.rs:jakarta.ws.rs-api'
+    implementation 'org.glassfish.jersey.core:jersey-common'
     implementation project(':conjure-java-jackson-serialization')
 
     runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation"
