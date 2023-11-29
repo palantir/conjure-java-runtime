@@ -9,7 +9,6 @@ ext {
 sourceSets {
     generatedObjects
     generatedJersey
-    generatedRetrofit
 }
 
 configurations {
@@ -27,16 +26,11 @@ dependencies {
     generatedJerseyImplementation 'com.palantir.conjure.java:conjure-lib'
     generatedJerseyImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     generatedJerseyImplementation sourceSets.generatedObjects.output
-    generatedRetrofitImplementation 'com.google.guava:guava'
-    generatedRetrofitImplementation 'com.palantir.conjure.java:conjure-lib'
-    generatedRetrofitImplementation 'com.squareup.retrofit2:retrofit'
-    generatedRetrofitImplementation sourceSets.generatedObjects.output
 
     testImplementation 'com.palantir.conjure.java:conjure-lib'
     testImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     testImplementation sourceSets.generatedObjects.output
     testImplementation sourceSets.generatedJersey.output
-    testImplementation sourceSets.generatedRetrofit.output
 }
 
 tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureEach {
@@ -47,14 +41,11 @@ idea {
     module {
         sourceDirs += sourceSets.generatedObjects.java.srcDirs
         sourceDirs += sourceSets.generatedJersey.java.srcDirs
-        sourceDirs += sourceSets.generatedRetrofit.java.srcDirs
         generatedSourceDirs += sourceSets.generatedObjects.java.srcDirs
         generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
-        generatedSourceDirs += sourceSets.generatedRetrofit.java.srcDirs
         scopes.COMPILE.plus += [
             configurations.generatedObjectsCompileClasspath,
-            configurations.generatedJerseyCompileClasspath,
-            configurations.generatedRetrofitCompileClasspath]
+            configurations.generatedJerseyCompileClasspath]
     }
 }
 
@@ -102,25 +93,14 @@ task conjureJavaJersey(type: Exec, dependsOn: unpackGenerator) {
     doFirst { delete "src/generatedJersey/java/*" }
 }
 
-task conjureJavaRetrofit(type: Exec, dependsOn: unpackGenerator) {
-    executable "${-> unpackGenerator.getExecutable()}"
-    args 'generate',  "${-> configurations.verificationApi.singleFile}", 'src/generatedRetrofit/java', '--retrofit', '--retrofitListenableFutures'
-
-    inputs.file "${-> configurations.verificationApi.singleFile}"
-    outputs.dir "src/generatedRetrofit/java"
-    doFirst { delete "src/generatedRetrofit/java/*" }
-}
-
 // ensure compiling the sourceSet automatically run these tasks
 compileGeneratedObjectsJava.dependsOn conjureJavaObjects
 compileGeneratedJerseyJava.dependsOn conjureJavaJersey
-compileGeneratedRetrofitJava.dependsOn conjureJavaRetrofit
 
-tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, conjureJavaRetrofit, unpackVerifier, copyTestCases
+tasks.idea.dependsOn conjureJavaObjects, conjureJavaJersey, unpackVerifier, copyTestCases
 test.dependsOn unpackVerifier, copyTestCases
 
 checkstyleGeneratedObjects.enabled = false
 checkstyleGeneratedJersey.enabled = false
-checkstyleGeneratedRetrofit.enabled = false
 
 checkUnusedDependenciesTest.enabled = false
