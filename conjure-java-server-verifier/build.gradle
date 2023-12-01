@@ -8,6 +8,7 @@ dependencies {
     testImplementation project(':conjure-java-jaxrs-client')
     testImplementation project(':conjure-java-jersey-jakarta-server')
     testImplementation project(':keystores')
+    testImplementation project(':okhttp-clients')
     testImplementation project(':undertow-jakarta-testing')
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
