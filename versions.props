@@ -22,7 +22,6 @@ org.jmock:jmock = 2.12.0
 org.junit.*:* = 5.10.1
 org.mockito:* = 5.7.0
 org.slf4j:* = 1.7.36
-io.leangen.geantyref:geantyref = 1.3.4
 io.undertow:* = 2.2.24.Final
 # dependency-upgrader:OFF
 # Last version of undertow with both Jakarta+Javax support before 'undertow-servlet' was
@@ -50,9 +49,6 @@ javax.inject:javax.inject = 1
 # dependency-upgrader:OFF
 
 com.fasterxml.jackson.*:* = 2.13.1
-
-# We cannot upgrade retrofit2 to 2.5.0 because of https://github.com/palantir/conjure-java-runtime/issues/930
-com.squareup.retrofit2:* = 2.4.0
 
 # Pin to same version as spark
 io.dropwizard.metrics:metrics-core = 3.2.6

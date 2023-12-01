@@ -60,15 +60,6 @@ allprojects {
             }
         }
     }
-
-    dependencies {
-        constraints {
-            rootConfiguration 'com.squareup.retrofit2:retrofit', {
-                version { strictly '2.4.0' }
-                because 'Retrofit 2.5.0 breaks with our path parameter routing logic'
-            }
-        }
-    }
 }
 
 subprojects {
