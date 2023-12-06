@@ -33,7 +33,7 @@ com.palantir.refreshable:refreshable = 2.3.0
 org.hibernate.validator:* = 6.2.0.Final
 org.checkerframework:checker-qual = 3.41.0
 
-org.apache.httpcomponents.client5:* = 5.2.3
+org.apache.httpcomponents.client5:* = 5.3
 
 # Jakarta EE9 Versions
 jakarta.servlet:jakarta.servlet-api = 5.0.0
