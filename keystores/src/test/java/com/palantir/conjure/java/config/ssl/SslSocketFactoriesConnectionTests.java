@@ -20,13 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 
-import com.google.common.base.Throwables;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.security.Provider;
@@ -289,8 +289,11 @@ public final class SslSocketFactoriesConnectionTests {
             } finally {
                 serverThread.join();
             }
-        } catch (IOException | InterruptedException ex) {
-            Throwables.propagate(ex);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
         }
     }
 
@@ -309,7 +312,7 @@ public final class SslSocketFactoriesConnectionTests {
                 assertThat(fromServer).isEqualTo(expectedMessage);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -334,7 +337,7 @@ public final class SslSocketFactoriesConnectionTests {
                     out.println(message);
                     clientSocket.close();
                 } catch (IOException e) {
-                    Throwables.propagate(e);
+                    throw new UncheckedIOException(e);
                 }
             }
         };

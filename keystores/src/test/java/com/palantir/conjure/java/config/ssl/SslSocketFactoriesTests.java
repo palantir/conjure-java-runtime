@@ -22,11 +22,11 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assumptions.assumeThat;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Files;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.Provider;
@@ -49,7 +49,7 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_withPemCertificatesByAlias() throws IOException {
-        String cert = Files.toString(TestConstants.CA_PEM_CERT_PATH.toFile(), StandardCharsets.UTF_8);
+        String cert = Files.readString(TestConstants.CA_PEM_CERT_PATH, StandardCharsets.UTF_8);
 
         Map<String, PemX509Certificate> certs = ImmutableMap.of("cert", PemX509Certificate.of(cert));
         assertThat(SslSocketFactories.createSslSocketFactory(certs)).isNotNull();
@@ -102,18 +102,11 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateTrustStorePemFromDirectory() throws IOException {
-        File certFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"))
-                .toFile();
+        File certFolder = Files.createDirectory(tempFolder.resolve("security")).toFile();
 
-        Files.copy(
-                TestConstants.CA_DER_CERT_PATH.toFile(),
-                certFolder.toPath().resolve("ca.der").toFile());
-        Files.copy(
-                TestConstants.SERVER_CERT_PEM_PATH.toFile(),
-                certFolder.toPath().resolve("server.crt").toFile());
-        Files.copy(
-                TestConstants.CLIENT_CERT_PEM_PATH.toFile(),
-                certFolder.toPath().resolve("client.crt").toFile());
+        Files.copy(TestConstants.CA_DER_CERT_PATH, certFolder.toPath().resolve("ca.der"));
+        Files.copy(TestConstants.SERVER_CERT_PEM_PATH, certFolder.toPath().resolve("server.crt"));
+        Files.copy(TestConstants.CLIENT_CERT_PEM_PATH, certFolder.toPath().resolve("client.crt"));
 
         SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(certFolder.toPath())
@@ -126,20 +119,14 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateTrustStorePuppetFromDirectory() throws IOException {
-        Path puppetFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"));
+        Path puppetFolder = Files.createDirectory(tempFolder.resolve("security"));
 
         File certsFolder = puppetFolder.resolve("certs").toFile();
         assertThat(certsFolder.mkdir()).isTrue();
 
-        Files.copy(
-                TestConstants.CA_PEM_CERT_PATH.toFile(),
-                certsFolder.toPath().resolve("ca.pem").toFile());
-        Files.copy(
-                TestConstants.SERVER_CERT_PEM_PATH.toFile(),
-                certsFolder.toPath().resolve("server.pem").toFile());
-        Files.copy(
-                TestConstants.CLIENT_CERT_PEM_PATH.toFile(),
-                certsFolder.toPath().resolve("client.pem").toFile());
+        Files.copy(TestConstants.CA_PEM_CERT_PATH, certsFolder.toPath().resolve("ca.pem"));
+        Files.copy(TestConstants.SERVER_CERT_PEM_PATH, certsFolder.toPath().resolve("server.pem"));
+        Files.copy(TestConstants.CLIENT_CERT_PEM_PATH, certsFolder.toPath().resolve("client.pem"));
 
         SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(puppetFolder)
@@ -152,7 +139,7 @@ public final class SslSocketFactoriesTests {
 
     @Test
     public void testCreateSslSocketFactory_canCreateKeyStorePuppetFromDirectory() throws IOException {
-        Path puppetFolder = java.nio.file.Files.createDirectory(tempFolder.resolve("security"));
+        Path puppetFolder = Files.createDirectory(tempFolder.resolve("security"));
 
         File keysFolder = puppetFolder.resolve("private_keys").toFile();
         assertThat(keysFolder.mkdir()).isTrue();
@@ -160,12 +147,8 @@ public final class SslSocketFactoriesTests {
         File certsFolder = puppetFolder.resolve("certs").toFile();
         assertThat(certsFolder.mkdir()).isTrue();
 
-        Files.copy(
-                TestConstants.SERVER_KEY_PEM_PATH.toFile(),
-                keysFolder.toPath().resolve("server.pem").toFile());
-        Files.copy(
-                TestConstants.SERVER_CERT_PEM_PATH.toFile(),
-                certsFolder.toPath().resolve("server.pem").toFile());
+        Files.copy(TestConstants.SERVER_KEY_PEM_PATH, keysFolder.toPath().resolve("server.pem"));
+        Files.copy(TestConstants.SERVER_CERT_PEM_PATH, certsFolder.toPath().resolve("server.pem"));
 
         SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)

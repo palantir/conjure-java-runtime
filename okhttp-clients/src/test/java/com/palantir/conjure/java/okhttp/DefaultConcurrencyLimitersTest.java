@@ -100,6 +100,7 @@ public final class DefaultConcurrencyLimitersTest {
         assertThat(toBeCompleted).isDone();
     }
 
+    @SuppressWarnings("ThreadPriorityCheck")
     private Thread exhaust() {
         Thread thread = new Thread(() -> {
             while (true) {

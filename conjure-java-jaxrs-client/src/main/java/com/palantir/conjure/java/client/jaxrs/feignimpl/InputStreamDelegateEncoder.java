@@ -21,7 +21,6 @@ import com.palantir.conjure.java.client.jaxrs.feignimpl.FeignClientMetrics.Dange
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import feign.RequestTemplate;
-import feign.Util;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
 import java.io.IOException;
@@ -52,7 +51,7 @@ public final class InputStreamDelegateEncoder implements Encoder {
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
         if (bodyType.equals(InputStream.class)) {
             try {
-                byte[] bytes = Util.toByteArray((InputStream) object);
+                byte[] bytes = ((InputStream) object).readAllBytes();
                 dangerousBufferingMeter.mark(Math.max(1, bytes.length));
                 template.body(bytes, StandardCharsets.UTF_8);
             } catch (IOException e) {

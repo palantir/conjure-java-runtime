@@ -19,7 +19,6 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.server.jersey.ConjureJerseyFeature;
 import com.palantir.undertest.UndertowServerExtension;
-import feign.Util;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.GET;
@@ -130,7 +129,7 @@ public final class GuavaTestServer {
         @Override
         public String readInputStream(InputStream data) {
             try {
-                return new String(Util.toByteArray(data), StandardCharsets.UTF_8);
+                return new String(data.readAllBytes(), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

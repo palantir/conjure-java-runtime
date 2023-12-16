@@ -24,7 +24,6 @@ import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import feign.Contract;
 import feign.MethodMetadata;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import javax.annotation.Nullable;
@@ -160,21 +159,6 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
             }
         }
         return isHttpParam;
-    }
-
-    @Nullable
-    private static Annotation getAnnotation(
-            AnnotatedElement element, @Nullable Class<? extends Annotation> annotationType) {
-        return annotationType != null ? element.getAnnotation(annotationType) : null;
-    }
-
-    @Nullable
-    private static Annotation getAnnotation(
-            AnnotatedElement element,
-            @Nullable Class<? extends Annotation> first,
-            @Nullable Class<? extends Annotation> second) {
-        Annotation result = getAnnotation(element, first);
-        return result != null ? result : getAnnotation(element, second);
     }
 
     @Nullable

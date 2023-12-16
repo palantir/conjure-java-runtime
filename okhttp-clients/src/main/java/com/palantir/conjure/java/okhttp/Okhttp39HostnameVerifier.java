@@ -148,7 +148,7 @@ final class Okhttp39HostnameVerifier implements HostnameVerifier {
                     }
                 }
             }
-            return result;
+            return Collections.unmodifiableList(result);
         } catch (CertificateParsingException e) {
             return Collections.emptyList();
         }

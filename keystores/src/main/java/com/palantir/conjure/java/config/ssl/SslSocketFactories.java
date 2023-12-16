@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.config.ssl;
 
-import com.google.common.base.Throwables;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
@@ -24,7 +23,6 @@ import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.util.Map;
@@ -152,7 +150,7 @@ public final class SslSocketFactories {
             sslContext.init(keyManagers, trustManagers, null);
             return sslContext;
         } catch (GeneralSecurityException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -167,7 +165,7 @@ public final class SslSocketFactories {
             sslContext.init(keyManagers, ConscryptCompatTrustManagers.wrap(trustManagers), null);
             return sslContext;
         } catch (GeneralSecurityException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -195,8 +193,8 @@ public final class SslSocketFactories {
                     TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             trustManagerFactory.init(KeyStores.createTrustStoreFromCertificates(trustCertificatesByAlias));
             return ConscryptCompatTrustManagers.wrap(trustManagerFactory.getTrustManagers());
-        } catch (NoSuchAlgorithmException | KeyStoreException e) {
-            throw Throwables.propagate(e);
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -306,7 +304,7 @@ public final class SslSocketFactories {
             trustManagerFactory.init(keyStore);
             return trustManagerFactory;
         } catch (GeneralSecurityException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -348,7 +346,7 @@ public final class SslSocketFactories {
 
             return keyManagerFactory;
         } catch (GeneralSecurityException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 }

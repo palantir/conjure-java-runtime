@@ -26,7 +26,6 @@ import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.undertest.UndertowServerExtension;
 import feign.Response;
-import feign.Util;
 import feign.codec.Decoder;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,8 +62,7 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 
-        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8))
-                .isEqualTo(data);
+        assertThat(new String(decoded.readAllBytes(), StandardCharsets.UTF_8)).isEqualTo(data);
     }
 
     @Test
@@ -84,20 +82,19 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 
-        assertThat(new String(Util.toByteArray(decoded), StandardCharsets.UTF_8))
-                .isEqualTo(data);
+        assertThat(new String(decoded.readAllBytes(), StandardCharsets.UTF_8)).isEqualTo(data);
     }
 
     @Test
     public void testStandardClientsUseInputStreamDelegateDecoder() throws IOException {
         String data = "bytes";
-        assertThat(Util.toByteArray(service.writeInputStream(data))).isEqualTo(bytes(data));
+        assertThat(service.writeInputStream(data).readAllBytes()).isEqualTo(bytes(data));
     }
 
     @Test
     public void testClientCanHandleEmptyInputStream() throws IOException {
         String data = "";
-        assertThat(Util.toByteArray(service.writeInputStream(data))).isEqualTo(bytes(data));
+        assertThat(service.writeInputStream(data).readAllBytes()).isEqualTo(bytes(data));
     }
 
     private static byte[] bytes(String text) {
