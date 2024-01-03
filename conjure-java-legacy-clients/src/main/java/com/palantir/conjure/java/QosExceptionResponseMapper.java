@@ -18,6 +18,7 @@ package com.palantir.conjure.java;
 
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReason;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
@@ -31,6 +32,8 @@ import java.util.stream.Stream;
 public final class QosExceptionResponseMapper {
 
     private static final SafeLogger log = SafeLoggerFactory.get(QosExceptionResponseMapper.class);
+
+    private static final QosReason QOS_REASON = QosReason.of("client-qos-response");
 
     private QosExceptionResponseMapper() {}
 
@@ -62,7 +65,7 @@ public final class QosExceptionResponseMapper {
         }
 
         try {
-            return Optional.of(QosException.retryOther(new URL(locationHeader)));
+            return Optional.of(QosException.retryOther(QOS_REASON, new URL(locationHeader)));
         } catch (MalformedURLException e) {
             log.error(
                     "Failed to parse location header, not performing redirect",
@@ -75,12 +78,12 @@ public final class QosExceptionResponseMapper {
     private static QosException map429(Function<String, String> headerFn) {
         String duration = headerFn.apply(HttpHeaders.RETRY_AFTER);
         if (duration != null) {
-            return QosException.throttle(Duration.ofSeconds(Long.parseLong(duration)));
+            return QosException.throttle(QOS_REASON, Duration.ofSeconds(Long.parseLong(duration)));
         }
-        return QosException.throttle();
+        return QosException.throttle(QOS_REASON);
     }
 
     private static QosException map503() {
-        return QosException.unavailable();
+        return QosException.unavailable(QOS_REASON);
     }
 }
