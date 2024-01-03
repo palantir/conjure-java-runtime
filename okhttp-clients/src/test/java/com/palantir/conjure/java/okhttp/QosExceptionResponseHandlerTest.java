@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReason;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
@@ -40,19 +41,20 @@ public final class QosExceptionResponseHandlerTest extends TestBase {
             new Request.Builder().url("http://127.0.0.1").build();
     private static final QosExceptionResponseHandler handler = QosExceptionResponseHandler.INSTANCE;
     private static final URL LOCAL_URL = parseUrl("https://localhost");
+    private static final QosReason QOS_REASON = QosReason.of("client-qos-response");
 
     @Test
-    public void test308() throws Exception {
+    public void test308() {
         Response response;
 
         // with header
         response = response(REQUEST, 308)
                 .header(HttpHeaders.LOCATION, LOCAL_URL.toString())
                 .build();
-        assertThat(handler.handle(response).get())
-                .isInstanceOfSatisfying(
-                        QosException.RetryOther.class,
-                        retryOther -> assertThat(retryOther.getRedirectTo()).isEqualTo(LOCAL_URL));
+        assertThat(handler.handle(response).get()).isInstanceOfSatisfying(QosException.RetryOther.class, retryOther -> {
+            assertThat(retryOther.getReason()).isEqualTo(QOS_REASON);
+            assertThat(retryOther.getRedirectTo()).isEqualTo(LOCAL_URL);
+        });
 
         // with header
         response = response(REQUEST, 308).build();
@@ -60,34 +62,39 @@ public final class QosExceptionResponseHandlerTest extends TestBase {
     }
 
     @Test
-    public void test429WithoutRetryAfter() throws Exception {
+    public void test429WithoutRetryAfter() {
         Response response = responseWithCode(REQUEST, 429);
 
-        assertThat(handler.handle(response).get())
-                .isInstanceOfSatisfying(
-                        QosException.Throttle.class,
-                        retryAfter -> assertThat(retryAfter.getRetryAfter()).isEmpty());
+        assertThat(handler.handle(response).get()).isInstanceOfSatisfying(QosException.Throttle.class, retryAfter -> {
+            assertThat(retryAfter.getReason()).isEqualTo(QOS_REASON);
+            assertThat(retryAfter.getRetryAfter()).isEmpty();
+        });
     }
 
     @Test
-    public void test429WithRetryAfter() throws Exception {
+    public void test429WithRetryAfter() {
         Response response = response(REQUEST, 429).header("Retry-After", "120").build();
 
-        assertThat(handler.handle(response).get())
-                .isInstanceOfSatisfying(
-                        QosException.Throttle.class,
-                        retryAfter -> assertThat(retryAfter.getRetryAfter()).contains(Duration.ofMinutes(2)));
+        assertThat(handler.handle(response).get()).isInstanceOfSatisfying(QosException.Throttle.class, retryAfter -> {
+            assertThat(retryAfter.getReason()).isEqualTo(QOS_REASON);
+            assertThat(retryAfter.getRetryAfter()).contains(Duration.ofMinutes(2));
+        });
     }
 
     @Test
-    public void test503() throws Exception {
+    public void test503() {
         Response response = responseWithCode(REQUEST, 503);
-        assertThat(handler.handle(response).get()).isInstanceOf(QosException.Unavailable.class);
+
+        assertThat(handler.handle(response).get())
+                .isInstanceOfSatisfying(QosException.Unavailable.class, retryAfter -> {
+                    assertThat(retryAfter.getReason()).isEqualTo(QOS_REASON);
+                });
     }
 
     @Test
-    public void doesNotHandleOtherCodes() throws Exception {
+    public void doesNotHandleOtherCodes() {
         Response response = responseWithCode(REQUEST, 500);
+
         assertThat(handler.handle(response)).isEmpty();
     }
 
