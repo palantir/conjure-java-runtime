@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Propagated QoS exceptions now include a reason.
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2766
