@@ -72,6 +72,10 @@ subprojects {
 
     tasks.check.dependsOn javadoc, checkImplicitDependenciesMain, checkUnusedDependencies
 
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += ['-Werror']
+    }
+
     test {
         minHeapSize = "512m"
         maxHeapSize = "512m"

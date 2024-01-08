@@ -102,6 +102,7 @@ public final class JaxRsClientProxyConfigTest extends TestBase {
     private static ProxySelector createProxySelector(String host, int port) {
         return new ProxySelector() {
             @Override
+            @SuppressWarnings("DnsLookup")
             public List<Proxy> select(URI _uri) {
                 InetSocketAddress addr = new InetSocketAddress(host, port);
                 return ImmutableList.of(new Proxy(Proxy.Type.HTTP, addr));

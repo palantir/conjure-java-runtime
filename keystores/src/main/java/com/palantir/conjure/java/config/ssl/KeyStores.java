@@ -18,7 +18,6 @@ package com.palantir.conjure.java.config.ssl;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.common.base.Throwables;
 import com.google.common.io.BaseEncoding;
 import com.palantir.conjure.java.config.ssl.pkcs1.Pkcs1PrivateKeyReader;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
@@ -127,8 +126,8 @@ final class KeyStores {
                     new ByteArrayInputStream(entry.getValue().pemCertificate().getBytes(StandardCharsets.UTF_8))) {
                 addCertificatesToKeystore(keyStore, entry.getKey(), readX509Certificates(certIn));
             } catch (IOException e) {
-                throw Throwables.propagate(e);
-            } catch (KeyStoreException | CertificateException e) {
+                throw new RuntimeException(e);
+            } catch (GeneralSecurityException e) {
                 throw new RuntimeException(
                         String.format(
                                 "Could not read certificate alias \"%s\" as an X.509 certificate", entry.getKey()),
@@ -176,7 +175,7 @@ final class KeyStores {
 
             return keyStore;
         } catch (GeneralSecurityException | IOException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -275,7 +274,7 @@ final class KeyStores {
             }
             return keyStore;
         } catch (GeneralSecurityException | IOException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -313,7 +312,7 @@ final class KeyStores {
             newKeyStore.setKeyEntry(alias, aliasKey, passwordChar, certificateChain);
             return newKeyStore;
         } catch (GeneralSecurityException | IOException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -323,7 +322,7 @@ final class KeyStores {
             keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             keyStore.load(null, null);
         } catch (GeneralSecurityException | IOException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
         return keyStore;
     }

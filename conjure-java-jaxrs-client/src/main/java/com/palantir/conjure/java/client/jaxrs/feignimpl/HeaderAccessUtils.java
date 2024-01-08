@@ -16,8 +16,9 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,7 +45,7 @@ public final class HeaderAccessUtils {
      * found.
      */
     public static Collection<String> caseInsensitiveGet(Map<String, Collection<String>> headers, String headerName) {
-        Collection<String> result = new LinkedList<>();
+        List<String> result = new ArrayList<>();
         boolean neverFound = true;
         for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
             String key = entry.getKey();
