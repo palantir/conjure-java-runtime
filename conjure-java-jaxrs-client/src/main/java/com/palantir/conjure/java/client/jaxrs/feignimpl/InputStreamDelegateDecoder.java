@@ -22,6 +22,7 @@ import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import feign.FeignException;
 import feign.Response;
+import feign.Util;
 import feign.codec.Decoder;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -51,7 +52,7 @@ public final class InputStreamDelegateDecoder implements Decoder {
     public Object decode(Response response, Type type) throws IOException, FeignException {
         if (type.equals(InputStream.class)) {
             byte[] body =
-                    response.body() != null ? response.body().asInputStream().readAllBytes() : new byte[0];
+                    response.body() != null ? Util.toByteArray(response.body().asInputStream()) : new byte[0];
             dangerousBufferingMeter.mark(Math.max(1, body.length));
             return new ByteArrayInputStream(body);
         } else {
