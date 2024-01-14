@@ -23,7 +23,7 @@ org.conscrypt:conscrypt-openjdk-uber = 2.5.2
 org.immutables:value = 2.10.0
 org.jmock:jmock = 2.12.0
 org.junit.*:* = 5.10.1
-org.mockito:* = 5.8.0
+org.mockito:* = 5.9.0
 org.slf4j:* = 1.7.36
 io.undertow:* = 2.2.24.Final
 # dependency-upgrader:OFF
