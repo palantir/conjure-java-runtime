@@ -50,7 +50,7 @@ public final class ClientConfigurations {
     private static final SafeLogger log = SafeLoggerFactory.get(ClientConfigurations.class);
 
     // Defaults for parameters that are optional in ServiceConfiguration.
-    private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(10);
+    private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(5);
     private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(250);
