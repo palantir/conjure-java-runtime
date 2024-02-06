@@ -1,4 +1,4 @@
-# Run ./gradlew --write-locks to regenerate this file
+# Run ./gradlew writeVersionsLock to regenerate this file
 com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
 com.fasterxml.jackson.core:jackson-annotations:2.15.3 (11 constraints: a5cb4d33)
 com.fasterxml.jackson.core:jackson-core:2.15.3 (15 constraints: 703bf562)
