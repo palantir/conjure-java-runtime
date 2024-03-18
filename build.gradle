@@ -9,6 +9,7 @@ buildscript {
         classpath 'com.palantir.gradle.jdks:gradle-jdks:0.36.0'
         classpath 'com.palantir.gradle.jdkslatest:gradle-jdks-latest:0.13.0'
         classpath 'com.palantir.gradle.externalpublish:gradle-external-publish-plugin:1.15.0'
+        classpath 'com.palantir.gradle.failure-reports:gradle-failure-reports:1.9.0'
         classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.40.0'
         classpath 'com.palantir.gradle.revapi:gradle-revapi:1.7.0'
         classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:7.0.1'
@@ -21,6 +22,7 @@ buildscript {
 }
 
 apply plugin: 'com.palantir.external-publish'
+apply plugin: 'com.palantir.failure-reports'
 apply plugin: 'com.palantir.baseline'
 apply plugin: 'com.palantir.git-version'
 apply plugin: 'com.palantir.consistent-versions'
