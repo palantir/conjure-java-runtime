@@ -1,8 +1,8 @@
 # Run ./gradlew writeVersionsLock to regenerate this file
 com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
 com.fasterxml.jackson.core:jackson-annotations:2.15.3 (11 constraints: a5cb8531)
-com.fasterxml.jackson.core:jackson-core:2.15.3 (15 constraints: 6f3b8e5f)
-com.fasterxml.jackson.core:jackson-databind:2.15.3 (19 constraints: 657bcd19)
+com.fasterxml.jackson.core:jackson-core:2.15.3 (14 constraints: ec23b668)
+com.fasterxml.jackson.core:jackson-databind:2.15.3 (18 constraints: e263a4e3)
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.15.3 (2 constraints: 3220a606)
 com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.15.3 (1 constraints: 3c05423b)
 com.fasterxml.jackson.datatype:jackson-datatype-guava:2.15.3 (1 constraints: 3c05423b)
@@ -11,7 +11,6 @@ com.fasterxml.jackson.datatype:jackson-datatype-joda:2.15.3 (1 constraints: 3c05
 com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.3 (1 constraints: 3c05423b)
 com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.15.3 (1 constraints: f71afd42)
 com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider:2.15.3 (1 constraints: 3c05423b)
-com.fasterxml.jackson.module:jackson-module-afterburner:2.15.3 (1 constraints: 3c05423b)
 com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.15.3 (2 constraints: e4300fb4)
 com.fasterxml.jackson.module:jackson-module-scala_2.12:2.15.3 (1 constraints: 3c05423b)
 com.github.ben-manes.caffeine:caffeine:3.1.8 (3 constraints: f223e4a4)
