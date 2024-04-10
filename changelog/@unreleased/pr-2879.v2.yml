@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Remove Dependency on Jackson Afterburner
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2879
