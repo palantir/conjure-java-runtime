@@ -32,6 +32,5 @@ public final class ObjectMapperOptimizations {
         return List.of();
     }
 
-    private ObjectMapperOptimizations() {
-    }
+    private ObjectMapperOptimizations() {}
 }
