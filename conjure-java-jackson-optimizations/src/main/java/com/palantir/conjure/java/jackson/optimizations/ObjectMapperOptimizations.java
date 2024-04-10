@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.jackson.optimizations;
 
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import java.util.List;
 
 /**
@@ -26,31 +25,13 @@ import java.util.List;
  */
 public final class ObjectMapperOptimizations {
 
-    private static final boolean NO_OPTIMIZATIONS =
-            // These optimizations are not used within graalvm because they leverage dynamic class creation The
-            // nativeimage check should not be refactored into a utility method which may reduce our ability to
-            // tree-shake.
-            System.getProperty("org.graalvm.nativeimage.imagecode") != null
-                    // This may be globally configured with a system property
-                    || readProperty(
-                            "com.palantir.conjure.java.jackson.optimizations.disabled", shouldDisableByDefault());
-
-    @SuppressWarnings("AfterburnerJavaIncompatibility")
     public static List<? extends com.fasterxml.jackson.databind.Module> createModules() {
-        return NO_OPTIMIZATIONS ? List.of() : List.<com.fasterxml.jackson.databind.Module>of(new AfterburnerModule());
+        // At one point this conditionally returned List.of(new AfterburnerModule), however afterburner is not
+        // supported on any supported LTS Java release anymore, and the Blackbird alternative incurs a memory
+        // leak (https://github.com/FasterXML/jackson-modules-base/issues/147).
+        return List.of();
     }
 
-    private ObjectMapperOptimizations() {}
-
-    /**
-     * We disable afterburner optimizations by default on java 16+ where internal access is
-     * restricted by https://openjdk.java.net/jeps/396 and https://openjdk.java.net/jeps/403.
-     */
-    private static boolean shouldDisableByDefault() {
-        return Runtime.version().feature() >= 16;
-    }
-
-    private static boolean readProperty(String property, boolean defaultValue) {
-        return Boolean.parseBoolean(System.getProperty(property, Boolean.toString(defaultValue)));
+    private ObjectMapperOptimizations() {
     }
 }
