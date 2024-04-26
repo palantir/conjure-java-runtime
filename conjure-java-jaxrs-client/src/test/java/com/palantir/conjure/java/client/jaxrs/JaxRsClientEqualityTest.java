@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 public final class JaxRsClientEqualityTest extends TestBase {
 
     @Test
+    @SuppressWarnings({"EqualsWithItself", "TruthSelfEquals"}) // explicitly testing self equals
     public void assertEqualsSelf() {
         TestService instance = newTestServiceClient(8123);
         assertThat(instance).isEqualTo(instance);
