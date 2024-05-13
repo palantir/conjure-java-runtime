@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.client.config;
 
+import com.palantir.logsafe.Preconditions;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.SocketAddress;
@@ -24,16 +25,15 @@ import java.net.SocketAddress;
  * Utility class for creating and identifying HTTPS proxy instances.
  * <p>
  * This class provides a way to create proxy instances that represent HTTPS connections, as there is no native support
- * for an HTTPS proxy type in the Java {@link Proxy} class. When using a proxy created with this class, consumers should
- * use the provided {@link #isHttps(Proxy)} method to determine if the proxy should be connected to using HTTPS.
+ * for an HTTPS proxy type in the Java {@link Proxy} class. When using a proxy that could have been created
+ * with this class, consumers should use the provided {@link #isHttps(Proxy)} method
+ * to determine if the proxy should be connected to using HTTPS.
  */
 public final class HttpsProxies {
 
     public static Proxy create(InetSocketAddress address, boolean https) {
-        if (https) {
-            return new HttpsProxy(address);
-        }
-        return new Proxy(Proxy.Type.HTTP, address);
+        Preconditions.checkNotNull(address, "address is required");
+        return new HttpsProxy(address);
     }
 
     public static boolean isHttps(Proxy proxy) {
