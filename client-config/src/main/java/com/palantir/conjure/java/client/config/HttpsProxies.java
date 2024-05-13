@@ -31,7 +31,7 @@ import java.net.SocketAddress;
  */
 public final class HttpsProxies {
 
-    public static Proxy create(InetSocketAddress address, boolean https) {
+    public static Proxy create(InetSocketAddress address) {
         Preconditions.checkNotNull(address, "address is required");
         return new HttpsProxy(address);
     }

@@ -177,9 +177,9 @@ public final class ClientConfigurations {
                 InetSocketAddress address = createInetSocketAddress(defaultEnvProxy);
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
             case HTTP:
-                return getHttpProxySelector(proxyConfig, false);
+                return getHttpProxySelector(proxyConfig);
             case HTTPS:
-                return getHttpProxySelector(proxyConfig, true);
+                return getHttpProxySelector(proxyConfig);
             case MESH:
                 return ProxySelector.getDefault(); // MESH proxy is not a Java proxy
             case SOCKS:
@@ -216,7 +216,7 @@ public final class ClientConfigurations {
         }
     }
 
-    private static ProxySelector getHttpProxySelector(ProxyConfiguration proxyConfig, boolean https) {
+    private static ProxySelector getHttpProxySelector(ProxyConfiguration proxyConfig) {
         HostAndPort httpsHostAndPort = HostAndPort.fromString(proxyConfig
                 .hostAndPort()
                 .orElseThrow(() -> new SafeIllegalArgumentException(
@@ -225,7 +225,7 @@ public final class ClientConfigurations {
                 // Proxy address must not be resolved, otherwise DNS changes while the application
                 // is running are ignored by the application.
                 InetSocketAddress.createUnresolved(httpsHostAndPort.getHost(), httpsHostAndPort.getPort());
-        return fixedProxySelectorFor(HttpsProxies.create(httpsAddress, https));
+        return fixedProxySelectorFor(HttpsProxies.create(httpsAddress));
     }
 
     private static ProxySelector fixedProxySelectorFor(Proxy proxy) {
