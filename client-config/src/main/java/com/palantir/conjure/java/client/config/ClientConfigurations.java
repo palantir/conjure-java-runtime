@@ -177,15 +177,9 @@ public final class ClientConfigurations {
                 InetSocketAddress address = createInetSocketAddress(defaultEnvProxy);
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
             case HTTP:
-                HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig
-                        .hostAndPort()
-                        .orElseThrow(() -> new SafeIllegalArgumentException(
-                                "Expected to find proxy hostAndPort configuration for HTTP proxy")));
-                InetSocketAddress addr =
-                        // Proxy address must not be resolved, otherwise DNS changes while the application
-                        // is running are ignored by the application.
-                        InetSocketAddress.createUnresolved(hostAndPort.getHost(), hostAndPort.getPort());
-                return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, addr));
+                return getHttpProxySelector(proxyConfig, false);
+            case HTTPS:
+                return getHttpProxySelector(proxyConfig, true);
             case MESH:
                 return ProxySelector.getDefault(); // MESH proxy is not a Java proxy
             case SOCKS:
@@ -220,6 +214,18 @@ public final class ClientConfigurations {
         } else {
             return Optional.empty();
         }
+    }
+
+    private static ProxySelector getHttpProxySelector(ProxyConfiguration proxyConfig, boolean https) {
+        HostAndPort httpsHostAndPort = HostAndPort.fromString(proxyConfig
+                .hostAndPort()
+                .orElseThrow(() -> new SafeIllegalArgumentException(
+                        "Expected to find proxy hostAndPort configuration for HTTP(S) proxy")));
+        InetSocketAddress address =
+                // Proxy address must not be resolved, otherwise DNS changes while the application
+                // is running are ignored by the application.
+                InetSocketAddress.createUnresolved(httpsHostAndPort.getHost(), httpsHostAndPort.getPort());
+        return fixedProxySelectorFor(https ? HttpsProxies.create(address) : new Proxy(Proxy.Type.HTTP, address));
     }
 
     private static ProxySelector fixedProxySelectorFor(Proxy proxy) {
