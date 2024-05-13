@@ -18,7 +18,6 @@ package com.palantir.conjure.java.client.config;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.Proxy.Type;
 import java.net.SocketAddress;
 
 /**
@@ -34,7 +33,7 @@ public final class HttpsProxies {
         if (https) {
             return new HttpsProxy(address);
         }
-        return new Proxy(Type.HTTP, address);
+        return new Proxy(Proxy.Type.HTTP, address);
     }
 
     public static boolean isHttps(Proxy proxy) {
@@ -45,7 +44,7 @@ public final class HttpsProxies {
 
     private static final class HttpsProxy extends Proxy {
         HttpsProxy(SocketAddress sa) {
-            super(Type.HTTP, sa);
+            super(Proxy.Type.HTTP, sa);
         }
     }
 }
