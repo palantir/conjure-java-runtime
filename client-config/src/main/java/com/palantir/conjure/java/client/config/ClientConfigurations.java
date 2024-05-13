@@ -41,6 +41,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 
@@ -177,15 +178,9 @@ public final class ClientConfigurations {
                 InetSocketAddress address = createInetSocketAddress(defaultEnvProxy);
                 return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
             case HTTP:
-                HostAndPort hostAndPort = HostAndPort.fromString(proxyConfig
-                        .hostAndPort()
-                        .orElseThrow(() -> new SafeIllegalArgumentException(
-                                "Expected to find proxy hostAndPort configuration for HTTP proxy")));
-                InetSocketAddress addr =
-                        // Proxy address must not be resolved, otherwise DNS changes while the application
-                        // is running are ignored by the application.
-                        InetSocketAddress.createUnresolved(hostAndPort.getHost(), hostAndPort.getPort());
-                return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, addr));
+                return getHttpProxySelector(proxyConfig, addr -> new Proxy(Proxy.Type.HTTP, addr));
+            case HTTPS:
+                return getHttpProxySelector(proxyConfig, HttpsProxy::new);
             case MESH:
                 return ProxySelector.getDefault(); // MESH proxy is not a Java proxy
             case SOCKS:
@@ -224,6 +219,19 @@ public final class ClientConfigurations {
 
     private static ProxySelector fixedProxySelectorFor(Proxy proxy) {
         return new FixedProxySelector(proxy);
+    }
+
+    private static ProxySelector getHttpProxySelector(
+            ProxyConfiguration proxyConfig, Function<InetSocketAddress, Proxy> proxyFactory) {
+        HostAndPort httpsHostAndPort = HostAndPort.fromString(proxyConfig
+                .hostAndPort()
+                .orElseThrow(() -> new SafeIllegalArgumentException(
+                        "Expected to find proxy hostAndPort configuration for HTTP(S) proxy")));
+        InetSocketAddress httpsAddress =
+                // Proxy address must not be resolved, otherwise DNS changes while the application
+                // is running are ignored by the application.
+                InetSocketAddress.createUnresolved(httpsHostAndPort.getHost(), httpsHostAndPort.getPort());
+        return fixedProxySelectorFor(proxyFactory.apply(httpsAddress));
     }
 
     private static final class FixedProxySelector extends ProxySelector {
