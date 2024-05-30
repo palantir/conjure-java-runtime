@@ -1,0 +1,50 @@
+# Danger! Multiple jars contain identically named classes. This may cause different behaviour depending on classpath ordering.
+# Run ./gradlew checkClassUniqueness --fix to update this file
+
+## runtimeClasspath
+[javax.el:javax.el-api, org.glassfish:jakarta.el]
+  - javax.el.ArrayELResolver
+  - javax.el.BeanELResolver
+  - javax.el.BeanELResolver$1
+  - javax.el.BeanELResolver$BPSoftReference
+  - javax.el.BeanELResolver$BeanProperties
+  - javax.el.BeanELResolver$BeanProperty
+  - javax.el.BeanELResolver$SoftConcurrentHashMap
+  - javax.el.BeanNameELResolver
+  - javax.el.BeanNameResolver
+  - javax.el.CompositeELResolver
+  - javax.el.CompositeELResolver$CompositeIterator
+  - javax.el.ELClass
+  - javax.el.ELContext
+  - javax.el.ELContextEvent
+  - javax.el.ELException
+  - javax.el.ELManager
+  - javax.el.ELProcessor
+  - javax.el.ELResolver
+  - javax.el.ELUtil
+  - javax.el.ELUtil$1
+  - javax.el.EvaluationListener
+  - javax.el.Expression
+  - javax.el.ExpressionFactory
+  - javax.el.FactoryFinder
+  - javax.el.FunctionMapper
+  - javax.el.ImportHandler
+  - javax.el.LambdaExpression
+  - javax.el.ListELResolver
+  - javax.el.MapELResolver
+  - javax.el.MethodExpression
+  - javax.el.MethodInfo
+  - javax.el.MethodNotFoundException
+  - javax.el.PropertyNotFoundException
+  - javax.el.PropertyNotWritableException
+  - javax.el.ResourceBundleELResolver
+  - javax.el.StandardELContext
+  - javax.el.StandardELContext$1
+  - javax.el.StandardELContext$DefaultFunctionMapper
+  - javax.el.StandardELContext$DefaultVariableMapper
+  - javax.el.StandardELContext$LocalBeanNameResolver
+  - javax.el.StaticFieldELResolver
+  - javax.el.TypeConverter
+  - javax.el.ValueExpression
+  - javax.el.ValueReference
+  - javax.el.VariableMapper
