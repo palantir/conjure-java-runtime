@@ -34,7 +34,7 @@ io.undertow:undertow-servlet-jakarta = 2.2.20.Final
 # dependency-upgrader:ON
 com.palantir.refreshable:refreshable = 2.5.0
 org.hibernate.validator:* = 6.2.0.Final
-org.checkerframework:checker-qual = 3.43.0
+org.checkerframework:checker-qual = 3.44.0
 org.apache.httpcomponents.client5:* = 5.3.1
 
 # Jakarta EE9 Versions
