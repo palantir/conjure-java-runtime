@@ -48,7 +48,6 @@ import org.immutables.value.Value;
 final class ConcurrencyLimiters {
     private static final SafeLogger log = SafeLoggerFactory.get(ConcurrencyLimiters.class);
     private static final Duration DEFAULT_TIMEOUT = Duration.ofMinutes(1);
-    private static final Void NO_CONTEXT = null;
 
     private final Timer slowAcquire;
     private final Timer slowAcquireTagged;
@@ -100,26 +99,26 @@ final class ConcurrencyLimiters {
     @VisibleForTesting
     Limit newLimit() {
         return new ConjureWindowedLimit(AIMDLimit.newBuilder()
-                /**
+                /*
                  * Requests slower than this timeout are treated as failures, which reduce concurrency. Since we have
                  * plenty of long streaming requests, we set this timeout to 292.27726 years to effectively turn it off.
                  */
                 .timeout(Long.MAX_VALUE, TimeUnit.NANOSECONDS)
-                /**
+                /*
                  * Our initial limit is pretty conservative - only 10 concurrent requests in flight at the same time. If
                  * a client is consistently maxing out its concurrency permits, this increases additively once per
-                 * second (see {@link ConjureWindowedLimit#MIN_WINDOW_TIME}.
+                 * second (see {@link ConjureWindowedLimit#MIN_WINDOW_TIME}).
                  */
                 .initialLimit(10)
-                /**
+                /*
                  * We reduce concurrency _immediately_ as soon as a request fails, which can result in drastic limit
                  * reductions, e.g. starting with 30 concurrent permits, 100 failures in a row results in: 30 * 0.9^100
                  * = 0.0007 (rounded up to the minLimit of 1).
                  */
                 .backoffRatio(0.9)
-                /** However many failures we get, we always need at least 1 permit so we can keep trying. */
+                /* However many failures we get, we always need at least 1 permit, so we can keep trying. */
                 .minLimit(1)
-                /** Note that the Dispatcher in {@link OkHttpClients} has a max concurrent requests too. */
+                /* Note that the Dispatcher in {@link OkHttpClients} has a max concurrent requests too. */
                 .maxLimit(Integer.MAX_VALUE)
                 .build());
     }
@@ -243,8 +242,8 @@ final class ConcurrencyLimiters {
                             SafeArg.of("pathTemplate", limiterKey.pathTemplate()),
                             UnsafeArg.of("hostname", limiterKey.hostname()));
                 }
-                Optional<Limiter.Listener> maybeAcquired = limiter.acquire(NO_CONTEXT);
-                if (!maybeAcquired.isPresent()) {
+                Optional<Limiter.Listener> maybeAcquired = limiter.acquire(/* no context */ null);
+                if (maybeAcquired.isEmpty()) {
                     if (!timeoutScheduled()) {
                         timeoutCleanup = scheduledExecutorService.schedule(
                                 this::resetLimiter, timeout.toMillis(), TimeUnit.MILLISECONDS);
@@ -291,7 +290,7 @@ final class ConcurrencyLimiters {
             long start = System.nanoTime();
             Futures.addCallback(
                     future,
-                    new FutureCallback<Limiter.Listener>() {
+                    new FutureCallback<>() {
                         @Override
                         public void onSuccess(Limiter.Listener _result) {
                             long end = System.nanoTime();
