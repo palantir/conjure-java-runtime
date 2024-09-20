@@ -25,6 +25,7 @@ apply plugin: 'com.palantir.external-publish'
 apply plugin: 'com.palantir.failure-reports'
 apply plugin: 'com.palantir.baseline'
 apply plugin: 'com.palantir.git-version'
+apply plugin: 'com.palantir.jdks'
 apply plugin: 'com.palantir.consistent-versions'
 apply plugin: 'com.palantir.baseline-java-versions'
 apply plugin: 'com.palantir.jdks.latest'
@@ -82,4 +83,8 @@ subprojects {
         minHeapSize = "512m"
         maxHeapSize = "512m"
     }
+}
+
+jdks {
+    daemonTarget = 17
 }
