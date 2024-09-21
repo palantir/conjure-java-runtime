@@ -1,7 +1,7 @@
 apply plugin: "org.inferred.processors"
 
 apply plugin: 'com.palantir.external-publish-jar'
-apply plugin: 'com.palantir.revapi'
+apply plugin: 'org.revapi.revapi-gradle-plugin'
 apply plugin: 'com.palantir.metric-schema'
 
 dependencies {
