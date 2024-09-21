@@ -1,2 +1,2 @@
 apply plugin: 'com.palantir.external-publish-jar'
-apply plugin: 'com.palantir.revapi'
+apply plugin: 'org.revapi.revapi-gradle-plugin'

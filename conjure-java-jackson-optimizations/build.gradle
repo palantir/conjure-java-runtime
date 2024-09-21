@@ -1,5 +1,5 @@
 apply plugin: 'com.palantir.external-publish-jar'
-apply plugin: 'com.palantir.revapi'
+apply plugin: 'org.revapi.revapi-gradle-plugin'
 
 dependencies {
     api "com.fasterxml.jackson.core:jackson-databind"
