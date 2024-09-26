@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.palantir.conjure.java.dialogue.serde.DefaultConjureRuntime;
 import com.palantir.dialogue.Channel;
@@ -87,7 +86,7 @@ public final class JaxRsClientDialogueEndpointTest {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
         UrlBuilder urlBuilder = mock(UrlBuilder.class);
-        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        endpointCaptor.getValue().renderPath(requestCaptor.getValue().pathParameters(), urlBuilder);
         verify(urlBuilder).queryParam("query", "a");
         verify(urlBuilder).queryParam("query", "/");
         verify(urlBuilder).queryParam("query", "");
@@ -167,7 +166,7 @@ public final class JaxRsClientDialogueEndpointTest {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
         UrlBuilder urlBuilder = mock(UrlBuilder.class);
-        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        endpointCaptor.getValue().renderPath(requestCaptor.getValue().pathParameters(), urlBuilder);
         verify(urlBuilder).pathSegment("foo"); // context path
         verify(urlBuilder).pathSegment("static0");
         verify(urlBuilder).pathSegment("dynamic0");
@@ -186,7 +185,7 @@ public final class JaxRsClientDialogueEndpointTest {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
         UrlBuilder urlBuilder = mock(UrlBuilder.class);
-        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        endpointCaptor.getValue().renderPath(requestCaptor.getValue().pathParameters(), urlBuilder);
         verify(urlBuilder).pathSegment("foo"); // context path
         verify(urlBuilder).pathSegment("static0");
         verify(urlBuilder).pathSegment("dynamic0");
@@ -205,7 +204,7 @@ public final class JaxRsClientDialogueEndpointTest {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
         UrlBuilder urlBuilder = mock(UrlBuilder.class);
-        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        endpointCaptor.getValue().renderPath(requestCaptor.getValue().pathParameters(), urlBuilder);
         verify(urlBuilder).pathSegment("foo"); // context path
         verify(urlBuilder).pathSegment("begin");
         verify(urlBuilder).pathSegment("");
@@ -222,12 +221,12 @@ public final class JaxRsClientDialogueEndpointTest {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
         UrlBuilder urlBuilder = mock(UrlBuilder.class);
-        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        endpointCaptor.getValue().renderPath(requestCaptor.getValue().pathParameters(), urlBuilder);
         verify(urlBuilder).pathSegment("foo"); // context path
         verify(urlBuilder).pathSegment("/"); // encoded into %2F by DefaultUrlBuilder
     }
 
-    static Channel stubNoContentResponseChannel() {
+    private static Channel stubNoContentResponseChannel() {
         Channel channel = mock(Channel.class);
         Response response = mock(Response.class);
         when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));

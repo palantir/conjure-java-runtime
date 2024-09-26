@@ -57,6 +57,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import org.immutables.value.Value;
 
 /**
  * {@link DialogueFeignClient} is an adapter from {@link feign.Client} to {@link Channel Dialogue Channel}
@@ -64,6 +66,7 @@ import java.util.Optional;
  */
 final class DialogueFeignClient implements feign.Client {
 
+    private static final String REQUEST_URL_PATH_PARAM = "request-url";
     private static final String PATH_TEMPLATE = "hr-path-template";
     private static final Splitter pathSplitter = Splitter.on('/');
     private static final Splitter querySplitter = Splitter.on('&').omitEmptyStrings();
@@ -74,6 +77,8 @@ final class DialogueFeignClient implements feign.Client {
     private final String baseUrl;
     private final String serviceName;
     private final String version;
+
+    private final ConcurrentHashMap<FeignEndpointKey, EndpointChannel> endpointChannels = new ConcurrentHashMap<>();
 
     DialogueFeignClient(Class<?> jaxrsInterface, Channel channel, ConjureRuntime runtime, String baseUrl) {
         this.channel = Preconditions.checkNotNull(channel, "Channel is required");
@@ -88,20 +93,26 @@ final class DialogueFeignClient implements feign.Client {
     @Override
     public feign.Response execute(Request request, Request.Options _options) throws IOException {
         com.palantir.dialogue.Request.Builder builder = com.palantir.dialogue.Request.builder();
+
+        builder.putPathParams(REQUEST_URL_PATH_PARAM, request.url());
+
         Optional<RequestBody> body = requestBody(request);
         if (body.isPresent()) {
             builder.body(body);
             builder.putHeaderParams(HttpHeaders.CONTENT_LENGTH, Integer.toString(request.body().length));
         }
+
         request.headers().forEach((headerName, values) -> {
             if (includeRequestHeader(headerName)) {
                 builder.putAllHeaderParams(headerName, values);
             }
         });
 
+        EndpointChannel endpointChannel =
+                endpointChannels.computeIfAbsent(FeignEndpointKey.of(request), this::toEndpointChannel);
+
         try {
-            return runtime.clients()
-                    .callBlocking(toEndpointChannel(request), builder.build(), FeignResponseDeserializer.INSTANCE);
+            return runtime.clients().callBlocking(endpointChannel, builder.build(), FeignResponseDeserializer.INSTANCE);
         } catch (UncheckedExecutionException e) {
             // Rethrow IOException to match standard feign behavior
             Throwable cause = e.getCause();
@@ -112,8 +123,8 @@ final class DialogueFeignClient implements feign.Client {
         }
     }
 
-    private EndpointChannel toEndpointChannel(Request feignRequest) {
-        Endpoint endpoint = new FeignRequestEndpoint(feignRequest);
+    private EndpointChannel toEndpointChannel(FeignEndpointKey key) {
+        Endpoint endpoint = new FeignEndpoint(key.httpMethod(), key.endpointName());
         return dialogueRequest -> channel.execute(endpoint, dialogueRequest);
     }
 
@@ -341,26 +352,32 @@ final class DialogueFeignClient implements feign.Client {
         }
     }
 
-    private final class FeignRequestEndpoint implements Endpoint {
-        private final Request request;
-        private final String endpoint;
-        private final HttpMethod method;
+    private final class FeignEndpoint implements Endpoint {
 
-        FeignRequestEndpoint(Request request) {
-            this.request = request;
-            this.method = HttpMethod.valueOf(request.method().toUpperCase(Locale.ENGLISH));
-            endpoint = getFirstHeader(request, EndpointNameHeaderEnrichmentContract.ENDPOINT_NAME_HEADER)
-                    .orElse("feign");
+        private final HttpMethod httpMethod;
+        private final String endpointName;
+
+        FeignEndpoint(HttpMethod httpMethod, String endpointName) {
+            this.httpMethod = httpMethod;
+            this.endpointName = endpointName;
         }
 
         @Override
-        public void renderPath(ListMultimap<String, String> _params, UrlBuilder url) {
-            String target = request.url();
+        public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
+            List<String> requestUrls = params.get(REQUEST_URL_PATH_PARAM);
+            Preconditions.checkState(
+                    params.size() == 1 && requestUrls.size() == 1,
+                    "Unexpected path parameters",
+                    SafeArg.of("params", params.size()),
+                    SafeArg.of("requestUrls", requestUrls.size()));
+
+            String target = requestUrls.get(0);
             Preconditions.checkState(
                     target.startsWith(baseUrl),
                     "Request URL must start with base url",
                     UnsafeArg.of("requestUrl", target),
                     UnsafeArg.of("baseUrl", baseUrl));
+
             int trailingOffset = 0;
             // If the trailing section starts with a slash, ignore it to prevent duplicate leading slashes.
             if (target.length() > baseUrl.length() && target.charAt(baseUrl.length()) == '/') {
@@ -391,7 +408,7 @@ final class DialogueFeignClient implements feign.Client {
 
         @Override
         public HttpMethod httpMethod() {
-            return method;
+            return httpMethod;
         }
 
         @Override
@@ -401,12 +418,29 @@ final class DialogueFeignClient implements feign.Client {
 
         @Override
         public String endpointName() {
-            return endpoint;
+            return endpointName;
         }
 
         @Override
         public String version() {
             return version;
+        }
+    }
+
+    @Value.Immutable(builder = false, prehash = true)
+    interface FeignEndpointKey {
+
+        @Value.Parameter
+        HttpMethod httpMethod();
+
+        @Value.Parameter
+        String endpointName();
+
+        private static FeignEndpointKey of(Request request) {
+            return ImmutableFeignEndpointKey.of(
+                    HttpMethod.valueOf(request.method().toUpperCase(Locale.ENGLISH)),
+                    getFirstHeader(request, EndpointNameHeaderEnrichmentContract.ENDPOINT_NAME_HEADER)
+                            .orElse("feign"));
         }
     }
 }
