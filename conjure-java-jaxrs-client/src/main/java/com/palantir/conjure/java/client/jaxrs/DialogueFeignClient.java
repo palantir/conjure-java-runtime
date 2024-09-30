@@ -27,6 +27,7 @@ import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.java.api.errors.UnknownRemoteException;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.EndpointNameHeaderEnrichmentContract;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.MethodHeaderEnrichmentContract;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -57,6 +58,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.ConcurrentHashMap;
 import org.immutables.value.Value;
 
@@ -67,10 +69,9 @@ import org.immutables.value.Value;
 final class DialogueFeignClient implements feign.Client {
 
     private static final String REQUEST_URL_PATH_PARAM = "request-url";
-    private static final String PATH_TEMPLATE = "hr-path-template";
-    private static final Splitter pathSplitter = Splitter.on('/');
-    private static final Splitter querySplitter = Splitter.on('&').omitEmptyStrings();
-    private static final Splitter queryValueSplitter = Splitter.on('=');
+    private static final Splitter PATH_SPLITTER = Splitter.on('/');
+    private static final Splitter QUERY_SPLITTER = Splitter.on('&').omitEmptyStrings();
+    private static final Splitter QUERY_VALUE_SPLITTER = Splitter.on('=');
 
     private final ConjureRuntime runtime;
     private final Channel channel;
@@ -96,11 +97,7 @@ final class DialogueFeignClient implements feign.Client {
 
         builder.putPathParams(REQUEST_URL_PATH_PARAM, request.url());
 
-        Optional<RequestBody> body = requestBody(request);
-        if (body.isPresent()) {
-            builder.body(body);
-            builder.putHeaderParams(HttpHeaders.CONTENT_LENGTH, Integer.toString(request.body().length));
-        }
+        builder.body(requestBody(request));
 
         request.headers().forEach((headerName, values) -> {
             if (includeRequestHeader(headerName)) {
@@ -136,8 +133,7 @@ final class DialogueFeignClient implements feign.Client {
         if (HttpHeaders.CONTENT_LENGTH.equalsIgnoreCase(headerName)) {
             return false;
         }
-        // Tracing path template is informational only
-        if (PATH_TEMPLATE.equalsIgnoreCase(headerName)) {
+        if (MethodHeaderEnrichmentContract.METHOD_HEADER.equalsIgnoreCase(headerName)) {
             return false;
         }
         if (EndpointNameHeaderEnrichmentContract.ENDPOINT_NAME_HEADER.equalsIgnoreCase(headerName)) {
@@ -160,10 +156,8 @@ final class DialogueFeignClient implements feign.Client {
             return Optional.empty();
         }
         Optional<String> maybeContentType = getFirstHeader(request, HttpHeaders.CONTENT_TYPE);
-        if (!maybeContentType.isPresent()) {
-            if (requestBodyContent.length == 0) {
-                return Optional.empty();
-            }
+        if (maybeContentType.isEmpty() && requestBodyContent.length == 0) {
+            return Optional.empty();
         }
         return Optional.of(new ByteArrayRequestBody(
                 requestBodyContent,
@@ -184,10 +178,12 @@ final class DialogueFeignClient implements feign.Client {
 
         private final byte[] buffer;
         private final String contentType;
+        private final OptionalLong contentLength;
 
         ByteArrayRequestBody(byte[] buffer, String contentType) {
             this.buffer = buffer;
             this.contentType = contentType;
+            this.contentLength = OptionalLong.of(buffer.length);
         }
 
         @Override
@@ -203,6 +199,11 @@ final class DialogueFeignClient implements feign.Client {
         @Override
         public boolean repeatable() {
             return true;
+        }
+
+        @Override
+        public OptionalLong contentLength() {
+            return contentLength;
         }
 
         @Override
@@ -387,14 +388,14 @@ final class DialogueFeignClient implements feign.Client {
             int queryParamsStart = trailing.indexOf('?');
             String queryPortion = queryParamsStart == -1 ? trailing : trailing.substring(0, queryParamsStart);
             if (!queryPortion.isEmpty()) {
-                for (String pathSegment : pathSplitter.split(queryPortion)) {
+                for (String pathSegment : PATH_SPLITTER.split(queryPortion)) {
                     url.pathSegment(urlDecode(pathSegment));
                 }
             }
             if (queryParamsStart != -1) {
                 String querySegments = trailing.substring(queryParamsStart + 1);
-                for (String querySegment : querySplitter.split(querySegments)) {
-                    List<String> keyValuePair = queryValueSplitter.splitToList(querySegment);
+                for (String querySegment : QUERY_SPLITTER.split(querySegments)) {
+                    List<String> keyValuePair = QUERY_VALUE_SPLITTER.splitToList(querySegment);
                     if (keyValuePair.size() != 2) {
                         throw new SafeIllegalStateException(
                                 "Expected two parameters",
@@ -434,11 +435,16 @@ final class DialogueFeignClient implements feign.Client {
         HttpMethod httpMethod();
 
         @Value.Parameter
+        String method();
+
+        @Value.Parameter
         String endpointName();
 
         private static FeignEndpointKey of(Request request) {
             return ImmutableFeignEndpointKey.of(
                     HttpMethod.valueOf(request.method().toUpperCase(Locale.ENGLISH)),
+                    getFirstHeader(request, MethodHeaderEnrichmentContract.METHOD_HEADER)
+                            .orElse(""),
                     getFirstHeader(request, EndpointNameHeaderEnrichmentContract.ENDPOINT_NAME_HEADER)
                             .orElse("feign"));
         }
