@@ -20,12 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.palantir.conjure.java.dialogue.serde.DefaultConjureRuntime;
 import com.palantir.dialogue.Channel;
@@ -87,7 +87,7 @@ public final class JaxRsClientDialogueEndpointTest {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
         UrlBuilder urlBuilder = mock(UrlBuilder.class);
-        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        endpointCaptor.getValue().renderPath(requestCaptor.getValue().pathParameters(), urlBuilder);
         verify(urlBuilder).queryParam("query", "a");
         verify(urlBuilder).queryParam("query", "/");
         verify(urlBuilder).queryParam("query", "");
@@ -111,10 +111,10 @@ public final class JaxRsClientDialogueEndpointTest {
         Request request = requestCaptor.getValue();
         assertThat(request.body()).isPresent();
         assertThat(request.body().get().contentType()).isEqualTo("text/plain");
+        assertThat(request.body().get().contentLength()).hasValue(13);
         assertThat(request.headerParams().asMap())
                 .containsExactly(
-                        new AbstractMap.SimpleImmutableEntry<>("Accept", ImmutableList.of("application/json")),
-                        new AbstractMap.SimpleImmutableEntry<>("Content-Length", ImmutableList.of("13")));
+                        new AbstractMap.SimpleImmutableEntry<>("Accept", ImmutableList.of("application/json")));
     }
 
     @Test
@@ -134,9 +134,9 @@ public final class JaxRsClientDialogueEndpointTest {
         Request request = requestCaptor.getValue();
         assertThat(request.body()).isPresent();
         assertThat(request.body().get().contentType()).isEqualTo("application/json");
+        assertThat(request.body().get().contentLength()).hasValue(15);
 
-        assertThat(request.headerParams().asMap())
-                .containsExactly(new AbstractMap.SimpleImmutableEntry<>("Content-Length", ImmutableList.of("15")));
+        assertThat(request.headerParams().asMap()).isEmpty();
     }
 
     @Test
@@ -167,7 +167,7 @@ public final class JaxRsClientDialogueEndpointTest {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
         UrlBuilder urlBuilder = mock(UrlBuilder.class);
-        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        endpointCaptor.getValue().renderPath(requestCaptor.getValue().pathParameters(), urlBuilder);
         verify(urlBuilder).pathSegment("foo"); // context path
         verify(urlBuilder).pathSegment("static0");
         verify(urlBuilder).pathSegment("dynamic0");
@@ -186,7 +186,7 @@ public final class JaxRsClientDialogueEndpointTest {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
         UrlBuilder urlBuilder = mock(UrlBuilder.class);
-        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        endpointCaptor.getValue().renderPath(requestCaptor.getValue().pathParameters(), urlBuilder);
         verify(urlBuilder).pathSegment("foo"); // context path
         verify(urlBuilder).pathSegment("static0");
         verify(urlBuilder).pathSegment("dynamic0");
@@ -205,7 +205,7 @@ public final class JaxRsClientDialogueEndpointTest {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
         UrlBuilder urlBuilder = mock(UrlBuilder.class);
-        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        endpointCaptor.getValue().renderPath(requestCaptor.getValue().pathParameters(), urlBuilder);
         verify(urlBuilder).pathSegment("foo"); // context path
         verify(urlBuilder).pathSegment("begin");
         verify(urlBuilder).pathSegment("");
@@ -222,12 +222,42 @@ public final class JaxRsClientDialogueEndpointTest {
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
         verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
         UrlBuilder urlBuilder = mock(UrlBuilder.class);
-        endpointCaptor.getValue().renderPath(ImmutableMap.of(), urlBuilder);
+        endpointCaptor.getValue().renderPath(requestCaptor.getValue().pathParameters(), urlBuilder);
         verify(urlBuilder).pathSegment("foo"); // context path
         verify(urlBuilder).pathSegment("/"); // encoded into %2F by DefaultUrlBuilder
     }
 
-    static Channel stubNoContentResponseChannel() {
+    @Test
+    public void testCache() {
+        Channel channel = stubNoContentResponseChannel();
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.ping();
+        service.ping();
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        verify(channel, times(2)).execute(endpointCaptor.capture(), any());
+
+        assertThat(endpointCaptor.getAllValues()).hasSize(2);
+        assertThat(endpointCaptor.getAllValues().get(0))
+                .isSameAs(endpointCaptor.getAllValues().get(1));
+    }
+
+    @Test
+    public void testOverload() {
+        Channel channel = stubNoContentResponseChannel();
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.overload();
+        service.overload("path");
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        verify(channel, times(2)).execute(endpointCaptor.capture(), any());
+
+        assertThat(endpointCaptor.getAllValues()).hasSize(2);
+        assertThat(endpointCaptor.getAllValues().get(0))
+                .isNotSameAs(endpointCaptor.getAllValues().get(1));
+    }
+
+    private static Channel stubNoContentResponseChannel() {
         Channel channel = mock(Channel.class);
         Response response = mock(Response.class);
         when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
@@ -262,6 +292,14 @@ public final class JaxRsClientDialogueEndpointTest {
         @GET
         @Path("begin/{path}/end")
         void innerPath(@PathParam("path") String path);
+
+        @GET
+        @Path("overload")
+        void overload();
+
+        @GET
+        @Path("overload/{path}")
+        void overload(@PathParam("path") String path);
     }
 
     @Path("bar")

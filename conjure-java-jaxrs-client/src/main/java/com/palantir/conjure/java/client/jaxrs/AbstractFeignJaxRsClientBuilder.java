@@ -31,8 +31,8 @@ import com.palantir.conjure.java.client.jaxrs.feignimpl.InputStreamDelegateDecod
 import com.palantir.conjure.java.client.jaxrs.feignimpl.InputStreamDelegateEncoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareDecoder;
+import com.palantir.conjure.java.client.jaxrs.feignimpl.MethodHeaderEnrichmentContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.NeverReturnNullDecoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderEnrichmentContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.SlashEncodingContract;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.TextDelegateDecoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.TextDelegateEncoder;
@@ -180,28 +180,35 @@ abstract class AbstractFeignJaxRsClientBuilder {
     }
 
     private static Contract createContract() {
-        return new EndpointNameHeaderEnrichmentContract(
-                new PathTemplateHeaderEnrichmentContract(new SlashEncodingContract(new Java8OptionalAwareContract(
-                        new GuavaOptionalAwareContract(new CompatibleJaxRsContract())))));
+        Contract contract = new CompatibleJaxRsContract();
+        contract = new GuavaOptionalAwareContract(contract);
+        contract = new Java8OptionalAwareContract(contract);
+        contract = new SlashEncodingContract(contract);
+        contract = new MethodHeaderEnrichmentContract(contract);
+        contract = new EndpointNameHeaderEnrichmentContract(contract);
+        return contract;
     }
 
     private static Decoder createDecoder(
             @Safe String clientNameForLogging, ObjectMapper jsonMapper, ObjectMapper cborMapper) {
-        return new NeverReturnNullDecoder(
-                new Java8OptionalAwareDecoder(new GuavaOptionalAwareDecoder(new EmptyContainerDecoder(
-                        jsonMapper,
-                        new InputStreamDelegateDecoder(
-                                clientNameForLogging,
-                                new TextDelegateDecoder(
-                                        new CborDelegateDecoder(cborMapper, new JacksonDecoder(jsonMapper))))))));
+        Decoder decoder = new JacksonDecoder(jsonMapper);
+        decoder = new CborDelegateDecoder(cborMapper, decoder);
+        decoder = new TextDelegateDecoder(decoder);
+        decoder = new InputStreamDelegateDecoder(clientNameForLogging, decoder);
+        decoder = new EmptyContainerDecoder(jsonMapper, decoder);
+        decoder = new GuavaOptionalAwareDecoder(decoder);
+        decoder = new Java8OptionalAwareDecoder(decoder);
+        decoder = new NeverReturnNullDecoder(decoder);
+        return decoder;
     }
 
     private static Encoder createEncoder(
             @Safe String clientNameForLogging, ObjectMapper jsonMapper, ObjectMapper cborMapper) {
-        return new InputStreamDelegateEncoder(
-                clientNameForLogging,
-                new TextDelegateEncoder(
-                        new CborDelegateEncoder(cborMapper, new ConjureFeignJacksonEncoder(jsonMapper))));
+        Encoder encoder = new ConjureFeignJacksonEncoder(jsonMapper);
+        encoder = new CborDelegateEncoder(cborMapper, encoder);
+        encoder = new TextDelegateEncoder(encoder);
+        encoder = new InputStreamDelegateEncoder(clientNameForLogging, encoder);
+        return encoder;
     }
 
     private static void verifyClientUsageAnnotations(Class<?> serviceClass) {
