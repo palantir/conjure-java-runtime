@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -226,6 +227,36 @@ public final class JaxRsClientDialogueEndpointTest {
         verify(urlBuilder).pathSegment("/"); // encoded into %2F by DefaultUrlBuilder
     }
 
+    @Test
+    public void testCache() {
+        Channel channel = stubNoContentResponseChannel();
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.ping();
+        service.ping();
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        verify(channel, times(2)).execute(endpointCaptor.capture(), any());
+
+        assertThat(endpointCaptor.getAllValues()).hasSize(2);
+        assertThat(endpointCaptor.getAllValues().get(0))
+                .isSameAs(endpointCaptor.getAllValues().get(1));
+    }
+
+    @Test
+    public void testOverload() {
+        Channel channel = stubNoContentResponseChannel();
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.overload();
+        service.overload("path");
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        verify(channel, times(2)).execute(endpointCaptor.capture(), any());
+
+        assertThat(endpointCaptor.getAllValues()).hasSize(2);
+        assertThat(endpointCaptor.getAllValues().get(0))
+                .isNotSameAs(endpointCaptor.getAllValues().get(1));
+    }
+
     private static Channel stubNoContentResponseChannel() {
         Channel channel = mock(Channel.class);
         Response response = mock(Response.class);
@@ -261,6 +292,14 @@ public final class JaxRsClientDialogueEndpointTest {
         @GET
         @Path("begin/{path}/end")
         void innerPath(@PathParam("path") String path);
+
+        @GET
+        @Path("overload")
+        void overload();
+
+        @GET
+        @Path("overload/{path}")
+        void overload(@PathParam("path") String path);
     }
 
     @Path("bar")
