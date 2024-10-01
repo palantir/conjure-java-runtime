@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Improve Javadoc for DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/2976
