@@ -160,9 +160,13 @@ public interface ClientConfiguration {
         ENABLED,
 
         /**
-         * Disables the client-side sympathetic QoS. Consumers should almost never use this option, reserving it for
-         * where there are known issues with the QoS interaction. Please consult project maintainers if applying this
-         * option.
+         * Disables the client-side sympathetic QoS.
+         *
+         * <p>This turns off all client-side concurrency limiters / queueing and immediately submits requests to the
+         * network.
+         *
+         * <p>Consumers should almost never use this option, reserving it for where there are known issues with the QoS
+         * interaction. Please consult project maintainers if applying this option.
          */
         DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS
     }
