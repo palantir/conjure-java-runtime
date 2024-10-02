@@ -12,7 +12,7 @@ com.palantir.conjure.verification:* = 0.19.0
 com.palantir.dialogue:* = 4.1.0
 com.palantir.safe-logging:* = 3.7.0
 com.palantir.tokens:* = 3.18.0
-com.palantir.tracing:* = 6.19.0
+com.palantir.tracing:* = 6.20.0
 com.palantir.tritium:* = 0.93.0
 com.squareup.okhttp3:* = 4.12.0
 io.dropwizard.metrics:* = 4.2.27
@@ -34,7 +34,7 @@ io.undertow:undertow-servlet-jakarta = 2.2.20.Final
 # dependency-upgrader:ON
 com.palantir.refreshable:refreshable = 2.5.0
 org.hibernate.validator:* = 6.2.0.Final
-org.checkerframework:checker-qual = 3.47.0
+org.checkerframework:checker-qual = 3.48.0
 org.apache.httpcomponents.client5:* = 5.3.1
 
 # Jakarta EE9 Versions
