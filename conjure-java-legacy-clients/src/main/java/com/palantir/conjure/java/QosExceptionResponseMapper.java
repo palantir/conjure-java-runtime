@@ -19,6 +19,8 @@ package com.palantir.conjure.java;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.QosException;
 import com.palantir.conjure.java.api.errors.QosReason;
+import com.palantir.conjure.java.api.errors.QosReasons;
+import com.palantir.conjure.java.api.errors.QosReasons.QosResponseDecodingAdapter;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
@@ -32,8 +34,6 @@ import java.util.stream.Stream;
 public final class QosExceptionResponseMapper {
 
     private static final SafeLogger log = SafeLoggerFactory.get(QosExceptionResponseMapper.class);
-
-    private static final QosReason QOS_REASON = QosReason.of("client-qos-response");
 
     private QosExceptionResponseMapper() {}
 
@@ -50,7 +50,7 @@ public final class QosExceptionResponseMapper {
             case 429:
                 return Optional.of(map429(headerFn));
             case 503:
-                return Optional.of(map503());
+                return Optional.of(map503(headerFn));
         }
 
         return Optional.empty();
@@ -65,7 +65,7 @@ public final class QosExceptionResponseMapper {
         }
 
         try {
-            return Optional.of(QosException.retryOther(QOS_REASON, new URL(locationHeader)));
+            return Optional.of(QosException.retryOther(parseQosReason(headerFn), new URL(locationHeader)));
         } catch (MalformedURLException e) {
             log.error(
                     "Failed to parse location header, not performing redirect",
@@ -78,12 +78,25 @@ public final class QosExceptionResponseMapper {
     private static QosException map429(Function<String, String> headerFn) {
         String duration = headerFn.apply(HttpHeaders.RETRY_AFTER);
         if (duration != null) {
-            return QosException.throttle(QOS_REASON, Duration.ofSeconds(Long.parseLong(duration)));
+            return QosException.throttle(parseQosReason(headerFn), Duration.ofSeconds(Long.parseLong(duration)));
         }
-        return QosException.throttle(QOS_REASON);
+        return QosException.throttle(parseQosReason(headerFn));
     }
 
-    private static QosException map503() {
-        return QosException.unavailable(QOS_REASON);
+    private static QosException map503(Function<String, String> headerFn) {
+        return QosException.unavailable(parseQosReason(headerFn));
+    }
+
+    private static QosReason parseQosReason(Function<String, String> headerFn) {
+        return QosReasons.parseFromResponse(headerFn, QosAdapter.INSTANCE);
+    }
+
+    private enum QosAdapter implements QosResponseDecodingAdapter<Function<String, String>> {
+        INSTANCE;
+
+        @Override
+        public Optional<String> getFirstHeader(Function<String, String> stringStringFunction, String headerName) {
+            return Optional.ofNullable(stringStringFunction.apply(headerName));
+        }
     }
 }

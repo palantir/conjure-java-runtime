@@ -20,6 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReason;
+import com.palantir.conjure.java.api.errors.QosReason.DueTo;
+import com.palantir.conjure.java.api.errors.QosReason.RetryHint;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import java.net.URL;
@@ -48,6 +51,20 @@ public final class QosExceptionMapperTest {
     }
 
     @Test
+    public void testThrottle_withMetadata() {
+        QosException exception = QosException.throttle(QosReason.builder()
+                .reason("reason")
+                .retryHint(RetryHint.DO_NOT_RETRY)
+                .dueTo(DueTo.CUSTOM)
+                .build());
+        Response response = mapper.toResponse(exception);
+        assertThat(response.getStatus()).isEqualTo(429);
+        assertThat(response.getHeaders())
+                .containsEntry("Qos-Retry-Hint", ImmutableList.of("do-not-retry"))
+                .containsEntry("Qos-Due-To", ImmutableList.of("custom"));
+    }
+
+    @Test
     public void testRetryOther() throws Exception {
         QosException exception = QosException.retryOther(new URL("http://foo"));
         Response response = mapper.toResponse(exception);
@@ -56,10 +73,41 @@ public final class QosExceptionMapperTest {
     }
 
     @Test
+    public void testRetryOther_withMetadata() throws Exception {
+        QosException exception = QosException.retryOther(
+                QosReason.builder()
+                        .reason("reason")
+                        .retryHint(RetryHint.DO_NOT_RETRY)
+                        .dueTo(DueTo.CUSTOM)
+                        .build(),
+                new URL("http://foo"));
+        Response response = mapper.toResponse(exception);
+        assertThat(response.getStatus()).isEqualTo(308);
+        assertThat(response.getHeaders())
+                .containsEntry("Qos-Retry-Hint", ImmutableList.of("do-not-retry"))
+                .containsEntry("Qos-Due-To", ImmutableList.of("custom"))
+                .containsEntry("Location", ImmutableList.of("http://foo"));
+    }
+
+    @Test
     public void testUnavailable() throws Exception {
         QosException exception = QosException.unavailable();
         Response response = mapper.toResponse(exception);
         assertThat(response.getStatus()).isEqualTo(503);
         assertThat(response.getHeaders()).isEmpty();
+    }
+
+    @Test
+    public void testUnavailable_withMetadata() {
+        QosException exception = QosException.unavailable(QosReason.builder()
+                .reason("reason")
+                .retryHint(RetryHint.DO_NOT_RETRY)
+                .dueTo(DueTo.CUSTOM)
+                .build());
+        Response response = mapper.toResponse(exception);
+        assertThat(response.getStatus()).isEqualTo(503);
+        assertThat(response.getHeaders())
+                .containsEntry("Qos-Retry-Hint", ImmutableList.of("do-not-retry"))
+                .containsEntry("Qos-Due-To", ImmutableList.of("custom"));
     }
 }
