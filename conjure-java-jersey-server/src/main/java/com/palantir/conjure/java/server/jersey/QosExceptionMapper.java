@@ -18,10 +18,13 @@ package com.palantir.conjure.java.server.jersey;
 
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.api.errors.QosException;
+import com.palantir.conjure.java.api.errors.QosReasons;
+import com.palantir.conjure.java.api.errors.QosReasons.QosResponseEncodingAdapter;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.time.temporal.ChronoUnit;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
@@ -52,6 +55,7 @@ final class QosExceptionMapper extends ListenableExceptionMapper<QosException> {
             @Override
             public Response visit(QosException.Throttle exception) {
                 Response.ResponseBuilder response = Response.status(429);
+                QosReasons.encodeToResponse(exception.getReason(), response, ResponseBuilderQosAdapter.INSTANCE);
                 exception
                         .getRetryAfter()
                         .ifPresent(duration -> response.header(
@@ -61,15 +65,27 @@ final class QosExceptionMapper extends ListenableExceptionMapper<QosException> {
 
             @Override
             public Response visit(QosException.RetryOther exception) {
-                return Response.status(308)
-                        .header(HttpHeaders.LOCATION, exception.getRedirectTo().toString())
-                        .build();
+                Response.ResponseBuilder response = Response.status(308)
+                        .header(HttpHeaders.LOCATION, exception.getRedirectTo().toString());
+                QosReasons.encodeToResponse(exception.getReason(), response, ResponseBuilderQosAdapter.INSTANCE);
+                return response.build();
             }
 
             @Override
-            public Response visit(QosException.Unavailable _exception) {
-                return Response.status(503).build();
+            public Response visit(QosException.Unavailable exception) {
+                Response.ResponseBuilder response = Response.status(503);
+                QosReasons.encodeToResponse(exception.getReason(), response, ResponseBuilderQosAdapter.INSTANCE);
+                return response.build();
             }
         });
+    }
+
+    private enum ResponseBuilderQosAdapter implements QosResponseEncodingAdapter<ResponseBuilder> {
+        INSTANCE;
+
+        @Override
+        public void setHeader(ResponseBuilder builder, String headerName, String headerValue) {
+            builder.header(headerName, headerValue);
+        }
     }
 }
