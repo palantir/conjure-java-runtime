@@ -27,21 +27,14 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public final class BinaryBytesDeserializationModuleTest {
 
-    private ObjectMapper smileMapper;
-
-    @BeforeEach
-    void before() {
-        smileMapper = ObjectMappers.newSmileClientObjectMapper();
-        smileMapper.registerModule(new BinaryBytesDeserializationModule());
-    }
-
     @Test
     void deserializesRawByteArrayToBytes() throws IOException {
+        ObjectMapper smileMapper = withBinaryDeserializationModule(ObjectMappers.newSmileClientObjectMapper());
+
         byte[] value = {1, 2, 3, 4};
         byte[] serialized = smileMapper.writeValueAsBytes(value);
 
@@ -51,6 +44,8 @@ public final class BinaryBytesDeserializationModuleTest {
 
     @Test
     void deserializesBytesNestedInMap() throws IOException {
+        ObjectMapper smileMapper = withBinaryDeserializationModule(ObjectMappers.newSmileClientObjectMapper());
+
         Map<Object, Object> object =
                 Map.of("foo", "bar", "num", 2, "obj", Map.of("bytes", Bytes.from(new byte[] {1, 2, 3})));
         byte[] serialized = smileMapper.writeValueAsBytes(object);
@@ -61,6 +56,11 @@ public final class BinaryBytesDeserializationModuleTest {
 
     @Test
     void deserializesNestedObjectFields() throws IOException {
+        @SuppressWarnings({"DangerousRecordArrayField", "ArrayRecordComponent"}) // Intentional
+        record RecordContainingObject(Object obj, byte[] byteArray, Bytes bytes) {}
+
+        ObjectMapper smileMapper = withBinaryDeserializationModule(ObjectMappers.newSmileClientObjectMapper());
+
         RecordContainingObject obj = new RecordContainingObject(
                 new byte[] {1, 2, 3}, new byte[] {4, 5, 6}, Bytes.from(new byte[] {7, 8, 9}));
         byte[] serialized = smileMapper.writeValueAsBytes(obj);
@@ -73,6 +73,8 @@ public final class BinaryBytesDeserializationModuleTest {
 
     @Test
     void deserializedBinaryUuidsAreEqual() throws IOException {
+        ObjectMapper smileMapper = withBinaryDeserializationModule(ObjectMappers.newSmileClientObjectMapper());
+
         // UUIDs are serialized as binary by default, and are the case where we have observed equality issues without
         // this module
         Set<UUID> uuids = Set.of(new UUID(0, 1), new UUID(2, 3), new UUID(4, 5));
@@ -85,6 +87,8 @@ public final class BinaryBytesDeserializationModuleTest {
 
     @Test
     void deserializesToByteArrayWhenSpecificallyRequested() throws IOException {
+        ObjectMapper smileMapper = withBinaryDeserializationModule(ObjectMappers.newSmileClientObjectMapper());
+
         byte[] value = {1, 2, 3, 4};
         byte[] serialized = smileMapper.writeValueAsBytes(value);
 
@@ -94,8 +98,7 @@ public final class BinaryBytesDeserializationModuleTest {
 
     @Test
     void deserializesCborBinaryAsBytes() throws IOException {
-        ObjectMapper cborMapper = ObjectMappers.newCborClientObjectMapper();
-        cborMapper.registerModule(new BinaryBytesDeserializationModule());
+        ObjectMapper cborMapper = withBinaryDeserializationModule(ObjectMappers.newCborClientObjectMapper());
 
         byte[] value = {1, 2, 3, 4};
         byte[] serialized = cborMapper.writeValueAsBytes(value);
@@ -106,19 +109,34 @@ public final class BinaryBytesDeserializationModuleTest {
 
     @Test
     void deserializesYamlBinaryAsBytes() throws IOException {
-        ObjectMapper yamlMapper = YAMLMapper.builder().build();
-        yamlMapper.registerModule(new BinaryBytesDeserializationModule());
+        record TestData(Object testData) {}
+
+        ObjectMapper yamlMapper =
+                withBinaryDeserializationModule(YAMLMapper.builder().build());
 
         byte[] value = new byte[] {1, 2, 3};
         String base64Value = new String(Base64.getEncoder().encode(value), StandardCharsets.UTF_8);
         String yaml = "testData: !!binary " + base64Value;
 
-        Object deserialized = yamlMapper.readValue(yaml, Object.class);
-        assertThat(deserialized).isInstanceOf(Map.class);
-        Map<?, ?> deserializedMap = (Map<?, ?>) deserialized;
-        assertThat(deserializedMap.get("testData")).isInstanceOf(Bytes.class).isEqualTo(Bytes.from(value));
+        TestData deserialized = yamlMapper.readValue(yaml, TestData.class);
+        assertThat(deserialized.testData()).isInstanceOf(Bytes.class).isEqualTo(Bytes.from(value));
     }
 
-    @SuppressWarnings({"DangerousRecordArrayField", "ArrayRecordComponent"}) // Intentional
-    private record RecordContainingObject(Object obj, byte[] byteArray, Bytes bytes) {}
+    @Test
+    void doesNotAffectJsonDeserialization() throws IOException {
+        ObjectMapper jsonMapper = withBinaryDeserializationModule(ObjectMappers.newClientObjectMapper());
+
+        byte[] value = {1, 2, 3, 4};
+        byte[] serialized = jsonMapper.writeValueAsBytes(value);
+
+        // Binary data should be written to JSON as a base64 string, and should deserialize to that string
+        Object deserialized = jsonMapper.readValue(serialized, Object.class);
+        assertThat(deserialized)
+                .isInstanceOf(String.class)
+                .isEqualTo(new String(Base64.getEncoder().encode(value), StandardCharsets.UTF_8));
+    }
+
+    private ObjectMapper withBinaryDeserializationModule(ObjectMapper rawMapper) {
+        return rawMapper.registerModule(new BinaryBytesDeserializationModule());
+    }
 }
