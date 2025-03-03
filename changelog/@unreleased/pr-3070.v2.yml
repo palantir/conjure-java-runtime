@@ -1,0 +1,6 @@
+type: feature
+feature:
+  description: Add Bytes deserialization module (as opt-in) to enable equality when
+    deserializing untyped binary data
+  links:
+  - https://github.com/palantir/conjure-java-runtime/pull/3070
