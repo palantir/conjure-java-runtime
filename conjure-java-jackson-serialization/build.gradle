@@ -15,6 +15,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core'
     implementation 'com.google.code.findbugs:jsr305'
     implementation 'com.google.guava:guava'
+    implementation 'com.palantir.conjure.java:conjure-lib'
     implementation "com.palantir.safe-logging:logger"
     implementation 'com.palantir.safe-logging:safe-logging'
     implementation 'com.palantir.tritium:tritium-registry'
