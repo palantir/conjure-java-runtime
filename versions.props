@@ -2,18 +2,18 @@ com.fasterxml.jackson.*:* = 2.18.3
 com.fasterxml.jackson.core:jackson-databind = 2.18.3
 com.github.ben-manes.caffeine:caffeine = 3.2.0
 com.google.code.findbugs:jsr305 = 3.0.2
-com.google.guava:guava = 33.4.0-jre
+com.google.guava:guava = 33.4.6-jre
 com.netflix.concurrency-limits:* = 0.2.2
 com.netflix.feign:feign-*= 8.18.0
 com.palantir.conjure.java:* = 8.45.0
 com.palantir.conjure.java:conjure-lib = 8.45.0
 com.palantir.conjure.java.api:* = 2.59.0
 com.palantir.conjure.verification:* = 0.19.0
-com.palantir.dialogue:* = 5.3.0
-com.palantir.safe-logging:* = 3.7.0
+com.palantir.dialogue:* = 5.4.0
+com.palantir.safe-logging:* = 3.9.0
 com.palantir.tokens:* = 3.18.0
 com.palantir.tracing:* = 6.21.0
-com.palantir.tritium:* = 0.96.0
+com.palantir.tritium:* = 0.97.0
 com.squareup.okhttp3:* = 4.12.0
 io.dropwizard.metrics:* = 4.2.30
 io.reactivex.rxjava2:rxjava = 2.2.21
@@ -22,9 +22,9 @@ org.assertj:assertj-core = 3.27.3
 org.conscrypt:conscrypt-openjdk-uber = 2.5.2
 org.immutables:value = 2.10.1
 org.jmock:jmock = 2.13.1
-org.junit.jupiter:* = 5.11.4
-org.junit.platform:* = 1.11.4
-org.mockito:* = 5.15.2
+org.junit.jupiter:* = 5.12.1
+org.junit.platform:* = 1.12.1
+org.mockito:* = 5.16.1
 org.slf4j:* = 1.7.36
 io.undertow:* = 2.2.37.Final
 # dependency-upgrader:OFF
@@ -35,7 +35,7 @@ io.undertow:undertow-servlet-jakarta = 2.2.20.Final
 # dependency-upgrader:ON
 com.palantir.refreshable:refreshable = 2.5.0
 org.hibernate.validator:* = 6.2.0.Final
-org.checkerframework:checker-qual = 3.49.0
+org.checkerframework:checker-qual = 3.49.2
 org.apache.httpcomponents.client5:* = 5.3.1
 
 # Jakarta EE9 Versions
