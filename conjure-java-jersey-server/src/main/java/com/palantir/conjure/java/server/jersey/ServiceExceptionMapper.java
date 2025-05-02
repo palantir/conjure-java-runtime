@@ -42,15 +42,15 @@ final class ServiceExceptionMapper extends ListenableExceptionMapper<ServiceExce
         int httpStatus = exception.getErrorType().httpErrorCode();
         if (httpStatus / 100 == 4 /* client error */) {
             log.info(
-                    "Error handling request",
-                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
+                    "Error handling request. {}: {}",
                     SafeArg.of("errorName", exception.getErrorType().name()),
+                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
                     exception);
         } else {
             log.error(
-                    "Error handling request",
-                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
+                    "Error handling request. {}: {}",
                     SafeArg.of("errorName", exception.getErrorType().name()),
+                    SafeArg.of("errorInstanceId", exception.getErrorInstanceId()),
                     exception);
         }
 
