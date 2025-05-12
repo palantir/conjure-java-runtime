@@ -50,7 +50,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.io.StringReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -143,11 +143,7 @@ final class DialogueFeignClient implements feign.Client {
     }
 
     private static String urlDecode(String input) {
-        try {
-            return URLDecoder.decode(input, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new SafeUncheckedIoException("Failed to decode path segment", e, UnsafeArg.of("encoded", input));
-        }
+        return URLDecoder.decode(input, StandardCharsets.UTF_8);
     }
 
     private static Optional<RequestBody> requestBody(Request request) {
@@ -239,6 +235,17 @@ final class DialogueFeignClient implements feign.Client {
 
         @Override
         public Reader asReader() {
+            Integer maybeLength = length();
+            if (maybeLength != null && maybeLength < 8192) {
+                // Avoid InputStreamReader / HeapByteBuffer overhead for small (less than 8KiB) inputs,
+                // see https://github.com/FasterXML/jackson-core/pull/1081
+                try (InputStream inputStream = asInputStream()) {
+                    return new StringReader(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
+                } catch (IOException e) {
+                    throw new SafeUncheckedIoException(
+                            "Failed to read response body", e, SafeArg.of("length", maybeLength));
+                }
+            }
             return new InputStreamReader(asInputStream(), StandardCharsets.UTF_8);
         }
 
