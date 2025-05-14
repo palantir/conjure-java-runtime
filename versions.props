@@ -25,7 +25,7 @@ org.jmock:jmock = 2.13.1
 org.junit.jupiter:* = 5.12.2
 org.junit.platform:* = 1.12.2
 org.mockito:* = 5.17.0
-org.slf4j:* = 1.7.36
+org.slf4j:* = 2.0.17
 io.undertow:* = 2.2.37.Final
 # dependency-upgrader:OFF
 # Last version of undertow with both Jakarta+Javax support before 'undertow-servlet' was
