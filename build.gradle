@@ -14,7 +14,7 @@ buildscript {
         classpath 'org.revapi:gradle-revapi:1.8.0'
         classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:7.0.1'
         classpath 'com.palantir.baseline:gradle-baseline-java:6.24.0'
-        classpath 'com.palantir.gradle.gitversion:gradle-git-version:3.4.0'
+        classpath 'com.palantir.gradle.gitversion:gradle-git-version:4.0.0'
         classpath 'com.palantir.gradle.idea-configuration:gradle-idea-configuration:0.4.0'
         classpath 'com.palantir.metricschema:gradle-metric-schema:0.33.0'
         classpath 'com.palantir.suppressible-error-prone:gradle-suppressible-error-prone:2.9.0'
