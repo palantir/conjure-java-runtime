@@ -19,6 +19,7 @@ package com.palantir.conjure.java.serialization;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -41,7 +42,7 @@ public final class BinaryBytesDeserializationModule extends SimpleModule {
     private static final class BytesObjectDeserializer extends UntypedObjectDeserializer {
         BytesObjectDeserializer() {
             // Use the default behaviour for lists and maps
-            super(null, null);
+            super(null, (JavaType) null);
         }
 
         @Override
