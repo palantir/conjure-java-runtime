@@ -1,4 +1,3 @@
-apply plugin: "org.inferred.processors"
 apply plugin: 'com.palantir.external-publish-jar'
 apply plugin: 'org.revapi.revapi-gradle-plugin'
 

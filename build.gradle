@@ -18,7 +18,6 @@ buildscript {
         classpath 'com.palantir.gradle.idea-configuration:gradle-idea-configuration:0.4.0'
         classpath 'com.palantir.metricschema:gradle-metric-schema:0.33.0'
         classpath 'com.palantir.suppressible-error-prone:gradle-suppressible-error-prone:2.11.0'
-        classpath 'gradle.plugin.org.inferred:gradle-processors:3.7.0'
         classpath 'com.palantir.gradle.consistentversions:gradle-consistent-versions:2.34.0'
     }
 }
