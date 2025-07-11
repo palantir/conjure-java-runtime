@@ -44,7 +44,7 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.security.auth.x500.X500Principal;
-import okhttp3.internal.Util;
+import okhttp3.internal._HostnamesCommonKt;
 
 /**
  * A HostnameVerifier consistent with <a href="http://www.ietf.org/rfc/rfc2818.txt">RFC 2818</a>.
@@ -78,7 +78,9 @@ final class Okhttp39HostnameVerifier implements HostnameVerifier {
     }
 
     public boolean verify(String host, X509Certificate certificate) {
-        return Util.canParseAsIpAddress(host) ? verifyIpAddress(host, certificate) : verifyHostname(host, certificate);
+        return _HostnamesCommonKt.canParseAsIpAddress(host)
+                ? verifyIpAddress(host, certificate)
+                : verifyHostname(host, certificate);
     }
 
     /** Returns true if {@code certificate} matches {@code ipAddress}. */
