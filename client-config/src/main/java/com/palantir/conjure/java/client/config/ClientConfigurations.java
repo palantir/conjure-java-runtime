@@ -18,6 +18,7 @@ package com.palantir.conjure.java.client.config;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
@@ -39,7 +40,10 @@ import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
@@ -71,6 +75,7 @@ public final class ClientConfigurations {
     private static final ClientConfiguration.RetryOnSocketException RETRY_ON_SOCKET_EXCEPTION_DEFAULT =
             ClientConfiguration.RetryOnSocketException.ENABLED;
     private static final String ENV_HTTPS_PROXY = "https_proxy";
+    private static final String ENV_NO_PROXY = "no_proxy";
 
     private ClientConfigurations() {}
 
@@ -163,6 +168,19 @@ public final class ClientConfigurations {
                 .build();
     }
 
+    private static ImmutableSet<String> parseNoProxyEnvironmentVar() {
+        String env = System.getenv(ENV_NO_PROXY);
+        if (env == null || env.isEmpty()) {
+            log.debug(ENV_NO_PROXY + " environment variable not set.");
+            return ImmutableSet.of();
+        }
+        return Arrays.stream(env.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(String::toLowerCase)
+                .collect(ImmutableSet.toImmutableSet());
+    }
+
     public static ProxySelector createProxySelector(ProxyConfiguration proxyConfig) {
         switch (proxyConfig.type()) {
             case DIRECT:
@@ -175,7 +193,13 @@ public final class ClientConfigurations {
                 }
                 log.info("Using proxy from environment variable", UnsafeArg.of("proxy", defaultEnvProxy));
                 InetSocketAddress address = createInetSocketAddress(defaultEnvProxy);
-                return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
+                ImmutableSet<String> noProxyHosts = parseNoProxyEnvironmentVar();
+                if (noProxyHosts.isEmpty()) {
+                    return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
+
+                } else {
+                    return noProxyAwareProxySelectorFor(new Proxy(Proxy.Type.HTTP, address), noProxyHosts);
+                }
             case HTTP:
                 return getHttpProxySelector(proxyConfig, false);
             case HTTPS:
@@ -232,6 +256,10 @@ public final class ClientConfigurations {
         return new FixedProxySelector(proxy);
     }
 
+    private static ProxySelector noProxyAwareProxySelectorFor(Proxy proxy, ImmutableSet<String> noProxyHosts) {
+        return new NoProxyAwareSelector(proxy, noProxyHosts);
+    }
+
     private static final class FixedProxySelector extends ProxySelector {
         private final Proxy proxy;
 
@@ -268,6 +296,59 @@ public final class ClientConfigurations {
         public String toString() {
             return "FixedProxySelector{proxy=" + proxy + '}';
         }
+    }
+
+    private static final class NoProxyAwareSelector extends ProxySelector {
+        private static final ImmutableList<Proxy> NO_PROXIES = ImmutableList.of(Proxy.NO_PROXY);
+
+        private final ImmutableList<Proxy> proxies;
+        private final ImmutableSet<String> noProxyHosts; // host or domain suffixes
+
+        NoProxyAwareSelector(Proxy proxy, ImmutableSet<String> noProxyHosts) {
+            this.proxies = ImmutableList.of(proxy);
+            this.noProxyHosts = noProxyHosts;
+        }
+
+        @Override
+        public List<Proxy> select(URI uri) {
+            return shouldSkipProxy(uri) ? NO_PROXIES : proxies;
+        }
+
+        private boolean shouldSkipProxy(URI uri) {
+            String host = uri.getHost().toLowerCase(Locale.ROOT);
+            for (String noProxyHost : noProxyHosts) {
+                if (host.equals(noProxyHost) || host.endsWith("." + noProxyHost)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other == null || NoProxyAwareSelector.class != other.getClass()) {
+                return false;
+            }
+            NoProxyAwareSelector that = (NoProxyAwareSelector) other;
+            return proxies.equals(that.proxies) && noProxyHosts.equals(that.noProxyHosts);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(proxies, noProxyHosts);
+        }
+
+        @Override
+        public String toString() {
+            return "NoProxyAwareProxySelector{proxy=" + proxies.stream().findFirst() + ", noProxyHosts=" + noProxyHosts
+                    + '}';
+        }
+
+        @Override
+        public void connectFailed(URI _uri, SocketAddress _sa, IOException _ioe) {}
     }
 
     /**
