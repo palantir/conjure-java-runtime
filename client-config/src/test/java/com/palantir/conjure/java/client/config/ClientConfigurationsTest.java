@@ -38,6 +38,8 @@ import java.util.List;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public final class ClientConfigurationsTest {
 
@@ -179,6 +181,56 @@ public final class ClientConfigurationsTest {
                 assertThat(address.getPort()).isEqualTo(1234);
             });
         });
+    }
+
+    @Test
+    public void environmentProxy() {
+        String uri = "https://localhost:8080";
+        ProxySelector selector = ClientConfigurations.proxySelectorFromEnvironment("http://egress-proxy-1.az.cloudprovider.com:8888");
+
+        List<Proxy> proxies = selector.select(URI.create(uri));
+        assertThat(proxies).hasSize(1).allSatisfy(proxy -> {
+            assertThat(proxy.type()).isEqualTo(Proxy.Type.HTTP);
+            // Assert that the proxy address is not resolved.
+            assertThat(proxy.address()).isInstanceOfSatisfying(InetSocketAddress.class, address -> {
+                assertThat(address.getHostString()).isEqualTo("egress-proxy-1.az.cloudprovider.com");
+                assertThat(address.getPort()).isEqualTo(8888);
+                assertThat(address.getAddress()).isNull();
+            });
+        });
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "https://my.service.com:8080,'my.service.com'                         ,true", // No port
+            "https://my.service.com:8080,'my.service.com:8080'                    ,true", // Same port
+            "https://my.service.com:8080,'my.service.com:4000'                    ,false", // Different port
+            "https://my.service.com:8080,'my.service.com:8080,my.service.com:4000',true", // One matching entry with same port
+            "https://my.service.com:8080,'my.service.com:4000,my.service.com'     ,true", // One matching entry without a port
+            "https://my.service.com:8080,'1.2.3.4\24'                             ,false", // CIDR - unsupported
+            "https://my.service.com:8080,'service.com'                            ,true", // Subdomain matching
+            "https://my.service.com:8080,'.service.com'                           ,false", // Leading dots are NOT stripped
+            "https://my.service.com:8080,'service.com,1.2.3.4,5.6.7.8\24'         ,true", // Subdomain matching with mixed types of entries
+            "https://my.service.com:8080,''                                       ,false", // Empty environment variable
+            "https://my.service.com:8080,',;'                                     ,false", // malformed environment variable
+            "https://my.service.com     ,'service.com'                            ,true", // no port in URI, subdomain matching
+            "https://127.0.0.1          ,'service.com,127.0.0.1'                  ,true", // IP matching
+    })
+    public void environmentProxyNoProxy(String uri, String noProxy, boolean expectedNoProxy) {
+        ProxySelector selector = ClientConfigurations.proxySelectorFromEnvironmentNoProxyAware("http://egress-proxy-1.az.cloudprovider.com:8888", noProxy);
+        List<Proxy> proxies = selector.select(URI.create(uri));
+        if (expectedNoProxy) {
+            assertThat(proxies).containsOnly(Proxy.NO_PROXY);
+        } else {
+            assertThat(proxies).hasSize(1).allSatisfy(proxy -> {
+                assertThat(proxy.type()).isEqualTo(Proxy.Type.HTTP);
+                assertThat(proxy.address()).isInstanceOfSatisfying(InetSocketAddress.class, address -> {
+                    assertThat(address.getHostString()).isEqualTo("egress-proxy-1.az.cloudprovider.com");
+                    assertThat(address.getPort()).isEqualTo(8888);
+                    assertThat(address.getAddress()).isNull();
+                });
+            });
+        }
     }
 
     private ServiceConfiguration meshProxyServiceConfig(List<String> theUris, int maxNumRetries) {

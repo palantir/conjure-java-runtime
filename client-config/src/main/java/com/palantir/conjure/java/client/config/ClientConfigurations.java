@@ -45,8 +45,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
+import org.jspecify.annotations.Nullable;
 
 /** Utilities for creating {@link ClientConfiguration} instances. */
 public final class ClientConfigurations {
@@ -168,38 +170,17 @@ public final class ClientConfigurations {
                 .build();
     }
 
-    private static ImmutableSet<String> parseNoProxyEnvironmentVar() {
-        String env = System.getenv(ENV_NO_PROXY);
-        if (env == null || env.isEmpty()) {
-            log.debug(ENV_NO_PROXY + " environment variable not set.");
-            return ImmutableSet.of();
-        }
-        return Arrays.stream(env.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .map(String::toLowerCase)
-                .collect(ImmutableSet.toImmutableSet());
-    }
-
     public static ProxySelector createProxySelector(ProxyConfiguration proxyConfig) {
         switch (proxyConfig.type()) {
             case DIRECT:
                 return fixedProxySelectorFor(Proxy.NO_PROXY);
-            case FROM_ENVIRONMENT:
-                String defaultEnvProxy = System.getenv(ENV_HTTPS_PROXY);
-                if (defaultEnvProxy == null) {
-                    log.info("Proxy environment variable not set, using no proxy");
-                    return fixedProxySelectorFor(Proxy.NO_PROXY);
-                }
-                log.info("Using proxy from environment variable", UnsafeArg.of("proxy", defaultEnvProxy));
-                InetSocketAddress address = createInetSocketAddress(defaultEnvProxy);
-                ImmutableSet<String> noProxyHosts = parseNoProxyEnvironmentVar();
-                if (noProxyHosts.isEmpty()) {
-                    return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
-
-                } else {
-                    return noProxyAwareProxySelectorFor(new Proxy(Proxy.Type.HTTP, address), noProxyHosts);
-                }
+            case FROM_ENVIRONMENT: {
+                return proxySelectorFromEnvironment(System.getenv(ENV_HTTPS_PROXY));
+            }
+            case FROM_ENVIRONMENT_NO_PROXY_AWARE:
+                return proxySelectorFromEnvironmentNoProxyAware(
+                        System.getenv(ENV_HTTPS_PROXY),
+                        System.getenv(ENV_NO_PROXY));
             case HTTP:
                 return getHttpProxySelector(proxyConfig, false);
             case HTTPS:
@@ -225,6 +206,44 @@ public final class ClientConfigurations {
                 SafeArg.of("type", proxyConfig.type()),
                 UnsafeArg.of("hostAndPort", proxyConfig.hostAndPort()));
     }
+
+    @VisibleForTesting
+    static ProxySelector proxySelectorFromEnvironment(@Nullable String defaultEnvProxy) {
+        if (defaultEnvProxy == null) {
+            log.info("Proxy environment variable not set, using no proxy");
+            return fixedProxySelectorFor(Proxy.NO_PROXY);
+        }
+        log.info("Using proxy from environment variable", UnsafeArg.of("proxy", defaultEnvProxy));
+        InetSocketAddress address = createInetSocketAddress(defaultEnvProxy);
+        return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
+    }
+
+    @VisibleForTesting
+    static ProxySelector proxySelectorFromEnvironmentNoProxyAware(
+            @Nullable String defaultEnvProxy,
+            @Nullable String noProxyEnvVariable) {
+        if (defaultEnvProxy == null) {
+            return fixedProxySelectorFor(Proxy.NO_PROXY);
+        }
+        log.info("Using proxy from environment variable", UnsafeArg.of("proxy", defaultEnvProxy));
+        InetSocketAddress address = createInetSocketAddress(defaultEnvProxy);
+        ImmutableSet<String> noProxyHosts = parseNoProxyEnvironmentVar(noProxyEnvVariable);
+        log.info("Skipping proxy for hosts", UnsafeArg.of("noProxyHosts", noProxyHosts));
+        return noProxyAwareProxySelectorFor(new Proxy(Proxy.Type.HTTP, address), noProxyHosts);
+    }
+
+    private static ImmutableSet<String> parseNoProxyEnvironmentVar(@Nullable String noProxyEnvVariable) {
+        if (noProxyEnvVariable == null || noProxyEnvVariable.isEmpty()) {
+            log.info(ENV_NO_PROXY + " environment variable not set.");
+            return ImmutableSet.of();
+        }
+        return Arrays.stream(noProxyEnvVariable.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(String::toLowerCase)
+                .collect(ImmutableSet.toImmutableSet());
+    }
+
 
     @VisibleForTesting
     static InetSocketAddress createInetSocketAddress(String uriString) {
@@ -314,10 +333,30 @@ public final class ClientConfigurations {
             return shouldSkipProxy(uri) ? NO_PROXIES : proxies;
         }
 
+        @Override
+        public void connectFailed(URI _uri, SocketAddress _sa, IOException _ioe) {}
+
+        // We do not support IP ranges in CIDR notation at present.
         private boolean shouldSkipProxy(URI uri) {
             String host = uri.getHost().toLowerCase(Locale.ROOT);
-            for (String noProxyHost : noProxyHosts) {
-                if (host.equals(noProxyHost) || host.endsWith("." + noProxyHost)) {
+            int port = uri.getPort();
+            for (String uriToSkip : noProxyHosts) {
+                String uriToSkipHost;
+                OptionalInt uriToSkipPort = OptionalInt.empty();
+                int colonIndex = uriToSkip.indexOf(':');
+                if (colonIndex != -1) {
+                    uriToSkipHost = uriToSkip.substring(0, colonIndex);
+                    try {
+                        uriToSkipPort = OptionalInt.of(Integer.parseInt(uriToSkip.substring(colonIndex + 1)));
+                    } catch (NumberFormatException e) {
+                        log.info("Failed to parse port from entry in no_proxy, ignoring.", UnsafeArg.of("uriToSkip", uriToSkip), e);
+                        continue;
+                    }
+                } else {
+                    uriToSkipHost = uriToSkip;
+                }
+                boolean hostMatches = host.equals(uriToSkipHost) || host.endsWith("." + uriToSkipHost);
+                if (hostMatches && (uriToSkipPort.isEmpty() || uriToSkipPort.getAsInt() == port)) {
                     return true;
                 }
             }
@@ -346,9 +385,6 @@ public final class ClientConfigurations {
             return "NoProxyAwareProxySelector{proxy=" + proxies.stream().findFirst() + ", noProxyHosts=" + noProxyHosts
                     + '}';
         }
-
-        @Override
-        public void connectFailed(URI _uri, SocketAddress _sa, IOException _ioe) {}
     }
 
     /**
