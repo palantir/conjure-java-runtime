@@ -43,18 +43,13 @@ public final class QosExceptionResponseMapper {
                 code, header -> headerFn.apply(header).findFirst().orElse(null));
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     public static Optional<QosException> mapResponseCode(int code, Function<String, String> headerFn) {
-        switch (code) {
-            case 308:
-                return map308(headerFn);
-            case 429:
-                return Optional.of(map429(headerFn));
-            case 503:
-                return Optional.of(map503(headerFn));
-        }
-
-        return Optional.empty();
+        return switch (code) {
+            case 308 -> map308(headerFn);
+            case 429 -> Optional.of(map429(headerFn));
+            case 503 -> Optional.of(map503(headerFn));
+            default -> Optional.empty();
+        };
     }
 
     private static Optional<QosException> map308(Function<String, String> headerFn) {

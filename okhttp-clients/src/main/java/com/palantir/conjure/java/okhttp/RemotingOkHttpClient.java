@@ -18,8 +18,6 @@ package com.palantir.conjure.java.okhttp;
 
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
@@ -130,18 +128,10 @@ final class RemotingOkHttpClient extends OkHttpClient {
         return redirectToNewRequest(requestUrl).orElse(requestUrl);
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private Optional<HttpUrl> redirectToNewRequest(HttpUrl current) {
-        switch (nodeSelectionStrategy) {
-            case ROUND_ROBIN:
-                return urls.redirectToNextRoundRobin(current);
-            case PIN_UNTIL_ERROR:
-            case PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE:
-                return urls.redirectToCurrent(current);
-        }
-
-        throw new SafeIllegalStateException(
-                "Encountered unknown node selection strategy",
-                SafeArg.of("nodeSelectionStrategy", nodeSelectionStrategy));
+        return switch (nodeSelectionStrategy) {
+            case ROUND_ROBIN -> urls.redirectToNextRoundRobin(current);
+            case PIN_UNTIL_ERROR, PIN_UNTIL_ERROR_WITHOUT_RESHUFFLE -> urls.redirectToCurrent(current);
+        };
     }
 }

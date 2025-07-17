@@ -134,26 +134,19 @@ final class DefaultHostMetrics implements HostMetrics {
         lastUpdateEpochMillis = clock.millis();
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private Timer timer(int statusCode) {
         // Explicitly not using javax.ws.rs.core.Response API since it's incompatible across versions.
         if (statusCode == 429 || statusCode == 503) {
             return qos;
         }
 
-        switch (statusCode / 100) {
-            case 1:
-                return informational;
-            case 2:
-                return successful;
-            case 3:
-                return redirection;
-            case 4:
-                return clientError;
-            case 5:
-                return serverError;
-        }
-
-        return other;
+        return switch (statusCode / 100) {
+            case 1 -> informational;
+            case 2 -> successful;
+            case 3 -> redirection;
+            case 4 -> clientError;
+            case 5 -> serverError;
+            default -> other;
+        };
     }
 }

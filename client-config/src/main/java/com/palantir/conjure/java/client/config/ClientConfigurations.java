@@ -25,10 +25,8 @@ import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.conjure.java.config.ssl.TrustContext;
-import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
@@ -163,27 +161,23 @@ public final class ClientConfigurations {
                 .build();
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     public static ProxySelector createProxySelector(ProxyConfiguration proxyConfig) {
-        switch (proxyConfig.type()) {
-            case DIRECT:
-                return fixedProxySelectorFor(Proxy.NO_PROXY);
-            case FROM_ENVIRONMENT:
+        return switch (proxyConfig.type()) {
+            case DIRECT -> fixedProxySelectorFor(Proxy.NO_PROXY);
+            case FROM_ENVIRONMENT -> {
                 String defaultEnvProxy = System.getenv(ENV_HTTPS_PROXY);
                 if (defaultEnvProxy == null) {
                     log.info("Proxy environment variable not set, using no proxy");
-                    return fixedProxySelectorFor(Proxy.NO_PROXY);
+                    yield fixedProxySelectorFor(Proxy.NO_PROXY);
                 }
                 log.info("Using proxy from environment variable", UnsafeArg.of("proxy", defaultEnvProxy));
                 InetSocketAddress address = createInetSocketAddress(defaultEnvProxy);
-                return fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
-            case HTTP:
-                return getHttpProxySelector(proxyConfig, false);
-            case HTTPS:
-                return getHttpProxySelector(proxyConfig, true);
-            case MESH:
-                return ProxySelector.getDefault(); // MESH proxy is not a Java proxy
-            case SOCKS:
+                yield fixedProxySelectorFor(new Proxy(Proxy.Type.HTTP, address));
+            }
+            case HTTP -> getHttpProxySelector(proxyConfig, false);
+            case HTTPS -> getHttpProxySelector(proxyConfig, true);
+            case MESH -> ProxySelector.getDefault(); // MESH proxy is not a Java proxy
+            case SOCKS -> {
                 HostAndPort socksHostAndPort = HostAndPort.fromString(proxyConfig
                         .hostAndPort()
                         .orElseThrow(() -> new SafeIllegalArgumentException(
@@ -192,15 +186,9 @@ public final class ClientConfigurations {
                         // Proxy address must not be resolved, otherwise DNS changes while the application
                         // is running are ignored by the application.
                         InetSocketAddress.createUnresolved(socksHostAndPort.getHost(), socksHostAndPort.getPort());
-                return fixedProxySelectorFor(new Proxy(Proxy.Type.SOCKS, socksAddress));
-            default:
-                // fall through
-        }
-
-        throw new SafeIllegalStateException(
-                "Failed to create ProxySelector for proxy configuration",
-                SafeArg.of("type", proxyConfig.type()),
-                UnsafeArg.of("hostAndPort", proxyConfig.hostAndPort()));
+                yield fixedProxySelectorFor(new Proxy(Proxy.Type.SOCKS, socksAddress));
+            }
+        };
     }
 
     @VisibleForTesting

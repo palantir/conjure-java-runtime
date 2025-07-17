@@ -29,7 +29,6 @@ import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeIoException;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
@@ -386,13 +385,12 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private boolean shouldRetry(IOException exception, Optional<Duration> backoff) {
         if (retryOnSocketException == ClientConfiguration.RetryOnSocketException.DANGEROUS_DISABLED) {
             return false;
         }
-        switch (retryOnTimeout) {
-            case DISABLED:
+        return switch (retryOnTimeout) {
+            case DISABLED -> {
                 if (exception instanceof SocketTimeoutException socketTimeout) {
                     // non-connect timeouts should not be retried
 
@@ -400,16 +398,13 @@ final class RemotingOkHttpCall extends ForwardingCall {
                     if (socketTimeout.getMessage() == null
                             || !(socketTimeout.getMessage().contains("connect timed out")
                                     || socketTimeout.getMessage().contains("Connect timed out"))) {
-                        return false;
+                        yield false;
                     }
                 }
-                return backoff.isPresent();
-            case DANGEROUS_ENABLE_AT_RISK_OF_RETRY_STORMS:
-                return backoff.isPresent();
-        }
-
-        throw new SafeIllegalStateException(
-                "Encountered unknown retry on timeout configuration", SafeArg.of("retryOnTimeout", retryOnTimeout));
+                yield backoff.isPresent();
+            }
+            case DANGEROUS_ENABLE_AT_RISK_OF_RETRY_STORMS -> backoff.isPresent();
+        };
     }
 
     @SuppressWarnings("FutureReturnValueIgnored")
@@ -589,17 +584,11 @@ final class RemotingOkHttpCall extends ForwardingCall {
         return call.request().body() != null && call.request().body().isOneShot();
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private static boolean shouldPropagateQos(ClientConfiguration.ServerQoS serverQoS) {
-        switch (serverQoS) {
-            case PROPAGATE_429_and_503_TO_CALLER:
-                return true;
-            case AUTOMATIC_RETRY:
-                return false;
-        }
-
-        throw new SafeIllegalStateException(
-                "Encountered unknown propagate QoS configuration", SafeArg.of("serverQoS", serverQoS));
+        return switch (serverQoS) {
+            case PROPAGATE_429_and_503_TO_CALLER -> true;
+            case AUTOMATIC_RETRY -> false;
+        };
     }
 
     private static void propagateResponse(Callback callback, Call call, Response response) {

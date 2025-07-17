@@ -50,19 +50,14 @@ final class LenientLongModule extends SimpleModule {
             super(Long.TYPE);
         }
 
-        @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
         @Override
         public Long deserialize(JsonParser jsonParser, DeserializationContext _ctxt) throws IOException {
-            switch (jsonParser.currentToken()) {
-                case VALUE_NUMBER_INT:
-                    return jsonParser.getLongValue();
-                case VALUE_STRING:
-                    return parseLong(jsonParser);
-                case VALUE_NULL:
-                    return null;
-                default:
-                    throw new SafeIoException("Expected a long value");
-            }
+            return switch (jsonParser.currentToken()) {
+                case VALUE_NUMBER_INT -> jsonParser.getLongValue();
+                case VALUE_STRING -> parseLong(jsonParser);
+                case VALUE_NULL -> null;
+                default -> throw new SafeIoException("Expected a long value");
+            };
         }
 
         @Override

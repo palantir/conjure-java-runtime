@@ -265,29 +265,21 @@ public final class SslSocketFactories {
                 .orElse(null);
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private static TrustManagerFactory createTrustManagerFactory(
             Path trustStorePath, SslConfiguration.StoreType trustStoreType) {
-        KeyStore keyStore;
-        switch (trustStoreType) {
-            case JKS:
-            case PKCS12:
-                keyStore = KeyStores.loadKeyStore(trustStoreType.name(), trustStorePath, Optional.empty());
-                break;
-            case PEM:
-                keyStore = KeyStores.createTrustStoreFromCertificates(trustStorePath);
-                break;
-            case PUPPET:
-                Path puppetCertsDir = trustStorePath.resolve("certs");
-                if (!puppetCertsDir.toFile().isDirectory()) {
-                    throw new IllegalStateException(
-                            String.format("Puppet certs directory did not exist at path \"%s\"", puppetCertsDir));
-                }
-                keyStore = KeyStores.createTrustStoreFromCertificates(puppetCertsDir);
-                break;
-            default:
-                throw new IllegalStateException("Unrecognized trust store type: " + trustStoreType);
-        }
+        KeyStore keyStore =
+                switch (trustStoreType) {
+                    case JKS, PKCS12 -> KeyStores.loadKeyStore(trustStoreType.name(), trustStorePath, Optional.empty());
+                    case PEM -> KeyStores.createTrustStoreFromCertificates(trustStorePath);
+                    case PUPPET -> {
+                        Path puppetCertsDir = trustStorePath.resolve("certs");
+                        if (!puppetCertsDir.toFile().isDirectory()) {
+                            throw new IllegalStateException(String.format(
+                                    "Puppet certs directory did not exist at path \"%s\"", puppetCertsDir));
+                        }
+                        yield KeyStores.createTrustStoreFromCertificates(puppetCertsDir);
+                    }
+                };
 
         // Add globally trusted root CAs
         DefaultCas.getCertificates().forEach((certAlias, cert) -> {
@@ -309,29 +301,21 @@ public final class SslSocketFactories {
         }
     }
 
-    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private static KeyManagerFactory createKeyManagerFactory(
             Path keyStorePath,
             Optional<String> keyStorePassword,
             SslConfiguration.StoreType keyStoreType,
             Optional<String> keyStoreKeyAlias) {
-        KeyStore keyStore;
-        switch (keyStoreType) {
-            case JKS:
-            case PKCS12:
-                keyStore = KeyStores.loadKeyStore(keyStoreType.name(), keyStorePath, keyStorePassword);
-                break;
-            case PEM:
-                keyStore = KeyStores.createKeyStoreFromCombinedPems(keyStorePath);
-                break;
-            case PUPPET:
-                Path puppetKeysDir = keyStorePath.resolve("private_keys");
-                Path puppetCertsDir = keyStorePath.resolve("certs");
-                keyStore = KeyStores.createKeyStoreFromPemDirectories(puppetKeysDir, ".pem", puppetCertsDir, ".pem");
-                break;
-            default:
-                throw new IllegalStateException("Unrecognized key store type: " + keyStoreType);
-        }
+        KeyStore keyStore =
+                switch (keyStoreType) {
+                    case JKS, PKCS12 -> KeyStores.loadKeyStore(keyStoreType.name(), keyStorePath, keyStorePassword);
+                    case PEM -> KeyStores.createKeyStoreFromCombinedPems(keyStorePath);
+                    case PUPPET -> {
+                        Path puppetKeysDir = keyStorePath.resolve("private_keys");
+                        Path puppetCertsDir = keyStorePath.resolve("certs");
+                        yield KeyStores.createKeyStoreFromPemDirectories(puppetKeysDir, ".pem", puppetCertsDir, ".pem");
+                    }
+                };
 
         if (keyStoreKeyAlias.isPresent()) {
             // default KeyManagerFactory does not support referencing key by alias, so
