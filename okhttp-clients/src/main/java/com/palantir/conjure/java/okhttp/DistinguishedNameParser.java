@@ -212,17 +212,17 @@ final class DistinguishedNameParser {
             }
 
             switch (chars[pos]) {
-                case '+':
-                case ',':
-                case ';':
+                case '+', ',', ';' -> {
                     // separator char has been found
                     return new String(chars, beg, end - beg);
-                case '\\':
+                    // separator char has been found
+                }
+                case '\\' -> {
                     // escaped char
                     chars[end++] = getEscaped();
                     pos++;
-                    break;
-                case ' ':
+                }
+                case ' ' -> {
                     // need to figure out whether space defines
                     // the end of attribute value or not
                     cur = end;
@@ -237,10 +237,11 @@ final class DistinguishedNameParser {
                         // separator char or the end of DN has been found
                         return new String(chars, beg, cur - beg);
                     }
-                    break;
-                default:
+                }
+                default -> {
                     chars[end++] = chars[pos];
                     pos++;
+                }
             }
         }
     }
@@ -252,26 +253,17 @@ final class DistinguishedNameParser {
             throw new IllegalStateException("Unexpected end of DN: " + dn);
         }
 
-        switch (chars[pos]) {
-            case '"':
-            case '\\':
-            case ',':
-            case '=':
-            case '+':
-            case '<':
-            case '>':
-            case '#':
-            case ';':
-            case ' ':
-            case '*':
-            case '%':
-            case '_':
+        char ch = chars[pos];
+        switch (ch) {
+            case '"', '\\', ',', '=', '+', '<', '>', '#', ';', ' ', '*', '%', '_' -> {
                 // FIXME: escaping is allowed only for leading or trailing space char
-                return chars[pos];
-            default:
+                return ch;
+            }
+            default -> {
                 // RFC doesn't explicitly say that escaped hex pair is
                 // interpreted as UTF-8 char. It only contains an example of such DN.
                 return getUTF8();
+            }
         }
     }
 
@@ -374,27 +366,18 @@ final class DistinguishedNameParser {
             return null;
         }
         while (true) {
-            String attValue = "";
-
             if (pos == length) {
                 return null;
             }
 
-            switch (chars[pos]) {
-                case '"':
-                    attValue = quotedAV();
-                    break;
-                case '#':
-                    attValue = hexAV();
-                    break;
-                case '+':
-                case ',':
-                case ';': // compatibility with RFC 1779: semicolon can separate RDNs
-                    // empty attribute value
-                    break;
-                default:
-                    attValue = escapedAV();
-            }
+            char ch = chars[pos];
+            String attValue =
+                    switch (ch) {
+                        case '"' -> quotedAV();
+                        case '#' -> hexAV();
+                        case '+', ',', ';' -> ""; // empty attribute value
+                        default -> escapedAV();
+                    };
 
             // Values are ordered from most specific to least specific
             // due to the RFC2253 formatting. So take the first match
@@ -407,8 +390,7 @@ final class DistinguishedNameParser {
                 return null;
             }
 
-            if (chars[pos] == ',' || chars[pos] == ';') {
-            } else if (chars[pos] != '+') {
+            if ((ch != ',' && ch != ';') && (ch != '+')) {
                 throw new IllegalStateException("Malformed DN: " + dn);
             }
 

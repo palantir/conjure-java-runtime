@@ -140,19 +140,13 @@ final class DefaultHostMetrics implements HostMetrics {
             return qos;
         }
 
-        switch (statusCode / 100) {
-            case 1:
-                return informational;
-            case 2:
-                return successful;
-            case 3:
-                return redirection;
-            case 4:
-                return clientError;
-            case 5:
-                return serverError;
-        }
-
-        return other;
+        return switch (statusCode / 100) {
+            case 1 -> informational;
+            case 2 -> successful;
+            case 3 -> redirection;
+            case 4 -> clientError;
+            case 5 -> serverError;
+            default -> other;
+        };
     }
 }

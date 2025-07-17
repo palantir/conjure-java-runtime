@@ -60,8 +60,8 @@ public interface HostEventsSink extends com.palantir.conjure.java.client.config.
         void recordIoException();
 
         static HostEventCallback from(com.palantir.conjure.java.client.config.HostEventsSink.HostEventCallback other) {
-            if (other instanceof HostEventCallback) {
-                return (HostEventCallback) other;
+            if (other instanceof HostEventCallback hostEventCallback) {
+                return hostEventCallback;
             }
             return new HostEventCallback() {
                 @Override
@@ -78,8 +78,8 @@ public interface HostEventsSink extends com.palantir.conjure.java.client.config.
     }
 
     static HostEventsSink from(com.palantir.conjure.java.client.config.HostEventsSink other) {
-        if (other instanceof HostEventsSink) {
-            return (HostEventsSink) other;
+        if (other instanceof HostEventsSink hostEventsSink) {
+            return hostEventsSink;
         }
         return new HostEventsSink() {
             @Override

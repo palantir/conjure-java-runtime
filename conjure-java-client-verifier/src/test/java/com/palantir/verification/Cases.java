@@ -26,6 +26,7 @@ import com.palantir.conjure.verification.server.IgnoredTestCases;
 import com.palantir.conjure.verification.server.TestCases;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Set;
 import javax.annotation.Nullable;
 
@@ -45,7 +46,7 @@ public final class Cases {
                     .readValue(file, TestCases.class)
                     .getClient();
         } catch (IOException e) {
-            throw new RuntimeException(
+            throw new UncheckedIOException(
                     String.format("Unable to read %s, you may need to run ./gradlew copyTestCases", file), e);
         }
     }
@@ -58,7 +59,7 @@ public final class Cases {
                     .readValue(file, IgnoredTestCases.class)
                     .getClient();
         } catch (IOException e) {
-            throw new RuntimeException(String.format("Unable to read %s", file), e);
+            throw new UncheckedIOException(String.format("Unable to read %s", file), e);
         }
     }
 

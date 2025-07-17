@@ -60,9 +60,8 @@ final class WebApplicationExceptionMapper extends ListenableExceptionMapper<WebA
 
         if (exception instanceof NotAuthorizedException) {
             return JsonExceptionMapper.createResponse(ErrorType.UNAUTHORIZED, errorInstanceId);
-        } else if (exception instanceof UnauthorizedException) {
-            return JsonExceptionMapper.createResponse(
-                    ((UnauthorizedException) exception).getErrorType(), errorInstanceId);
+        } else if (exception instanceof UnauthorizedException unauthorizedException) {
+            return JsonExceptionMapper.createResponse(unauthorizedException.getErrorType(), errorInstanceId);
         } else if (exception instanceof ForbiddenException) {
             return JsonExceptionMapper.createResponse(ErrorType.PERMISSION_DENIED, errorInstanceId);
         } else if (exception instanceof NotFoundException) {

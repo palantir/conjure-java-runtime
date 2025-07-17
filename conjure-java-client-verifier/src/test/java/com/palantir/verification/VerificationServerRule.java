@@ -29,6 +29,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.concurrent.CountDownLatch;
@@ -94,7 +95,7 @@ public final class VerificationServerRule implements BeforeAllCallback, AfterAll
                     System.out.println(line);
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         });
         thread.setDaemon(true);

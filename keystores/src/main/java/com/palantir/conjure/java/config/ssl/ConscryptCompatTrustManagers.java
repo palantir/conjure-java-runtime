@@ -53,11 +53,11 @@ final class ConscryptCompatTrustManagers {
             // Already wrapped, nothing else is needed
             return trustManager;
         }
-        if (trustManager instanceof X509ExtendedTrustManager) {
-            return new ConscryptCompatX509ExtendedTrustManager((X509ExtendedTrustManager) trustManager);
+        if (trustManager instanceof X509ExtendedTrustManager x509ExtendedTrustManager) {
+            return new ConscryptCompatX509ExtendedTrustManager(x509ExtendedTrustManager);
         }
-        if (trustManager instanceof X509TrustManager) {
-            return new ConscryptCompatX509TrustManager((X509TrustManager) trustManager);
+        if (trustManager instanceof X509TrustManager x509TrustManager) {
+            return new ConscryptCompatX509TrustManager(x509TrustManager);
         }
         return trustManager;
     }

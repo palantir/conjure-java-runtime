@@ -46,6 +46,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -303,7 +304,7 @@ public final class ExceptionMappingTest {
             try {
                 throw QosException.retryOther(new URL("http://foo"));
             } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         }
 

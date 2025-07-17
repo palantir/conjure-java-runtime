@@ -42,7 +42,7 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
-import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import feign.Request;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -113,8 +113,8 @@ final class DialogueFeignClient implements feign.Client {
         } catch (UncheckedExecutionException e) {
             // Rethrow IOException to match standard feign behavior
             Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                throw (IOException) cause;
+            if (cause instanceof IOException iOException) {
+                throw iOException;
             }
             throw e;
         }
@@ -146,7 +146,7 @@ final class DialogueFeignClient implements feign.Client {
         try {
             return URLDecoder.decode(input, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw new SafeRuntimeException("Failed to decode path segment", e, UnsafeArg.of("encoded", input));
+            throw new SafeUncheckedIoException("Failed to decode path segment", e, UnsafeArg.of("encoded", input));
         }
     }
 
@@ -290,7 +290,7 @@ final class DialogueFeignClient implements feign.Client {
                 try {
                     return body.asInputStream();
                 } catch (IOException e) {
-                    throw new SafeRuntimeException("Failed to access the delegate response body", e);
+                    throw new SafeUncheckedIoException("Failed to access the delegate response body", e);
                 }
             }
             return new ByteArrayInputStream(new byte[0]);

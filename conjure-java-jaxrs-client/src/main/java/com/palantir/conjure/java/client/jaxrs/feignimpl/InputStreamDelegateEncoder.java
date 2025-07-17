@@ -26,6 +26,7 @@ import feign.codec.EncodeException;
 import feign.codec.Encoder;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
@@ -56,7 +57,7 @@ public final class InputStreamDelegateEncoder implements Encoder {
                 dangerousBufferingMeter.mark(Math.max(1, bytes.length));
                 template.body(bytes, StandardCharsets.UTF_8);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             }
         } else {
             delegate.encode(object, bodyType, template);

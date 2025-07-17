@@ -30,9 +30,7 @@ import com.palantir.conjure.java.api.config.service.UserAgents;
 import com.palantir.conjure.java.client.config.CipherSuites;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
-import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
-import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.tracing.Tracers;
@@ -305,15 +303,10 @@ public final class OkHttpClients {
     }
 
     private static boolean shouldEnableQos(ClientConfiguration.ClientQoS clientQoS) {
-        switch (clientQoS) {
-            case ENABLED:
-                return true;
-            case DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS:
-                return false;
-        }
-
-        throw new SafeIllegalStateException(
-                "Encountered unknown client QoS configuration", SafeArg.of("ClientQoS", clientQoS));
+        return switch (clientQoS) {
+            case ENABLED -> true;
+            case DANGEROUS_DISABLE_SYMPATHETIC_CLIENT_QOS -> false;
+        };
     }
 
     /**

@@ -23,6 +23,7 @@ import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeRuntimeException;
+import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.UndertowOptions;
@@ -196,7 +197,7 @@ public final class UndertowServerExtension implements BeforeAllCallback, AfterAl
         try (CloseableHttpResponse response = makeRequest(request)) {
             handler.accept(response);
         } catch (IOException e) {
-            throw new SafeRuntimeException("Failed to make http request", e);
+            throw new SafeUncheckedIoException("Failed to make http request", e);
         } catch (Exception e) {
             throw new SafeRuntimeException("Failed to respond to request", e);
         }
