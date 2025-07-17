@@ -36,6 +36,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import javax.annotation.CheckForNull;
@@ -187,11 +188,11 @@ public final class RemoteExceptionResponseHandlerTest {
         try {
             json = SERVER_MAPPER.writeValueAsString(error);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
 
-        int status = (exception instanceof WebApplicationException)
-                ? ((WebApplicationException) exception).getResponse().getStatus()
+        int status = (exception instanceof WebApplicationException webApplicationException)
+                ? webApplicationException.getResponse().getStatus()
                 : 400;
         return decode(MediaType.APPLICATION_JSON, status, json);
     }

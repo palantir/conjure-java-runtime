@@ -24,6 +24,7 @@ import com.google.common.net.HttpHeaders;
 import feign.RequestTemplate;
 import feign.codec.EncodeException;
 import feign.codec.Encoder;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -66,7 +67,7 @@ public final class CborDelegateEncoder implements Encoder {
             JavaType javaType = cborMapper.getTypeFactory().constructType(bodyType);
             template.body(cborMapper.writerFor(javaType).writeValueAsBytes(object), StandardCharsets.UTF_8);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 }

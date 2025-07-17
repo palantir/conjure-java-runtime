@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -100,7 +101,7 @@ final class KeyStores {
             try (InputStream in = new BufferedInputStream(Files.newInputStream(currFile.toPath()))) {
                 addCertificatesToKeystore(keyStore, currFile.getName(), readX509Certificates(in));
             } catch (IOException e) {
-                throw new RuntimeException(
+                throw new UncheckedIOException(
                         String.format("IOException encountered when opening '%s'", currFile.toPath()), e);
             } catch (CertificateException | KeyStoreException e) {
                 throw new RuntimeException(
@@ -126,7 +127,7 @@ final class KeyStores {
                     new ByteArrayInputStream(entry.getValue().pemCertificate().getBytes(StandardCharsets.UTF_8))) {
                 addCertificatesToKeystore(keyStore, entry.getKey(), readX509Certificates(certIn));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new UncheckedIOException(e);
             } catch (GeneralSecurityException e) {
                 throw new RuntimeException(
                         String.format(
@@ -468,10 +469,10 @@ final class KeyStores {
             if (this == obj) {
                 return true;
             }
-            if (!(obj instanceof EqualByteArray)) {
+            if (!(obj instanceof EqualByteArray other)) {
                 return false;
             }
-            EqualByteArray other = (EqualByteArray) obj;
+
             return Arrays.equals(this.bytes, other.bytes);
         }
     }

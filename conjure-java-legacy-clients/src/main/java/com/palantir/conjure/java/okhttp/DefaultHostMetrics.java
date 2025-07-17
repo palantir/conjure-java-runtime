@@ -134,6 +134,7 @@ final class DefaultHostMetrics implements HostMetrics {
         lastUpdateEpochMillis = clock.millis();
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private Timer timer(int statusCode) {
         // Explicitly not using javax.ws.rs.core.Response API since it's incompatible across versions.
         if (statusCode == 429 || statusCode == 503) {

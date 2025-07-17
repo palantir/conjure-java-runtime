@@ -50,6 +50,7 @@ final class LenientLongModule extends SimpleModule {
             super(Long.TYPE);
         }
 
+        @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
         @Override
         public Long deserialize(JsonParser jsonParser, DeserializationContext _ctxt) throws IOException {
             switch (jsonParser.currentToken()) {

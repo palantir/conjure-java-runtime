@@ -130,6 +130,7 @@ final class RemotingOkHttpClient extends OkHttpClient {
         return redirectToNewRequest(requestUrl).orElse(requestUrl);
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private Optional<HttpUrl> redirectToNewRequest(HttpUrl current) {
         switch (nodeSelectionStrategy) {
             case ROUND_ROBIN:

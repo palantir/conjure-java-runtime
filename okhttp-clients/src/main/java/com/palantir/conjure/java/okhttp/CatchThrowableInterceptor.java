@@ -35,8 +35,8 @@ enum CatchThrowableInterceptor implements Interceptor {
         try {
             return chain.proceed(chain.request());
         } catch (Throwable t) {
-            if (t instanceof IOException) {
-                throw (IOException) t;
+            if (t instanceof IOException iOException) {
+                throw iOException;
             }
             throw new SafeIoException(
                     "Caught a non-IOException. "

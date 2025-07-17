@@ -163,6 +163,7 @@ public final class ClientConfigurations {
                 .build();
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     public static ProxySelector createProxySelector(ProxyConfiguration proxyConfig) {
         switch (proxyConfig.type()) {
             case DIRECT:

@@ -43,6 +43,7 @@ public final class QosExceptionResponseMapper {
                 code, header -> headerFn.apply(header).findFirst().orElse(null));
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     public static Optional<QosException> mapResponseCode(int code, Function<String, String> headerFn) {
         switch (code) {
             case 308:

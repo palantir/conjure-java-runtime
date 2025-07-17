@@ -224,7 +224,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
 
     @Override
     public boolean isCanceled() {
-        return getDelegate().isCanceled() || previous.map(Call::isCanceled).orElse(Boolean.FALSE);
+        return getDelegate().isCanceled() || previous.map(Call::isCanceled).orElse(false);
     }
 
     private void enqueueClosingEntireSpan(Callback callback) {
@@ -386,15 +386,16 @@ final class RemotingOkHttpCall extends ForwardingCall {
         }
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private boolean shouldRetry(IOException exception, Optional<Duration> backoff) {
         if (retryOnSocketException == ClientConfiguration.RetryOnSocketException.DANGEROUS_DISABLED) {
             return false;
         }
         switch (retryOnTimeout) {
             case DISABLED:
-                if (exception instanceof SocketTimeoutException) {
+                if (exception instanceof SocketTimeoutException socketTimeout) {
                     // non-connect timeouts should not be retried
-                    SocketTimeoutException socketTimeout = (SocketTimeoutException) exception;
+
                     // in java 14 "connect timed out" renamed to "Connect timed out"
                     if (socketTimeout.getMessage() == null
                             || !(socketTimeout.getMessage().contains("connect timed out")
@@ -588,6 +589,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
         return call.request().body() != null && call.request().body().isOneShot();
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private static boolean shouldPropagateQos(ClientConfiguration.ServerQoS serverQoS) {
         switch (serverQoS) {
             case PROPAGATE_429_and_503_TO_CALLER:

@@ -65,8 +65,8 @@ public final class Java8OptionalMessageBodyWriter implements MessageBodyWriter<O
             throw new NoContentException("Absent value for type: " + genericType);
         }
 
-        Type innerGenericType = (genericType instanceof ParameterizedType)
-                ? ((ParameterizedType) genericType).getActualTypeArguments()[0]
+        Type innerGenericType = (genericType instanceof ParameterizedType parameterizedType)
+                ? parameterizedType.getActualTypeArguments()[0]
                 : entity.get().getClass();
 
         MessageBodyWriter writer =

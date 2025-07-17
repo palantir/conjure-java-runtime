@@ -202,6 +202,7 @@ final class DistinguishedNameParser {
     }
 
     // gets string attribute value: *( stringchar / pair )
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private String escapedAV() {
         beg = pos;
         end = pos;
@@ -246,6 +247,7 @@ final class DistinguishedNameParser {
     }
 
     // returns escaped char
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private char getEscaped() {
         pos++;
         if (pos == length) {
@@ -361,6 +363,7 @@ final class DistinguishedNameParser {
      *
      * @param attributeType attribute type to look for (e.g. "ca")
      */
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     public String findMostSpecific(String attributeType) {
         // Initialize internal state.
         pos = 0;

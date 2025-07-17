@@ -239,8 +239,8 @@ public final class SslSocketFactories {
      */
     public static X509TrustManager getX509TrustManager(TrustManager[] trustManagers) {
         TrustManager trustManager = trustManagers[0];
-        if (trustManager instanceof X509TrustManager) {
-            return (X509TrustManager) trustManager;
+        if (trustManager instanceof X509TrustManager x509TrustManager) {
+            return x509TrustManager;
         } else {
             throw new SafeRuntimeException(
                     "First TrustManager associated with SslConfiguration was expected to be an X509TrustManager",
@@ -265,6 +265,7 @@ public final class SslSocketFactories {
                 .orElse(null);
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private static TrustManagerFactory createTrustManagerFactory(
             Path trustStorePath, SslConfiguration.StoreType trustStoreType) {
         KeyStore keyStore;
@@ -308,6 +309,7 @@ public final class SslSocketFactories {
         }
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private static KeyManagerFactory createKeyManagerFactory(
             Path keyStorePath,
             Optional<String> keyStorePassword,

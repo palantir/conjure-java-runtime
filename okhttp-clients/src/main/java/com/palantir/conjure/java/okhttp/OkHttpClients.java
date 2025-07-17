@@ -304,6 +304,7 @@ public final class OkHttpClients {
                 config.retryOnSocketException());
     }
 
+    @SuppressWarnings("for-rollout:StatementSwitchToExpressionSwitch")
     private static boolean shouldEnableQos(ClientConfiguration.ClientQoS clientQoS) {
         switch (clientQoS) {
             case ENABLED:
