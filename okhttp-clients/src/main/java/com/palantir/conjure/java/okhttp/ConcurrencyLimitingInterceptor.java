@@ -85,7 +85,9 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
 
     private static Response wrapResponse(Limiter.Listener listener, Response response) throws IOException {
         // OkHttp guarantees not-null to execute() and callbacks, but not at this level.
-        if (response.body() == null) {
+        // In OkHttp 5.x, response.body() is guaranteed to be non-null, but in 4.x it can be null.
+        // If it is empty however, the content type is null
+        if (response.body() == null || response.body().contentType() == null) {
             listener.onIgnore();
             return response;
         } else if (response.body().source().exhausted()) {
