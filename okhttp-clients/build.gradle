@@ -22,7 +22,7 @@ dependencies {
     implementation 'com.palantir.tritium:tritium-registry'
     implementation 'com.palantir.tritium:tritium-metrics'
     implementation 'io.dropwizard.metrics:metrics-core'
-    implementation 'com.squareup.okhttp3:okhttp-jvm'
+    implementation 'com.squareup.okhttp3:okhttp'
     implementation 'com.squareup.okio:okio-jvm'
 
     testImplementation project(":keystores")

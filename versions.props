@@ -18,7 +18,7 @@ com.palantir.tritium:* = 0.101.0
 # There are some ABI breaks in 5.x that would require consumers to fix their code, which would be disruptive to
 # conjure upgrades.
 # Instead, conjure-java-runtime was made to be compatible with both 4.x and 5.x
-com.squareup.okhttp3:* = 5.0.0
+com.squareup.okhttp3:* = 4.12.0
 # dependency-upgrader:ON
 io.dropwizard.metrics:* = 4.2.33
 io.reactivex.rxjava2:rxjava = 2.2.21
