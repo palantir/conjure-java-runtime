@@ -53,7 +53,6 @@ import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.Protocol;
 import okhttp3.TlsVersion;
-import okhttp3.internal.Util;
 
 public final class OkHttpClients {
     private static final SafeLogger log = SafeLoggerFactory.get(OkHttpClients.class);
@@ -119,7 +118,7 @@ public final class OkHttpClients {
     /** The {@link ScheduledExecutorService} used for recovering leaked limits. */
     private static final Supplier<ScheduledExecutorService> limitReviver =
             Suppliers.memoize(() -> Tracers.wrap(Executors.newSingleThreadScheduledExecutor(instrument(
-                    Util.threadFactory("conjure-java-runtime/leaked limit reviver", true),
+                    threadFactory("conjure-java-runtime/leaked limit reviver", true),
                     "conjure-java-runtime/leaked limit reviver"))));
 
     /**
@@ -134,7 +133,7 @@ public final class OkHttpClients {
             Suppliers.memoize(() -> Tracers.wrap(Executors.newScheduledThreadPool(
                     NUM_SCHEDULING_THREADS,
                     instrument(
-                            Util.threadFactory("conjure-java-runtime/OkHttp Scheduler", true),
+                            threadFactory("conjure-java-runtime/OkHttp Scheduler", true),
                             "conjure-java-runtime/OkHttp Scheduler"))));
 
     private OkHttpClients() {}
@@ -339,5 +338,15 @@ public final class OkHttpClients {
     @SuppressWarnings("deprecation") // Singleton registry for a singleton executor
     private static ThreadFactory instrument(ThreadFactory threadFactory, String name) {
         return MetricRegistries.instrument(SharedTaggedMetricRegistries.getSingleton(), threadFactory, name);
+    }
+
+    private static ThreadFactory threadFactory(String name, boolean daemon) {
+        // Inspired by OkHttp's internal thread factory
+        // Extracted to be compatible with OkHttp 4.x and 5.x
+        return runnable -> {
+            Thread thread = new Thread(runnable, name);
+            thread.setDaemon(daemon);
+            return thread;
+        };
     }
 }
