@@ -1,18 +1,18 @@
 com.fasterxml.jackson.*:* = 2.19.1
-com.github.ben-manes.caffeine:caffeine = 3.2.1
+com.github.ben-manes.caffeine:caffeine = 3.2.2
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 33.4.8-jre
 com.netflix.concurrency-limits:* = 0.2.2
 com.netflix.feign:feign-*= 8.18.0
-com.palantir.conjure.java:* = 8.48.0
-com.palantir.conjure.java:conjure-lib = 8.48.0
+com.palantir.conjure.java:* = 8.49.0
+com.palantir.conjure.java:conjure-lib = 8.49.0
 com.palantir.conjure.java.api:* = 2.60.0
 com.palantir.conjure.verification:* = 0.19.0
-com.palantir.dialogue:* = 6.1.0
+com.palantir.dialogue:* = 6.2.0
 com.palantir.safe-logging:* = 3.9.0
 com.palantir.tokens:* = 3.18.0
 com.palantir.tracing:* = 6.24.0
-com.palantir.tritium:* = 0.101.0
+com.palantir.tritium:* = 0.102.0
 # dependency-upgrader:OFF
 # We don't want to prematurely force upgrades to oktthp 5.x for consumers on 4.x.
 # There are some ABI breaks in 5.x that would require consumers to fix their code, which would be disruptive to
@@ -22,13 +22,13 @@ com.squareup.okhttp3:* = 4.12.0
 # dependency-upgrader:ON
 io.dropwizard.metrics:* = 4.2.33
 io.reactivex.rxjava2:rxjava = 2.2.21
-org.apache.commons:commons-lang3 = 3.17.0
+org.apache.commons:commons-lang3 = 3.18.0
 org.assertj:assertj-core = 3.27.3
 org.conscrypt:conscrypt-openjdk-uber = 2.5.2
-org.immutables:value = 2.11.0
+org.immutables:value = 2.11.1
 org.jmock:jmock = 2.13.1
-org.junit.jupiter:* = 5.13.2
-org.junit.platform:* = 1.13.2
+org.junit.jupiter:* = 5.13.4
+org.junit.platform:* = 1.13.4
 org.mockito:* = 5.18.0
 org.slf4j:* = 2.0.17
 io.undertow:* = 2.2.37.Final
