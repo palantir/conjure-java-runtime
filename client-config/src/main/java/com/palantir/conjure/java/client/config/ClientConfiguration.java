@@ -127,6 +127,8 @@ public interface ClientConfiguration {
     /** Per-host failures are recorded using this interface. */
     Optional<HostEventsSink> hostEventsSink();
 
+    Optional<Boolean> supportsConjureErrorDeserializationAsJson();
+
     @Value.Check
     default void check() {
         if (meshProxy().isPresent()) {
