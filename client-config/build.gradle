@@ -3,6 +3,7 @@ apply plugin: 'org.revapi.revapi-gradle-plugin'
 
 dependencies {
     api 'com.palantir.conjure.java.api:service-config'
+    api 'com.palantir.conjure.java.api:errors'
     api 'com.palantir.tritium:tritium-registry'
     api 'com.google.errorprone:error_prone_annotations'
     api 'com.palantir.refreshable:refreshable'
