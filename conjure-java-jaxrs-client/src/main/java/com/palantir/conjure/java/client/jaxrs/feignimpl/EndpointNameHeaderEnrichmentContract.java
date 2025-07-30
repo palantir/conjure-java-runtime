@@ -38,6 +38,7 @@ public final class EndpointNameHeaderEnrichmentContract extends AbstractDelegati
         super(delegate);
     }
 
+    @SuppressWarnings("for-rollout:UnusedException")
     @Override
     protected void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
         String httpMethod = metadata.template().method();
