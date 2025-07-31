@@ -38,7 +38,6 @@ public final class EndpointNameHeaderEnrichmentContract extends AbstractDelegati
         super(delegate);
     }
 
-    @SuppressWarnings("for-rollout:UnusedException")
     @Override
     protected void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
         String httpMethod = metadata.template().method();
@@ -53,6 +52,7 @@ public final class EndpointNameHeaderEnrichmentContract extends AbstractDelegati
         } catch (IllegalArgumentException e) {
             throw new SafeIllegalArgumentException(
                     "Unsupported HTTP method",
+                    e,
                     SafeArg.of("class", targetType.getSimpleName()),
                     SafeArg.of("method", method.getName()),
                     SafeArg.of("httpMethod", httpMethod));
