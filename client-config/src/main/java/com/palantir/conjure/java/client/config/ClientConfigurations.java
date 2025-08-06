@@ -30,14 +30,17 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
-
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.net.*;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.SocketAddress;
+import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 
 /** Utilities for creating {@link ClientConfiguration} instances. */
 public final class ClientConfigurations {

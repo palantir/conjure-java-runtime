@@ -16,6 +16,8 @@
 
 package com.palantir.conjure.java.client.config;
 
+import static com.palantir.logsafe.Preconditions.checkArgument;
+
 import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.api.config.service.PartialServiceConfiguration;
@@ -25,16 +27,13 @@ import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
-import org.immutables.value.Value;
-
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
 import java.net.ProxySelector;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
-
-import static com.palantir.logsafe.Preconditions.checkArgument;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
+import org.immutables.value.Value;
 
 /**
  * A context-independent (i.e., does not depend on configuration files or on-disk entities like JKS keystores)
