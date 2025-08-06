@@ -30,17 +30,14 @@ import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
+
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.ProxySelector;
-import java.net.SocketAddress;
-import java.net.URI;
+import java.net.*;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
 
 /** Utilities for creating {@link ClientConfiguration} instances. */
 public final class ClientConfigurations {
@@ -51,7 +48,9 @@ public final class ClientConfigurations {
     private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(5);
     private static final Duration DEFAULT_READ_TIMEOUT = Duration.ofMinutes(5);
     private static final Duration DEFAULT_WRITE_TIMEOUT = Duration.ofMinutes(5);
-    private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(250);
+    private static final Duration DEFAULT_BACKOFF_SLOT_SIZE = Duration.ofMillis(10);
+    private static final int DEFAULT_BACKOFF_FACTOR = 10;
+    private static final Duration DEFAULT_MAX_BACKOFF = Duration.ofSeconds(2);
     private static final Duration DEFAULT_FAILED_URL_COOLDOWN = Duration.ZERO;
     // GCM ciphers perform poorly using a java 1.8 runtime, but improve significantly in 9 and beyond.
     // See http://openjdk.java.net/jeps/246
@@ -103,9 +102,11 @@ public final class ClientConfigurations {
                 .proxyCredentials(config.proxy().flatMap(ProxyConfiguration::credentials))
                 .meshProxy(meshProxy(config.proxy()))
                 .maxNumRetries(config.maxNumRetries().orElse(DEFAULT_MAX_NUM_RETRIES))
+                .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
+                .backoffFactor(config.backoffFactor().orElse(DEFAULT_BACKOFF_FACTOR))
+                .maxBackoff(config.maxBackoff().orElse(DEFAULT_MAX_BACKOFF))
                 .nodeSelectionStrategy(DEFAULT_NODE_SELECTION_STRATEGY)
                 .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)
-                .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
                 .clientQoS(CLIENT_QOS_DEFAULT)
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
@@ -150,6 +151,8 @@ public final class ClientConfigurations {
                 .proxyCredentials(Optional.empty())
                 .maxNumRetries(DEFAULT_MAX_NUM_RETRIES)
                 .backoffSlotSize(DEFAULT_BACKOFF_SLOT_SIZE)
+                .backoffFactor(DEFAULT_BACKOFF_FACTOR)
+                .maxBackoff(DEFAULT_MAX_BACKOFF)
                 .nodeSelectionStrategy(DEFAULT_NODE_SELECTION_STRATEGY)
                 .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)
                 .clientQoS(CLIENT_QOS_DEFAULT)

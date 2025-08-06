@@ -16,8 +16,6 @@
 
 package com.palantir.conjure.java.client.config;
 
-import static com.palantir.logsafe.Preconditions.checkArgument;
-
 import com.google.common.net.HostAndPort;
 import com.palantir.conjure.java.api.config.service.BasicCredentials;
 import com.palantir.conjure.java.api.config.service.PartialServiceConfiguration;
@@ -27,13 +25,16 @@ import com.palantir.logsafe.DoNotLog;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
+import org.immutables.value.Value;
+
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 import java.net.ProxySelector;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509TrustManager;
-import org.immutables.value.Value;
+
+import static com.palantir.logsafe.Preconditions.checkArgument;
 
 /**
  * A context-independent (i.e., does not depend on configuration files or on-disk entities like JKS keystores)
@@ -102,9 +103,22 @@ public interface ClientConfiguration {
 
     /**
      * The size of one backoff time slot for call retries. For example, an exponential backoff retry algorithm may
-     * choose a backoff time in {@code [0, backoffSlotSize * 2^c]} for the c-th retry.
+     * choose a backoff time in {@code [0, backoffSlotSize * backoffFactor^c]} for the c-th retry, configured by
+     * {@link #backoffFactor()}, capped by {@link #maxBackoff()}.
      */
     Duration backoffSlotSize();
+
+    /**
+     * The factor by which the wait between retry calls increases.
+     * See also {@link #backoffSlotSize()}.
+     */
+    int backoffFactor();
+
+    /**
+     * The maximum amount of time to wait before call retries.
+     * See also {@link #backoffSlotSize()}.
+     */
+    Duration maxBackoff();
 
     /** Indicates whether client-side sympathetic QoS should be enabled. */
     ClientQoS clientQoS();
