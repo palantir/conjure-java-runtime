@@ -90,7 +90,7 @@ public final class ConjureClients {
         /** Per-host success/failure information will be recorded to this sink. */
         T withHostEventsSink(HostEventsSink hostEventsSink);
 
-        T withConjureErrorParameterSerializationFormat(ConjureErrorParameterFormat format);
+        T withConjureErrorParameterFormat(ConjureErrorParameterFormat format);
     }
 
     public interface ToReloadingFactory<U> {

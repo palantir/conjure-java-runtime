@@ -82,5 +82,6 @@ acceptedBreaks:
   "8.22.0":
     com.palantir.conjure.java.runtime:client-config:
     - code: "java.method.addedToInterface"
-      new: "method T com.palantir.conjure.java.clients.ConjureClients.WithClientOptions<T>::withConjureErrorParameterSerializationFormat(com.palantir.conjure.java.api.errors.ConjureErrorParameterFormat)"
-      justification: "Allowing clients to request error parameter serialization format"
+      new: "method T com.palantir.conjure.java.clients.ConjureClients.WithClientOptions<T>::withConjureErrorParameterFormat(com.palantir.conjure.java.api.errors.ConjureErrorParameterFormat)"
+      justification: "Adding method to allow clients to request error parameter serialization\
+        \ format"
