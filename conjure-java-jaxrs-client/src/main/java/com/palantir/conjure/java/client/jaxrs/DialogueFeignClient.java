@@ -72,7 +72,8 @@ final class DialogueFeignClient implements feign.Client {
     private static final String REQUEST_URL_PATH_PARAM = "request-url";
     private static final Splitter PATH_SPLITTER = Splitter.on('/');
     private static final Splitter QUERY_SPLITTER = Splitter.on('&').omitEmptyStrings();
-    private static final Splitter QUERY_VALUE_SPLITTER = Splitter.on('=');
+    private static final char QUERY_KEY_VALUE_SEPARATOR = '=';
+    private static final Splitter QUERY_KEY_VALUE_SPLITTER = Splitter.on(QUERY_KEY_VALUE_SEPARATOR);
 
     private final ConjureRuntime runtime;
     private final Channel channel;
@@ -386,6 +387,7 @@ final class DialogueFeignClient implements feign.Client {
         }
 
         @Override
+        @SuppressWarnings("CyclomaticComplexity")
         public void renderPath(ListMultimap<String, String> params, UrlBuilder url) {
             List<String> requestUrls = params.get(REQUEST_URL_PATH_PARAM);
             Preconditions.checkState(
@@ -417,14 +419,21 @@ final class DialogueFeignClient implements feign.Client {
             if (queryParamsStart != -1) {
                 String querySegments = trailing.substring(queryParamsStart + 1);
                 for (String querySegment : QUERY_SPLITTER.split(querySegments)) {
-                    List<String> keyValuePair = QUERY_VALUE_SPLITTER.splitToList(querySegment);
-                    if (keyValuePair.size() != 2) {
+                    int equalsIndex = querySegment.indexOf(QUERY_KEY_VALUE_SEPARATOR);
+                    if (equalsIndex > -1) {
+                        String key = querySegment.substring(0, equalsIndex);
+                        int valueStart = equalsIndex + 1;
+                        if (querySegment.indexOf(QUERY_KEY_VALUE_SEPARATOR, valueStart) == -1) {
+                            String value = querySegment.substring(valueStart);
+                            url.queryParam(urlDecode(key), urlDecode(value));
+                        }
+                    } else {
+                        List<String> keyValuePair = QUERY_KEY_VALUE_SPLITTER.splitToList(querySegment);
                         throw new SafeIllegalStateException(
                                 "Expected two parameters",
                                 SafeArg.of("parameters", keyValuePair.size()),
                                 UnsafeArg.of("values", keyValuePair));
                     }
-                    url.queryParam(urlDecode(keyValuePair.get(0)), urlDecode(keyValuePair.get(1)));
                 }
             }
         }
