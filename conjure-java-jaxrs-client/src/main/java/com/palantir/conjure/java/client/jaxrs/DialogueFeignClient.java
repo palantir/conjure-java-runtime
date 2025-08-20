@@ -248,7 +248,7 @@ final class DialogueFeignClient implements feign.Client {
                     byte[] bytes = new byte[toRead];
                     try {
                         int read = inputStream.readNBytes(bytes, 0, toRead);
-                        if (read == length) {
+                        if (read <= length) {
                             // fully read input
                             inputStream.close();
                             return new StringReader(new String(bytes, 0, read, StandardCharsets.UTF_8));
