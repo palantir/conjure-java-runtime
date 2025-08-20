@@ -419,15 +419,18 @@ final class DialogueFeignClient implements feign.Client {
             if (queryParamsStart != -1) {
                 String querySegments = trailing.substring(queryParamsStart + 1);
                 for (String querySegment : QUERY_SPLITTER.split(querySegments)) {
+                    boolean isValid = false;
                     int equalsIndex = querySegment.indexOf(QUERY_KEY_VALUE_SEPARATOR);
                     if (equalsIndex > -1) {
                         String key = querySegment.substring(0, equalsIndex);
                         int valueStart = equalsIndex + 1;
                         if (querySegment.indexOf(QUERY_KEY_VALUE_SEPARATOR, valueStart) == -1) {
-                            String value = querySegment.substring(valueStart);
-                            url.queryParam(urlDecode(key), urlDecode(value));
+                            isValid = true;
+                            url.queryParam(urlDecode(key), urlDecode(querySegment.substring(valueStart)));
                         }
-                    } else {
+                    }
+
+                    if (!isValid) {
                         List<String> keyValuePair = QUERY_KEY_VALUE_SPLITTER.splitToList(querySegment);
                         throw new SafeIllegalStateException(
                                 "Expected two parameters",
