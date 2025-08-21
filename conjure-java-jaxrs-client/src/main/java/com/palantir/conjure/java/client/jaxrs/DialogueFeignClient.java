@@ -73,7 +73,6 @@ final class DialogueFeignClient implements feign.Client {
     private static final Splitter PATH_SPLITTER = Splitter.on('/');
     private static final Splitter QUERY_SPLITTER = Splitter.on('&').omitEmptyStrings();
     private static final char QUERY_KEY_VALUE_SEPARATOR = '=';
-    private static final Splitter QUERY_KEY_VALUE_SPLITTER = Splitter.on(QUERY_KEY_VALUE_SEPARATOR);
 
     private final ConjureRuntime runtime;
     private final Channel channel;
@@ -419,23 +418,18 @@ final class DialogueFeignClient implements feign.Client {
             if (queryParamsStart != -1) {
                 String querySegments = trailing.substring(queryParamsStart + 1);
                 for (String querySegment : QUERY_SPLITTER.split(querySegments)) {
-                    boolean isValid = false;
                     int equalsIndex = querySegment.indexOf(QUERY_KEY_VALUE_SEPARATOR);
-                    if (equalsIndex > -1) {
+                    if (equalsIndex > 0) {
                         String key = querySegment.substring(0, equalsIndex);
-                        int valueStart = equalsIndex + 1;
-                        if (querySegment.indexOf(QUERY_KEY_VALUE_SEPARATOR, valueStart) == -1) {
-                            isValid = true;
-                            url.queryParam(urlDecode(key), urlDecode(querySegment.substring(valueStart)));
-                        }
-                    }
-
-                    if (!isValid) {
-                        List<String> keyValuePair = QUERY_KEY_VALUE_SPLITTER.splitToList(querySegment);
+                        String value = querySegment.substring(equalsIndex + 1);
+                        url.queryParam(urlDecode(key), urlDecode(value));
+                    } else {
                         throw new SafeIllegalStateException(
                                 "Expected two parameters",
-                                SafeArg.of("parameters", keyValuePair.size()),
-                                UnsafeArg.of("values", keyValuePair));
+                                SafeArg.of(
+                                        "parameters",
+                                        querySegment.split(String.valueOf(QUERY_KEY_VALUE_SEPARATOR)).length),
+                                UnsafeArg.of("values", querySegment));
                     }
                 }
             }
