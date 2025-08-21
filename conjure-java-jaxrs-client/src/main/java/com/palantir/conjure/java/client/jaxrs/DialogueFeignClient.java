@@ -426,9 +426,7 @@ final class DialogueFeignClient implements feign.Client {
                     } else {
                         throw new SafeIllegalStateException(
                                 "Expected two parameters",
-                                SafeArg.of(
-                                        "parameters",
-                                        querySegment.split(String.valueOf(QUERY_KEY_VALUE_SEPARATOR)).length),
+                                SafeArg.of("parameters", equalsIndex == -1 ? 0 : 1),
                                 UnsafeArg.of("values", querySegment));
                     }
                 }

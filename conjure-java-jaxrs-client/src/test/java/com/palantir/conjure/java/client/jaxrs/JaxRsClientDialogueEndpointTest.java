@@ -105,7 +105,7 @@ public final class JaxRsClientDialogueEndpointTest {
     public void testQueryParameters() {
         Channel channel = stubNoContentResponseChannel();
         StubService service = JaxRsClient.create(StubService.class, channel, runtime);
-        service.collectionOfQueryParams(List.of("", "=", "test=value"));
+        service.collectionOfQueryParams(List.of("", "=", "value", "test=value"));
 
         ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
         ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
@@ -114,11 +114,12 @@ public final class JaxRsClientDialogueEndpointTest {
                 .hasSize(1)
                 .extractingByKey("request-url")
                 .asInstanceOf(collection(String.class))
-                .containsExactly("dialogue://feign/foo/params?query=&query=%3D&query=test%3Dvalue");
+                .containsExactly("dialogue://feign/foo/params?query=&query=%3D&query=value&query=test%3Dvalue");
         Endpoint endpoint = endpointCaptor.getValue();
         UrlBuilder urlBuilder = mock(UrlBuilder.class);
         endpoint.renderPath(
-                ImmutableListMultimap.of("request-url", "dialogue://feign/foo/params?query=&query==&query=test=value"),
+                ImmutableListMultimap.of(
+                        "request-url", "dialogue://feign/foo/params?query=&query==&query=value&query=test=value"),
                 urlBuilder);
         verify(urlBuilder).queryParam("query", "");
         verify(urlBuilder).queryParam("query", "=");
@@ -141,13 +142,19 @@ public final class JaxRsClientDialogueEndpointTest {
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasLogMessage("Expected two parameters")
                 .args()
-                .containsExactlyInAnyOrder(SafeArg.of("parameters", 0), UnsafeArg.of("values", "="));
+                .containsExactlyInAnyOrder(SafeArg.of("parameters", 1), UnsafeArg.of("values", "="));
+        assertThatLoggableExceptionThrownBy(() -> endpoint.renderPath(
+                        ImmutableListMultimap.of("request-url", "dialogue://feign/foo/params?=value"), urlBuilder))
+                .isInstanceOf(SafeIllegalStateException.class)
+                .hasLogMessage("Expected two parameters")
+                .args()
+                .containsExactlyInAnyOrder(SafeArg.of("parameters", 1), UnsafeArg.of("values", "=value"));
         assertThatLoggableExceptionThrownBy(() -> endpoint.renderPath(
                         ImmutableListMultimap.of("request-url", "dialogue://feign/foo/params?query"), urlBuilder))
                 .isInstanceOf(SafeIllegalStateException.class)
                 .hasLogMessage("Expected two parameters")
                 .args()
-                .containsExactlyInAnyOrder(SafeArg.of("parameters", 1), UnsafeArg.of("values", "query"));
+                .containsExactlyInAnyOrder(SafeArg.of("parameters", 0), UnsafeArg.of("values", "query"));
         verify(urlBuilder, never()).queryParam(any(), any());
     }
 
