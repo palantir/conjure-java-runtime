@@ -50,7 +50,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.io.SequenceInputStream;
+import java.io.StringReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -143,11 +144,7 @@ final class DialogueFeignClient implements feign.Client {
     }
 
     private static String urlDecode(String input) {
-        try {
-            return URLDecoder.decode(input, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new SafeUncheckedIoException("Failed to decode path segment", e, UnsafeArg.of("encoded", input));
-        }
+        return URLDecoder.decode(input, StandardCharsets.UTF_8);
     }
 
     private static Optional<RequestBody> requestBody(Request request) {
@@ -239,7 +236,32 @@ final class DialogueFeignClient implements feign.Client {
 
         @Override
         public Reader asReader() {
-            return new InputStreamReader(asInputStream(), StandardCharsets.UTF_8);
+            InputStream inputStream = asInputStream();
+            Integer maybeLength = length();
+            if (maybeLength != null) {
+                int length = maybeLength;
+                if (length < 8192) {
+                    // Avoid InputStreamReader / HeapByteBuffer overhead for small (less than 8KiB) inputs,
+                    // see https://github.com/FasterXML/jackson-core/pull/1081
+                    // try to read an extra byte to determine if more bytes were provided than actual content-length
+                    int toRead = length + 1;
+                    byte[] bytes = new byte[toRead];
+                    try {
+                        int read = inputStream.readNBytes(bytes, 0, toRead);
+                        if (read <= length) {
+                            // fully read input
+                            inputStream.close();
+                            return new StringReader(new String(bytes, 0, read, StandardCharsets.UTF_8));
+                        }
+                        // input was larger than provided content length, fallback to stream path
+                        inputStream = new SequenceInputStream(new ByteArrayInputStream(bytes), inputStream);
+                    } catch (IOException e) {
+                        throw new SafeUncheckedIoException(
+                                "Failed to read response body", e, SafeArg.of("length", maybeLength));
+                    }
+                }
+            }
+            return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         }
 
         @Override
