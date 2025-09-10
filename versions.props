@@ -6,7 +6,7 @@ com.netflix.concurrency-limits:* = 0.2.2
 com.netflix.feign:feign-*= 8.18.0
 com.palantir.conjure.java:* = 8.55.0
 com.palantir.conjure.java:conjure-lib = 8.55.0
-com.palantir.conjure.java.api:* = 2.64.0
+com.palantir.conjure.java.api:* = 2.65.0
 com.palantir.conjure.verification:* = 0.19.0
 com.palantir.dialogue:* = 6.8.0
 com.palantir.ri:* = 2.11.0
@@ -41,7 +41,7 @@ io.undertow:undertow-servlet-jakarta = 2.2.20.Final
 # dependency-upgrader:ON
 com.palantir.refreshable:refreshable = 2.7.0
 org.hibernate.validator:* = 6.2.0.Final
-org.checkerframework:checker-qual = 3.50.0
+org.checkerframework:checker-qual = 3.51.0
 org.apache.httpcomponents.client5:* = 5.3.1
 
 # Jakarta EE9 Versions
