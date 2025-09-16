@@ -98,15 +98,15 @@ com.palantir.tracing:tracing-jersey-jakarta:6.28.0 (1 constraints: 4205633b)
 
 com.palantir.tracing:tracing-okhttp3:6.28.0 (1 constraints: 4205633b)
 
-com.palantir.tritium:tritium-api:0.108.0 (2 constraints: 931f4af4)
+com.palantir.tritium:tritium-api:0.109.0 (2 constraints: 951f7ff4)
 
-com.palantir.tritium:tritium-core:0.108.0 (1 constraints: 7110afb2)
+com.palantir.tritium:tritium-core:0.109.0 (1 constraints: 7210b2b2)
 
-com.palantir.tritium:tritium-ids:0.108.0 (1 constraints: f80f86a6)
+com.palantir.tritium:tritium-ids:0.109.0 (1 constraints: f80f86a6)
 
-com.palantir.tritium:tritium-metrics:0.108.0 (5 constraints: 574c1a16)
+com.palantir.tritium:tritium-metrics:0.109.0 (5 constraints: 584cec16)
 
-com.palantir.tritium:tritium-registry:0.108.0 (7 constraints: c86ccd6a)
+com.palantir.tritium:tritium-registry:0.109.0 (7 constraints: ca6c006c)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
@@ -116,7 +116,7 @@ com.squareup.okio:okio-jvm:3.6.0 (1 constraints: 500ad3b9)
 
 com.thoughtworks.paranamer:paranamer:2.8.3 (1 constraints: dc154900)
 
-io.dropwizard.metrics:metrics-core:4.2.37 (6 constraints: 17583b2f)
+io.dropwizard.metrics:metrics-core:4.2.37 (6 constraints: 19586c2f)
 
 jakarta.activation:jakarta.activation-api:2.1.0 (1 constraints: 8c0f4791)
 
