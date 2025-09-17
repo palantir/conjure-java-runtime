@@ -32,15 +32,15 @@ com.github.ben-manes.caffeine:caffeine:3.2.2 (3 constraints: e3233da2)
 
 com.google.code.findbugs:jsr305:3.0.2 (7 constraints: 5f6b7728)
 
-com.google.errorprone:error_prone_annotations:2.7.1 (18 constraints: e3171df7)
+com.google.errorprone:error_prone_annotations:2.7.1 (18 constraints: df17a6eb)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.4.8-jre (17 constraints: 102fa569)
+com.google.guava:guava:33.5.0-jre (17 constraints: 092f6252)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
-com.google.j2objc:j2objc-annotations:3.0.0 (1 constraints: 150aeab4)
+com.google.j2objc:j2objc-annotations:3.1 (1 constraints: b809f1a0)
 
 com.netflix.concurrency-limits:concurrency-limits-core:0.2.2 (1 constraints: 0605f335)
 
