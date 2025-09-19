@@ -222,7 +222,7 @@ jakarta.servlet:jakarta.servlet-api:5.0.0 (2 constraints: 1015bdac)
 
 junit:junit:4.13.2 (1 constraints: 690fa77c)
 
-net.bytebuddy:byte-buddy:1.17.6 (2 constraints: c716ff4f)
+net.bytebuddy:byte-buddy:1.17.7 (2 constraints: 9e161a3f)
 
 net.bytebuddy:byte-buddy-agent:1.17.6 (1 constraints: 490b4dde)
 
@@ -234,7 +234,7 @@ org.apache.commons:commons-lang3:3.18.0 (1 constraints: 3e054d3b)
 
 org.apiguardian:apiguardian-api:1.1.2 (6 constraints: 5366ce6e)
 
-org.assertj:assertj-core:3.27.4 (2 constraints: a5195ae0)
+org.assertj:assertj-core:3.27.5 (2 constraints: a61994e0)
 
 org.conscrypt:conscrypt-openjdk-uber:2.5.2 (1 constraints: 0b050636)
 
