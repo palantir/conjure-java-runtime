@@ -20,6 +20,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.ServicesConfigBlock;
 import com.palantir.conjure.java.api.config.service.UserAgent;
+import com.palantir.conjure.java.api.errors.ConjureErrorParameterFormat;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.client.config.HostEventsSink;
 import com.palantir.conjure.java.client.config.NodeSelectionStrategy;
@@ -88,6 +89,8 @@ public final class ConjureClients {
 
         /** Per-host success/failure information will be recorded to this sink. */
         T withHostEventsSink(HostEventsSink hostEventsSink);
+
+        T withConjureErrorParameterFormat(ConjureErrorParameterFormat format);
     }
 
     public interface ToReloadingFactory<U> {

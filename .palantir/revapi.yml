@@ -79,3 +79,9 @@ acceptedBreaks:
     - code: "java.class.removed"
       old: "enum com.palantir.conjure.java.server.jersey.ErrorCause"
       justification: "ErrorCause is never used by consumers"
+  "8.24.0":
+    com.palantir.conjure.java.runtime:client-config:
+    - code: "java.method.addedToInterface"
+      new: "method T com.palantir.conjure.java.clients.ConjureClients.WithClientOptions<T>::withConjureErrorParameterFormat(com.palantir.conjure.java.api.errors.ConjureErrorParameterFormat)"
+      justification: "Adding method to allow clients to request error parameter serialization\
+        \ format"
