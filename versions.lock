@@ -170,7 +170,7 @@ org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
 org.hibernate.validator:hibernate-validator:8.0.1.Final (1 constraints: 1916ffe3)
 
-org.immutables:value:2.11.3 (2 constraints: 0215eac1)
+org.immutables:value:2.11.4 (2 constraints: 031519c2)
 
 org.javassist:javassist:3.29.2-GA (1 constraints: 30112ef1)
 
