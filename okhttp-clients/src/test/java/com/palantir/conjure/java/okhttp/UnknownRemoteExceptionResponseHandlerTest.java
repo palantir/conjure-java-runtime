@@ -79,6 +79,7 @@ public final class UnknownRemoteExceptionResponseHandlerTest {
         return handler.handle(response(status, contentType, body));
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     private static Response response(int code, String mediaType, @CheckForNull String body) {
         Response.Builder response = new Response.Builder()
                 .request(request)

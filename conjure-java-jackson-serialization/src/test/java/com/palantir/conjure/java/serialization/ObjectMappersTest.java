@@ -325,6 +325,7 @@ public final class ObjectMappersTest {
 
     @Test
     public void testStringMetrics_json() throws IOException {
+        @SuppressWarnings("for-rollout:deprecation")
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
         removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(JsonFactory.FORMAT_NAME_JSON);
@@ -339,6 +340,7 @@ public final class ObjectMappersTest {
 
     @Test
     public void testStringMetricsNotRecordedWhenValuesAreSmall_json() throws IOException {
+        @SuppressWarnings("for-rollout:deprecation")
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
         removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(JsonFactory.FORMAT_NAME_JSON);
@@ -351,6 +353,7 @@ public final class ObjectMappersTest {
 
     @Test
     public void testStringMetrics_smile() throws IOException {
+        @SuppressWarnings("for-rollout:deprecation")
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
         removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(SmileFactory.FORMAT_NAME_SMILE);
@@ -366,6 +369,7 @@ public final class ObjectMappersTest {
 
     @Test
     public void testStringMetricsNotRecordedWhenValuesAreSmall_smile() throws IOException {
+        @SuppressWarnings("for-rollout:deprecation")
         TaggedMetricRegistry registry = SharedTaggedMetricRegistries.getSingleton();
         removeJsonParserMetrics(registry);
         Histogram stringLength = JsonParserMetrics.of(registry).stringLength(SmileFactory.FORMAT_NAME_SMILE);
@@ -439,6 +443,7 @@ public final class ObjectMappersTest {
 
     @Test
     public void testJsonMapperBuilderWithDefaultModules() throws IOException {
+        @SuppressWarnings("for-rollout:deprecation")
         ObjectMapper mapper = ObjectMappers.withDefaultModules(
                         JsonMapper.builder().addModule(new Jdk8Module().configureAbsentsAsNulls(true)))
                 .build();

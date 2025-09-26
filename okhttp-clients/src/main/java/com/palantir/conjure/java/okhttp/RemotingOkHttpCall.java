@@ -187,6 +187,7 @@ final class RemotingOkHttpCall extends ForwardingCall {
                 .build();
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     private static ResponseBody buffer(MediaType mediaType, byte[] bodyBytes) {
         return ResponseBody.create(mediaType, bodyBytes);
     }

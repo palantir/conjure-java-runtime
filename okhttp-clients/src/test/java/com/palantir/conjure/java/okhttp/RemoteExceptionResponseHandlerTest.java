@@ -201,6 +201,7 @@ public final class RemoteExceptionResponseHandlerTest {
         return handler.handle(response(status, contentType, body));
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     private static okhttp3.Response response(int code, String mediaType, @CheckForNull String body) {
         okhttp3.Response.Builder response = new okhttp3.Response.Builder()
                 .request(request)

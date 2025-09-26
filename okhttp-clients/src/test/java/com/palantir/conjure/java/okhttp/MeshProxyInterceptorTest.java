@@ -42,6 +42,7 @@ public final class MeshProxyInterceptorTest {
 
     private MeshProxyInterceptor interceptor;
 
+    @SuppressWarnings("for-rollout:deprecation")
     @BeforeEach
     public void before() throws Exception {
         MockitoAnnotations.initMocks(this);
