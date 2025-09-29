@@ -39,6 +39,7 @@ public final class TracerTest {
             .jersey(ConjureJerseyFeature.INSTANCE)
             .jersey(new TracerTest.TracingTestResource());
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testTracingFilterIsApplied() {
         undertow.runRequest(

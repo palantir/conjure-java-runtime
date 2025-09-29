@@ -46,6 +46,7 @@ public final class RefreshableProxyInvocationHandlerTest {
     @Mock
     private Callable delegate2;
 
+    @SuppressWarnings("for-rollout:deprecation")
     @BeforeEach
     public void before() {
         MockitoAnnotations.initMocks(this);

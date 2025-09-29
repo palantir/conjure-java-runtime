@@ -45,6 +45,7 @@ public final class JaxRsClientConfigRefreshTest extends TestBase {
         ClientConfiguration config2 = createTestConfig("http://localhost:" + server2.getPort());
 
         Refreshable<ClientConfiguration> refreshableConfig = Refreshable.of(config1);
+        @SuppressWarnings("for-rollout:deprecation")
         TestService proxy = JaxRsClient.create(
                 TestService.class, UserAgents.tryParse("agent"), new HostMetricsRegistry(), refreshableConfig);
 

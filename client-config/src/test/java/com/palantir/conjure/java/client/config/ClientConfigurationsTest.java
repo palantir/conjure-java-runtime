@@ -43,6 +43,7 @@ public final class ClientConfigurationsTest {
 
     private static final ImmutableList<String> uris = ImmutableList.of("uri");
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testFromServiceConfig_fillsInDefaults() {
         ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
@@ -111,6 +112,7 @@ public final class ClientConfigurationsTest {
                 .hasMessage("If meshProxy is configured then uris must contain exactly 1 URI");
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void overriding_tagged_metric_registry_is_convenient() {
         ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
@@ -150,6 +152,7 @@ public final class ClientConfigurationsTest {
                 .isNull();
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     @Test
     public void testProxyAddressIsNotResolved() {
         ProxySelector selector = ClientConfigurations.createProxySelector(ProxyConfiguration.of("localhost:80"));

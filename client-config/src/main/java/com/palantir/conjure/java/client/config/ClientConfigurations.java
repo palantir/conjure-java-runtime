@@ -85,6 +85,7 @@ public final class ClientConfigurations {
      * {@link TrustContextFactory}, filling in empty/absent configuration with the defaults specified as constants
      * in this class.
      */
+    @SuppressWarnings("for-rollout:deprecation")
     public static ClientConfiguration of(ServiceConfiguration config, TrustContextFactory factory) {
         TrustContext trustContext = factory.create(config.security());
         return ClientConfiguration.builder()
@@ -132,6 +133,7 @@ public final class ClientConfigurations {
         return of(uris, sslSocketFactory, trustManager, Optional.of(userAgent));
     }
 
+    @SuppressWarnings("for-rollout:deprecation")
     private static ClientConfiguration of(
             List<String> uris,
             SSLSocketFactory sslSocketFactory,
