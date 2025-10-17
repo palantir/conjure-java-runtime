@@ -176,7 +176,7 @@ org.javassist:javassist:3.29.2-GA (1 constraints: 30112ef1)
 
 org.jboss.logging:jboss-logging:3.5.0.Final (4 constraints: 0747c0c6)
 
-org.jboss.threads:jboss-threads:3.5.0.Final (3 constraints: b52a2fe5)
+org.jboss.threads:jboss-threads:3.5.1.Final (3 constraints: ba2a18e6)
 
 org.jetbrains:annotations:26.0.2 (3 constraints: e02f6235)
 
@@ -214,7 +214,7 @@ com.squareup.okhttp3:mockwebserver:4.12.0 (1 constraints: 3905413b)
 
 io.reactivex.rxjava2:rxjava:2.2.21 (1 constraints: 3905363b)
 
-io.undertow:undertow-core:2.2.37.Final (2 constraints: aa19d6eb)
+io.undertow:undertow-core:2.2.38.Final (2 constraints: ab1911ec)
 
 io.undertow:undertow-servlet-jakarta:2.2.20.Final (1 constraints: 50071361)
 
