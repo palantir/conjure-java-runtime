@@ -2,11 +2,11 @@
 
 com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
 
-com.fasterxml.jackson.core:jackson-annotations:2.20 (12 constraints: 93df37ce)
+com.fasterxml.jackson.core:jackson-annotations:2.20 (12 constraints: 2bdf2b3a)
 
-com.fasterxml.jackson.core:jackson-core:2.20.0 (14 constraints: 9f2330d5)
+com.fasterxml.jackson.core:jackson-core:2.20.0 (14 constraints: 952317d5)
 
-com.fasterxml.jackson.core:jackson-databind:2.20.0 (18 constraints: a7631c28)
+com.fasterxml.jackson.core:jackson-databind:2.20.0 (18 constraints: 9d63fd23)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.20.0 (2 constraints: 2520c704)
 
@@ -48,7 +48,7 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.58.0 (3 constraints: 79258054)
+com.palantir.conjure.java:conjure-lib:8.58.0 (3 constraints: 7b25b554)
 
 com.palantir.conjure.java.api:errors:2.65.0 (5 constraints: f54464b1)
 
@@ -58,17 +58,17 @@ com.palantir.conjure.java.api:ssl-config:2.65.0 (2 constraints: 05183e87)
 
 com.palantir.deadlines:deadlines:0.16.0 (1 constraints: 690f1b86)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.11.0 (1 constraints: 3a054a3b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.12.0 (1 constraints: 3b054d3b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.11.0 (2 constraints: cf2367b2)
+com.palantir.dialogue:dialogue-blocking-channels:6.12.0 (2 constraints: d1239bb2)
 
-com.palantir.dialogue:dialogue-core:6.11.0 (2 constraints: 3519daec)
+com.palantir.dialogue:dialogue-core:6.12.0 (2 constraints: 37191aed)
 
-com.palantir.dialogue:dialogue-futures:6.11.0 (3 constraints: bf332fbb)
+com.palantir.dialogue:dialogue-futures:6.12.0 (3 constraints: c233c1bb)
 
-com.palantir.dialogue:dialogue-serde:6.11.0 (1 constraints: 3a054a3b)
+com.palantir.dialogue:dialogue-serde:6.12.0 (1 constraints: 3b054d3b)
 
-com.palantir.dialogue:dialogue-target:6.11.0 (5 constraints: f34c3d54)
+com.palantir.dialogue:dialogue-target:6.12.0 (5 constraints: f84c3956)
 
 com.palantir.nylon:nylon-threads:0.4.0 (1 constraints: 0c10fa91)
 
