@@ -2,11 +2,11 @@
 
 com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
 
-com.fasterxml.jackson.core:jackson-annotations:2.20 (12 constraints: 2bdf2b3a)
+com.fasterxml.jackson.core:jackson-annotations:2.20 (12 constraints: c3de8c8e)
 
 com.fasterxml.jackson.core:jackson-core:2.20.0 (14 constraints: 952317d5)
 
-com.fasterxml.jackson.core:jackson-databind:2.20.0 (18 constraints: 9d63fd23)
+com.fasterxml.jackson.core:jackson-databind:2.20.0 (18 constraints: 93637821)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.20.0 (2 constraints: 2520c704)
 
@@ -88,7 +88,7 @@ com.palantir.safe-logging:safe-logging:3.9.0 (20 constraints: 06397954)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.3.0 (1 constraints: 350faa76)
 
-com.palantir.tokens:auth-tokens:3.19.0 (5 constraints: 4c481353)
+com.palantir.tokens:auth-tokens:3.20.0 (5 constraints: 4448ec4c)
 
 com.palantir.tracing:tracing:6.28.0 (8 constraints: e67dc5a2)
 
