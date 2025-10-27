@@ -58,17 +58,17 @@ com.palantir.conjure.java.api:ssl-config:2.65.0 (2 constraints: 05183e87)
 
 com.palantir.deadlines:deadlines:0.16.0 (1 constraints: 690f1b86)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.12.0 (1 constraints: 3b054d3b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.12.0-rc1 (1 constraints: 6e063a53)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.12.0 (2 constraints: d1239bb2)
+com.palantir.dialogue:dialogue-blocking-channels:6.12.0-rc1 (2 constraints: 3726dad3)
 
-com.palantir.dialogue:dialogue-core:6.12.0 (2 constraints: 37191aed)
+com.palantir.dialogue:dialogue-core:6.12.0-rc1 (2 constraints: 9d1b4db7)
 
-com.palantir.dialogue:dialogue-futures:6.12.0 (3 constraints: c233c1bb)
+com.palantir.dialogue:dialogue-futures:6.12.0-rc1 (3 constraints: 5b377028)
 
-com.palantir.dialogue:dialogue-serde:6.12.0 (1 constraints: 3b054d3b)
+com.palantir.dialogue:dialogue-serde:6.12.0-rc1 (1 constraints: 6e063a53)
 
-com.palantir.dialogue:dialogue-target:6.12.0 (5 constraints: f84c3956)
+com.palantir.dialogue:dialogue-target:6.12.0-rc1 (5 constraints: f752e73d)
 
 com.palantir.nylon:nylon-threads:0.4.0 (1 constraints: 0c10fa91)
 
@@ -134,11 +134,11 @@ jakarta.xml.bind:jakarta.xml.bind-api:4.0.0 (2 constraints: 3a33f1c3)
 
 joda-time:joda-time:2.12.7 (1 constraints: 2f16b1f1)
 
-org.apache.httpcomponents.client5:httpclient5:5.3.1 (2 constraints: d718f0c3)
+org.apache.httpcomponents.client5:httpclient5:5.4.4 (2 constraints: db18f6c3)
 
-org.apache.httpcomponents.core5:httpcore5:5.3.6 (3 constraints: 6939cd0f)
+org.apache.httpcomponents.core5:httpcore5:5.3.6 (3 constraints: 6b390810)
 
-org.apache.httpcomponents.core5:httpcore5-h2:5.2.4 (1 constraints: 3f130d3c)
+org.apache.httpcomponents.core5:httpcore5-h2:5.3.4 (1 constraints: 4013103c)
 
 org.eclipse.collections:eclipse-collections:13.0.0 (1 constraints: 1c1091a9)
 
