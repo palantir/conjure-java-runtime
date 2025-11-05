@@ -13,7 +13,7 @@ com.palantir.dialogue:* = 6.14.0
 com.palantir.ri:* = 2.11.0
 com.palantir.safe-logging:* = 3.9.0
 com.palantir.tokens:* = 3.20.0
-com.palantir.tracing:* = 6.28.0
+com.palantir.tracing:* = 6.29.0
 com.palantir.tritium:* = 0.111.0
 # dependency-upgrader:OFF
 # We don't want to prematurely force upgrades to oktthp 5.x for consumers on 4.x.
