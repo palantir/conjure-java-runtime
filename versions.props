@@ -5,7 +5,7 @@ com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 33.5.0-jre
 com.netflix.concurrency-limits:* = 0.2.2
 com.netflix.feign:feign-*= 8.18.0
-com.palantir.conjure.java:* = 8.60.0
+com.palantir.conjure.java:* = 8.61.0
 com.palantir.conjure.java:conjure-lib = 8.61.0
 com.palantir.conjure.java.api:* = 2.65.0
 com.palantir.conjure.verification:* = 0.19.0
@@ -14,7 +14,7 @@ com.palantir.ri:* = 2.11.0
 com.palantir.safe-logging:* = 3.9.0
 com.palantir.tokens:* = 3.20.0
 com.palantir.tracing:* = 6.29.0
-com.palantir.tritium:* = 0.112.0
+com.palantir.tritium:* = 0.113.0
 # dependency-upgrader:OFF
 # We don't want to prematurely force upgrades to oktthp 5.x for consumers on 4.x.
 # There are some ABI breaks in 5.x that would require consumers to fix their code, which would be disruptive to
