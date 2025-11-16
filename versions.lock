@@ -230,7 +230,7 @@ net.jcip:jcip-annotations:1.0 (1 constraints: 560ff165)
 
 org.apache-extras.beanshell:bsh:2.0b6 (1 constraints: ac07626b)
 
-org.apache.commons:commons-lang3:3.19.0 (1 constraints: 3f05503b)
+org.apache.commons:commons-lang3:3.20.0 (1 constraints: 3705393b)
 
 org.apiguardian:apiguardian-api:1.1.2 (6 constraints: 5366ce6e)
 
