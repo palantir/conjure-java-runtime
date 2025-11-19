@@ -45,6 +45,8 @@ dependencies {
         version {
             strictly jerseyVersion
         }
+        // This conflicts with javax.el:javax.el-api (which contains the same classes), when at the version requested by 2.40
+        exclude group: 'org.glassfish', module: 'jakarta.el'
     }
     runtimeOnly 'org.glassfish.jersey.inject:jersey-hk2', {
         version {
