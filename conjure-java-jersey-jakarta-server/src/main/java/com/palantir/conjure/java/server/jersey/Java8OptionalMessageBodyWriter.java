@@ -69,6 +69,7 @@ public final class Java8OptionalMessageBodyWriter implements MessageBodyWriter<O
                 ? parameterizedType.getActualTypeArguments()[0]
                 : entity.get().getClass();
 
+        @SuppressWarnings("for-rollout:RawTypes")
         MessageBodyWriter writer =
                 mbw.get().getMessageBodyWriter(entity.get().getClass(), innerGenericType, annotations, mediaType);
 

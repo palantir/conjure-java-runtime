@@ -56,7 +56,7 @@ public final class BinaryBytesDeserializationModuleTest {
 
     @Test
     void deserializesNestedObjectFields() throws IOException {
-        @SuppressWarnings({"DangerousRecordArrayField", "ArrayRecordComponent"}) // Intentional
+        @SuppressWarnings({"ArrayRecordComponent", "DangerousRecordArrayField"}) // Intentional
         record RecordContainingObject(Object obj, byte[] byteArray, Bytes bytes) {}
 
         ObjectMapper smileMapper = withBinaryDeserializationModule(ObjectMappers.newSmileClientObjectMapper());
