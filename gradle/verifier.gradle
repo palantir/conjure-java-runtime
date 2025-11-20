@@ -27,8 +27,6 @@ dependencies {
     generatedJerseyImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     generatedJerseyImplementation sourceSets.generatedObjects.output
 
-    testImplementation 'com.palantir.conjure.java:conjure-lib'
-    testImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     testImplementation sourceSets.generatedObjects.output
     testImplementation sourceSets.generatedJersey.output
 }
@@ -102,5 +100,3 @@ test.dependsOn unpackVerifier, copyTestCases
 
 checkstyleGeneratedObjects.enabled = false
 checkstyleGeneratedJersey.enabled = false
-
-checkUnusedDependenciesTest.enabled = false

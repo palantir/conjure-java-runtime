@@ -8,10 +8,11 @@ dependencies {
     testImplementation project(':conjure-java-jaxrs-client')
     testImplementation project(':conjure-java-jersey-jakarta-server')
     testImplementation project(':keystores')
-    testImplementation project(':okhttp-clients')
     testImplementation project(':undertow-jakarta-testing')
     testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     testImplementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8'
+    testImplementation 'com.palantir.conjure.java:conjure-lib'
+    testImplementation 'jakarta.ws.rs:jakarta.ws.rs-api'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
     testImplementation 'org.junit.jupiter:junit-jupiter-params'
