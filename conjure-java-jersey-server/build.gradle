@@ -1,7 +1,7 @@
 apply plugin: 'com.palantir.external-publish-jar'
 apply plugin: 'com.palantir.metric-schema'
 
-def jerseyVersion = '2.40'
+def jerseyVersion = '2.47'
 
 versionsLock {
     disableJavaPluginDefaults()
@@ -45,6 +45,8 @@ dependencies {
         version {
             strictly jerseyVersion
         }
+        // This conflicts with org.glassfish:jakarta.el (which contains the same classes), when at the version requested by 2.40
+        exclude group: 'jakarta.el', module: 'jakarta.el-api'
     }
     runtimeOnly 'org.glassfish.jersey.inject:jersey-hk2', {
         version {
