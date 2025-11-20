@@ -47,27 +47,6 @@ allprojects {
     repositories {
         mavenCentral() { metadataSources { mavenPom(); ignoreGradleMetadataRedirection() } }
     }
-
-    configurations.all {
-        resolutionStrategy {
-            preferProjectModules()
-        }
-
-        resolutionStrategy.eachDependency { details ->
-            if (details.requested.group == 'com.google.errorprone' && details.requested.name == 'error_prone_annotations') {
-                details.useTarget group: 'com.google.errorprone', name: 'error_prone_annotations', version: '2.7.1'
-                details.because "The error_prone_annotations dependency must be low to avoid forcing consumers to use newer releases"
-            }
-            if (details.requested.group == 'com.github.ben-manes.caffeine' && details.requested.name == 'caffeine' && details.requested.version == '3.1.7') {
-                details.useTarget group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '3.1.6'
-                details.because "https://github.com/ben-manes/caffeine/issues/1111"
-            }
-            if (details.requested.group.startsWith('com.fasterxml.jackson') && (details.requested.version == '2.16.0' || details.requested.version == '2.16.1')) {
-                details.useTarget group: details.requested.group, name: details.requested.name, version: '2.15.3'
-                details.because 'https://github.com/FasterXML/jackson-databind/pull/4230'
-            }
-        }
-    }
 }
 
 subprojects {

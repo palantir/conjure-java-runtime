@@ -55,15 +55,6 @@ dependencies {
     }
 }
 
-configurations.all {
-    resolutionStrategy {
-        // Conflicts with javax.inject:javax.inject:1
-        // This is safe to remove, the purpose of the repackaged version is to implement OSGI, which we don't use
-        // Source: https://stackoverflow.com/a/25218230/274699
-        exclude group: 'org.glassfish.hk2.external', module: 'jakarta.inject'
-    }
-}
-
 checkImplicitDependencies {
     ignore 'com.palantir.conjure.java.runtime', 'conjure-java-jersey-jakarta-server'
 }
