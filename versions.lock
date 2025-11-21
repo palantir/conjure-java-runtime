@@ -32,7 +32,7 @@ com.github.ben-manes.caffeine:caffeine:3.2.2 (3 constraints: e3233da2)
 
 com.google.code.findbugs:jsr305:3.0.2 (7 constraints: 5f6b7728)
 
-com.google.errorprone:error_prone_annotations:2.41.0 (18 constraints: ba1866af)
+com.google.errorprone:error_prone_annotations:2.41.0 (18 constraints: e7184b53)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
@@ -48,7 +48,7 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.62.0 (3 constraints: 68256551)
+com.palantir.conjure.java:conjure-lib:8.64.0 (3 constraints: 6a252552)
 
 com.palantir.conjure.java.api:errors:2.65.0 (5 constraints: f54464b1)
 
