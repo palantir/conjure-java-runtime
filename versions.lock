@@ -98,15 +98,15 @@ com.palantir.tracing:tracing-jersey-jakarta:6.29.0 (1 constraints: 4305663b)
 
 com.palantir.tracing:tracing-okhttp3:6.29.0 (1 constraints: 4305663b)
 
-com.palantir.tritium:tritium-api:0.115.0 (2 constraints: 8f1fe2f3)
+com.palantir.tritium:tritium-api:0.117.0 (2 constraints: 931f4cf4)
 
-com.palantir.tritium:tritium-core:0.115.0 (1 constraints: 6f10aab2)
+com.palantir.tritium:tritium-core:0.117.0 (1 constraints: 7110b0b2)
 
-com.palantir.tritium:tritium-ids:0.115.0 (1 constraints: f80f86a6)
+com.palantir.tritium:tritium-ids:0.117.0 (1 constraints: f80f86a6)
 
-com.palantir.tritium:tritium-metrics:0.115.0 (5 constraints: 534c2b17)
+com.palantir.tritium:tritium-metrics:0.117.0 (5 constraints: 554ccf18)
 
-com.palantir.tritium:tritium-registry:0.115.0 (6 constraints: c15cb5cd)
+com.palantir.tritium:tritium-registry:0.117.0 (6 constraints: c55cbdcf)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
