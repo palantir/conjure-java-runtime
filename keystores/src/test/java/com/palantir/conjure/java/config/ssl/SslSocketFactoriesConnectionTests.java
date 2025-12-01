@@ -222,9 +222,15 @@ public final class SslSocketFactoriesConnectionTests {
         assertThatThrownBy(() -> {
                     runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
                 })
-                .isInstanceOf(RuntimeException.class)
-                .hasCauseInstanceOf(SSLHandshakeException.class)
-                .hasMessageContaining("bad_certificate");
+                .isInstanceOfSatisfying(RuntimeException.class, ex -> {
+                    assertThat(ex.getCause()).isInstanceOfAny(SSLHandshakeException.class);
+                    assertThat(ex.getMessage())
+                            .satisfiesAnyOf(
+                                    message -> assertThat(message).contains("bad_certificate"),
+                                    // Modified from bad_certificate as of https://bugs.openjdk.org/browse/JDK-8311644
+                                    // https://github.com/openjdk/jdk/commit/f62b5789add23adda2634a1cfb80f48b4387be74
+                                    message -> assertThat(message).contains("certificate_required"));
+                });
     }
 
     @Test
@@ -248,7 +254,10 @@ public final class SslSocketFactoriesConnectionTests {
                             .satisfiesAnyOf(
                                     message -> assertThat(message).contains("readHandshakeRecord"),
                                     message -> assertThat(message).contains("certificate_unknown"),
-                                    message -> assertThat(message).contains("bad_certificate"));
+                                    message -> assertThat(message).contains("bad_certificate"),
+                                    // Modified from bad_certificate as of https://bugs.openjdk.org/browse/JDK-8311644
+                                    // https://github.com/openjdk/jdk/commit/f62b5789add23adda2634a1cfb80f48b4387be74
+                                    message -> assertThat(message).contains("certificate_required"));
                 });
     }
 
