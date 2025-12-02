@@ -48,7 +48,7 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.64.0 (3 constraints: 6a252552)
+com.palantir.conjure.java:conjure-lib:8.65.0 (3 constraints: 6b258552)
 
 com.palantir.conjure.java.api:errors:2.66.0 (5 constraints: f64420b2)
 
