@@ -48,27 +48,27 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.65.0 (3 constraints: 6b258552)
+com.palantir.conjure.java:conjure-lib:8.65.0 (3 constraints: 75258e53)
 
-com.palantir.conjure.java.api:errors:2.67.0 (5 constraints: f744dcb2)
+com.palantir.conjure.java.api:errors:2.67.0 (5 constraints: fd4406b4)
 
-com.palantir.conjure.java.api:service-config:2.67.0 (3 constraints: af2849e5)
+com.palantir.conjure.java.api:service-config:2.67.0 (3 constraints: b328afe5)
 
 com.palantir.conjure.java.api:ssl-config:2.67.0 (2 constraints: 0918b687)
 
 com.palantir.deadlines:deadlines:0.16.0 (1 constraints: 690f1b86)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.16.0 (1 constraints: 3f05593b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.17.0 (1 constraints: 40055c3b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.16.0 (2 constraints: d9236bb3)
+com.palantir.dialogue:dialogue-blocking-channels:6.17.0 (2 constraints: db239fb3)
 
-com.palantir.dialogue:dialogue-core:6.16.0 (2 constraints: 3f191aee)
+com.palantir.dialogue:dialogue-core:6.17.0 (2 constraints: 41195aee)
 
-com.palantir.dialogue:dialogue-futures:6.16.0 (3 constraints: ce3309be)
+com.palantir.dialogue:dialogue-futures:6.17.0 (3 constraints: d1339bbe)
 
-com.palantir.dialogue:dialogue-serde:6.16.0 (1 constraints: 3f05593b)
+com.palantir.dialogue:dialogue-serde:6.17.0 (1 constraints: 40055c3b)
 
-com.palantir.dialogue:dialogue-target:6.16.0 (5 constraints: 0c4d295e)
+com.palantir.dialogue:dialogue-target:6.17.0 (5 constraints: 114d2560)
 
 com.palantir.nylon:nylon-threads:0.4.0 (1 constraints: 0c10fa91)
 
@@ -90,9 +90,9 @@ com.palantir.safethreadlocalrandom:safe-thread-local-random:0.3.0 (1 constraints
 
 com.palantir.tokens:auth-tokens:3.20.0 (5 constraints: 2548f843)
 
-com.palantir.tracing:tracing:6.29.0 (8 constraints: e97d58a4)
+com.palantir.tracing:tracing:6.29.0 (8 constraints: ed7d0ea7)
 
-com.palantir.tracing:tracing-api:6.29.0 (6 constraints: 03582dd4)
+com.palantir.tracing:tracing-api:6.29.0 (6 constraints: 055872d5)
 
 com.palantir.tracing:tracing-jersey-jakarta:6.29.0 (1 constraints: 4305663b)
 
@@ -104,9 +104,9 @@ com.palantir.tritium:tritium-core:0.117.0 (1 constraints: 7110b0b2)
 
 com.palantir.tritium:tritium-ids:0.117.0 (1 constraints: fc0f93a6)
 
-com.palantir.tritium:tritium-metrics:0.117.0 (5 constraints: 554ccf18)
+com.palantir.tritium:tritium-metrics:0.117.0 (5 constraints: 674c8f1c)
 
-com.palantir.tritium:tritium-registry:0.117.0 (6 constraints: c55cbdcf)
+com.palantir.tritium:tritium-registry:0.117.0 (6 constraints: d75ccbd6)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
