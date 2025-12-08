@@ -14,7 +14,7 @@ com.palantir.ri:* = 2.11.0
 com.palantir.safe-logging:* = 3.9.0
 com.palantir.tokens:* = 3.20.0
 com.palantir.tracing:* = 6.29.0
-com.palantir.tritium:* = 0.120.0
+com.palantir.tritium:* = 0.121.0
 # dependency-upgrader:OFF
 # We don't want to prematurely force upgrades to oktthp 5.x for consumers on 4.x.
 # There are some ABI breaks in 5.x that would require consumers to fix their code, which would be disruptive to
@@ -27,7 +27,7 @@ io.reactivex.rxjava2:rxjava = 2.2.21
 org.apache.commons:commons-lang3 = 3.20.0
 org.assertj:assertj-core = 3.27.6
 org.conscrypt:conscrypt-openjdk-uber = 2.5.2
-org.immutables:value = 2.11.7
+org.immutables:value = 2.12.0
 org.jmock:jmock = 2.13.1
 org.junit.jupiter:* = 6.0.1
 org.junit.platform:* = 6.0.1
