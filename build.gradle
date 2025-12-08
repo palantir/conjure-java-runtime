@@ -13,7 +13,7 @@ buildscript {
         classpath 'com.palantir.javaformat:gradle-palantir-java-format:2.83.0'
         classpath 'org.revapi:gradle-revapi:1.8.0'
         classpath 'com.netflix.nebula:gradle-dependency-lock-plugin:7.0.1'
-        classpath 'com.palantir.baseline:gradle-baseline-java:6.80.0'
+        classpath 'com.palantir.baseline:gradle-baseline-java:6.84.0'
         classpath 'com.palantir.gradle.gitversion:gradle-git-version:4.2.0'
         classpath 'com.palantir.gradle.idea-configuration:gradle-idea-configuration:0.8.0'
         classpath 'com.palantir.metricschema:gradle-metric-schema:0.39.0'
