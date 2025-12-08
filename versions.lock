@@ -98,15 +98,15 @@ com.palantir.tracing:tracing-jersey-jakarta:6.29.0 (1 constraints: 4305663b)
 
 com.palantir.tracing:tracing-okhttp3:6.29.0 (1 constraints: 4305663b)
 
-com.palantir.tritium:tritium-api:0.120.0 (2 constraints: 871f10f3)
+com.palantir.tritium:tritium-api:0.121.0 (2 constraints: 891f45f3)
 
-com.palantir.tritium:tritium-core:0.120.0 (1 constraints: 6b109fb2)
+com.palantir.tritium:tritium-core:0.121.0 (1 constraints: 6c10a2b2)
 
-com.palantir.tritium:tritium-ids:0.120.0 (1 constraints: fc0f93a6)
+com.palantir.tritium:tritium-ids:0.121.0 (1 constraints: fc0f93a6)
 
-com.palantir.tritium:tritium-metrics:0.120.0 (5 constraints: 614ca417)
+com.palantir.tritium:tritium-metrics:0.121.0 (5 constraints: 624c7618)
 
-com.palantir.tritium:tritium-registry:0.120.0 (6 constraints: cb5cb5d0)
+com.palantir.tritium:tritium-registry:0.121.0 (6 constraints: cd5cb9d1)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
@@ -170,7 +170,7 @@ org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
 org.hibernate.validator:hibernate-validator:8.0.2.Final (1 constraints: 1a1606e4)
 
-org.immutables:value:2.11.7 (2 constraints: 0a15aac2)
+org.immutables:value:2.12.0 (2 constraints: 041592c1)
 
 org.javassist:javassist:3.30.2-GA (1 constraints: 2811fff0)
 
