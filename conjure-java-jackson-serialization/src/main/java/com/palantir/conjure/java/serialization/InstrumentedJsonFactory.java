@@ -313,7 +313,6 @@ final class InstrumentedJsonFactory extends JsonFactory {
             return delegate.getFeatureMask();
         }
 
-        @SuppressWarnings("for-rollout:deprecation")
         @Override
         @Deprecated
         public JsonParser setFeatureMask(int mask) {
@@ -404,7 +403,6 @@ final class InstrumentedJsonFactory extends JsonFactory {
             return delegate.getCurrentToken();
         }
 
-        @SuppressWarnings("for-rollout:deprecation")
         @Override
         @Deprecated
         public int getCurrentTokenId() {
