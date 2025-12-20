@@ -134,11 +134,11 @@ jakarta.xml.bind:jakarta.xml.bind-api:4.0.2 (2 constraints: 3c33f3c3)
 
 joda-time:joda-time:2.12.7 (1 constraints: 2f16b1f1)
 
-org.apache.httpcomponents.client5:httpclient5:5.5.2 (2 constraints: dc18a8c4)
+org.apache.httpcomponents.client5:httpclient5:5.6 (2 constraints: 7d1898a5)
 
-org.apache.httpcomponents.core5:httpcore5:5.3.6 (3 constraints: 6f397610)
+org.apache.httpcomponents.core5:httpcore5:5.4 (3 constraints: a938183c)
 
-org.apache.httpcomponents.core5:httpcore5-h2:5.3.6 (1 constraints: 4213123c)
+org.apache.httpcomponents.core5:httpcore5-h2:5.4 (1 constraints: df12c515)
 
 org.eclipse.collections:eclipse-collections:13.0.0 (1 constraints: 1c1091a9)
 
