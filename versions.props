@@ -5,8 +5,8 @@ com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 33.5.0-jre
 com.netflix.concurrency-limits:* = 0.2.2
 com.netflix.feign:feign-*= 8.18.0
-com.palantir.conjure.java:* = 8.66.0
-com.palantir.conjure.java:conjure-lib = 8.66.0
+com.palantir.conjure.java:* = 8.67.0
+com.palantir.conjure.java:conjure-lib = 8.67.0
 com.palantir.conjure.java.api:* = 2.67.0
 com.palantir.conjure.verification:* = 0.19.0
 com.palantir.dialogue:* = 6.17.0
@@ -27,7 +27,7 @@ io.reactivex.rxjava2:rxjava = 2.2.21
 org.apache.commons:commons-lang3 = 3.20.0
 org.assertj:assertj-core = 3.27.6
 org.conscrypt:conscrypt-openjdk-uber = 2.5.2
-org.immutables:value = 2.12.0
+org.immutables:value = 2.12.1
 org.jmock:jmock = 2.13.1
 org.junit.jupiter:* = 6.0.2
 org.junit.platform:* = 6.0.2
@@ -42,7 +42,7 @@ io.undertow:undertow-servlet-jakarta = 2.2.20.Final
 # dependency-upgrader:ON
 com.palantir.refreshable:refreshable = 2.8.0
 org.hibernate.validator:* = 6.2.0.Final
-org.checkerframework:checker-qual = 3.52.1
+org.checkerframework:checker-qual = 3.53.0
 org.apache.httpcomponents.client5:* = 5.6
 
 # Jakarta EE9 Versions

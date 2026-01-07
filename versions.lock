@@ -48,7 +48,7 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.66.0 (3 constraints: 7625ee53)
+com.palantir.conjure.java:conjure-lib:8.67.0 (3 constraints: 77254e54)
 
 com.palantir.conjure.java.api:errors:2.67.0 (5 constraints: ff4420b5)
 
@@ -186,7 +186,7 @@ org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
 org.hibernate.validator:hibernate-validator:8.0.2.Final (1 constraints: 1a1606e4)
 
-org.immutables:value:2.12.0 (2 constraints: 041592c1)
+org.immutables:value:2.12.1 (2 constraints: 0515c1c1)
 
 org.javassist:javassist:3.30.2-GA (1 constraints: 2811fff0)
 
