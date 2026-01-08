@@ -70,21 +70,21 @@ com.palantir.dialogue:dialogue-serde:6.18.0 (1 constraints: 41055f3b)
 
 com.palantir.dialogue:dialogue-target:6.18.0 (5 constraints: 164d2162)
 
-com.palantir.nylon:nylon-threads:0.5.0 (1 constraints: 0d10fd91)
+com.palantir.nylon:nylon-threads:0.6.0 (1 constraints: 0e100092)
 
 com.palantir.refreshable:refreshable:2.8.0 (2 constraints: 4714c38a)
 
 com.palantir.ri:resource-identifier:2.12.0 (3 constraints: 2e30b3ae)
 
-com.palantir.safe-logging:logger:3.10.0 (15 constraints: 70e3a8cd)
+com.palantir.safe-logging:logger:3.10.0 (15 constraints: e8e3c95e)
 
 com.palantir.safe-logging:logger-slf4j:3.10.0 (1 constraints: 2f0e8750)
 
 com.palantir.safe-logging:logger-spi:3.10.0 (2 constraints: 6d1ed4af)
 
-com.palantir.safe-logging:preconditions:3.10.0 (22 constraints: 7458109e)
+com.palantir.safe-logging:preconditions:3.10.0 (22 constraints: 1459eeca)
 
-com.palantir.safe-logging:safe-logging:3.10.0 (20 constraints: d139ec09)
+com.palantir.safe-logging:safe-logging:3.10.0 (20 constraints: 493a389c)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.3.0 (1 constraints: 350faa76)
 
@@ -98,15 +98,15 @@ com.palantir.tracing:tracing-jersey-jakarta:6.30.0 (1 constraints: 3b054f3b)
 
 com.palantir.tracing:tracing-okhttp3:6.30.0 (1 constraints: 3b054f3b)
 
-com.palantir.tritium:tritium-api:0.122.0 (2 constraints: 8b1f7af3)
+com.palantir.tritium:tritium-api:0.123.0 (2 constraints: 8d1faff3)
 
-com.palantir.tritium:tritium-core:0.122.0 (1 constraints: 6d10a5b2)
+com.palantir.tritium:tritium-core:0.123.0 (1 constraints: 6e10a8b2)
 
-com.palantir.tritium:tritium-ids:0.122.0 (1 constraints: f80f88a6)
+com.palantir.tritium:tritium-ids:0.123.0 (1 constraints: f80f88a6)
 
-com.palantir.tritium:tritium-metrics:0.122.0 (5 constraints: 574ccb16)
+com.palantir.tritium:tritium-metrics:0.123.0 (5 constraints: 584c9d17)
 
-com.palantir.tritium:tritium-registry:0.122.0 (6 constraints: c35c0cce)
+com.palantir.tritium:tritium-registry:0.123.0 (6 constraints: c55c10cf)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
