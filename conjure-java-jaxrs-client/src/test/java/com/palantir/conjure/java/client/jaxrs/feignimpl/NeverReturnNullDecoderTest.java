@@ -23,6 +23,7 @@ import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.testing.Assertions;
+import feign.Request;
 import feign.Response;
 import feign.codec.Decoder;
 import feign.jackson.JacksonDecoder;
@@ -38,6 +39,11 @@ public final class NeverReturnNullDecoderTest extends TestBase {
     private final Map<String, Collection<String>> headers = new HashMap<>();
     private final Decoder textDelegateDecoder =
             new NeverReturnNullDecoder(new JacksonDecoder(ObjectMappers.newClientJsonMapper()));
+    private static final Request REQUEST = Request.create(Request.HttpMethod.GET,
+            "url",
+            Map.of(),
+            new byte[]{},
+            StandardCharsets.UTF_8);
 
     @Test
     public void throws_nullpointerexception_when_body_is_null() {
@@ -45,6 +51,7 @@ public final class NeverReturnNullDecoderTest extends TestBase {
                 .status(200)
                 .reason("OK")
                 .headers(headers)
+                .request(REQUEST)
                 .body(null, StandardCharsets.UTF_8)
                 .build();
 
@@ -60,6 +67,7 @@ public final class NeverReturnNullDecoderTest extends TestBase {
                 .status(200)
                 .reason("OK")
                 .headers(headers)
+                .request(REQUEST)
                 .body("null", StandardCharsets.UTF_8)
                 .build();
 
@@ -75,6 +83,7 @@ public final class NeverReturnNullDecoderTest extends TestBase {
                 .status(200)
                 .reason("OK")
                 .headers(headers)
+                .request(REQUEST)
                 .body("", StandardCharsets.UTF_8)
                 .build();
 
@@ -90,6 +99,7 @@ public final class NeverReturnNullDecoderTest extends TestBase {
                 .status(200)
                 .reason("OK")
                 .headers(headers)
+                .request(REQUEST)
                 .body("[1, 2, 3]", StandardCharsets.UTF_8)
                 .build();
         Object decodedObject = textDelegateDecoder.decode(response, List.class);

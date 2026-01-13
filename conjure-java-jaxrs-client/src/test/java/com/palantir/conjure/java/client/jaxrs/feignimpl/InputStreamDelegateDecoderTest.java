@@ -24,11 +24,13 @@ import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.undertest.UndertowServerExtension;
+import feign.Request;
 import feign.Response;
 import feign.codec.Decoder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -38,6 +40,9 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
 
     @RegisterExtension
     public static final UndertowServerExtension undertow = GuavaTestServer.createUndertow();
+
+    private static final Request REQUEST =
+            Request.create(Request.HttpMethod.GET, "url", Map.of(), new byte[] {}, StandardCharsets.UTF_8);
 
     private GuavaTestServer.TestService service;
     private Decoder delegate;
@@ -60,6 +65,7 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
         Response response = Response.builder()
                 .status(200)
                 .reason("OK")
+                .request(REQUEST)
                 .body(data, StandardCharsets.UTF_8)
                 .build();
 
@@ -76,6 +82,7 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
         Response response = Response.builder()
                 .status(200)
                 .reason("OK")
+                .request(REQUEST)
                 .body(returned, StandardCharsets.UTF_8)
                 .build();
         String decodedObject = (String) inputStreamDelegateDecoder.decode(response, String.class);
@@ -88,6 +95,7 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
         Response response = Response.builder()
                 .status(200)
                 .reason("OK")
+                .request(REQUEST)
                 .body((Response.Body) null)
                 .build();
 

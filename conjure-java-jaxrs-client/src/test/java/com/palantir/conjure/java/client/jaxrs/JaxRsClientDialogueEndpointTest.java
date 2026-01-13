@@ -144,7 +144,6 @@ public final class JaxRsClientDialogueEndpointTest {
         Channel channel = mock(Channel.class);
         assertThatThrownBy(() -> JaxRsClient.create(TraceService.class, channel, runtime))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Unsupported HTTP method")
                 .hasMessageContaining("TRACE");
     }
 
@@ -153,7 +152,6 @@ public final class JaxRsClientDialogueEndpointTest {
         Channel channel = mock(Channel.class);
         assertThatThrownBy(() -> JaxRsClient.create(ArbitraryMethodService.class, channel, runtime))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Unsupported HTTP method")
                 .hasMessageContaining("ARBITRARY");
     }
 

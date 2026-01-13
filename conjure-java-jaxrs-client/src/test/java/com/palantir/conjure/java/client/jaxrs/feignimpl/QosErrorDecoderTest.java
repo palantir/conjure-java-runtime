@@ -28,9 +28,11 @@ import com.palantir.conjure.java.api.errors.QosReason;
 import com.palantir.conjure.java.api.errors.QosReason.DueTo;
 import com.palantir.conjure.java.api.errors.QosReason.RetryHint;
 import com.palantir.conjure.java.api.errors.QosReasons;
+import feign.Request;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import jakarta.ws.rs.core.HttpHeaders;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
@@ -39,6 +41,8 @@ import org.junit.jupiter.api.Test;
 public final class QosErrorDecoderTest {
 
     private static final String methodKey = "method";
+    private static final Request REQUEST =
+            Request.create(Request.HttpMethod.GET, "url", Map.of(), new byte[] {}, StandardCharsets.UTF_8);
 
     static QosErrorDecoder decoder() {
         return new QosErrorDecoder(new ErrorDecoder.Default());
@@ -52,6 +56,7 @@ public final class QosErrorDecoderTest {
                 .status(429)
                 .reason("too many requests")
                 .headers(headers)
+                .request(REQUEST)
                 .body(new byte[0])
                 .build();
         assertThat(decoder().decode(methodKey, response))
@@ -73,6 +78,7 @@ public final class QosErrorDecoderTest {
                 .status(429)
                 .reason("too many requests")
                 .headers(headers)
+                .request(REQUEST)
                 .body(new byte[0])
                 .build();
         assertThat(decoder().decode(methodKey, response))
@@ -89,6 +95,7 @@ public final class QosErrorDecoderTest {
                 .status(429)
                 .reason("too many requests")
                 .headers(headers)
+                .request(REQUEST)
                 .body(new byte[0])
                 .build();
         assertThat(decoder().decode(methodKey, response))
@@ -104,6 +111,7 @@ public final class QosErrorDecoderTest {
                 .status(503)
                 .reason("unavailable")
                 .headers(headers)
+                .request(REQUEST)
                 .body(new byte[0])
                 .build();
         assertThat(decoder().decode(methodKey, response))
@@ -124,6 +132,7 @@ public final class QosErrorDecoderTest {
                 .status(503)
                 .reason("unavailable")
                 .headers(headers)
+                .request(REQUEST)
                 .body(new byte[0])
                 .build();
         assertThat(decoder().decode(methodKey, response))

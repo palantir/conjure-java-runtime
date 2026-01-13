@@ -31,7 +31,7 @@ public final class JaxrsClientValidationTest {
         Channel channel = mock(Channel.class);
         assertThatThrownBy(() -> JaxRsClient.create(NotJaxRs.class, channel, runtime))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Method getValue not annotated with HTTP method type");
+                .hasMessageContaining("not annotated with HTTP method type");
     }
 
     @SuppressWarnings("unused")

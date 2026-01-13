@@ -31,6 +31,7 @@ import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.undertest.UndertowServerExtension;
 import feign.FeignException;
+import feign.Request;
 import feign.Response;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
@@ -48,6 +49,9 @@ public final class TextDelegateDecoderTest extends TestBase {
 
     @RegisterExtension
     public static final UndertowServerExtension undertow = GuavaTestServer.createUndertow();
+
+    private static final Request REQUEST =
+            Request.create(Request.HttpMethod.GET, "url", Map.of(), new byte[] {}, StandardCharsets.UTF_8);
 
     private GuavaTestServer.TestService service;
     private Map<String, Collection<String>> headers;
@@ -72,6 +76,7 @@ public final class TextDelegateDecoderTest extends TestBase {
                 .status(200)
                 .reason("OK")
                 .headers(headers)
+                .request(REQUEST)
                 .body("text response", StandardCharsets.UTF_8)
                 .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
@@ -95,6 +100,7 @@ public final class TextDelegateDecoderTest extends TestBase {
                 .status(200)
                 .reason("OK")
                 .headers(headers)
+                .request(REQUEST)
                 .body("text response", StandardCharsets.UTF_8)
                 .build();
 
@@ -111,6 +117,7 @@ public final class TextDelegateDecoderTest extends TestBase {
                 .status(200)
                 .reason("OK")
                 .headers(headers)
+                .request(REQUEST)
                 .body("text response", StandardCharsets.UTF_8)
                 .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
@@ -126,6 +133,7 @@ public final class TextDelegateDecoderTest extends TestBase {
                 .status(200)
                 .reason("OK")
                 .headers(headers)
+                .request(REQUEST)
                 .body(null, StandardCharsets.UTF_8)
                 .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
@@ -141,6 +149,7 @@ public final class TextDelegateDecoderTest extends TestBase {
                 .status(200)
                 .reason("OK")
                 .headers(headers)
+                .request(REQUEST)
                 .body(new byte[0])
                 .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
@@ -156,6 +165,7 @@ public final class TextDelegateDecoderTest extends TestBase {
                 .status(200)
                 .reason("OK")
                 .headers(headers)
+                .request(REQUEST)
                 .body(new byte[0])
                 .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
@@ -171,6 +181,7 @@ public final class TextDelegateDecoderTest extends TestBase {
                 .status(200)
                 .reason("OK")
                 .headers(headers)
+                .request(REQUEST)
                 .body(new byte[0])
                 .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);

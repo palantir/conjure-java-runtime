@@ -285,7 +285,7 @@ final class DialogueFeignClient implements feign.Client {
     private static final class FeignResponseDeserializer implements Deserializer<feign.Response> {
         private final Request request;
 
-        public FeignResponseDeserializer(Request request) {
+        FeignResponseDeserializer(Request request) {
             this.request = request;
         }
 

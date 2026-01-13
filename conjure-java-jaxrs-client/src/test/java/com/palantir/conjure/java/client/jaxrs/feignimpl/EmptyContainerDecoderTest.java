@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.serialization.ObjectMappers;
+import feign.Request;
 import feign.Response;
 import feign.codec.Decoder;
 import jakarta.ws.rs.core.MediaType;
@@ -50,9 +51,12 @@ import org.junit.jupiter.api.Test;
 public class EmptyContainerDecoderTest {
 
     private static final JsonMapper mapper = ObjectMappers.newClientJsonMapper();
+    private static final Request REQUEST =
+            Request.create(Request.HttpMethod.GET, "url", Map.of(), new byte[] {}, StandardCharsets.UTF_8);
     private static final Response HTTP_204 = Response.builder()
             .status(204)
             .reason("No content")
+            .request(REQUEST)
             .body(new byte[] {})
             .build();
     private final Decoder delegate = mock(Decoder.class);
@@ -65,6 +69,7 @@ public class EmptyContainerDecoderTest {
                 .status(200)
                 .reason("OK")
                 .headers(ImmutableMap.of(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN)))
+                .request(REQUEST)
                 .body("text response", StandardCharsets.UTF_8)
                 .build();
 
