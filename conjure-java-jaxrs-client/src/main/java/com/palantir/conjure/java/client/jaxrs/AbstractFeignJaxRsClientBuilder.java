@@ -127,7 +127,10 @@ abstract class AbstractFeignJaxRsClientBuilder {
      * which makes every client appear to use the same URL.
      */
     private static final class FeignDialogueTarget<T> implements Target<T> {
-        private static final String BASE_URL = "dialogue://feign";
+        // Openfeign 13 seems to have a weird thing where it assumes any URL that doesn't start with "http" isn't
+        // absolute and thus causes apply to fail below when it calls RequestTemplate#target. Hopefully nobody
+        // is relying on this URL?
+        private static final String BASE_URL = "httpdialogue://feign";
 
         private final Class<T> serviceClass;
         private final Target<T> delegate;
@@ -157,10 +160,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
 
         @Override
         public Request apply(RequestTemplate input) {
-            // There's something weird going on with how Feign takes RequestTemplate#target and RequestTemplate#uri
-            // and it really doesn't seem to matter much for Dialogue so let's just ignore it.
-            input.uri(url());
-            return input.request();
+            return delegate.apply(input);
         }
 
         @Override
