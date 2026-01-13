@@ -48,7 +48,12 @@ public final class QosErrorDecoderTest {
     public void http_429_throw_qos_throttle() {
         QosReason expected = QosReason.builder().reason("client-qos-response").build();
         Map<String, Collection<String>> headers = headersFor(expected);
-        Response response = Response.create(429, "too many requests", headers, new byte[0]);
+        Response response = Response.builder()
+                .status(429)
+                .reason("too many requests")
+                .headers(headers)
+                .body(new byte[0])
+                .build();
         assertThat(decoder().decode(methodKey, response))
                 .isInstanceOfSatisfying(QosException.Throttle.class, throttle -> {
                     assertThat(throttle.getRetryAfter()).isEmpty();
@@ -64,7 +69,12 @@ public final class QosErrorDecoderTest {
                 .retryHint(RetryHint.DO_NOT_RETRY)
                 .build();
         Map<String, Collection<String>> headers = headersFor(expected);
-        Response response = Response.create(429, "too many requests", headers, new byte[0]);
+        Response response = Response.builder()
+                .status(429)
+                .reason("too many requests")
+                .headers(headers)
+                .body(new byte[0])
+                .build();
         assertThat(decoder().decode(methodKey, response))
                 .isInstanceOfSatisfying(QosException.Throttle.class, throttle -> {
                     assertThat(throttle.getRetryAfter()).isEmpty();
@@ -75,7 +85,12 @@ public final class QosErrorDecoderTest {
     @Test
     public void http_429_throw_qos_throttle_with_retry_after() {
         Map<String, Collection<String>> headers = ImmutableMap.of(HttpHeaders.RETRY_AFTER, ImmutableList.of("5"));
-        Response response = Response.create(429, "too many requests", headers, new byte[0]);
+        Response response = Response.builder()
+                .status(429)
+                .reason("too many requests")
+                .headers(headers)
+                .body(new byte[0])
+                .build();
         assertThat(decoder().decode(methodKey, response))
                 .isInstanceOfSatisfying(QosException.Throttle.class, e -> assertThat(e.getRetryAfter())
                         .contains(Duration.ofSeconds(5)));
@@ -85,7 +100,12 @@ public final class QosErrorDecoderTest {
     public void http_503_throw_qos_unavailable() {
         QosReason expected = QosReason.builder().reason("client-qos-response").build();
         Map<String, Collection<String>> headers = headersFor(expected);
-        Response response = Response.create(503, "unavailable", headers, new byte[0]);
+        Response response = Response.builder()
+                .status(503)
+                .reason("unavailable")
+                .headers(headers)
+                .body(new byte[0])
+                .build();
         assertThat(decoder().decode(methodKey, response))
                 .isInstanceOfSatisfying(
                         QosException.Unavailable.class,
@@ -100,7 +120,12 @@ public final class QosErrorDecoderTest {
                 .retryHint(RetryHint.DO_NOT_RETRY)
                 .build();
         Map<String, Collection<String>> headers = headersFor(expected);
-        Response response = Response.create(503, "unavailable", headers, new byte[0]);
+        Response response = Response.builder()
+                .status(503)
+                .reason("unavailable")
+                .headers(headers)
+                .body(new byte[0])
+                .build();
         assertThat(decoder().decode(methodKey, response))
                 .isInstanceOfSatisfying(
                         QosException.Unavailable.class,

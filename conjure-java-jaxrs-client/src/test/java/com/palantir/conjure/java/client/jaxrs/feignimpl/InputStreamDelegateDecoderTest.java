@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
@@ -58,7 +57,11 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
     public void testDecodesAsInputStream() throws Exception {
         String data = "data";
 
-        Response response = Response.create(200, "OK", ImmutableMap.of(), data, StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .body(data, StandardCharsets.UTF_8)
+                .build();
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 
@@ -70,7 +73,11 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
         String returned = "string";
 
         when(delegate.decode(any(), any())).thenReturn(returned);
-        Response response = Response.create(200, "OK", ImmutableMap.of(), returned, StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .body(returned, StandardCharsets.UTF_8)
+                .build();
         String decodedObject = (String) inputStreamDelegateDecoder.decode(response, String.class);
         assertThat(decodedObject).isEqualTo(returned);
     }
@@ -78,7 +85,11 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
     @Test
     public void testSupportsNullBody() throws Exception {
         String data = "";
-        Response response = Response.create(200, "OK", ImmutableMap.of(), (Response.Body) null);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .body((Response.Body) null)
+                .build();
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 

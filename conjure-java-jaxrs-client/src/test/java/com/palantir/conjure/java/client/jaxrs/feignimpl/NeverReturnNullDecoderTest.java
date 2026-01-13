@@ -41,7 +41,12 @@ public final class NeverReturnNullDecoderTest extends TestBase {
 
     @Test
     public void throws_nullpointerexception_when_body_is_null() {
-        Response response = Response.create(200, "OK", headers, null, StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(headers)
+                .body(null, StandardCharsets.UTF_8)
+                .build();
 
         Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
                 .isInstanceOf(NullPointerException.class)
@@ -51,7 +56,12 @@ public final class NeverReturnNullDecoderTest extends TestBase {
 
     @Test
     public void throws_nullpointerexception_when_body_is_string_null() {
-        Response response = Response.create(200, "OK", headers, "null", StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(headers)
+                .body("null", StandardCharsets.UTF_8)
+                .build();
 
         Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
                 .isInstanceOf(NullPointerException.class)
@@ -61,7 +71,12 @@ public final class NeverReturnNullDecoderTest extends TestBase {
 
     @Test
     public void throws_nullpointerexception_when_body_is_empty_string() {
-        Response response = Response.create(200, "OK", headers, "", StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(headers)
+                .body("", StandardCharsets.UTF_8)
+                .build();
 
         Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
                 .isInstanceOf(NullPointerException.class)
@@ -71,7 +86,12 @@ public final class NeverReturnNullDecoderTest extends TestBase {
 
     @Test
     public void works_fine_when_body_is_not_null() throws Exception {
-        Response response = Response.create(200, "OK", headers, "[1, 2, 3]", StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(headers)
+                .body("[1, 2, 3]", StandardCharsets.UTF_8)
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, List.class);
         assertThat(decodedObject).isEqualTo(ImmutableList.of(1, 2, 3));
     }

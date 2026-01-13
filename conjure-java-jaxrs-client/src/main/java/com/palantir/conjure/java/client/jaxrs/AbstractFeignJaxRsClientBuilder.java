@@ -157,7 +157,10 @@ abstract class AbstractFeignJaxRsClientBuilder {
 
         @Override
         public Request apply(RequestTemplate input) {
-            return delegate.apply(input);
+            // There's something weird going on with how Feign takes RequestTemplate#target and RequestTemplate#uri
+            // and it really doesn't seem to matter much for Dialogue so let's just ignore it.
+            input.uri(url());
+            return input.request();
         }
 
         @Override

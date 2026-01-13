@@ -68,7 +68,12 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Test
     public void testUsesStringDecoderWithTextPlain() throws Exception {
         headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN));
-        Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(headers)
+                .body("text response", StandardCharsets.UTF_8)
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat(decodedObject).isEqualTo("text response");
@@ -86,7 +91,12 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Test
     public void testUsesStringDecoderWithTextPlainAndCharset() throws Exception {
         headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN + "; charset=utf-8"));
-        Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(headers)
+                .body("text response", StandardCharsets.UTF_8)
+                .build();
 
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
@@ -97,7 +107,12 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Test
     public void testUsesStringDecoderWithTextPlainWithWeirdHeaderCapitalization() throws Exception {
         headers.put("content-TYPE", ImmutableSet.of(MediaType.TEXT_PLAIN));
-        Response response = Response.create(200, "OK", headers, "text response", StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(headers)
+                .body("text response", StandardCharsets.UTF_8)
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat(decodedObject).isEqualTo("text response");
@@ -107,7 +122,12 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Test
     public void testReturnsEmptyStringForNullResponseBodyWithTextPlain() throws Exception {
         headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN));
-        Response response = Response.create(200, "OK", headers, null, StandardCharsets.UTF_8);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(headers)
+                .body(null, StandardCharsets.UTF_8)
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat(decodedObject).isEqualTo("");
@@ -117,7 +137,12 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Test
     public void testUsesDelegateWithNoHeader() throws Exception {
         when(delegate.decode(any(), any())).thenReturn(DELEGATE_RESPONSE);
-        Response response = Response.create(200, "OK", headers, new byte[0]);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(headers)
+                .body(new byte[0])
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat(decodedObject).isEqualTo(DELEGATE_RESPONSE);
@@ -127,7 +152,12 @@ public final class TextDelegateDecoderTest extends TestBase {
     public void testUsesDelegateWithComplexHeader() throws Exception {
         headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN, MediaType.APPLICATION_JSON));
         when(delegate.decode(any(), any())).thenReturn(DELEGATE_RESPONSE);
-        Response response = Response.create(200, "OK", headers, new byte[0]);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(headers)
+                .body(new byte[0])
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat(decodedObject).isEqualTo(DELEGATE_RESPONSE);
@@ -137,7 +167,12 @@ public final class TextDelegateDecoderTest extends TestBase {
     public void testUsesDelegateWithNonTextContentType() throws Exception {
         headers.put(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.APPLICATION_JSON));
         when(delegate.decode(any(), any())).thenReturn(DELEGATE_RESPONSE);
-        Response response = Response.create(200, "OK", headers, new byte[0]);
+        Response response = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(headers)
+                .body(new byte[0])
+                .build();
         Object decodedObject = textDelegateDecoder.decode(response, String.class);
 
         assertThat(decodedObject).isEqualTo(DELEGATE_RESPONSE);
