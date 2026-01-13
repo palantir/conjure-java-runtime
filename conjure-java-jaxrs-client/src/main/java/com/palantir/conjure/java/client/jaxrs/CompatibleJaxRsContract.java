@@ -52,7 +52,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
                 // Strip off any trailing slashes, since the template has already had slashes appropriately added
                 pathValue = pathValue.substring(0, pathValue.length() - 1);
             }
-            data.template().target(pathValue);
+            data.template().uri(pathValue);
         }
         Annotation consumes = Annotations.CONSUMES.getAnnotation(clz);
         if (consumes != null) {
@@ -186,10 +186,11 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
     }
 
     private Collection<String> addTemplatedParam(Collection<String> possiblyNull, String name) {
-        if (possiblyNull == null) {
-            possiblyNull = new ArrayList<>();
+        Collection<String> toUse = possiblyNull;
+        if (toUse == null) {
+            toUse = new ArrayList<>();
         }
-        possiblyNull.add(String.format("{%s}", name));
-        return possiblyNull;
+        toUse.add(String.format("{%s}", name));
+        return toUse;
     }
 }

@@ -36,7 +36,6 @@ import feign.codec.Decoder;
 import jakarta.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,19 +50,23 @@ import org.junit.jupiter.api.Test;
 public class EmptyContainerDecoderTest {
 
     private static final JsonMapper mapper = ObjectMappers.newClientJsonMapper();
-    private static final Response HTTP_204 = Response.create(204, "No Content", Collections.emptyMap(), new byte[] {});
+    private static final Response HTTP_204 = Response.builder()
+            .status(204)
+            .reason("No content")
+            .body(new byte[] {})
+            .build();
     private final Decoder delegate = mock(Decoder.class);
     private final EmptyContainerDecoder emptyContainerDecoder = new EmptyContainerDecoder(mapper, delegate);
 
     @Test
     public void http_200_uses_delegate_decoder() throws IOException {
         when(delegate.decode(any(), eq(String.class))).thenReturn("text response");
-        Response http200 = Response.create(
-                200,
-                "OK",
-                ImmutableMap.of(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN)),
-                "text response",
-                StandardCharsets.UTF_8);
+        Response http200 = Response.builder()
+                .status(200)
+                .reason("OK")
+                .headers(ImmutableMap.of(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN)))
+                .body("text response", StandardCharsets.UTF_8)
+                .build();
 
         emptyContainerDecoder.decode(http200, String.class);
         verify(delegate, times(1)).decode(any(), any());
