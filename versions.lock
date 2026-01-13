@@ -48,9 +48,9 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.67.0 (3 constraints: 7b25b854)
+com.palantir.conjure.java:conjure-lib:8.69.0 (3 constraints: 7d257855)
 
-com.palantir.conjure.java.api:errors:2.68.0 (5 constraints: 0045dcb5)
+com.palantir.conjure.java.api:errors:2.68.0 (5 constraints: 014569b6)
 
 com.palantir.conjure.java.api:service-config:2.68.0 (3 constraints: b42819e6)
 
@@ -74,7 +74,7 @@ com.palantir.nylon:nylon-threads:0.6.0 (1 constraints: 0e100092)
 
 com.palantir.refreshable:refreshable:2.8.0 (2 constraints: 4714c38a)
 
-com.palantir.ri:resource-identifier:2.12.0 (3 constraints: 2e30b3ae)
+com.palantir.ri:resource-identifier:2.12.0 (3 constraints: 2f3013af)
 
 com.palantir.safe-logging:logger:3.10.0 (15 constraints: e8e3c95e)
 
@@ -82,13 +82,13 @@ com.palantir.safe-logging:logger-slf4j:3.10.0 (1 constraints: 2f0e8750)
 
 com.palantir.safe-logging:logger-spi:3.10.0 (2 constraints: 6d1ed4af)
 
-com.palantir.safe-logging:preconditions:3.10.0 (22 constraints: 1459eeca)
+com.palantir.safe-logging:preconditions:3.10.0 (22 constraints: 3c59e870)
 
-com.palantir.safe-logging:safe-logging:3.10.0 (20 constraints: 493a389c)
+com.palantir.safe-logging:safe-logging:3.10.0 (20 constraints: 713ac234)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.3.0 (1 constraints: 350faa76)
 
-com.palantir.tokens:auth-tokens:3.21.0 (5 constraints: 2648bd44)
+com.palantir.tokens:auth-tokens:3.21.0 (5 constraints: 27485345)
 
 com.palantir.tracing:tracing:6.30.0 (8 constraints: d57d799a)
 
