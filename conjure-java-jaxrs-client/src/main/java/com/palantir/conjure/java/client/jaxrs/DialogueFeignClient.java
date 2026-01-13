@@ -111,7 +111,8 @@ final class DialogueFeignClient implements feign.Client {
                 endpointChannels.computeIfAbsent(FeignEndpointKey.of(request), this::toEndpointChannel);
 
         try {
-            return runtime.clients().callBlocking(endpointChannel, builder.build(), FeignResponseDeserializer.INSTANCE);
+            return runtime.clients()
+                    .callBlocking(endpointChannel, builder.build(), new FeignResponseDeserializer(request));
         } catch (UncheckedExecutionException e) {
             // Rethrow IOException to match standard feign behavior
             Throwable cause = e.getCause();
@@ -281,8 +282,12 @@ final class DialogueFeignClient implements feign.Client {
         }
     }
 
-    enum FeignResponseDeserializer implements Deserializer<feign.Response> {
-        INSTANCE;
+    private static final class FeignResponseDeserializer implements Deserializer<feign.Response> {
+        private final Request request;
+
+        public FeignResponseDeserializer(Request request) {
+            this.request = request;
+        }
 
         @Override
         public feign.Response deserialize(Response response) {
@@ -290,6 +295,7 @@ final class DialogueFeignClient implements feign.Client {
                     .status(response.code())
                     .headers(Multimaps.asMap((Multimap<String, String>) response.headers()))
                     .body(new DialogueResponseBody(response))
+                    .request(request)
                     .build();
         }
 
