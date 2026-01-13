@@ -8,7 +8,7 @@ dependencies {
     api project(":conjure-java-legacy-clients")
     api "com.google.code.findbugs:jsr305"
     // TODO(dsanduleac): Should be implementation, but can't because we expose feign.TextDelegateEncoder
-    api "com.netflix.feign:feign-core", {
+    api "io.github.openfeign:feign-core", {
         // prefer jakarta.ws.rs:jakarta.ws.rs-api
         exclude group: 'javax.ws.rs', module: 'javax.ws.rs-api'
     }
@@ -35,11 +35,11 @@ dependencies {
     implementation project(":conjure-java-jackson-serialization")
     implementation "com.google.guava:guava"
     implementation "com.github.ben-manes.caffeine:caffeine"
-    implementation "com.netflix.feign:feign-jackson"
+    implementation "io.github.openfeign:feign-jackson"
     testImplementation project(":conjure-java-jersey-jakarta-server")
     testImplementation project(':keystores')
     testImplementation project(':undertow-jakarta-testing')
-    testImplementation "com.netflix.feign:feign-jackson"
+    testImplementation "io.github.openfeign:feign-jackson"
     testImplementation "com.squareup.okhttp3:mockwebserver"
     testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation 'org.junit.jupiter:junit-jupiter-api'

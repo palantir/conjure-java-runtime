@@ -52,8 +52,7 @@ public final class CborDelegateEncoder implements Encoder {
 
     @Override
     public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
-        Collection<String> contentTypes =
-                HeaderAccessUtils.caseInsensitiveGet(template.headers(), HttpHeaders.CONTENT_TYPE);
+        Collection<String> contentTypes = template.headers().get(HttpHeaders.CONTENT_TYPE);
         if (contentTypes == null) {
             contentTypes = ImmutableSet.of();
         }

@@ -28,6 +28,7 @@ import java.util.Map;
  * map which is case-insensitive with respect to the key. com.netflix.feign:feign-core:8.18.0 will have it for the
  * {@link feign.Response} headers due to https://github.com/Netflix/feign/pull/418.
  */
+// XXX: Delete
 public final class HeaderAccessUtils {
     private HeaderAccessUtils() {}
 

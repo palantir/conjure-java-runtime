@@ -23,8 +23,10 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import feign.Contract;
 import feign.MethodMetadata;
+import feign.Request.HttpMethod;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import javax.annotation.Nullable;
 
@@ -50,7 +52,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
                 // Strip off any trailing slashes, since the template has already had slashes appropriately added
                 pathValue = pathValue.substring(0, pathValue.length() - 1);
             }
-            data.template().insert(0, pathValue);
+            data.template().target(pathValue);
         }
         Annotation consumes = Annotations.CONSUMES.getAnnotation(clz);
         if (consumes != null) {
@@ -74,7 +76,9 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
                     SafeArg.of("method", method.getName()),
                     SafeArg.of("existingMethod", data.template().method()),
                     SafeArg.of("newMethod", httpValue));
-            data.template().method(Preconditions.checkNotNull(httpValue, "Unexpected null HttpMethod value"));
+            data.template()
+                    .method(Preconditions.checkNotNull(
+                            HttpMethod.valueOf(httpValue), "Unexpected null HttpMethod value"));
         } else if (Annotations.PATH.matches(annotationType)) {
             String pathValue = Strings.emptyToNull(getAnnotationValue(methodAnnotation));
             Preconditions.checkState(
@@ -85,7 +89,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
             // jax-rs allows whitespace around the param name, as well as an optional regex. The contract should
             // strip these out appropriately.
             pathValue = pathValue.replaceAll("\\{\\s*(.+?)\\s*(:.+?)?\\}", "\\{$1\\}");
-            data.template().append(pathValue);
+            data.template().uri(pathValue, true);
         } else if (Annotations.PRODUCES.matches(annotationType)) {
             handleProducesAnnotation(data, methodAnnotation, "method " + method.getName());
         } else if (Annotations.CONSUMES.matches(annotationType)) {
@@ -179,5 +183,13 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
             throw new SafeIllegalStateException(
                     "Failed to read annotation value", e, SafeArg.of("annotationType", annotation.annotationType()));
         }
+    }
+
+    private Collection<String> addTemplatedParam(Collection<String> possiblyNull, String name) {
+        if (possiblyNull == null) {
+            possiblyNull = new ArrayList<>();
+        }
+        possiblyNull.add(String.format("{%s}", name));
+        return possiblyNull;
     }
 }

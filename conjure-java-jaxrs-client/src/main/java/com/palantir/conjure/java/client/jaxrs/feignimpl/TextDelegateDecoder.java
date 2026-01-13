@@ -42,8 +42,7 @@ public final class TextDelegateDecoder implements Decoder {
 
     @Override
     public Object decode(Response response, Type type) throws IOException, FeignException {
-        Collection<String> contentTypes =
-                HeaderAccessUtils.caseInsensitiveGet(response.headers(), HttpHeaders.CONTENT_TYPE);
+        Collection<String> contentTypes = response.headers().get(HttpHeaders.CONTENT_TYPE);
         if (contentTypes == null) {
             contentTypes = ImmutableSet.of();
         }

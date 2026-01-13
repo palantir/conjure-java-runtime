@@ -53,6 +53,7 @@ import java.io.Reader;
 import java.io.SequenceInputStream;
 import java.io.StringReader;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Collections;
@@ -236,6 +237,11 @@ final class DialogueFeignClient implements feign.Client {
 
         @Override
         public Reader asReader() {
+            return asReader(StandardCharsets.UTF_8);
+        }
+
+        @Override
+        public Reader asReader(Charset charset) {
             InputStream inputStream = asInputStream();
             Integer maybeLength = length();
             if (maybeLength != null) {
@@ -251,7 +257,7 @@ final class DialogueFeignClient implements feign.Client {
                         if (read <= length) {
                             // fully read input
                             inputStream.close();
-                            return new StringReader(new String(bytes, 0, read, StandardCharsets.UTF_8));
+                            return new StringReader(new String(bytes, 0, read, charset));
                         }
                         // input was larger than provided content length, fallback to stream path
                         inputStream = new SequenceInputStream(new ByteArrayInputStream(bytes), inputStream);
@@ -261,7 +267,7 @@ final class DialogueFeignClient implements feign.Client {
                     }
                 }
             }
-            return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            return new InputStreamReader(inputStream, charset);
         }
 
         @Override
@@ -280,11 +286,11 @@ final class DialogueFeignClient implements feign.Client {
 
         @Override
         public feign.Response deserialize(Response response) {
-            return feign.Response.create(
-                    response.code(),
-                    null,
-                    Multimaps.asMap((Multimap<String, String>) response.headers()),
-                    new DialogueResponseBody(response));
+            return feign.Response.builder()
+                    .status(response.code())
+                    .headers(Multimaps.asMap((Multimap<String, String>) response.headers()))
+                    .body(new DialogueResponseBody(response))
+                    .build();
         }
 
         @Override
@@ -464,7 +470,7 @@ final class DialogueFeignClient implements feign.Client {
 
         private static FeignEndpointKey of(Request request) {
             return ImmutableFeignEndpointKey.of(
-                    HttpMethod.valueOf(request.method().toUpperCase(Locale.ENGLISH)),
+                    HttpMethod.valueOf(request.httpMethod().name().toUpperCase(Locale.ENGLISH)),
                     getFirstHeader(request, MethodHeaderEnrichmentContract.METHOD_HEADER)
                             .orElse(""),
                     getFirstHeader(request, EndpointNameHeaderEnrichmentContract.ENDPOINT_NAME_HEADER)

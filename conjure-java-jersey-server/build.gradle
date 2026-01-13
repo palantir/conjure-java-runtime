@@ -29,7 +29,7 @@ dependencies {
     }
     implementation 'com.google.code.findbugs:jsr305'
     implementation 'com.google.guava:guava'
-    implementation "com.netflix.feign:feign-core"
+    implementation "io.github.openfeign:feign-core"
     implementation "com.palantir.safe-logging:safe-logging"
     implementation "com.palantir.safe-logging:logger"
     implementation 'com.palantir.tokens:auth-tokens'
