@@ -76,15 +76,15 @@ com.palantir.refreshable:refreshable:2.8.0 (2 constraints: 4714c38a)
 
 com.palantir.ri:resource-identifier:2.12.0 (3 constraints: 2f3013af)
 
-com.palantir.safe-logging:logger:3.10.0 (15 constraints: e8e3c95e)
+com.palantir.safe-logging:logger:3.11.0 (15 constraints: e9e34a61)
 
-com.palantir.safe-logging:logger-slf4j:3.10.0 (1 constraints: 2f0e8750)
+com.palantir.safe-logging:logger-slf4j:3.11.0 (1 constraints: 300e8a50)
 
-com.palantir.safe-logging:logger-spi:3.10.0 (2 constraints: 6d1ed4af)
+com.palantir.safe-logging:logger-spi:3.11.0 (2 constraints: 6f1e0ab0)
 
-com.palantir.safe-logging:preconditions:3.10.0 (22 constraints: 3c59e870)
+com.palantir.safe-logging:preconditions:3.11.0 (22 constraints: 3e59ba75)
 
-com.palantir.safe-logging:safe-logging:3.10.0 (20 constraints: 713ac234)
+com.palantir.safe-logging:safe-logging:3.11.0 (20 constraints: 763a373c)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.3.0 (1 constraints: 350faa76)
 
@@ -224,7 +224,7 @@ com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.20.1 (1 constraints: 
 
 com.google.code.findbugs:annotations:3.0.1u2 (1 constraints: 450b07da)
 
-com.palantir.safe-logging:preconditions-assertj:3.10.0 (1 constraints: 3605353b)
+com.palantir.safe-logging:preconditions-assertj:3.11.0 (1 constraints: 3705383b)
 
 com.squareup.okhttp3:mockwebserver:4.12.0 (1 constraints: 3905413b)
 
@@ -238,7 +238,7 @@ jakarta.servlet:jakarta.servlet-api:5.0.0 (2 constraints: 1015bdac)
 
 junit:junit:4.13.2 (1 constraints: 690fa77c)
 
-net.bytebuddy:byte-buddy:1.17.7 (2 constraints: 9f161b3f)
+net.bytebuddy:byte-buddy:1.18.3 (2 constraints: 9c16b43e)
 
 net.bytebuddy:byte-buddy-agent:1.17.7 (1 constraints: 4a0b4ede)
 
@@ -250,7 +250,7 @@ org.apache.commons:commons-lang3:3.20.0 (1 constraints: 3705393b)
 
 org.apiguardian:apiguardian-api:1.1.2 (6 constraints: 5366ce6e)
 
-org.assertj:assertj-core:3.27.6 (2 constraints: aa19d1e0)
+org.assertj:assertj-core:3.27.7 (2 constraints: ab190be1)
 
 org.conscrypt:conscrypt-openjdk-uber:2.5.2 (1 constraints: 0b050636)
 
