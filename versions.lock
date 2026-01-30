@@ -76,15 +76,15 @@ com.palantir.refreshable:refreshable:2.8.0 (2 constraints: 4714c38a)
 
 com.palantir.ri:resource-identifier:2.12.0 (3 constraints: 2f3013af)
 
-com.palantir.safe-logging:logger:3.11.0 (15 constraints: e9e34a61)
+com.palantir.safe-logging:logger:3.11.0 (15 constraints: ece3d961)
 
 com.palantir.safe-logging:logger-slf4j:3.11.0 (1 constraints: 300e8a50)
 
 com.palantir.safe-logging:logger-spi:3.11.0 (2 constraints: 6f1e0ab0)
 
-com.palantir.safe-logging:preconditions:3.11.0 (22 constraints: 3e59ba75)
+com.palantir.safe-logging:preconditions:3.11.0 (22 constraints: 4259d976)
 
-com.palantir.safe-logging:safe-logging:3.11.0 (20 constraints: 763a373c)
+com.palantir.safe-logging:safe-logging:3.11.0 (20 constraints: 793acc3c)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.3.0 (1 constraints: 350faa76)
 
@@ -98,15 +98,15 @@ com.palantir.tracing:tracing-jersey-jakarta:6.30.0 (1 constraints: 3b054f3b)
 
 com.palantir.tracing:tracing-okhttp3:6.30.0 (1 constraints: 3b054f3b)
 
-com.palantir.tritium:tritium-api:0.123.0 (2 constraints: 8d1faff3)
+com.palantir.tritium:tritium-api:0.124.0 (2 constraints: 8f1fe4f3)
 
-com.palantir.tritium:tritium-core:0.123.0 (1 constraints: 6e10a8b2)
+com.palantir.tritium:tritium-core:0.124.0 (1 constraints: 6f10abb2)
 
-com.palantir.tritium:tritium-ids:0.123.0 (1 constraints: f80f88a6)
+com.palantir.tritium:tritium-ids:0.124.0 (1 constraints: f80f88a6)
 
-com.palantir.tritium:tritium-metrics:0.123.0 (5 constraints: 584c9d17)
+com.palantir.tritium:tritium-metrics:0.124.0 (5 constraints: 594c6f18)
 
-com.palantir.tritium:tritium-registry:0.123.0 (6 constraints: c55c10cf)
+com.palantir.tritium:tritium-registry:0.124.0 (6 constraints: c75c14d0)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
@@ -116,7 +116,7 @@ com.squareup.okio:okio-jvm:3.6.0 (1 constraints: 500ad3b9)
 
 com.thoughtworks.paranamer:paranamer:2.8.3 (1 constraints: dc154900)
 
-io.dropwizard.metrics:metrics-core:4.2.38 (6 constraints: 20585834)
+io.dropwizard.metrics:metrics-core:4.2.38 (6 constraints: 22588934)
 
 io.smallrye.common:smallrye-common-annotation:2.14.0 (1 constraints: f20d0944)
 
