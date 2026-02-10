@@ -2,11 +2,11 @@
 
 com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
 
-com.fasterxml.jackson.core:jackson-annotations:2.21 (12 constraints: 02de5e78)
+com.fasterxml.jackson.core:jackson-annotations:2.21 (12 constraints: 03de1b79)
 
-com.fasterxml.jackson.core:jackson-core:2.21.0 (14 constraints: 99230be9)
+com.fasterxml.jackson.core:jackson-core:2.21.0 (14 constraints: 99230de9)
 
-com.fasterxml.jackson.core:jackson-databind:2.21.0 (18 constraints: 8863d329)
+com.fasterxml.jackson.core:jackson-databind:2.21.0 (18 constraints: 8863d529)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.0 (2 constraints: 27201805)
 
@@ -48,9 +48,9 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.69.0 (3 constraints: 8125e255)
+com.palantir.conjure.java:conjure-lib:8.70.0 (3 constraints: 7925e352)
 
-com.palantir.conjure.java.api:errors:2.69.0 (5 constraints: 0545bab7)
+com.palantir.conjure.java.api:errors:2.69.0 (5 constraints: 064547b8)
 
 com.palantir.conjure.java.api:service-config:2.69.0 (3 constraints: b728b6e6)
 
@@ -74,7 +74,7 @@ com.palantir.nylon:nylon-threads:0.6.0 (1 constraints: 0e100092)
 
 com.palantir.refreshable:refreshable:2.9.0 (2 constraints: 4914f58a)
 
-com.palantir.ri:resource-identifier:2.13.0 (3 constraints: 313048af)
+com.palantir.ri:resource-identifier:2.13.0 (3 constraints: 3230a8af)
 
 com.palantir.safe-logging:logger:3.11.0 (15 constraints: 5de5c531)
 
@@ -82,13 +82,13 @@ com.palantir.safe-logging:logger-slf4j:3.11.0 (1 constraints: 300e8a50)
 
 com.palantir.safe-logging:logger-spi:3.11.0 (2 constraints: 6f1e0ab0)
 
-com.palantir.safe-logging:preconditions:3.11.0 (22 constraints: 575b93ee)
+com.palantir.safe-logging:preconditions:3.11.0 (22 constraints: 585b41f2)
 
-com.palantir.safe-logging:safe-logging:3.11.0 (20 constraints: ea3bfdcd)
+com.palantir.safe-logging:safe-logging:3.11.0 (20 constraints: eb3b51d1)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.4.0 (1 constraints: 360fad76)
 
-com.palantir.tokens:auth-tokens:3.22.0 (5 constraints: 2b48ad46)
+com.palantir.tokens:auth-tokens:3.22.0 (5 constraints: 2c484347)
 
 com.palantir.tracing:tracing:6.31.0 (8 constraints: b97d9587)
 
