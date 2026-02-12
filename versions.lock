@@ -144,7 +144,7 @@ jakarta.inject:jakarta.inject-api:2.0.1 (5 constraints: 82605b36)
 
 jakarta.validation:jakarta.validation-api:3.0.2 (2 constraints: fa24a2e0)
 
-jakarta.ws.rs:jakarta.ws.rs-api:3.1.0 (8 constraints: 8c8c036d)
+jakarta.ws.rs:jakarta.ws.rs-api:4.0.0 (8 constraints: 8c8c056d)
 
 jakarta.xml.bind:jakarta.xml.bind-api:4.0.2 (2 constraints: 3c33f3c3)
 
