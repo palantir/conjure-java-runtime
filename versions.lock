@@ -58,17 +58,17 @@ com.palantir.conjure.java.api:ssl-config:2.69.0 (2 constraints: 0d182e88)
 
 com.palantir.deadlines:deadlines:0.18.0 (1 constraints: 6b0f2186)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.20.0 (1 constraints: 3a054b3b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.23.0 (1 constraints: 3d05543b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.20.0 (2 constraints: cf2369b2)
+com.palantir.dialogue:dialogue-blocking-channels:6.23.0 (2 constraints: d52305b3)
 
-com.palantir.dialogue:dialogue-core:6.20.0 (2 constraints: 3519dcec)
+com.palantir.dialogue:dialogue-core:6.23.0 (2 constraints: 3b199ced)
 
-com.palantir.dialogue:dialogue-futures:6.20.0 (3 constraints: bf3332bb)
+com.palantir.dialogue:dialogue-futures:6.23.0 (3 constraints: c833e8bc)
 
-com.palantir.dialogue:dialogue-serde:6.20.0 (1 constraints: 3a054b3b)
+com.palantir.dialogue:dialogue-serde:6.23.0 (1 constraints: 3d05543b)
 
-com.palantir.dialogue:dialogue-target:6.20.0 (5 constraints: f34c4254)
+com.palantir.dialogue:dialogue-target:6.23.0 (5 constraints: 024d365a)
 
 com.palantir.nylon:nylon-threads:0.6.0 (1 constraints: 0e100092)
 
