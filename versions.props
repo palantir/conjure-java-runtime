@@ -1,6 +1,6 @@
 com.fasterxml.jackson.*:* = 2.21.1
 com.fasterxml.jackson.core:jackson-annotations = 2.21
-com.github.ben-manes.caffeine:caffeine = 3.2.2
+com.github.ben-manes.caffeine:caffeine = 3.2.3
 com.google.code.findbugs:jsr305 = 3.0.2
 com.google.guava:guava = 33.5.0-jre
 com.netflix.concurrency-limits:* = 0.2.2
