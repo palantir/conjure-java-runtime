@@ -157,10 +157,13 @@ public final class ClientConfigurationsTest {
     public void testProxyAddressIsNotResolved() {
         ProxySelector selector = ClientConfigurations.createProxySelector(ProxyConfiguration.of("localhost:80"));
         List<Proxy> selected = selector.select(URI.create("https://foo"));
-        assertThat(selected).hasOnlyOneElementSatisfying(proxy -> assertThat(proxy.address())
-                .isInstanceOfSatisfying(InetSocketAddress.class, address -> assertThat(address.getAddress())
-                        .as("The address must not be resolved")
-                        .isNull()));
+        assertThat(selected)
+                .hasOnlyOneElementSatisfying(proxy -> assertThat(proxy.address())
+                        .isInstanceOfSatisfying(
+                                InetSocketAddress.class,
+                                address -> assertThat(address.getAddress())
+                                        .as("The address must not be resolved")
+                                        .isNull()));
     }
 
     @Test
