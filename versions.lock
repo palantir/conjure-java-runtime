@@ -234,7 +234,7 @@ io.undertow:undertow-core:2.2.38.Final (2 constraints: ab1911ec)
 
 io.undertow:undertow-servlet-jakarta:2.2.20.Final (1 constraints: 50071361)
 
-jakarta.servlet:jakarta.servlet-api:5.0.0 (2 constraints: 1015bdac)
+jakarta.servlet:jakarta.servlet-api:6.1.0 (2 constraints: 12151fad)
 
 junit:junit:4.13.2 (1 constraints: 690fa77c)
 
