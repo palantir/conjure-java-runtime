@@ -28,11 +28,11 @@ com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.21.1 (
 
 com.fasterxml.jackson.module:jackson-module-scala_2.12:2.21.1 (1 constraints: 3805373b)
 
-com.github.ben-manes.caffeine:caffeine:3.2.2 (3 constraints: e3233da2)
+com.github.ben-manes.caffeine:caffeine:3.2.3 (3 constraints: e42397a2)
 
 com.google.code.findbugs:jsr305:3.0.2 (7 constraints: 5f6b7728)
 
-com.google.errorprone:error_prone_annotations:2.41.0 (18 constraints: 1b181383)
+com.google.errorprone:error_prone_annotations:2.43.0 (18 constraints: 1e18138c)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
