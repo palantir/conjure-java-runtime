@@ -288,9 +288,9 @@ org.junit.platform:junit-platform-engine:6.0.3 (2 constraints: f1224608)
 
 org.junit.platform:junit-platform-launcher:6.0.3 (1 constraints: 0b050c36)
 
-org.mockito:mockito-core:5.21.0 (2 constraints: 2c146a86)
+org.mockito:mockito-core:5.22.0 (2 constraints: 2e149b86)
 
-org.mockito:mockito-junit-jupiter:5.21.0 (1 constraints: 3a05483b)
+org.mockito:mockito-junit-jupiter:5.22.0 (1 constraints: 3b054b3b)
 
 org.objenesis:objenesis:3.3 (1 constraints: b20a14bd)
 
