@@ -31,7 +31,7 @@ org.immutables:value = 2.12.1
 org.jmock:jmock = 2.13.1
 org.junit.jupiter:* = 6.0.3
 org.junit.platform:* = 6.0.3
-org.mockito:* = 5.22.0
+org.mockito:* = 5.23.0
 org.slf4j:* = 2.0.17
 io.undertow:* = 2.2.38.Final
 # dependency-upgrader:OFF
