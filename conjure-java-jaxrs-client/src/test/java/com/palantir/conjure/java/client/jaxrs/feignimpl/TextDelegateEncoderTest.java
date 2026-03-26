@@ -21,8 +21,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import com.google.common.net.HttpHeaders;
-import feign.RequestTemplate;
-import feign.codec.Encoder;
+import com.palantir.conjure.java.client.jaxrs.feign.RequestTemplate;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.Encoder;
 import jakarta.ws.rs.core.MediaType;
 import java.util.Arrays;
 import java.util.Collection;

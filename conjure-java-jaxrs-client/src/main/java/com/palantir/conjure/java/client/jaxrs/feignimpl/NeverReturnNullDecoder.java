@@ -16,11 +16,11 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
+import com.palantir.conjure.java.client.jaxrs.feign.FeignException;
+import com.palantir.conjure.java.client.jaxrs.feign.Response;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.Decoder;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
-import feign.FeignException;
-import feign.Response;
-import feign.codec.Decoder;
 import java.io.IOException;
 import java.lang.reflect.Type;
 

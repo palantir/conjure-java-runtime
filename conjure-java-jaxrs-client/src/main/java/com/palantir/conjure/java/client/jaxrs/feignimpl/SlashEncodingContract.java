@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import feign.Contract;
-import feign.MethodMetadata;
+import com.palantir.conjure.java.client.jaxrs.feign.Contract;
+import com.palantir.conjure.java.client.jaxrs.feign.MethodMetadata;
 import java.lang.reflect.Method;
 
 /** Decorates a {@link Contract} and forces slashes to be encoded when they are part of a URL. */

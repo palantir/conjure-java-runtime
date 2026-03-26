@@ -18,7 +18,7 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import feign.Param.Expander;
+import com.palantir.conjure.java.client.jaxrs.feign.Param.Expander;
 import java.util.OptionalInt;
 
 /**

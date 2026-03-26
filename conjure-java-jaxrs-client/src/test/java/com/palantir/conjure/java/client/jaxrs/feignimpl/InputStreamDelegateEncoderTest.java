@@ -21,10 +21,10 @@ import static org.mockito.Mockito.verify;
 
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
+import com.palantir.conjure.java.client.jaxrs.feign.RequestTemplate;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.Encoder;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.undertest.UndertowServerExtension;
-import feign.RequestTemplate;
-import feign.codec.Encoder;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;

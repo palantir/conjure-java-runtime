@@ -17,8 +17,8 @@
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotations;
-import feign.Contract;
-import feign.MethodMetadata;
+import com.palantir.conjure.java.client.jaxrs.feign.Contract;
+import com.palantir.conjure.java.client.jaxrs.feign.MethodMetadata;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;

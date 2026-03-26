@@ -17,8 +17,8 @@
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.palantir.conjure.java.QosExceptionResponseMapper;
-import feign.Response;
-import feign.codec.ErrorDecoder;
+import com.palantir.conjure.java.client.jaxrs.feign.Response;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.ErrorDecoder;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;

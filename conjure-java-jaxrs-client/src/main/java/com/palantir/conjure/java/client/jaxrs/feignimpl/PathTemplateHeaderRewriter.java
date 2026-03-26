@@ -16,8 +16,8 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import feign.RequestInterceptor;
-import feign.RequestTemplate;
+import com.palantir.conjure.java.client.jaxrs.feign.RequestInterceptor;
+import com.palantir.conjure.java.client.jaxrs.feign.RequestTemplate;
 
 /**
  * No longer used.

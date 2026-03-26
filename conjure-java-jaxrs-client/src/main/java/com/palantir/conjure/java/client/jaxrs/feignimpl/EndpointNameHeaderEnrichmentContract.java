@@ -16,12 +16,12 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
+import com.palantir.conjure.java.client.jaxrs.feign.Contract;
+import com.palantir.conjure.java.client.jaxrs.feign.MethodMetadata;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
-import feign.Contract;
-import feign.MethodMetadata;
 import java.lang.reflect.Method;
 import java.util.Locale;
 

@@ -19,14 +19,14 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
-import feign.RequestTemplate;
-import feign.codec.EncodeException;
-import feign.codec.Encoder;
+import com.palantir.conjure.java.client.jaxrs.feign.RequestTemplate;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.EncodeException;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.Encoder;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
 /**
- * Delegates to a {@link feign.codec.Encoder.Default} if the response has a Content-Type of text/plain, or falls back to
+ * Delegates to a {@link Encoder.Default} if the response has a Content-Type of text/plain, or falls back to
  * the given delegate otherwise.
  */
 public final class TextDelegateEncoder implements Encoder {

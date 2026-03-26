@@ -19,14 +19,15 @@ package com.palantir.conjure.java.client.jaxrs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.RequestTemplate;
-import feign.codec.EncodeException;
-import feign.codec.Encoder;
+import com.palantir.conjure.java.client.jaxrs.feign.RequestTemplate;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.EncodeException;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.Encoder;
+import com.palantir.conjure.java.client.jaxrs.feign.jackson.JacksonEncoder;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Similar to {@link feign.jackson.JacksonEncoder}, but optimized to avoid intermediate String representation of request
+ * Similar to {@link JacksonEncoder}, but optimized to avoid intermediate String representation of request
  * body. See upstream PR https://github.com/OpenFeign/feign/pull/989 .
  */
 final class ConjureFeignJacksonEncoder implements Encoder {

@@ -17,13 +17,13 @@
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.codahale.metrics.Meter;
+import com.palantir.conjure.java.client.jaxrs.feign.RequestTemplate;
+import com.palantir.conjure.java.client.jaxrs.feign.Util;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.EncodeException;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.Encoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.FeignClientMetrics.DangerousBuffering_Direction;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
-import feign.RequestTemplate;
-import feign.Util;
-import feign.codec.EncodeException;
-import feign.codec.Encoder;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;

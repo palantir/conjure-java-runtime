@@ -18,9 +18,9 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotations;
-import feign.Contract;
-import feign.MethodMetadata;
-import feign.Param.Expander;
+import com.palantir.conjure.java.client.jaxrs.feign.Contract;
+import com.palantir.conjure.java.client.jaxrs.feign.MethodMetadata;
+import com.palantir.conjure.java.client.jaxrs.feign.Param.Expander;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;

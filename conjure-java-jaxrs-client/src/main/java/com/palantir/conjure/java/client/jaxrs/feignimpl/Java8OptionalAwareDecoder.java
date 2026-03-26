@@ -18,9 +18,9 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import feign.FeignException;
-import feign.Response;
-import feign.codec.Decoder;
+import com.palantir.conjure.java.client.jaxrs.feign.FeignException;
+import com.palantir.conjure.java.client.jaxrs.feign.Response;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.Decoder;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

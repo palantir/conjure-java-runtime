@@ -17,13 +17,13 @@
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.codahale.metrics.Meter;
+import com.palantir.conjure.java.client.jaxrs.feign.FeignException;
+import com.palantir.conjure.java.client.jaxrs.feign.Response;
+import com.palantir.conjure.java.client.jaxrs.feign.Util;
+import com.palantir.conjure.java.client.jaxrs.feign.codec.Decoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.FeignClientMetrics.DangerousBuffering_Direction;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
-import feign.FeignException;
-import feign.Response;
-import feign.Util;
-import feign.codec.Decoder;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
