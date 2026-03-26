@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2018 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2026 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,31 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package feign.codec;
 
-package feign;
+import static java.lang.String.format;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.EmptyContainerDecoder;
-import feign.codec.Decoder;
+import feign.Response;
+import feign.Util;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-/**
- * Use {@link EmptyContainerDecoder}.
- *
- * @deprecated Use {@link EmptyContainerDecoder}.
- */
-@Deprecated
-public final class ConjureEmptyContainerDecoder implements Decoder {
-
-    private final Decoder delegate;
-
-    public ConjureEmptyContainerDecoder(ObjectMapper mapper, Decoder delegate) {
-        this.delegate = new EmptyContainerDecoder(mapper, delegate);
-    }
+public class StringDecoder implements Decoder {
 
     @Override
     public Object decode(Response response, Type type) throws IOException {
-        return delegate.decode(response, type);
+        Response.Body body = response.body();
+        if (body == null) {
+            return null;
+        }
+        if (String.class.equals(type)) {
+            return Util.toString(body.asReader());
+        }
+        throw new DecodeException(format("%s is not a type supported by this decoder.", type));
     }
 }
