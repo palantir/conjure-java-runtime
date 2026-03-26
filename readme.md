@@ -6,10 +6,11 @@
 
 # Conjure Java Runtime (formerly http-remoting)
 This repository provides an opinionated set of libraries for defining and creating RESTish/RPC servers and clients based
-on [Feign](https://github.com/OpenFeign/feign) as a client and
-[Dropwizard](http://www.dropwizard.io/)/[Jersey](https://jersey.java.net/) with [JAX-RS](https://jax-rs-spec.java.net/)
-service definitions as a server. Refer to the [API Contract](#api-contract) section for details on the contract between
-clients and servers. This library requires Java 8.
+on [JAX-RS](https://jax-rs-spec.java.net/) service definitions using
+[Dialogue](https://github.com/palantir/dialogue)/[Feign](https://github.com/OpenFeign/feign) as a client and
+[Dropwizard](http://www.dropwizard.io/)/[Jersey](https://jersey.java.net/) as a server. Refer to the
+[API Contract](#api-contract) section for details on the contract between clients and servers. This library requires
+Java 17.
 
 Core libraries:
 - conjure-java-jaxrs-client: Clients for JAX-RS-defined service interfaces
@@ -33,8 +34,8 @@ dependencies {
 
 
 ## conjure-java-jaxrs-client
-Provides the `JaxRsClient` factory for creating Feign-based clients for JAX-RS APIs. SSL configuration is mandatory for
-all clients, plain-text HTTP is not supported. Example:
+Provides the `JaxRsClient` factory for creating clients for JAX-RS APIs. SSL configuration is mandatory for all clients,
+plain-text HTTP is not supported. Example:
 
 ```java
 SslConfiguration sslConfig = SslConfiguration.of(Paths.get("path/to/trustStore"));

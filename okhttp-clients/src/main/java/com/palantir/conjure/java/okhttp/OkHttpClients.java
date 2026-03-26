@@ -257,8 +257,6 @@ public final class OkHttpClients {
         client.addInterceptor(UserAgentInterceptor.of(augmentUserAgent(agent, serviceClass)));
 
         // timeouts
-        // Note that Feign overrides OkHttp timeouts with the timeouts given in FeignBuilder#Options if given, or
-        // with its own default otherwise.
         client.connectTimeout(config.connectTimeout());
         client.readTimeout(config.readTimeout());
         client.writeTimeout(config.writeTimeout());
