@@ -26,8 +26,6 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.java.api.errors.UnknownRemoteException;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.EndpointNameHeaderEnrichmentContract;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.MethodHeaderEnrichmentContract;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -35,7 +33,6 @@ import com.palantir.dialogue.Endpoint;
 import com.palantir.dialogue.EndpointChannel;
 import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.RequestBody;
-import com.palantir.dialogue.Response;
 import com.palantir.dialogue.ResponseAttachments;
 import com.palantir.dialogue.UrlBuilder;
 import com.palantir.logsafe.Preconditions;
@@ -43,7 +40,6 @@ import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.UnsafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import com.palantir.logsafe.exceptions.SafeUncheckedIoException;
-import feign.Request;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,10 +60,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.immutables.value.Value;
 
 /**
- * {@link DialogueFeignClient} is an adapter from {@link feign.Client} to {@link Channel Dialogue Channel}
+ * {@link DialogueFeignClient} is an adapter from {@link Client} to {@link Channel Dialogue Channel}
  * taking advantage of the superior observability and stability provided by Dialogue.
  */
-final class DialogueFeignClient implements feign.Client {
+final class DialogueFeignClient implements Client {
 
     private static final String REQUEST_URL_PATH_PARAM = "request-url";
     private static final Splitter PATH_SPLITTER = Splitter.on('/');
@@ -93,7 +89,7 @@ final class DialogueFeignClient implements feign.Client {
     }
 
     @Override
-    public feign.Response execute(Request request, Request.Options _options) throws IOException {
+    public Response execute(Request request, Request.Options _options) throws IOException {
         com.palantir.dialogue.Request.Builder builder = com.palantir.dialogue.Request.builder();
 
         builder.putPathParams(REQUEST_URL_PATH_PARAM, request.url());
@@ -209,11 +205,11 @@ final class DialogueFeignClient implements feign.Client {
         }
     }
 
-    private static final class DialogueResponseBody implements feign.Response.Body {
+    private static final class DialogueResponseBody implements Response.Body {
 
-        private final Response response;
+        private final com.palantir.dialogue.Response response;
 
-        DialogueResponseBody(Response response) {
+        DialogueResponseBody(com.palantir.dialogue.Response response) {
             this.response = response;
         }
 
@@ -275,12 +271,12 @@ final class DialogueFeignClient implements feign.Client {
         }
     }
 
-    enum FeignResponseDeserializer implements Deserializer<feign.Response> {
+    enum FeignResponseDeserializer implements Deserializer<Response> {
         INSTANCE;
 
         @Override
-        public feign.Response deserialize(Response response) {
-            return feign.Response.create(
+        public Response deserialize(com.palantir.dialogue.Response response) {
+            return Response.create(
                     response.code(),
                     null,
                     Multimaps.asMap((Multimap<String, String>) response.headers()),
@@ -295,19 +291,19 @@ final class DialogueFeignClient implements feign.Client {
     }
 
     /** Converts back from a feign response into a dialogue response for exception mapping. */
-    private static final class FeignDialogueResponse implements Response {
+    private static final class FeignDialogueResponse implements com.palantir.dialogue.Response {
 
-        private final feign.Response delegate;
+        private final Response delegate;
         private final ResponseAttachments attachments;
 
-        FeignDialogueResponse(feign.Response delegate) {
+        FeignDialogueResponse(Response delegate) {
             this.delegate = delegate;
             this.attachments = ResponseAttachments.create();
         }
 
         @Override
         public InputStream body() {
-            feign.Response.Body body = delegate.body();
+            Response.Body body = delegate.body();
             if (body != null) {
                 try {
                     return body.asInputStream();
@@ -355,7 +351,7 @@ final class DialogueFeignClient implements feign.Client {
     }
 
     /** Implements exception handling equivalent dialogue decoders. */
-    static final class RemoteExceptionDecoder implements feign.codec.ErrorDecoder {
+    static final class RemoteExceptionDecoder implements ErrorDecoder {
 
         private final ConjureRuntime runtime;
 
@@ -364,7 +360,7 @@ final class DialogueFeignClient implements feign.Client {
         }
 
         @Override
-        public Exception decode(String _methodKey, feign.Response response) {
+        public Exception decode(String _methodKey, Response response) {
             try {
                 // The dialogue empty body deserializer properly handles exception mapping
                 runtime.bodySerDe().emptyBodyDeserializer().deserialize(new FeignDialogueResponse(response));
@@ -468,7 +464,7 @@ final class DialogueFeignClient implements feign.Client {
                     getFirstHeader(request, MethodHeaderEnrichmentContract.METHOD_HEADER)
                             .orElse(""),
                     getFirstHeader(request, EndpointNameHeaderEnrichmentContract.ENDPOINT_NAME_HEADER)
-                            .orElse("feign"));
+                            .orElse("com/palantir/conjure/java/client/jaxrs"));
         }
     }
 }

@@ -21,8 +21,6 @@ import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotati
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
-import feign.Contract;
-import feign.MethodMetadata;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Collection;
