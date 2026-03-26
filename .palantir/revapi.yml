@@ -85,3 +85,9 @@ acceptedBreaks:
       new: "method T com.palantir.conjure.java.clients.ConjureClients.WithClientOptions<T>::withConjureErrorParameterFormat(com.palantir.conjure.java.api.errors.ConjureErrorParameterFormat)"
       justification: "Adding method to allow clients to request error parameter serialization\
         \ format"
+  "8.32.0":
+    com.palantir.conjure.java.runtime:client-config:
+    - code: "java.method.removed"
+      old: "method void com.palantir.conjure.java.client.config.ClientConfiguration::checkTimeoutPrecision(java.time.Duration,\
+        \ java.lang.String)"
+      justification: "Removed internal method"
