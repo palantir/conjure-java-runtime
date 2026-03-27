@@ -15,8 +15,6 @@
  */
 package com.palantir.conjure.java.client.jaxrs;
 
-import static com.palantir.conjure.java.client.jaxrs.Util.checkState;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -44,16 +42,16 @@ interface Contract {
 
         @Override
         public List<MethodMetadata> parseAndValidateMetadata(Class<?> targetType) {
-            checkState(
+            Util.checkState(
                     targetType.getTypeParameters().length == 0,
                     "Parameterized types unsupported: %s",
                     targetType.getSimpleName());
-            checkState(
+            Util.checkState(
                     targetType.getInterfaces().length <= 1,
                     "Only single inheritance supported: %s",
                     targetType.getSimpleName());
             if (targetType.getInterfaces().length == 1) {
-                checkState(
+                Util.checkState(
                         targetType.getInterfaces()[0].getInterfaces().length == 0,
                         "Only single-level inheritance supported: %s",
                         targetType.getSimpleName());
@@ -66,7 +64,7 @@ interface Contract {
                     continue;
                 }
                 MethodMetadata metadata = parseAndValidateMetadata(targetType, method);
-                checkState(
+                Util.checkState(
                         !result.containsKey(metadata.configKey()), "Overrides unsupported: %s", metadata.configKey());
                 result.put(metadata.configKey(), metadata);
             }
@@ -89,7 +87,7 @@ interface Contract {
             for (Annotation methodAnnotation : method.getAnnotations()) {
                 processAnnotationOnMethod(data, methodAnnotation, method);
             }
-            checkState(
+            Util.checkState(
                     data.template().method() != null,
                     "Method %s not annotated with HTTP method type (ex. GET, POST)",
                     method.getName());
@@ -105,22 +103,23 @@ interface Contract {
                 if (parameterTypes[i] == URI.class) {
                     data.urlIndex(i);
                 } else if (!isHttpAnnotation) {
-                    checkState(data.formParams().isEmpty(), "Body parameters cannot be used with form parameters.");
-                    checkState(data.bodyIndex() == null, "Method has too many Body parameters: %s", method);
+                    Util.checkState(
+                            data.formParams().isEmpty(), "Body parameters cannot be used with form parameters.");
+                    Util.checkState(data.bodyIndex() == null, "Method has too many Body parameters: %s", method);
                     data.bodyIndex(i);
                     data.bodyType(Types.resolve(targetType, targetType, method.getGenericParameterTypes()[i]));
                 }
             }
 
             if (data.headerMapIndex() != null) {
-                checkState(
+                Util.checkState(
                         Map.class.isAssignableFrom(parameterTypes[data.headerMapIndex()]),
                         "HeaderMap parameter must be a Map: %s",
                         parameterTypes[data.headerMapIndex()]);
             }
 
             if (data.queryMapIndex() != null) {
-                checkState(
+                Util.checkState(
                         Map.class.isAssignableFrom(parameterTypes[data.queryMapIndex()]),
                         "QueryMap parameter must be a Map: %s",
                         parameterTypes[data.queryMapIndex()]);
@@ -153,9 +152,9 @@ interface Contract {
          * @return true if you called {@link #nameParam(MethodMetadata, String, int)} after finding an
          * http-relevant annotation.
          */
-        abstract boolean processAnnotationsOnParameter(
-                MethodMetadata data, Annotation[] annotations, int paramIndex);
+        abstract boolean processAnnotationsOnParameter(MethodMetadata data, Annotation[] annotations, int paramIndex);
 
+        @SuppressWarnings("ParameterAssignment")
         Collection<String> addTemplatedParam(Collection<String> possiblyNull, String name) {
             if (possiblyNull == null) {
                 possiblyNull = new ArrayList<String>();
@@ -167,11 +166,11 @@ interface Contract {
         /**
          * links a parameter name to its index in the method signature.
          */
-        void nameParam(MethodMetadata data, String name, int i) {
+        void nameParam(MethodMetadata data, String name, int index) {
             Collection<String> names =
-                    data.indexToName().containsKey(i) ? data.indexToName().get(i) : new ArrayList<String>();
+                    data.indexToName().containsKey(index) ? data.indexToName().get(index) : new ArrayList<String>();
             names.add(name);
-            data.indexToName().put(i, names);
+            data.indexToName().put(index, names);
         }
     }
 }

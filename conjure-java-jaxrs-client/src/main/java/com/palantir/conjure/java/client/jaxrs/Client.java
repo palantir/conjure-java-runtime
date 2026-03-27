@@ -26,7 +26,7 @@ interface Client {
      * Executes a request against its {@link Request#url() url} and returns a response.
      *
      * @param request safe to replay.
-     * @return connected response, {@link Response.Body} is absent or unread.
+     * @return connected response, {@link Response.Body} is absent or unread
      * @throws IOException on a network error connecting to {@link Request#url()}.
      */
     Response execute(Request request) throws IOException;

@@ -15,12 +15,6 @@
  */
 package com.palantir.conjure.java.client.jaxrs;
 
-import static com.palantir.conjure.java.client.jaxrs.Util.UTF_8;
-import static com.palantir.conjure.java.client.jaxrs.Util.checkNotNull;
-import static com.palantir.conjure.java.client.jaxrs.Util.checkState;
-import static com.palantir.conjure.java.client.jaxrs.Util.decodeOrDefault;
-import static com.palantir.conjure.java.client.jaxrs.Util.valuesOrEmpty;
-
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -28,6 +22,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,7 +41,7 @@ final class Response implements Closeable {
     private final Body body;
 
     private Response(int status, String reason, Map<String, Collection<String>> headers, Body body) {
-        checkState(status >= 200, "Invalid status code: %s", status);
+        Util.checkState(status >= 200, "Invalid status code: %s", status);
         this.status = status;
         this.reason = reason; // nullable
         this.headers = Collections.unmodifiableMap(caseInsensitiveCopyOf(headers));
@@ -110,14 +105,18 @@ final class Response implements Closeable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("HTTP/1.1 ").append(status);
-        if (reason != null) builder.append(' ').append(reason);
+        if (reason != null) {
+            builder.append(' ').append(reason);
+        }
         builder.append('\n');
         for (String field : headers.keySet()) {
-            for (String value : valuesOrEmpty(headers, field)) {
+            for (String value : Util.valuesOrEmpty(headers, field)) {
                 builder.append(field).append(": ").append(value).append('\n');
             }
         }
-        if (body != null) builder.append('\n').append(body);
+        if (body != null) {
+            builder.append('\n').append(body);
+        }
         return builder.toString();
     }
 
@@ -186,7 +185,7 @@ final class Response implements Closeable {
 
         @Override
         public Reader asReader() throws IOException {
-            return new InputStreamReader(inputStream, UTF_8);
+            return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         }
 
         @Override
@@ -214,7 +213,7 @@ final class Response implements Closeable {
             if (text == null) {
                 return null;
             }
-            checkNotNull(charset, "charset");
+            Util.checkNotNull(charset, "charset");
             return new ByteArrayBody(text.getBytes(charset));
         }
 
@@ -235,7 +234,7 @@ final class Response implements Closeable {
 
         @Override
         public Reader asReader() throws IOException {
-            return new InputStreamReader(asInputStream(), UTF_8);
+            return new InputStreamReader(asInputStream(), StandardCharsets.UTF_8);
         }
 
         @Override
@@ -243,7 +242,7 @@ final class Response implements Closeable {
 
         @Override
         public String toString() {
-            return decodeOrDefault(data, UTF_8, "Binary data");
+            return Util.decodeOrDefault(data, StandardCharsets.UTF_8, "Binary data");
         }
     }
 

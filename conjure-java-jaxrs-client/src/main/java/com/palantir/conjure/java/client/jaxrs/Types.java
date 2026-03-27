@@ -31,6 +31,7 @@ import java.util.NoSuchElementException;
  * @author Bob Lee
  * @author Jesse Wilson
  */
+@SuppressWarnings({"CyclomaticComplexity", "ParameterAssignment", "ParameterName"})
 final class Types {
 
     private static final Type[] EMPTY_TYPE_ARRAY = new Type[0];

@@ -15,10 +15,6 @@
  */
 package com.palantir.conjure.java.client.jaxrs;
 
-import static com.palantir.conjure.java.client.jaxrs.Util.checkArgument;
-import static com.palantir.conjure.java.client.jaxrs.Util.checkNotNull;
-import static com.palantir.conjure.java.client.jaxrs.Util.checkState;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -76,8 +72,8 @@ final class ReflectiveFeign extends Feign {
         private final Map<Method, MethodHandler> dispatch;
 
         FeignInvocationHandler(Target<?> target, Map<Method, MethodHandler> dispatch) {
-            this.target = checkNotNull(target, "target");
-            this.dispatch = checkNotNull(dispatch, "dispatch for %s", target);
+            this.target = Util.checkNotNull(target, "target");
+            this.dispatch = Util.checkNotNull(dispatch, "dispatch for %s", target);
         }
 
         @Override
@@ -131,11 +127,11 @@ final class ReflectiveFeign extends Feign {
                 Decoder decoder,
                 ErrorDecoder errorDecoder,
                 SynchronousMethodHandler.Factory factory) {
-            this.contract = checkNotNull(contract, "contract");
-            this.factory = checkNotNull(factory, "factory");
-            this.errorDecoder = checkNotNull(errorDecoder, "errorDecoder");
-            this.encoder = checkNotNull(encoder, "encoder");
-            this.decoder = checkNotNull(decoder, "decoder");
+            this.contract = Util.checkNotNull(contract, "contract");
+            this.factory = Util.checkNotNull(factory, "factory");
+            this.errorDecoder = Util.checkNotNull(errorDecoder, "errorDecoder");
+            this.encoder = Util.checkNotNull(encoder, "encoder");
+            this.decoder = Util.checkNotNull(decoder, "decoder");
         }
 
         Map<String, MethodHandler> apply(Target<?> key) {
@@ -158,7 +154,9 @@ final class ReflectiveFeign extends Feign {
 
     private static class BuildTemplateByResolvingArgs implements RequestTemplate.Factory {
 
+        @SuppressWarnings("VisibilityModifier")
         final MethodMetadata metadata;
+
         private final Map<Integer, Expander> indexToExpander = new LinkedHashMap<Integer, Expander>();
 
         private BuildTemplateByResolvingArgs(MethodMetadata metadata) {
@@ -190,17 +188,17 @@ final class ReflectiveFeign extends Feign {
             RequestTemplate mutable = new RequestTemplate(metadata.template());
             if (metadata.urlIndex() != null) {
                 int urlIndex = metadata.urlIndex();
-                checkArgument(argv[urlIndex] != null, "URI parameter %s was null", urlIndex);
+                Util.checkArgument(argv[urlIndex] != null, "URI parameter %s was null", urlIndex);
                 mutable.insert(0, String.valueOf(argv[urlIndex]));
             }
             Map<String, Object> varBuilder = new LinkedHashMap<String, Object>();
             for (Entry<Integer, Collection<String>> entry :
                     metadata.indexToName().entrySet()) {
-                int i = entry.getKey();
+                int index = entry.getKey();
                 Object value = argv[entry.getKey()];
                 if (value != null) { // Null values are skipped.
-                    if (indexToExpander.containsKey(i)) {
-                        value = expandElements(indexToExpander.get(i), value);
+                    if (indexToExpander.containsKey(index)) {
+                        value = expandElements(indexToExpander.get(index), value);
                     }
                     for (String name : entry.getValue()) {
                         varBuilder.put(name, value);
@@ -242,7 +240,7 @@ final class ReflectiveFeign extends Feign {
         private RequestTemplate addHeaderMapHeaders(Object[] argv, RequestTemplate mutable) {
             Map<Object, Object> headerMap = (Map<Object, Object>) argv[metadata.headerMapIndex()];
             for (Entry<Object, Object> currEntry : headerMap.entrySet()) {
-                checkState(
+                Util.checkState(
                         currEntry.getKey().getClass() == String.class,
                         "HeaderMap key must be a String: %s",
                         currEntry.getKey());
@@ -268,7 +266,7 @@ final class ReflectiveFeign extends Feign {
         private RequestTemplate addQueryMapQueryParameters(Object[] argv, RequestTemplate mutable) {
             Map<Object, Object> queryMap = (Map<Object, Object>) argv[metadata.queryMapIndex()];
             for (Entry<Object, Object> currEntry : queryMap.entrySet()) {
-                checkState(
+                Util.checkState(
                         currEntry.getKey().getClass() == String.class,
                         "QueryMap key must be a String: %s",
                         currEntry.getKey());
@@ -330,7 +328,7 @@ final class ReflectiveFeign extends Feign {
         @Override
         RequestTemplate resolve(Object[] argv, RequestTemplate mutable, Map<String, Object> variables) {
             Object body = argv[metadata.bodyIndex()];
-            checkArgument(body != null, "Body parameter %s was null", metadata.bodyIndex());
+            Util.checkArgument(body != null, "Body parameter %s was null", metadata.bodyIndex());
             encoder.encode(body, metadata.bodyType(), mutable);
             return super.resolve(argv, mutable, variables);
         }

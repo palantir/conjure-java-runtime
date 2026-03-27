@@ -15,18 +15,9 @@
  */
 package com.palantir.conjure.java.client.jaxrs;
 
-import static com.palantir.conjure.java.client.jaxrs.Util.CONTENT_LENGTH;
-import static com.palantir.conjure.java.client.jaxrs.Util.UTF_8;
-import static com.palantir.conjure.java.client.jaxrs.Util.checkArgument;
-import static com.palantir.conjure.java.client.jaxrs.Util.checkNotNull;
-import static com.palantir.conjure.java.client.jaxrs.Util.emptyToNull;
-import static com.palantir.conjure.java.client.jaxrs.Util.toArray;
-import static com.palantir.conjure.java.client.jaxrs.Util.valuesOrEmpty;
-
-import java.io.UncheckedIOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,7 +34,7 @@ import java.util.Map.Entry;
  * javax.ws.rs.client.Invocation.Builder}, ensuring you can modify any part of the request. However,
  * this object is mutable, so needs to be guarded with the copy constructor.
  */
-@SuppressWarnings("MissingSummary")
+@SuppressWarnings({"HiddenField", "MissingSummary"})
 final class RequestTemplate {
 
     private final Map<String, Collection<String>> queries = new LinkedHashMap<String, Collection<String>>();
@@ -59,7 +50,7 @@ final class RequestTemplate {
 
     /** Copy constructor. Use this when making templates. */
     RequestTemplate(RequestTemplate toCopy) {
-        checkNotNull(toCopy, "toCopy");
+        Util.checkNotNull(toCopy, "toCopy");
         this.method = toCopy.method;
         this.url.append(toCopy.url);
         this.queries.putAll(toCopy.queries);
@@ -69,19 +60,11 @@ final class RequestTemplate {
     }
 
     private static String urlDecode(String arg) {
-        try {
-            return URLDecoder.decode(arg, UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new UncheckedIOException(e);
-        }
+        return URLDecoder.decode(arg, StandardCharsets.UTF_8);
     }
 
     private static String urlEncode(Object arg) {
-        try {
-            return URLEncoder.encode(String.valueOf(arg), UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new UncheckedIOException(e);
-        }
+        return URLEncoder.encode(String.valueOf(arg), StandardCharsets.UTF_8);
     }
 
     /**
@@ -94,13 +77,14 @@ final class RequestTemplate {
      * @param variables to the URI template
      * @return expanded template, leaving any unresolved parameters literal
      */
+    @SuppressWarnings("LocalVariableName")
     static String expand(String template, Map<String, ?> variables) {
         // skip expansion if there's no valid variables set. ex. {a} is the
         // first valid
-        if (checkNotNull(template, "template").length() < 3) {
+        if (Util.checkNotNull(template, "template").length() < 3) {
             return template.toString();
         }
-        checkNotNull(variables, "variables for %s", template);
+        Util.checkNotNull(variables, "variables for %s", template);
 
         boolean inVar = false;
         StringBuilder var = new StringBuilder();
@@ -144,9 +128,10 @@ final class RequestTemplate {
         return builder.toString();
     }
 
+    @SuppressWarnings("LocalVariableName")
     private static Map<String, Collection<String>> parseAndDecodeQueries(String queryLine) {
         Map<String, Collection<String>> map = new LinkedHashMap<String, Collection<String>>();
-        if (emptyToNull(queryLine) == null) {
+        if (Util.emptyToNull(queryLine) == null) {
             return map;
         }
         if (queryLine.indexOf('&') == -1) {
@@ -204,7 +189,7 @@ final class RequestTemplate {
         Map<String, Collection<String>> resolvedHeaders = new LinkedHashMap<String, Collection<String>>();
         for (String field : headers.keySet()) {
             Collection<String> resolvedValues = new ArrayList<String>();
-            for (String value : valuesOrEmpty(headers, field)) {
+            for (String value : Util.valuesOrEmpty(headers, field)) {
                 String resolved = expand(value, unencoded);
                 resolvedValues.add(resolved);
             }
@@ -224,8 +209,8 @@ final class RequestTemplate {
 
     /** @see Request#method() */
     RequestTemplate method(String method) {
-        this.method = checkNotNull(method, "method");
-        checkArgument(method.matches("^[A-Z]+$"), "Invalid HTTP Method: %s", method);
+        this.method = Util.checkNotNull(method, "method");
+        Util.checkArgument(method.matches("^[A-Z]+$"), "Invalid HTTP Method: %s", method);
         return this;
     }
 
@@ -251,6 +236,7 @@ final class RequestTemplate {
     }
 
     /** @see #url() */
+    @SuppressWarnings("ParameterAssignment")
     RequestTemplate insert(int pos, String value) {
         if (value.startsWith("http")) {
             if (value.endsWith("/")) {
@@ -318,11 +304,11 @@ final class RequestTemplate {
     }
 
     private RequestTemplate doQuery(boolean encoded, String name, String... values) {
-        checkNotNull(name, "name");
+        Util.checkNotNull(name, "name");
         String paramName = encoded ? name : encodeIfNotVariable(name);
         queries.remove(paramName);
         if (values != null && values.length > 0 && values[0] != null) {
-            ArrayList<String> paramValues = new ArrayList<String>();
+            List<String> paramValues = new ArrayList<String>();
             for (String value : values) {
                 paramValues.add(encoded ? value : encodeIfNotVariable(value));
             }
@@ -333,7 +319,7 @@ final class RequestTemplate {
 
     private RequestTemplate doQuery(boolean encoded, String name, Iterable<String> values) {
         if (values != null) {
-            return doQuery(encoded, name, toArray(values, String.class));
+            return doQuery(encoded, name, Util.toArray(values, String.class));
         }
         return doQuery(encoded, name, (String[]) null);
     }
@@ -361,7 +347,7 @@ final class RequestTemplate {
             this.queries.clear();
         } else {
             for (Entry<String, Collection<String>> entry : queries.entrySet()) {
-                query(entry.getKey(), toArray(entry.getValue(), String.class));
+                query(entry.getKey(), Util.toArray(entry.getValue(), String.class));
             }
         }
         return this;
@@ -376,7 +362,7 @@ final class RequestTemplate {
         Map<String, Collection<String>> decoded = new LinkedHashMap<String, Collection<String>>();
         for (String field : queries.keySet()) {
             Collection<String> decodedValues = new ArrayList<String>();
-            for (String value : valuesOrEmpty(queries, field)) {
+            for (String value : Util.valuesOrEmpty(queries, field)) {
                 if (value != null) {
                     decodedValues.add(urlDecode(value));
                 } else {
@@ -404,7 +390,7 @@ final class RequestTemplate {
      * @see #headers()
      */
     RequestTemplate header(String name, String... values) {
-        checkNotNull(name, "header name");
+        Util.checkNotNull(name, "header name");
         if (values == null || (values.length == 1 && values[0] == null)) {
             headers.remove(name);
         } else {
@@ -418,7 +404,7 @@ final class RequestTemplate {
     /** @see #header(String, String...) */
     RequestTemplate header(String name, Iterable<String> values) {
         if (values != null) {
-            return header(name, toArray(values, String.class));
+            return header(name, Util.toArray(values, String.class));
         }
         return header(name, (String[]) null);
     }
@@ -461,7 +447,7 @@ final class RequestTemplate {
     RequestTemplate body(byte[] bodyData) {
         this.body = bodyData;
         int bodyLength = bodyData != null ? bodyData.length : 0;
-        header(CONTENT_LENGTH, String.valueOf(bodyLength));
+        header(Util.CONTENT_LENGTH, String.valueOf(bodyLength));
         return this;
     }
 
@@ -568,7 +554,7 @@ final class RequestTemplate {
         }
         StringBuilder queryBuilder = new StringBuilder();
         for (String field : queries.keySet()) {
-            for (String value : valuesOrEmpty(queries, field)) {
+            for (String value : Util.valuesOrEmpty(queries, field)) {
                 queryBuilder.append('&');
                 queryBuilder.append(field);
                 if (value != null) {

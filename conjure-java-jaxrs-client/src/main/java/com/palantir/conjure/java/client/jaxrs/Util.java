@@ -15,8 +15,6 @@
  */
 package com.palantir.conjure.java.client.jaxrs;
 
-import static java.lang.String.format;
-
 import com.google.errorprone.annotations.FormatMethod;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -73,7 +71,7 @@ final class Util {
     @FormatMethod
     static void checkArgument(boolean expression, String errorMessageTemplate, Object... errorMessageArgs) {
         if (!expression) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, errorMessageArgs));
+            throw new IllegalArgumentException(String.format(errorMessageTemplate, errorMessageArgs));
         }
     }
 
@@ -84,7 +82,7 @@ final class Util {
     static <T> T checkNotNull(T reference, String errorMessageTemplate, Object... errorMessageArgs) {
         if (reference == null) {
             // If either of these parameters is null, the right thing happens anyway
-            throw new NullPointerException(format(errorMessageTemplate, errorMessageArgs));
+            throw new NullPointerException(String.format(errorMessageTemplate, errorMessageArgs));
         }
         return reference;
     }
@@ -95,7 +93,7 @@ final class Util {
     @FormatMethod
     static void checkState(boolean expression, String errorMessageTemplate, Object... errorMessageArgs) {
         if (!expression) {
-            throw new IllegalStateException(format(errorMessageTemplate, errorMessageArgs));
+            throw new IllegalStateException(String.format(errorMessageTemplate, errorMessageArgs));
         }
     }
 
@@ -107,8 +105,8 @@ final class Util {
         // declared in an interface.
         // method.isDefault() is not sufficient for our usage as it does not check
         // for synthetic methods.  As a result, it picks up overridden methods as well as actual default methods.
-        final int SYNTHETIC = 0x00001000;
-        return ((method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC | SYNTHETIC))
+        final int synthetic = 0x00001000;
+        return ((method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC | synthetic))
                         == Modifier.PUBLIC)
                 && method.getDeclaringClass().isInterface();
     }
@@ -251,12 +249,12 @@ final class Util {
         byte[] buf = new byte[BUF_SIZE];
         long total = 0;
         while (true) {
-            int r = from.read(buf);
-            if (r == -1) {
+            int read = from.read(buf);
+            if (read == -1) {
                 break;
             }
-            to.write(buf, 0, r);
-            total += r;
+            to.write(buf, 0, read);
+            total += read;
         }
         return total;
     }

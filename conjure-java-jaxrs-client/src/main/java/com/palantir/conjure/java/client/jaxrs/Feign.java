@@ -43,6 +43,7 @@ abstract class Feign {
      * @param targetType {@link Target#type() type} of the Feign interface.
      * @param method invoked method, present on {@code type} or its super.
      */
+    @SuppressWarnings("ModifiedControlVariable")
     static String configKey(Class<?> targetType, Method method) {
         StringBuilder builder = new StringBuilder();
         builder.append(targetType.getSimpleName());
@@ -63,6 +64,7 @@ abstract class Feign {
      */
     abstract <T> T newInstance(Target<T> target);
 
+    @SuppressWarnings("HiddenField")
     static final class Builder {
 
         private Contract contract;

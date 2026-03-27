@@ -15,9 +15,6 @@
  */
 package com.palantir.conjure.java.client.jaxrs;
 
-import static com.palantir.conjure.java.client.jaxrs.Util.checkNotNull;
-import static com.palantir.conjure.java.client.jaxrs.Util.valuesOrEmpty;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
@@ -41,9 +38,9 @@ final class Request {
     private final byte[] body;
 
     Request(String method, String url, Map<String, Collection<String>> headers, byte[] body) {
-        this.method = checkNotNull(method, "method of %s", url);
-        this.url = checkNotNull(url, "url");
-        this.headers = checkNotNull(headers, "headers of %s %s", method, url);
+        this.method = Util.checkNotNull(method, "method of %s", url);
+        this.url = Util.checkNotNull(url, "url");
+        this.headers = Util.checkNotNull(headers, "headers of %s %s", method, url);
         this.body = body; // nullable
     }
 
@@ -75,7 +72,7 @@ final class Request {
         StringBuilder builder = new StringBuilder();
         builder.append(method).append(' ').append(url).append(" HTTP/1.1\n");
         for (String field : headers.keySet()) {
-            for (String value : valuesOrEmpty(headers, field)) {
+            for (String value : Util.valuesOrEmpty(headers, field)) {
                 builder.append(field).append(": ").append(value).append('\n');
             }
         }

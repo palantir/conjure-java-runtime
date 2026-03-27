@@ -25,5 +25,6 @@ import java.lang.reflect.Method;
  */
 public interface MethodHandler {
 
+    @SuppressWarnings("IllegalThrows")
     Object invoke(Object[] argv) throws Throwable;
 }

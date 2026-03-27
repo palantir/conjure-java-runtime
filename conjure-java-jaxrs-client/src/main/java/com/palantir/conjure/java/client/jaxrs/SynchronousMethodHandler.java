@@ -15,9 +15,6 @@
  */
 package com.palantir.conjure.java.client.jaxrs;
 
-import static com.palantir.conjure.java.client.jaxrs.Util.checkNotNull;
-import static com.palantir.conjure.java.client.jaxrs.Util.ensureClosed;
-
 final class SynchronousMethodHandler implements MethodHandler {
 
     private static final long MAX_RESPONSE_BUFFER_SIZE = 8192L;
@@ -36,12 +33,12 @@ final class SynchronousMethodHandler implements MethodHandler {
             RequestTemplate.Factory buildTemplateFromArgs,
             Decoder decoder,
             ErrorDecoder errorDecoder) {
-        this.target = checkNotNull(target, "target");
-        this.client = checkNotNull(client, "client for %s", target);
-        this.metadata = checkNotNull(metadata, "metadata for %s", target);
-        this.buildTemplateFromArgs = checkNotNull(buildTemplateFromArgs, "metadata for %s", target);
-        this.errorDecoder = checkNotNull(errorDecoder, "errorDecoder for %s", target);
-        this.decoder = checkNotNull(decoder, "decoder for %s", target);
+        this.target = Util.checkNotNull(target, "target");
+        this.client = Util.checkNotNull(client, "client for %s", target);
+        this.metadata = Util.checkNotNull(metadata, "metadata for %s", target);
+        this.buildTemplateFromArgs = Util.checkNotNull(buildTemplateFromArgs, "metadata for %s", target);
+        this.errorDecoder = Util.checkNotNull(errorDecoder, "errorDecoder for %s", target);
+        this.decoder = Util.checkNotNull(decoder, "decoder for %s", target);
     }
 
     @Override
@@ -50,7 +47,7 @@ final class SynchronousMethodHandler implements MethodHandler {
         return executeAndDecode(template);
     }
 
-    Object executeAndDecode(RequestTemplate template) throws Throwable {
+    Object executeAndDecode(RequestTemplate template) throws Exception {
         Request request = target.apply(new RequestTemplate(template));
 
         Response response = client.execute(request);
@@ -80,7 +77,7 @@ final class SynchronousMethodHandler implements MethodHandler {
             }
         } finally {
             if (shouldClose) {
-                ensureClosed(response.body());
+                Util.ensureClosed(response.body());
             }
         }
     }
@@ -90,7 +87,7 @@ final class SynchronousMethodHandler implements MethodHandler {
         private final Client client;
 
         Factory(Client client) {
-            this.client = checkNotNull(client, "client");
+            this.client = Util.checkNotNull(client, "client");
         }
 
         public MethodHandler create(
