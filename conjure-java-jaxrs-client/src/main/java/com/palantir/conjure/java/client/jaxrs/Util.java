@@ -23,8 +23,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -95,20 +93,6 @@ final class Util {
         if (!expression) {
             throw new IllegalStateException(String.format(errorMessageTemplate, errorMessageArgs));
         }
-    }
-
-    /**
-     * Identifies a method as a default instance method.
-     */
-    static boolean isDefault(Method method) {
-        // Default methods are non-abstract, non-synthetic, and non-static instance methods
-        // declared in an interface.
-        // method.isDefault() is not sufficient for our usage as it does not check
-        // for synthetic methods.  As a result, it picks up overridden methods as well as actual default methods.
-        final int synthetic = 0x00001000;
-        return ((method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC | synthetic))
-                        == Modifier.PUBLIC)
-                && method.getDeclaringClass().isInterface();
     }
 
     /**

@@ -40,29 +40,20 @@ final class ReflectiveFeign extends Feign {
      * to cache the result.
      */
     @Override
-    @SuppressWarnings({"ProxyNonConstantType", "RedundantControlFlow"})
+    @SuppressWarnings("ProxyNonConstantType")
     <T> T newInstance(Target<T> target) {
         Map<String, MethodHandler> nameToHandler = targetToHandlersByName.apply(target);
         Map<Method, MethodHandler> methodToHandler = new HashMap<>();
-        List<DefaultMethodHandler> defaultMethodHandlers = new ArrayList<>();
 
         for (Method method : target.type().getMethods()) {
-            if (method.getDeclaringClass() == Object.class) {
+            if (method.getDeclaringClass() == Object.class || method.isDefault()) {
                 continue;
-            } else if (Util.isDefault(method)) {
-                DefaultMethodHandler handler = new DefaultMethodHandler(method);
-                defaultMethodHandlers.add(handler);
-                methodToHandler.put(method, handler);
-            } else {
-                methodToHandler.put(method, nameToHandler.get(Feign.configKey(target.type(), method)));
             }
+            methodToHandler.put(method, nameToHandler.get(Feign.configKey(target.type(), method)));
         }
         InvocationHandler handler = new FeignInvocationHandler(target, methodToHandler);
         T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(), new Class<?>[] {target.type()}, handler);
 
-        for (DefaultMethodHandler defaultMethodHandler : defaultMethodHandlers) {
-            defaultMethodHandler.bindTo(proxy);
-        }
         return proxy;
     }
 
@@ -77,7 +68,11 @@ final class ReflectiveFeign extends Feign {
         }
 
         @Override
-        public Object invoke(Object _proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (method.isDefault()) {
+                return InvocationHandler.invokeDefault(proxy, method, args);
+            }
+
             if ("equals".equals(method.getName())) {
                 try {
                     Object otherHandler =

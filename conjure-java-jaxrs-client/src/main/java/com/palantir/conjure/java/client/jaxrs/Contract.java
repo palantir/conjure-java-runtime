@@ -60,7 +60,7 @@ interface Contract {
             for (Method method : targetType.getMethods()) {
                 if (method.getDeclaringClass() == Object.class
                         || (method.getModifiers() & Modifier.STATIC) != 0
-                        || Util.isDefault(method)) {
+                        || method.isDefault()) {
                     continue;
                 }
                 MethodMetadata metadata = parseAndValidateMetadata(targetType, method);
