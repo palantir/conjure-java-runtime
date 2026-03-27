@@ -26,11 +26,6 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.palantir.conjure.java.api.errors.UnknownRemoteException;
-import com.palantir.conjure.java.client.jaxrs.feign.Client;
-import com.palantir.conjure.java.client.jaxrs.feign.Request;
-import com.palantir.conjure.java.client.jaxrs.feign.codec.ErrorDecoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.EndpointNameHeaderEnrichmentContract;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.MethodHeaderEnrichmentContract;
 import com.palantir.dialogue.Channel;
 import com.palantir.dialogue.ConjureRuntime;
 import com.palantir.dialogue.Deserializer;
@@ -95,7 +90,7 @@ final class DialogueFeignClient implements Client {
     }
 
     @Override
-    public com.palantir.conjure.java.client.jaxrs.feign.Response execute(Request request) throws IOException {
+    public com.palantir.conjure.java.client.jaxrs.Response execute(Request request) throws IOException {
         com.palantir.dialogue.Request.Builder builder = com.palantir.dialogue.Request.builder();
 
         builder.putPathParams(REQUEST_URL_PATH_PARAM, request.url());
@@ -211,8 +206,7 @@ final class DialogueFeignClient implements Client {
         }
     }
 
-    private static final class DialogueResponseBody
-            implements com.palantir.conjure.java.client.jaxrs.feign.Response.Body {
+    private static final class DialogueResponseBody implements com.palantir.conjure.java.client.jaxrs.Response.Body {
 
         private final Response response;
 
@@ -278,12 +272,12 @@ final class DialogueFeignClient implements Client {
         }
     }
 
-    enum FeignResponseDeserializer implements Deserializer<com.palantir.conjure.java.client.jaxrs.feign.Response> {
+    enum FeignResponseDeserializer implements Deserializer<com.palantir.conjure.java.client.jaxrs.Response> {
         INSTANCE;
 
         @Override
-        public com.palantir.conjure.java.client.jaxrs.feign.Response deserialize(Response response) {
-            return com.palantir.conjure.java.client.jaxrs.feign.Response.create(
+        public com.palantir.conjure.java.client.jaxrs.Response deserialize(Response response) {
+            return com.palantir.conjure.java.client.jaxrs.Response.create(
                     response.code(),
                     null,
                     Multimaps.asMap((Multimap<String, String>) response.headers()),
@@ -300,17 +294,17 @@ final class DialogueFeignClient implements Client {
     /** Converts back from a feign response into a dialogue response for exception mapping. */
     private static final class FeignDialogueResponse implements Response {
 
-        private final com.palantir.conjure.java.client.jaxrs.feign.Response delegate;
+        private final com.palantir.conjure.java.client.jaxrs.Response delegate;
         private final ResponseAttachments attachments;
 
-        FeignDialogueResponse(com.palantir.conjure.java.client.jaxrs.feign.Response delegate) {
+        FeignDialogueResponse(com.palantir.conjure.java.client.jaxrs.Response delegate) {
             this.delegate = delegate;
             this.attachments = ResponseAttachments.create();
         }
 
         @Override
         public InputStream body() {
-            com.palantir.conjure.java.client.jaxrs.feign.Response.Body body = delegate.body();
+            com.palantir.conjure.java.client.jaxrs.Response.Body body = delegate.body();
             if (body != null) {
                 try {
                     return body.asInputStream();
@@ -367,7 +361,7 @@ final class DialogueFeignClient implements Client {
         }
 
         @Override
-        public Exception decode(String _methodKey, com.palantir.conjure.java.client.jaxrs.feign.Response response) {
+        public Exception decode(String _methodKey, com.palantir.conjure.java.client.jaxrs.Response response) {
             try {
                 // The dialogue empty body deserializer properly handles exception mapping
                 runtime.bodySerDe().emptyBodyDeserializer().deserialize(new FeignDialogueResponse(response));

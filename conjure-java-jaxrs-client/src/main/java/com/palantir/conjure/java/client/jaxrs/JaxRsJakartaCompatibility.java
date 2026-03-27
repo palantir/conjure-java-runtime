@@ -21,7 +21,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.Set;
 import javax.annotation.Nullable;
 
-public final class JaxRsJakartaCompatibility {
+final class JaxRsJakartaCompatibility {
     private JaxRsJakartaCompatibility() {}
 
     @Nullable
@@ -72,7 +72,7 @@ public final class JaxRsJakartaCompatibility {
     @Nullable
     private static final Class<? extends Annotation> JAKARTA_QUERY_PARAM = resolve("jakarta.ws.rs.QueryParam");
 
-    public enum Annotations {
+    enum Annotations {
         CONSUMES(JAVAX_CONSUMES, JAKARTA_CONSUMES),
         PRODUCES(JAVAX_PRODUCES, JAKARTA_PRODUCES),
         PATH_PARAM(JAVAX_PATH_PARAM, JAKARTA_PATH_PARAM),
@@ -94,16 +94,16 @@ public final class JaxRsJakartaCompatibility {
             this.jakarta = jakarta;
         }
 
-        public boolean matches(Class<? extends Annotation> annotation) {
+        boolean matches(Class<? extends Annotation> annotation) {
             return annotation == jakarta || annotation == javax;
         }
 
-        public boolean matches(Set<Class<?>> annotations) {
+        boolean matches(Set<Class<?>> annotations) {
             return annotations.contains(jakarta) || annotations.contains(javax);
         }
 
         @Nullable
-        public Annotation getAnnotation(AnnotatedElement element) {
+        Annotation getAnnotation(AnnotatedElement element) {
             if (jakarta != null) {
                 Annotation annotation = element.getAnnotation(jakarta);
                 if (annotation != null) {

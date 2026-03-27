@@ -18,8 +18,6 @@ package com.palantir.conjure.java.client.jaxrs;
 import com.google.common.base.Strings;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotations;
-import com.palantir.conjure.java.client.jaxrs.feign.Contract;
-import com.palantir.conjure.java.client.jaxrs.feign.MethodMetadata;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalStateException;
@@ -34,10 +32,10 @@ import javax.annotation.Nullable;
  * JAXRSContract.java</a> which is licensed under Apache 2.
  * We have modified the implementation to handle both jaxrs and jakarta annotations, easing migrations.
  */
-public final class CompatibleJaxRsContract extends Contract.BaseContract {
+final class CompatibleJaxRsContract extends Contract.BaseContract {
 
     @Override
-    protected void processAnnotationOnClass(MethodMetadata data, Class<?> clz) {
+    void processAnnotationOnClass(MethodMetadata data, Class<?> clz) {
         Annotation path = Annotations.PATH.getAnnotation(clz);
         if (path != null) {
             String pathValue = Strings.emptyToNull(getAnnotationValue(path));
@@ -63,7 +61,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
     }
 
     @Override
-    protected void processAnnotationOnMethod(MethodMetadata data, Annotation methodAnnotation, Method method) {
+    void processAnnotationOnMethod(MethodMetadata data, Annotation methodAnnotation, Method method) {
         Class<? extends Annotation> annotationType = methodAnnotation.annotationType();
         Annotation http = Annotations.HTTP_METHOD.getAnnotation(annotationType);
         if (http != null) {
@@ -112,7 +110,7 @@ public final class CompatibleJaxRsContract extends Contract.BaseContract {
     }
 
     @Override
-    protected boolean processAnnotationsOnParameter(MethodMetadata data, Annotation[] annotations, int paramIndex) {
+    boolean processAnnotationsOnParameter(MethodMetadata data, Annotation[] annotations, int paramIndex) {
         boolean isHttpParam = false;
         for (Annotation parameterAnnotation : annotations) {
             Class<? extends Annotation> annotationType =

@@ -21,30 +21,6 @@ import com.palantir.conjure.java.annotations.JaxRsClient;
 import com.palantir.conjure.java.annotations.JaxRsServer;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
-import com.palantir.conjure.java.client.jaxrs.feign.Contract;
-import com.palantir.conjure.java.client.jaxrs.feign.Feign;
-import com.palantir.conjure.java.client.jaxrs.feign.Request;
-import com.palantir.conjure.java.client.jaxrs.feign.RequestTemplate;
-import com.palantir.conjure.java.client.jaxrs.feign.Target;
-import com.palantir.conjure.java.client.jaxrs.feign.codec.Decoder;
-import com.palantir.conjure.java.client.jaxrs.feign.codec.Encoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.CborDelegateDecoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.CborDelegateEncoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.EmptyContainerDecoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.EndpointNameHeaderEnrichmentContract;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaOptionalAwareContract;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.GuavaOptionalAwareDecoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.InputStreamDelegateDecoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.InputStreamDelegateEncoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.JacksonDecoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.JacksonEncoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareContract;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.Java8OptionalAwareDecoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.MethodHeaderEnrichmentContract;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.NeverReturnNullDecoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.SlashEncodingContract;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.TextDelegateDecoder;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.TextDelegateEncoder;
 import com.palantir.conjure.java.dialogue.serde.DefaultConjureRuntime;
 import com.palantir.conjure.java.okhttp.HostEventsSink;
 import com.palantir.dialogue.Channel;
@@ -70,9 +46,9 @@ abstract class AbstractFeignJaxRsClientBuilder {
         this.config = config;
     }
 
-    protected abstract ObjectMapper getObjectMapper();
+    abstract ObjectMapper getObjectMapper();
 
-    protected abstract ObjectMapper getCborObjectMapper();
+    abstract ObjectMapper getCborObjectMapper();
 
     /** Set the host metrics registry to use when constructing the OkHttp client. */
     final AbstractFeignJaxRsClientBuilder hostEventsSink(HostEventsSink newHostEventsSink) {
