@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
 import com.codahale.metrics.Meter;
-import com.palantir.conjure.java.client.jaxrs.feign.FeignException;
 import com.palantir.conjure.java.client.jaxrs.feign.Response;
 import com.palantir.conjure.java.client.jaxrs.feign.Util;
 import com.palantir.conjure.java.client.jaxrs.feign.codec.Decoder;
@@ -49,7 +48,7 @@ public final class InputStreamDelegateDecoder implements Decoder {
     }
 
     @Override
-    public Object decode(Response response, Type type) throws IOException, FeignException {
+    public Object decode(Response response, Type type) throws IOException {
         if (type.equals(InputStream.class)) {
             byte[] body =
                     response.body() != null ? Util.toByteArray(response.body().asInputStream()) : new byte[0];

@@ -19,11 +19,7 @@ import static com.palantir.conjure.java.client.jaxrs.feign.Util.checkArgument;
 import static com.palantir.conjure.java.client.jaxrs.feign.Util.checkNotNull;
 import static com.palantir.conjure.java.client.jaxrs.feign.Util.checkState;
 
-import com.palantir.conjure.java.client.jaxrs.feign.InvocationHandlerFactory.MethodHandler;
-import com.palantir.conjure.java.client.jaxrs.feign.Param.Expander;
-import com.palantir.conjure.java.client.jaxrs.feign.Request.Options;
 import com.palantir.conjure.java.client.jaxrs.feign.codec.Decoder;
-import com.palantir.conjure.java.client.jaxrs.feign.codec.EncodeException;
 import com.palantir.conjure.java.client.jaxrs.feign.codec.Encoder;
 import com.palantir.conjure.java.client.jaxrs.feign.codec.ErrorDecoder;
 import java.lang.reflect.InvocationHandler;
@@ -31,9 +27,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -41,23 +37,21 @@ import java.util.Map.Entry;
 public class ReflectiveFeign extends Feign {
 
     private final ParseHandlersByName targetToHandlersByName;
-    private final InvocationHandlerFactory factory;
 
-    ReflectiveFeign(ParseHandlersByName targetToHandlersByName, InvocationHandlerFactory factory) {
+    ReflectiveFeign(ParseHandlersByName targetToHandlersByName) {
         this.targetToHandlersByName = targetToHandlersByName;
-        this.factory = factory;
     }
 
     /**
      * creates an api binding to the {@code target}. As this invokes reflection, care should be taken
      * to cache the result.
      */
-    @SuppressWarnings("unchecked")
     @Override
+    @SuppressWarnings({"ProxyNonConstantType", "RedundantControlFlow"})
     public <T> T newInstance(Target<T> target) {
         Map<String, MethodHandler> nameToHandler = targetToHandlersByName.apply(target);
-        Map<Method, MethodHandler> methodToHandler = new LinkedHashMap<Method, MethodHandler>();
-        List<DefaultMethodHandler> defaultMethodHandlers = new LinkedList<DefaultMethodHandler>();
+        Map<Method, MethodHandler> methodToHandler = new HashMap<>();
+        List<DefaultMethodHandler> defaultMethodHandlers = new ArrayList<>();
 
         for (Method method : target.type().getMethods()) {
             if (method.getDeclaringClass() == Object.class) {
@@ -70,7 +64,7 @@ public class ReflectiveFeign extends Feign {
                 methodToHandler.put(method, nameToHandler.get(Feign.configKey(target.type(), method)));
             }
         }
-        InvocationHandler handler = factory.create(target, methodToHandler);
+        InvocationHandler handler = new FeignInvocationHandler(target, methodToHandler);
         T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(), new Class<?>[] {target.type()}, handler);
 
         for (DefaultMethodHandler defaultMethodHandler : defaultMethodHandlers) {
@@ -81,16 +75,16 @@ public class ReflectiveFeign extends Feign {
 
     static class FeignInvocationHandler implements InvocationHandler {
 
-        private final Target target;
+        private final Target<?> target;
         private final Map<Method, MethodHandler> dispatch;
 
-        FeignInvocationHandler(Target target, Map<Method, MethodHandler> dispatch) {
+        FeignInvocationHandler(Target<?> target, Map<Method, MethodHandler> dispatch) {
             this.target = checkNotNull(target, "target");
             this.dispatch = checkNotNull(dispatch, "dispatch for %s", target);
         }
 
         @Override
-        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        public Object invoke(Object _proxy, Method method, Object[] args) throws Throwable {
             if ("equals".equals(method.getName())) {
                 try {
                     Object otherHandler =
@@ -109,8 +103,7 @@ public class ReflectiveFeign extends Feign {
 
         @Override
         public boolean equals(Object obj) {
-            if (obj instanceof FeignInvocationHandler) {
-                FeignInvocationHandler other = (FeignInvocationHandler) obj;
+            if (obj instanceof FeignInvocationHandler other) {
                 return target.equals(other.target);
             }
             return false;
@@ -130,7 +123,6 @@ public class ReflectiveFeign extends Feign {
     static final class ParseHandlersByName {
 
         private final Contract contract;
-        private final Options options;
         private final Encoder encoder;
         private final Decoder decoder;
         private final ErrorDecoder errorDecoder;
@@ -138,32 +130,30 @@ public class ReflectiveFeign extends Feign {
 
         ParseHandlersByName(
                 Contract contract,
-                Options options,
                 Encoder encoder,
                 Decoder decoder,
                 ErrorDecoder errorDecoder,
                 SynchronousMethodHandler.Factory factory) {
-            this.contract = contract;
-            this.options = options;
-            this.factory = factory;
-            this.errorDecoder = errorDecoder;
+            this.contract = checkNotNull(contract, "contract");
+            this.factory = checkNotNull(factory, "factory");
+            this.errorDecoder = checkNotNull(errorDecoder, "errorDecoder");
             this.encoder = checkNotNull(encoder, "encoder");
             this.decoder = checkNotNull(decoder, "decoder");
         }
 
-        public Map<String, MethodHandler> apply(Target key) {
-            List<MethodMetadata> metadata = contract.parseAndValidatateMetadata(key.type());
+        public Map<String, MethodHandler> apply(Target<?> key) {
+            List<MethodMetadata> metadata = contract.parseAndValidateMetadata(key.type());
             Map<String, MethodHandler> result = new LinkedHashMap<String, MethodHandler>();
             for (MethodMetadata md : metadata) {
                 BuildTemplateByResolvingArgs buildTemplate;
-                if (!md.formParams().isEmpty() && md.template().bodyTemplate() == null) {
+                if (!md.formParams().isEmpty()) {
                     buildTemplate = new BuildFormEncodedTemplateFromArgs(md, encoder);
                 } else if (md.bodyIndex() != null) {
                     buildTemplate = new BuildEncodedTemplateFromArgs(md, encoder);
                 } else {
                     buildTemplate = new BuildTemplateByResolvingArgs(md);
                 }
-                result.put(md.configKey(), factory.create(key, md, buildTemplate, options, decoder, errorDecoder));
+                result.put(md.configKey(), factory.create(key, md, buildTemplate, decoder, errorDecoder));
             }
             return result;
         }
@@ -188,10 +178,11 @@ public class ReflectiveFeign extends Feign {
                 try {
                     indexToExpander.put(
                             indexToExpanderClass.getKey(),
-                            indexToExpanderClass.getValue().newInstance());
-                } catch (InstantiationException e) {
-                    throw new IllegalStateException(e);
-                } catch (IllegalAccessException e) {
+                            indexToExpanderClass
+                                    .getValue()
+                                    .getDeclaredConstructor()
+                                    .newInstance());
+                } catch (ReflectiveOperationException e) {
                     throw new IllegalStateException(e);
                 }
             }
@@ -235,15 +226,15 @@ public class ReflectiveFeign extends Feign {
         }
 
         private Object expandElements(Expander expander, Object value) {
-            if (value instanceof Iterable) {
-                return expandIterable(expander, (Iterable) value);
+            if (value instanceof Iterable<?> iterable) {
+                return expandIterable(expander, iterable);
             }
             return expander.expand(value);
         }
 
-        private List<String> expandIterable(Expander expander, Iterable value) {
+        private List<String> expandIterable(Expander expander, Iterable<?> value) {
             List<String> values = new ArrayList<String>();
-            for (Object element : (Iterable) value) {
+            for (Object element : value) {
                 if (element != null) {
                     values.add(expander.expand(element));
                 }
@@ -251,7 +242,6 @@ public class ReflectiveFeign extends Feign {
             return values;
         }
 
-        @SuppressWarnings("unchecked")
         private RequestTemplate addHeaderMapHeaders(Object[] argv, RequestTemplate mutable) {
             Map<Object, Object> headerMap = (Map<Object, Object>) argv[metadata.headerMapIndex()];
             for (Entry<Object, Object> currEntry : headerMap.entrySet()) {
@@ -263,8 +253,8 @@ public class ReflectiveFeign extends Feign {
                 Collection<String> values = new ArrayList<String>();
 
                 Object currValue = currEntry.getValue();
-                if (currValue instanceof Iterable<?>) {
-                    Iterator<?> iter = ((Iterable<?>) currValue).iterator();
+                if (currValue instanceof Iterable<?> iterable) {
+                    Iterator<?> iter = iterable.iterator();
                     while (iter.hasNext()) {
                         Object nextObject = iter.next();
                         values.add(nextObject == null ? null : nextObject.toString());
@@ -278,7 +268,6 @@ public class ReflectiveFeign extends Feign {
             return mutable;
         }
 
-        @SuppressWarnings("unchecked")
         private RequestTemplate addQueryMapQueryParameters(Object[] argv, RequestTemplate mutable) {
             Map<Object, Object> queryMap = (Map<Object, Object>) argv[metadata.queryMapIndex()];
             for (Entry<Object, Object> currEntry : queryMap.entrySet()) {
@@ -290,8 +279,8 @@ public class ReflectiveFeign extends Feign {
                 Collection<String> values = new ArrayList<String>();
 
                 Object currValue = currEntry.getValue();
-                if (currValue instanceof Iterable<?>) {
-                    Iterator<?> iter = ((Iterable<?>) currValue).iterator();
+                if (currValue instanceof Iterable<?> iterable) {
+                    Iterator<?> iter = iterable.iterator();
                     while (iter.hasNext()) {
                         Object nextObject = iter.next();
                         values.add(nextObject == null ? null : nextObject.toString());
@@ -305,12 +294,12 @@ public class ReflectiveFeign extends Feign {
             return mutable;
         }
 
-        protected RequestTemplate resolve(Object[] argv, RequestTemplate mutable, Map<String, Object> variables) {
+        protected RequestTemplate resolve(Object[] _argv, RequestTemplate mutable, Map<String, Object> variables) {
             return mutable.resolve(variables);
         }
     }
 
-    private static class BuildFormEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
+    private static final class BuildFormEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
 
         private final Encoder encoder;
 
@@ -327,18 +316,12 @@ public class ReflectiveFeign extends Feign {
                     formVariables.put(entry.getKey(), entry.getValue());
                 }
             }
-            try {
-                encoder.encode(formVariables, Encoder.MAP_STRING_WILDCARD, mutable);
-            } catch (EncodeException e) {
-                throw e;
-            } catch (RuntimeException e) {
-                throw new EncodeException(e.getMessage(), e);
-            }
+            encoder.encode(formVariables, Encoder.MAP_STRING_WILDCARD, mutable);
             return super.resolve(argv, mutable, variables);
         }
     }
 
-    private static class BuildEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
+    private static final class BuildEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
 
         private final Encoder encoder;
 
@@ -351,13 +334,7 @@ public class ReflectiveFeign extends Feign {
         protected RequestTemplate resolve(Object[] argv, RequestTemplate mutable, Map<String, Object> variables) {
             Object body = argv[metadata.bodyIndex()];
             checkArgument(body != null, "Body parameter %s was null", metadata.bodyIndex());
-            try {
-                encoder.encode(body, metadata.bodyType(), mutable);
-            } catch (EncodeException e) {
-                throw e;
-            } catch (RuntimeException e) {
-                throw new EncodeException(e.getMessage(), e);
-            }
+            encoder.encode(body, metadata.bodyType(), mutable);
             return super.resolve(argv, mutable, variables);
         }
     }

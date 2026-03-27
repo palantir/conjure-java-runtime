@@ -24,11 +24,10 @@ import static com.palantir.conjure.java.client.jaxrs.feign.Util.toArray;
 import static com.palantir.conjure.java.client.jaxrs.feign.Util.valuesOrEmpty;
 
 import com.palantir.conjure.java.client.jaxrs.feign.codec.Encoder;
-import java.io.Serializable;
+import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,31 +44,28 @@ import java.util.Map.Entry;
  * javax.ws.rs.client.Invocation.Builder}, ensuring you can modify any part of the request. However,
  * this object is mutable, so needs to be guarded with the copy constructor.
  */
-public final class RequestTemplate implements Serializable {
+@SuppressWarnings("MissingSummary")
+public final class RequestTemplate {
 
-    private static final long serialVersionUID = 1L;
     private final Map<String, Collection<String>> queries = new LinkedHashMap<String, Collection<String>>();
     private final Map<String, Collection<String>> headers = new LinkedHashMap<String, Collection<String>>();
     private String method;
-    /* final to encourage mutable use vs replacing the object. */
+    /** final to encourage mutable use vs replacing the object. */
     private StringBuilder url = new StringBuilder();
-    private transient Charset charset;
+
     private byte[] body;
-    private String bodyTemplate;
     private boolean decodeSlash = true;
 
     public RequestTemplate() {}
 
-    /* Copy constructor. Use this when making templates. */
+    /** Copy constructor. Use this when making templates. */
     public RequestTemplate(RequestTemplate toCopy) {
         checkNotNull(toCopy, "toCopy");
         this.method = toCopy.method;
         this.url.append(toCopy.url);
         this.queries.putAll(toCopy.queries);
         this.headers.putAll(toCopy.headers);
-        this.charset = toCopy.charset;
         this.body = toCopy.body;
-        this.bodyTemplate = toCopy.bodyTemplate;
         this.decodeSlash = toCopy.decodeSlash;
     }
 
@@ -77,7 +73,7 @@ public final class RequestTemplate implements Serializable {
         try {
             return URLDecoder.decode(arg, UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -85,21 +81,7 @@ public final class RequestTemplate implements Serializable {
         try {
             return URLEncoder.encode(String.valueOf(arg), UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static boolean isHttpUrl(CharSequence value) {
-        return value.length() >= 4 && value.subSequence(0, 3).equals("http".substring(0, 3));
-    }
-
-    private static CharSequence removeTrailingSlash(CharSequence charSequence) {
-        if (charSequence != null
-                && charSequence.length() > 0
-                && charSequence.charAt(charSequence.length() - 1) == '/') {
-            return charSequence.subSequence(0, charSequence.length() - 1);
-        } else {
-            return charSequence;
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -124,9 +106,10 @@ public final class RequestTemplate implements Serializable {
         boolean inVar = false;
         StringBuilder var = new StringBuilder();
         StringBuilder builder = new StringBuilder();
-        for (char c : template.toCharArray()) {
+        for (int i = 0; i < template.length(); i++) {
+            char c = template.charAt(i);
             switch (c) {
-                case '{':
+                case '{' -> {
                     if (inVar) {
                         // '{{' is an escape: write the brace and don't interpret as a variable
                         builder.append("{");
@@ -134,8 +117,8 @@ public final class RequestTemplate implements Serializable {
                         break;
                     }
                     inVar = true;
-                    break;
-                case '}':
+                }
+                case '}' -> {
                     if (!inVar) { // then write the brace literally
                         builder.append('}');
                         break;
@@ -149,13 +132,14 @@ public final class RequestTemplate implements Serializable {
                         builder.append('{').append(key).append('}');
                     }
                     var = new StringBuilder();
-                    break;
-                default:
+                }
+                default -> {
                     if (inVar) {
                         var.append(c);
                     } else {
                         builder.append(c);
                     }
+                }
             }
         }
         return builder.toString();
@@ -229,32 +213,24 @@ public final class RequestTemplate implements Serializable {
         }
         headers.clear();
         headers.putAll(resolvedHeaders);
-        if (bodyTemplate != null) {
-            body(urlDecode(expand(bodyTemplate, encoded)));
-        }
         return this;
     }
 
-    /* roughly analogous to {@code javax.ws.rs.client.Target.request()}. */
+    /** roughly analogous to {@code javax.ws.rs.client.Target.request()}. */
     public Request request() {
         Map<String, Collection<String>> safeCopy = new LinkedHashMap<String, Collection<String>>();
         safeCopy.putAll(headers);
-        return Request.create(
-                method,
-                new StringBuilder(url).append(queryLine()).toString(),
-                Collections.unmodifiableMap(safeCopy),
-                body,
-                charset);
+        return Request.create(method, url + queryLine(), Collections.unmodifiableMap(safeCopy), body);
     }
 
-    /* @see Request#method() */
+    /** @see Request#method() */
     public RequestTemplate method(String method) {
         this.method = checkNotNull(method, "method");
         checkArgument(method.matches("^[A-Z]+$"), "Invalid HTTP Method: %s", method);
         return this;
     }
 
-    /* @see Request#method() */
+    /** @see Request#method() */
     public String method() {
         return method;
     }
@@ -268,17 +244,19 @@ public final class RequestTemplate implements Serializable {
         return decodeSlash;
     }
 
-    /* @see #url() */
-    public RequestTemplate append(CharSequence value) {
+    /** @see #url() */
+    public RequestTemplate append(String value) {
         url.append(value);
         url = pullAnyQueriesOutOfUrl(url);
         return this;
     }
 
-    /* @see #url() */
-    public RequestTemplate insert(int pos, CharSequence value) {
-        if (isHttpUrl(value)) {
-            value = removeTrailingSlash(value);
+    /** @see #url() */
+    public RequestTemplate insert(int pos, String value) {
+        if (value.startsWith("http")) {
+            if (value.endsWith("/")) {
+                value = value.substring(0, value.length() - 1);
+            }
             if (url.length() > 0 && url.charAt(0) != '/') {
                 url.insert(0, '/');
             }
@@ -295,7 +273,7 @@ public final class RequestTemplate implements Serializable {
      * Replaces queries with the specified {@code name} with the {@code values} supplied.
      * <br> Values can be passed in decoded or in url-encoded form depending on the value of the
      * {@code encoded} parameter.
-     * <br> When the {@code value} is {@code null}, all queries with the {@code configKey} are
+     * <br> When the {@code values} is {@code null}, all queries with the {@code configKey} are
      * removed. <br> <br><br><b>relationship to JAXRS 2.0</b><br> <br> Like {@code WebTarget.query},
      * except the values can be templatized. <br> ex. <br>
      * <pre>
@@ -319,7 +297,7 @@ public final class RequestTemplate implements Serializable {
         return doQuery(encoded, name, values);
     }
 
-    /* @see #query(boolean, String, String...) */
+    /** @see #query(boolean, String, String...) */
     public RequestTemplate query(boolean encoded, String name, Iterable<String> values) {
         return doQuery(encoded, name, values);
     }
@@ -413,7 +391,7 @@ public final class RequestTemplate implements Serializable {
 
     /**
      * Replaces headers with the specified {@code configKey} with the {@code values} supplied. <br>
-     * When the {@code value} is {@code null}, all headers with the {@code configKey} are removed.
+     * When the {@code values} is {@code null}, all headers with the {@code configKey} are removed.
      * <br> <br><br><b>relationship to JAXRS 2.0</b><br> <br> Like {@code WebTarget.queries} and
      * {@code javax.ws.rs.client.Invocation.Builder.header}, except the values can be templatized.
      * <br> ex. <br>
@@ -438,7 +416,7 @@ public final class RequestTemplate implements Serializable {
         return this;
     }
 
-    /* @see #header(String, String...) */
+    /** @see #header(String, String...) */
     public RequestTemplate header(String name, Iterable<String> values) {
         if (values != null) {
             return header(name, toArray(values, String.class));
@@ -481,9 +459,7 @@ public final class RequestTemplate implements Serializable {
      *
      * @see Request#body()
      */
-    public RequestTemplate body(byte[] bodyData, Charset charset) {
-        this.bodyTemplate = null;
-        this.charset = charset;
+    public RequestTemplate body(byte[] bodyData) {
         this.body = bodyData;
         int bodyLength = bodyData != null ? bodyData.length : 0;
         header(CONTENT_LENGTH, String.valueOf(bodyLength));
@@ -491,50 +467,10 @@ public final class RequestTemplate implements Serializable {
     }
 
     /**
-     * replaces the {@link Util#CONTENT_LENGTH} header. <br> Usually populated by an {@link
-     * Encoder}.
-     *
-     * @see Request#body()
-     */
-    public RequestTemplate body(String bodyText) {
-        byte[] bodyData = bodyText != null ? bodyText.getBytes(UTF_8) : null;
-        return body(bodyData, UTF_8);
-    }
-
-    /**
-     * The character set with which the body is encoded, or null if unknown or not applicable.  When
-     * this is present, you can use {@code new String(req.body(), req.charset())} to access the body
-     * as a String.
-     */
-    public Charset charset() {
-        return charset;
-    }
-
-    /**
      * @see Request#body()
      */
     public byte[] body() {
         return body;
-    }
-
-    /**
-     * populated by {@link Body}
-     *
-     * @see Request#body()
-     */
-    public RequestTemplate bodyTemplate(String bodyTemplate) {
-        this.bodyTemplate = bodyTemplate;
-        this.charset = null;
-        this.body = null;
-        return this;
-    }
-
-    /**
-     * @see Request#body()
-     * @see #expand(String, Map)
-     */
-    public String bodyTemplate() {
-        return bodyTemplate;
     }
 
     /**

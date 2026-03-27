@@ -1,5 +1,5 @@
 /*
- * (c) Copyright 2017 Palantir Technologies Inc. All rights reserved.
+ * (c) Copyright 2026 Palantir Technologies Inc. All rights reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package com.palantir.conjure.java.client.jaxrs.feignimpl;
+package com.palantir.conjure.java.client.jaxrs.feign;
 
-import com.palantir.conjure.java.client.jaxrs.feign.RequestInterceptor;
-import com.palantir.conjure.java.client.jaxrs.feign.RequestTemplate;
+public interface Expander {
 
-/**
- * No longer used.
- *
- * @deprecated no longer used
- */
-@Deprecated
-public enum PathTemplateHeaderRewriter implements RequestInterceptor {
-    INSTANCE;
-
-    @Override
-    public void apply(RequestTemplate _template) {
-        // nop
-    }
+    /**
+     * Expands the value into a string. Does not accept or return null.
+     */
+    String expand(Object value);
 }

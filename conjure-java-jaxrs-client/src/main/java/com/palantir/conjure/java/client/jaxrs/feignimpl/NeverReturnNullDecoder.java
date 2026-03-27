@@ -16,7 +16,6 @@
 
 package com.palantir.conjure.java.client.jaxrs.feignimpl;
 
-import com.palantir.conjure.java.client.jaxrs.feign.FeignException;
 import com.palantir.conjure.java.client.jaxrs.feign.Response;
 import com.palantir.conjure.java.client.jaxrs.feign.codec.Decoder;
 import com.palantir.logsafe.Preconditions;
@@ -32,7 +31,7 @@ public final class NeverReturnNullDecoder implements Decoder {
     }
 
     @Override
-    public Object decode(Response response, Type type) throws FeignException, IOException {
+    public Object decode(Response response, Type type) throws IOException {
         Object object = delegate.decode(response, type);
         Preconditions.checkNotNull(object, "Unexpected null body", SafeArg.of("status", response.status()));
 

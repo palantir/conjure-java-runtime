@@ -15,23 +15,8 @@
  */
 package com.palantir.conjure.java.client.jaxrs.feign.codec;
 
-import static com.palantir.conjure.java.client.jaxrs.feign.FeignException.errorStatus;
-import static com.palantir.conjure.java.client.jaxrs.feign.Util.RETRY_AFTER;
-import static com.palantir.conjure.java.client.jaxrs.feign.Util.checkNotNull;
-import static java.util.Locale.US;
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import com.palantir.conjure.java.client.jaxrs.feign.Feign;
-import com.palantir.conjure.java.client.jaxrs.feign.FeignException;
 import com.palantir.conjure.java.client.jaxrs.feign.Response;
-import com.palantir.conjure.java.client.jaxrs.feign.RetryableException;
-import com.palantir.conjure.java.client.jaxrs.feign.Util;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
 
 /**
  * Allows you to massage an exception into a application-specific one. Converting out to a throttle
@@ -57,95 +42,21 @@ import java.util.Map;
  * range are classified as errors, addressed by the {@link ErrorDecoder}. That said, certain RPC
  * apis return errors defined in the {@link Response#body()} even on a 200 status. For example, in
  * the DynECT api, a job still running condition is returned with a 200 status, encoded in json.
- * When scenarios like this occur, you should raise an application-specific exception (which may be
- * {@link RetryableException retryable}).
- *
- * <p/><b>Not Found Semantics</b>
- * <p/> It is commonly the case that 404 (Not Found) status has semantic value in HTTP apis. While
- * the default behavior is to raise exeception, users can alternatively enable 404 processing via
- * {@link Feign.Builder#decode404()}.
+ * When scenarios like this occur, you should raise an application-specific exception.
  */
 public interface ErrorDecoder {
 
     /**
      * Implement this method in order to decode an HTTP {@link Response} when {@link
      * Response#status()} is not in the 2xx range. Please raise  application-specific exceptions where
-     * possible. If your exception is retryable, wrap or subclass {@link RetryableException}
+     * possible.
      *
      * @param methodKey {@link Feign#configKey} of the java method that invoked the request.
      *                  ex. {@code IAM#getUser()}
      * @param response  HTTP response where {@link Response#status() status} is greater than or equal
      *                  to {@code 300}.
      * @return Exception IOException, if there was a network error reading the response or an
-     * application-specific exception decoded by the implementation. If the throwable is retryable, it
-     * should be wrapped, or a subtype of {@link RetryableException}
+     * application-specific exception decoded by the implementation.
      */
-    public Exception decode(String methodKey, Response response);
-
-    public static class Default implements ErrorDecoder {
-
-        private final RetryAfterDecoder retryAfterDecoder = new RetryAfterDecoder();
-
-        @Override
-        public Exception decode(String methodKey, Response response) {
-            FeignException exception = errorStatus(methodKey, response);
-            Date retryAfter = retryAfterDecoder.apply(firstOrNull(response.headers(), RETRY_AFTER));
-            if (retryAfter != null) {
-                return new RetryableException(exception.getMessage(), exception, retryAfter);
-            }
-            return exception;
-        }
-
-        private <T> T firstOrNull(Map<String, Collection<T>> map, String key) {
-            if (map.containsKey(key) && !map.get(key).isEmpty()) {
-                return map.get(key).iterator().next();
-            }
-            return null;
-        }
-    }
-
-    /**
-     * Decodes a {@link Util#RETRY_AFTER} header into an absolute date, if possible. <br> See <a
-     * href="https://tools.ietf.org/html/rfc2616#section-14.37">Retry-After format</a>
-     */
-    static class RetryAfterDecoder {
-
-        static final DateFormat RFC822_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", US);
-        private final DateFormat rfc822Format;
-
-        RetryAfterDecoder() {
-            this(RFC822_FORMAT);
-        }
-
-        RetryAfterDecoder(DateFormat rfc822Format) {
-            this.rfc822Format = checkNotNull(rfc822Format, "rfc822Format");
-        }
-
-        protected long currentTimeMillis() {
-            return System.currentTimeMillis();
-        }
-
-        /**
-         * returns a date that corresponds to the first time a request can be retried.
-         *
-         * @param retryAfter String in <a href="https://tools.ietf.org/html/rfc2616#section-14.37"
-         *                   >Retry-After format</a>
-         */
-        public Date apply(String retryAfter) {
-            if (retryAfter == null) {
-                return null;
-            }
-            if (retryAfter.matches("^[0-9]+$")) {
-                long deltaMillis = SECONDS.toMillis(Long.parseLong(retryAfter));
-                return new Date(currentTimeMillis() + deltaMillis);
-            }
-            synchronized (rfc822Format) {
-                try {
-                    return rfc822Format.parse(retryAfter);
-                } catch (ParseException ignored) {
-                    return null;
-                }
-            }
-        }
-    }
+    Exception decode(String methodKey, Response response);
 }

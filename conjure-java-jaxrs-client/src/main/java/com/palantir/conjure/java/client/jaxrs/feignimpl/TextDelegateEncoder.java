@@ -20,17 +20,18 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.client.jaxrs.feign.RequestTemplate;
-import com.palantir.conjure.java.client.jaxrs.feign.codec.EncodeException;
 import com.palantir.conjure.java.client.jaxrs.feign.codec.Encoder;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 /**
- * Delegates to a {@link Encoder.Default} if the response has a Content-Type of text/plain, or falls back to
- * the given delegate otherwise.
+ * Encodes the value as a string if the request has a Content-Type of text/plain, or falls back to the given delegate
+ * otherwise.
  */
 public final class TextDelegateEncoder implements Encoder {
-    private static final Encoder defaultEncoder = new Encoder.Default();
 
     private final Encoder delegate;
 
@@ -39,7 +40,7 @@ public final class TextDelegateEncoder implements Encoder {
     }
 
     @Override
-    public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
+    public void encode(Object object, Type bodyType, RequestTemplate template) {
         Collection<String> contentTypes =
                 HeaderAccessUtils.caseInsensitiveGet(template.headers(), HttpHeaders.CONTENT_TYPE);
         if (contentTypes == null) {
@@ -49,7 +50,14 @@ public final class TextDelegateEncoder implements Encoder {
         // In the case of multiple content types, or an unknown content type, we'll use the delegate instead.
         if (contentTypes.size() == 1
                 && Iterables.getOnlyElement(contentTypes, "").equals("text/plain")) {
-            defaultEncoder.encode(object, bodyType, template);
+            if (bodyType == String.class) {
+                template.body(object.toString().getBytes(StandardCharsets.UTF_8));
+            } else if (bodyType == byte[].class) {
+                template.body((byte[]) object);
+            } else if (object != null) {
+                throw new SafeRuntimeException(
+                        "Type is not supported by this encoder", SafeArg.of("type", object.getClass()));
+            }
         } else {
             delegate.encode(object, bodyType, template);
         }

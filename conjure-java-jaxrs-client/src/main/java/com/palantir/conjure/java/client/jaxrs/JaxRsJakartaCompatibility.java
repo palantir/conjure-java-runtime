@@ -120,7 +120,6 @@ public final class JaxRsJakartaCompatibility {
     }
 
     @Nullable
-    @SuppressWarnings("unchecked")
     private static Class<? extends Annotation> resolve(String fqcn) {
         try {
             return (Class<? extends Annotation>) Class.forName(fqcn);

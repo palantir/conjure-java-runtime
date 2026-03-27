@@ -19,7 +19,6 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 import com.codahale.metrics.Meter;
 import com.palantir.conjure.java.client.jaxrs.feign.RequestTemplate;
 import com.palantir.conjure.java.client.jaxrs.feign.Util;
-import com.palantir.conjure.java.client.jaxrs.feign.codec.EncodeException;
 import com.palantir.conjure.java.client.jaxrs.feign.codec.Encoder;
 import com.palantir.conjure.java.client.jaxrs.feignimpl.FeignClientMetrics.DangerousBuffering_Direction;
 import com.palantir.logsafe.Safe;
@@ -28,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 
 /** If the body type is an InputStream, write it into the body, otherwise pass to delegate. */
 public final class InputStreamDelegateEncoder implements Encoder {
@@ -50,12 +48,12 @@ public final class InputStreamDelegateEncoder implements Encoder {
     }
 
     @Override
-    public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
+    public void encode(Object object, Type bodyType, RequestTemplate template) {
         if (bodyType.equals(InputStream.class)) {
             try {
                 byte[] bytes = Util.toByteArray((InputStream) object);
                 dangerousBufferingMeter.mark(Math.max(1, bytes.length));
-                template.body(bytes, StandardCharsets.UTF_8);
+                template.body(bytes);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

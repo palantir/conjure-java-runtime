@@ -28,9 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import com.palantir.conjure.java.client.jaxrs.JaxRsClient;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
-import com.palantir.conjure.java.client.jaxrs.feign.FeignException;
 import com.palantir.conjure.java.client.jaxrs.feign.Response;
-import com.palantir.conjure.java.client.jaxrs.feign.codec.DecodeException;
 import com.palantir.conjure.java.client.jaxrs.feign.codec.Decoder;
 import com.palantir.conjure.java.okhttp.HostMetricsRegistry;
 import com.palantir.undertest.UndertowServerExtension;
@@ -78,7 +76,8 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Test
     public void testCannotReturnStringWithMediaTypeJson() {
         assertThatThrownBy(() -> service.getJsonString("foo"))
-                .isInstanceOf(FeignException.class)
+                .isInstanceOf(RuntimeException.class)
+                .cause()
                 .hasMessageStartingWith("Unrecognized token 'foo': was expecting "
                         + "(JSON String, Number, Array, Object or token 'null', 'true' or 'false')");
     }
@@ -146,8 +145,6 @@ public final class TextDelegateDecoderTest extends TestBase {
     @Test
     public void testStandardClientsUseTextDelegateEncoder() {
         assertThat(service.getString("string")).isEqualTo("string");
-        assertThatExceptionOfType(DecodeException.class)
-                .isThrownBy(() -> service.getString(null))
-                .withCauseInstanceOf(NullPointerException.class);
+        assertThatExceptionOfType(NullPointerException.class).isThrownBy(() -> service.getString(null));
     }
 }

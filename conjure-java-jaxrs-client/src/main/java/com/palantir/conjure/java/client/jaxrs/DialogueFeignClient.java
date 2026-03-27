@@ -95,7 +95,7 @@ final class DialogueFeignClient implements Client {
     }
 
     @Override
-    public com.palantir.conjure.java.client.jaxrs.feign.Response execute(Request request, Request.Options _options) throws IOException {
+    public com.palantir.conjure.java.client.jaxrs.feign.Response execute(Request request) throws IOException {
         com.palantir.dialogue.Request.Builder builder = com.palantir.dialogue.Request.builder();
 
         builder.putPathParams(REQUEST_URL_PATH_PARAM, request.url());
@@ -211,7 +211,8 @@ final class DialogueFeignClient implements Client {
         }
     }
 
-    private static final class DialogueResponseBody implements com.palantir.conjure.java.client.jaxrs.feign.Response.Body {
+    private static final class DialogueResponseBody
+            implements com.palantir.conjure.java.client.jaxrs.feign.Response.Body {
 
         private final Response response;
 

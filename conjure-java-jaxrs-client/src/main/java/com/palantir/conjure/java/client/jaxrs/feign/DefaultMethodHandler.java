@@ -16,18 +16,16 @@
 
 package com.palantir.conjure.java.client.jaxrs.feign;
 
-import com.palantir.conjure.java.client.jaxrs.feign.InvocationHandlerFactory.MethodHandler;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import org.jvnet.animal_sniffer.IgnoreJRERequirement;
 
 /**
  * Handles default methods by directly invoking the default method code on the interface.
  * The bindTo method must be called on the result before invoke is called.
  */
-@IgnoreJRERequirement
 final class DefaultMethodHandler implements MethodHandler {
     // Uses Java 7 MethodHandle based reflection.  As default methods will only exist when
     // run on a Java 8 JVM this will not affect use on legacy JVMs.
@@ -58,7 +56,7 @@ final class DefaultMethodHandler implements MethodHandler {
      */
     public void bindTo(Object proxy) {
         if (handle != null) {
-            throw new IllegalStateException("Attempted to rebind a default method handler that was already bound");
+            throw new SafeIllegalStateException("Attempted to rebind a default method handler that was already bound");
         }
         handle = unboundHandle.bindTo(proxy);
     }
@@ -70,7 +68,7 @@ final class DefaultMethodHandler implements MethodHandler {
     @Override
     public Object invoke(Object[] argv) throws Throwable {
         if (handle == null) {
-            throw new IllegalStateException("Default method handler invoked before proxy has been bound.");
+            throw new SafeIllegalStateException("Default method handler invoked before proxy has been bound.");
         }
         return handle.invokeWithArguments(argv);
     }

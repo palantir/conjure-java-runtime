@@ -15,8 +15,6 @@
  */
 package com.palantir.conjure.java.client.jaxrs.feign;
 
-import com.palantir.conjure.java.client.jaxrs.feign.Param.Expander;
-import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,9 +22,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class MethodMetadata implements Serializable {
+@SuppressWarnings("MissingSummary")
+public final class MethodMetadata {
 
-    private static final long serialVersionUID = 1L;
     private String configKey;
     private transient Type returnType;
     private Integer urlIndex;
@@ -47,6 +45,7 @@ public final class MethodMetadata implements Serializable {
     /**
      * @see Feign#configKey(Class, java.lang.reflect.Method)
      */
+    @SuppressWarnings("MissingSummary")
     public String configKey() {
         return configKey;
     }

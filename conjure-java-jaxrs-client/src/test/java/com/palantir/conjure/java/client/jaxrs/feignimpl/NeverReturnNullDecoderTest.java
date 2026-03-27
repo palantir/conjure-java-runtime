@@ -22,7 +22,6 @@ import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.client.jaxrs.TestBase;
 import com.palantir.conjure.java.client.jaxrs.feign.Response;
 import com.palantir.conjure.java.client.jaxrs.feign.codec.Decoder;
-import com.palantir.conjure.java.client.jaxrs.feign.jackson.JacksonDecoder;
 import com.palantir.conjure.java.serialization.ObjectMappers;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.testing.Assertions;

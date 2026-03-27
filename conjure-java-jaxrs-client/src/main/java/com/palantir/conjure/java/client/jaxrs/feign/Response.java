@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -253,7 +254,7 @@ public final class Response implements Closeable {
         for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {
             String headerName = entry.getKey();
             if (!result.containsKey(headerName)) {
-                result.put(headerName.toLowerCase(Locale.ROOT), new LinkedList<String>());
+                result.put(headerName.toLowerCase(Locale.ROOT), new ArrayList<>());
             }
             result.get(headerName).addAll(entry.getValue());
         }

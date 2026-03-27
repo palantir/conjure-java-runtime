@@ -19,20 +19,20 @@ package com.palantir.conjure.java.client.jaxrs.feignimpl;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
-import com.palantir.conjure.java.client.jaxrs.feign.FeignException;
 import com.palantir.conjure.java.client.jaxrs.feign.Response;
+import com.palantir.conjure.java.client.jaxrs.feign.Util;
 import com.palantir.conjure.java.client.jaxrs.feign.codec.Decoder;
-import com.palantir.conjure.java.client.jaxrs.feign.codec.StringDecoder;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.exceptions.SafeRuntimeException;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
 /**
- * Delegates to a {@link StringDecoder} if the response has a Content-Type of text/plain, or falls back to the given
+ * Decodes the response as a string if the response has a Content-Type of text/plain, or falls back to the given
  * delegate otherwise.
  */
 public final class TextDelegateDecoder implements Decoder {
-    private static final Decoder stringDecoder = new StringDecoder();
 
     private final Decoder delegate;
 
@@ -41,7 +41,7 @@ public final class TextDelegateDecoder implements Decoder {
     }
 
     @Override
-    public Object decode(Response response, Type type) throws IOException, FeignException {
+    public Object decode(Response response, Type type) throws IOException {
         Collection<String> contentTypes =
                 HeaderAccessUtils.caseInsensitiveGet(response.headers(), HttpHeaders.CONTENT_TYPE);
         if (contentTypes == null) {
@@ -50,11 +50,14 @@ public final class TextDelegateDecoder implements Decoder {
         // In the case of multiple content types, or an unknown content type, we'll use the delegate instead.
         if (contentTypes.size() == 1
                 && Iterables.getOnlyElement(contentTypes, "").startsWith("text/plain")) {
-            Object decoded = stringDecoder.decode(response, type);
-            if (decoded == null) {
+            Response.Body body = response.body();
+            if (body == null) {
                 return "";
             }
-            return decoded;
+            if (String.class.equals(type)) {
+                return Util.toString(body.asReader());
+            }
+            throw new SafeRuntimeException("Type is not supported by this encoder", SafeArg.of("type", type));
         }
 
         return delegate.decode(response, type);

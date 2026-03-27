@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.net.HttpHeaders;
-import com.palantir.conjure.java.client.jaxrs.feign.FeignException;
 import com.palantir.conjure.java.client.jaxrs.feign.Response;
 import com.palantir.conjure.java.client.jaxrs.feign.codec.Decoder;
 import java.io.IOException;
@@ -48,7 +47,7 @@ public final class CborDelegateDecoder implements Decoder {
     }
 
     @Override
-    public Object decode(Response response, Type type) throws IOException, FeignException {
+    public Object decode(Response response, Type type) throws IOException {
         Collection<String> contentTypes =
                 HeaderAccessUtils.caseInsensitiveGet(response.headers(), HttpHeaders.CONTENT_TYPE);
         if (contentTypes == null) {

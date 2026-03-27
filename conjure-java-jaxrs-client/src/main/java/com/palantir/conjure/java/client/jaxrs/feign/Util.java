@@ -17,6 +17,7 @@ package com.palantir.conjure.java.client.jaxrs.feign;
 
 import static java.lang.String.format;
 
+import com.google.errorprone.annotations.FormatMethod;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -26,9 +27,7 @@ import java.io.Reader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -46,38 +45,16 @@ import java.util.Set;
 /**
  * Utilities, typically copied in from guava, so as to avoid dependency conflicts.
  */
-public class Util {
+public final class Util {
 
     /**
      * The HTTP Content-Length header field name.
      */
     public static final String CONTENT_LENGTH = "Content-Length";
     /**
-     * The HTTP Content-Encoding header field name.
-     */
-    public static final String CONTENT_ENCODING = "Content-Encoding";
-    /**
-     * The HTTP Retry-After header field name.
-     */
-    public static final String RETRY_AFTER = "Retry-After";
-    /**
-     * Value for the Content-Encoding header that indicates that GZIP encoding is in use.
-     */
-    public static final String ENCODING_GZIP = "gzip";
-    /**
-     * Value for the Content-Encoding header that indicates that DEFLATE encoding is in use.
-     */
-    public static final String ENCODING_DEFLATE = "deflate";
-    /**
      * UTF-8: eight-bit UCS Transformation Format.
      */
     public static final Charset UTF_8 = Charset.forName("UTF-8");
-
-    // com.google.common.base.Charsets
-    /**
-     * ISO-8859-1: ISO Latin Alphabet Number 1 (ISO-LATIN-1).
-     */
-    public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
 
     private static final int BUF_SIZE = 0x800; // 2K chars (4K bytes)
 
@@ -93,6 +70,7 @@ public class Util {
     /**
      * Copy of {@code com.google.common.base.Preconditions#checkArgument}.
      */
+    @FormatMethod
     public static void checkArgument(boolean expression, String errorMessageTemplate, Object... errorMessageArgs) {
         if (!expression) {
             throw new IllegalArgumentException(format(errorMessageTemplate, errorMessageArgs));
@@ -102,6 +80,7 @@ public class Util {
     /**
      * Copy of {@code com.google.common.base.Preconditions#checkNotNull}.
      */
+    @FormatMethod
     public static <T> T checkNotNull(T reference, String errorMessageTemplate, Object... errorMessageArgs) {
         if (reference == null) {
             // If either of these parameters is null, the right thing happens anyway
@@ -113,6 +92,7 @@ public class Util {
     /**
      * Copy of {@code com.google.common.base.Preconditions#checkState}.
      */
+    @FormatMethod
     public static void checkState(boolean expression, String errorMessageTemplate, Object... errorMessageArgs) {
         if (!expression) {
             throw new IllegalStateException(format(errorMessageTemplate, errorMessageArgs));
@@ -143,7 +123,6 @@ public class Util {
     /**
      * Adapted from {@code com.google.common.base.Strings#emptyToNull}.
      */
-    @SuppressWarnings("unchecked")
     public static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
         Collection<T> collection;
         if (iterable instanceof Collection) {
@@ -172,34 +151,6 @@ public class Util {
             } catch (IOException ignored) { // NOPMD
             }
         }
-    }
-
-    /**
-     * Resolves the last type parameter of the parameterized {@code supertype}, based on the {@code
-     * genericContext}, into its upper bounds. <p/> Implementation copied from {@code
-     * retrofit.RestMethodInfo}.
-     *
-     * @param genericContext Ex. {@link java.lang.reflect.Field#getGenericType()}
-     * @param supertype      Ex. {@code Decoder.class}
-     * @return in the example above, the type parameter of {@code Decoder}.
-     * @throws IllegalStateException if {@code supertype} cannot be resolved into a parameterized type
-     *                               using {@code context}.
-     */
-    public static Type resolveLastTypeParameter(Type genericContext, Class<?> supertype) throws IllegalStateException {
-        Type resolvedSuperType = Types.getSupertype(genericContext, Types.getRawType(genericContext), supertype);
-        checkState(
-                resolvedSuperType instanceof ParameterizedType,
-                "could not resolve %s into a parameterized type %s",
-                genericContext,
-                supertype);
-        Type[] types = ParameterizedType.class.cast(resolvedSuperType).getActualTypeArguments();
-        for (int i = 0; i < types.length; i++) {
-            Type type = types[i];
-            if (type instanceof WildcardType) {
-                types[i] = ((WildcardType) type).getUpperBounds()[0];
-            }
-        }
-        return types[types.length - 1];
     }
 
     /**
@@ -235,14 +186,17 @@ public class Util {
         empties.put(
                 Iterator.class,
                 new Iterator<Object>() { // Collections.emptyIterator is a 1.7 api
+                    @Override
                     public boolean hasNext() {
                         return false;
                     }
 
+                    @Override
                     public Object next() {
                         throw new NoSuchElementException();
                     }
 
+                    @Override
                     public void remove() {
                         throw new IllegalStateException();
                     }

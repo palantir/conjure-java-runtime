@@ -15,8 +15,6 @@
  */
 package com.palantir.conjure.java.client.jaxrs.feign.codec;
 
-import static java.lang.String.format;
-
 import com.palantir.conjure.java.client.jaxrs.feign.MethodMetadata;
 import com.palantir.conjure.java.client.jaxrs.feign.RequestTemplate;
 import com.palantir.conjure.java.client.jaxrs.feign.Util;
@@ -70,24 +68,6 @@ public interface Encoder {
      * @param bodyType the type the object should be encoded as. {@link #MAP_STRING_WILDCARD}
      *                 indicates form encoding.
      * @param template the request template to populate.
-     * @throws EncodeException when encoding failed due to a checked exception.
      */
-    void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException;
-
-    /**
-     * Default implementation of {@code Encoder}.
-     */
-    class Default implements Encoder {
-
-        @Override
-        public void encode(Object object, Type bodyType, RequestTemplate template) {
-            if (bodyType == String.class) {
-                template.body(object.toString());
-            } else if (bodyType == byte[].class) {
-                template.body((byte[]) object, null);
-            } else if (object != null) {
-                throw new EncodeException(format("%s is not a type supported by this encoder.", object.getClass()));
-            }
-        }
-    }
+    void encode(Object object, Type bodyType, RequestTemplate template);
 }

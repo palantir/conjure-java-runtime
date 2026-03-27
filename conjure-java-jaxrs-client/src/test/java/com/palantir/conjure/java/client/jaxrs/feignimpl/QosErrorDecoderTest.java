@@ -29,7 +29,6 @@ import com.palantir.conjure.java.api.errors.QosReason.DueTo;
 import com.palantir.conjure.java.api.errors.QosReason.RetryHint;
 import com.palantir.conjure.java.api.errors.QosReasons;
 import com.palantir.conjure.java.client.jaxrs.feign.Response;
-import com.palantir.conjure.java.client.jaxrs.feign.codec.ErrorDecoder;
 import jakarta.ws.rs.core.HttpHeaders;
 import java.time.Duration;
 import java.util.Collection;
@@ -41,7 +40,7 @@ public final class QosErrorDecoderTest {
     private static final String methodKey = "method";
 
     static QosErrorDecoder decoder() {
-        return new QosErrorDecoder(new ErrorDecoder.Default());
+        return new QosErrorDecoder(null);
     }
 
     @Test

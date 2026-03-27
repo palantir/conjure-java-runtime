@@ -44,9 +44,7 @@ final class Types {
             // Type is a normal class.
             return (Class<?>) type;
 
-        } else if (type instanceof ParameterizedType) {
-            ParameterizedType parameterizedType = (ParameterizedType) type;
-
+        } else if (type instanceof ParameterizedType parameterizedType) {
             // I'm not exactly sure why getRawType() returns Type instead of Class. Neal isn't either but
             // suspects some pathological case related to nested classes exists.
             Type rawType = parameterizedType.getRawType();
@@ -55,8 +53,8 @@ final class Types {
             }
             return (Class<?>) rawType;
 
-        } else if (type instanceof GenericArrayType) {
-            Type componentType = ((GenericArrayType) type).getGenericComponentType();
+        } else if (type instanceof GenericArrayType genericArrayType) {
+            Type componentType = genericArrayType.getGenericComponentType();
             return Array.newInstance(getRawType(componentType), 0).getClass();
 
         } else if (type instanceof TypeVariable) {
@@ -64,8 +62,8 @@ final class Types {
             // type that's more general than necessary is okay.
             return Object.class;
 
-        } else if (type instanceof WildcardType) {
-            return getRawType(((WildcardType) type).getUpperBounds()[0]);
+        } else if (type instanceof WildcardType wildcardType) {
+            return getRawType(wildcardType.getUpperBounds()[0]);
 
         } else {
             String className = type == null ? "null" : type.getClass().getName();
@@ -85,39 +83,31 @@ final class Types {
         } else if (a instanceof Class) {
             return a.equals(b); // Class already specifies equals().
 
-        } else if (a instanceof ParameterizedType) {
-            if (!(b instanceof ParameterizedType)) {
+        } else if (a instanceof ParameterizedType pa) {
+            if (!(b instanceof ParameterizedType pb)) {
                 return false;
             }
-            ParameterizedType pa = (ParameterizedType) a;
-            ParameterizedType pb = (ParameterizedType) b;
             return equal(pa.getOwnerType(), pb.getOwnerType())
                     && pa.getRawType().equals(pb.getRawType())
                     && Arrays.equals(pa.getActualTypeArguments(), pb.getActualTypeArguments());
 
-        } else if (a instanceof GenericArrayType) {
-            if (!(b instanceof GenericArrayType)) {
+        } else if (a instanceof GenericArrayType ga) {
+            if (!(b instanceof GenericArrayType gb)) {
                 return false;
             }
-            GenericArrayType ga = (GenericArrayType) a;
-            GenericArrayType gb = (GenericArrayType) b;
             return equals(ga.getGenericComponentType(), gb.getGenericComponentType());
 
-        } else if (a instanceof WildcardType) {
-            if (!(b instanceof WildcardType)) {
+        } else if (a instanceof WildcardType wa) {
+            if (!(b instanceof WildcardType wb)) {
                 return false;
             }
-            WildcardType wa = (WildcardType) a;
-            WildcardType wb = (WildcardType) b;
             return Arrays.equals(wa.getUpperBounds(), wb.getUpperBounds())
                     && Arrays.equals(wa.getLowerBounds(), wb.getLowerBounds());
 
-        } else if (a instanceof TypeVariable) {
-            if (!(b instanceof TypeVariable)) {
+        } else if (a instanceof TypeVariable<?> va) {
+            if (!(b instanceof TypeVariable<?> vb)) {
                 return false;
             }
-            TypeVariable<?> va = (TypeVariable<?>) a;
-            TypeVariable<?> vb = (TypeVariable<?>) b;
             return va.getGenericDeclaration() == vb.getGenericDeclaration()
                     && va.getName().equals(vb.getName());
 
@@ -275,9 +265,9 @@ final class Types {
         }
 
         Type declaredBy = getGenericSupertype(context, contextRawType, declaredByRaw);
-        if (declaredBy instanceof ParameterizedType) {
+        if (declaredBy instanceof ParameterizedType parameterizedType) {
             int index = indexOf(declaredByRaw.getTypeParameters(), unknown);
-            return ((ParameterizedType) declaredBy).getActualTypeArguments()[index];
+            return parameterizedType.getActualTypeArguments()[index];
         }
 
         return unknown;
@@ -293,7 +283,7 @@ final class Types {
     }
 
     private static void checkNotPrimitive(Type type) {
-        if (type instanceof Class<?> && ((Class<?>) type).isPrimitive()) {
+        if (type instanceof Class<?> classType && classType.isPrimitive()) {
             throw new IllegalArgumentException();
         }
     }
@@ -306,8 +296,8 @@ final class Types {
 
         ParameterizedTypeImpl(Type ownerType, Type rawType, Type... typeArguments) {
             // Require an owner type if the raw type needs it.
-            if (rawType instanceof Class<?>
-                    && (ownerType == null) != (((Class<?>) rawType).getEnclosingClass() == null)) {
+            if (rawType instanceof Class<?> classType
+                    && (ownerType == null) != (classType.getEnclosingClass() == null)) {
                 throw new IllegalArgumentException();
             }
 
@@ -323,21 +313,24 @@ final class Types {
             }
         }
 
+        @Override
         public Type[] getActualTypeArguments() {
             return typeArguments.clone();
         }
 
+        @Override
         public Type getRawType() {
             return rawType;
         }
 
+        @Override
         public Type getOwnerType() {
             return ownerType;
         }
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof ParameterizedType && Types.equals(this, (ParameterizedType) other);
+            return other instanceof ParameterizedType parameterizedType && Types.equals(this, parameterizedType);
         }
 
         @Override
@@ -368,13 +361,14 @@ final class Types {
             this.componentType = componentType;
         }
 
+        @Override
         public Type getGenericComponentType() {
             return componentType;
         }
 
         @Override
         public boolean equals(Object o) {
-            return o instanceof GenericArrayType && Types.equals(this, (GenericArrayType) o);
+            return o instanceof GenericArrayType genericArrayType && Types.equals(this, genericArrayType);
         }
 
         @Override
@@ -426,17 +420,19 @@ final class Types {
             }
         }
 
+        @Override
         public Type[] getUpperBounds() {
             return new Type[] {upperBound};
         }
 
+        @Override
         public Type[] getLowerBounds() {
             return lowerBound != null ? new Type[] {lowerBound} : EMPTY_TYPE_ARRAY;
         }
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof WildcardType && Types.equals(this, (WildcardType) other);
+            return other instanceof WildcardType wildcardType && Types.equals(this, wildcardType);
         }
 
         @Override
