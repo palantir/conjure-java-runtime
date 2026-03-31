@@ -72,17 +72,17 @@ com.palantir.dialogue:dialogue-target:6.24.0 (5 constraints: 074d325c)
 
 com.palantir.nylon:nylon-threads:0.8.0 (1 constraints: 10100692)
 
-com.palantir.refreshable:refreshable:2.10.0 (2 constraints: 991477ab)
+com.palantir.refreshable:refreshable:2.11.0 (2 constraints: 9a14a7ab)
 
 com.palantir.ri:resource-identifier:2.14.0 (3 constraints: 373072b0)
 
-com.palantir.safe-logging:logger:3.13.0 (15 constraints: c2e5057c)
+com.palantir.safe-logging:logger:3.13.0 (15 constraints: c3e5da7c)
 
 com.palantir.safe-logging:logger-slf4j:3.13.0 (1 constraints: 320e9050)
 
 com.palantir.safe-logging:logger-spi:3.13.0 (2 constraints: 731e76b0)
 
-com.palantir.safe-logging:preconditions:3.13.0 (22 constraints: c75b0704)
+com.palantir.safe-logging:preconditions:3.13.0 (22 constraints: c85b7105)
 
 com.palantir.safe-logging:safe-logging:3.13.0 (20 constraints: 5a3caba5)
 
