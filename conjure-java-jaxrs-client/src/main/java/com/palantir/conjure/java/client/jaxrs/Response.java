@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,38 +35,22 @@ import java.util.TreeMap;
 final class Response implements Closeable {
 
     private final int status;
-    private final String reason;
     private final Map<String, Collection<String>> headers;
     private final Body body;
 
-    private Response(int status, String reason, Map<String, Collection<String>> headers, Body body) {
+    private Response(int status, Map<String, Collection<String>> headers, Body body) {
         Util.checkState(status >= 200, "Invalid status code: %s", status);
         this.status = status;
-        this.reason = reason; // nullable
         this.headers = Collections.unmodifiableMap(caseInsensitiveCopyOf(headers));
-        this.body = body; // nullable
+        this.body = body;
     }
 
-    static Response create(
-            int status,
-            String reason,
-            Map<String, Collection<String>> headers,
-            InputStream inputStream,
-            Integer length) {
-        return new Response(status, reason, headers, InputStreamBody.orNull(inputStream, length));
+    static Response create(int status, Map<String, Collection<String>> headers, byte[] data) {
+        return new Response(status, headers, new ByteArrayBody(data));
     }
 
-    static Response create(int status, String reason, Map<String, Collection<String>> headers, byte[] data) {
-        return new Response(status, reason, headers, ByteArrayBody.orNull(data));
-    }
-
-    static Response create(
-            int status, String reason, Map<String, Collection<String>> headers, String text, Charset charset) {
-        return new Response(status, reason, headers, ByteArrayBody.orNull(text, charset));
-    }
-
-    static Response create(int status, String reason, Map<String, Collection<String>> headers, Body body) {
-        return new Response(status, reason, headers, body);
+    static Response create(int status, Map<String, Collection<String>> headers, Body body) {
+        return new Response(status, headers, body);
     }
 
     /**
@@ -77,15 +60,6 @@ final class Response implements Closeable {
      */
     int status() {
         return status;
-    }
-
-    /**
-     * Nullable and not set when using http/2
-     *
-     * See https://github.com/http2/http2-spec/issues/202
-     */
-    String reason() {
-        return reason;
     }
 
     /**
@@ -105,9 +79,6 @@ final class Response implements Closeable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("HTTP/1.1 ").append(status);
-        if (reason != null) {
-            builder.append(' ').append(reason);
-        }
         builder.append('\n');
         for (String field : headers.keySet()) {
             for (String value : Util.valuesOrEmpty(headers, field)) {
@@ -136,11 +107,6 @@ final class Response implements Closeable {
         Integer length();
 
         /**
-         * True if {@link #asInputStream()} and {@link #asReader()} can be called more than once.
-         */
-        boolean isRepeatable();
-
-        /**
          * It is the responsibility of the caller to close the stream.
          */
         InputStream asInputStream() throws IOException;
@@ -151,49 +117,6 @@ final class Response implements Closeable {
         Reader asReader() throws IOException;
     }
 
-    private static final class InputStreamBody implements Body {
-
-        private final InputStream inputStream;
-        private final Integer length;
-
-        private InputStreamBody(InputStream inputStream, Integer length) {
-            this.inputStream = inputStream;
-            this.length = length;
-        }
-
-        private static Body orNull(InputStream inputStream, Integer length) {
-            if (inputStream == null) {
-                return null;
-            }
-            return new InputStreamBody(inputStream, length);
-        }
-
-        @Override
-        public Integer length() {
-            return length;
-        }
-
-        @Override
-        public boolean isRepeatable() {
-            return false;
-        }
-
-        @Override
-        public InputStream asInputStream() throws IOException {
-            return inputStream;
-        }
-
-        @Override
-        public Reader asReader() throws IOException {
-            return new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-        }
-
-        @Override
-        public void close() throws IOException {
-            inputStream.close();
-        }
-    }
-
     private static final class ByteArrayBody implements Body {
 
         private final byte[] data;
@@ -202,29 +125,9 @@ final class Response implements Closeable {
             this.data = data;
         }
 
-        private static Body orNull(byte[] data) {
-            if (data == null) {
-                return null;
-            }
-            return new ByteArrayBody(data);
-        }
-
-        private static Body orNull(String text, Charset charset) {
-            if (text == null) {
-                return null;
-            }
-            Util.checkNotNull(charset, "charset");
-            return new ByteArrayBody(text.getBytes(charset));
-        }
-
         @Override
         public Integer length() {
             return data.length;
-        }
-
-        @Override
-        public boolean isRepeatable() {
-            return true;
         }
 
         @Override

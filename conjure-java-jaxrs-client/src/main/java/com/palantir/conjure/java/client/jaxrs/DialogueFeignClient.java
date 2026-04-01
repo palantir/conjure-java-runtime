@@ -222,11 +222,6 @@ final class DialogueFeignClient implements Client {
         }
 
         @Override
-        public boolean isRepeatable() {
-            return false;
-        }
-
-        @Override
         public InputStream asInputStream() {
             return response.body();
         }
@@ -279,7 +274,6 @@ final class DialogueFeignClient implements Client {
         public com.palantir.conjure.java.client.jaxrs.Response deserialize(Response response) {
             return com.palantir.conjure.java.client.jaxrs.Response.create(
                     response.code(),
-                    null,
                     Multimaps.asMap((Multimap<String, String>) response.headers()),
                     new DialogueResponseBody(response));
         }

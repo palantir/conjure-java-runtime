@@ -49,7 +49,7 @@ import org.junit.jupiter.api.Test;
 public class EmptyContainerDecoderTest {
 
     private static final JsonMapper mapper = ObjectMappers.newClientJsonMapper();
-    private static final Response HTTP_204 = Response.create(204, "No Content", Collections.emptyMap(), new byte[] {});
+    private static final Response HTTP_204 = Response.create(204, Collections.emptyMap(), new byte[] {});
     private final Decoder delegate = mock(Decoder.class);
     private final EmptyContainerDecoder emptyContainerDecoder = new EmptyContainerDecoder(mapper, delegate);
 
@@ -58,10 +58,8 @@ public class EmptyContainerDecoderTest {
         when(delegate.decode(any(), eq(String.class))).thenReturn("text response");
         Response http200 = Response.create(
                 200,
-                "OK",
                 ImmutableMap.of(HttpHeaders.CONTENT_TYPE, ImmutableSet.of(MediaType.TEXT_PLAIN)),
-                "text response",
-                StandardCharsets.UTF_8);
+                "text response".getBytes(StandardCharsets.UTF_8));
 
         emptyContainerDecoder.decode(http200, String.class);
         verify(delegate, times(1)).decode(any(), any());

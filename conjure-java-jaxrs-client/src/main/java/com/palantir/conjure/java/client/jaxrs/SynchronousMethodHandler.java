@@ -64,7 +64,7 @@ final class SynchronousMethodHandler implements MethodHandler {
                 }
                 // Ensure the response body is disconnected
                 byte[] bodyData = Util.toByteArray(response.body().asInputStream());
-                return Response.create(response.status(), response.reason(), response.headers(), bodyData);
+                return Response.create(response.status(), response.headers(), bodyData);
             }
             if (response.status() >= 200 && response.status() < 300) {
                 if (void.class == metadata.returnType()) {
