@@ -39,6 +39,7 @@ import org.immutables.value.Value;
  * A context-independent (i.e., does not depend on configuration files or on-disk entities like JKS keystores)
  * instantiation of a {@link ServiceConfiguration}.
  */
+@SuppressWarnings("for-rollout:DangerousImmutablesToStringDoNotLog")
 @DoNotLog
 @Value.Immutable
 @ImmutablesStyle
