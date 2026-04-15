@@ -61,6 +61,9 @@ public interface ClientConfiguration {
     /** See {@link PartialServiceConfiguration#writeTimeout}. */
     Duration writeTimeout();
 
+    /** The maximum time a request may spend queued waiting for a concurrency permit before being rejected. */
+    Optional<Duration> queueTimeout();
+
     /** See {@link PartialServiceConfiguration#enableGcmCipherSuites}. */
     boolean enableGcmCipherSuites();
 

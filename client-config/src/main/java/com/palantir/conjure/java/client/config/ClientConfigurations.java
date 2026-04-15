@@ -107,6 +107,7 @@ public final class ClientConfigurations {
                 .nodeSelectionStrategy(DEFAULT_NODE_SELECTION_STRATEGY)
                 .failedUrlCooldown(DEFAULT_FAILED_URL_COOLDOWN)
                 .backoffSlotSize(config.backoffSlotSize().orElse(DEFAULT_BACKOFF_SLOT_SIZE))
+                .queueTimeout(config.queueTimeout())
                 .clientQoS(CLIENT_QOS_DEFAULT)
                 .serverQoS(PROPAGATE_QOS_DEFAULT)
                 .retryOnTimeout(RETRY_ON_TIMEOUT_DEFAULT)
