@@ -47,6 +47,8 @@ dependencies {
         }
         // This conflicts with org.glassfish:jakarta.el (which contains the same classes), when at the version requested by 2.40
         exclude group: 'jakarta.el', module: 'jakarta.el-api'
+        // Due to renames of the above
+        exclude group: 'javax.el', module: 'javax.el-api'
     }
     runtimeOnly 'org.glassfish.jersey.inject:jersey-hk2', {
         version {
