@@ -1,0 +1,1 @@
+Lockfile has inconsistent versions for glob io.undertow:*: [Line{group=io.undertow, artifact=undertow-core, version=2.2.38.Final, constraints=2, hash=ab1911ec}, Line{group=io.undertow, artifact=undertow-servlet-jakarta, version=2.2.20.Final, constraints=1, hash=50071361}]
