@@ -144,10 +144,6 @@ final class Util {
      *   <li>{@code Map}</li>
      *   <li>{@code Set}</li>
      * </ul>
-     *
-     * <p/> When {@link Feign.Builder#decode404() decoding HTTP 404 status}, you'll need to teach
-     * decoders a default empty value for a type. This method cheaply supports typical types by only
-     * looking at the raw type (vs type hierarchy). Decorate for sophistication.
      */
     static Object emptyValueOf(Type type) {
         return EMPTIES.get(Types.getRawType(type));

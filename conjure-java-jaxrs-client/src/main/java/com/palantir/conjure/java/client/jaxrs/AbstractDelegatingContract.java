@@ -16,15 +16,12 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Base class that provides the structure for a delegating {@link Contract}. Delegates the initial
  * {@link #parseAndValidateMetadata(Class)} call to the wrapped Contract and then calls {@link #processMetadata(Class,
- * Method, MethodMetadata)} on all of the methods that have metadata from the initial call.
+ * MethodMetadata)} on all of the methods that have metadata from the initial call.
  */
 abstract class AbstractDelegatingContract implements Contract {
 
@@ -36,26 +33,14 @@ abstract class AbstractDelegatingContract implements Contract {
 
     @Override
     public final List<MethodMetadata> parseAndValidateMetadata(Class<?> targetType) {
-        List<MethodMetadata> mdList = delegate.parseAndValidateMetadata(targetType);
+        List<MethodMetadata> methodMetadatas = delegate.parseAndValidateMetadata(targetType);
 
-        Map<String, MethodMetadata> methodMetadataByConfigKey = new LinkedHashMap<String, MethodMetadata>();
-        for (MethodMetadata md : mdList) {
-            methodMetadataByConfigKey.put(md.configKey(), md);
-        }
+        methodMetadatas.forEach(methodMetadata -> {
+            processMetadata(targetType, methodMetadata);
+        });
 
-        for (Method method : targetType.getMethods()) {
-            if (method.getDeclaringClass() == Object.class) {
-                continue;
-            }
-            String configKey = Feign.configKey(targetType, method);
-            MethodMetadata metadata = methodMetadataByConfigKey.get(configKey);
-            if (metadata != null) {
-                processMetadata(targetType, method, metadata);
-            }
-        }
-
-        return mdList;
+        return methodMetadatas;
     }
 
-    abstract void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata);
+    abstract void processMetadata(Class<?> targetType, MethodMetadata metadata);
 }

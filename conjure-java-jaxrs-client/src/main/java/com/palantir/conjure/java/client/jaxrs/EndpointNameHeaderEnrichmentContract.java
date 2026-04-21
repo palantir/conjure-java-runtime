@@ -20,7 +20,6 @@ import com.palantir.dialogue.HttpMethod;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
 import com.palantir.logsafe.exceptions.SafeNullPointerException;
-import java.lang.reflect.Method;
 import java.util.Locale;
 
 /**
@@ -37,13 +36,13 @@ final class EndpointNameHeaderEnrichmentContract extends AbstractDelegatingContr
     }
 
     @Override
-    void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
+    void processMetadata(Class<?> targetType, MethodMetadata metadata) {
         String httpMethod = metadata.template().method();
         if (httpMethod == null) {
             throw new SafeNullPointerException(
                     "An HTTP method is required",
                     SafeArg.of("class", targetType.getSimpleName()),
-                    SafeArg.of("method", method.getName()));
+                    SafeArg.of("method", metadata.method().getName()));
         }
         try {
             HttpMethod.valueOf(httpMethod.toUpperCase(Locale.ENGLISH));
@@ -52,9 +51,9 @@ final class EndpointNameHeaderEnrichmentContract extends AbstractDelegatingContr
                     "Unsupported HTTP method",
                     e,
                     SafeArg.of("class", targetType.getSimpleName()),
-                    SafeArg.of("method", method.getName()),
+                    SafeArg.of("method", metadata.method().getName()),
                     SafeArg.of("httpMethod", httpMethod));
         }
-        metadata.template().header(ENDPOINT_NAME_HEADER, method.getName());
+        metadata.template().header(ENDPOINT_NAME_HEADER, metadata.method().getName());
     }
 }

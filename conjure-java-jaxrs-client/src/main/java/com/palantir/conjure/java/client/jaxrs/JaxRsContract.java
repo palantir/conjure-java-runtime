@@ -56,7 +56,7 @@ final class JaxRsContract implements Contract {
                     "Only single-level inheritance supported: %s",
                     targetType.getSimpleName());
         }
-        Map<String, MethodMetadata> result = new LinkedHashMap<String, MethodMetadata>();
+        Map<Method, MethodMetadata> result = new LinkedHashMap<Method, MethodMetadata>();
         for (Method method : targetType.getMethods()) {
             if (method.getDeclaringClass() == Object.class
                     || (method.getModifiers() & Modifier.STATIC) != 0
@@ -64,17 +64,16 @@ final class JaxRsContract implements Contract {
                 continue;
             }
             MethodMetadata metadata = parseAndValidateMetadata(targetType, method);
-            Util.checkState(
-                    !result.containsKey(metadata.configKey()), "Overrides unsupported: %s", metadata.configKey());
-            result.put(metadata.configKey(), metadata);
+            Util.checkState(!result.containsKey(metadata.method()), "Overrides unsupported: %s", metadata.method());
+            result.put(method, metadata);
         }
         return new ArrayList<MethodMetadata>(result.values());
     }
 
     private MethodMetadata parseAndValidateMetadata(Class<?> targetType, Method method) {
         MethodMetadata data = new MethodMetadata();
+        data.method(method);
         data.returnType(Types.resolve(targetType, targetType, method.getGenericReturnType()));
-        data.configKey(Feign.configKey(targetType, method));
 
         if (targetType.getInterfaces().length == 1) {
             processAnnotationOnClass(data, targetType.getInterfaces()[0]);

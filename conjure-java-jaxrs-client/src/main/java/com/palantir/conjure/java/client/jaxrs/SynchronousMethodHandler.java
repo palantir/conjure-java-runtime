@@ -73,7 +73,7 @@ final class SynchronousMethodHandler implements MethodHandler {
                     return decoder.decode(response, metadata.returnType());
                 }
             } else {
-                throw errorDecoder.decode(metadata.configKey(), response);
+                throw errorDecoder.decode(response);
             }
         } finally {
             if (shouldClose) {

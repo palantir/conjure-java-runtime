@@ -42,9 +42,8 @@ import java.lang.reflect.Type;
  * </pre>
  * <br/> <h3>Implementation Note</h3> The {@code type} parameter will correspond to the {@link
  * java.lang.reflect.Method#getGenericReturnType() generic return type} of an {@link
- * Target#type() interface} processed by {@link Feign#newInstance(Target)}.  When
- * writing your implementation of Decoder, ensure you also test parameterized types such as {@code
- * List<Foo>}.
+ * Target#type() interface}.  When writing your implementation of Decoder, ensure you also test parameterized types
+ * such as {@code List<Foo>}.
  */
 interface Decoder {
 

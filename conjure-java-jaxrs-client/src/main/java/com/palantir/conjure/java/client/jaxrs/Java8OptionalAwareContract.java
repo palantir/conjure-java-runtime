@@ -19,7 +19,6 @@ package com.palantir.conjure.java.client.jaxrs;
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotations;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -55,22 +54,16 @@ final class Java8OptionalAwareContract extends AbstractDelegatingContract {
     }
 
     @Override
-    void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        Annotation[][] annotations = method.getParameterAnnotations();
+    void processMetadata(Class<?> targetType, MethodMetadata metadata) {
+        Class<?>[] parameterTypes = metadata.method().getParameterTypes();
+        Annotation[][] annotations = metadata.method().getParameterAnnotations();
         for (int i = 0; i < parameterTypes.length; i++) {
             Class<?> cls = parameterTypes[i];
             for (ExpanderDef def : expanders) {
                 if (cls.equals(def.match)) {
                     Set<Class<?>> paramAnnotations = getAnnotations(annotations, i);
                     configureOptionalExpanders(
-                            targetType,
-                            method,
-                            metadata,
-                            i,
-                            paramAnnotations,
-                            def.emptyExpanderClass,
-                            def.nullExpanderClass);
+                            targetType, metadata, i, paramAnnotations, def.emptyExpanderClass, def.nullExpanderClass);
                 }
             }
         }
@@ -82,7 +75,6 @@ final class Java8OptionalAwareContract extends AbstractDelegatingContract {
 
     private void configureOptionalExpanders(
             Class<?> targetType,
-            Method method,
             MethodMetadata metadata,
             int index,
             Set<Class<?>> paramAnnotations,
@@ -95,7 +87,7 @@ final class Java8OptionalAwareContract extends AbstractDelegatingContract {
         } else if (Annotations.PATH_PARAM.matches(paramAnnotations)) {
             throw new RuntimeException(String.format(
                     "Cannot use Java8 Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
-                    targetType.getName(), method.getName(), index));
+                    targetType.getName(), metadata.method().getName(), index));
         }
     }
 

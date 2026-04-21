@@ -48,12 +48,10 @@ interface ErrorDecoder {
      * Response#status()} is not in the 2xx range. Please raise  application-specific exceptions where
      * possible.
      *
-     * @param methodKey {@link Feign#configKey} of the java method that invoked the request.
-     *                  ex. {@code IAM#getUser()}
      * @param response  HTTP response where {@link Response#status() status} is greater than or equal
      *                  to {@code 300}.
      * @return Exception IOException, if there was a network error reading the response or an
      * application-specific exception decoded by the implementation.
      */
-    Exception decode(String methodKey, Response response);
+    Exception decode(Response response);
 }

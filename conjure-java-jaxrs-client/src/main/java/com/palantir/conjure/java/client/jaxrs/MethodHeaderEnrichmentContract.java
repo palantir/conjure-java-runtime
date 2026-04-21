@@ -16,8 +16,6 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-import java.lang.reflect.Method;
-
 /**
  * Contract to capture the method name and pass it to a feign client.
  *
@@ -32,7 +30,7 @@ final class MethodHeaderEnrichmentContract extends AbstractDelegatingContract {
     }
 
     @Override
-    void processMetadata(Class<?> _targetType, Method method, MethodMetadata metadata) {
-        metadata.template().header(METHOD_HEADER, method.toString());
+    void processMetadata(Class<?> _targetType, MethodMetadata metadata) {
+        metadata.template().header(METHOD_HEADER, metadata.method().toString());
     }
 }

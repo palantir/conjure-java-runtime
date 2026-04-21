@@ -18,7 +18,6 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotations;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,9 +39,9 @@ final class GuavaOptionalAwareContract extends AbstractDelegatingContract {
     }
 
     @Override
-    protected void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        Annotation[][] annotations = method.getParameterAnnotations();
+    protected void processMetadata(Class<?> targetType, MethodMetadata metadata) {
+        Class<?>[] parameterTypes = metadata.method().getParameterTypes();
+        Annotation[][] annotations = metadata.method().getParameterAnnotations();
         for (int i = 0; i < parameterTypes.length; i++) {
             Class<?> cls = parameterTypes[i];
             if (cls.equals(com.google.common.base.Optional.class)) {
@@ -56,7 +55,7 @@ final class GuavaOptionalAwareContract extends AbstractDelegatingContract {
                 } else if (Annotations.PATH_PARAM.matches(paramAnnotations)) {
                     throw new RuntimeException(String.format(
                             "Cannot use Guava Optionals with PathParams. (Class: %s, Method: %s, Param: arg%d)",
-                            targetType.getName(), method.getName(), i));
+                            targetType.getName(), metadata.method().getName(), i));
                 }
             }
         }

@@ -355,7 +355,7 @@ final class DialogueFeignClient implements Client {
         }
 
         @Override
-        public Exception decode(String _methodKey, com.palantir.conjure.java.client.jaxrs.Response response) {
+        public Exception decode(com.palantir.conjure.java.client.jaxrs.Response response) {
             try {
                 // The dialogue empty body deserializer properly handles exception mapping
                 runtime.bodySerDe().emptyBodyDeserializer().deserialize(new FeignDialogueResponse(response));

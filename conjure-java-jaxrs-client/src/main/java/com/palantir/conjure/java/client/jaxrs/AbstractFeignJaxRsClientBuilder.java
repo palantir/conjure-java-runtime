@@ -31,6 +31,16 @@ import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.Safe;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.exceptions.SafeIllegalArgumentException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /** Not meant to be implemented outside of this library. */
 abstract class AbstractFeignJaxRsClientBuilder {
@@ -76,6 +86,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
         return create(name, serviceClass, channel, RUNTIME, getObjectMapper(), getCborObjectMapper());
     }
 
+    @SuppressWarnings("ProxyNonConstantType")
     static <T> T create(
             @Safe String clientNameForLogging,
             Class<T> serviceClass,
@@ -84,40 +95,36 @@ abstract class AbstractFeignJaxRsClientBuilder {
             ObjectMapper jsonMapper,
             ObjectMapper cborMapper) {
         verifyClientUsageAnnotations(serviceClass);
-        return Feign.builder()
-                .contract(createContract())
-                .encoder(createEncoder(clientNameForLogging, jsonMapper, cborMapper))
-                .decoder(createDecoder(clientNameForLogging, jsonMapper, cborMapper))
-                .errorDecoder(new DialogueFeignClient.RemoteExceptionDecoder(runtime))
-                .client(new DialogueFeignClient(serviceClass, channel, runtime, FeignDialogueTarget.BASE_URL))
-                .target(new FeignDialogueTarget<>(serviceClass, channel));
-    }
 
-    /**
-     * Exists to fix equality computation between Feign client instances, which only compare the serviceClass and
-     * target. However, there's a great deal of other configuration, and we handle failover/retries in Dialogue
-     * which makes every client appear to use the same URL.
-     */
-    private record FeignDialogueTarget<T>(Class<T> serviceClass, Channel channel) implements Target<T> {
-        private static final String BASE_URL = "dialogue://feign";
+        Contract contract = createContract();
+        Encoder encoder = createEncoder(clientNameForLogging, jsonMapper, cborMapper);
+        Decoder decoder = createDecoder(clientNameForLogging, jsonMapper, cborMapper);
+        ErrorDecoder errorDecoder = new DialogueFeignClient.RemoteExceptionDecoder(runtime);
+        Client client = new DialogueFeignClient(serviceClass, channel, runtime, FeignDialogueTarget.BASE_URL);
+        Target<T> target = new FeignDialogueTarget<>(serviceClass, channel);
 
-        @Override
-        public Class<T> type() {
-            return serviceClass;
-        }
+        SynchronousMethodHandler.Factory methodHandlerFactory = new SynchronousMethodHandler.Factory(client);
 
-        @Override
-        public String url() {
-            return BASE_URL;
-        }
+        List<MethodMetadata> metadata = contract.parseAndValidateMetadata(target.type());
 
-        @Override
-        public Request apply(RequestTemplate input) {
-            if (input.url().indexOf("http") != 0) {
-                input.insert(0, url());
+        Map<Method, MethodHandler> methodHandlers = new LinkedHashMap<Method, MethodHandler>();
+        for (MethodMetadata md : metadata) {
+            BuildTemplateByResolvingArgs buildTemplate;
+            if (!md.formParams().isEmpty()) {
+                buildTemplate = new BuildFormEncodedTemplateFromArgs(md, encoder);
+            } else if (md.bodyIndex() != null) {
+                buildTemplate = new BuildEncodedTemplateFromArgs(md, encoder);
+            } else {
+                buildTemplate = new BuildTemplateByResolvingArgs(md);
             }
-            return input.request();
+            methodHandlers.put(
+                    md.method(), methodHandlerFactory.create(target, md, buildTemplate, decoder, errorDecoder));
         }
+
+        InvocationHandler handler = new FeignInvocationHandler(target, methodHandlers);
+        T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(), new Class<?>[] {target.type()}, handler);
+
+        return proxy;
     }
 
     private static Contract createContract() {
@@ -158,6 +165,215 @@ abstract class AbstractFeignJaxRsClientBuilder {
                     "Service class should not be used as a client because it is annotated with \"@JaxRsServer\" and "
                             + "should only used as a server resource",
                     SafeArg.of("serviceClass", serviceClass));
+        }
+    }
+
+    /**
+     * Exists to fix equality computation between Feign client instances, which only compare the serviceClass and
+     * target. However, there's a great deal of other configuration, and we handle failover/retries in Dialogue
+     * which makes every client appear to use the same URL.
+     */
+    private record FeignDialogueTarget<T>(Class<T> serviceClass, Channel channel) implements Target<T> {
+        private static final String BASE_URL = "dialogue://feign";
+
+        @Override
+        public Class<T> type() {
+            return serviceClass;
+        }
+
+        @Override
+        public String url() {
+            return BASE_URL;
+        }
+
+        @Override
+        public Request apply(RequestTemplate input) {
+            if (input.url().indexOf("http") != 0) {
+                input.insert(0, url());
+            }
+            return input.request();
+        }
+    }
+
+    private static class BuildTemplateByResolvingArgs implements RequestTemplate.Factory {
+
+        @SuppressWarnings("VisibilityModifier")
+        final MethodMetadata metadata;
+
+        private final Map<Integer, Expander> indexToExpander = new LinkedHashMap<Integer, Expander>();
+
+        private BuildTemplateByResolvingArgs(MethodMetadata metadata) {
+            this.metadata = metadata;
+            if (metadata.indexToExpander() != null) {
+                indexToExpander.putAll(metadata.indexToExpander());
+                return;
+            }
+            if (metadata.indexToExpanderClass().isEmpty()) {
+                return;
+            }
+            for (Entry<Integer, Class<? extends Expander>> indexToExpanderClass :
+                    metadata.indexToExpanderClass().entrySet()) {
+                try {
+                    indexToExpander.put(
+                            indexToExpanderClass.getKey(),
+                            indexToExpanderClass
+                                    .getValue()
+                                    .getDeclaredConstructor()
+                                    .newInstance());
+                } catch (ReflectiveOperationException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
+        }
+
+        @Override
+        public RequestTemplate create(Object[] argv) {
+            RequestTemplate mutable = new RequestTemplate(metadata.template());
+            if (metadata.urlIndex() != null) {
+                int urlIndex = metadata.urlIndex();
+                Util.checkArgument(argv[urlIndex] != null, "URI parameter %s was null", urlIndex);
+                mutable.insert(0, String.valueOf(argv[urlIndex]));
+            }
+            Map<String, Object> varBuilder = new LinkedHashMap<String, Object>();
+            for (Entry<Integer, Collection<String>> entry :
+                    metadata.indexToName().entrySet()) {
+                int index = entry.getKey();
+                Object value = argv[entry.getKey()];
+                if (value != null) { // Null values are skipped.
+                    if (indexToExpander.containsKey(index)) {
+                        value = expandElements(indexToExpander.get(index), value);
+                    }
+                    for (String name : entry.getValue()) {
+                        varBuilder.put(name, value);
+                    }
+                }
+            }
+
+            RequestTemplate template = resolve(argv, mutable, varBuilder);
+            if (metadata.queryMapIndex() != null) {
+                // add query map parameters after initial resolve so that they take
+                // precedence over any predefined values
+                template = addQueryMapQueryParameters(argv, template);
+            }
+
+            if (metadata.headerMapIndex() != null) {
+                template = addHeaderMapHeaders(argv, template);
+            }
+
+            return template;
+        }
+
+        private Object expandElements(Expander expander, Object value) {
+            if (value instanceof Iterable<?> iterable) {
+                return expandIterable(expander, iterable);
+            }
+            return expander.expand(value);
+        }
+
+        private List<String> expandIterable(Expander expander, Iterable<?> value) {
+            List<String> values = new ArrayList<String>();
+            for (Object element : value) {
+                if (element != null) {
+                    values.add(expander.expand(element));
+                }
+            }
+            return values;
+        }
+
+        private RequestTemplate addHeaderMapHeaders(Object[] argv, RequestTemplate mutable) {
+            Map<Object, Object> headerMap = (Map<Object, Object>) argv[metadata.headerMapIndex()];
+            for (Entry<Object, Object> currEntry : headerMap.entrySet()) {
+                Util.checkState(
+                        currEntry.getKey().getClass() == String.class,
+                        "HeaderMap key must be a String: %s",
+                        currEntry.getKey());
+
+                Collection<String> values = new ArrayList<String>();
+
+                Object currValue = currEntry.getValue();
+                if (currValue instanceof Iterable<?> iterable) {
+                    Iterator<?> iter = iterable.iterator();
+                    while (iter.hasNext()) {
+                        Object nextObject = iter.next();
+                        values.add(nextObject == null ? null : nextObject.toString());
+                    }
+                } else {
+                    values.add(currValue == null ? null : currValue.toString());
+                }
+
+                mutable.header((String) currEntry.getKey(), values);
+            }
+            return mutable;
+        }
+
+        private RequestTemplate addQueryMapQueryParameters(Object[] argv, RequestTemplate mutable) {
+            Map<Object, Object> queryMap = (Map<Object, Object>) argv[metadata.queryMapIndex()];
+            for (Entry<Object, Object> currEntry : queryMap.entrySet()) {
+                Util.checkState(
+                        currEntry.getKey().getClass() == String.class,
+                        "QueryMap key must be a String: %s",
+                        currEntry.getKey());
+
+                Collection<String> values = new ArrayList<String>();
+
+                Object currValue = currEntry.getValue();
+                if (currValue instanceof Iterable<?> iterable) {
+                    Iterator<?> iter = iterable.iterator();
+                    while (iter.hasNext()) {
+                        Object nextObject = iter.next();
+                        values.add(nextObject == null ? null : nextObject.toString());
+                    }
+                } else {
+                    values.add(currValue == null ? null : currValue.toString());
+                }
+
+                mutable.query(metadata.queryMapEncoded(), (String) currEntry.getKey(), values);
+            }
+            return mutable;
+        }
+
+        RequestTemplate resolve(Object[] _argv, RequestTemplate mutable, Map<String, Object> variables) {
+            return mutable.resolve(variables);
+        }
+    }
+
+    private static final class BuildFormEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
+
+        private final Encoder encoder;
+
+        private BuildFormEncodedTemplateFromArgs(MethodMetadata metadata, Encoder encoder) {
+            super(metadata);
+            this.encoder = encoder;
+        }
+
+        @Override
+        RequestTemplate resolve(Object[] argv, RequestTemplate mutable, Map<String, Object> variables) {
+            Map<String, Object> formVariables = new LinkedHashMap<String, Object>();
+            for (Entry<String, Object> entry : variables.entrySet()) {
+                if (metadata.formParams().contains(entry.getKey())) {
+                    formVariables.put(entry.getKey(), entry.getValue());
+                }
+            }
+            encoder.encode(formVariables, Encoder.MAP_STRING_WILDCARD, mutable);
+            return super.resolve(argv, mutable, variables);
+        }
+    }
+
+    private static final class BuildEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
+
+        private final Encoder encoder;
+
+        private BuildEncodedTemplateFromArgs(MethodMetadata metadata, Encoder encoder) {
+            super(metadata);
+            this.encoder = encoder;
+        }
+
+        @Override
+        RequestTemplate resolve(Object[] argv, RequestTemplate mutable, Map<String, Object> variables) {
+            Object body = argv[metadata.bodyIndex()];
+            Util.checkArgument(body != null, "Body parameter %s was null", metadata.bodyIndex());
+            encoder.encode(body, metadata.bodyType(), mutable);
+            return super.resolve(argv, mutable, variables);
         }
     }
 }

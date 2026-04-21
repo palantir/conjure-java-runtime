@@ -15,6 +15,7 @@
  */
 package com.palantir.conjure.java.client.jaxrs;
 
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,33 +26,29 @@ import java.util.Map;
 @SuppressWarnings({"HiddenField", "MissingSummary"})
 final class MethodMetadata {
 
-    private String configKey;
-    private transient Type returnType;
+    private Method method;
+    private Type returnType;
     private Integer urlIndex;
     private Integer bodyIndex;
     private Integer headerMapIndex;
     private Integer queryMapIndex;
     private boolean queryMapEncoded;
-    private transient Type bodyType;
+    private Type bodyType;
     private RequestTemplate template = new RequestTemplate();
     private List<String> formParams = new ArrayList<String>();
     private Map<Integer, Collection<String>> indexToName = new LinkedHashMap<Integer, Collection<String>>();
     private Map<Integer, Class<? extends Expander>> indexToExpanderClass =
             new LinkedHashMap<Integer, Class<? extends Expander>>();
-    private transient Map<Integer, Expander> indexToExpander;
+    private Map<Integer, Expander> indexToExpander;
 
     MethodMetadata() {}
 
-    /**
-     * @see Feign#configKey(Class, java.lang.reflect.Method)
-     */
-    @SuppressWarnings("MissingSummary")
-    String configKey() {
-        return configKey;
+    Method method() {
+        return method;
     }
 
-    MethodMetadata configKey(String configKey) {
-        this.configKey = configKey;
+    MethodMetadata method(Method method) {
+        this.method = method;
         return this;
     }
 
