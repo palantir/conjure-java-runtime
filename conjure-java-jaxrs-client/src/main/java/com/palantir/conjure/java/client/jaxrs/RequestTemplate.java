@@ -44,7 +44,6 @@ final class RequestTemplate {
     private StringBuilder url = new StringBuilder();
 
     private byte[] body;
-    private boolean decodeSlash = true;
 
     RequestTemplate() {}
 
@@ -56,7 +55,6 @@ final class RequestTemplate {
         this.queries.putAll(toCopy.queries);
         this.headers.putAll(toCopy.headers);
         this.body = toCopy.body;
-        this.decodeSlash = toCopy.decodeSlash;
     }
 
     private static String urlDecode(String arg) {
@@ -181,9 +179,6 @@ final class RequestTemplate {
             encoded.put(entry.getKey(), urlEncode(String.valueOf(entry.getValue())));
         }
         String resolvedUrl = expand(url.toString(), encoded).replace("+", "%20");
-        if (decodeSlash) {
-            resolvedUrl = resolvedUrl.replace("%2F", "/");
-        }
         url = new StringBuilder(resolvedUrl);
 
         Map<String, Collection<String>> resolvedHeaders = new LinkedHashMap<String, Collection<String>>();
@@ -217,15 +212,6 @@ final class RequestTemplate {
     /** @see Request#method() */
     String method() {
         return method;
-    }
-
-    RequestTemplate decodeSlash(boolean decodeSlash) {
-        this.decodeSlash = decodeSlash;
-        return this;
-    }
-
-    boolean decodeSlash() {
-        return decodeSlash;
     }
 
     /** @see #url() */
@@ -439,15 +425,10 @@ final class RequestTemplate {
     }
 
     /**
-     * replaces the {@link Util#CONTENT_LENGTH} header. <br> Usually populated by an {@link
-     * Encoder}.
-     *
      * @see Request#body()
      */
-    RequestTemplate body(byte[] bodyData) {
-        this.body = bodyData;
-        int bodyLength = bodyData != null ? bodyData.length : 0;
-        header(Util.CONTENT_LENGTH, String.valueOf(bodyLength));
+    RequestTemplate body(byte[] body) {
+        this.body = body;
         return this;
     }
 

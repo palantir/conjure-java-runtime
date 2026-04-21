@@ -124,7 +124,6 @@ abstract class AbstractFeignJaxRsClientBuilder {
         Contract contract = new JaxRsContract();
         contract = new GuavaOptionalAwareContract(contract);
         contract = new Java8OptionalAwareContract(contract);
-        contract = new SlashEncodingContract(contract);
         contract = new MethodHeaderEnrichmentContract(contract);
         contract = new EndpointNameHeaderEnrichmentContract(contract);
         return contract;

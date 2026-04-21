@@ -47,10 +47,6 @@ final class Util {
      * The HTTP Content-Length header field name.
      */
     static final String CONTENT_LENGTH = "Content-Length";
-    /**
-     * UTF-8: eight-bit UCS Transformation Format.
-     */
-    static final Charset UTF_8 = Charset.forName("UTF-8");
 
     private static final int BUF_SIZE = 0x800; // 2K chars (4K bytes)
 
