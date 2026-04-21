@@ -121,7 +121,7 @@ abstract class AbstractFeignJaxRsClientBuilder {
     }
 
     private static Contract createContract() {
-        Contract contract = new CompatibleJaxRsContract();
+        Contract contract = new JaxRsContract();
         contract = new GuavaOptionalAwareContract(contract);
         contract = new Java8OptionalAwareContract(contract);
         contract = new SlashEncodingContract(contract);

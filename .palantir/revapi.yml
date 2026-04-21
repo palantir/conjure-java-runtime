@@ -93,6 +93,9 @@ acceptedBreaks:
       justification: "Removed internal method"
     com.palantir.conjure.java.runtime:conjure-java-jaxrs-client:
     - code: "java.class.removed"
+      old: "class com.palantir.conjure.java.client.jaxrs.CompatibleJaxRsContract"
+      justification: "Class is package private"
+    - code: "java.class.removed"
       old: "class com.palantir.conjure.java.client.jaxrs.feignimpl.CborDelegateDecoder"
       justification: "Removing Feign dependency and making internals private"
     - code: "java.class.removed"
