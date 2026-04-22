@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.net.HttpHeaders;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 /**
@@ -35,20 +34,20 @@ import java.util.Collection;
  * <p>In the future we will likely codegen the client and thus remove the need for scanning the headers on every
  * request.
  */
-public final class CborDelegateEncoder implements Encoder {
+final class CborDelegateEncoder implements Encoder {
 
     public static final String MIME_TYPE = "application/cbor";
 
     private final ObjectMapper cborMapper;
     private final Encoder delegate;
 
-    public CborDelegateEncoder(ObjectMapper cborMapper, Encoder delegate) {
+    CborDelegateEncoder(ObjectMapper cborMapper, Encoder delegate) {
         this.cborMapper = cborMapper;
         this.delegate = delegate;
     }
 
     @Override
-    public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
+    public void encode(Object object, Type bodyType, RequestTemplate template) {
         Collection<String> contentTypes =
                 HeaderAccessUtils.caseInsensitiveGet(template.headers(), HttpHeaders.CONTENT_TYPE);
         if (contentTypes == null) {
@@ -62,7 +61,7 @@ public final class CborDelegateEncoder implements Encoder {
 
         try {
             JavaType javaType = cborMapper.getTypeFactory().constructType(bodyType);
-            template.body(cborMapper.writerFor(javaType).writeValueAsBytes(object), StandardCharsets.UTF_8);
+            template.body(cborMapper.writerFor(javaType).writeValueAsBytes(object));
         } catch (JsonProcessingException e) {
             throw new UncheckedIOException(e);
         }

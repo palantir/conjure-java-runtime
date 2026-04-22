@@ -23,16 +23,16 @@ import java.lang.reflect.Method;
  *
  * This should be considered internal API and should not be depended upon.
  */
-public final class MethodHeaderEnrichmentContract extends AbstractDelegatingContract {
+final class MethodHeaderEnrichmentContract extends AbstractDelegatingContract {
 
     public static final String METHOD_HEADER = "dialogue-method";
 
-    public MethodHeaderEnrichmentContract(Contract delegate) {
+    MethodHeaderEnrichmentContract(Contract delegate) {
         super(delegate);
     }
 
     @Override
-    protected void processMetadata(Class<?> _targetType, Method method, MethodMetadata metadata) {
+    void processMetadata(Class<?> _targetType, Method method, MethodMetadata metadata) {
         metadata.template().header(METHOD_HEADER, method.toString());
     }
 }

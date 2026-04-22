@@ -17,7 +17,6 @@
 package com.palantir.conjure.java.client.jaxrs;
 
 import com.google.common.base.Preconditions;
-import com.palantir.conjure.java.client.jaxrs.Param.Expander;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -25,7 +24,7 @@ import java.util.Optional;
  * Expands Optional by using the empty string for {@link Optional#empty()} and the {@link Object#toString()} of the
  * value otherwise.
  */
-public final class Java8EmptyOptionalExpander implements Expander {
+final class Java8EmptyOptionalExpander implements Expander {
 
     @Override
     public String expand(Object value) {

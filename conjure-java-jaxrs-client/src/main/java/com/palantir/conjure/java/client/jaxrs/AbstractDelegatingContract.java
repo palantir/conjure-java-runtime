@@ -23,7 +23,7 @@ import java.util.Map;
 
 /**
  * Base class that provides the structure for a delegating {@link Contract}. Delegates the initial
- * {@link #parseAndValidatateMetadata(Class)} call to the wrapped Contract and then calls {@link #processMetadata(Class,
+ * {@link #parseAndValidateMetadata(Class)} call to the wrapped Contract and then calls {@link #processMetadata(Class,
  * Method, MethodMetadata)} on all of the methods that have metadata from the initial call.
  */
 abstract class AbstractDelegatingContract implements Contract {
@@ -35,8 +35,8 @@ abstract class AbstractDelegatingContract implements Contract {
     }
 
     @Override
-    public final List<MethodMetadata> parseAndValidatateMetadata(Class<?> targetType) {
-        List<MethodMetadata> mdList = delegate.parseAndValidatateMetadata(targetType);
+    public final List<MethodMetadata> parseAndValidateMetadata(Class<?> targetType) {
+        List<MethodMetadata> mdList = delegate.parseAndValidateMetadata(targetType);
 
         Map<String, MethodMetadata> methodMetadataByConfigKey = new LinkedHashMap<String, MethodMetadata>();
         for (MethodMetadata md : mdList) {
@@ -57,5 +57,5 @@ abstract class AbstractDelegatingContract implements Contract {
         return mdList;
     }
 
-    protected abstract void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata);
+    abstract void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata);
 }

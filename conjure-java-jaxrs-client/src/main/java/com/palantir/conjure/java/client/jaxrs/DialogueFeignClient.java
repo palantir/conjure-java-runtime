@@ -72,15 +72,13 @@ final class DialogueFeignClient implements Client {
 
     private final ConjureRuntime runtime;
     private final Channel channel;
-    private final String baseUrl;
     private final String serviceName;
     private final String version;
 
     private final ConcurrentHashMap<FeignEndpointKey, EndpointChannel> endpointChannels = new ConcurrentHashMap<>();
 
-    DialogueFeignClient(Class<?> jaxrsInterface, Channel channel, ConjureRuntime runtime, String baseUrl) {
+    DialogueFeignClient(Class<?> jaxrsInterface, Channel channel, ConjureRuntime runtime) {
         this.channel = Preconditions.checkNotNull(channel, "Channel is required");
-        this.baseUrl = Preconditions.checkNotNull(baseUrl, "Base URL is required");
         this.runtime = Preconditions.checkNotNull(runtime, "ConjureRuntime is required");
         this.serviceName = Preconditions.checkNotNull(jaxrsInterface, "Service is required")
                 .getSimpleName();
@@ -89,7 +87,7 @@ final class DialogueFeignClient implements Client {
     }
 
     @Override
-    public Response execute(Request request, Request.Options _options) throws IOException {
+    public Response execute(Request request) throws IOException {
         com.palantir.dialogue.Request.Builder builder = com.palantir.dialogue.Request.builder();
 
         builder.putPathParams(REQUEST_URL_PATH_PARAM, request.url());
@@ -221,11 +219,6 @@ final class DialogueFeignClient implements Client {
         }
 
         @Override
-        public boolean isRepeatable() {
-            return false;
-        }
-
-        @Override
         public InputStream asInputStream() {
             return response.body();
         }
@@ -278,7 +271,6 @@ final class DialogueFeignClient implements Client {
         public Response deserialize(com.palantir.dialogue.Response response) {
             return Response.create(
                     response.code(),
-                    null,
                     Multimaps.asMap((Multimap<String, String>) response.headers()),
                     new DialogueResponseBody(response));
         }
@@ -391,27 +383,20 @@ final class DialogueFeignClient implements Client {
                     SafeArg.of("requestUrls", requestUrls.size()));
 
             String target = requestUrls.get(0);
-            Preconditions.checkState(
-                    target.startsWith(baseUrl),
-                    "Request URL must start with base url",
-                    UnsafeArg.of("requestUrl", target),
-                    UnsafeArg.of("baseUrl", baseUrl));
 
-            int trailingOffset = 0;
-            // If the trailing section starts with a slash, ignore it to prevent duplicate leading slashes.
-            if (target.length() > baseUrl.length() && target.charAt(baseUrl.length()) == '/') {
-                trailingOffset = 1;
+            // If the target section starts with a slash, ignore it to prevent duplicate leading slashes.
+            if (!target.isEmpty() && target.charAt(0) == '/') {
+                target = target.substring(1);
             }
-            String trailing = target.substring(baseUrl.length() + trailingOffset);
-            int queryParamsStart = trailing.indexOf('?');
-            String queryPortion = queryParamsStart == -1 ? trailing : trailing.substring(0, queryParamsStart);
+            int queryParamsStart = target.indexOf('?');
+            String queryPortion = queryParamsStart == -1 ? target : target.substring(0, queryParamsStart);
             if (!queryPortion.isEmpty()) {
                 for (String pathSegment : PATH_SPLITTER.split(queryPortion)) {
                     url.pathSegment(urlDecode(pathSegment));
                 }
             }
             if (queryParamsStart != -1) {
-                String querySegments = trailing.substring(queryParamsStart + 1);
+                String querySegments = target.substring(queryParamsStart + 1);
                 for (String querySegment : QUERY_SPLITTER.split(querySegments)) {
                     List<String> keyValuePair = QUERY_VALUE_SPLITTER.splitToList(querySegment);
                     if (keyValuePair.size() != 2) {

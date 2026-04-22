@@ -34,18 +34,18 @@ import java.util.Collection;
  * <p>Ideally we'll codegen a client which handles the content-type switching where necessary (multiple possible
  * response Content-Types from the server) and does not do the checking where this is known at compile time.
  */
-public final class CborDelegateDecoder implements Decoder {
+final class CborDelegateDecoder implements Decoder {
 
     private final ObjectMapper cborMapper;
     private final Decoder delegate;
 
-    public CborDelegateDecoder(ObjectMapper cborMapper, Decoder delegate) {
+    CborDelegateDecoder(ObjectMapper cborMapper, Decoder delegate) {
         this.cborMapper = cborMapper;
         this.delegate = delegate;
     }
 
     @Override
-    public Object decode(Response response, Type type) throws IOException, FeignException {
+    public Object decode(Response response, Type type) throws IOException {
         Collection<String> contentTypes =
                 HeaderAccessUtils.caseInsensitiveGet(response.headers(), HttpHeaders.CONTENT_TYPE);
         if (contentTypes == null) {

@@ -18,14 +18,13 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.palantir.conjure.java.client.jaxrs.Param.Expander;
 import java.util.OptionalInt;
 
 /**
  * Expands OptionalInt by using null for {@link OptionalInt#empty()} and the {@link Integer#toString()} of the value
  * otherwise.
  */
-public final class Java8NullOptionalIntExpander implements Expander {
+final class Java8NullOptionalIntExpander implements Expander {
 
     @Override
     public String expand(Object value) {

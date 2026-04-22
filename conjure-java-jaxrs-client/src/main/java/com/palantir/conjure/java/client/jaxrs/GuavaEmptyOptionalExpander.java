@@ -17,14 +17,13 @@
 package com.palantir.conjure.java.client.jaxrs;
 
 import com.google.common.base.Preconditions;
-import com.palantir.conjure.java.client.jaxrs.Param.Expander;
 import java.util.Objects;
 
 /**
  * Expands Optional by using the empty string for {@link com.google.common.base.Optional#absent()} and the
  * {@link Object#toString()} of the value otherwise.
  */
-public final class GuavaEmptyOptionalExpander implements Expander {
+final class GuavaEmptyOptionalExpander implements Expander {
 
     @Override
     public String expand(Object value) {

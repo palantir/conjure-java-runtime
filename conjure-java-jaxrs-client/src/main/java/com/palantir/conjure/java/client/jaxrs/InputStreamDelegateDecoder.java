@@ -17,7 +17,7 @@
 package com.palantir.conjure.java.client.jaxrs;
 
 import com.codahale.metrics.Meter;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.FeignClientMetrics.DangerousBuffering_Direction;
+import com.palantir.conjure.java.client.jaxrs.FeignClientMetrics.DangerousBuffering_Direction;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import java.io.ByteArrayInputStream;
@@ -26,16 +26,16 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 
 /** If the return type is InputStream, return it, otherwise delegate to provided decoder. */
-public final class InputStreamDelegateDecoder implements Decoder {
+final class InputStreamDelegateDecoder implements Decoder {
     private final Decoder delegate;
     private final Meter dangerousBufferingMeter;
 
-    public InputStreamDelegateDecoder(Decoder delegate) {
+    InputStreamDelegateDecoder(Decoder delegate) {
         this("unknown", delegate);
     }
 
     @SuppressWarnings("deprecation") // No access to a TaggedMetricRegistry without breaking API
-    public InputStreamDelegateDecoder(@Safe String clientNameForLogging, Decoder delegate) {
+    InputStreamDelegateDecoder(@Safe String clientNameForLogging, Decoder delegate) {
         this.delegate = delegate;
         this.dangerousBufferingMeter = FeignClientMetrics.of(SharedTaggedMetricRegistries.getSingleton())
                 .dangerousBuffering()
@@ -45,7 +45,7 @@ public final class InputStreamDelegateDecoder implements Decoder {
     }
 
     @Override
-    public Object decode(Response response, Type type) throws IOException, FeignException {
+    public Object decode(Response response, Type type) throws IOException {
         if (type.equals(InputStream.class)) {
             byte[] body =
                     response.body() != null ? Util.toByteArray(response.body().asInputStream()) : new byte[0];

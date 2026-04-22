@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+import com.google.common.reflect.TypeToken;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.logsafe.SafeArg;
 import com.palantir.logsafe.logger.SafeLogger;
@@ -46,12 +47,12 @@ import javax.annotation.Nullable;
  *
  * <p>Empty instances are cached and re-used to avoid reflection and exceptions on a hot codepath.
  */
-public final class EmptyContainerDecoder implements Decoder {
+final class EmptyContainerDecoder implements Decoder {
 
     private final LoadingCache<Type, Object> blankInstanceCache;
     private final Decoder delegate;
 
-    public EmptyContainerDecoder(ObjectMapper mapper, Decoder delegate) {
+    EmptyContainerDecoder(ObjectMapper mapper, Decoder delegate) {
         this.delegate = delegate;
         this.blankInstanceCache = Caffeine.newBuilder()
                 .maximumSize(1000)
@@ -85,7 +86,8 @@ public final class EmptyContainerDecoder implements Decoder {
         @Nullable
         @Override
         public Object load(@Nonnull Type type) {
-            return constructEmptyInstance(RawTypes.get(type), type, 10).orElse(null);
+            return constructEmptyInstance(TypeToken.of(type).getRawType(), type, 10)
+                    .orElse(null);
         }
 
         private Optional<Object> constructEmptyInstance(Class<?> clazz, Type originalType, int maxRecursion) {

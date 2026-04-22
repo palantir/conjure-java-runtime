@@ -21,15 +21,15 @@ import com.palantir.logsafe.SafeArg;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-public final class NeverReturnNullDecoder implements Decoder {
+final class NeverReturnNullDecoder implements Decoder {
     private final Decoder delegate;
 
-    public NeverReturnNullDecoder(Decoder delegate) {
+    NeverReturnNullDecoder(Decoder delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public Object decode(Response response, Type type) throws FeignException, IOException {
+    public Object decode(Response response, Type type) throws IOException {
         Object object = delegate.decode(response, type);
         Preconditions.checkNotNull(object, "Unexpected null body", SafeArg.of("status", response.status()));
 

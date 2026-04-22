@@ -15,23 +15,23 @@
  */
 package com.palantir.conjure.java.client.jaxrs;
 
-import com.palantir.conjure.java.client.jaxrs.Logger.NoOpLogger;
-import com.palantir.conjure.java.client.jaxrs.ReflectiveFeign.ParseHandlersByName;
-import com.palantir.conjure.java.client.jaxrs.Request.Options;
-import com.palantir.conjure.java.client.jaxrs.Target.HardCodedTarget;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
-/**
- * Feign's purpose is to ease development against http apis that feign restfulness. <br> In
- * implementation, Feign is a {@link Feign#newInstance factory} for generating {@link Target
- * targeted} http apis.
- */
-public abstract class Feign {
+enum Feign {
+    ;
 
-    public static Builder builder() {
+    static Builder builder() {
         return new Builder();
     }
 
@@ -45,15 +45,16 @@ public abstract class Feign {
      * denominator.route53.Route53#listAt(String, String)} </ul> <br> Note that there is no whitespace
      * expected in a key!
      *
-     * @param targetType {@link Target#type() type} of the Feign interface.
+     * @param type type of the Feign interface.
      * @param method invoked method, present on {@code type} or its super.
      */
-    public static String configKey(Class targetType, Method method) {
+    @SuppressWarnings("ModifiedControlVariable")
+    static String configKey(Class<?> type, Method method) {
         StringBuilder builder = new StringBuilder();
-        builder.append(targetType.getSimpleName());
+        builder.append(type.getSimpleName());
         builder.append('#').append(method.getName()).append('(');
         for (Type param : method.getGenericParameterTypes()) {
-            param = Types.resolve(targetType, targetType, param);
+            param = Types.resolve(type, type, param);
             builder.append(Types.getRawType(param).getSimpleName()).append(',');
         }
         if (method.getParameterTypes().length > 0) {
@@ -62,142 +63,286 @@ public abstract class Feign {
         return builder.append(')').toString();
     }
 
-    /**
-     * @deprecated use {@link #configKey(Class, Method)} instead.
-     */
-    @Deprecated
-    public static String configKey(Method method) {
-        return configKey(method.getDeclaringClass(), method);
-    }
+    @SuppressWarnings("HiddenField")
+    static final class Builder {
 
-    /**
-     * Returns a new instance of an HTTP API, defined by annotations in the {@link Feign Contract},
-     * for the specified {@code target}. You should cache this result.
-     */
-    public abstract <T> T newInstance(Target<T> target);
+        private Contract contract;
+        private Client client;
+        private Encoder encoder;
+        private Decoder decoder;
+        private ErrorDecoder errorDecoder;
 
-    public static class Builder {
+        private Builder() {}
 
-        private final List<RequestInterceptor> requestInterceptors = new ArrayList<RequestInterceptor>();
-        private Logger.Level logLevel = Logger.Level.NONE;
-        private Contract contract = new Contract.Default();
-        private Client client = new Client.Default(null, null);
-        private Retryer retryer = new Retryer.Default();
-        private Logger logger = new NoOpLogger();
-        private Encoder encoder = new Encoder.Default();
-        private Decoder decoder = new Decoder.Default();
-        private ErrorDecoder errorDecoder = new ErrorDecoder.Default();
-        private Options options = new Options();
-        private InvocationHandlerFactory invocationHandlerFactory = new InvocationHandlerFactory.Default();
-        private boolean decode404;
-
-        public Builder logLevel(Logger.Level logLevel) {
-            this.logLevel = logLevel;
-            return this;
-        }
-
-        public Builder contract(Contract contract) {
+        Builder contract(Contract contract) {
             this.contract = contract;
             return this;
         }
 
-        public Builder client(Client client) {
+        Builder client(Client client) {
             this.client = client;
             return this;
         }
 
-        public Builder retryer(Retryer retryer) {
-            this.retryer = retryer;
-            return this;
-        }
-
-        public Builder logger(Logger logger) {
-            this.logger = logger;
-            return this;
-        }
-
-        public Builder encoder(Encoder encoder) {
+        Builder encoder(Encoder encoder) {
             this.encoder = encoder;
             return this;
         }
 
-        public Builder decoder(Decoder decoder) {
+        Builder decoder(Decoder decoder) {
             this.decoder = decoder;
             return this;
         }
 
-        /**
-         * This flag indicates that the {@link #decoder(Decoder) decoder} should process responses with
-         * 404 status, specifically returning null or empty instead of throwing {@link FeignException}.
-         *
-         * <p/> All first-party (ex gson) decoders return well-known empty values defined by
-         * {@link Util#emptyValueOf}. To customize further, wrap an existing
-         * {@link #decoder(Decoder) decoder} or make your own.
-         *
-         * <p/> This flag only works with 404, as opposed to all or arbitrary status codes. This was an
-         * explicit decision: 404 -> empty is safe, common and doesn't complicate redirection, retry or
-         * fallback policy. If your server returns a different status for not-found, correct via a
-         * custom {@link #client(Client) client}.
-         *
-         * @since 8.12
-         */
-        public Builder decode404() {
-            this.decode404 = true;
-            return this;
-        }
-
-        public Builder errorDecoder(ErrorDecoder errorDecoder) {
+        Builder errorDecoder(ErrorDecoder errorDecoder) {
             this.errorDecoder = errorDecoder;
             return this;
         }
 
-        public Builder options(Options options) {
-            this.options = options;
-            return this;
-        }
+        @SuppressWarnings("ProxyNonConstantType")
+        <T> T build(Class<T> type) {
+            List<MethodMetadata> metadata = contract.parseAndValidateMetadata(type);
 
-        /**
-         * Adds a single request interceptor to the builder.
-         */
-        public Builder requestInterceptor(RequestInterceptor requestInterceptor) {
-            this.requestInterceptors.add(requestInterceptor);
-            return this;
-        }
+            SynchronousMethodHandler.Factory factory = new SynchronousMethodHandler.Factory(client);
 
-        /**
-         * Sets the full set of request interceptors for the builder, overwriting any previous
-         * interceptors.
-         */
-        public Builder requestInterceptors(Iterable<RequestInterceptor> requestInterceptors) {
-            this.requestInterceptors.clear();
-            for (RequestInterceptor requestInterceptor : requestInterceptors) {
-                this.requestInterceptors.add(requestInterceptor);
+            Map<String, MethodHandler> nameToHandler = new LinkedHashMap<String, MethodHandler>();
+            for (MethodMetadata md : metadata) {
+                BuildTemplateByResolvingArgs buildTemplate;
+                if (!md.formParams().isEmpty()) {
+                    buildTemplate = new BuildFormEncodedTemplateFromArgs(md, encoder);
+                } else if (md.bodyIndex() != null) {
+                    buildTemplate = new BuildEncodedTemplateFromArgs(md, encoder);
+                } else {
+                    buildTemplate = new BuildTemplateByResolvingArgs(md);
+                }
+                nameToHandler.put(md.configKey(), factory.create(md, buildTemplate, decoder, errorDecoder));
             }
-            return this;
+
+            Map<Method, MethodHandler> methodToHandler = new HashMap<>();
+            for (Method method : type.getMethods()) {
+                if (method.getDeclaringClass() == Object.class || method.isDefault()) {
+                    continue;
+                }
+                methodToHandler.put(method, nameToHandler.get(Feign.configKey(type, method)));
+            }
+
+            InvocationHandler handler = new FeignInvocationHandler(methodToHandler);
+            T proxy = (T) Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[] {type}, handler);
+
+            return proxy;
+        }
+    }
+
+    private static class FeignInvocationHandler implements InvocationHandler {
+
+        private final Map<Method, MethodHandler> dispatch;
+
+        FeignInvocationHandler(Map<Method, MethodHandler> dispatch) {
+            this.dispatch = Util.checkNotNull(dispatch, "dispatch");
         }
 
-        /**
-         * Allows you to override how reflective dispatch works inside of Feign.
-         */
-        public Builder invocationHandlerFactory(InvocationHandlerFactory invocationHandlerFactory) {
-            this.invocationHandlerFactory = invocationHandlerFactory;
-            return this;
+        @Override
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if (method.isDefault()) {
+                return InvocationHandler.invokeDefault(proxy, method, args);
+            }
+
+            if ("equals".equals(method.getName())) {
+                try {
+                    Object otherHandler =
+                            args.length > 0 && args[0] != null ? Proxy.getInvocationHandler(args[0]) : null;
+                    return equals(otherHandler);
+                } catch (IllegalArgumentException e) {
+                    return false;
+                }
+            } else if ("hashCode".equals(method.getName())) {
+                return hashCode();
+            } else if ("toString".equals(method.getName())) {
+                return toString();
+            }
+            return dispatch.get(method).invoke(args);
+        }
+    }
+
+    private static class BuildTemplateByResolvingArgs implements RequestTemplate.Factory {
+
+        @SuppressWarnings("VisibilityModifier")
+        final MethodMetadata metadata;
+
+        private final Map<Integer, Expander> indexToExpander = new LinkedHashMap<Integer, Expander>();
+
+        private BuildTemplateByResolvingArgs(MethodMetadata metadata) {
+            this.metadata = metadata;
+            if (metadata.indexToExpander() != null) {
+                indexToExpander.putAll(metadata.indexToExpander());
+                return;
+            }
+            if (metadata.indexToExpanderClass().isEmpty()) {
+                return;
+            }
+            for (Entry<Integer, Class<? extends Expander>> indexToExpanderClass :
+                    metadata.indexToExpanderClass().entrySet()) {
+                try {
+                    indexToExpander.put(
+                            indexToExpanderClass.getKey(),
+                            indexToExpanderClass
+                                    .getValue()
+                                    .getDeclaredConstructor()
+                                    .newInstance());
+                } catch (ReflectiveOperationException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
         }
 
-        public <T> T target(Class<T> apiType, String url) {
-            return target(new HardCodedTarget<T>(apiType, url));
+        @Override
+        public RequestTemplate create(Object[] argv) {
+            RequestTemplate mutable = new RequestTemplate(metadata.template());
+            if (metadata.urlIndex() != null) {
+                int urlIndex = metadata.urlIndex();
+                Util.checkArgument(argv[urlIndex] != null, "URI parameter %s was null", urlIndex);
+                mutable.insert(0, String.valueOf(argv[urlIndex]));
+            }
+            Map<String, Object> varBuilder = new LinkedHashMap<String, Object>();
+            for (Entry<Integer, Collection<String>> entry :
+                    metadata.indexToName().entrySet()) {
+                int index = entry.getKey();
+                Object value = argv[entry.getKey()];
+                if (value != null) { // Null values are skipped.
+                    if (indexToExpander.containsKey(index)) {
+                        value = expandElements(indexToExpander.get(index), value);
+                    }
+                    for (String name : entry.getValue()) {
+                        varBuilder.put(name, value);
+                    }
+                }
+            }
+
+            RequestTemplate template = resolve(argv, mutable, varBuilder);
+            if (metadata.queryMapIndex() != null) {
+                // add query map parameters after initial resolve so that they take
+                // precedence over any predefined values
+                template = addQueryMapQueryParameters(argv, template);
+            }
+
+            if (metadata.headerMapIndex() != null) {
+                template = addHeaderMapHeaders(argv, template);
+            }
+
+            return template;
         }
 
-        public <T> T target(Target<T> target) {
-            return build().newInstance(target);
+        private Object expandElements(Expander expander, Object value) {
+            if (value instanceof Iterable<?> iterable) {
+                return expandIterable(expander, iterable);
+            }
+            return expander.expand(value);
         }
 
-        public Feign build() {
-            SynchronousMethodHandler.Factory synchronousMethodHandlerFactory = new SynchronousMethodHandler.Factory(
-                    client, retryer, requestInterceptors, logger, logLevel, decode404);
-            ParseHandlersByName handlersByName = new ParseHandlersByName(
-                    contract, options, encoder, decoder, errorDecoder, synchronousMethodHandlerFactory);
-            return new ReflectiveFeign(handlersByName, invocationHandlerFactory);
+        private List<String> expandIterable(Expander expander, Iterable<?> value) {
+            List<String> values = new ArrayList<String>();
+            for (Object element : value) {
+                if (element != null) {
+                    values.add(expander.expand(element));
+                }
+            }
+            return values;
+        }
+
+        private RequestTemplate addHeaderMapHeaders(Object[] argv, RequestTemplate mutable) {
+            Map<Object, Object> headerMap = (Map<Object, Object>) argv[metadata.headerMapIndex()];
+            for (Entry<Object, Object> currEntry : headerMap.entrySet()) {
+                Util.checkState(
+                        currEntry.getKey().getClass() == String.class,
+                        "HeaderMap key must be a String: %s",
+                        currEntry.getKey());
+
+                Collection<String> values = new ArrayList<String>();
+
+                Object currValue = currEntry.getValue();
+                if (currValue instanceof Iterable<?> iterable) {
+                    Iterator<?> iter = iterable.iterator();
+                    while (iter.hasNext()) {
+                        Object nextObject = iter.next();
+                        values.add(nextObject == null ? null : nextObject.toString());
+                    }
+                } else {
+                    values.add(currValue == null ? null : currValue.toString());
+                }
+
+                mutable.header((String) currEntry.getKey(), values);
+            }
+            return mutable;
+        }
+
+        private RequestTemplate addQueryMapQueryParameters(Object[] argv, RequestTemplate mutable) {
+            Map<Object, Object> queryMap = (Map<Object, Object>) argv[metadata.queryMapIndex()];
+            for (Entry<Object, Object> currEntry : queryMap.entrySet()) {
+                Util.checkState(
+                        currEntry.getKey().getClass() == String.class,
+                        "QueryMap key must be a String: %s",
+                        currEntry.getKey());
+
+                Collection<String> values = new ArrayList<String>();
+
+                Object currValue = currEntry.getValue();
+                if (currValue instanceof Iterable<?> iterable) {
+                    Iterator<?> iter = iterable.iterator();
+                    while (iter.hasNext()) {
+                        Object nextObject = iter.next();
+                        values.add(nextObject == null ? null : nextObject.toString());
+                    }
+                } else {
+                    values.add(currValue == null ? null : currValue.toString());
+                }
+
+                mutable.query(metadata.queryMapEncoded(), (String) currEntry.getKey(), values);
+            }
+            return mutable;
+        }
+
+        RequestTemplate resolve(Object[] _argv, RequestTemplate mutable, Map<String, Object> variables) {
+            return mutable.resolve(variables);
+        }
+    }
+
+    private static final class BuildFormEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
+
+        private final Encoder encoder;
+
+        private BuildFormEncodedTemplateFromArgs(MethodMetadata metadata, Encoder encoder) {
+            super(metadata);
+            this.encoder = encoder;
+        }
+
+        @Override
+        RequestTemplate resolve(Object[] argv, RequestTemplate mutable, Map<String, Object> variables) {
+            Map<String, Object> formVariables = new LinkedHashMap<String, Object>();
+            for (Entry<String, Object> entry : variables.entrySet()) {
+                if (metadata.formParams().contains(entry.getKey())) {
+                    formVariables.put(entry.getKey(), entry.getValue());
+                }
+            }
+            encoder.encode(formVariables, Encoder.MAP_STRING_WILDCARD, mutable);
+            return super.resolve(argv, mutable, variables);
+        }
+    }
+
+    private static final class BuildEncodedTemplateFromArgs extends BuildTemplateByResolvingArgs {
+
+        private final Encoder encoder;
+
+        private BuildEncodedTemplateFromArgs(MethodMetadata metadata, Encoder encoder) {
+            super(metadata);
+            this.encoder = encoder;
+        }
+
+        @Override
+        RequestTemplate resolve(Object[] argv, RequestTemplate mutable, Map<String, Object> variables) {
+            Object body = argv[metadata.bodyIndex()];
+            Util.checkArgument(body != null, "Body parameter %s was null", metadata.bodyIndex());
+            encoder.encode(body, metadata.bodyType(), mutable);
+            return super.resolve(argv, mutable, variables);
         }
     }
 }

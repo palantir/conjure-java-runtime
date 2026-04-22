@@ -13,24 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.palantir.conjure.java.client.jaxrs;
 
-import static java.lang.String.format;
+interface Expander {
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-
-public class StringDecoder implements Decoder {
-
-    @Override
-    public Object decode(Response response, Type type) throws IOException {
-        Response.Body body = response.body();
-        if (body == null) {
-            return null;
-        }
-        if (String.class.equals(type)) {
-            return Util.toString(body.asReader());
-        }
-        throw new DecodeException(format("%s is not a type supported by this decoder.", type));
-    }
+    /**
+     * Expands the value into a string. Does not accept or return null.
+     */
+    String expand(Object value);
 }

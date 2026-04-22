@@ -28,10 +28,10 @@ import java.util.Map;
  * map which is case-insensitive with respect to the key. com.netflix.feign:feign-core:8.18.0 will have it for the
  * {@link Response} headers due to https://github.com/Netflix/feign/pull/418.
  */
-public final class HeaderAccessUtils {
+final class HeaderAccessUtils {
     private HeaderAccessUtils() {}
 
-    public static boolean caseInsensitiveContains(Map<String, Collection<String>> headers, String headerName) {
+    static boolean caseInsensitiveContains(Map<String, Collection<String>> headers, String headerName) {
         for (String key : headers.keySet()) {
             if (headerName.equalsIgnoreCase(key)) {
                 return true;
@@ -44,7 +44,7 @@ public final class HeaderAccessUtils {
      * Compares the keys of the map to the headerName in a case-insensitive manner and returns null if it was never
      * found.
      */
-    public static Collection<String> caseInsensitiveGet(Map<String, Collection<String>> headers, String headerName) {
+    static Collection<String> caseInsensitiveGet(Map<String, Collection<String>> headers, String headerName) {
         List<String> result = new ArrayList<>();
         boolean neverFound = true;
         for (Map.Entry<String, Collection<String>> entry : headers.entrySet()) {

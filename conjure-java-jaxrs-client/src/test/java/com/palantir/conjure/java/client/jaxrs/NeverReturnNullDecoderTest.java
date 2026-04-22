@@ -36,18 +36,8 @@ public final class NeverReturnNullDecoderTest extends TestBase {
             new NeverReturnNullDecoder(new JacksonDecoder(ObjectMappers.newClientJsonMapper()));
 
     @Test
-    public void throws_nullpointerexception_when_body_is_null() {
-        Response response = Response.create(200, "OK", headers, null, StandardCharsets.UTF_8);
-
-        Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
-                .isInstanceOf(NullPointerException.class)
-                .hasLogMessage("Unexpected null body")
-                .containsArgs(SafeArg.of("status", 200));
-    }
-
-    @Test
     public void throws_nullpointerexception_when_body_is_string_null() {
-        Response response = Response.create(200, "OK", headers, "null", StandardCharsets.UTF_8);
+        Response response = Response.create(200, headers, "null".getBytes(StandardCharsets.UTF_8));
 
         Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
                 .isInstanceOf(NullPointerException.class)
@@ -57,7 +47,7 @@ public final class NeverReturnNullDecoderTest extends TestBase {
 
     @Test
     public void throws_nullpointerexception_when_body_is_empty_string() {
-        Response response = Response.create(200, "OK", headers, "", StandardCharsets.UTF_8);
+        Response response = Response.create(200, headers, "".getBytes(StandardCharsets.UTF_8));
 
         Assertions.assertThatLoggableExceptionThrownBy(() -> textDelegateDecoder.decode(response, List.class))
                 .isInstanceOf(NullPointerException.class)
@@ -67,7 +57,7 @@ public final class NeverReturnNullDecoderTest extends TestBase {
 
     @Test
     public void works_fine_when_body_is_not_null() throws Exception {
-        Response response = Response.create(200, "OK", headers, "[1, 2, 3]", StandardCharsets.UTF_8);
+        Response response = Response.create(200, headers, "[1, 2, 3]".getBytes(StandardCharsets.UTF_8));
         Object decodedObject = textDelegateDecoder.decode(response, List.class);
         assertThat(decodedObject).isEqualTo(ImmutableList.of(1, 2, 3));
     }

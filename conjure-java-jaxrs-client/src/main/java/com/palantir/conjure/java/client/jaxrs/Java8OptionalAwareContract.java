@@ -18,7 +18,6 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import com.google.common.collect.ImmutableList;
 import com.palantir.conjure.java.client.jaxrs.JaxRsJakartaCompatibility.Annotations;
-import com.palantir.conjure.java.client.jaxrs.Param.Expander;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -39,7 +38,7 @@ import java.util.stream.Collectors;
  *
  * <p>{@link jakarta.ws.rs.PathParam}s require a value, and so we explicitly disallow use with {@link Optional}.
  */
-public final class Java8OptionalAwareContract extends AbstractDelegatingContract {
+final class Java8OptionalAwareContract extends AbstractDelegatingContract {
 
     private static final List<ExpanderDef> expanders = ImmutableList.of(
             new ExpanderDef(Optional.class, Java8EmptyOptionalExpander.class, Java8NullOptionalExpander.class),
@@ -51,12 +50,12 @@ public final class Java8OptionalAwareContract extends AbstractDelegatingContract
             new ExpanderDef(
                     OptionalLong.class, Java8EmptyOptionalLongExpander.class, Java8NullOptionalLongExpander.class));
 
-    public Java8OptionalAwareContract(Contract delegate) {
+    Java8OptionalAwareContract(Contract delegate) {
         super(delegate);
     }
 
     @Override
-    protected void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
+    void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Annotation[][] annotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterTypes.length; i++) {

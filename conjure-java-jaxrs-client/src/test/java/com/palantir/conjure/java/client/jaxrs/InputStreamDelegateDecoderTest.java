@@ -54,7 +54,7 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
     public void testDecodesAsInputStream() throws Exception {
         String data = "data";
 
-        Response response = Response.create(200, "OK", ImmutableMap.of(), data, StandardCharsets.UTF_8);
+        Response response = Response.create(200, ImmutableMap.of(), data.getBytes(StandardCharsets.UTF_8));
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 
@@ -66,7 +66,7 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
         String returned = "string";
 
         when(delegate.decode(any(), any())).thenReturn(returned);
-        Response response = Response.create(200, "OK", ImmutableMap.of(), returned, StandardCharsets.UTF_8);
+        Response response = Response.create(200, ImmutableMap.of(), returned.getBytes(StandardCharsets.UTF_8));
         String decodedObject = (String) inputStreamDelegateDecoder.decode(response, String.class);
         assertThat(decodedObject).isEqualTo(returned);
     }
@@ -74,7 +74,7 @@ public final class InputStreamDelegateDecoderTest extends TestBase {
     @Test
     public void testSupportsNullBody() throws Exception {
         String data = "";
-        Response response = Response.create(200, "OK", ImmutableMap.of(), (Response.Body) null);
+        Response response = Response.create(200, ImmutableMap.of(), (Response.Body) null);
 
         InputStream decoded = (InputStream) inputStreamDelegateDecoder.decode(response, InputStream.class);
 

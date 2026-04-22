@@ -15,8 +15,7 @@
  */
 package com.palantir.conjure.java.client.jaxrs;
 
-import static java.lang.String.format;
-
+import com.google.errorprone.annotations.FormatMethod;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
@@ -24,11 +23,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -46,45 +41,19 @@ import java.util.Set;
 /**
  * Utilities, typically copied in from guava, so as to avoid dependency conflicts.
  */
-public class Util {
+final class Util {
 
     /**
      * The HTTP Content-Length header field name.
      */
-    public static final String CONTENT_LENGTH = "Content-Length";
-    /**
-     * The HTTP Content-Encoding header field name.
-     */
-    public static final String CONTENT_ENCODING = "Content-Encoding";
-    /**
-     * The HTTP Retry-After header field name.
-     */
-    public static final String RETRY_AFTER = "Retry-After";
-    /**
-     * Value for the Content-Encoding header that indicates that GZIP encoding is in use.
-     */
-    public static final String ENCODING_GZIP = "gzip";
-    /**
-     * Value for the Content-Encoding header that indicates that DEFLATE encoding is in use.
-     */
-    public static final String ENCODING_DEFLATE = "deflate";
-    /**
-     * UTF-8: eight-bit UCS Transformation Format.
-     */
-    public static final Charset UTF_8 = Charset.forName("UTF-8");
-
-    // com.google.common.base.Charsets
-    /**
-     * ISO-8859-1: ISO Latin Alphabet Number 1 (ISO-LATIN-1).
-     */
-    public static final Charset ISO_8859_1 = Charset.forName("ISO-8859-1");
+    static final String CONTENT_LENGTH = "Content-Length";
 
     private static final int BUF_SIZE = 0x800; // 2K chars (4K bytes)
 
     /**
      * Type literal for {@code Map<String, ?>}.
      */
-    public static final Type MAP_STRING_WILDCARD = new Types.ParameterizedTypeImpl(
+    static final Type MAP_STRING_WILDCARD = new Types.ParameterizedTypeImpl(
             null, Map.class, String.class, new Types.WildcardTypeImpl(new Type[] {Object.class}, new Type[0]));
 
     private Util() { // no instances
@@ -93,19 +62,21 @@ public class Util {
     /**
      * Copy of {@code com.google.common.base.Preconditions#checkArgument}.
      */
-    public static void checkArgument(boolean expression, String errorMessageTemplate, Object... errorMessageArgs) {
+    @FormatMethod
+    static void checkArgument(boolean expression, String errorMessageTemplate, Object... errorMessageArgs) {
         if (!expression) {
-            throw new IllegalArgumentException(format(errorMessageTemplate, errorMessageArgs));
+            throw new IllegalArgumentException(String.format(errorMessageTemplate, errorMessageArgs));
         }
     }
 
     /**
      * Copy of {@code com.google.common.base.Preconditions#checkNotNull}.
      */
-    public static <T> T checkNotNull(T reference, String errorMessageTemplate, Object... errorMessageArgs) {
+    @FormatMethod
+    static <T> T checkNotNull(T reference, String errorMessageTemplate, Object... errorMessageArgs) {
         if (reference == null) {
             // If either of these parameters is null, the right thing happens anyway
-            throw new NullPointerException(format(errorMessageTemplate, errorMessageArgs));
+            throw new NullPointerException(String.format(errorMessageTemplate, errorMessageArgs));
         }
         return reference;
     }
@@ -113,38 +84,24 @@ public class Util {
     /**
      * Copy of {@code com.google.common.base.Preconditions#checkState}.
      */
-    public static void checkState(boolean expression, String errorMessageTemplate, Object... errorMessageArgs) {
+    @FormatMethod
+    static void checkState(boolean expression, String errorMessageTemplate, Object... errorMessageArgs) {
         if (!expression) {
-            throw new IllegalStateException(format(errorMessageTemplate, errorMessageArgs));
+            throw new IllegalStateException(String.format(errorMessageTemplate, errorMessageArgs));
         }
-    }
-
-    /**
-     * Identifies a method as a default instance method.
-     */
-    public static boolean isDefault(Method method) {
-        // Default methods are public non-abstract, non-synthetic, and non-static instance methods
-        // declared in an interface.
-        // method.isDefault() is not sufficient for our usage as it does not check
-        // for synthetic methods.  As a result, it picks up overridden methods as well as actual default methods.
-        final int SYNTHETIC = 0x00001000;
-        return ((method.getModifiers() & (Modifier.ABSTRACT | Modifier.PUBLIC | Modifier.STATIC | SYNTHETIC))
-                        == Modifier.PUBLIC)
-                && method.getDeclaringClass().isInterface();
     }
 
     /**
      * Adapted from {@code com.google.common.base.Strings#emptyToNull}.
      */
-    public static String emptyToNull(String string) {
+    static String emptyToNull(String string) {
         return string == null || string.isEmpty() ? null : string;
     }
 
     /**
      * Adapted from {@code com.google.common.base.Strings#emptyToNull}.
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
+    static <T> T[] toArray(Iterable<? extends T> iterable, Class<T> type) {
         Collection<T> collection;
         if (iterable instanceof Collection) {
             collection = (Collection<T>) iterable;
@@ -161,45 +118,17 @@ public class Util {
     /**
      * Returns an unmodifiable collection which may be empty, but is never null.
      */
-    public static <T> Collection<T> valuesOrEmpty(Map<String, Collection<T>> map, String key) {
+    static <T> Collection<T> valuesOrEmpty(Map<String, Collection<T>> map, String key) {
         return map.containsKey(key) && map.get(key) != null ? map.get(key) : Collections.<T>emptyList();
     }
 
-    public static void ensureClosed(Closeable closeable) {
+    static void ensureClosed(Closeable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();
             } catch (IOException ignored) { // NOPMD
             }
         }
-    }
-
-    /**
-     * Resolves the last type parameter of the parameterized {@code supertype}, based on the {@code
-     * genericContext}, into its upper bounds. <p/> Implementation copied from {@code
-     * retrofit.RestMethodInfo}.
-     *
-     * @param genericContext Ex. {@link java.lang.reflect.Field#getGenericType()}
-     * @param supertype      Ex. {@code Decoder.class}
-     * @return in the example above, the type parameter of {@code Decoder}.
-     * @throws IllegalStateException if {@code supertype} cannot be resolved into a parameterized type
-     *                               using {@code context}.
-     */
-    public static Type resolveLastTypeParameter(Type genericContext, Class<?> supertype) throws IllegalStateException {
-        Type resolvedSuperType = Types.getSupertype(genericContext, Types.getRawType(genericContext), supertype);
-        checkState(
-                resolvedSuperType instanceof ParameterizedType,
-                "could not resolve %s into a parameterized type %s",
-                genericContext,
-                supertype);
-        Type[] types = ParameterizedType.class.cast(resolvedSuperType).getActualTypeArguments();
-        for (int i = 0; i < types.length; i++) {
-            Type type = types[i];
-            if (type instanceof WildcardType) {
-                types[i] = ((WildcardType) type).getUpperBounds()[0];
-            }
-        }
-        return types[types.length - 1];
     }
 
     /**
@@ -220,7 +149,7 @@ public class Util {
      * decoders a default empty value for a type. This method cheaply supports typical types by only
      * looking at the raw type (vs type hierarchy). Decorate for sophistication.
      */
-    public static Object emptyValueOf(Type type) {
+    static Object emptyValueOf(Type type) {
         return EMPTIES.get(Types.getRawType(type));
     }
 
@@ -235,14 +164,17 @@ public class Util {
         empties.put(
                 Iterator.class,
                 new Iterator<Object>() { // Collections.emptyIterator is a 1.7 api
+                    @Override
                     public boolean hasNext() {
                         return false;
                     }
 
+                    @Override
                     public Object next() {
                         throw new NoSuchElementException();
                     }
 
+                    @Override
                     public void remove() {
                         throw new IllegalStateException();
                     }
@@ -256,7 +188,7 @@ public class Util {
     /**
      * Adapted from {@code com.google.common.io.CharStreams.toString()}.
      */
-    public static String toString(Reader reader) throws IOException {
+    static String toString(Reader reader) throws IOException {
         if (reader == null) {
             return null;
         }
@@ -277,7 +209,7 @@ public class Util {
     /**
      * Adapted from {@code com.google.common.io.ByteStreams.toByteArray()}.
      */
-    public static byte[] toByteArray(InputStream in) throws IOException {
+    static byte[] toByteArray(InputStream in) throws IOException {
         checkNotNull(in, "in");
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -297,12 +229,12 @@ public class Util {
         byte[] buf = new byte[BUF_SIZE];
         long total = 0;
         while (true) {
-            int r = from.read(buf);
-            if (r == -1) {
+            int read = from.read(buf);
+            if (read == -1) {
                 break;
             }
-            to.write(buf, 0, r);
-            total += r;
+            to.write(buf, 0, read);
+            total += read;
         }
         return total;
     }

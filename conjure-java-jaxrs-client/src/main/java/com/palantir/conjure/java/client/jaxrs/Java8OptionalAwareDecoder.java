@@ -18,6 +18,7 @@ package com.palantir.conjure.java.client.jaxrs;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.reflect.TypeToken;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -27,17 +28,17 @@ import java.util.Optional;
  * Decorates a Feign {@link Decoder} such that it returns {@link Optional#empty} when observing an HTTP 204 error code
  * for a method with {@link Type} {@link Optional}.
  */
-public final class Java8OptionalAwareDecoder implements Decoder {
+final class Java8OptionalAwareDecoder implements Decoder {
 
     private final Decoder delegate;
 
-    public Java8OptionalAwareDecoder(Decoder delegate) {
+    Java8OptionalAwareDecoder(Decoder delegate) {
         this.delegate = delegate;
     }
 
     @Override
-    public Object decode(Response response, Type type) throws IOException, FeignException {
-        if (RawTypes.get(type).equals(Optional.class)) {
+    public Object decode(Response response, Type type) throws IOException {
+        if (TypeToken.of(type).getRawType().equals(Optional.class)) {
             if (response.status() == 204) {
                 return Optional.empty();
             } else {

@@ -15,19 +15,9 @@
  */
 package com.palantir.conjure.java.client.jaxrs;
 
-import static com.palantir.conjure.java.client.jaxrs.Util.CONTENT_LENGTH;
-import static com.palantir.conjure.java.client.jaxrs.Util.UTF_8;
-import static com.palantir.conjure.java.client.jaxrs.Util.checkArgument;
-import static com.palantir.conjure.java.client.jaxrs.Util.checkNotNull;
-import static com.palantir.conjure.java.client.jaxrs.Util.emptyToNull;
-import static com.palantir.conjure.java.client.jaxrs.Util.toArray;
-import static com.palantir.conjure.java.client.jaxrs.Util.valuesOrEmpty;
-
-import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,62 +34,35 @@ import java.util.Map.Entry;
  * javax.ws.rs.client.Invocation.Builder}, ensuring you can modify any part of the request. However,
  * this object is mutable, so needs to be guarded with the copy constructor.
  */
-public final class RequestTemplate implements Serializable {
+@SuppressWarnings({"HiddenField", "MissingSummary"})
+final class RequestTemplate {
 
-    private static final long serialVersionUID = 1L;
     private final Map<String, Collection<String>> queries = new LinkedHashMap<String, Collection<String>>();
     private final Map<String, Collection<String>> headers = new LinkedHashMap<String, Collection<String>>();
     private String method;
-    /* final to encourage mutable use vs replacing the object. */
+    /** final to encourage mutable use vs replacing the object. */
     private StringBuilder url = new StringBuilder();
-    private transient Charset charset;
+
     private byte[] body;
-    private String bodyTemplate;
-    private boolean decodeSlash = true;
 
-    public RequestTemplate() {}
+    RequestTemplate() {}
 
-    /* Copy constructor. Use this when making templates. */
-    public RequestTemplate(RequestTemplate toCopy) {
-        checkNotNull(toCopy, "toCopy");
+    /** Copy constructor. Use this when making templates. */
+    RequestTemplate(RequestTemplate toCopy) {
+        Util.checkNotNull(toCopy, "toCopy");
         this.method = toCopy.method;
         this.url.append(toCopy.url);
         this.queries.putAll(toCopy.queries);
         this.headers.putAll(toCopy.headers);
-        this.charset = toCopy.charset;
         this.body = toCopy.body;
-        this.bodyTemplate = toCopy.bodyTemplate;
-        this.decodeSlash = toCopy.decodeSlash;
     }
 
     private static String urlDecode(String arg) {
-        try {
-            return URLDecoder.decode(arg, UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        return URLDecoder.decode(arg, StandardCharsets.UTF_8);
     }
 
     private static String urlEncode(Object arg) {
-        try {
-            return URLEncoder.encode(String.valueOf(arg), UTF_8.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static boolean isHttpUrl(CharSequence value) {
-        return value.length() >= 4 && value.subSequence(0, 3).equals("http".substring(0, 3));
-    }
-
-    private static CharSequence removeTrailingSlash(CharSequence charSequence) {
-        if (charSequence != null
-                && charSequence.length() > 0
-                && charSequence.charAt(charSequence.length() - 1) == '/') {
-            return charSequence.subSequence(0, charSequence.length() - 1);
-        } else {
-            return charSequence;
-        }
+        return URLEncoder.encode(String.valueOf(arg), StandardCharsets.UTF_8);
     }
 
     /**
@@ -112,20 +75,22 @@ public final class RequestTemplate implements Serializable {
      * @param variables to the URI template
      * @return expanded template, leaving any unresolved parameters literal
      */
-    public static String expand(String template, Map<String, ?> variables) {
+    @SuppressWarnings("LocalVariableName")
+    static String expand(String template, Map<String, ?> variables) {
         // skip expansion if there's no valid variables set. ex. {a} is the
         // first valid
-        if (checkNotNull(template, "template").length() < 3) {
+        if (Util.checkNotNull(template, "template").length() < 3) {
             return template.toString();
         }
-        checkNotNull(variables, "variables for %s", template);
+        Util.checkNotNull(variables, "variables for %s", template);
 
         boolean inVar = false;
         StringBuilder var = new StringBuilder();
         StringBuilder builder = new StringBuilder();
-        for (char c : template.toCharArray()) {
+        for (int i = 0; i < template.length(); i++) {
+            char c = template.charAt(i);
             switch (c) {
-                case '{':
+                case '{' -> {
                     if (inVar) {
                         // '{{' is an escape: write the brace and don't interpret as a variable
                         builder.append("{");
@@ -133,8 +98,8 @@ public final class RequestTemplate implements Serializable {
                         break;
                     }
                     inVar = true;
-                    break;
-                case '}':
+                }
+                case '}' -> {
                     if (!inVar) { // then write the brace literally
                         builder.append('}');
                         break;
@@ -148,21 +113,23 @@ public final class RequestTemplate implements Serializable {
                         builder.append('{').append(key).append('}');
                     }
                     var = new StringBuilder();
-                    break;
-                default:
+                }
+                default -> {
                     if (inVar) {
                         var.append(c);
                     } else {
                         builder.append(c);
                     }
+                }
             }
         }
         return builder.toString();
     }
 
+    @SuppressWarnings("LocalVariableName")
     private static Map<String, Collection<String>> parseAndDecodeQueries(String queryLine) {
         Map<String, Collection<String>> map = new LinkedHashMap<String, Collection<String>>();
-        if (emptyToNull(queryLine) == null) {
+        if (Util.emptyToNull(queryLine) == null) {
             return map;
         }
         if (queryLine.indexOf('&') == -1) {
@@ -205,22 +172,19 @@ public final class RequestTemplate implements Serializable {
      * similar to {@code javax.ws.rs.client.WebTarget.resolveTemplates(templateValues, true)} , except
      * that the template values apply to any part of the request, not just the URL
      */
-    public RequestTemplate resolve(Map<String, ?> unencoded) {
+    RequestTemplate resolve(Map<String, ?> unencoded) {
         replaceQueryValues(unencoded);
         Map<String, String> encoded = new LinkedHashMap<String, String>();
         for (Entry<String, ?> entry : unencoded.entrySet()) {
             encoded.put(entry.getKey(), urlEncode(String.valueOf(entry.getValue())));
         }
         String resolvedUrl = expand(url.toString(), encoded).replace("+", "%20");
-        if (decodeSlash) {
-            resolvedUrl = resolvedUrl.replace("%2F", "/");
-        }
         url = new StringBuilder(resolvedUrl);
 
         Map<String, Collection<String>> resolvedHeaders = new LinkedHashMap<String, Collection<String>>();
         for (String field : headers.keySet()) {
             Collection<String> resolvedValues = new ArrayList<String>();
-            for (String value : valuesOrEmpty(headers, field)) {
+            for (String value : Util.valuesOrEmpty(headers, field)) {
                 String resolved = expand(value, unencoded);
                 resolvedValues.add(resolved);
             }
@@ -228,56 +192,42 @@ public final class RequestTemplate implements Serializable {
         }
         headers.clear();
         headers.putAll(resolvedHeaders);
-        if (bodyTemplate != null) {
-            body(urlDecode(expand(bodyTemplate, encoded)));
-        }
         return this;
     }
 
-    /* roughly analogous to {@code javax.ws.rs.client.Target.request()}. */
-    public Request request() {
+    /** roughly analogous to {@code javax.ws.rs.client.Target.request()}. */
+    Request request() {
         Map<String, Collection<String>> safeCopy = new LinkedHashMap<String, Collection<String>>();
         safeCopy.putAll(headers);
-        return Request.create(
-                method,
-                new StringBuilder(url).append(queryLine()).toString(),
-                Collections.unmodifiableMap(safeCopy),
-                body,
-                charset);
+        return Request.create(method, url + queryLine(), Collections.unmodifiableMap(safeCopy), body);
     }
 
-    /* @see Request#method() */
-    public RequestTemplate method(String method) {
-        this.method = checkNotNull(method, "method");
-        checkArgument(method.matches("^[A-Z]+$"), "Invalid HTTP Method: %s", method);
+    /** @see Request#method() */
+    RequestTemplate method(String method) {
+        this.method = Util.checkNotNull(method, "method");
+        Util.checkArgument(method.matches("^[A-Z]+$"), "Invalid HTTP Method: %s", method);
         return this;
     }
 
-    /* @see Request#method() */
-    public String method() {
+    /** @see Request#method() */
+    String method() {
         return method;
     }
 
-    public RequestTemplate decodeSlash(boolean decodeSlash) {
-        this.decodeSlash = decodeSlash;
-        return this;
-    }
-
-    public boolean decodeSlash() {
-        return decodeSlash;
-    }
-
-    /* @see #url() */
-    public RequestTemplate append(CharSequence value) {
+    /** @see #url() */
+    RequestTemplate append(String value) {
         url.append(value);
         url = pullAnyQueriesOutOfUrl(url);
         return this;
     }
 
-    /* @see #url() */
-    public RequestTemplate insert(int pos, CharSequence value) {
-        if (isHttpUrl(value)) {
-            value = removeTrailingSlash(value);
+    /** @see #url() */
+    @SuppressWarnings("ParameterAssignment")
+    RequestTemplate insert(int pos, String value) {
+        if (value.startsWith("http")) {
+            if (value.endsWith("/")) {
+                value = value.substring(0, value.length() - 1);
+            }
             if (url.length() > 0 && url.charAt(0) != '/') {
                 url.insert(0, '/');
             }
@@ -286,7 +236,7 @@ public final class RequestTemplate implements Serializable {
         return this;
     }
 
-    public String url() {
+    String url() {
         return url.toString();
     }
 
@@ -294,7 +244,7 @@ public final class RequestTemplate implements Serializable {
      * Replaces queries with the specified {@code name} with the {@code values} supplied.
      * <br> Values can be passed in decoded or in url-encoded form depending on the value of the
      * {@code encoded} parameter.
-     * <br> When the {@code value} is {@code null}, all queries with the {@code configKey} are
+     * <br> When the {@code values} is {@code null}, all queries with the {@code configKey} are
      * removed. <br> <br><br><b>relationship to JAXRS 2.0</b><br> <br> Like {@code WebTarget.query},
      * except the values can be templatized. <br> ex. <br>
      * <pre>
@@ -314,12 +264,12 @@ public final class RequestTemplate implements Serializable {
      *                  to be null.
      * @see #queries()
      */
-    public RequestTemplate query(boolean encoded, String name, String... values) {
+    RequestTemplate query(boolean encoded, String name, String... values) {
         return doQuery(encoded, name, values);
     }
 
-    /* @see #query(boolean, String, String...) */
-    public RequestTemplate query(boolean encoded, String name, Iterable<String> values) {
+    /** @see #query(boolean, String, String...) */
+    RequestTemplate query(boolean encoded, String name, Iterable<String> values) {
         return doQuery(encoded, name, values);
     }
 
@@ -327,7 +277,7 @@ public final class RequestTemplate implements Serializable {
      * Shortcut for {@code query(false, String, String...)}
      * @see #query(boolean, String, String...)
      */
-    public RequestTemplate query(String name, String... values) {
+    RequestTemplate query(String name, String... values) {
         return doQuery(false, name, values);
     }
 
@@ -335,16 +285,16 @@ public final class RequestTemplate implements Serializable {
      * Shortcut for {@code query(false, String, Iterable<String>)}
      * @see #query(boolean, String, String...)
      */
-    public RequestTemplate query(String name, Iterable<String> values) {
+    RequestTemplate query(String name, Iterable<String> values) {
         return doQuery(false, name, values);
     }
 
     private RequestTemplate doQuery(boolean encoded, String name, String... values) {
-        checkNotNull(name, "name");
+        Util.checkNotNull(name, "name");
         String paramName = encoded ? name : encodeIfNotVariable(name);
         queries.remove(paramName);
         if (values != null && values.length > 0 && values[0] != null) {
-            ArrayList<String> paramValues = new ArrayList<String>();
+            List<String> paramValues = new ArrayList<String>();
             for (String value : values) {
                 paramValues.add(encoded ? value : encodeIfNotVariable(value));
             }
@@ -355,7 +305,7 @@ public final class RequestTemplate implements Serializable {
 
     private RequestTemplate doQuery(boolean encoded, String name, Iterable<String> values) {
         if (values != null) {
-            return doQuery(encoded, name, toArray(values, String.class));
+            return doQuery(encoded, name, Util.toArray(values, String.class));
         }
         return doQuery(encoded, name, (String[]) null);
     }
@@ -378,12 +328,12 @@ public final class RequestTemplate implements Serializable {
      * @param queries if null, remove all queries. else value to replace all queries with.
      * @see #queries()
      */
-    public RequestTemplate queries(Map<String, Collection<String>> queries) {
+    RequestTemplate queries(Map<String, Collection<String>> queries) {
         if (queries == null || queries.isEmpty()) {
             this.queries.clear();
         } else {
             for (Entry<String, Collection<String>> entry : queries.entrySet()) {
-                query(entry.getKey(), toArray(entry.getValue(), String.class));
+                query(entry.getKey(), Util.toArray(entry.getValue(), String.class));
             }
         }
         return this;
@@ -394,11 +344,11 @@ public final class RequestTemplate implements Serializable {
      *
      * @see Request#url()
      */
-    public Map<String, Collection<String>> queries() {
+    Map<String, Collection<String>> queries() {
         Map<String, Collection<String>> decoded = new LinkedHashMap<String, Collection<String>>();
         for (String field : queries.keySet()) {
             Collection<String> decodedValues = new ArrayList<String>();
-            for (String value : valuesOrEmpty(queries, field)) {
+            for (String value : Util.valuesOrEmpty(queries, field)) {
                 if (value != null) {
                     decodedValues.add(urlDecode(value));
                 } else {
@@ -412,7 +362,7 @@ public final class RequestTemplate implements Serializable {
 
     /**
      * Replaces headers with the specified {@code configKey} with the {@code values} supplied. <br>
-     * When the {@code value} is {@code null}, all headers with the {@code configKey} are removed.
+     * When the {@code values} is {@code null}, all headers with the {@code configKey} are removed.
      * <br> <br><br><b>relationship to JAXRS 2.0</b><br> <br> Like {@code WebTarget.queries} and
      * {@code javax.ws.rs.client.Invocation.Builder.header}, except the values can be templatized.
      * <br> ex. <br>
@@ -425,8 +375,8 @@ public final class RequestTemplate implements Serializable {
      *               be null.
      * @see #headers()
      */
-    public RequestTemplate header(String name, String... values) {
-        checkNotNull(name, "header name");
+    RequestTemplate header(String name, String... values) {
+        Util.checkNotNull(name, "header name");
         if (values == null || (values.length == 1 && values[0] == null)) {
             headers.remove(name);
         } else {
@@ -437,10 +387,10 @@ public final class RequestTemplate implements Serializable {
         return this;
     }
 
-    /* @see #header(String, String...) */
-    public RequestTemplate header(String name, Iterable<String> values) {
+    /** @see #header(String, String...) */
+    RequestTemplate header(String name, Iterable<String> values) {
         if (values != null) {
-            return header(name, toArray(values, String.class));
+            return header(name, Util.toArray(values, String.class));
         }
         return header(name, (String[]) null);
     }
@@ -456,7 +406,7 @@ public final class RequestTemplate implements Serializable {
      * @param headers if null, remove all headers. else value to replace all headers with.
      * @see #headers()
      */
-    public RequestTemplate headers(Map<String, Collection<String>> headers) {
+    RequestTemplate headers(Map<String, Collection<String>> headers) {
         if (headers == null || headers.isEmpty()) {
             this.headers.clear();
         } else {
@@ -470,70 +420,23 @@ public final class RequestTemplate implements Serializable {
      *
      * @see Request#headers()
      */
-    public Map<String, Collection<String>> headers() {
+    Map<String, Collection<String>> headers() {
         return Collections.unmodifiableMap(headers);
     }
 
     /**
-     * replaces the {@link Util#CONTENT_LENGTH} header. <br> Usually populated by an {@link
-     * Encoder}.
-     *
      * @see Request#body()
      */
-    public RequestTemplate body(byte[] bodyData, Charset charset) {
-        this.bodyTemplate = null;
-        this.charset = charset;
-        this.body = bodyData;
-        int bodyLength = bodyData != null ? bodyData.length : 0;
-        header(CONTENT_LENGTH, String.valueOf(bodyLength));
+    RequestTemplate body(byte[] body) {
+        this.body = body;
         return this;
     }
 
     /**
-     * replaces the {@link Util#CONTENT_LENGTH} header. <br> Usually populated by an {@link
-     * Encoder}.
-     *
      * @see Request#body()
      */
-    public RequestTemplate body(String bodyText) {
-        byte[] bodyData = bodyText != null ? bodyText.getBytes(UTF_8) : null;
-        return body(bodyData, UTF_8);
-    }
-
-    /**
-     * The character set with which the body is encoded, or null if unknown or not applicable.  When
-     * this is present, you can use {@code new String(req.body(), req.charset())} to access the body
-     * as a String.
-     */
-    public Charset charset() {
-        return charset;
-    }
-
-    /**
-     * @see Request#body()
-     */
-    public byte[] body() {
+    byte[] body() {
         return body;
-    }
-
-    /**
-     * populated by {@link Body}
-     *
-     * @see Request#body()
-     */
-    public RequestTemplate bodyTemplate(String bodyTemplate) {
-        this.bodyTemplate = bodyTemplate;
-        this.charset = null;
-        this.body = null;
-        return this;
-    }
-
-    /**
-     * @see Request#body()
-     * @see #expand(String, Map)
-     */
-    public String bodyTemplate() {
-        return bodyTemplate;
     }
 
     /**
@@ -591,7 +494,7 @@ public final class RequestTemplate implements Serializable {
      * Replaces query values which are templated with corresponding values from the {@code unencoded}
      * map. Any unresolved queries are removed.
      */
-    public void replaceQueryValues(Map<String, ?> unencoded) {
+    void replaceQueryValues(Map<String, ?> unencoded) {
         Iterator<Entry<String, Collection<String>>> iterator =
                 queries.entrySet().iterator();
         while (iterator.hasNext()) {
@@ -626,13 +529,13 @@ public final class RequestTemplate implements Serializable {
         }
     }
 
-    public String queryLine() {
+    String queryLine() {
         if (queries.isEmpty()) {
             return "";
         }
         StringBuilder queryBuilder = new StringBuilder();
         for (String field : queries.keySet()) {
-            for (String value : valuesOrEmpty(queries, field)) {
+            for (String value : Util.valuesOrEmpty(queries, field)) {
                 queryBuilder.append('&');
                 queryBuilder.append(field);
                 if (value != null) {

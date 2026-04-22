@@ -33,9 +33,9 @@ import java.util.stream.Collectors;
  * <p>{@link jakarta.ws.rs.PathParam}s require a value, and so we explicitly disallow use with
  * {@link com.google.common.base.Optional}.
  */
-public final class GuavaOptionalAwareContract extends AbstractDelegatingContract {
+final class GuavaOptionalAwareContract extends AbstractDelegatingContract {
 
-    public GuavaOptionalAwareContract(Contract delegate) {
+    GuavaOptionalAwareContract(Contract delegate) {
         super(delegate);
     }
 

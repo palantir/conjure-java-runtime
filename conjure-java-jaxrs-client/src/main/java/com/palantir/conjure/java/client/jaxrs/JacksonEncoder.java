@@ -13,33 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.palantir.conjure.java.client.jaxrs;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
-import java.util.Collections;
 
-public class JacksonEncoder implements Encoder {
+final class JacksonEncoder implements Encoder {
 
     private final ObjectMapper mapper;
 
-    public JacksonEncoder() {
-        this(Collections.<Module>emptyList());
-    }
-
-    public JacksonEncoder(Iterable<Module> modules) {
-        this(new ObjectMapper()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                .configure(SerializationFeature.INDENT_OUTPUT, true)
-                .registerModules(modules));
-    }
-
-    public JacksonEncoder(ObjectMapper mapper) {
+    JacksonEncoder(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
@@ -47,9 +34,9 @@ public class JacksonEncoder implements Encoder {
     public void encode(Object object, Type bodyType, RequestTemplate template) {
         try {
             JavaType javaType = mapper.getTypeFactory().constructType(bodyType);
-            template.body(mapper.writerFor(javaType).writeValueAsString(object));
+            template.body(mapper.writerFor(javaType).writeValueAsBytes(object));
         } catch (JsonProcessingException e) {
-            throw new EncodeException(e.getMessage(), e);
+            throw new UncheckedIOException(e);
         }
     }
 }

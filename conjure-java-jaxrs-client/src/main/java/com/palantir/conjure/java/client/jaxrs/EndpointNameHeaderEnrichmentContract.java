@@ -28,16 +28,16 @@ import java.util.Locale;
  *
  * This should be considered internal API and should not be depended upon.
  */
-public final class EndpointNameHeaderEnrichmentContract extends AbstractDelegatingContract {
+final class EndpointNameHeaderEnrichmentContract extends AbstractDelegatingContract {
 
-    public static final String ENDPOINT_NAME_HEADER = "dialogue-endpoint-name";
+    static final String ENDPOINT_NAME_HEADER = "dialogue-endpoint-name";
 
-    public EndpointNameHeaderEnrichmentContract(Contract delegate) {
+    EndpointNameHeaderEnrichmentContract(Contract delegate) {
         super(delegate);
     }
 
     @Override
-    protected void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
+    void processMetadata(Class<?> targetType, Method method, MethodMetadata metadata) {
         String httpMethod = metadata.template().method();
         if (httpMethod == null) {
             throw new SafeNullPointerException(

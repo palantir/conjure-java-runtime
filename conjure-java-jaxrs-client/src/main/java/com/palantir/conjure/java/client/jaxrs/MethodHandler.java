@@ -16,12 +16,15 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
-/** A {@link BackoffStrategy} that attempts the operation exactly once, i.e., returns false always. */
-public enum NeverRetryingBackoffStrategy implements BackoffStrategy {
-    INSTANCE;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 
-    @Override
-    public boolean backoff(int _numFailedAttempts) {
-        return false;
-    }
+/**
+ * Like {@link InvocationHandler#invoke(Object, Method, Object[])}, except for a
+ * single method.
+ */
+public interface MethodHandler {
+
+    @SuppressWarnings("IllegalThrows")
+    Object invoke(Object[] argv) throws Throwable;
 }

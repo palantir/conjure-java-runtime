@@ -17,26 +17,25 @@
 package com.palantir.conjure.java.client.jaxrs;
 
 import com.codahale.metrics.Meter;
-import com.palantir.conjure.java.client.jaxrs.feignimpl.FeignClientMetrics.DangerousBuffering_Direction;
+import com.palantir.conjure.java.client.jaxrs.FeignClientMetrics.DangerousBuffering_Direction;
 import com.palantir.logsafe.Safe;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 
 /** If the body type is an InputStream, write it into the body, otherwise pass to delegate. */
-public final class InputStreamDelegateEncoder implements Encoder {
+final class InputStreamDelegateEncoder implements Encoder {
     private final Encoder delegate;
     private final Meter dangerousBufferingMeter;
 
-    public InputStreamDelegateEncoder(Encoder delegate) {
+    InputStreamDelegateEncoder(Encoder delegate) {
         this("unknown", delegate);
     }
 
     @SuppressWarnings("deprecation") // No access to a TaggedMetricRegistry without breaking API
-    public InputStreamDelegateEncoder(@Safe String clientNameForLogging, Encoder delegate) {
+    InputStreamDelegateEncoder(@Safe String clientNameForLogging, Encoder delegate) {
         this.delegate = delegate;
         this.dangerousBufferingMeter = FeignClientMetrics.of(SharedTaggedMetricRegistries.getSingleton())
                 .dangerousBuffering()
@@ -46,12 +45,12 @@ public final class InputStreamDelegateEncoder implements Encoder {
     }
 
     @Override
-    public void encode(Object object, Type bodyType, RequestTemplate template) throws EncodeException {
+    public void encode(Object object, Type bodyType, RequestTemplate template) {
         if (bodyType.equals(InputStream.class)) {
             try {
                 byte[] bytes = Util.toByteArray((InputStream) object);
                 dangerousBufferingMeter.mark(Math.max(1, bytes.length));
-                template.body(bytes, StandardCharsets.UTF_8);
+                template.body(bytes);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
