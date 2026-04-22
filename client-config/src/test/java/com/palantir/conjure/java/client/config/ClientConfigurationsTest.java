@@ -26,7 +26,6 @@ import com.palantir.conjure.java.api.config.service.ProxyConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
-import com.palantir.logsafe.testing.Assertions;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -81,17 +80,6 @@ public final class ClientConfigurationsTest {
         assertThat(actual.enableHttp2()).isEmpty();
         assertThat(actual.fallbackToCommonNameVerification()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
-    }
-
-    @Test
-    public void testTimeoutMustBeMilliseconds() {
-        ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
-                .uris(uris)
-                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
-                .connectTimeout(Duration.ofNanos(5))
-                .build();
-        Assertions.assertThatLoggableExceptionThrownBy(() -> ClientConfigurations.of(serviceConfig))
-                .hasLogMessage("Timeouts with sub-millisecond precision are not supported");
     }
 
     @Test

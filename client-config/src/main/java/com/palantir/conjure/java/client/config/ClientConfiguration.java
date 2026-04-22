@@ -24,8 +24,6 @@ import com.palantir.conjure.java.api.config.service.PartialServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.service.UserAgent;
 import com.palantir.logsafe.DoNotLog;
-import com.palantir.logsafe.SafeArg;
-import com.palantir.logsafe.UnsafeArg;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
 import java.net.ProxySelector;
 import java.time.Duration;
@@ -134,20 +132,7 @@ public interface ClientConfiguration {
             checkArgument(maxNumRetries() == 0, "If meshProxy is configured then maxNumRetries must be 0");
             checkArgument(uris().size() == 1, "If meshProxy is configured then uris must contain exactly 1 URI");
         }
-        // Assert that timeouts are in milliseconds, not any higher precision, because feign only supports millis.
-        checkTimeoutPrecision(connectTimeout(), "connectTimeout");
-        checkTimeoutPrecision(readTimeout(), "readTimeout");
-        checkTimeoutPrecision(writeTimeout(), "writeTimeout");
         checkArgument(!failedUrlCooldown().isNegative(), "failedUrlCooldown may not be negative");
-    }
-
-    default void checkTimeoutPrecision(Duration duration, String timeoutName) {
-        checkArgument(
-                duration.minusMillis(duration.toMillis()).isZero(),
-                "Timeouts with sub-millisecond precision are not supported",
-                SafeArg.of("timeoutName", timeoutName),
-                SafeArg.of("duration", duration),
-                UnsafeArg.of("uris", uris()));
     }
 
     static Builder builder() {

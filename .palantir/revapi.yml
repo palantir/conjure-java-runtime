@@ -120,3 +120,9 @@ acceptedBreaks:
     - code: "java.class.removed"
       old: "enum com.palantir.conjure.java.client.jaxrs.feignimpl.PathTemplateHeaderRewriter"
       justification: "Removed unused classes"
+  "8.33.0":
+    com.palantir.conjure.java.runtime:client-config:
+    - code: "java.method.removed"
+      old: "method void com.palantir.conjure.java.client.config.ClientConfiguration::checkTimeoutPrecision(java.time.Duration,\
+        \ java.lang.String)"
+      justification: "Removed internal method"

@@ -44,7 +44,6 @@ public enum ConjureJerseyFeature implements Feature {
         // Exception mappers
         context.register(new NoContentExceptionMapper());
         context.register(new IllegalArgumentExceptionMapper(exceptionListener));
-        context.register(new RetryableExceptionMapper(exceptionListener));
         context.register(new RuntimeExceptionMapper(exceptionListener));
         context.register(new WebApplicationExceptionMapper(exceptionListener));
         context.register(new RemoteExceptionMapper(exceptionListener));
