@@ -22,7 +22,7 @@ import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.palantir.conjure.java.client.config.ClientConfiguration;
 import com.palantir.conjure.java.serialization.ScalaObjectMappers;
 
-public final class FeignJaxRsScalaClientBuilder extends AbstractFeignJaxRsClientBuilder {
+final class FeignJaxRsScalaClientBuilder extends AbstractFeignJaxRsClientBuilder {
 
     private static final JsonMapper JSON_MAPPER = ScalaObjectMappers.newClientJsonMapper();
     private static final CBORMapper CBOR_MAPPER = ScalaObjectMappers.newClientCborMapper();
@@ -32,12 +32,12 @@ public final class FeignJaxRsScalaClientBuilder extends AbstractFeignJaxRsClient
     }
 
     @Override
-    protected ObjectMapper getObjectMapper() {
+    ObjectMapper getObjectMapper() {
         return JSON_MAPPER;
     }
 
     @Override
-    protected ObjectMapper getCborObjectMapper() {
+    ObjectMapper getCborObjectMapper() {
         return CBOR_MAPPER;
     }
 }
