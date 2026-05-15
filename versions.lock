@@ -76,15 +76,15 @@ com.palantir.refreshable:refreshable:2.12.0 (2 constraints: 9d14ddab)
 
 com.palantir.ri:resource-identifier:2.17.0 (3 constraints: 3c303cb1)
 
-com.palantir.safe-logging:logger:3.15.0 (15 constraints: dde53ea0)
+com.palantir.safe-logging:logger:3.15.0 (15 constraints: e0e5cda0)
 
 com.palantir.safe-logging:logger-slf4j:3.15.0 (1 constraints: 340e9650)
 
 com.palantir.safe-logging:logger-spi:3.15.0 (2 constraints: 771ee2b0)
 
-com.palantir.safe-logging:preconditions:3.15.0 (22 constraints: ee5b9052)
+com.palantir.safe-logging:preconditions:3.15.0 (22 constraints: f25baf53)
 
-com.palantir.safe-logging:safe-logging:3.15.0 (20 constraints: 7e3c36e7)
+com.palantir.safe-logging:safe-logging:3.15.0 (20 constraints: 813ccbe7)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.8.0 (1 constraints: 3a0fb976)
 
@@ -98,15 +98,15 @@ com.palantir.tracing:tracing-jersey-jakarta:6.34.0 (1 constraints: 3f055b3b)
 
 com.palantir.tracing:tracing-okhttp3:6.34.0 (1 constraints: 3f055b3b)
 
-com.palantir.tritium:tritium-api:0.129.0 (2 constraints: 991fedf4)
+com.palantir.tritium:tritium-api:0.130.0 (2 constraints: 891f47f3)
 
-com.palantir.tritium:tritium-core:0.129.0 (1 constraints: 7410bab2)
+com.palantir.tritium:tritium-core:0.130.0 (1 constraints: 6c10a3b2)
 
-com.palantir.tritium:tritium-ids:0.129.0 (1 constraints: fd0f97a6)
+com.palantir.tritium:tritium-ids:0.130.0 (1 constraints: fd0f97a6)
 
-com.palantir.tritium:tritium-metrics:0.129.0 (5 constraints: 704c4b20)
+com.palantir.tritium:tritium-metrics:0.130.0 (5 constraints: 684cbc19)
 
-com.palantir.tritium:tritium-registry:0.129.0 (6 constraints: e35c38dc)
+com.palantir.tritium:tritium-registry:0.130.0 (6 constraints: d35c1ad4)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
