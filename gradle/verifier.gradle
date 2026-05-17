@@ -37,8 +37,6 @@ tasks.withType(JavaCompile).matching { it.name == "compileTestJava" }.configureE
 
 idea {
     module {
-        sourceDirs += sourceSets.generatedObjects.java.srcDirs
-        sourceDirs += sourceSets.generatedJersey.java.srcDirs
         generatedSourceDirs += sourceSets.generatedObjects.java.srcDirs
         generatedSourceDirs += sourceSets.generatedJersey.java.srcDirs
         scopes.COMPILE.plus += [
