@@ -1,6 +1,6 @@
 
 apply plugin: 'com.palantir.external-publish-jar'
-apply plugin: 'org.revapi.revapi-gradle-plugin'
+apply plugin: 'com.palantir.revapi'
 apply plugin: 'com.palantir.metric-schema'
 
 dependencies {
