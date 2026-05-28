@@ -32,7 +32,7 @@ com.github.ben-manes.caffeine:caffeine:3.2.4 (3 constraints: e9234fa3)
 
 com.google.code.findbugs:jsr305:3.0.2 (7 constraints: 5f6b7728)
 
-com.google.errorprone:error_prone_annotations:2.49.0 (18 constraints: 7e188e29)
+com.google.errorprone:error_prone_annotations:2.49.0 (18 constraints: 8018a42a)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
@@ -76,27 +76,27 @@ com.palantir.refreshable:refreshable:2.13.0 (2 constraints: 9e140dac)
 
 com.palantir.ri:resource-identifier:2.17.0 (3 constraints: 3e30fcb1)
 
-com.palantir.safe-logging:logger:3.15.0 (15 constraints: e3e5a4a4)
+com.palantir.safe-logging:logger:3.15.0 (15 constraints: e4e52aa5)
 
 com.palantir.safe-logging:logger-slf4j:3.15.0 (1 constraints: 340e9650)
 
 com.palantir.safe-logging:logger-spi:3.15.0 (2 constraints: 771ee2b0)
 
-com.palantir.safe-logging:preconditions:3.15.0 (22 constraints: f85b8c63)
+com.palantir.safe-logging:preconditions:3.15.0 (22 constraints: f95b4164)
 
-com.palantir.safe-logging:safe-logging:3.15.0 (20 constraints: 843c3bf1)
+com.palantir.safe-logging:safe-logging:3.15.0 (20 constraints: 853cc6f1)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.8.0 (1 constraints: 3a0fb976)
 
 com.palantir.tokens:auth-tokens:4.5.0 (5 constraints: 4647c92f)
 
-com.palantir.tracing:tracing:6.34.0 (8 constraints: cd7d1e91)
+com.palantir.tracing:tracing:6.35.0 (8 constraints: d07db192)
 
-com.palantir.tracing:tracing-api:6.34.0 (6 constraints: ed5730ca)
+com.palantir.tracing:tracing-api:6.35.0 (6 constraints: f157bdcb)
 
-com.palantir.tracing:tracing-jersey-jakarta:6.34.0 (1 constraints: 3f055b3b)
+com.palantir.tracing:tracing-jersey-jakarta:6.35.0 (1 constraints: 40055e3b)
 
-com.palantir.tracing:tracing-okhttp3:6.34.0 (1 constraints: 3f055b3b)
+com.palantir.tracing:tracing-okhttp3:6.35.0 (1 constraints: 40055e3b)
 
 com.palantir.tritium:tritium-api:0.130.0 (2 constraints: 891f47f3)
 
