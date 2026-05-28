@@ -4,9 +4,9 @@ com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
 
 com.fasterxml.jackson.core:jackson-annotations:2.21 (12 constraints: 03de1b79)
 
-com.fasterxml.jackson.core:jackson-core:2.21.1 (14 constraints: a723ccfe)
+com.fasterxml.jackson.core:jackson-core:2.21.1 (15 constraints: 233af41e)
 
-com.fasterxml.jackson.core:jackson-databind:2.21.1 (18 constraints: 98637c49)
+com.fasterxml.jackson.core:jackson-databind:2.21.1 (19 constraints: 147a8ed9)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.1 (2 constraints: 29206505)
 
@@ -23,6 +23,8 @@ com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.1 (1 constraints: 38
 com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.21.1 (1 constraints: f21af342)
 
 com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider:2.21.1 (1 constraints: 3805373b)
+
+com.fasterxml.jackson.module:jackson-module-blackbird:2.21.1 (1 constraints: 3805373b)
 
 com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.21.1 (2 constraints: e230dab2)
 
