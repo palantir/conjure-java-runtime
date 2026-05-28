@@ -50,11 +50,11 @@ com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
 com.palantir.conjure.java:conjure-lib:8.78.0 (3 constraints: 7f25b055)
 
-com.palantir.conjure.java.api:errors:2.72.0 (5 constraints: eb44adad)
+com.palantir.conjure.java.api:errors:2.73.0 (5 constraints: ec4469ae)
 
-com.palantir.conjure.java.api:service-config:2.72.0 (3 constraints: a7283ee3)
+com.palantir.conjure.java.api:service-config:2.73.0 (3 constraints: a828a8e3)
 
-com.palantir.conjure.java.api:ssl-config:2.72.0 (2 constraints: 0118c886)
+com.palantir.conjure.java.api:ssl-config:2.73.0 (2 constraints: 03180487)
 
 com.palantir.deadlines:deadlines:0.21.0 (1 constraints: 650f1086)
 
@@ -76,19 +76,19 @@ com.palantir.refreshable:refreshable:2.13.0 (2 constraints: 9e140dac)
 
 com.palantir.ri:resource-identifier:2.17.0 (3 constraints: 3e30fcb1)
 
-com.palantir.safe-logging:logger:3.15.0 (15 constraints: e2e54ea2)
+com.palantir.safe-logging:logger:3.15.0 (15 constraints: e3e5a4a4)
 
 com.palantir.safe-logging:logger-slf4j:3.15.0 (1 constraints: 340e9650)
 
 com.palantir.safe-logging:logger-spi:3.15.0 (2 constraints: 771ee2b0)
 
-com.palantir.safe-logging:preconditions:3.15.0 (22 constraints: f55ba459)
+com.palantir.safe-logging:preconditions:3.15.0 (22 constraints: f85b8c63)
 
-com.palantir.safe-logging:safe-logging:3.15.0 (20 constraints: 823c21eb)
+com.palantir.safe-logging:safe-logging:3.15.0 (20 constraints: 843c3bf1)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.8.0 (1 constraints: 3a0fb976)
 
-com.palantir.tokens:auth-tokens:4.5.0 (5 constraints: 44470d2f)
+com.palantir.tokens:auth-tokens:4.5.0 (5 constraints: 4647c92f)
 
 com.palantir.tracing:tracing:6.34.0 (8 constraints: cd7d1e91)
 
@@ -102,7 +102,7 @@ com.palantir.tritium:tritium-api:0.130.0 (2 constraints: 891f47f3)
 
 com.palantir.tritium:tritium-core:0.130.0 (1 constraints: 6c10a3b2)
 
-com.palantir.tritium:tritium-ids:0.130.0 (1 constraints: fd0f97a6)
+com.palantir.tritium:tritium-ids:0.130.0 (1 constraints: fe0f9aa6)
 
 com.palantir.tritium:tritium-metrics:0.130.0 (5 constraints: 684cbc19)
 
@@ -186,7 +186,7 @@ org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
 org.hibernate.validator:hibernate-validator:8.0.2.Final (1 constraints: 1a1606e4)
 
-org.immutables:value:2.12.2 (2 constraints: 0115edc1)
+org.immutables:value:2.12.2 (2 constraints: 0215eec1)
 
 org.javassist:javassist:3.30.2-GA (1 constraints: 2811fff0)
 
