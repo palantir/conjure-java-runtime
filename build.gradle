@@ -71,3 +71,16 @@ subprojects {
 jdks {
     daemonTarget = 21
 }
+
+// Force conjure-java-api to the RC build. 2.72.0-rc1 sorts below the released 2.72.0 that
+// conjure-lib transitively requires, so this is a downgrade past a hard requirement and a strict
+// constraint can't satisfy it. A hard force is required to override the platform alignment.
+allprojects {
+    configurations.all {
+        resolutionStrategy {
+            force 'com.palantir.conjure.java.api:errors:2.72.0-rc1'
+            force 'com.palantir.conjure.java.api:service-config:2.72.0-rc1'
+            force 'com.palantir.conjure.java.api:ssl-config:2.72.0-rc1'
+        }
+    }
+}
