@@ -36,7 +36,7 @@ com.google.errorprone:error_prone_annotations:2.49.0 (18 constraints: 8018a42a)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.6.0-jre (17 constraints: b02ee6d8)
+com.google.guava:guava:33.6.0-jre (17 constraints: ae2e68d3)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -50,11 +50,11 @@ com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
 com.palantir.conjure.java:conjure-lib:8.78.0 (3 constraints: 7f25b055)
 
-com.palantir.conjure.java.api:errors:2.72.0 (5 constraints: 1e468ca3)
+com.palantir.conjure.java.api:errors:2.72.0-rc1 (5 constraints: 1e468ca3)
 
-com.palantir.conjure.java.api:service-config:2.72.0 (3 constraints: da29c776)
+com.palantir.conjure.java.api:service-config:2.72.0-rc1 (3 constraints: da29c776)
 
-com.palantir.conjure.java.api:ssl-config:2.72.0 (2 constraints: 34197fdf)
+com.palantir.conjure.java.api:ssl-config:2.72.0-rc1 (2 constraints: 671a5f47)
 
 com.palantir.deadlines:deadlines:0.21.0 (1 constraints: 650f1086)
 
@@ -76,19 +76,19 @@ com.palantir.refreshable:refreshable:2.13.0 (2 constraints: 9e140dac)
 
 com.palantir.ri:resource-identifier:2.17.0 (3 constraints: 3e30fcb1)
 
-com.palantir.safe-logging:logger:3.15.0 (15 constraints: e3e5d4a2)
+com.palantir.safe-logging:logger:3.15.0 (15 constraints: e2e57ea0)
 
 com.palantir.safe-logging:logger-slf4j:3.15.0 (1 constraints: 340e9650)
 
 com.palantir.safe-logging:logger-spi:3.15.0 (2 constraints: 771ee2b0)
 
-com.palantir.safe-logging:preconditions:3.15.0 (22 constraints: f65b595a)
+com.palantir.safe-logging:preconditions:3.15.0 (22 constraints: f35b7150)
 
-com.palantir.safe-logging:safe-logging:3.15.0 (20 constraints: 833caceb)
+com.palantir.safe-logging:safe-logging:3.15.0 (20 constraints: 813c92e5)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.8.0 (1 constraints: 3a0fb976)
 
-com.palantir.tokens:auth-tokens:4.5.0 (5 constraints: 44470d2f)
+com.palantir.tokens:auth-tokens:4.5.0 (5 constraints: 4347af2e)
 
 com.palantir.tracing:tracing:6.35.0 (8 constraints: d07db192)
 
@@ -102,7 +102,7 @@ com.palantir.tritium:tritium-api:0.130.0 (2 constraints: 891f47f3)
 
 com.palantir.tritium:tritium-core:0.130.0 (1 constraints: 6c10a3b2)
 
-com.palantir.tritium:tritium-ids:0.130.0 (1 constraints: fd0f97a6)
+com.palantir.tritium:tritium-ids:0.130.0 (1 constraints: fc0f94a6)
 
 com.palantir.tritium:tritium-metrics:0.130.0 (5 constraints: 684cbc19)
 
