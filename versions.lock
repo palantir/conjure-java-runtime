@@ -70,21 +70,21 @@ com.palantir.dialogue:dialogue-serde:6.29.0 (1 constraints: 4305663b)
 
 com.palantir.dialogue:dialogue-target:6.29.0 (5 constraints: 204d1e66)
 
-com.palantir.nylon:nylon-threads:0.10.0 (1 constraints: 39102ca2)
+com.palantir.nylon:nylon-threads:0.11.0 (1 constraints: 3a102fa2)
 
 com.palantir.refreshable:refreshable:2.13.0 (2 constraints: 9f1410ac)
 
 com.palantir.ri:resource-identifier:2.17.0 (3 constraints: 403031b2)
 
-com.palantir.safe-logging:logger:3.15.0 (15 constraints: eae513af)
+com.palantir.safe-logging:logger:3.15.0 (15 constraints: ebe516b0)
 
 com.palantir.safe-logging:logger-slf4j:3.15.0 (1 constraints: 340e9650)
 
 com.palantir.safe-logging:logger-spi:3.15.0 (2 constraints: 771ee2b0)
 
-com.palantir.safe-logging:preconditions:3.15.0 (22 constraints: 005c8474)
+com.palantir.safe-logging:preconditions:3.15.0 (22 constraints: 015c1c76)
 
-com.palantir.safe-logging:safe-logging:3.15.0 (20 constraints: 8b3c5aff)
+com.palantir.safe-logging:safe-logging:3.15.0 (20 constraints: 8c3c0901)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.9.0 (1 constraints: 3b0fbc76)
 
@@ -98,15 +98,15 @@ com.palantir.tracing:tracing-jersey-jakarta:6.35.0 (1 constraints: 40055e3b)
 
 com.palantir.tracing:tracing-okhttp3:6.35.0 (1 constraints: 40055e3b)
 
-com.palantir.tritium:tritium-api:0.130.0 (2 constraints: 891f47f3)
+com.palantir.tritium:tritium-api:0.131.0 (2 constraints: 8b1f7cf3)
 
-com.palantir.tritium:tritium-core:0.130.0 (1 constraints: 6c10a3b2)
+com.palantir.tritium:tritium-core:0.131.0 (1 constraints: 6d10a6b2)
 
-com.palantir.tritium:tritium-ids:0.130.0 (1 constraints: fe0f9aa6)
+com.palantir.tritium:tritium-ids:0.131.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-metrics:0.130.0 (5 constraints: 4d4c7611)
+com.palantir.tritium:tritium-metrics:0.131.0 (5 constraints: 4e4c4812)
 
-com.palantir.tritium:tritium-registry:0.130.0 (6 constraints: b85cdfc6)
+com.palantir.tritium:tritium-registry:0.131.0 (6 constraints: 4e5f87a3)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
@@ -116,7 +116,7 @@ com.squareup.okio:okio-jvm:3.6.0 (1 constraints: 500ad3b9)
 
 com.thoughtworks.paranamer:paranamer:2.8.3 (1 constraints: dc154900)
 
-io.dropwizard.metrics:metrics-core:4.2.39 (6 constraints: 28580f38)
+io.dropwizard.metrics:metrics-core:4.2.39 (6 constraints: 2a584038)
 
 io.smallrye.common:smallrye-common-annotation:2.14.0 (1 constraints: f20d0944)
 
