@@ -58,17 +58,17 @@ com.palantir.conjure.java.api:ssl-config:2.73.0 (2 constraints: 03180487)
 
 com.palantir.deadlines:deadlines:0.22.0 (1 constraints: 660f1386)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.29.0 (1 constraints: 4305663b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.30.0 (1 constraints: 3b054f3b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.29.0 (2 constraints: e1233db4)
+com.palantir.dialogue:dialogue-blocking-channels:6.30.0 (2 constraints: d1239fb2)
 
-com.palantir.dialogue:dialogue-core:6.29.0 (2 constraints: 47191cef)
+com.palantir.dialogue:dialogue-core:6.30.0 (2 constraints: 37191eed)
 
-com.palantir.dialogue:dialogue-futures:6.29.0 (3 constraints: da3354c0)
+com.palantir.dialogue:dialogue-futures:6.30.0 (3 constraints: c233c7bb)
 
-com.palantir.dialogue:dialogue-serde:6.29.0 (1 constraints: 4305663b)
+com.palantir.dialogue:dialogue-serde:6.30.0 (1 constraints: 3b054f3b)
 
-com.palantir.dialogue:dialogue-target:6.29.0 (5 constraints: 204d1e66)
+com.palantir.dialogue:dialogue-target:6.30.0 (5 constraints: f84c4356)
 
 com.palantir.nylon:nylon-threads:0.11.0 (1 constraints: 3a102fa2)
 
@@ -104,9 +104,9 @@ com.palantir.tritium:tritium-core:0.131.0 (1 constraints: 6d10a6b2)
 
 com.palantir.tritium:tritium-ids:0.131.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-metrics:0.131.0 (5 constraints: 4e4c4812)
+com.palantir.tritium:tritium-metrics:0.131.0 (5 constraints: 514ce812)
 
-com.palantir.tritium:tritium-registry:0.131.0 (6 constraints: 4e5f87a3)
+com.palantir.tritium:tritium-registry:0.131.0 (6 constraints: 515fb4a4)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
