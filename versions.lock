@@ -6,7 +6,7 @@ com.fasterxml.jackson.core:jackson-annotations:2.21 (12 constraints: 03de1b79)
 
 com.fasterxml.jackson.core:jackson-core:2.21.4 (14 constraints: d1231840)
 
-com.fasterxml.jackson.core:jackson-databind:2.21.4 (18 constraints: c563b4a7)
+com.fasterxml.jackson.core:jackson-databind:2.21.4 (18 constraints: c86371a8)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.4 (2 constraints: 2f204c06)
 
@@ -76,19 +76,19 @@ com.palantir.refreshable:refreshable:2.13.0 (2 constraints: 9f1410ac)
 
 com.palantir.ri:resource-identifier:2.19.0 (3 constraints: 4530fbb2)
 
-com.palantir.safe-logging:logger:3.16.0 (15 constraints: f2e5b5bc)
+com.palantir.safe-logging:logger:3.16.0 (15 constraints: f3e561bd)
 
 com.palantir.safe-logging:logger-slf4j:3.16.0 (1 constraints: 350e9950)
 
 com.palantir.safe-logging:logger-spi:3.16.0 (2 constraints: 791e18b1)
 
-com.palantir.safe-logging:preconditions:3.16.0 (22 constraints: 0f5c6498)
+com.palantir.safe-logging:preconditions:3.16.0 (22 constraints: 105c3f99)
 
 com.palantir.safe-logging:safe-logging:3.16.0 (20 constraints: 9b3caf1f)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.9.0 (1 constraints: 3b0fbc76)
 
-com.palantir.tokens:auth-tokens:4.5.0 (5 constraints: 49479030)
+com.palantir.tokens:auth-tokens:4.6.0 (5 constraints: 4a475131)
 
 com.palantir.tracing:tracing:6.35.0 (8 constraints: d57d9c96)
 
