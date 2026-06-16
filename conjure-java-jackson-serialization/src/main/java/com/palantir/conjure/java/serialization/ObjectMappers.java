@@ -19,6 +19,9 @@ package com.palantir.conjure.java.serialization;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.TSFBuilder;
+import com.fasterxml.jackson.core.util.BufferRecycler;
+import com.fasterxml.jackson.core.util.JsonRecyclerPools;
+import com.fasterxml.jackson.core.util.RecyclerPool;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +44,24 @@ public final class ObjectMappers {
     private ObjectMappers() {}
 
     /**
+     * Selects how Jackson recycles the {@link BufferRecycler} instances that hold the reusable
+     * {@code byte[]}/{@code char[]} buffers used while parsing and generating.
+     */
+    public enum RecyclerPoolType {
+        /**
+         * Jackson's default: one recycler per thread. Ideal for a platform thread-pool execution model, where a
+         * small number of long-lived workers each reuse their recycler (and its buffers) across many requests.
+         */
+        THREAD_LOCAL,
+        /**
+         * A thread-identity-independent shared pool. Prefer this under a thread-per-task virtual-thread execution
+         * model, where {@link #THREAD_LOCAL} would reallocate buffers for every short-lived virtual thread instead
+         * of recycling them.
+         */
+        SHARED;
+    }
+
+    /**
      * Returns a default ObjectMapper with settings adjusted for use in clients.
      *
      * <p>Settings:
@@ -50,7 +71,11 @@ public final class ObjectMappers {
      * </ul>
      */
     public static JsonMapper newClientJsonMapper() {
-        return withDefaultModules(JsonMapper.builder(jsonFactory()))
+        return newClientJsonMapper(RecyclerPoolType.THREAD_LOCAL);
+    }
+
+    public static JsonMapper newClientJsonMapper(RecyclerPoolType recyclerPool) {
+        return withDefaultModules(JsonMapper.builder(jsonFactory(recyclerPool)))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -65,7 +90,11 @@ public final class ObjectMappers {
      * </ul>
      */
     public static CBORMapper newClientCborMapper() {
-        return withDefaultModules(CBORMapper.builder(cborFactory()))
+        return newClientCborMapper(RecyclerPoolType.THREAD_LOCAL);
+    }
+
+    public static CBORMapper newClientCborMapper(RecyclerPoolType recyclerPool) {
+        return withDefaultModules(CBORMapper.builder(cborFactory(recyclerPool)))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -81,7 +110,11 @@ public final class ObjectMappers {
      * </ul>
      */
     public static SmileMapper newClientSmileMapper() {
-        return withDefaultModules(SmileMapper.builder(smileFactory()))
+        return newClientSmileMapper(RecyclerPoolType.THREAD_LOCAL);
+    }
+
+    public static SmileMapper newClientSmileMapper(RecyclerPoolType recyclerPool) {
+        return withDefaultModules(SmileMapper.builder(smileFactory(recyclerPool)))
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -96,7 +129,11 @@ public final class ObjectMappers {
      * </ul>
      */
     public static JsonMapper newServerJsonMapper() {
-        return withDefaultModules(JsonMapper.builder(jsonFactory()))
+        return newServerJsonMapper(RecyclerPoolType.THREAD_LOCAL);
+    }
+
+    public static JsonMapper newServerJsonMapper(RecyclerPoolType recyclerPool) {
+        return withDefaultModules(JsonMapper.builder(jsonFactory(recyclerPool)))
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -111,7 +148,11 @@ public final class ObjectMappers {
      * </ul>
      */
     public static CBORMapper newServerCborMapper() {
-        return withDefaultModules(CBORMapper.builder(cborFactory()))
+        return newServerCborMapper(RecyclerPoolType.THREAD_LOCAL);
+    }
+
+    public static CBORMapper newServerCborMapper(RecyclerPoolType recyclerPool) {
+        return withDefaultModules(CBORMapper.builder(cborFactory(recyclerPool)))
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -127,7 +168,11 @@ public final class ObjectMappers {
      * </ul>
      */
     public static SmileMapper newServerSmileMapper() {
-        return withDefaultModules(SmileMapper.builder(smileFactory()))
+        return newServerSmileMapper(RecyclerPoolType.THREAD_LOCAL);
+    }
+
+    public static SmileMapper newServerSmileMapper(RecyclerPoolType recyclerPool) {
+        return withDefaultModules(SmileMapper.builder(smileFactory(recyclerPool)))
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -136,24 +181,48 @@ public final class ObjectMappers {
         return newClientJsonMapper();
     }
 
+    public static ObjectMapper newClientObjectMapper(RecyclerPoolType recyclerPool) {
+        return newClientJsonMapper(recyclerPool);
+    }
+
     public static ObjectMapper newCborClientObjectMapper() {
         return newClientCborMapper();
+    }
+
+    public static ObjectMapper newCborClientObjectMapper(RecyclerPoolType recyclerPool) {
+        return newClientCborMapper(recyclerPool);
     }
 
     public static ObjectMapper newSmileClientObjectMapper() {
         return newClientSmileMapper();
     }
 
+    public static ObjectMapper newSmileClientObjectMapper(RecyclerPoolType recyclerPool) {
+        return newClientSmileMapper(recyclerPool);
+    }
+
     public static ObjectMapper newServerObjectMapper() {
         return newServerJsonMapper();
+    }
+
+    public static ObjectMapper newServerObjectMapper(RecyclerPoolType recyclerPool) {
+        return newServerJsonMapper(recyclerPool);
     }
 
     public static ObjectMapper newCborServerObjectMapper() {
         return newServerCborMapper();
     }
 
+    public static ObjectMapper newCborServerObjectMapper(RecyclerPoolType recyclerPool) {
+        return newServerCborMapper(recyclerPool);
+    }
+
     public static ObjectMapper newSmileServerObjectMapper() {
         return newServerSmileMapper();
+    }
+
+    public static ObjectMapper newSmileServerObjectMapper(RecyclerPoolType recyclerPool) {
+        return newServerSmileMapper(recyclerPool);
     }
 
     /**
@@ -230,23 +299,41 @@ public final class ObjectMappers {
 
     /** Creates a new {@link JsonFactory} configured with Conjure defaults. */
     public static JsonFactory jsonFactory() {
-        return withDefaults(InstrumentedJsonFactory.builder()).build();
+        return jsonFactory(RecyclerPoolType.THREAD_LOCAL);
+    }
+
+    /** Creates a new {@link JsonFactory} configured with Conjure defaults and the given recycler pool. */
+    public static JsonFactory jsonFactory(RecyclerPoolType recyclerPool) {
+        return withDefaults(InstrumentedJsonFactory.builder(), recyclerPool).build();
     }
 
     /** Creates a new {@link SmileFactory} configured with Conjure defaults. */
     public static SmileFactory smileFactory() {
-        return withDefaults(InstrumentedSmileFactory.builder().disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT))
+        return smileFactory(RecyclerPoolType.THREAD_LOCAL);
+    }
+
+    /** Creates a new {@link SmileFactory} configured with Conjure defaults and the given recycler pool. */
+    public static SmileFactory smileFactory(RecyclerPoolType recyclerPool) {
+        return withDefaults(
+                        InstrumentedSmileFactory.builder().disable(SmileGenerator.Feature.ENCODE_BINARY_AS_7BIT),
+                        recyclerPool)
                 .build();
     }
 
     /** Creates a new {@link CBORFactory} configured with Conjure defaults. */
     public static CBORFactory cborFactory() {
-        return withDefaults(CBORFactory.builder()).build();
+        return cborFactory(RecyclerPoolType.THREAD_LOCAL);
     }
 
-    /** Configures provided JsonFactory with Conjure default settings. */
-    private static <F extends JsonFactory, B extends TSFBuilder<F, B>> B withDefaults(B builder) {
-        return builder
+    /** Creates a new {@link CBORFactory} configured with Conjure defaults and the given recycler pool. */
+    public static CBORFactory cborFactory(RecyclerPoolType recyclerPool) {
+        return withDefaults(CBORFactory.builder(), recyclerPool).build();
+    }
+
+    /** Configures provided JsonFactory with Conjure default settings and the given recycler pool. */
+    private static <F extends JsonFactory, B extends TSFBuilder<F, B>> B withDefaults(
+            B builder, RecyclerPoolType recyclerPool) {
+        return builder.recyclerPool(jacksonRecyclerPool(recyclerPool))
                 // Interning introduces excessive contention https://github.com/FasterXML/jackson-core/issues/946
                 .disable(JsonFactory.Feature.INTERN_FIELD_NAMES)
                 // Canonicalization can be helpful to avoid string re-allocation, however we expect unbounded
@@ -259,5 +346,12 @@ public final class ObjectMappers {
                         // from the risk introduced by taking a dependency upgrade.
                         .maxStringLength(50_000_000)
                         .build());
+    }
+
+    private static RecyclerPool<BufferRecycler> jacksonRecyclerPool(RecyclerPoolType recyclerPool) {
+        return switch (recyclerPool) {
+            case THREAD_LOCAL -> JsonRecyclerPools.threadLocalPool();
+            case SHARED -> JsonRecyclerPools.sharedConcurrentDequePool();
+        };
     }
 }
