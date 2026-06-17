@@ -12,6 +12,8 @@ dependencies {
     api "com.fasterxml.jackson.datatype:jackson-datatype-joda"
     api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     api "com.palantir.safe-logging:preconditions"
+
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
     implementation 'com.fasterxml.jackson.core:jackson-core'
     implementation 'com.google.code.findbugs:jsr305'
     implementation 'com.google.guava:guava'
