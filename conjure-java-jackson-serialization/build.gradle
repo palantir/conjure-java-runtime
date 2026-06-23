@@ -29,3 +29,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
 }
+
+tasks.named('test', Test) {
+    // Forward the opt-in flag for JacksonWarmupReproducerTest so it can be enabled with
+    // `./gradlew :conjure-java-jackson-serialization:test -Djackson.warmup.reproducer=true`.
+    systemProperty 'jackson.warmup.reproducer', System.getProperty('jackson.warmup.reproducer', 'false')
+}
