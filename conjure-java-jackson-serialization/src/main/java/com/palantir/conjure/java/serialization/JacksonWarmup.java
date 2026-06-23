@@ -24,6 +24,9 @@ import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,17 +38,31 @@ import java.util.stream.Stream;
  * (typed vs untyped serializer) with full type-profile coverage before customer traffic perturbs it.
  *
  * <p>Without this warmup, a hot host that gets restarted and then receives a perturbing workload can re-enter
- * {@code unstable_if} deopt thrash on the JSON serialization path. The bytecode site is
- * {@code if (_typeSerializer == null)} in {@code BeanPropertyWriter.serializeAsField}: properties feeding
- * monomorphic serializers take one branch while properties feeding polymorphic serializers (Conjure unions,
- * {@code @JsonTypeInfo} types) take the other. The JIT speculates one branch, hits the other, deopts, recompiles,
- * and repeats - manifesting as kernel/system CPU from safepoints, code-cache invalidation, and recompilation.
+ * {@code unstable_if} deopt thrash on the JSON serialization path. The bytecode site is the
+ * {@code if (_typeSerializer == null)} check in {@code BeanPropertyWriter.serializeAsField}
+ * (<a href="https://github.com/FasterXML/jackson-databind/blob/jackson-databind-2.21.4/src/main/java/com/fasterxml/jackson/databind/ser/BeanPropertyWriter.java#L731-L735">jackson-databind
+ * 2.21.4 source</a>): properties feeding monomorphic serializers take one branch while properties feeding
+ * polymorphic serializers (Conjure unions, {@code @JsonTypeInfo} types) take the other. The JIT speculates
+ * one branch, hits the other, deopts, recompiles, and repeats - manifesting as kernel/system CPU from
+ * safepoints, code-cache invalidation, and recompilation. Throughput regressions of ~10x have been
+ * observed in production when this fires.
+ *
+ * <p>One might expect C2 to learn the bimorphic profile after a few deopts and stop. It does not: HotSpot
+ * suppresses re-profiling at sites that have already produced an {@code uncommon_trap} (the
+ * {@code too_many_traps} predicate, see Shipilev's
+ * <a href="https://shipilev.net/jvm/anatomy-quarks/29-uncommon-traps/">"Uncommon Traps" article</a>), so the
+ * site stays compiled for the wrong branch and keeps deoptimizing. The upstream fix is
+ * <a href="https://github.com/openjdk/jdk/pull/28966">openjdk/jdk#28966</a>, which switches the predicate to
+ * {@code too_many_traps_or_recompiles}. Until that lands and propagates, this class works around the bug
+ * by feeding C2 a bimorphic profile at startup for the Jackson serialization path.
  *
  * <p>The warmup payloads include both kinds of fields in the same object so each iteration exercises both branches,
  * letting C2 record a bimorphic profile for {@code serializeAsField} during warmup rather than learning it from
- * production traffic.
+ * production traffic. The bimorphic dispatch this leaves behind is essentially free (a single null check plus
+ * an inline cache with two entries), and is many orders of magnitude cheaper than the recompilation storm it
+ * prevents, even on hosts that only ever exercise one branch in steady state.
  *
- * <p>See OpenJDK issues:<ul>
+ * <p>See also OpenJDK issues:<ul>
  * <li> <a href="https://bugs.openjdk.org/browse/JDK-8330258">JDK-8330258</a> </li>
  * <li> <a href="https://bugs.openjdk.org/browse/JDK-8374307">JDK-8374307</a> </li>
  * </ul>
@@ -54,8 +71,12 @@ public final class JacksonWarmup {
 
     private static final SafeLogger log = SafeLoggerFactory.get(JacksonWarmup.class);
 
-    // Comfortably above HotSpot's tiered-compilation threshold (10_000) so C2 compilation completes during warmup.
-    static final int ITERATIONS = 20_000;
+    // Each iteration runs every mapper against every payload once, so per (mapper, payload) we hit ITERATIONS
+    // top-level writeValue invocations and many more invocations of the shared inner methods like
+    // BeanPropertyWriter.serializeAsField (one per field per payload). This is comfortably above HotSpot's
+    // tiered-compilation invocation thresholds (Tier4InvocationThreshold defaults to 5_000) so C2 settles on
+    // the bimorphic profile during warmup. Total warmup wall-clock is O(1s) on modern hardware.
+    static final int ITERATIONS = 10_000;
 
     private JacksonWarmup() {}
 
@@ -89,19 +110,27 @@ public final class JacksonWarmup {
         long count = 0;
         try (OutputStream sink = new DiscardOutputStream()) {
             List<Object> payloads = buildPayloads();
-            for (ObjectMapper mapper : mappers) {
-                try {
-                    for (int i = 0; i < ITERATIONS; i++) {
+            // Iteration is the outer loop and mappers is the inner loop so each iteration exercises every mapper.
+            // The hot methods being warmed (BeanPropertyWriter.serializeAsField, the per-field serializers) are
+            // JVM-wide compiled, so interleaving lets every mapper contribute to the type profile rather than
+            // letting the first mapper dominate and the rest only confirm it.
+            List<ObjectMapper> active = new ArrayList<>(Arrays.asList(mappers));
+            for (int i = 0; i < ITERATIONS && !active.isEmpty(); i++) {
+                for (Iterator<ObjectMapper> it = active.iterator(); it.hasNext(); ) {
+                    ObjectMapper mapper = it.next();
+                    try {
                         for (Object payload : payloads) {
                             mapper.writeValue(sink, payload);
                             count++;
                         }
+                    } catch (IOException | RuntimeException e) {
+                        log.warn(
+                                "Jackson ObjectMapper warmup failed; continuing without it",
+                                SafeArg.of("mapperClass", mapper.getClass().getCanonicalName()),
+                                e);
+                        // Drop the mapper from the active set so we don't spam logs on every subsequent iteration.
+                        it.remove();
                     }
-                } catch (IOException | RuntimeException e) {
-                    log.warn(
-                            "Jackson ObjectMapper warmup failed; continuing without it",
-                            SafeArg.of("mapperClass", mapper.getClass().getCanonicalName()),
-                            e);
                 }
             }
             long elapsedMillis = (System.nanoTime() - startNanos) / 1_000_000L;
