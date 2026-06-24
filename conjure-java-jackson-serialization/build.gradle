@@ -12,6 +12,8 @@ dependencies {
     api "com.fasterxml.jackson.datatype:jackson-datatype-joda"
     api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     api "com.palantir.safe-logging:preconditions"
+
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
     implementation 'com.fasterxml.jackson.core:jackson-core'
     implementation 'com.google.code.findbugs:jsr305'
     implementation 'com.google.guava:guava'
@@ -26,4 +28,10 @@ dependencies {
     testImplementation "org.assertj:assertj-core"
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
+}
+
+tasks.named('test', Test) {
+    // Forward the opt-in flag for JacksonWarmupReproducerTest so it can be enabled with
+    // `./gradlew :conjure-java-jackson-serialization:test -Djackson.warmup.reproducer=true`.
+    systemProperty 'jackson.warmup.reproducer', System.getProperty('jackson.warmup.reproducer', 'false')
 }
