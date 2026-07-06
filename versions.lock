@@ -50,49 +50,49 @@ com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
 com.palantir.conjure.java:conjure-lib:8.80.0 (3 constraints: 6c25d551)
 
-com.palantir.conjure.java.api:errors:2.74.0 (5 constraints: f14447b0)
+com.palantir.conjure.java.api:errors:2.74.0 (5 constraints: f444dcb0)
 
-com.palantir.conjure.java.api:service-config:2.74.0 (3 constraints: ab2845e4)
+com.palantir.conjure.java.api:service-config:2.74.0 (3 constraints: ad2878e4)
 
 com.palantir.conjure.java.api:ssl-config:2.74.0 (2 constraints: 05184087)
 
-com.palantir.deadlines:deadlines:0.22.0 (1 constraints: 660f1386)
+com.palantir.deadlines:deadlines:0.23.0 (1 constraints: 670f1686)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.31.0 (1 constraints: 3c05523b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.32.0 (1 constraints: 3d05553b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.31.0 (2 constraints: d323d3b2)
+com.palantir.dialogue:dialogue-blocking-channels:6.32.0 (2 constraints: d52307b3)
 
-com.palantir.dialogue:dialogue-core:6.31.0 (2 constraints: 39195eed)
+com.palantir.dialogue:dialogue-core:6.32.0 (2 constraints: 3b199eed)
 
-com.palantir.dialogue:dialogue-futures:6.31.0 (3 constraints: c53359bc)
+com.palantir.dialogue:dialogue-futures:6.32.0 (3 constraints: c833ebbc)
 
-com.palantir.dialogue:dialogue-serde:6.31.0 (1 constraints: 3c05523b)
+com.palantir.dialogue:dialogue-serde:6.32.0 (1 constraints: 3d05553b)
 
-com.palantir.dialogue:dialogue-target:6.31.0 (5 constraints: fd4c3f58)
+com.palantir.dialogue:dialogue-target:6.32.0 (5 constraints: 024d3b5a)
 
 com.palantir.nylon:nylon-threads:0.12.0 (1 constraints: 3b1032a2)
 
-com.palantir.refreshable:refreshable:2.14.0 (2 constraints: a01440ac)
+com.palantir.refreshable:refreshable:2.14.0 (2 constraints: a11443ac)
 
 com.palantir.ri:resource-identifier:2.19.0 (3 constraints: 4530fbb2)
 
-com.palantir.safe-logging:logger:3.16.0 (15 constraints: f8e5c8bf)
+com.palantir.safe-logging:logger:3.16.0 (15 constraints: f9e5f4c1)
 
 com.palantir.safe-logging:logger-slf4j:3.16.0 (1 constraints: 350e9950)
 
 com.palantir.safe-logging:logger-spi:3.16.0 (2 constraints: 791e18b1)
 
-com.palantir.safe-logging:preconditions:3.16.0 (22 constraints: 165c609d)
+com.palantir.safe-logging:preconditions:3.16.0 (22 constraints: 175c50a0)
 
-com.palantir.safe-logging:safe-logging:3.16.0 (20 constraints: 9f3ce421)
+com.palantir.safe-logging:safe-logging:3.16.0 (20 constraints: a03cac24)
 
-com.palantir.safethreadlocalrandom:safe-thread-local-random:0.9.0 (1 constraints: 3b0fbc76)
+com.palantir.safethreadlocalrandom:safe-thread-local-random:0.10.0 (1 constraints: 630f0986)
 
-com.palantir.tokens:auth-tokens:4.6.0 (5 constraints: 4a475131)
+com.palantir.tokens:auth-tokens:4.6.0 (5 constraints: 4c478531)
 
-com.palantir.tracing:tracing:6.36.0 (8 constraints: d87d2f98)
+com.palantir.tracing:tracing:6.36.0 (8 constraints: dd7d1a9c)
 
-com.palantir.tracing:tracing-api:6.36.0 (6 constraints: f7578fce)
+com.palantir.tracing:tracing-api:6.36.0 (6 constraints: f957d4cf)
 
 com.palantir.tracing:tracing-jersey-jakarta:6.36.0 (1 constraints: 4105613b)
 
@@ -104,9 +104,9 @@ com.palantir.tritium:tritium-core:0.132.0 (1 constraints: 6e10a9b2)
 
 com.palantir.tritium:tritium-ids:0.132.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-metrics:0.132.0 (5 constraints: 524cba13)
+com.palantir.tritium:tritium-metrics:0.132.0 (5 constraints: 564c0115)
 
-com.palantir.tritium:tritium-registry:0.132.0 (6 constraints: 535fb9a5)
+com.palantir.tritium:tritium-registry:0.132.0 (6 constraints: 575fbca7)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
@@ -116,7 +116,7 @@ com.squareup.okio:okio-jvm:3.6.0 (1 constraints: 500ad3b9)
 
 com.thoughtworks.paranamer:paranamer:2.8.3 (1 constraints: dc154900)
 
-io.dropwizard.metrics:metrics-core:4.2.39 (6 constraints: 2a584038)
+io.dropwizard.metrics:metrics-core:4.2.39 (6 constraints: 2b580539)
 
 io.smallrye.common:smallrye-common-annotation:2.14.0 (1 constraints: f20d0944)
 
@@ -150,11 +150,11 @@ jakarta.xml.bind:jakarta.xml.bind-api:4.0.2 (2 constraints: 3c33f3c3)
 
 joda-time:joda-time:2.12.7 (1 constraints: 2f16b1f1)
 
-org.apache.httpcomponents.client5:httpclient5:5.6.1 (2 constraints: dd18adc4)
+org.apache.httpcomponents.client5:httpclient5:5.6.2 (2 constraints: de18aec4)
 
-org.apache.httpcomponents.core5:httpcore5:5.4 (3 constraints: 4638c7ec)
+org.apache.httpcomponents.core5:httpcore5:5.4.3 (3 constraints: 6939360f)
 
-org.apache.httpcomponents.core5:httpcore5-h2:5.4 (1 constraints: df12c515)
+org.apache.httpcomponents.core5:httpcore5-h2:5.4.3 (1 constraints: 4013123c)
 
 org.eclipse.collections:eclipse-collections:13.0.0 (1 constraints: 1c1091a9)
 
