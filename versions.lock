@@ -150,7 +150,7 @@ jakarta.xml.bind:jakarta.xml.bind-api:4.0.2 (2 constraints: 3c33f3c3)
 
 joda-time:joda-time:2.12.7 (1 constraints: 2f16b1f1)
 
-org.apache.httpcomponents.client5:httpclient5:5.6.2 (2 constraints: de18aec4)
+org.apache.httpcomponents.client5:httpclient5:5.6.2 (2 constraints: df18e8c4)
 
 org.apache.httpcomponents.core5:httpcore5:5.4.3 (3 constraints: 6939360f)
 
