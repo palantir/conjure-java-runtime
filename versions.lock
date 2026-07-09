@@ -76,15 +76,15 @@ com.palantir.refreshable:refreshable:2.14.0 (2 constraints: a11443ac)
 
 com.palantir.ri:resource-identifier:2.19.0 (3 constraints: 4530fbb2)
 
-com.palantir.safe-logging:logger:3.16.0 (15 constraints: f9e5f4c1)
+com.palantir.safe-logging:logger:3.17.0 (15 constraints: fae580c4)
 
-com.palantir.safe-logging:logger-slf4j:3.16.0 (1 constraints: 350e9950)
+com.palantir.safe-logging:logger-slf4j:3.17.0 (1 constraints: 360e9c50)
 
-com.palantir.safe-logging:logger-spi:3.16.0 (2 constraints: 791e18b1)
+com.palantir.safe-logging:logger-spi:3.17.0 (2 constraints: 7b1e4eb1)
 
-com.palantir.safe-logging:preconditions:3.16.0 (22 constraints: 175c50a0)
+com.palantir.safe-logging:preconditions:3.17.0 (22 constraints: 195c33a5)
 
-com.palantir.safe-logging:safe-logging:3.16.0 (20 constraints: a03cac24)
+com.palantir.safe-logging:safe-logging:3.17.0 (20 constraints: a53c302c)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.10.0 (1 constraints: 630f0986)
 
@@ -224,7 +224,7 @@ com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.21.4 (1 constraints: 
 
 com.google.code.findbugs:annotations:3.0.1u2 (1 constraints: 450b07da)
 
-com.palantir.safe-logging:preconditions-assertj:3.16.0 (1 constraints: 3c05473b)
+com.palantir.safe-logging:preconditions-assertj:3.17.0 (1 constraints: 3d054a3b)
 
 com.squareup.okhttp3:mockwebserver:4.12.0 (1 constraints: 3905413b)
 
