@@ -50,7 +50,12 @@ public final class ObjectMappers {
      * </ul>
      */
     public static JsonMapper newClientJsonMapper() {
-        return withDefaultModules(JsonMapper.builder(jsonFactory()))
+        return newClientJsonMapper(false);
+    }
+
+    /** Like {@link #newClientJsonMapper()}, optionally enabling Jackson optimization modules (Blackbird). */
+    public static JsonMapper newClientJsonMapper(boolean useOptimizations) {
+        return withDefaultModules(JsonMapper.builder(jsonFactory()), useOptimizations)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -65,7 +70,12 @@ public final class ObjectMappers {
      * </ul>
      */
     public static CBORMapper newClientCborMapper() {
-        return withDefaultModules(CBORMapper.builder(cborFactory()))
+        return newClientCborMapper(false);
+    }
+
+    /** Like {@link #newClientCborMapper()}, optionally enabling Jackson optimization modules (Blackbird). */
+    public static CBORMapper newClientCborMapper(boolean useOptimizations) {
+        return withDefaultModules(CBORMapper.builder(cborFactory()), useOptimizations)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -81,7 +91,12 @@ public final class ObjectMappers {
      * </ul>
      */
     public static SmileMapper newClientSmileMapper() {
-        return withDefaultModules(SmileMapper.builder(smileFactory()))
+        return newClientSmileMapper(false);
+    }
+
+    /** Like {@link #newClientSmileMapper()}, optionally enabling Jackson optimization modules (Blackbird). */
+    public static SmileMapper newClientSmileMapper(boolean useOptimizations) {
+        return withDefaultModules(SmileMapper.builder(smileFactory()), useOptimizations)
                 .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -96,7 +111,12 @@ public final class ObjectMappers {
      * </ul>
      */
     public static JsonMapper newServerJsonMapper() {
-        return withDefaultModules(JsonMapper.builder(jsonFactory()))
+        return newServerJsonMapper(false);
+    }
+
+    /** Like {@link #newServerJsonMapper()}, optionally enabling Jackson optimization modules (Blackbird). */
+    public static JsonMapper newServerJsonMapper(boolean useOptimizations) {
+        return withDefaultModules(JsonMapper.builder(jsonFactory()), useOptimizations)
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -111,7 +131,12 @@ public final class ObjectMappers {
      * </ul>
      */
     public static CBORMapper newServerCborMapper() {
-        return withDefaultModules(CBORMapper.builder(cborFactory()))
+        return newServerCborMapper(false);
+    }
+
+    /** Like {@link #newServerCborMapper()}, optionally enabling Jackson optimization modules (Blackbird). */
+    public static CBORMapper newServerCborMapper(boolean useOptimizations) {
+        return withDefaultModules(CBORMapper.builder(cborFactory()), useOptimizations)
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -127,7 +152,12 @@ public final class ObjectMappers {
      * </ul>
      */
     public static SmileMapper newServerSmileMapper() {
-        return withDefaultModules(SmileMapper.builder(smileFactory()))
+        return newServerSmileMapper(false);
+    }
+
+    /** Like {@link #newServerSmileMapper()}, optionally enabling Jackson optimization modules (Blackbird). */
+    public static SmileMapper newServerSmileMapper(boolean useOptimizations) {
+        return withDefaultModules(SmileMapper.builder(smileFactory()), useOptimizations)
                 .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
                 .build();
     }
@@ -170,13 +200,22 @@ public final class ObjectMappers {
      *   <li>Deserializing a null for a primitive field will throw an exception.
      * </ul>
      */
-    @SuppressWarnings("for-rollout:deprecation")
     public static <M extends ObjectMapper, B extends MapperBuilder<M, B>> B withDefaultModules(B builder) {
+        return withDefaultModules(builder, false);
+    }
+
+    /**
+     * Like {@link #withDefaultModules(MapperBuilder)}, optionally enabling Jackson optimization modules (Blackbird).
+     * See {@link ObjectMapperOptimizations#createModules(boolean)} for the tradeoffs of enabling optimizations.
+     */
+    @SuppressWarnings("for-rollout:deprecation")
+    public static <M extends ObjectMapper, B extends MapperBuilder<M, B>> B withDefaultModules(
+            B builder, boolean useOptimizations) {
         return builder.typeFactory(NonCachingTypeFactory.from(builder.build().getTypeFactory()))
                 .addModule(new GuavaModule())
                 .addModule(new ShimJdk7Module())
                 .addModule(new Jdk8Module().configureAbsentsAsNulls(true))
-                .addModules(ObjectMapperOptimizations.createModules())
+                .addModules(ObjectMapperOptimizations.createModules(useOptimizations))
                 .addModule(new JavaTimeModule())
                 .addModule(new LenientLongModule())
                 // we strongly recommend using built-in java.time classes instead of joda ones. Joda deserialization

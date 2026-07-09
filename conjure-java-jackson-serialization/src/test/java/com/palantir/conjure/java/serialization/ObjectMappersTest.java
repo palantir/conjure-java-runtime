@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.palantir.conjure.java.jackson.optimizations.ObjectMapperOptimizations;
 import com.palantir.logsafe.Preconditions;
 import com.palantir.tritium.metrics.registry.SharedTaggedMetricRegistries;
 import com.palantir.tritium.metrics.registry.TaggedMetricRegistry;
@@ -50,6 +51,7 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -509,6 +511,40 @@ public final class ObjectMappersTest {
         int size = 10_000_000;
         String parsed = ObjectMappers.newServerJsonMapper().readValue('"' + "a".repeat(size) + '"', String.class);
         assertThat(parsed).hasSize(size);
+    }
+
+    @Test
+    public void optimizationsDisabledByDefault() {
+        assertThat(ObjectMapperOptimizations.createModules()).isEmpty();
+        assertThat(ObjectMapperOptimizations.createModules(false)).isEmpty();
+        assertThat(hasBlackbird(ObjectMappers.newServerJsonMapper()))
+                .as("Blackbird should not be registered by default")
+                .isFalse();
+    }
+
+    @Test
+    public void blackbirdOptimizationRegistersModuleAndPreservesOutput() throws IOException {
+        assertThat(ObjectMapperOptimizations.createModules(true)).hasSize(1);
+
+        JsonMapper optimized = ObjectMappers.newServerJsonMapper(true);
+        assertThat(hasBlackbird(optimized))
+                .as("Blackbird should be registered when optimizations are enabled")
+                .isTrue();
+        assertThat(hasBlackbird(ObjectMappers.newClientJsonMapper(true)))
+                .as("Blackbird should be registered on client mappers too")
+                .isTrue();
+
+        // Blackbird only changes how (de)serialization is performed, not the wire output.
+        Map<String, Object> value = Map.of("name", "witchcraft", "count", 42);
+        String optimizedJson = optimized.writeValueAsString(value);
+        assertThat(optimizedJson).isEqualTo(ObjectMappers.newServerJsonMapper().writeValueAsString(value));
+        assertThat(optimized.readValue(optimizedJson, new TypeReference<Map<String, Object>>() {}))
+                .isEqualTo(value);
+    }
+
+    private static boolean hasBlackbird(ObjectMapper mapper) {
+        return mapper.getRegisteredModuleIds().stream()
+                .anyMatch(id -> id.toString().toLowerCase(Locale.ROOT).contains("blackbird"));
     }
 
     private static String ser(Object object) throws IOException {
