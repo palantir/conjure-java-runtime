@@ -126,3 +126,11 @@ acceptedBreaks:
       old: "method void com.palantir.conjure.java.client.config.ClientConfiguration::checkTimeoutPrecision(java.time.Duration,\
         \ java.lang.String)"
       justification: "Removed internal method"
+  "8.38.0":
+    com.palantir.conjure.java.runtime:client-config:
+    - code: "java.method.addedToInterface"
+      new: "method T com.palantir.conjure.java.clients.ConjureClients.WithClientOptions<T>::withQueueTimeout(java.time.Duration)"
+      justification: "Adding support for Dialogue queue timeouts"
+    - code: "java.method.addedToInterface"
+      new: "method java.util.Optional<java.time.Duration> com.palantir.conjure.java.client.config.ClientConfiguration::queueTimeout()"
+      justification: "Adding support for Dialogue queue timeouts"

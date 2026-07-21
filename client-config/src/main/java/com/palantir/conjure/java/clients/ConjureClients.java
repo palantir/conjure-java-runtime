@@ -83,6 +83,8 @@ public final class ConjureClients {
 
         T withMaxNumRetries(int maxNumRetries);
 
+        T withQueueTimeout(Duration duration);
+
         T withTaggedMetrics(TaggedMetricRegistry metrics);
 
         T withUserAgent(UserAgent agent);
