@@ -72,7 +72,7 @@ com.palantir.dialogue:dialogue-target:6.34.0 (5 constraints: 0c4d335e)
 
 com.palantir.nylon:nylon-threads:0.12.0 (1 constraints: 3b1032a2)
 
-com.palantir.refreshable:refreshable:2.15.0 (2 constraints: a31476ac)
+com.palantir.refreshable:refreshable:2.16.0 (2 constraints: a414a6ac)
 
 com.palantir.ri:resource-identifier:2.20.0 (3 constraints: 2e30b6ae)
 
