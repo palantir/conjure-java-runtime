@@ -76,27 +76,27 @@ com.palantir.refreshable:refreshable:2.15.0 (2 constraints: a31476ac)
 
 com.palantir.ri:resource-identifier:2.20.0 (3 constraints: 2e30b6ae)
 
-com.palantir.safe-logging:logger:3.17.0 (15 constraints: 02e694d1)
+com.palantir.safe-logging:logger:3.17.0 (15 constraints: 04e6a0d2)
 
 com.palantir.safe-logging:logger-slf4j:3.17.0 (1 constraints: 360e9c50)
 
 com.palantir.safe-logging:logger-spi:3.17.0 (2 constraints: 7b1e4eb1)
 
-com.palantir.safe-logging:preconditions:3.17.0 (22 constraints: 265cb5c5)
+com.palantir.safe-logging:preconditions:3.17.0 (22 constraints: 285c1fc7)
 
-com.palantir.safe-logging:safe-logging:3.17.0 (20 constraints: af3ca744)
+com.palantir.safe-logging:safe-logging:3.17.0 (20 constraints: b13cbd45)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.10.0 (1 constraints: 630f0986)
 
 com.palantir.tokens:auth-tokens:4.7.0 (5 constraints: 53475c34)
 
-com.palantir.tracing:tracing:6.36.0 (8 constraints: de7d4f9d)
+com.palantir.tracing:tracing:6.37.0 (8 constraints: e17de29e)
 
-com.palantir.tracing:tracing-api:6.36.0 (6 constraints: f957d4cf)
+com.palantir.tracing:tracing-api:6.37.0 (6 constraints: fd5761d1)
 
-com.palantir.tracing:tracing-jersey-jakarta:6.36.0 (1 constraints: 4105613b)
+com.palantir.tracing:tracing-jersey-jakarta:6.37.0 (1 constraints: 4205643b)
 
-com.palantir.tracing:tracing-okhttp3:6.36.0 (1 constraints: 4105613b)
+com.palantir.tracing:tracing-okhttp3:6.37.0 (1 constraints: 4205643b)
 
 com.palantir.tritium:tritium-api:0.134.0 (2 constraints: 911f1bf4)
 
