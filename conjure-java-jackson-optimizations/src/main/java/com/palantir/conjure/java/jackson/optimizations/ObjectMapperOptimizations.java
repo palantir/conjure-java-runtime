@@ -16,6 +16,7 @@
 
 package com.palantir.conjure.java.jackson.optimizations;
 
+import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
 import java.util.List;
 
 /**
@@ -25,11 +26,29 @@ import java.util.List;
  */
 public final class ObjectMapperOptimizations {
 
+    // Blackbird generates classes at runtime via LambdaMetafactory, which native images cannot do.
+    private static final boolean NATIVE_IMAGE = System.getProperty("org.graalvm.nativeimage.imagecode") != null;
+
+    /** Equivalent to {@link #createModules(boolean) createModules(false)}: no optimization modules. */
     public static List<? extends com.fasterxml.jackson.databind.Module> createModules() {
-        // At one point this conditionally returned List.of(new AfterburnerModule), however afterburner is not
-        // supported on any supported LTS Java release anymore, and the Blackbird alternative incurs a memory
-        // leak (https://github.com/FasterXML/jackson-modules-base/issues/147).
-        return List.of();
+        return createModules(false);
+    }
+
+    /**
+     * Optionally registers the Blackbird module, which speeds up (de)serialization by generating accessors at
+     * runtime rather than using reflection. At one point this returned an {@code AfterburnerModule}, however
+     * afterburner is not supported on any supported LTS Java release anymore.
+     *
+     * <p>Blackbird generates a class per accessor via {@code LambdaMetafactory}. This is bounded and safe when a
+     * service reuses a small set of long-lived {@code ObjectMapper}s, but creating mappers per-request leaks
+     * compressed class space (https://github.com/FasterXML/jackson-modules-base/issues/147), so it is opt-in.
+     * Optimizations are always disabled within native images, where runtime class generation is unsupported.
+     */
+    public static List<? extends com.fasterxml.jackson.databind.Module> createModules(boolean useBlackbird) {
+        if (!useBlackbird || NATIVE_IMAGE) {
+            return List.of();
+        }
+        return List.of(new BlackbirdModule());
     }
 
     private ObjectMapperOptimizations() {}
