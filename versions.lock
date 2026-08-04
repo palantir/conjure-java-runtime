@@ -2,31 +2,31 @@
 
 com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
 
-com.fasterxml.jackson.core:jackson-annotations:2.22 (12 constraints: 04de8179)
+com.fasterxml.jackson.core:jackson-annotations:2.22 (12 constraints: 0bde9b83)
 
-com.fasterxml.jackson.core:jackson-core:2.21.4 (14 constraints: d1231840)
+com.fasterxml.jackson.core:jackson-core:2.22.1 (14 constraints: b923041b)
 
-com.fasterxml.jackson.core:jackson-databind:2.21.4 (18 constraints: c86371a8)
+com.fasterxml.jackson.core:jackson-databind:2.22.1 (18 constraints: b2630775)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.21.4 (2 constraints: 2f204c06)
+com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.22.1 (2 constraints: 2d204c06)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.21.4 (1 constraints: 3b053a3b)
+com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.22.1 (1 constraints: 3b053a3b)
 
-com.fasterxml.jackson.datatype:jackson-datatype-guava:2.21.4 (1 constraints: 3b053a3b)
+com.fasterxml.jackson.datatype:jackson-datatype-guava:2.22.1 (1 constraints: 3b053a3b)
 
-com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.21.4 (1 constraints: 3b053a3b)
+com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.22.1 (1 constraints: 3b053a3b)
 
-com.fasterxml.jackson.datatype:jackson-datatype-joda:2.21.4 (1 constraints: 3b053a3b)
+com.fasterxml.jackson.datatype:jackson-datatype-joda:2.22.1 (1 constraints: 3b053a3b)
 
-com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.21.4 (1 constraints: 3b053a3b)
+com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.22.1 (1 constraints: 3b053a3b)
 
-com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.21.4 (1 constraints: f51af642)
+com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-base:2.22.1 (1 constraints: f31af642)
 
-com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider:2.21.4 (1 constraints: 3b053a3b)
+com.fasterxml.jackson.jakarta.rs:jackson-jakarta-rs-cbor-provider:2.22.1 (1 constraints: 3b053a3b)
 
-com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.21.4 (2 constraints: e53097b3)
+com.fasterxml.jackson.module:jackson-module-jakarta-xmlbind-annotations:2.22.1 (2 constraints: e3301bb3)
 
-com.fasterxml.jackson.module:jackson-module-scala_2.12:2.21.4 (1 constraints: 3b053a3b)
+com.fasterxml.jackson.module:jackson-module-scala_2.12:2.22.1 (1 constraints: 3b053a3b)
 
 com.github.ben-manes.caffeine:caffeine:3.2.4 (3 constraints: e9234fa3)
 
@@ -48,7 +48,7 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.83.0 (3 constraints: 73255f53)
+com.palantir.conjure.java:conjure-lib:8.84.0 (3 constraints: 7425bf53)
 
 com.palantir.conjure.java.api:errors:2.76.0 (5 constraints: ff4425b5)
 
@@ -220,7 +220,7 @@ org.wildfly.common:wildfly-common:2.0.1 (2 constraints: 591adc48)
 
 [Test dependencies]
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.21.4 (1 constraints: 3b053a3b)
+com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.22.1 (1 constraints: 3b053a3b)
 
 com.google.code.findbugs:annotations:3.0.1u2 (1 constraints: 450b07da)
 
