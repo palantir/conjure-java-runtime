@@ -2,7 +2,7 @@
 
 com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
 
-com.fasterxml.jackson.core:jackson-annotations:2.21 (12 constraints: 03de1b79)
+com.fasterxml.jackson.core:jackson-annotations:2.22 (12 constraints: 04de8179)
 
 com.fasterxml.jackson.core:jackson-core:2.21.4 (14 constraints: d1231840)
 
@@ -74,7 +74,7 @@ com.palantir.nylon:nylon-threads:0.14.0 (1 constraints: 3d1038a2)
 
 com.palantir.refreshable:refreshable:2.16.0 (2 constraints: a414a6ac)
 
-com.palantir.ri:resource-identifier:2.20.0 (3 constraints: 2e30b6ae)
+com.palantir.ri:resource-identifier:2.21.0 (3 constraints: 2e30b6ae)
 
 com.palantir.safe-logging:logger:3.17.0 (15 constraints: 08e632d4)
 
