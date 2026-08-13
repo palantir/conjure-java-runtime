@@ -252,7 +252,7 @@ org.apiguardian:apiguardian-api:1.1.2 (6 constraints: 5366ce6e)
 
 org.assertj:assertj-core:3.27.7 (2 constraints: ac190ce1)
 
-org.conscrypt:conscrypt-openjdk-uber:2.6.1 (1 constraints: 0b050836)
+org.conscrypt:conscrypt-openjdk-uber:2.6.2 (1 constraints: 0c050936)
 
 org.glassfish.jersey.containers:jersey-container-servlet-core:3.1.11 (1 constraints: 3805363b)
 
