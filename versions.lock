@@ -32,11 +32,11 @@ com.github.ben-manes.caffeine:caffeine:3.2.4 (3 constraints: e9234fa3)
 
 com.google.code.findbugs:jsr305:3.0.2 (7 constraints: 5f6b7728)
 
-com.google.errorprone:error_prone_annotations:2.50.0 (18 constraints: 7c18731e)
+com.google.errorprone:error_prone_annotations:2.50.0 (18 constraints: 5418d9d0)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.7.0-jre (17 constraints: b12e3bdc)
+com.google.guava:guava:33.7.0-jre (17 constraints: b72e72e7)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -58,17 +58,17 @@ com.palantir.conjure.java.api:ssl-config:2.77.0 (2 constraints: 0b18f487)
 
 com.palantir.deadlines:deadlines:0.25.0 (1 constraints: 690f1c86)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.36.0 (1 constraints: 4105613b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.37.0 (1 constraints: 4205643b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.36.0 (2 constraints: dd23d7b3)
+com.palantir.dialogue:dialogue-blocking-channels:6.37.0 (2 constraints: df230bb4)
 
-com.palantir.dialogue:dialogue-core:6.36.0 (2 constraints: 43199eee)
+com.palantir.dialogue:dialogue-core:6.37.0 (2 constraints: 4519deee)
 
-com.palantir.dialogue:dialogue-futures:6.36.0 (3 constraints: d43333bf)
+com.palantir.dialogue:dialogue-futures:6.37.0 (3 constraints: d733c5bf)
 
-com.palantir.dialogue:dialogue-serde:6.36.0 (1 constraints: 4105613b)
+com.palantir.dialogue:dialogue-serde:6.37.0 (1 constraints: 4205643b)
 
-com.palantir.dialogue:dialogue-target:6.36.0 (5 constraints: 164d2b62)
+com.palantir.dialogue:dialogue-target:6.37.0 (5 constraints: 1b4d2764)
 
 com.palantir.nylon:nylon-threads:0.14.0 (1 constraints: 3d1038a2)
 
@@ -204,7 +204,7 @@ org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10 (1 constraints: e210ffd2)
 
 org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10 (3 constraints: eb27efa7)
 
-org.jspecify:jspecify:1.0.1 (20 constraints: 9e428e90)
+org.jspecify:jspecify:1.0.1 (20 constraints: a44218a0)
 
 org.jvnet:animal-sniffer-annotation:1.0 (1 constraints: f20b95eb)
 
