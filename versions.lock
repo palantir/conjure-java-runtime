@@ -90,13 +90,13 @@ com.palantir.safethreadlocalrandom:safe-thread-local-random:0.12.0 (1 constraint
 
 com.palantir.tokens:auth-tokens:4.8.0 (5 constraints: 56475135)
 
-com.palantir.tracing:tracing:6.38.0 (8 constraints: ed7d16a7)
+com.palantir.tracing:tracing:6.40.0 (8 constraints: d87d149c)
 
-com.palantir.tracing:tracing-api:6.38.0 (6 constraints: 055878d5)
+com.palantir.tracing:tracing-api:6.40.0 (6 constraints: e957a1ca)
 
-com.palantir.tracing:tracing-jersey-jakarta:6.38.0 (1 constraints: 4305673b)
+com.palantir.tracing:tracing-jersey-jakarta:6.40.0 (1 constraints: 3c05533b)
 
-com.palantir.tracing:tracing-okhttp3:6.38.0 (1 constraints: 4305673b)
+com.palantir.tracing:tracing-okhttp3:6.40.0 (1 constraints: 3c05533b)
 
 com.palantir.tritium:tritium-api:0.136.0 (2 constraints: 951f85f4)
 
