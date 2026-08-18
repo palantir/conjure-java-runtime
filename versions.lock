@@ -32,11 +32,11 @@ com.github.ben-manes.caffeine:caffeine:3.2.4 (3 constraints: e9234fa3)
 
 com.google.code.findbugs:jsr305:3.0.2 (7 constraints: 5f6b7728)
 
-com.google.errorprone:error_prone_annotations:2.49.0 (18 constraints: 8218b22f)
+com.google.errorprone:error_prone_annotations:2.50.0 (18 constraints: 7c18731e)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.6.0-jre (17 constraints: b02ee6d8)
+com.google.guava:guava:33.7.0-jre (17 constraints: b12e3bdc)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -204,7 +204,7 @@ org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10 (1 constraints: e210ffd2)
 
 org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10 (3 constraints: eb27efa7)
 
-org.jspecify:jspecify:1.0.0 (20 constraints: 9d42438d)
+org.jspecify:jspecify:1.0.1 (20 constraints: 9e428e90)
 
 org.jvnet:animal-sniffer-annotation:1.0 (1 constraints: f20b95eb)
 
