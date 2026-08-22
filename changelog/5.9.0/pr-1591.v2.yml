@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: ClientConfiguration includes `Optional<HostEventsSink>`
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1591

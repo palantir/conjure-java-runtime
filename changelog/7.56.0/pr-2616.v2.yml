@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Migrate to junit5
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/2616

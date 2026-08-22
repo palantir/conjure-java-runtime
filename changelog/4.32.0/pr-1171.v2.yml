@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Allow disabling of handling of SocketExceptions
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1171

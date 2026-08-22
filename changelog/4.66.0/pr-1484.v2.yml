@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Include default root CAs when creating trustmanagers
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1484

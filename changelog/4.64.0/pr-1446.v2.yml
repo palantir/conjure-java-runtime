@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Instrument OkHttp client handshakes
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1446

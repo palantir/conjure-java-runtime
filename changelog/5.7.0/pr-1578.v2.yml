@@ -1,6 +1,0 @@
-type: improvement
-improvement:
-  description: Change proxySelector FROM_ENVIRONMENT creation to parse env var as
-    URI.
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1578

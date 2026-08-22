@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Reduce the default conjure connect timeout to 5 seconds (from 10)
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/2777

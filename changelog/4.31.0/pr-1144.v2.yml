@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: better debugging for concurrency leaks
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1144

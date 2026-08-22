@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: '`WebPreconditions` is now marked as deprecated.'
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1363

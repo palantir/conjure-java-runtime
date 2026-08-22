@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: ConjureJerseyFeature uses conjure mappers for Jackson failures
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1771
