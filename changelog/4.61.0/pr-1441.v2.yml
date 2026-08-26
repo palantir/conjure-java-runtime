@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Clients may discover endpoint deprecation by observing return headers.
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1441

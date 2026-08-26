@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: OkHttpClients thread factory is instrumented
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1576

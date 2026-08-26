@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Don't share connection pools between clients.
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1533

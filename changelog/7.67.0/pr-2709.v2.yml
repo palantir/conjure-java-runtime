@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Bump to OkHttp 4.X
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/2709

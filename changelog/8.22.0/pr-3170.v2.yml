@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: Support both okhttp 4.x and 5.x while staying on 4.x for now
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/3170

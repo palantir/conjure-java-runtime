@@ -1,5 +1,0 @@
-type: feature
-feature:
-  description: Implement overloads in SslSocketFactories for specific security providers
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1562

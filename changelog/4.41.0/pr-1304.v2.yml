@@ -1,5 +1,0 @@
-type: feature
-feature:
-  description: Allow `OkHttpClients#create` to accept an `OkHttpClient.Builder`.
-  links:
-  - https://github.com/palantir/conjure-java-runtime/pull/1304

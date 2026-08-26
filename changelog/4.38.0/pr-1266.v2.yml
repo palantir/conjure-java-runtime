@@ -1,5 +1,0 @@
-type: improvement
-improvement:
-  description: SO_KEEPALIVE enabled for all OkhttpClients created using ClientConfigurations.of().
-  links:
-    - https://github.com/palantir/conjure-java-runtime/pull/1266
