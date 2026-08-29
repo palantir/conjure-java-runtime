@@ -7,11 +7,7 @@ versionsLock {
 dependencies {
     api 'org.junit.jupiter:junit-jupiter'
     api 'io.undertow:undertow-core'
-    api 'io.undertow:undertow-servlet-jakarta', {
-        // Use  standard servlet-api instead
-        exclude group: 'org.jboss.spec.javax.servlet', module: 'jboss-servlet-api_4.0_spec'
-        exclude group: 'org.jboss.spec.javax.annotation', module: 'jboss-annotations-api_1.3_spec'
-    }
+    api 'io.undertow:undertow-servlet'
     api 'jakarta.annotation:jakarta.annotation-api'
     api 'jakarta.servlet:jakarta.servlet-api'
     api 'org.apache.httpcomponents.client5:httpclient5'
