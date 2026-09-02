@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.exc.InputCoercionException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.util.InternCache;
@@ -509,6 +510,29 @@ public final class ObjectMappersTest {
         int size = 10_000_000;
         String parsed = ObjectMappers.newServerJsonMapper().readValue('"' + "a".repeat(size) + '"', String.class);
         assertThat(parsed).hasSize(size);
+    }
+
+    @Test
+    public void globalStreamReadConstraintsDoNotOverrideConjureDefaults() throws IOException {
+        StreamReadConstraints originalConstraints = StreamReadConstraints.defaults();
+        try {
+            StreamReadConstraints.overrideDefaultStreamReadConstraints(
+                    originalConstraints.rebuild().maxStringLength(10).build());
+
+            JsonMapper mapper = ObjectMappers.newServerJsonMapper();
+
+            assertThat(StreamReadConstraints.defaults().getMaxStringLength())
+                    .as("globally overridden maximum string length")
+                    .isEqualTo(10);
+            assertThat(mapper.getFactory().streamReadConstraints().getMaxStringLength())
+                    .as("maximum string length explicitly configured by ObjectMappers")
+                    .isEqualTo(50_000_000);
+            String valueBeyondGlobalLimit = "a".repeat(1000);
+            assertThat(mapper.readValue('"' + valueBeyondGlobalLimit + '"', String.class))
+                    .isEqualTo(valueBeyondGlobalLimit);
+        } finally {
+            StreamReadConstraints.overrideDefaultStreamReadConstraints(originalConstraints);
+        }
     }
 
     private static String ser(Object object) throws IOException {
