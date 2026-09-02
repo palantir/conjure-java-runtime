@@ -76,19 +76,19 @@ com.palantir.refreshable:refreshable:2.17.0 (2 constraints: a714dcac)
 
 com.palantir.ri:resource-identifier:2.22.0 (3 constraints: 31304baf)
 
-com.palantir.safe-logging:logger:3.18.0 (15 constraints: 16e610e6)
+com.palantir.safe-logging:logger:3.18.0 (15 constraints: 17e6bce6)
 
 com.palantir.safe-logging:logger-slf4j:3.18.0 (1 constraints: 370e9f50)
 
 com.palantir.safe-logging:logger-spi:3.18.0 (2 constraints: 7d1e84b1)
 
-com.palantir.safe-logging:preconditions:3.18.0 (22 constraints: 425ccdf2)
+com.palantir.safe-logging:preconditions:3.18.0 (22 constraints: 435ca8f3)
 
 com.palantir.safe-logging:safe-logging:3.18.0 (20 constraints: c83c226a)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.13.0 (1 constraints: 660f1286)
 
-com.palantir.tokens:auth-tokens:4.8.0 (5 constraints: 58474236)
+com.palantir.tokens:auth-tokens:4.9.0 (5 constraints: 59470337)
 
 com.palantir.tracing:tracing:6.40.0 (8 constraints: bd7d538a)
 
@@ -204,7 +204,7 @@ org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10 (1 constraints: e210ffd2)
 
 org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10 (3 constraints: eb27efa7)
 
-org.jspecify:jspecify:1.0.1 (20 constraints: a842aaa5)
+org.jspecify:jspecify:1.0.1 (20 constraints: a94279a7)
 
 org.jvnet:animal-sniffer-annotation:1.0 (1 constraints: f20b95eb)
 
