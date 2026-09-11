@@ -50,11 +50,11 @@ com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
 com.palantir.conjure.java:conjure-lib:8.86.0 (3 constraints: 7e255355)
 
-com.palantir.conjure.java.api:errors:2.78.0 (5 constraints: 0945e1b8)
+com.palantir.conjure.java.api:errors:2.79.0 (5 constraints: 0a459db9)
 
-com.palantir.conjure.java.api:service-config:2.78.0 (3 constraints: b928ece6)
+com.palantir.conjure.java.api:service-config:2.79.0 (3 constraints: ba2856e7)
 
-com.palantir.conjure.java.api:ssl-config:2.78.0 (2 constraints: 0d183088)
+com.palantir.conjure.java.api:ssl-config:2.79.0 (2 constraints: 0f186c88)
 
 com.palantir.deadlines:deadlines:0.26.0 (1 constraints: 6a0f1f86)
 
@@ -76,19 +76,19 @@ com.palantir.refreshable:refreshable:2.17.0 (2 constraints: a714dcac)
 
 com.palantir.ri:resource-identifier:2.22.0 (3 constraints: 3430e0af)
 
-com.palantir.safe-logging:logger:3.19.0 (15 constraints: 1de605f1)
+com.palantir.safe-logging:logger:3.19.0 (15 constraints: 1ee65bf3)
 
 com.palantir.safe-logging:logger-slf4j:3.19.0 (1 constraints: 380ea250)
 
 com.palantir.safe-logging:logger-spi:3.19.0 (2 constraints: 7f1ebab1)
 
-com.palantir.safe-logging:preconditions:3.19.0 (22 constraints: 4c5c9d09)
+com.palantir.safe-logging:preconditions:3.19.0 (22 constraints: 4f5c8513)
 
-com.palantir.safe-logging:safe-logging:3.19.0 (20 constraints: d33cc87f)
+com.palantir.safe-logging:safe-logging:3.19.0 (20 constraints: d53ce285)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.13.0 (1 constraints: 660f1286)
 
-com.palantir.tokens:auth-tokens:4.9.0 (5 constraints: 5c47ca37)
+com.palantir.tokens:auth-tokens:4.9.0 (5 constraints: 5d472838)
 
 com.palantir.tracing:tracing:6.40.0 (8 constraints: bd7d538a)
 
@@ -186,7 +186,7 @@ org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
 org.hibernate.validator:hibernate-validator:8.0.2.Final (1 constraints: 1a1606e4)
 
-org.immutables:value:2.12.2 (2 constraints: 0215eec1)
+org.immutables:value:2.12.2 (1 constraints: 3905373b)
 
 org.javassist:javassist:3.30.2-GA (1 constraints: 2811fff0)
 
