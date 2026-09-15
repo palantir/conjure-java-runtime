@@ -36,7 +36,7 @@ com.google.errorprone:error_prone_annotations:2.50.0 (18 constraints: 2c1876a2)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.7.1-jre (17 constraints: c72ea2f9)
+com.google.guava:guava:33.7.1-jre (17 constraints: c82eccfa)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -72,17 +72,17 @@ com.palantir.dialogue:dialogue-target:6.43.0 (5 constraints: 0c4d385e)
 
 com.palantir.nylon:nylon-threads:0.15.0 (1 constraints: 3e103ba2)
 
-com.palantir.refreshable:refreshable:2.17.0 (2 constraints: a714dcac)
+com.palantir.refreshable:refreshable:2.18.0 (2 constraints: a8140cad)
 
 com.palantir.ri:resource-identifier:2.22.0 (3 constraints: 3430e0af)
 
-com.palantir.safe-logging:logger:3.19.0 (15 constraints: 1ee65bf3)
+com.palantir.safe-logging:logger:3.19.0 (15 constraints: 1fe630f4)
 
 com.palantir.safe-logging:logger-slf4j:3.19.0 (1 constraints: 380ea250)
 
 com.palantir.safe-logging:logger-spi:3.19.0 (2 constraints: 7f1ebab1)
 
-com.palantir.safe-logging:preconditions:3.19.0 (22 constraints: 4f5c8513)
+com.palantir.safe-logging:preconditions:3.19.0 (22 constraints: 505cef14)
 
 com.palantir.safe-logging:safe-logging:3.19.0 (20 constraints: d53ce285)
 
