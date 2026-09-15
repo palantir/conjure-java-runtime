@@ -32,11 +32,11 @@ com.github.ben-manes.caffeine:caffeine:3.2.4 (3 constraints: e9234fa3)
 
 com.google.code.findbugs:jsr305:3.0.2 (7 constraints: 5f6b7728)
 
-com.google.errorprone:error_prone_annotations:2.50.0 (18 constraints: 2c1876a2)
+com.google.errorprone:error_prone_annotations:2.50.0 (18 constraints: 24181f9e)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.7.1-jre (17 constraints: c82eccfa)
+com.google.guava:guava:33.7.1-jre (17 constraints: cc2e5efe)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -76,27 +76,27 @@ com.palantir.refreshable:refreshable:2.18.0 (2 constraints: a8140cad)
 
 com.palantir.ri:resource-identifier:2.22.0 (3 constraints: 3430e0af)
 
-com.palantir.safe-logging:logger:3.19.0 (15 constraints: 1fe630f4)
+com.palantir.safe-logging:logger:3.19.0 (15 constraints: 20e6b6f4)
 
 com.palantir.safe-logging:logger-slf4j:3.19.0 (1 constraints: 380ea250)
 
 com.palantir.safe-logging:logger-spi:3.19.0 (2 constraints: 7f1ebab1)
 
-com.palantir.safe-logging:preconditions:3.19.0 (22 constraints: 505cef14)
+com.palantir.safe-logging:preconditions:3.19.0 (22 constraints: 515ca415)
 
-com.palantir.safe-logging:safe-logging:3.19.0 (20 constraints: d53ce285)
+com.palantir.safe-logging:safe-logging:3.19.0 (20 constraints: d63c6d86)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.13.0 (1 constraints: 660f1286)
 
 com.palantir.tokens:auth-tokens:4.9.0 (5 constraints: 5d472838)
 
-com.palantir.tracing:tracing:6.40.0 (8 constraints: bd7d538a)
+com.palantir.tracing:tracing:6.41.0 (8 constraints: c07de68b)
 
-com.palantir.tracing:tracing-api:6.40.0 (6 constraints: db57c0c1)
+com.palantir.tracing:tracing-api:6.41.0 (6 constraints: df574dc3)
 
-com.palantir.tracing:tracing-jersey-jakarta:6.40.0 (1 constraints: 3c05533b)
+com.palantir.tracing:tracing-jersey-jakarta:6.41.0 (1 constraints: 3d05563b)
 
-com.palantir.tracing:tracing-okhttp3:6.40.0 (1 constraints: 3c05533b)
+com.palantir.tracing:tracing-okhttp3:6.41.0 (1 constraints: 3d05563b)
 
 com.palantir.tritium:tritium-api:0.137.0 (2 constraints: 971fbaf4)
 
