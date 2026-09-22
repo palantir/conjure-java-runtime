@@ -58,6 +58,7 @@ final class LeakDetector<T> {
         pruneAndLog();
     }
 
+    @SuppressWarnings("for-rollout:ReferenceEquality")
     synchronized void unregister(T objectToNoLongerMonitor) {
         for (int i = 0; i < references.size(); i++) {
             if (references.get(i).get() == objectToNoLongerMonitor) {
