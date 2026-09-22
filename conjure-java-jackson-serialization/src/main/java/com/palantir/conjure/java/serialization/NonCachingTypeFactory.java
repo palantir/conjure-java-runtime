@@ -37,6 +37,7 @@ final class NonCachingTypeFactory extends TypeFactory {
      * If the provided TypeFactory is non-default, this may not be possible to do safely
      * and the original will be returned.
      */
+    @SuppressWarnings("for-rollout:ReferenceEquality")
     static TypeFactory from(TypeFactory original) {
         if (original instanceof NonCachingTypeFactory) {
             return original;
