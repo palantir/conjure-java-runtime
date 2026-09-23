@@ -371,13 +371,12 @@ final class DistinguishedNameParser {
             }
 
             char ch = chars[pos];
-            String attValue =
-                    switch (ch) {
-                        case '"' -> quotedAV();
-                        case '#' -> hexAV();
-                        case '+', ',', ';' -> ""; // empty attribute value
-                        default -> escapedAV();
-                    };
+            String attValue = switch (ch) {
+                case '"' -> quotedAV();
+                case '#' -> hexAV();
+                case '+', ',', ';' -> ""; // empty attribute value
+                default -> escapedAV();
+            };
 
             // Values are ordered from most specific to least specific
             // due to the RFC2253 formatting. So take the first match
