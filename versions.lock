@@ -74,7 +74,7 @@ com.palantir.nylon:nylon-threads:0.16.0 (1 constraints: 3f103ea2)
 
 com.palantir.refreshable:refreshable:2.18.0 (2 constraints: a8140cad)
 
-com.palantir.ri:resource-identifier:2.22.0 (3 constraints: 3430e0af)
+com.palantir.ri:resource-identifier:2.23.0 (3 constraints: 3430e0af)
 
 com.palantir.safe-logging:logger:3.19.0 (15 constraints: 24e648f6)
 
@@ -82,9 +82,9 @@ com.palantir.safe-logging:logger-slf4j:3.19.0 (1 constraints: 380ea250)
 
 com.palantir.safe-logging:logger-spi:3.19.0 (2 constraints: 7f1ebab1)
 
-com.palantir.safe-logging:preconditions:3.19.0 (22 constraints: 565c5b18)
+com.palantir.safe-logging:preconditions:3.19.0 (22 constraints: 575c9819)
 
-com.palantir.safe-logging:safe-logging:3.19.0 (20 constraints: da3ca288)
+com.palantir.safe-logging:safe-logging:3.19.0 (20 constraints: db3c158a)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.13.0 (1 constraints: 660f1286)
 
