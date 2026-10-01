@@ -4,9 +4,9 @@ com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
 
 com.fasterxml.jackson.core:jackson-annotations:2.22 (12 constraints: 0edecc86)
 
-com.fasterxml.jackson.core:jackson-core:2.22.3 (14 constraints: cf23d63f)
+com.fasterxml.jackson.core:jackson-core:2.22.3 (14 constraints: d1233440)
 
-com.fasterxml.jackson.core:jackson-databind:2.22.3 (18 constraints: c46327a6)
+com.fasterxml.jackson.core:jackson-databind:2.22.3 (18 constraints: c66313a8)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.22.3 (2 constraints: 2f205006)
 
@@ -48,7 +48,7 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.90.0 (3 constraints: 6f256d52)
+com.palantir.conjure.java:conjure-lib:8.91.0 (3 constraints: 7025cd52)
 
 com.palantir.conjure.java.api:errors:2.81.0 (5 constraints: e74490ac)
 
