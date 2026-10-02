@@ -233,7 +233,6 @@ public final class OkHttpClientsTest extends TestBase {
     @Test
     /** See {@link DispatcherMetricSet}. */
     public void verifyGlobalMetricsAreRegistered() {
-        @SuppressWarnings("for-rollout:deprecation")
         TaggedMetricRegistry registry = DefaultTaggedMetricRegistry.getDefault();
         ClientConfiguration clientConfiguration = ClientConfiguration.builder()
                 .from(createTestConfig(url))

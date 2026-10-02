@@ -92,7 +92,6 @@ abstract class AbstractFeignJaxRsClientBuilder {
         String name = "JaxRsClient-" + serviceClass.getSimpleName();
         ApacheHttpClientChannels.CloseableClient client =
                 ApacheHttpClientChannels.createCloseableHttpClient(hydratedConfiguration, name);
-        @SuppressWarnings("for-rollout:deprecation")
         Channel channel = DialogueChannel.builder()
                 .channelName(name)
                 .channelFactory(uri -> ApacheHttpClientChannels.createSingleUri(uri, client))
