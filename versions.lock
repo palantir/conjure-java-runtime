@@ -88,7 +88,7 @@ com.palantir.safe-logging:safe-logging:3.20.0 (20 constraints: 6c3c44a3)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.14.0 (1 constraints: 670f1586)
 
-com.palantir.tokens:auth-tokens:4.11.0 (5 constraints: 2648c744)
+com.palantir.tokens:auth-tokens:4.12.0 (5 constraints: 27488c45)
 
 com.palantir.tracing:tracing:6.41.0 (8 constraints: be7d5f87)
 
