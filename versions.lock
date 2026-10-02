@@ -36,7 +36,7 @@ com.google.errorprone:error_prone_annotations:2.50.0 (18 constraints: 1c182086)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.7.2-jre (17 constraints: d32eeb0c)
+com.google.guava:guava:33.7.2-jre (17 constraints: d72e2a0e)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -76,15 +76,15 @@ com.palantir.refreshable:refreshable:2.18.0 (2 constraints: a9140fad)
 
 com.palantir.ri:resource-identifier:2.24.0 (3 constraints: 373075b0)
 
-com.palantir.safe-logging:logger:3.20.0 (15 constraints: e6e5d08e)
+com.palantir.safe-logging:logger:3.20.0 (15 constraints: cee55b8a)
 
 com.palantir.safe-logging:logger-slf4j:3.20.0 (1 constraints: 300e8b50)
 
 com.palantir.safe-logging:logger-spi:3.20.0 (2 constraints: 6f1e0cb0)
 
-com.palantir.safe-logging:preconditions:3.20.0 (22 constraints: e95b320e)
+com.palantir.safe-logging:preconditions:3.20.0 (22 constraints: c95b3e05)
 
-com.palantir.safe-logging:safe-logging:3.20.0 (20 constraints: 6c3c44a3)
+com.palantir.safe-logging:safe-logging:3.20.0 (20 constraints: 543c9f9e)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.14.0 (1 constraints: 670f1586)
 
@@ -98,15 +98,15 @@ com.palantir.tracing:tracing-jersey-jakarta:6.41.0 (1 constraints: 3d05563b)
 
 com.palantir.tracing:tracing-okhttp3:6.41.0 (1 constraints: 3d05563b)
 
-com.palantir.tritium:tritium-api:0.138.0 (2 constraints: 991feff4)
+com.palantir.tritium:tritium-api:0.139.0 (2 constraints: 9b1f24f5)
 
-com.palantir.tritium:tritium-core:0.138.0 (1 constraints: 7410bbb2)
+com.palantir.tritium:tritium-core:0.139.0 (1 constraints: 7510beb2)
 
-com.palantir.tritium:tritium-ids:0.138.0 (1 constraints: fe0f9aa6)
+com.palantir.tritium:tritium-ids:0.139.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-metrics:0.138.0 (5 constraints: 744c9721)
+com.palantir.tritium:tritium-metrics:0.139.0 (5 constraints: 754c6922)
 
-com.palantir.tritium:tritium-registry:0.138.0 (6 constraints: 7b5fecb9)
+com.palantir.tritium:tritium-registry:0.139.0 (6 constraints: 7d5ff1ba)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
