@@ -118,7 +118,6 @@ public final class ConcurrencyLimitingInterceptorTest {
     @Test
     public void wrapsResponseBody() throws IOException {
         String data = "data";
-        @SuppressWarnings("for-rollout:deprecation")
         ResponseBody body = ResponseBody.create(MediaType.parse("application/json"), data);
         when(chain.proceed(request)).thenReturn(response.newBuilder().body(body).build());
         Response wrappedResponse = interceptor.intercept(chain);
@@ -129,7 +128,6 @@ public final class ConcurrencyLimitingInterceptorTest {
 
     @Test
     public void proxyHandlesExceptions() throws IOException {
-        @SuppressWarnings("for-rollout:deprecation")
         ResponseBody body = ResponseBody.create(MediaType.parse("application/json"), -1, mockSource);
         when(chain.proceed(request)).thenReturn(response.newBuilder().body(body).build());
         IOException exception = new IOException();
@@ -149,7 +147,6 @@ public final class ConcurrencyLimitingInterceptorTest {
 
     @Test
     public void marksSuccessIfContentEmpty() throws IOException {
-        @SuppressWarnings("for-rollout:deprecation")
         Response empty = response.newBuilder()
                 .code(204)
                 .body(ResponseBody.create(MediaType.parse("application/json"), new byte[0]))
