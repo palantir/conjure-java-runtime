@@ -390,8 +390,7 @@ final class KeyStores {
     static PrivateKey getPrivateKeyFromString(String pemFileString) throws GeneralSecurityException {
         Matcher matcher = KEY_PATTERN.matcher(pemFileString);
         if (!matcher.find() || !Objects.equals(matcher.group(1), matcher.group(3))) {
-            throw new GeneralSecurityException(
-                    String.format("unable to find valid RSA key in the provided string: %s", pemFileString));
+            throw new GeneralSecurityException("unable to find valid RSA key in the provided string");
         }
 
         // get content between headers and strip newlines to get Base64 encoded ASN1 DER only
