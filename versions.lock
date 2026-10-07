@@ -230,7 +230,7 @@ com.squareup.okhttp3:mockwebserver:4.12.0 (1 constraints: 3905413b)
 
 io.reactivex.rxjava2:rxjava:2.2.21 (1 constraints: 3905363b)
 
-io.undertow:undertow-core:2.2.38.Final (2 constraints: ab1911ec)
+io.undertow:undertow-core:2.2.39.Final (2 constraints: ac194cec)
 
 io.undertow:undertow-servlet-jakarta:2.2.20.Final (1 constraints: 50071361)
 
