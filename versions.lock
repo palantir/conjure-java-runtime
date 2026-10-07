@@ -48,7 +48,7 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.93.0 (3 constraints: 7625f753)
+com.palantir.conjure.java:conjure-lib:8.93.0 (3 constraints: 78252c54)
 
 com.palantir.conjure.java.api:errors:2.81.0 (5 constraints: eb44b2ad)
 
@@ -58,17 +58,17 @@ com.palantir.conjure.java.api:ssl-config:2.81.0 (2 constraints: 0118ca86)
 
 com.palantir.deadlines:deadlines:0.28.0 (1 constraints: 6c0f2586)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.45.0 (1 constraints: 4105623b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.46.0 (1 constraints: 4205653b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.45.0 (2 constraints: dd23d9b3)
+com.palantir.dialogue:dialogue-blocking-channels:6.46.0 (2 constraints: df230db4)
 
-com.palantir.dialogue:dialogue-core:6.45.0 (2 constraints: 4319a0ee)
+com.palantir.dialogue:dialogue-core:6.46.0 (2 constraints: 4519e0ee)
 
-com.palantir.dialogue:dialogue-futures:6.45.0 (3 constraints: d43336bf)
+com.palantir.dialogue:dialogue-futures:6.46.0 (3 constraints: d733c8bf)
 
-com.palantir.dialogue:dialogue-serde:6.45.0 (1 constraints: 4105623b)
+com.palantir.dialogue:dialogue-serde:6.46.0 (1 constraints: 4205653b)
 
-com.palantir.dialogue:dialogue-target:6.45.0 (5 constraints: 164d3062)
+com.palantir.dialogue:dialogue-target:6.46.0 (5 constraints: 1b4d2c64)
 
 com.palantir.nylon:nylon-threads:0.16.0 (1 constraints: 3f103ea2)
 
