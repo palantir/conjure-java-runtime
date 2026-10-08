@@ -58,23 +58,23 @@ com.palantir.conjure.java.api:ssl-config:2.81.0 (2 constraints: 0118ca86)
 
 com.palantir.deadlines:deadlines:0.28.0 (1 constraints: 6c0f2586)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.46.0 (1 constraints: 4205653b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.47.0 (1 constraints: 4305683b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.46.0 (2 constraints: df230db4)
+com.palantir.dialogue:dialogue-blocking-channels:6.47.0 (2 constraints: e12341b4)
 
-com.palantir.dialogue:dialogue-core:6.46.0 (2 constraints: 4519e0ee)
+com.palantir.dialogue:dialogue-core:6.47.0 (2 constraints: 471920ef)
 
-com.palantir.dialogue:dialogue-futures:6.46.0 (3 constraints: d733c8bf)
+com.palantir.dialogue:dialogue-futures:6.47.0 (3 constraints: da335ac0)
 
-com.palantir.dialogue:dialogue-serde:6.46.0 (1 constraints: 4205653b)
+com.palantir.dialogue:dialogue-serde:6.47.0 (1 constraints: 4305683b)
 
-com.palantir.dialogue:dialogue-target:6.46.0 (5 constraints: 1b4d2c64)
+com.palantir.dialogue:dialogue-target:6.47.0 (5 constraints: 204d2866)
 
 com.palantir.nylon:nylon-threads:0.16.0 (1 constraints: 3f103ea2)
 
 com.palantir.refreshable:refreshable:2.18.0 (2 constraints: a9140fad)
 
-com.palantir.ri:resource-identifier:2.25.0 (3 constraints: 3a300ab1)
+com.palantir.ri:resource-identifier:2.25.0 (3 constraints: 3c303fb1)
 
 com.palantir.safe-logging:logger:3.20.0 (15 constraints: cee55b8a)
 
