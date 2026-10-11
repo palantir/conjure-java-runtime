@@ -186,7 +186,7 @@ org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
 org.hibernate.validator:hibernate-validator:8.0.2.Final (1 constraints: 1a1606e4)
 
-org.immutables:value:2.12.2 (1 constraints: 3905373b)
+org.immutables:value:2.12.3 (1 constraints: 3a05383b)
 
 org.javassist:javassist:3.30.2-GA (1 constraints: 2811fff0)
 
