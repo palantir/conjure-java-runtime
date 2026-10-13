@@ -48,7 +48,7 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.95.0 (3 constraints: 7a25ec54)
+com.palantir.conjure.java:conjure-lib:8.95.0 (3 constraints: 7e255655)
 
 com.palantir.conjure.java.api:errors:2.81.0 (5 constraints: eb44b2ad)
 
@@ -58,17 +58,17 @@ com.palantir.conjure.java.api:ssl-config:2.81.0 (2 constraints: 0118ca86)
 
 com.palantir.deadlines:deadlines:0.28.0 (1 constraints: 6c0f2586)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.47.0 (1 constraints: 4305683b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.48.0 (1 constraints: 44056b3b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.47.0 (2 constraints: e12341b4)
+com.palantir.dialogue:dialogue-blocking-channels:6.48.0 (2 constraints: e32375b4)
 
-com.palantir.dialogue:dialogue-core:6.47.0 (2 constraints: 471920ef)
+com.palantir.dialogue:dialogue-core:6.48.0 (2 constraints: 491960ef)
 
-com.palantir.dialogue:dialogue-futures:6.47.0 (3 constraints: da335ac0)
+com.palantir.dialogue:dialogue-futures:6.48.0 (3 constraints: dd33ecc0)
 
-com.palantir.dialogue:dialogue-serde:6.47.0 (1 constraints: 4305683b)
+com.palantir.dialogue:dialogue-serde:6.48.0 (1 constraints: 44056b3b)
 
-com.palantir.dialogue:dialogue-target:6.47.0 (5 constraints: 204d2866)
+com.palantir.dialogue:dialogue-target:6.48.0 (5 constraints: 254d2468)
 
 com.palantir.nylon:nylon-threads:0.16.0 (1 constraints: 3f103ea2)
 
@@ -150,9 +150,9 @@ jakarta.xml.bind:jakarta.xml.bind-api:4.0.2 (2 constraints: 3c33f3c3)
 
 joda-time:joda-time:2.12.7 (1 constraints: 2f16b1f1)
 
-org.apache.httpcomponents.client5:httpclient5:5.6.5 (2 constraints: e41898c5)
+org.apache.httpcomponents.client5:httpclient5:5.6.5 (2 constraints: e51899c5)
 
-org.apache.httpcomponents.core5:httpcore5:5.4.4 (3 constraints: 6b396d0f)
+org.apache.httpcomponents.core5:httpcore5:5.4.4 (3 constraints: 6c39d90f)
 
 org.apache.httpcomponents.core5:httpcore5-h2:5.4.4 (1 constraints: 4113133c)
 
