@@ -48,7 +48,7 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.96.0 (3 constraints: 7f25b655)
+com.palantir.conjure.java:conjure-lib:8.97.0 (3 constraints: 80251656)
 
 com.palantir.conjure.java.api:errors:2.81.0 (5 constraints: eb44b2ad)
 
@@ -82,9 +82,9 @@ com.palantir.safe-logging:logger-slf4j:3.21.0 (1 constraints: 310e8e50)
 
 com.palantir.safe-logging:logger-spi:3.21.0 (2 constraints: 711e42b0)
 
-com.palantir.safe-logging:preconditions:3.21.0 (22 constraints: bc5bd1f9)
+com.palantir.safe-logging:preconditions:3.21.0 (22 constraints: bd5b81fd)
 
-com.palantir.safe-logging:safe-logging:3.21.0 (20 constraints: 523c57a2)
+com.palantir.safe-logging:safe-logging:3.21.0 (20 constraints: 533cada5)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.14.0 (1 constraints: 670f1586)
 
