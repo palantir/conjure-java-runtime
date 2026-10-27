@@ -4,9 +4,9 @@ com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
 
 com.fasterxml.jackson.core:jackson-annotations:2.22 (12 constraints: 0edecc86)
 
-com.fasterxml.jackson.core:jackson-core:2.22.4 (14 constraints: dd23c355)
+com.fasterxml.jackson.core:jackson-core:2.22.4 (14 constraints: de23c455)
 
-com.fasterxml.jackson.core:jackson-databind:2.22.4 (18 constraints: d3633dc5)
+com.fasterxml.jackson.core:jackson-databind:2.22.4 (18 constraints: d463a5c5)
 
 com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.22.4 (2 constraints: 31209d06)
 
@@ -58,17 +58,17 @@ com.palantir.conjure.java.api:ssl-config:2.81.0 (2 constraints: 0118ca86)
 
 com.palantir.deadlines:deadlines:0.29.0 (1 constraints: 6d0f2886)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.49.0 (1 constraints: 45056e3b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.50.0 (1 constraints: 3d05573b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.49.0 (2 constraints: e523a9b4)
+com.palantir.dialogue:dialogue-blocking-channels:6.50.0 (2 constraints: d5230bb3)
 
-com.palantir.dialogue:dialogue-core:6.49.0 (2 constraints: 4b19a0ef)
+com.palantir.dialogue:dialogue-core:6.50.0 (2 constraints: 3b19a2ed)
 
-com.palantir.dialogue:dialogue-futures:6.49.0 (3 constraints: e0337ec1)
+com.palantir.dialogue:dialogue-futures:6.50.0 (3 constraints: c833f1bc)
 
-com.palantir.dialogue:dialogue-serde:6.49.0 (1 constraints: 45056e3b)
+com.palantir.dialogue:dialogue-serde:6.50.0 (1 constraints: 3d05573b)
 
-com.palantir.dialogue:dialogue-target:6.49.0 (5 constraints: 2a4d206a)
+com.palantir.dialogue:dialogue-target:6.50.0 (5 constraints: 024d455a)
 
 com.palantir.nylon:nylon-threads:0.16.0 (1 constraints: 3f103ea2)
 
