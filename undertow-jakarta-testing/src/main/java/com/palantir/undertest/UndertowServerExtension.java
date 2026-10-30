@@ -183,7 +183,6 @@ public final class UndertowServerExtension implements BeforeAllCallback, AfterAl
         }
     }
 
-    @SuppressWarnings("for-rollout:deprecation")
     @MustBeClosed
     @CheckReturnValue
     public CloseableHttpResponse makeRequest(ClassicHttpRequest request) throws IOException {
