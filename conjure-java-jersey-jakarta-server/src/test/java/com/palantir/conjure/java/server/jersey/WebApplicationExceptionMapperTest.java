@@ -92,15 +92,15 @@ public final class WebApplicationExceptionMapperTest {
 
         response = mapper.toResponse(new WebApplicationException("secret", 503));
         String entity = objectMapper.writeValueAsString(response.getEntity());
-        assertThat(entity).contains("\"errorCode\" : \"jakarta.ws.rs.WebApplicationException\"");
-        assertThat(entity).contains("\"errorName\" : \"WebApplicationException\"");
+        assertThat(entity).contains("\"errorCode\" : \"INTERNAL\"");
+        assertThat(entity).contains("\"errorName\" : \"Default:Internal\"");
         assertThat(response.getStatus()).isEqualTo(503);
         assertThat(entity).doesNotContain("secret");
 
         response = mapper.toResponse(new ServiceUnavailableException("secret"));
         entity = objectMapper.writeValueAsString(response.getEntity());
-        assertThat(entity).contains("\"errorCode\" : \"jakarta.ws.rs.ServiceUnavailableException\"");
-        assertThat(entity).contains("\"errorName\" : \"ServiceUnavailableException\"");
+        assertThat(entity).contains("\"errorCode\" : \"INTERNAL\"");
+        assertThat(entity).contains("\"errorName\" : \"Default:Internal\"");
         assertThat(response.getStatus()).isEqualTo(503);
         assertThat(entity).doesNotContain("secret");
     }
@@ -110,8 +110,8 @@ public final class WebApplicationExceptionMapperTest {
         Response response = mapper.toResponse(
                 new RedirectionException(Response.notModified("test-etag").build()));
         String entity = objectMapper.writeValueAsString(response.getEntity());
-        assertThat(entity).contains("\"errorCode\" : \"jakarta.ws.rs.RedirectionException\"");
-        assertThat(entity).contains("\"errorName\" : \"RedirectionException\"");
+        assertThat(entity).contains("\"errorCode\" : \"INTERNAL\"");
+        assertThat(entity).contains("\"errorName\" : \"Default:Internal\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
         assertThat(response.getStatus()).isEqualTo(304);
         assertThat(response.getHeaderString("ETag")).isNull();

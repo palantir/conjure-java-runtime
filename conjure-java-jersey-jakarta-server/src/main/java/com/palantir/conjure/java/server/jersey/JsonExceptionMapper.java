@@ -73,15 +73,15 @@ abstract class JsonExceptionMapper<T extends Throwable> extends ListenableExcept
     }
 
     static Response createResponse(ErrorType errorType, String errorInstanceId) {
-        return createResponse(errorType.httpErrorCode(), errorType.code().name(), errorType.name(), errorInstanceId);
+        return createResponse(errorType.httpErrorCode(), errorType, errorInstanceId);
     }
 
-    static Response createResponse(int httpErrorCode, String errorCode, String errorName, String errorInstanceId) {
+    static Response createResponse(int httpErrorCode, ErrorType errorType, String errorInstanceId) {
         return Response.status(httpErrorCode)
                 .type(MediaType.APPLICATION_JSON)
                 .entity(SerializableError.builder()
-                        .errorCode(errorCode)
-                        .errorName(errorName)
+                        .errorCode(errorType.code().name())
+                        .errorName(errorType.name())
                         .errorInstanceId(errorInstanceId)
                         .build())
                 .build();
