@@ -70,10 +70,7 @@ final class WebApplicationExceptionMapper extends ListenableExceptionMapper<WebA
             return JsonExceptionMapper.createResponse(ErrorType.INVALID_ARGUMENT, errorInstanceId);
         } else {
             return JsonExceptionMapper.createResponse(
-                    exception.getResponse().getStatus(),
-                    exception.getClass().getName(),
-                    exception.getClass().getSimpleName(),
-                    errorInstanceId);
+                    exception.getResponse().getStatus(), ErrorType.INTERNAL, errorInstanceId);
         }
     }
 }
