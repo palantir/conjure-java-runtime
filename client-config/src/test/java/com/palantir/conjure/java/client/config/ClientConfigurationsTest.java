@@ -54,7 +54,7 @@ public final class ClientConfigurationsTest {
         assertThat(actual.sslSocketFactory()).isNotNull();
         assertThat(actual.trustManager()).isNotNull();
         assertThat(actual.uris()).containsExactlyElementsOf(uris);
-        assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(5));
+        assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(2));
         assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.enableGcmCipherSuites()).isTrue();
@@ -73,13 +73,24 @@ public final class ClientConfigurationsTest {
         assertThat(actual.sslSocketFactory()).isEqualTo(sslFactory);
         assertThat(actual.trustManager()).isEqualTo(trustManager);
         assertThat(actual.uris()).containsExactlyElementsOf(uris);
-        assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(5));
+        assertThat(actual.connectTimeout()).isEqualTo(Duration.ofSeconds(2));
         assertThat(actual.readTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.writeTimeout()).isEqualTo(Duration.ofMinutes(5));
         assertThat(actual.enableGcmCipherSuites()).isTrue();
         assertThat(actual.enableHttp2()).isEmpty();
         assertThat(actual.fallbackToCommonNameVerification()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
+    }
+
+    @Test
+    public void testFromServiceConfig_preservesConnectTimeout() {
+        ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
+                .uris(uris)
+                .security(SslConfiguration.of(Paths.get("src/test/resources/trustStore.jks")))
+                .connectTimeout(Duration.ofSeconds(10))
+                .build();
+
+        assertThat(ClientConfigurations.of(serviceConfig).connectTimeout()).isEqualTo(Duration.ofSeconds(10));
     }
 
     @Test
