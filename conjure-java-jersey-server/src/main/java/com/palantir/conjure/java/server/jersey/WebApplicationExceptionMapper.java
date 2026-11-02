@@ -69,8 +69,7 @@ final class WebApplicationExceptionMapper extends ListenableExceptionMapper<WebA
         } else if (exception instanceof BadRequestException || exception instanceof ParamException) {
             return JsonExceptionMapper.createResponse(ErrorType.INVALID_ARGUMENT, errorInstanceId);
         } else {
-            return JsonExceptionMapper.createResponse(
-                    exception.getResponse().getStatus(), ErrorType.INTERNAL, errorInstanceId);
+            return JsonExceptionMapper.createResponse(exception.getResponse().getStatus(), errorInstanceId);
         }
     }
 }

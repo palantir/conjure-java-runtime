@@ -26,6 +26,7 @@ import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.RedirectionException;
+import jakarta.ws.rs.ServerErrorException;
 import jakarta.ws.rs.ServiceUnavailableException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -92,15 +93,15 @@ public final class WebApplicationExceptionMapperTest {
 
         response = mapper.toResponse(new WebApplicationException("secret", 503));
         String entity = objectMapper.writeValueAsString(response.getEntity());
-        assertThat(entity).contains("\"errorCode\" : \"INTERNAL\"");
-        assertThat(entity).contains("\"errorName\" : \"Default:Internal\"");
+        assertThat(entity).contains("\"errorCode\" : \"Service Unavailable\"");
+        assertThat(entity).contains("\"errorName\" : \"Service Unavailable\"");
         assertThat(response.getStatus()).isEqualTo(503);
         assertThat(entity).doesNotContain("secret");
 
         response = mapper.toResponse(new ServiceUnavailableException("secret"));
         entity = objectMapper.writeValueAsString(response.getEntity());
-        assertThat(entity).contains("\"errorCode\" : \"INTERNAL\"");
-        assertThat(entity).contains("\"errorName\" : \"Default:Internal\"");
+        assertThat(entity).contains("\"errorCode\" : \"Service Unavailable\"");
+        assertThat(entity).contains("\"errorName\" : \"Service Unavailable\"");
         assertThat(response.getStatus()).isEqualTo(503);
         assertThat(entity).doesNotContain("secret");
     }
@@ -110,11 +111,23 @@ public final class WebApplicationExceptionMapperTest {
         Response response = mapper.toResponse(
                 new RedirectionException(Response.notModified("test-etag").build()));
         String entity = objectMapper.writeValueAsString(response.getEntity());
-        assertThat(entity).contains("\"errorCode\" : \"INTERNAL\"");
-        assertThat(entity).contains("\"errorName\" : \"Default:Internal\"");
+        assertThat(entity).contains("\"errorCode\" : \"Not Modified\"");
+        assertThat(entity).contains("\"errorName\" : \"Not Modified\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
         assertThat(response.getStatus()).isEqualTo(304);
         assertThat(response.getHeaderString("ETag")).isNull();
+        assertThat(entity).doesNotContain("secret");
+    }
+
+    @Test
+    public void handleUnknownStatusCode() throws Exception {
+        Response response =
+                mapper.toResponse(new ServerErrorException(Response.status(599).build()));
+        String entity = objectMapper.writeValueAsString(response.getEntity());
+        assertThat(entity).contains("\"errorCode\" : \"Unknown\"");
+        assertThat(entity).contains("\"errorName\" : \"Unknown\"");
+        assertThat(entity).contains("\"errorInstanceId\" : ");
+        assertThat(response.getStatus()).isEqualTo(599);
         assertThat(entity).doesNotContain("secret");
     }
 }

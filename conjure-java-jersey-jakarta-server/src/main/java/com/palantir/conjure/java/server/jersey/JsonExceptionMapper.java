@@ -23,6 +23,7 @@ import com.palantir.logsafe.logger.SafeLogger;
 import com.palantir.logsafe.logger.SafeLoggerFactory;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import java.util.UUID;
 
@@ -73,15 +74,24 @@ abstract class JsonExceptionMapper<T extends Throwable> extends ListenableExcept
     }
 
     static Response createResponse(ErrorType errorType, String errorInstanceId) {
-        return createResponse(errorType.httpErrorCode(), errorType, errorInstanceId);
-    }
-
-    static Response createResponse(int httpErrorCode, ErrorType errorType, String errorInstanceId) {
-        return Response.status(httpErrorCode)
+        return Response.status(errorType.httpErrorCode())
                 .type(MediaType.APPLICATION_JSON)
                 .entity(SerializableError.builder()
                         .errorCode(errorType.code().name())
                         .errorName(errorType.name())
+                        .errorInstanceId(errorInstanceId)
+                        .build())
+                .build();
+    }
+
+    static Response createResponse(int statusCode, String errorInstanceId) {
+        Status status = Status.fromStatusCode(statusCode);
+        String errorCode = status != null ? status.getReasonPhrase() : "Unknown";
+        return Response.status(statusCode)
+                .type(MediaType.APPLICATION_JSON)
+                .entity(SerializableError.builder()
+                        .errorCode(errorCode)
+                        .errorName(errorCode)
                         .errorInstanceId(errorInstanceId)
                         .build())
                 .build();
