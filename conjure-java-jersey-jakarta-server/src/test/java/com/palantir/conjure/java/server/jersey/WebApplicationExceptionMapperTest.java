@@ -124,8 +124,8 @@ public final class WebApplicationExceptionMapperTest {
         Response response =
                 mapper.toResponse(new ServerErrorException(Response.status(599).build()));
         String entity = objectMapper.writeValueAsString(response.getEntity());
-        assertThat(entity).contains("\"errorCode\" : \"Unknown\"");
-        assertThat(entity).contains("\"errorName\" : \"Unknown\"");
+        assertThat(entity).contains("\"errorCode\" : \"\"");
+        assertThat(entity).contains("\"errorName\" : \"\"");
         assertThat(entity).contains("\"errorInstanceId\" : ");
         assertThat(response.getStatus()).isEqualTo(599);
         assertThat(entity).doesNotContain("secret");

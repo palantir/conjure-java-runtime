@@ -24,7 +24,7 @@ import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.ExceptionMapper;
 
 /**
@@ -84,14 +84,12 @@ abstract class JsonExceptionMapper<T extends Throwable> extends ListenableExcept
                 .build();
     }
 
-    static Response createResponse(int statusCode, String errorInstanceId) {
-        Status status = Status.fromStatusCode(statusCode);
-        String errorCode = status != null ? status.getReasonPhrase() : "Unknown";
-        return Response.status(statusCode)
+    static Response createResponse(StatusType statusType, String errorInstanceId) {
+        return Response.status(statusType.getStatusCode())
                 .type(MediaType.APPLICATION_JSON)
                 .entity(SerializableError.builder()
-                        .errorCode(errorCode)
-                        .errorName(errorCode)
+                        .errorCode(statusType.getReasonPhrase())
+                        .errorName(statusType.getReasonPhrase())
                         .errorInstanceId(errorInstanceId)
                         .build())
                 .build();
