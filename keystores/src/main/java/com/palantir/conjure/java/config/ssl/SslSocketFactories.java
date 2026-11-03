@@ -177,7 +177,7 @@ public final class SslSocketFactories {
      */
     public static TrustManager[] createTrustManagers(SslConfiguration config) {
         return ConscryptCompatTrustManagers.wrap(
-                createTrustManagerFactory(config.trustStorePath(), config.trustStoreType())
+                createTrustManagerFactory(config.trustStorePath(), config.trustStoreType(), config.disableDefaultCas())
                         .getTrustManagers());
     }
 
@@ -266,7 +266,7 @@ public final class SslSocketFactories {
     }
 
     private static TrustManagerFactory createTrustManagerFactory(
-            Path trustStorePath, SslConfiguration.StoreType trustStoreType) {
+            Path trustStorePath, SslConfiguration.StoreType trustStoreType, boolean disableDefaultCas) {
         KeyStore keyStore = switch (trustStoreType) {
             case JKS, PKCS12 -> KeyStores.loadKeyStore(trustStoreType.name(), trustStorePath, Optional.empty());
             case PEM -> KeyStores.createTrustStoreFromCertificates(trustStorePath);
@@ -280,15 +280,16 @@ public final class SslSocketFactories {
             }
         };
 
-        // Add globally trusted root CAs
-        DefaultCas.getCertificates().forEach((certAlias, cert) -> {
-            try {
-                keyStore.setCertificateEntry(certAlias, cert);
-            } catch (KeyStoreException e) {
-                throw new SafeRuntimeException(
-                        "Unable to add certificate to store", e, SafeArg.of("certificateAlias", certAlias));
-            }
-        });
+        if (!disableDefaultCas) {
+            DefaultCas.getCertificates().forEach((certAlias, cert) -> {
+                try {
+                    keyStore.setCertificateEntry(certAlias, cert);
+                } catch (KeyStoreException e) {
+                    throw new SafeRuntimeException(
+                            "Unable to add certificate to store", e, SafeArg.of("certificateAlias", certAlias));
+                }
+            });
+        }
 
         try {
             TrustManagerFactory trustManagerFactory =

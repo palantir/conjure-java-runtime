@@ -25,12 +25,19 @@ import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.Provider;
+import java.security.cert.Certificate;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import org.conscrypt.Conscrypt;
@@ -48,23 +55,48 @@ public final class SslSocketFactoriesTests {
     }
 
     @Test
-    public void testCreateSslSocketFactory_withPemCertificatesByAlias() throws IOException {
+    public void testCreateSslSocketFactory_withPemCertificatesByAlias() throws IOException, GeneralSecurityException {
         String cert = Files.readString(TestConstants.CA_PEM_CERT_PATH, StandardCharsets.UTF_8);
 
         Map<String, PemX509Certificate> certs = ImmutableMap.of("cert", PemX509Certificate.of(cert));
         assertThat(SslSocketFactories.createSslSocketFactory(certs)).isNotNull();
-        assertThat(SslSocketFactories.createX509TrustManager(certs)).isNotNull();
+        try (InputStream in = Files.newInputStream(TestConstants.CA_PEM_CERT_PATH)) {
+            assertThat(Set.<Certificate>of(
+                            SslSocketFactories.createX509TrustManager(certs).getAcceptedIssuers()))
+                    .containsExactlyInAnyOrderElementsOf(KeyStores.readX509Certificates(in));
+        }
     }
 
     @Test
-    public void testCreateSslSocketFactory_canCreateWithAllTrustStoreParams() {
+    public void testCreateSslSocketFactory_canCreateWithAllTrustStoreParams()
+            throws IOException, GeneralSecurityException {
         SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .trustStoreType(TestConstants.CA_TRUST_STORE_TYPE)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).isNotNull();
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).isNotNull();
+        assertDefaultCasOption(sslConfig, TestConstants.CA_PEM_CERT_PATH);
+    }
+
+    @Test
+    public void testDefaultCasOptionPkcs12() throws IOException, GeneralSecurityException {
+        KeyStore trustStore = KeyStore.getInstance("PKCS12");
+        trustStore.load(null, null);
+        try (InputStream in = Files.newInputStream(TestConstants.CA_PEM_CERT_PATH)) {
+            trustStore.setCertificateEntry(
+                    "ca", KeyStores.readX509Certificates(in).get(0));
+        }
+        Path trustStorePath = tempFolder.resolve("trust.p12");
+        try (OutputStream out = Files.newOutputStream(trustStorePath)) {
+            trustStore.store(out, null);
+        }
+
+        SslConfiguration sslConfig = SslConfiguration.builder()
+                .trustStorePath(trustStorePath)
+                .trustStoreType(SslConfiguration.StoreType.PKCS12)
+                .build();
+
+        assertDefaultCasOption(sslConfig, TestConstants.CA_PEM_CERT_PATH);
     }
 
     @Test
@@ -79,29 +111,43 @@ public final class SslSocketFactoriesTests {
     }
 
     @Test
-    public void testCreateSslSocketFactory_canCreateTrustStorePemTypePemFormat() {
+    public void testCreateSslSocketFactory_canCreateTrustStorePemTypePemFormat()
+            throws IOException, GeneralSecurityException {
         SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_PEM_CERT_PATH)
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).isNotNull();
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).isNotNull();
+        assertDefaultCasOption(sslConfig, TestConstants.CA_PEM_CERT_PATH);
     }
 
     @Test
-    public void testCreateSslSocketFactory_canCreateTrustStorePemTypeDerFormat() {
+    public void testCreateSslSocketFactory_canCreateTrustStorePemTypeDerFormat()
+            throws IOException, GeneralSecurityException {
         SslConfiguration sslConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_DER_CERT_PATH)
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).isNotNull();
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).isNotNull();
+        assertDefaultCasOption(sslConfig, TestConstants.CA_PEM_CERT_PATH);
     }
 
     @Test
-    public void testCreateSslSocketFactory_canCreateTrustStorePemFromDirectory() throws IOException {
+    public void testDefaultCasOptionWithPemBundle() throws IOException, GeneralSecurityException {
+        Path bundle = tempFolder.resolve("bundle.pem");
+        Files.writeString(
+                bundle,
+                Files.readString(TestConstants.CA_PEM_CERT_PATH, StandardCharsets.UTF_8)
+                        + Files.readString(TestConstants.SERVER_CERT_PEM_PATH, StandardCharsets.UTF_8),
+                StandardCharsets.UTF_8);
+        SslConfiguration sslConfig = SslConfiguration.of(bundle);
+
+        assertDefaultCasOption(sslConfig, TestConstants.CA_PEM_CERT_PATH, TestConstants.SERVER_CERT_PEM_PATH);
+    }
+
+    @Test
+    public void testCreateSslSocketFactory_canCreateTrustStorePemFromDirectory()
+            throws IOException, GeneralSecurityException {
         File certFolder = Files.createDirectory(tempFolder.resolve("security")).toFile();
 
         Files.copy(TestConstants.CA_DER_CERT_PATH, certFolder.toPath().resolve("ca.der"));
@@ -113,12 +159,16 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(SslConfiguration.StoreType.PEM)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).isNotNull();
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).isNotNull();
+        assertDefaultCasOption(
+                sslConfig,
+                TestConstants.CA_PEM_CERT_PATH,
+                TestConstants.SERVER_CERT_PEM_PATH,
+                TestConstants.CLIENT_CERT_PEM_PATH);
     }
 
     @Test
-    public void testCreateSslSocketFactory_canCreateTrustStorePuppetFromDirectory() throws IOException {
+    public void testCreateSslSocketFactory_canCreateTrustStorePuppetFromDirectory()
+            throws IOException, GeneralSecurityException {
         Path puppetFolder = Files.createDirectory(tempFolder.resolve("security"));
 
         File certsFolder = puppetFolder.resolve("certs").toFile();
@@ -133,8 +183,11 @@ public final class SslSocketFactoriesTests {
                 .trustStoreType(SslConfiguration.StoreType.PUPPET)
                 .build();
 
-        assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).isNotNull();
-        assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).isNotNull();
+        assertDefaultCasOption(
+                sslConfig,
+                TestConstants.CA_PEM_CERT_PATH,
+                TestConstants.SERVER_CERT_PEM_PATH,
+                TestConstants.CLIENT_CERT_PEM_PATH);
     }
 
     @Test
@@ -374,5 +427,35 @@ public final class SslSocketFactoriesTests {
         SSLSocketFactory defaultFactory = SslSocketFactories.createSslSocketFactory(sslConfig);
         assertThat(Conscrypt.isConscrypt(conscryptFactory)).isTrue();
         assertThat(Conscrypt.isConscrypt(defaultFactory)).isFalse();
+    }
+
+    private static void assertDefaultCasOption(SslConfiguration config, Path... certificatePaths)
+            throws IOException, GeneralSecurityException {
+        Set<Certificate> configuredCertificates = new HashSet<>();
+        for (Path path : certificatePaths) {
+            try (InputStream in = Files.newInputStream(path)) {
+                configuredCertificates.addAll(KeyStores.readX509Certificates(in));
+            }
+        }
+        Set<Certificate> withDefaultCas =
+                new HashSet<>(DefaultCas.getCertificates().values());
+        withDefaultCas.addAll(configuredCertificates);
+
+        assertTrustAnchors(config, withDefaultCas);
+        assertTrustAnchors(
+                SslConfiguration.builder().from(config).disableDefaultCas(false).build(), withDefaultCas);
+        assertTrustAnchors(
+                SslConfiguration.builder().from(config).disableDefaultCas(true).build(), configuredCertificates);
+    }
+
+    private static void assertTrustAnchors(SslConfiguration config, Set<Certificate> expected) {
+        assertThat(SslSocketFactories.createSslSocketFactory(config)).isNotNull();
+        assertThat(Set.<Certificate>of(
+                        SslSocketFactories.createX509TrustManager(config).getAcceptedIssuers()))
+                .containsExactlyInAnyOrderElementsOf(expected);
+        assertThat(Set.<Certificate>of(SslSocketFactories.createTrustContext(config)
+                        .x509TrustManager()
+                        .getAcceptedIssuers()))
+                .containsExactlyInAnyOrderElementsOf(expected);
     }
 }

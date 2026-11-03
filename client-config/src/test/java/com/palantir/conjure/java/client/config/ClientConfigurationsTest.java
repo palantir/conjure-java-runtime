@@ -27,13 +27,21 @@ import com.palantir.conjure.java.api.config.service.ServiceConfiguration;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import com.palantir.conjure.java.config.ssl.SslSocketFactories;
 import com.palantir.tritium.metrics.registry.DefaultTaggedMetricRegistry;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.X509TrustManager;
 import org.junit.jupiter.api.Test;
@@ -62,6 +70,32 @@ public final class ClientConfigurationsTest {
         assertThat(actual.fallbackToCommonNameVerification()).isFalse();
         assertThat(actual.proxy().select(URI.create("https://foo"))).containsExactly(Proxy.NO_PROXY);
         assertThat(actual.taggedMetricRegistry()).isSameAs(DefaultTaggedMetricRegistry.getDefault());
+    }
+
+    @Test
+    public void testFromServiceConfig_disablesDefaultCas() throws Exception {
+        Path trustStorePath = Paths.get("src/test/resources/trustStore.jks");
+        KeyStore trustStore = KeyStore.getInstance("JKS");
+        try (InputStream in = Files.newInputStream(trustStorePath)) {
+            trustStore.load(in, null);
+        }
+        Set<Certificate> configuredCertificates = new HashSet<>();
+        for (String alias : Collections.list(trustStore.aliases())) {
+            configuredCertificates.add(trustStore.getCertificate(alias));
+        }
+        assertThat(configuredCertificates).isNotEmpty();
+
+        ServiceConfiguration serviceConfig = ServiceConfiguration.builder()
+                .uris(uris)
+                .security(SslConfiguration.builder()
+                        .trustStorePath(trustStorePath)
+                        .disableDefaultCas(true)
+                        .build())
+                .build();
+        ClientConfiguration actual = ClientConfigurations.of(serviceConfig);
+
+        assertThat(Set.<Certificate>of(actual.trustManager().getAcceptedIssuers()))
+                .containsExactlyInAnyOrderElementsOf(configuredCertificates);
     }
 
     @Test

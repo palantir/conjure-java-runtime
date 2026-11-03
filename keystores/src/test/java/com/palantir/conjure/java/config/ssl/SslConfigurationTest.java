@@ -36,7 +36,7 @@ public final class SslConfigurationTest {
                 .keyStorePassword("password")
                 .build();
         String deserializedCamelCase = "{\"trustStorePath\":\"truststore.jks\",\"trustStoreType\":\"JKS\","
-                + "\"keyStorePath\":\"keystore.jks\",\"keyStorePassword\":\"password\","
+                + "\"disableDefaultCas\":false,\"keyStorePath\":\"keystore.jks\",\"keyStorePassword\":\"password\","
                 + "\"keyStoreType\":\"JKS\",\"keyStoreKeyAlias\":\"alias\"}";
         String deserializedKebabCase = "{\"trust-store-path\":\"truststore.jks\",\"trust-store-type\":\"JKS\","
                 + "\"key-store-path\":\"keystore.jks\",\"key-store-password\":\"password\","
@@ -54,7 +54,8 @@ public final class SslConfigurationTest {
     public void serDe_optional() throws Exception {
         SslConfiguration serialized = SslConfiguration.of(Paths.get("trustStore.jks"));
         String deserializedCamelCase = "{\"trustStorePath\":\"trustStore.jks\",\"trustStoreType\":\"JKS\","
-                + "\"keyStorePath\":null,\"keyStorePassword\":null,\"keyStoreType\":\"JKS\",\"keyStoreKeyAlias\":null}";
+                + "\"disableDefaultCas\":false,\"keyStorePath\":null,\"keyStorePassword\":null,"
+                + "\"keyStoreType\":\"JKS\",\"keyStoreKeyAlias\":null}";
         String deserializedKebabCase = "{\"trust-store-path\":\"trustStore.jks\",\"trust-store-type\":\"JKS\","
                 + "\"key-store-path\":null,\"key-store-password\":null,\"key-store-type\":\"JKS\","
                 + "\"key-store-key-alias\":null}";
