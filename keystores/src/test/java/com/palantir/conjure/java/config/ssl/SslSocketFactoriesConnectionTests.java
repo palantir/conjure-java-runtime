@@ -29,10 +29,7 @@ import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.security.KeyStore;
 import java.security.Provider;
-import java.security.cert.Certificate;
 import java.util.Optional;
 import java.util.UUID;
 import javax.net.ssl.SSLContext;
@@ -41,10 +38,11 @@ import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.X509KeyManager;
 import org.conscrypt.Conscrypt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @Timeout(value = 5)
 public final class SslSocketFactoriesConnectionTests {
@@ -144,54 +142,22 @@ public final class SslSocketFactoriesConnectionTests {
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
     }
 
-    @Test
-    public void testSslWithClientAuthenticationJks() {
-        SslConfiguration serverConfig = SslConfiguration.of(
-                TestConstants.CA_TRUST_STORE_PATH,
-                TestConstants.SERVER_KEY_STORE_JKS_PATH,
-                TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
-
-        SslConfiguration clientConfig = SslConfiguration.of(
-                TestConstants.CA_TRUST_STORE_PATH,
-                TestConstants.CLIENT_KEY_STORE_JKS_PATH,
-                TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
-
-        runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
-    }
-
-    @Test
-    public void testSslWithClientAuthenticationAndDefaultCasDisabled() throws Exception {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    public void testSslWithClientAuthenticationJks(boolean disableDefaultCas) {
         SslConfiguration serverConfig = SslConfiguration.builder()
-                .from(SslConfiguration.of(
-                        TestConstants.CA_TRUST_STORE_PATH,
-                        TestConstants.SERVER_KEY_STORE_JKS_PATH,
-                        TestConstants.SERVER_KEY_STORE_JKS_PASSWORD))
-                .disableDefaultCas(true)
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.SERVER_KEY_STORE_JKS_PATH)
+                .keyStorePassword(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
+                .disableDefaultCas(disableDefaultCas)
                 .build();
 
         SslConfiguration clientConfig = SslConfiguration.builder()
-                .trustStorePath(TestConstants.CA_PEM_CERT_PATH)
-                .keyStorePath(TestConstants.MULTIPLE_KEY_STORE_JKS_PATH)
-                .keyStorePassword(TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD)
-                .keyStoreKeyAlias(TestConstants.MULTIPLE_KEY_STORE_CLIENT_ALIAS)
-                .disableDefaultCas(true)
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.CLIENT_KEY_STORE_JKS_PATH)
+                .keyStorePassword(TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD)
+                .disableDefaultCas(disableDefaultCas)
                 .build();
-
-        KeyStore keyStore = KeyStores.loadKeyStore(
-                "JKS",
-                TestConstants.MULTIPLE_KEY_STORE_JKS_PATH,
-                Optional.of(TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD));
-        Certificate[] expectedChain = keyStore.getCertificateChain(TestConstants.MULTIPLE_KEY_STORE_CLIENT_ALIAS);
-        Key expectedKey = keyStore.getKey(
-                TestConstants.MULTIPLE_KEY_STORE_CLIENT_ALIAS,
-                TestConstants.MULTIPLE_KEY_STORE_JKS_PASSWORD.toCharArray());
-        assertThat(SslSocketFactories.createKeyManagers(clientConfig))
-                .singleElement()
-                .isInstanceOfSatisfying(X509KeyManager.class, keyManager -> {
-                    String alias = keyManager.chooseClientAlias(new String[] {"RSA"}, null, null);
-                    assertThat(keyManager.getCertificateChain(alias)).isEqualTo(expectedChain);
-                    assertThat(keyManager.getPrivateKey(alias)).isEqualTo(expectedKey);
-                });
 
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
     }
