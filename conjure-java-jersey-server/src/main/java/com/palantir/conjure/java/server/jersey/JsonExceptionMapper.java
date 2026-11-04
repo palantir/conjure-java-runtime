@@ -24,6 +24,7 @@ import com.palantir.logsafe.logger.SafeLoggerFactory;
 import java.util.UUID;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.StatusType;
 import javax.ws.rs.ext.ExceptionMapper;
 
 /**
@@ -73,15 +74,22 @@ abstract class JsonExceptionMapper<T extends Throwable> extends ListenableExcept
     }
 
     static Response createResponse(ErrorType errorType, String errorInstanceId) {
-        return createResponse(errorType.httpErrorCode(), errorType, errorInstanceId);
-    }
-
-    static Response createResponse(int httpErrorCode, ErrorType errorType, String errorInstanceId) {
-        return Response.status(httpErrorCode)
+        return Response.status(errorType.httpErrorCode())
                 .type(MediaType.APPLICATION_JSON)
                 .entity(SerializableError.builder()
                         .errorCode(errorType.code().name())
                         .errorName(errorType.name())
+                        .errorInstanceId(errorInstanceId)
+                        .build())
+                .build();
+    }
+
+    static Response createResponse(StatusType statusType, String errorInstanceId) {
+        return Response.status(statusType.getStatusCode())
+                .type(MediaType.APPLICATION_JSON)
+                .entity(SerializableError.builder()
+                        .errorCode(statusType.getReasonPhrase())
+                        .errorName(statusType.getReasonPhrase())
                         .errorInstanceId(errorInstanceId)
                         .build())
                 .build();
