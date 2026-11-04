@@ -8,9 +8,9 @@ com.fasterxml.jackson.core:jackson-core:2.22.4 (14 constraints: df23f355)
 
 com.fasterxml.jackson.core:jackson-databind:2.22.4 (18 constraints: d86338c8)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.22.4 (2 constraints: 31209d06)
+com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.22.4 (3 constraints: 06300468)
 
-com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.22.4 (1 constraints: 3c053d3b)
+com.fasterxml.jackson.dataformat:jackson-dataformat-smile:2.22.4 (2 constraints: 111553c4)
 
 com.fasterxml.jackson.datatype:jackson-datatype-guava:2.22.4 (1 constraints: 3c053d3b)
 
@@ -32,11 +32,11 @@ com.github.ben-manes.caffeine:caffeine:3.3.1 (3 constraints: e32343a2)
 
 com.google.code.findbugs:jsr305:3.0.2 (7 constraints: 5f6b7728)
 
-com.google.errorprone:error_prone_annotations:2.52.0 (18 constraints: 24180a8d)
+com.google.errorprone:error_prone_annotations:2.52.0 (18 constraints: 2e186ea0)
 
 com.google.guava:failureaccess:1.0.3 (1 constraints: 160ae3b4)
 
-com.google.guava:guava:33.8.0-jre (17 constraints: d52e930c)
+com.google.guava:guava:33.8.0-jre (17 constraints: cf2e7401)
 
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava (1 constraints: bd17c918)
 
@@ -48,7 +48,7 @@ com.netflix.feign:feign-core:8.18.0 (2 constraints: 1213df52)
 
 com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
-com.palantir.conjure.java:conjure-lib:8.99.0 (3 constraints: 88257557)
+com.palantir.conjure.java:conjure-lib:8.99.0 (3 constraints: 8a25aa57)
 
 com.palantir.conjure.java.api:errors:2.82.0 (5 constraints: f04490af)
 
@@ -58,17 +58,17 @@ com.palantir.conjure.java.api:ssl-config:2.82.0 (2 constraints: 03180687)
 
 com.palantir.deadlines:deadlines:0.29.0 (1 constraints: 6d0f2886)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.51.0 (1 constraints: 3e055a3b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.52.0 (1 constraints: 3f055d3b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.51.0 (2 constraints: d7233fb3)
+com.palantir.dialogue:dialogue-blocking-channels:6.52.0 (2 constraints: d92373b3)
 
-com.palantir.dialogue:dialogue-core:6.51.0 (2 constraints: 3d19e2ed)
+com.palantir.dialogue:dialogue-core:6.52.0 (2 constraints: 3f1922ee)
 
-com.palantir.dialogue:dialogue-futures:6.51.0 (3 constraints: cb3383bd)
+com.palantir.dialogue:dialogue-futures:6.52.0 (3 constraints: ce3315be)
 
-com.palantir.dialogue:dialogue-serde:6.51.0 (1 constraints: 3e055a3b)
+com.palantir.dialogue:dialogue-serde:6.52.0 (1 constraints: 3f055d3b)
 
-com.palantir.dialogue:dialogue-target:6.51.0 (5 constraints: 074d415c)
+com.palantir.dialogue:dialogue-target:6.52.0 (5 constraints: 0c4d3d5e)
 
 com.palantir.nylon:nylon-threads:0.17.0 (1 constraints: 401041a2)
 
@@ -104,9 +104,9 @@ com.palantir.tritium:tritium-core:0.141.0 (1 constraints: 6e10aab2)
 
 com.palantir.tritium:tritium-ids:0.141.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-metrics:0.141.0 (5 constraints: 734c9a1e)
+com.palantir.tritium:tritium-metrics:0.141.0 (5 constraints: 5e4c3d1a)
 
-com.palantir.tritium:tritium-registry:0.141.0 (6 constraints: 745fa9b6)
+com.palantir.tritium:tritium-registry:0.141.0 (6 constraints: 5f5f71ae)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
