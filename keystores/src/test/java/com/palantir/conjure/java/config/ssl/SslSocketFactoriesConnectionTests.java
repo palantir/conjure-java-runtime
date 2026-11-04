@@ -144,19 +144,19 @@ public final class SslSocketFactoriesConnectionTests {
 
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
-    public void testSslWithClientAuthenticationJks(boolean disableDefaultCas) {
+    public void testSslWithClientAuthenticationJks(boolean trustDefaultCas) {
         SslConfiguration serverConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .keyStorePath(TestConstants.SERVER_KEY_STORE_JKS_PATH)
                 .keyStorePassword(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
-                .disableDefaultCas(disableDefaultCas)
+                .trustDefaultCas(trustDefaultCas)
                 .build();
 
         SslConfiguration clientConfig = SslConfiguration.builder()
                 .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
                 .keyStorePath(TestConstants.CLIENT_KEY_STORE_JKS_PATH)
                 .keyStorePassword(TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD)
-                .disableDefaultCas(disableDefaultCas)
+                .trustDefaultCas(trustDefaultCas)
                 .build();
 
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);

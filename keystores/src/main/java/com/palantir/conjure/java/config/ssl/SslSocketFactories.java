@@ -177,7 +177,7 @@ public final class SslSocketFactories {
      */
     public static TrustManager[] createTrustManagers(SslConfiguration config) {
         return ConscryptCompatTrustManagers.wrap(
-                createTrustManagerFactory(config.trustStorePath(), config.trustStoreType(), config.disableDefaultCas())
+                createTrustManagerFactory(config.trustStorePath(), config.trustStoreType(), config.trustDefaultCas())
                         .getTrustManagers());
     }
 
@@ -266,7 +266,7 @@ public final class SslSocketFactories {
     }
 
     private static TrustManagerFactory createTrustManagerFactory(
-            Path trustStorePath, SslConfiguration.StoreType trustStoreType, boolean disableDefaultCas) {
+            Path trustStorePath, SslConfiguration.StoreType trustStoreType, boolean trustDefaultCas) {
         KeyStore keyStore = switch (trustStoreType) {
             case JKS, PKCS12 -> KeyStores.loadKeyStore(trustStoreType.name(), trustStorePath, Optional.empty());
             case PEM -> KeyStores.createTrustStoreFromCertificates(trustStorePath);
@@ -280,7 +280,7 @@ public final class SslSocketFactories {
             }
         };
 
-        if (!disableDefaultCas) {
+        if (trustDefaultCas) {
             DefaultCas.getCertificates().forEach((certAlias, cert) -> {
                 try {
                     keyStore.setCertificateEntry(certAlias, cert);

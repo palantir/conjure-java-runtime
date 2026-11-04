@@ -73,7 +73,7 @@ public final class SslSocketFactoriesTests {
     }
 
     @Test
-    public void testDefaultCasOption() throws IOException, GeneralSecurityException {
+    public void testTrustDefaultCasOption() throws IOException, GeneralSecurityException {
         Set<Certificate> configuredCertificates;
         try (InputStream in = Files.newInputStream(TestConstants.CA_PEM_CERT_PATH)) {
             configuredCertificates = Set.copyOf(KeyStores.readX509Certificates(in));
@@ -88,13 +88,13 @@ public final class SslSocketFactoriesTests {
                 .containsExactlyInAnyOrderElementsOf(withDefaultCas);
         assertThat(Set.<Certificate>of(SslSocketFactories.createX509TrustManager(SslConfiguration.builder()
                                 .from(config)
-                                .disableDefaultCas(false)
+                                .trustDefaultCas(true)
                                 .build())
                         .getAcceptedIssuers()))
                 .containsExactlyInAnyOrderElementsOf(withDefaultCas);
         assertThat(Set.<Certificate>of(SslSocketFactories.createX509TrustManager(SslConfiguration.builder()
                                 .from(config)
-                                .disableDefaultCas(true)
+                                .trustDefaultCas(false)
                                 .build())
                         .getAcceptedIssuers()))
                 .containsExactlyInAnyOrderElementsOf(configuredCertificates);

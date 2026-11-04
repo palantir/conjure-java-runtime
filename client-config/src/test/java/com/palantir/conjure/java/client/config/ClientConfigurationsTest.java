@@ -73,7 +73,7 @@ public final class ClientConfigurationsTest {
     }
 
     @Test
-    public void testFromServiceConfig_disablesDefaultCas() throws Exception {
+    public void testFromServiceConfig_trustsOnlyConfiguredCas() throws Exception {
         Path trustStorePath = Paths.get("src/test/resources/trustStore.jks");
         KeyStore trustStore = KeyStore.getInstance("JKS");
         try (InputStream in = Files.newInputStream(trustStorePath)) {
@@ -89,7 +89,7 @@ public final class ClientConfigurationsTest {
                 .uris(uris)
                 .security(SslConfiguration.builder()
                         .trustStorePath(trustStorePath)
-                        .disableDefaultCas(true)
+                        .trustDefaultCas(false)
                         .build())
                 .build();
         ClientConfiguration actual = ClientConfigurations.of(serviceConfig);
