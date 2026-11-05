@@ -25,12 +25,17 @@ import com.google.common.collect.ImmutableMap;
 import com.palantir.conjure.java.api.config.ssl.SslConfiguration;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.security.GeneralSecurityException;
 import java.security.Provider;
+import java.security.cert.Certificate;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import org.conscrypt.Conscrypt;
@@ -65,6 +70,34 @@ public final class SslSocketFactoriesTests {
 
         assertThat(SslSocketFactories.createSslSocketFactory(sslConfig)).isNotNull();
         assertThat(SslSocketFactories.createX509TrustManager(sslConfig)).isNotNull();
+    }
+
+    @Test
+    public void testTrustDefaultCasOption() throws IOException, GeneralSecurityException {
+        Set<Certificate> configuredCertificates;
+        try (InputStream in = Files.newInputStream(TestConstants.CA_PEM_CERT_PATH)) {
+            configuredCertificates = Set.copyOf(KeyStores.readX509Certificates(in));
+        }
+        Set<Certificate> withDefaultCas =
+                new HashSet<>(DefaultCas.getCertificates().values());
+        withDefaultCas.addAll(configuredCertificates);
+
+        SslConfiguration config = SslConfiguration.of(TestConstants.CA_PEM_CERT_PATH);
+        assertThat(Set.<Certificate>of(
+                        SslSocketFactories.createX509TrustManager(config).getAcceptedIssuers()))
+                .containsExactlyInAnyOrderElementsOf(withDefaultCas);
+        assertThat(Set.<Certificate>of(SslSocketFactories.createX509TrustManager(SslConfiguration.builder()
+                                .from(config)
+                                .trustDefaultCas(true)
+                                .build())
+                        .getAcceptedIssuers()))
+                .containsExactlyInAnyOrderElementsOf(withDefaultCas);
+        assertThat(Set.<Certificate>of(SslSocketFactories.createX509TrustManager(SslConfiguration.builder()
+                                .from(config)
+                                .trustDefaultCas(false)
+                                .build())
+                        .getAcceptedIssuers()))
+                .containsExactlyInAnyOrderElementsOf(configuredCertificates);
     }
 
     @Test

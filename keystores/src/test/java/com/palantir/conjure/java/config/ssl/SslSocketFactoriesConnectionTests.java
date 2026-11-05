@@ -41,6 +41,8 @@ import javax.net.ssl.SSLSocketFactory;
 import org.conscrypt.Conscrypt;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @Timeout(value = 5)
 public final class SslSocketFactoriesConnectionTests {
@@ -140,17 +142,22 @@ public final class SslSocketFactoriesConnectionTests {
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.NO_CLIENT_AUTH);
     }
 
-    @Test
-    public void testSslWithClientAuthenticationJks() {
-        SslConfiguration serverConfig = SslConfiguration.of(
-                TestConstants.CA_TRUST_STORE_PATH,
-                TestConstants.SERVER_KEY_STORE_JKS_PATH,
-                TestConstants.SERVER_KEY_STORE_JKS_PASSWORD);
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    public void testSslWithClientAuthenticationJks(boolean trustDefaultCas) {
+        SslConfiguration serverConfig = SslConfiguration.builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.SERVER_KEY_STORE_JKS_PATH)
+                .keyStorePassword(TestConstants.SERVER_KEY_STORE_JKS_PASSWORD)
+                .trustDefaultCas(trustDefaultCas)
+                .build();
 
-        SslConfiguration clientConfig = SslConfiguration.of(
-                TestConstants.CA_TRUST_STORE_PATH,
-                TestConstants.CLIENT_KEY_STORE_JKS_PATH,
-                TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD);
+        SslConfiguration clientConfig = SslConfiguration.builder()
+                .trustStorePath(TestConstants.CA_TRUST_STORE_PATH)
+                .keyStorePath(TestConstants.CLIENT_KEY_STORE_JKS_PATH)
+                .keyStorePassword(TestConstants.CLIENT_KEY_STORE_JKS_PASSWORD)
+                .trustDefaultCas(trustDefaultCas)
+                .build();
 
         runSslConnectionTest(serverConfig, clientConfig, ClientAuth.WITH_CLIENT_AUTH);
     }
