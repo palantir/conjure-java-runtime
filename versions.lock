@@ -50,25 +50,25 @@ com.netflix.feign:feign-jackson:8.18.0 (1 constraints: 43056b3b)
 
 com.palantir.conjure.java:conjure-lib:8.100.0 (3 constraints: a9251f68)
 
-com.palantir.conjure.java.api:errors:2.83.0 (5 constraints: f244d9b0)
+com.palantir.conjure.java.api:errors:2.83.0 (5 constraints: f5446eb1)
 
-com.palantir.conjure.java.api:service-config:2.83.0 (3 constraints: ab2848e4)
+com.palantir.conjure.java.api:service-config:2.83.0 (3 constraints: ad287be4)
 
 com.palantir.conjure.java.api:ssl-config:2.83.0 (2 constraints: 05184287)
 
 com.palantir.deadlines:deadlines:0.29.0 (1 constraints: 6d0f2886)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.52.0 (1 constraints: 3f055d3b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.53.0 (1 constraints: 4005603b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.52.0 (2 constraints: d92373b3)
+com.palantir.dialogue:dialogue-blocking-channels:6.53.0 (2 constraints: db23a7b3)
 
-com.palantir.dialogue:dialogue-core:6.52.0 (2 constraints: 3f1922ee)
+com.palantir.dialogue:dialogue-core:6.53.0 (2 constraints: 411962ee)
 
-com.palantir.dialogue:dialogue-futures:6.52.0 (3 constraints: ce3315be)
+com.palantir.dialogue:dialogue-futures:6.53.0 (3 constraints: d133a7be)
 
-com.palantir.dialogue:dialogue-serde:6.52.0 (1 constraints: 3f055d3b)
+com.palantir.dialogue:dialogue-serde:6.53.0 (1 constraints: 4005603b)
 
-com.palantir.dialogue:dialogue-target:6.52.0 (5 constraints: 0c4d3d5e)
+com.palantir.dialogue:dialogue-target:6.53.0 (5 constraints: 114d3960)
 
 com.palantir.nylon:nylon-threads:0.17.0 (1 constraints: 401041a2)
 
@@ -104,9 +104,9 @@ com.palantir.tritium:tritium-core:0.143.0 (1 constraints: 7010b0b2)
 
 com.palantir.tritium:tritium-ids:0.143.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-metrics:0.143.0 (5 constraints: 604ce11b)
+com.palantir.tritium:tritium-metrics:0.143.0 (5 constraints: 634c811c)
 
-com.palantir.tritium:tritium-registry:0.143.0 (6 constraints: 635f7bb0)
+com.palantir.tritium:tritium-registry:0.143.0 (6 constraints: 665fa8b1)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
