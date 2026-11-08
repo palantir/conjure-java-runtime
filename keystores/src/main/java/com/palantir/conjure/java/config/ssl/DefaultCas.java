@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-final class DefaultCas {
+public final class DefaultCas {
 
     private static final SafeLogger log = SafeLoggerFactory.get(DefaultCas.class);
 
