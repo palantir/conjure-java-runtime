@@ -1,6 +1,6 @@
 # Run ./gradlew writeVersionsLocks to regenerate this file. Blank lines are to minimize merge conflicts.
 
-com.fasterxml:classmate:1.5.1 (1 constraints: 9a122a13)
+com.fasterxml:classmate:1.7.1 (1 constraints: 9c123013)
 
 com.fasterxml.jackson.core:jackson-annotations:2.22 (12 constraints: 0edecc86)
 
@@ -184,7 +184,7 @@ org.glassfish.jersey.inject:jersey-hk2:3.1.11 (1 constraints: 3805363b)
 
 org.hdrhistogram:HdrHistogram:2.2.2 (1 constraints: 0e100092)
 
-org.hibernate.validator:hibernate-validator:8.0.2.Final (1 constraints: 1a1606e4)
+org.hibernate.validator:hibernate-validator:9.1.6.Final (1 constraints: 1a1606e4)
 
 org.immutables:value:2.12.3 (1 constraints: 3a05383b)
 
