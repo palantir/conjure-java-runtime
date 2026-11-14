@@ -236,13 +236,11 @@ final class InstrumentedJsonFactory extends JsonFactory {
             return delegate.currentTokenLocation();
         }
 
-        @SuppressWarnings("for-rollout:deprecation")
         @Override
         public JsonLocation getCurrentLocation() {
             return delegate.getCurrentLocation();
         }
 
-        @SuppressWarnings("for-rollout:deprecation")
         @Override
         public JsonLocation getTokenLocation() {
             return delegate.getTokenLocation();
@@ -258,13 +256,11 @@ final class InstrumentedJsonFactory extends JsonFactory {
             delegate.assignCurrentValue(value);
         }
 
-        @SuppressWarnings("for-rollout:deprecation")
         @Override
         public Object getCurrentValue() {
             return delegate.getCurrentValue();
         }
 
-        @SuppressWarnings("for-rollout:deprecation")
         @Override
         public void setCurrentValue(Object value) {
             delegate.setCurrentValue(value);
@@ -459,7 +455,6 @@ final class InstrumentedJsonFactory extends JsonFactory {
             delegate.overrideCurrentName(name);
         }
 
-        @SuppressWarnings("for-rollout:deprecation")
         @Override
         public String getCurrentName() throws IOException {
             return delegate.getCurrentName();
