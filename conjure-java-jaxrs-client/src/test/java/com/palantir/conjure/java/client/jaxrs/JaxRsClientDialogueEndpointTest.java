@@ -16,10 +16,13 @@
 
 package com.palantir.conjure.java.client.jaxrs;
 
+import static com.palantir.logsafe.testing.Assertions.assertThatLoggableExceptionThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.collection;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,6 +38,9 @@ import com.palantir.dialogue.HttpMethod;
 import com.palantir.dialogue.Request;
 import com.palantir.dialogue.Response;
 import com.palantir.dialogue.UrlBuilder;
+import com.palantir.logsafe.SafeArg;
+import com.palantir.logsafe.UnsafeArg;
+import com.palantir.logsafe.exceptions.SafeIllegalStateException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -93,6 +99,63 @@ public final class JaxRsClientDialogueEndpointTest {
         verify(urlBuilder).queryParam("query", "");
         verify(urlBuilder).queryParam("query", "a b");
         verify(urlBuilder).queryParam("query", "a+b");
+    }
+
+    @Test
+    public void testQueryParameters() {
+        Channel channel = stubNoContentResponseChannel();
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.collectionOfQueryParams(List.of("", "=", "value", "test=value"));
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
+        assertThat(requestCaptor.getValue().pathParameters().asMap())
+                .hasSize(1)
+                .extractingByKey("request-url")
+                .asInstanceOf(collection(String.class))
+                .containsExactly("dialogue://feign/foo/params?query=&query=%3D&query=value&query=test%3Dvalue");
+        Endpoint endpoint = endpointCaptor.getValue();
+        UrlBuilder urlBuilder = mock(UrlBuilder.class);
+        endpoint.renderPath(
+                ImmutableListMultimap.of(
+                        "request-url", "dialogue://feign/foo/params?query=&query==&query=value&query=test=value"),
+                urlBuilder);
+        verify(urlBuilder).queryParam("query", "");
+        verify(urlBuilder).queryParam("query", "=");
+        verify(urlBuilder).queryParam("query", "test=value");
+    }
+
+    @Test
+    public void testInvalidQueryParameters() {
+        Channel channel = stubNoContentResponseChannel();
+        StubService service = JaxRsClient.create(StubService.class, channel, runtime);
+        service.collectionOfQueryParams(List.of());
+
+        ArgumentCaptor<Endpoint> endpointCaptor = ArgumentCaptor.forClass(Endpoint.class);
+        ArgumentCaptor<Request> requestCaptor = ArgumentCaptor.forClass(Request.class);
+        verify(channel).execute(endpointCaptor.capture(), requestCaptor.capture());
+        Endpoint endpoint = endpointCaptor.getValue();
+        UrlBuilder urlBuilder = mock(UrlBuilder.class);
+        assertThatLoggableExceptionThrownBy(() -> endpoint.renderPath(
+                        ImmutableListMultimap.of("request-url", "dialogue://feign/foo/params?="), urlBuilder))
+                .isInstanceOf(SafeIllegalStateException.class)
+                .hasLogMessage("Expected two parameters")
+                .args()
+                .containsExactlyInAnyOrder(SafeArg.of("parameters", 1), UnsafeArg.of("values", "="));
+        assertThatLoggableExceptionThrownBy(() -> endpoint.renderPath(
+                        ImmutableListMultimap.of("request-url", "dialogue://feign/foo/params?=value"), urlBuilder))
+                .isInstanceOf(SafeIllegalStateException.class)
+                .hasLogMessage("Expected two parameters")
+                .args()
+                .containsExactlyInAnyOrder(SafeArg.of("parameters", 1), UnsafeArg.of("values", "=value"));
+        assertThatLoggableExceptionThrownBy(() -> endpoint.renderPath(
+                        ImmutableListMultimap.of("request-url", "dialogue://feign/foo/params?query"), urlBuilder))
+                .isInstanceOf(SafeIllegalStateException.class)
+                .hasLogMessage("Expected two parameters")
+                .args()
+                .containsExactlyInAnyOrder(SafeArg.of("parameters", 0), UnsafeArg.of("values", "query"));
+        verify(urlBuilder, never()).queryParam(any(), any());
     }
 
     @Test
