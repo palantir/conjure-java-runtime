@@ -8,7 +8,7 @@
 This repository provides an opinionated set of libraries for defining and creating RESTish/RPC servers and clients based
 on [JAX-RS](https://jax-rs-spec.java.net/) service definitions using
 [Dialogue](https://github.com/palantir/dialogue)/[Feign](https://github.com/OpenFeign/feign) as a client and
-[Dropwizard](http://www.dropwizard.io/)/[Jersey](https://jersey.java.net/) as a server. Refer to the
+[Dropwizard](https://www.dropwizard.io/)/[Jersey](https://jersey.java.net/) as a server. Refer to the
 [API Contract](#api-contract) section for details on the contract between clients and servers. This library requires
 Java 17.
 
