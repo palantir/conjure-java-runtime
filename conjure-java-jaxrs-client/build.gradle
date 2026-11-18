@@ -7,11 +7,6 @@ dependencies {
     api project(":client-config")
     api project(":conjure-java-legacy-clients")
     api "com.google.code.findbugs:jsr305"
-    // TODO(dsanduleac): Should be implementation, but can't because we expose feign.TextDelegateEncoder
-    api "com.netflix.feign:feign-core", {
-        // prefer jakarta.ws.rs:jakarta.ws.rs-api
-        exclude group: 'javax.ws.rs', module: 'javax.ws.rs-api'
-    }
     api "com.palantir.dialogue:dialogue-target"
 
     implementation project(":conjure-java-annotations")
@@ -35,11 +30,9 @@ dependencies {
     implementation project(":conjure-java-jackson-serialization")
     implementation "com.google.guava:guava"
     implementation "com.github.ben-manes.caffeine:caffeine"
-    implementation "com.netflix.feign:feign-jackson"
     testImplementation project(":conjure-java-jersey-jakarta-server")
     testImplementation project(':keystores')
     testImplementation project(':undertow-jakarta-testing')
-    testImplementation "com.netflix.feign:feign-jackson"
     testImplementation "com.squareup.okhttp3:mockwebserver"
     testImplementation "org.junit.jupiter:junit-jupiter"
     testImplementation 'org.junit.jupiter:junit-jupiter-api'
@@ -47,12 +40,4 @@ dependencies {
     testImplementation "org.mockito:mockito-core"
     testImplementation "org.mockito:mockito-junit-jupiter"
     testImplementation "com.palantir.safe-logging:preconditions-assertj"
-}
-
-// feign.DefaultMethodHandler sets Lookup.IMPL_LOOKUP accessible resulting in
-// InaccessibleObjectException: Unable to make field static final java.lang.invoke.MethodHandles$Lookup
-// java.lang.invoke.MethodHandles$Lookup.IMPL_LOOKUP accessible: module java.base does not
-// "opens java.lang.invoke" to unnamed module
-moduleJvmArgs {
-    opens 'java.base/java.lang.invoke'
 }
