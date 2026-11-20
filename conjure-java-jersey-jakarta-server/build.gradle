@@ -26,7 +26,6 @@ dependencies {
     implementation 'org.glassfish.jersey.core:jersey-common'
     implementation project(':conjure-java-jackson-serialization')
 
-    runtimeOnly "org.glassfish.jersey.ext:jersey-bean-validation"
     runtimeOnly 'org.glassfish.jersey.inject:jersey-hk2'
 
     testImplementation project(':conjure-java-jackson-serialization')
@@ -38,5 +37,4 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter-api"
     testImplementation "org.assertj:assertj-core"
     implementation 'com.palantir.safe-logging:logger'
-
 }
