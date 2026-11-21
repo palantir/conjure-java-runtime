@@ -96,7 +96,6 @@ final class ConcurrencyLimitingInterceptor implements Interceptor {
             return response;
         }
         ResponseBody currentBody = response.body();
-        @SuppressWarnings("for-rollout:deprecation")
         ResponseBody newResponseBody = ResponseBody.create(
                 currentBody.contentType(), currentBody.contentLength(), wrapSource(currentBody.source(), listener));
         return response.newBuilder().body(newResponseBody).build();
