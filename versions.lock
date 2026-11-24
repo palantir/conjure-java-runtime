@@ -70,7 +70,7 @@ com.palantir.dialogue:dialogue-target:6.57.0 (5 constraints: 254d2968)
 
 com.palantir.refreshable:refreshable:2.20.0 (2 constraints: 9b14acab)
 
-com.palantir.ri:resource-identifier:2.26.0 (3 constraints: 403034b2)
+com.palantir.ri:resource-identifier:2.27.0 (3 constraints: 403034b2)
 
 com.palantir.safe-logging:logger:3.22.0 (14 constraints: 4ad7e1e0)
 
