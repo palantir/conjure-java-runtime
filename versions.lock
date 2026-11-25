@@ -54,33 +54,33 @@ com.palantir.conjure.java.api:service-config:2.83.0 (3 constraints: ad287be4)
 
 com.palantir.conjure.java.api:ssl-config:2.83.0 (2 constraints: 05184287)
 
-com.palantir.deadlines:deadlines:0.30.0 (1 constraints: 650f1186)
+com.palantir.deadlines:deadlines:0.31.0 (1 constraints: 660f1486)
 
-com.palantir.dialogue:dialogue-apache-hc5-client:6.57.0 (1 constraints: 44056c3b)
+com.palantir.dialogue:dialogue-apache-hc5-client:6.58.0 (1 constraints: 45056f3b)
 
-com.palantir.dialogue:dialogue-blocking-channels:6.57.0 (2 constraints: e32377b4)
+com.palantir.dialogue:dialogue-blocking-channels:6.58.0 (2 constraints: e523abb4)
 
-com.palantir.dialogue:dialogue-core:6.57.0 (2 constraints: 491962ef)
+com.palantir.dialogue:dialogue-core:6.58.0 (2 constraints: 4b19a2ef)
 
-com.palantir.dialogue:dialogue-futures:6.57.0 (3 constraints: dd33efc0)
+com.palantir.dialogue:dialogue-futures:6.58.0 (3 constraints: e03381c1)
 
-com.palantir.dialogue:dialogue-serde:6.57.0 (1 constraints: 44056c3b)
+com.palantir.dialogue:dialogue-serde:6.58.0 (1 constraints: 45056f3b)
 
-com.palantir.dialogue:dialogue-target:6.57.0 (5 constraints: 254d2968)
+com.palantir.dialogue:dialogue-target:6.58.0 (5 constraints: 2a4d256a)
 
 com.palantir.refreshable:refreshable:2.20.0 (2 constraints: 9b14acab)
 
 com.palantir.ri:resource-identifier:2.27.0 (3 constraints: 403034b2)
 
-com.palantir.safe-logging:logger:3.22.0 (14 constraints: 4ad7e1e0)
+com.palantir.safe-logging:logger:3.22.0 (14 constraints: 4fd7cce7)
 
 com.palantir.safe-logging:logger-slf4j:3.22.0 (1 constraints: 320e9150)
 
 com.palantir.safe-logging:logger-spi:3.22.0 (2 constraints: 731e78b0)
 
-com.palantir.safe-logging:preconditions:3.22.0 (21 constraints: 4c4d1342)
+com.palantir.safe-logging:preconditions:3.22.0 (21 constraints: 524d6a4e)
 
-com.palantir.safe-logging:safe-logging:3.22.0 (19 constraints: e02dcd01)
+com.palantir.safe-logging:safe-logging:3.22.0 (19 constraints: e52dc70b)
 
 com.palantir.safethreadlocalrandom:safe-thread-local-random:0.16.0 (1 constraints: 690f1b86)
 
@@ -100,9 +100,9 @@ com.palantir.tritium:tritium-core:0.144.0 (1 constraints: 7110b3b2)
 
 com.palantir.tritium:tritium-ids:0.144.0 (1 constraints: fe0f9aa6)
 
-com.palantir.tritium:tritium-metrics:0.144.0 (5 constraints: 624cb11a)
+com.palantir.tritium:tritium-metrics:0.144.0 (5 constraints: 654c511b)
 
-com.palantir.tritium:tritium-registry:0.144.0 (6 constraints: 665fadaf)
+com.palantir.tritium:tritium-registry:0.144.0 (6 constraints: 695fdab0)
 
 com.squareup.okhttp3:okhttp:4.12.0 (3 constraints: 3b24fdc0)
 
