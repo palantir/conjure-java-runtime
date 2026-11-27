@@ -327,7 +327,7 @@ public final class OkHttpClients {
     private static ImmutableList<ConnectionSpec> createConnectionSpecs() {
         return ImmutableList.of(
                 new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
-                        .tlsVersions(TlsVersion.TLS_1_2)
+                        .tlsVersions(TlsVersion.TLS_1_3, TlsVersion.TLS_1_2)
                         .cipherSuites(CipherSuites.allCipherSuites())
                         .build(),
                 ConnectionSpec.CLEARTEXT);
