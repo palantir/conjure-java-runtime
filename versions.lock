@@ -196,7 +196,23 @@ com.squareup.okhttp3:mockwebserver:4.12.0 (1 constraints: 3905413b)
 
 io.reactivex.rxjava2:rxjava:2.2.21 (1 constraints: 3905363b)
 
-io.undertow:undertow-core:2.2.39.Final (2 constraints: ac194cec)
+io.smallrye.common:smallrye-common-annotation:2.6.0 (1 constraints: c30d1c36)
+
+io.smallrye.common:smallrye-common-constraint:2.6.0 (4 constraints: 8a413caf)
+
+io.smallrye.common:smallrye-common-cpu:2.6.0 (2 constraints: 731c91d2)
+
+io.smallrye.common:smallrye-common-expression:2.4.0 (1 constraints: b10e835a)
+
+io.smallrye.common:smallrye-common-function:2.6.0 (2 constraints: 5c215988)
+
+io.smallrye.common:smallrye-common-net:2.4.0 (1 constraints: b10e835a)
+
+io.smallrye.common:smallrye-common-os:2.4.0 (1 constraints: b10e835a)
+
+io.smallrye.common:smallrye-common-ref:2.4.0 (1 constraints: b10e835a)
+
+io.undertow:undertow-core:2.3.27.Final (2 constraints: aa19d8eb)
 
 io.undertow:undertow-servlet-jakarta:2.2.20.Final (1 constraints: 50071361)
 
@@ -232,9 +248,9 @@ org.hamcrest:hamcrest-core:2.2 (2 constraints: 89126f10)
 
 org.hamcrest:hamcrest-library:2.2 (1 constraints: 1607425c)
 
-org.jboss.logging:jboss-logging:3.4.1.Final (3 constraints: f03036d7)
+org.jboss.logging:jboss-logging:3.6.1.Final (7 constraints: c4838fcc)
 
-org.jboss.threads:jboss-threads:3.5.1.Final (2 constraints: 5b1a8443)
+org.jboss.threads:jboss-threads:3.7.0.Final (2 constraints: 5c1ab543)
 
 org.jboss.xnio:xnio-api:3.8.16.Final (2 constraints: d71a2474)
 
@@ -270,6 +286,6 @@ org.reactivestreams:reactive-streams:1.0.3 (1 constraints: 1f0c60f9)
 
 org.wildfly.client:wildfly-client-config:1.0.1.Final (1 constraints: 940c6308)
 
-org.wildfly.common:wildfly-common:1.5.4.Final (2 constraints: 741cfbf1)
+org.wildfly.common:wildfly-common:2.0.0 (2 constraints: 581ab548)
 
 org.yaml:snakeyaml:2.5 (1 constraints: 3f178e10)
