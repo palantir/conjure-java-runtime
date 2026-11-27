@@ -204,9 +204,9 @@ jakarta.servlet:jakarta.servlet-api:5.0.0 (2 constraints: 1015bdac)
 
 junit:junit:4.13.2 (1 constraints: 690fa77c)
 
-net.bytebuddy:byte-buddy:1.18.3 (2 constraints: 9c16b43e)
+net.bytebuddy:byte-buddy:1.18.17 (2 constraints: ce167f55)
 
-net.bytebuddy:byte-buddy-agent:1.17.7 (1 constraints: 4a0b4ede)
+net.bytebuddy:byte-buddy-agent:1.18.17 (1 constraints: 7c0bc7e9)
 
 net.jcip:jcip-annotations:1.0 (1 constraints: 560ff165)
 
@@ -258,11 +258,9 @@ org.junit.platform:junit-platform-engine:6.1.3 (2 constraints: f3227f08)
 
 org.junit.platform:junit-platform-launcher:6.1.3 (1 constraints: 0c050f36)
 
-org.mockito:mockito-core:5.24.0 (2 constraints: 3214fd86)
+org.mockito:mockito-core:5.25.0 (2 constraints: 34142e87)
 
-org.mockito:mockito-junit-jupiter:5.24.0 (1 constraints: 3d05513b)
-
-org.objenesis:objenesis:3.3 (1 constraints: b20a14bd)
+org.mockito:mockito-junit-jupiter:5.25.0 (1 constraints: 3e05543b)
 
 org.opentest4j:opentest4j:1.3.0 (2 constraints: cf209249)
 
