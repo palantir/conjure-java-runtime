@@ -170,7 +170,6 @@ public final class ObjectMappers {
      *   <li>Deserializing a null for a primitive field will throw an exception.
      * </ul>
      */
-    @SuppressWarnings("for-rollout:deprecation")
     public static <M extends ObjectMapper, B extends MapperBuilder<M, B>> B withDefaultModules(B builder) {
         return builder.typeFactory(NonCachingTypeFactory.from(builder.build().getTypeFactory()))
                 .addModule(new GuavaModule())
@@ -206,7 +205,6 @@ public final class ObjectMappers {
      *   <li>Deserializing a null for a primitive field will throw an exception.
      * </ul>
      */
-    @SuppressWarnings("for-rollout:deprecation")
     public static ObjectMapper withDefaultModules(ObjectMapper mapper) {
         return mapper.setTypeFactory(NonCachingTypeFactory.from(mapper.getTypeFactory()))
                 .registerModule(new GuavaModule())
